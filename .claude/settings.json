@@ -1,0 +1,20 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash 'C:/저장소/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/statusline-command.sh'"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash 'C:/저장소/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/hooks/invoke_reviewer.sh'",
+            "timeout": 1200
+          }
+        ]
+      }
+    ]
+  }
+}

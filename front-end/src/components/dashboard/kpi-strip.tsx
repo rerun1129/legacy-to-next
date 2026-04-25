@@ -1,0 +1,25 @@
+import { kpiData } from "@/lib/mock-data";
+
+const variantClass: Record<string, string> = {
+  default: "",
+  ok:      "kpi--ok",
+  warn:    "kpi--warn",
+  danger:  "kpi--danger",
+  neutral: "kpi--neutral",
+};
+
+export function KpiStrip() {
+  return (
+    <div className="kpi-strip">
+      {kpiData.map((kpi) => (
+        <div key={kpi.label} className={`kpi ${variantClass[kpi.variant]}`}>
+          <div className="kpi__label">{kpi.label}</div>
+          <div className="kpi__value">{kpi.value}</div>
+          <div className={`kpi__delta ${kpi.trend}`}>
+            {kpi.trend === "up" ? "▲" : "▼"} {kpi.delta}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
