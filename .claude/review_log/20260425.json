@@ -1,3 +1,272 @@
 {"timestamp":"2026-04-25T14:08:24","verdict":"REJECTED","severity":"medium","model":"claude-sonnet-4-6","duration_ms":191180,"summary":"Controller → Service 레이어 도입 자체는 ARCH1 의 어댑터 직결 문제를 올바르게 해소하는 방향이다. 그러나 MasterBlServiceImpl.list() 가 외부 query 입력인 Bound bound 를 수신하고도 findAll(pageable) 에 적용하지 않아 bound 필터링이 사실상 무효화된 AI 전형적 happy-path 구현(A3)이 남아 있어 반려한다.","violations":[{"rule":"rules/ai_specific.md:A3","file":"back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/service/MasterBlServiceImpl.java","line":26,"detail":"Controller 가 클라이언트 @RequestParam 에서 받은 Bound bound 를 service.list(bound, pageable) 로 전달하지만, 구현체는 masterBlRepository.findAll(pageable) 만 호출하여 bound 필터를 완전히 무시한다. 결과적으로 EXP/IMP 구분 없이 전체 레코드가 반환되는 happy-path 전용 구현이다."}],"suggestions":[{"file":"back-end/java-spring/src/test/java/com/freightos/fms/domain/masterbl/service/MasterBlServiceImplTest.java","issue":"list_delegatesToRepository 테스트가 Bound.EXP 를 인자로 넘기지만 구현이 bound 를 무시하므로, 테스트가 bound 필터 동작을 전혀 검증하지 못한다. 버그가 있는 구현을 통과시키는 무의미한 위임 검증에 그친다.","proposal":"bound 필터 적용 후 findByBound(bound, pageable) 또는 이에 상응하는 쿼리를 호출하도록 구현을 수정하고, 테스트에서 EXP/IMP 각각에 대해 올바른 repository 메서드가 호출되는지 then(masterBlRepository).should().findByBound(Bound.EXP, pageable) 형태로 검증해야 한다."},{"file":"back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/service/MasterBlServiceImpl.java","issue":"MasterBlRepository 가 JpaRepository<MasterBl, UUID> 를 extend 하는 Spring Data JPA 특화 인터페이스이므로, Application 레이어(ServiceImpl)가 JPA 인프라에 간접 의존하게 된다. 엄밀한 헥사고널 구조에서는 Application 이 프레임워크 미의존 Port 인터페이스에만 의존해야 한다.","proposal":"순수 Port 인터페이스(예: MasterBlRepositoryPort)를 application/service 패키지에 정의하고, MasterBlRepository 가 이를 구현하도록 분리. 단, 프로젝트 전체가 동일 패턴을 일관되게 사용 중이라면 별도 RFC 를 통해 일괄 결정 필요."}]}
 {"timestamp":"2026-04-25T14:13:58","verdict":"APPROVED","severity":"low","model":"claude-sonnet-4-6","duration_ms":133550,"summary":"bound 파라미터를 무시하던 list() 버그가 정확하게 수정되었고, 테스트도 실제 위임 동작을 검증한다. 규칙 위반은 없으며, 테스트 파라미터화와 공유 enum 위치 정리가 장기 유지보수에 유리하다.","violations":[],"suggestions":[{"file":"back-end/java-spring/src/test/java/com/freightos/fms/domain/masterbl/service/MasterBlServiceImplTest.java","issue":"list_exp_delegatesToFindAllByBound 와 list_imp_delegatesToFindAllByBound 두 테스트가 Bound 값만 다르고 구조가 동일하며, Bound.values() 가 추가되면 테스트가 자동으로 누락된다.","proposal":"@ParameterizedTest + @EnumSource(Bound.class) 로 통합하면 enum 값 추가 시 자동 커버리지가 보장된다."},{"file":"back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/repository/MasterBlRepository.java","issue":"Bound enum 이 domain.housebl.enums 에 정의되어 있으나 masterbl 의 service 인터페이스·구현체·repository 모두에서 참조되고 있어 cross-subdomain 결합이 존재한다.","proposal":"Bound 를 domain.common.enums 또는 domain.shared 패키지로 이동하면 housebl ↔ masterbl 간 순환/교차 의존을 제거할 수 있다."}]}
 {"timestamp":"2026-04-25T15:43:47","verdict":"APPROVED","severity":"low","model":"claude-sonnet-4-6","duration_ms":30722,"summary":"`.gitignore`에 `.claude/review_log/` 한 줄 추가. 설정 파일로 ARCH 규칙 적용 대상 외이며, 다른 규칙 위반 없음.","violations":[],"suggestions":[]}
+{
+  "timestamp": "2026-04-25T17:19:43",
+  "verdict": "REJECTED",
+  "severity": "architectural",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 343798,
+  "summary": "mock-data.ts가 lib/에서 adapter/out/mock/으로 이동하면서 12개 컴포넌트의 import가 driven-adapter를 직접 참조하는 ARCH1 위반이 이번 커밋에서 신규 도입됐다; list-grid.tsx는 신설된 Application 레이어도 우회한다. API 어댑터 두 파일에도 외부 응답에 대한 A1(옵셔널 체이닝 조용한 실패)·A3(런타임 검증 누락) 위반이 포함된다.",
+  "violations": [
+    {
+      "rule": "architecture.md:ARCH1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/list-grid.tsx",
+      "line": 5,
+      "detail": "list-grid.tsx(UI driving-adapter)가 `@/adapter/out/mock/mock-data`를 직접 import해 이번 커밋에서 신설된 HouseBlPort/createHouseBlUseCases Application 레이어를 우회함."
+    },
+    {
+      "rule": "architecture.md:ARCH1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/dashboard/activity-feed.tsx",
+      "line": 1,
+      "detail": "대시보드 컴포넌트 11개 전체가 `@/adapter/out/mock/mock-data`를 직접 import — mock-data.ts가 lib/에서 adapter/out/mock/으로 이동하면서 adapter→adapter 직접 참조 위반이 이번 커밋에서 발생; kpiData 등 비-house-bl 데이터는 대응 Application 레이어 자체가 없는 상태."
+    },
+    {
+      "rule": "ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 10,
+      "detail": "`json.data?.content ?? []`: HTTP 200이지만 응답에 `data.content`가 없을 때 예외 없이 빈 배열 반환 — A1이 명시한 '검증 없는 옵셔널 체이닝으로 조용한 실패' 패턴."
+    },
+    {
+      "rule": "ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 10,
+      "detail": "`json.data?.content ?? []`가 응답 구조 불일치를 무시하고 빈 배열 반환 — house-bl.ts와 동일한 A1 패턴."
+    },
+    {
+      "rule": "ai_specific.md:A3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 16,
+      "detail": "`getById`(L16)·`save`(L26)에서 `return json.data`로 외부 API 응답을 런타임 스키마 검증 없이 HouseBlRow로 반환 — 응답 구조 불일치 시 undefined 전파."
+    },
+    {
+      "rule": "ai_specific.md:A3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 16,
+      "detail": "`getById`(L16)에서 `return json.data`로 외부 API 응답을 런타임 검증 없이 MasterBlRow로 반환 — house-bl.ts와 동일한 A3 패턴."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "L6: `new URLSearchParams(filter as Record<string, string>)` — HouseBlFilter의 page·size는 number이지만 string으로 강제 캐스트 처리.",
+      "proposal": "Object.entries(filter).filter(([,v]) => v != null).reduce((p,[k,v]) => { p.set(k, String(v)); return p; }, new URLSearchParams()) 패턴으로 명시적 문자열 변환."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/mock/master-bl.ts",
+      "issue": "masterBlRows가 빈 배열이라 list는 항상 [], getById는 항상 예외 — master-bl 관련 UI 개발 시 mock이 동작하지 않음.",
+      "proposal": "house-bl mock처럼 픽스처 데이터를 추가하거나, 빈 배열이 의도적임을 주석으로 명시."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-25T17:30:28",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 223297,
+  "summary": "ARCH1(adapter→adapter) 위반은 mock-data를 `lib/`로 이동하여 올바르게 해소되었으며, API 응답 엔벨로프 검증(content 배열 체크, data 존재 체크) 추가로 A3 부분 개선이 이루어졌다. 그러나 `as HouseBlRow[]` TypeScript 캐스트는 런타임 제거되어 개별 원소 형상 보장이 없고(A3 잔존), 모든 에러를 범용 `new Error`로 throw하여 호출자 분기가 불가한 C1 위반이 두 API 어댑터에 공통으로 존재한다.",
+  "violations": [
+    {
+      "rule": "rules/ai_specific.md:A3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 18,
+      "detail": "list() 에서 `json.data.content`가 배열임은 확인하지만 각 원소의 HouseBlRow 필드 형상은 무검증 상태로 `as HouseBlRow[]` TypeScript 캐스트만 적용됨 — 런타임에 캐스트는 제거되므로 백엔드가 잘못된 형태의 객체를 반환할 때 오류 없이 오염된 도메인 객체가 상위로 전달된다. getById(line 25)·save(line 35) 도 동일 패턴(`as HouseBlRow`)."
+    },
+    {
+      "rule": "rules/ai_specific.md:A3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 18,
+      "detail": "list()·getById(line 24) 모두 `json.data.content`·`json.data` 존재 여부만 확인하고 MasterBlRow 필드 형상은 런타임 미검증 상태로 `as` 캐스트만 적용 — house-bl과 동일한 A3 잔존 패턴."
+    },
+    {
+      "rule": "rules/correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 13,
+      "detail": "HTTP 실패·구조 불일치·not-found 등 모든 에러 경로에서 범용 `new Error(...)` 만 사용 — 호출 측이 에러 종류를 instanceof로 분기할 수 없다. C1은 '도메인 에러는 별도 클래스(ValidationError, NotFoundError 등)'를 명시하며 '무차별 Error 만 쓰면 호출자가 분기 불가'로 위반 규정."
+    },
+    {
+      "rule": "rules/correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 13,
+      "detail": "house-bl.ts와 동일하게 모든 실패 경로에서 범용 `new Error(...)` 사용 — 네트워크 오류·404·응답 구조 이상을 동일 에러 클래스로 throw하여 호출자 분기 불가."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "A3 부분 수정에 그쳐 있음 — 응답 엔벨로프(content 배열 여부, data 존재 여부)는 검증하지만 HouseBlRow 개별 필드는 무검증.",
+      "proposal": "zod 스키마(`HouseBlRowSchema = z.object({ hbl: z.string(), ... })`) 를 domain 또는 adapter 레벨에 정의하고 `HouseBlRowSchema.array().parse(json.data.content)` 로 파싱 — 런타임 형상 보장 및 zod 파싱 실패 시 자동 에러 throw."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "에러 클래스 미분류로 호출자가 HTTP 404 / 네트워크 오류 / 응답 파싱 오류를 구분할 수 없음.",
+      "proposal": "`class ApiError extends Error { constructor(msg: string, public readonly cause?: unknown) { super(msg); } }` 또는 `HouseBlNotFoundError`, `HouseBlApiError` 등 어댑터 전용 에러 클래스를 정의하여 용도별로 throw — use-case 레이어가 에러 종류에 따라 다른 UX 분기 가능."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-25T17:43:37",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 227817,
+  "summary": "zod 런타임 검증 도입과 타입화된 에러 클래스는 올바른 방향이나, fetch() 네트워크 실패와 res.json() JSON 파싱 오류가 어댑터 내부에서 잡히지 않아 도메인 에러 타입 미변환 상태로 상위 레이어에 노출되는 C1 위반이 두 파일 모두에 존재하며, 모듈 레벨 상수 명명이 CONV3(UPPER_SNAKE_CASE) 기준을 따르지 않음.",
+  "violations": [
+    {
+      "rule": "rules/correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 33,
+      "detail": "모든 메서드에서 fetch() 네트워크 오류(TypeError: Failed to fetch)와 res.json() JSON 파싱 오류(SyntaxError)가 try-catch 없이 전파되어 어댑터 경계를 벗어남 — 호출자(use-case 레이어)가 ApiError/ResponseParseError 대신 원시 브라우저 예외를 받게 되어 에러 분기가 불가능해짐"
+    },
+    {
+      "rule": "rules/correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 26,
+      "detail": "모든 메서드에서 fetch() 네트워크 오류(TypeError: Failed to fetch)와 res.json() JSON 파싱 오류(SyntaxError)가 try-catch 없이 전파되어 어댑터 경계를 벗어남 — 호출자(use-case 레이어)가 ApiError/ResponseParseError 대신 원시 브라우저 예외를 받게 되어 에러 분기가 불가능해짐"
+    },
+    {
+      "rule": "rules/conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 31,
+      "detail": "모듈 레벨 불변 const 내보내기 'apiHouseBlPort' 가 camelCase — CONV3 기준 UPPER_SNAKE_CASE 로 명명해야 함 (예: API_HOUSE_BL_PORT)"
+    },
+    {
+      "rule": "rules/conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 24,
+      "detail": "모듈 레벨 불변 const 내보내기 'apiMasterBlPort' 가 camelCase — CONV3 기준 UPPER_SNAKE_CASE 로 명명해야 함 (예: API_MASTER_BL_PORT)"
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "toSearchParams 함수가 house-bl.ts 와 master-bl.ts 에 타입 시그니처만 다른 채로 구현이 완전히 동일하게 중복 정의됨",
+      "proposal": "adapter/out/api/utils.ts 로 제네릭 함수(toSearchParams<T extends object>(filter: T)) 또는 타입 무관한 단일 구현으로 추출 후 양쪽에서 import"
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/errors.ts",
+      "issue": "ApiError, ResponseParseError 생성자가 cause 옵션을 받지 않아 fetch/res.json() 오류 래핑 시 원본 예외 체인이 끊김",
+      "proposal": "constructor 시그니처에 options?: ErrorOptions 추가 후 super(message, options) 로 전달 — 예: new ApiError('Network error', undefined, { cause: e })"
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-25T17:54:12",
+  "verdict": "REJECTED",
+  "severity": "low",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 253530,
+  "summary": "try-catch 추가·toSearchParams 추출·UPPER_SNAKE_CASE 리네임 방향은 모두 적절하나, Zod 스키마 상수(HouseBlRowSchema, MasterBlRowSchema)에 동일한 네이밍 규칙이 적용되지 않아 CONV3 위반이다. 추가로 fetchJson 중복과 204 No Content 미처리가 향후 운영 오류의 씨앗이 될 수 있어 함께 수정을 권장한다.",
+  "violations": [
+    {
+      "rule": "conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 7,
+      "detail": "HouseBlRowSchema는 모듈 레벨 불변 상수(const)이므로 CONV3에 따라 HOUSE_BL_ROW_SCHEMA로 명명해야 한다; 커밋에서 API_HOUSE_BL_PORT는 UPPER_SNAKE_CASE로 변경했으나 스키마 상수는 누락됐다."
+    },
+    {
+      "rule": "conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 7,
+      "detail": "MasterBlRowSchema는 모듈 레벨 불변 상수(const)이므로 CONV3에 따라 MASTER_BL_ROW_SCHEMA로 명명해야 한다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "fetchJson 함수(L26-40)가 master-bl.ts(L19-33)에 한 글자도 다르지 않게 복붙되어 있다. toSearchParams를 utils.ts로 추출한 방식과 일관성이 없다.",
+      "proposal": "fetchJson을 utils.ts로 이동하고 두 어댑터에서 import. 향후 어댑터 추가 시 삼중 복붙을 방지한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "fetchJson이 2xx 응답에서 항상 res.json()을 호출한다. DELETE 성공 시 서버가 204 No Content를 반환하면 res.json()이 SyntaxError를 던지고 ResponseParseError로 변환된다. HouseBlPort.delete()는 Promise<void>이므로 응답 바디가 불필요하다.",
+      "proposal": "fetchJson 내부에 'if (res.status === 204 || res.headers.get(\"content-length\") === \"0\") return null;' 분기를 추가하거나, delete 전용 fetchVoid 헬퍼를 utils.ts에 추가하여 res.json() 호출 자체를 생략한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "issue": "save 메서드(L57-66)에서 json === null 여부를 검사하지 않는다. POST가 예외적으로 404를 반환하면 fetchJson이 null을 돌려주고, 이후 safeParse(undefined)가 실패하여 NotFoundError가 아닌 ResponseParseError가 발생해 오류 분류가 어긋난다.",
+      "proposal": "getById/delete처럼 const json = await fetchJson(...); if (json === null) throw new NotFoundError('HouseBl', '(unknown)'); 를 safeParse 전에 추가할 것."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-25T18:07:19",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 210085,
+  "summary": "fetchJson이 HTTP 404와 204를 동일한 null로 반환하는 설계로 인해, house-bl.ts와 master-bl.ts의 delete 메서드 모두 정상 삭제(204)를 NotFoundError로 오분류하는 정확성 버그가 존재한다. save의 null 체크도 의미론적으로 잘못된 에러 타입을 사용하고 있으며, 근본 수정은 utils.ts의 null 반환 계약을 명확히 분리하는 것이다.",
+  "violations": [
+    {
+      "rule": "correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/utils.ts",
+      "line": 16,
+      "detail": "fetchJson이 HTTP 404(라인 16)와 204(라인 18) 모두 null을 반환하므로, 호출자가 '리소스 없음(404)'과 '성공·내용 없음(204)'을 구분할 수 없는 모호한 계약을 만든다."
+    },
+    {
+      "rule": "correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 54,
+      "detail": "DELETE가 204로 성공해도 fetchJson은 null을 반환하고, null 체크가 NotFoundError를 throw하므로 정상 삭제가 매번 '찾을 수 없음' 오류로 처리된다."
+    },
+    {
+      "rule": "correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/master-bl.ts",
+      "line": 36,
+      "detail": "house-bl.ts delete와 동일 구조 — DELETE 204 성공 응답이 NotFoundError로 오분류된다."
+    },
+    {
+      "rule": "correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/house-bl.ts",
+      "line": 47,
+      "detail": "POST(save)에서 null 수신 시 NotFoundError('HouseBl', '(unknown)')를 throw하는데, 204·빈 본문은 '찾을 수 없음'이 아니라 '성공·내용 없음'이므로 의미론적으로 잘못된 에러 타입이다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/utils.ts",
+      "issue": "404와 204를 동일한 null로 반환하여 호출자가 의미를 구분할 수 없음.",
+      "proposal": "방법 A: fetchJson 내부에서 404를 즉시 throw new NotFoundError(...)로 처리하고 204만 null 반환하면, 호출자의 null 체크가 '성공·내용 없음'만 의미하게 된다. 방법 B: 반환 타입을 { kind: 'notFound' } | { kind: 'noContent' } | { kind: 'ok'; body: unknown } discriminated union으로 변경하여 호출자가 케이스를 명시적으로 분기한다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-25T18:12:37",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 180108,
+  "summary": "404를 throw로 전환한 방향 자체는 올바르나, 동일 모듈에 이미 존재하는 `NotFoundError` 타입 대신 generic `ApiError`를 사용해 타입 기반 에러 분기가 불가능해졌다. `NotFoundError`가 dead code가 되는 구조 불일치가 이번 커밋에서 발생했으므로 수정이 필요하다.",
+  "violations": [
+    {
+      "rule": "correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/utils.ts",
+      "line": 16,
+      "detail": "`fetchJson`은 404를 포함한 모든 non-ok 응답에 generic `ApiError`를 throw하지만, 동일 모듈(`errors.ts`)에 `NotFoundError extends ApiError`가 정의되어 있다. 이번 커밋이 명시적으로 404 throw 동작을 도입했음에도 `NotFoundError`를 사용하지 않아, 해당 클래스는 dead code가 되고 호출자는 `instanceof NotFoundError` 대신 `err.statusCode === 404` 분기를 강요받는다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/utils.ts",
+      "issue": "`NotFoundError` 클래스가 정의되어 있으나 `fetchJson`에서 사용되지 않아 사실상 사문화된 상태",
+      "proposal": "`if (!res.ok)` 분기 내에 `if (res.status === 404) throw new NotFoundError('resource', String(input));`를 먼저 처리한 뒤 나머지 non-ok를 generic `ApiError`로 throw하면, `NotFoundError`의 의도가 살아나고 호출자가 타입 기반으로 분기 가능해진다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-25T18:34:54",
+  "verdict": "APPROVED",
+  "severity": "low",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 107576,
+  "summary": "404 전용 NotFoundError 분기 추가가 올바른 위치(res.ok 검사 전)에 삽입되었고, 에러 클래스 계층 활용·silent failure 없음·ARCH1 레이어 경계 준수 모두 양호함. String(input)의 Request 객체 대응 미흡만 개선 권고.",
+  "violations": [],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/adapter/out/api/utils.ts",
+      "issue": "line 16에서 String(input) 사용 시 input이 Request 객체인 경우 \"[object Request]\"가 반환되어 에러 메시지에서 URL 식별자가 유실됨. RequestInfo 타입은 string | Request이므로 이 경로는 타입 상 가능함.",
+      "proposal": "typeof input === 'string' ? input : input.url 로 URL을 명시적으로 추출 후 NotFoundError 생성자에 전달. 이렇게 하면 Request 객체가 전달되어도 에러 로그에서 URL을 식별할 수 있음 (C1: 에러 메시지에 식별자 포함)."
+    }
+  ]
+}

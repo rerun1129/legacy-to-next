@@ -27,6 +27,10 @@
           · [ESCALATE_TO_USER] 태그 있음 (2회 이상) → 메인이 사용자에게 위반 내용 직접 보고 + 작업 중단 대기
       · APPROVED → 마커 파일 생성 → exit 2로 메인 재개 → 메인이 [QA] 호출
   → [QA]                         통합 빌드·테스트 (단일)
+  → [메인] worktree 정리 (QA 통과 후)
+      → git worktree list로 남은 worktree 확인
+      → git worktree remove -f -f <path> × N회
+      → git branch -D <worktree-branch> × N회
   → [메인] 사용자 결과 보고 후 종료
       → Stop 훅 재실행 → APPROVED_MARKER 파일 존재 확인 → 마커 삭제 후 exit 0
 ```
@@ -67,6 +71,7 @@
 | Mediator 충돌 해결 후 | `git add <files>` → `git commit -m "merge: resolve conflicts from parallel Coders"` → `touch .claude/.review_pending` |
 | Reviewer REJECTED 후 Coder 재작업 완료 시 | `git add <files>` → `git commit -m "fix: rework per reviewer feedback"` → `touch .claude/.review_pending` |
 | Reviewer APPROVED 후 QA 호출 전 | `git diff --name-only <BASE> HEAD` → 결과를 QA에 변경 파일 목록으로 전달 |
+| QA 통과 후 worktree 정리 | `git worktree list` 확인 → `git worktree remove -f -f <path>` × N회 → `git branch -D <worktree-branch>` × N회 |
 
 ## 공통 규칙
 
