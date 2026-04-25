@@ -58,15 +58,15 @@ export function MainTabAir({ variant }: Props) {
               <div className="li">
                 <span className="li__label is-required">{isExp ? "Airline *" : "Carrier *"}</span>
                 <div className="li__input" style={{ gap: 4 }}>
-                  <input placeholder="Code" defaultValue={isExp ? "KE" : "OZ"} style={{ width: 60, height: 26, padding: "0 6px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
-                  <input defaultValue={isExp ? "Korean Air" : "Asiana Airlines"} style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                  <input placeholder="Code" defaultValue={isExp ? "KE" : "OZ"} style={{ width: 60, height: 26, padding: "0 6px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                  <input defaultValue={isExp ? "Korean Air" : "Asiana Airlines"} style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 12 }} />
                 </div>
               </div>
               <div className="li">
                 <span className="li__label is-required">Departure *</span>
                 <div className="li__input" style={{ gap: 4 }}>
-                  <input placeholder="IATA" defaultValue="ICN" style={{ width: 60, height: 26, padding: "0 6px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
-                  <input defaultValue="Incheon Int'l" style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                  <input placeholder="IATA" defaultValue="ICN" style={{ width: 60, height: 26, padding: "0 6px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                  <input defaultValue="Incheon Int'l" style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 12 }} />
                 </div>
               </div>
             </div>
@@ -117,7 +117,7 @@ export function MainTabAir({ variant }: Props) {
                   <div key={f} className="li">
                     <span className="li__label">{f}</span>
                     <div className="li__input">
-                      <input defaultValue={f === "Issue Date" ? "2026-04-20" : f === "Issue Place" ? "ICN" : ""} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                      <input defaultValue={f === "Issue Date" ? "2026-04-20" : f === "Issue Place" ? "ICN" : ""} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12 }} />
                     </div>
                   </div>
                 ))}
@@ -147,7 +147,7 @@ export function MainTabAir({ variant }: Props) {
                 <div key={f.l} className="li">
                   <span className="li__label">{f.l}</span>
                   <div className="li__input">
-                    <input defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                    <input defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12 }} />
                   </div>
                 </div>
               ))}
