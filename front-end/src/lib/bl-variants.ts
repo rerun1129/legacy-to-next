@@ -64,6 +64,12 @@ export function getBLVariant(key: string): BLVariantConfig {
   return BL_VARIANTS[key as BLVariantKey] ?? BL_VARIANTS['sea-exp']
 }
 
+export function getPageTitle(variant: BLVariantConfig, blType: 'House' | 'Master', pageType: 'Entry' | 'List'): string {
+  const modeStr = variant.mode === 'SEA' ? 'Sea' : 'Air';
+  const dirStr  = variant.direction === 'EXP' ? 'Export' : 'Import';
+  return `${modeStr} ${dirStr} ${blType} B/L ${pageType}`;
+}
+
 export function getMasterVariant(key: string): MasterVariantConfig {
   return MASTER_VARIANTS[key as BLVariantKey] ?? MASTER_VARIANTS['sea-exp']
 }

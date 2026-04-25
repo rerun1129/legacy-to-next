@@ -1,7 +1,7 @@
 import { Download, FileText, Columns3 } from "lucide-react";
 import { ListFilter } from "@/components/fms/house-bl/list-filter";
 import { ListGrid }   from "@/components/fms/house-bl/list-grid";
-import { getBLVariant, BL_VARIANT_KEYS } from "@/lib/bl-variants";
+import { getBLVariant, getPageTitle, BL_VARIANT_KEYS } from "@/lib/bl-variants";
 
 export function generateStaticParams() {
   return BL_VARIANT_KEYS.map((v) => ({ variant: v }));
@@ -18,7 +18,7 @@ export default async function HouseBLListPage({ params }: Props) {
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><FileText size={14} /></div>
-          House B/L List
+          {getPageTitle(variant, 'House', 'List')}
         </div>
         <div className="page-head__actions">
           <button className="btn btn--sm"><Columns3 size={12} />Columns</button>

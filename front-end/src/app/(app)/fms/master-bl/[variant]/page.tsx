@@ -1,5 +1,5 @@
 import { Download, Layers } from "lucide-react";
-import { getMasterVariant, BL_VARIANT_KEYS } from "@/lib/bl-variants";
+import { getMasterVariant, getPageTitle, BL_VARIANT_KEYS } from "@/lib/bl-variants";
 import { ListFilter }   from "@/components/fms/house-bl/list-filter";
 import { MasterBlGrid } from "@/components/fms/master-bl/master-bl-grid";
 
@@ -18,7 +18,7 @@ export default async function MasterBLListPage({ params }: Props) {
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><Layers size={14} /></div>
-          Master B/L List
+          {getPageTitle(variant, 'Master', 'List')}
         </div>
         <div className="page-head__actions">
           <button className="btn btn--sm"><Download size={12} />Export</button>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
+import { getPageTitle } from "@/lib/bl-variants";
 import { MasterMainTab } from "./tabs/main-tab";
 import { MasterEdiTab }  from "./tabs/edi-tab";
 import { OtherTab }      from "@/components/fms/house-bl/tabs/other-tab";
@@ -36,7 +37,7 @@ export function MasterBLEntry({ variant }: Props) {
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><Layers size={14} /></div>
-          Master B/L Entry
+          {getPageTitle(variant, 'Master', 'Entry')}
         </div>
         <div className="page-head__meta">
           <span className="badge badge--draft">DRAFT</span>
