@@ -13,7 +13,6 @@ export async function fetchJson(input: RequestInfo, init?: RequestInit): Promise
   } catch (e) {
     throw new ApiError('Network error', undefined, e);
   }
-  if (res.status === 404) return null;
   if (!res.ok) throw new ApiError(`HTTP ${res.status}`, res.status);
   if (res.status === 204 || res.headers.get('content-length') === '0') return null;
   try {

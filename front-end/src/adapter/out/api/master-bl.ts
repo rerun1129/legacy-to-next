@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { MasterBlPort } from '@/application/master-bl/ports';
 import type { MasterBlFilter } from '@/domain/master-bl';
-import { NotFoundError, ResponseParseError } from './errors';
+import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
 
 const MASTER_BL_ROW_SCHEMA = z.object({
@@ -26,13 +26,11 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
   },
   async getById(id: string) {
     const json = await fetchJson(`/api/v1/master-bl/${id}`);
-    if (json === null) throw new NotFoundError('MasterBl', id);
     const parsed = MASTER_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid master B/L response: ${parsed.error.message}`);
     return parsed.data;
   },
   async delete(id: string) {
-    const json = await fetchJson(`/api/v1/master-bl/${id}`, { method: 'DELETE' });
-    if (json === null) throw new NotFoundError('MasterBl', id);
+    await fetchJson(`/api/v1/master-bl/${id}`, { method: 'DELETE' });
   },
 };
