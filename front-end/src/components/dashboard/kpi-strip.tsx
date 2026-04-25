@@ -1,4 +1,4 @@
-import { kpiData } from "@/adapter/out/mock/mock-data";
+import { kpiData } from "@/lib/mock-data";
 
 const variantClass: Record<string, string> = {
   default: "",

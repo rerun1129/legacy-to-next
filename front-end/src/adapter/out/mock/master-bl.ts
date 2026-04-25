@@ -1,6 +1,7 @@
 import type { MasterBlPort } from '@/application/master-bl/ports';
 import type { MasterBlRow, MasterBlFilter } from '@/domain/master-bl';
 
+// Master B/L fixture data: empty until backend integration is completed
 const masterBlRows: MasterBlRow[] = [];
 
 export const mockMasterBlPort: MasterBlPort = {

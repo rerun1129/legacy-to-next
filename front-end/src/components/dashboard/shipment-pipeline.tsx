@@ -1,4 +1,4 @@
-import { pipelineData } from "@/adapter/out/mock/mock-data";
+import { pipelineData } from "@/lib/mock-data";
 
 export function ShipmentPipeline() {
   return (

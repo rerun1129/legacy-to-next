@@ -1,6 +1,6 @@
 import type { HouseBlPort } from '@/application/house-bl/ports';
 import type { HouseBlRow, HouseBlFilter } from '@/domain/house-bl';
-import { houseBLRows } from './mock-data';
+import { houseBLRows } from '@/lib/mock-data';
 
 export const mockHouseBlPort: HouseBlPort = {
   async list(_filter: HouseBlFilter): Promise<HouseBlRow[]> {

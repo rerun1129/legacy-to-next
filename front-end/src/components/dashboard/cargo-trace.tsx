@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { traceData } from "@/adapter/out/mock/mock-data";
+import { traceData } from "@/lib/mock-data";
 
 export function CargoTrace() {
   const [query, setQuery] = useState("HBLKR24041801");

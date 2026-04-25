@@ -1,6 +1,6 @@
 "use client";
 
-import { weeklyVolumeData } from "@/adapter/out/mock/mock-data";
+import { weeklyVolumeData } from "@/lib/mock-data";
 
 export function WeeklyVolume() {
   const maxTotal = Math.max(...weeklyVolumeData.map((d) => d.total));

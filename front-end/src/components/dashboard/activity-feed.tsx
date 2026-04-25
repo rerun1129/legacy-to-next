@@ -1,4 +1,4 @@
-import { activityData } from "@/adapter/out/mock/mock-data";
+import { activityData } from "@/lib/mock-data";
 
 export function ActivityFeed() {
   return (

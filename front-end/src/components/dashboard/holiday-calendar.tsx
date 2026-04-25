@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { holidayData } from "@/adapter/out/mock/mock-data";
+import { holidayData } from "@/lib/mock-data";
 
 const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 

@@ -1,4 +1,4 @@
-import { fxData } from "@/adapter/out/mock/mock-data";
+import { fxData } from "@/lib/mock-data";
 
 export function ExchangeRates() {
   return (
