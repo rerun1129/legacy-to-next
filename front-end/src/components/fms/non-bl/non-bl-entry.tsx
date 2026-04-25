@@ -3,6 +3,18 @@
 import { useState } from "react";
 import { Save, Trash2, Package, Printer } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+
+type ContainerInfoRow = Record<string, never>;
+
+const CONTAINER_INFO_COLS: GridTableColumn<ContainerInfoRow>[] = [
+  { key: "_no",  label: "#",             render: (_, __, i) => i + 1 },
+  { key: "cno",  label: "Container No." },
+  { key: "type", label: "Type" },
+  { key: "pkg",  label: "Pkg",  className: "is-num" },
+  { key: "gw",   label: "G/W",  className: "is-num" },
+  { key: "cbm",  label: "CBM",  className: "is-num" },
+];
 
 type WorkDiv = "Sea" | "Air" | "Warehouse" | "Trucking";
 
@@ -139,8 +151,11 @@ export function NonBLEntry() {
             <div className="panel__body">
               {workDiv === "Sea" && (
                 <div style={{ overflowX: "auto" }}>
-                  <table className="grid"><thead><tr><th>#</th><th>Container No.</th><th>Type</th><th className="is-num">Pkg</th><th className="is-num">G/W</th><th className="is-num">CBM</th></tr></thead>
-                  <tbody><tr><td colSpan={6} className="grid__empty">+ Add Container</td></tr></tbody></table>
+                  <GridTable
+                    columns={CONTAINER_INFO_COLS}
+                    data={[]}
+                    emptyMessage="+ Add Container"
+                  />
                 </div>
               )}
               {workDiv === "Air" && (

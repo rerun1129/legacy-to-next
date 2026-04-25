@@ -1,3 +1,18 @@
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+
+type CoLoadRow = Record<string, never>;
+
+const CO_LOAD_COLS: GridTableColumn<CoLoadRow>[] = [
+  { key: "_no",       label: "#",         className: "row-num", render: (_, __, i) => i + 1 },
+  { key: "hblNo",     label: "HBL No" },
+  { key: "shipper",   label: "Shipper" },
+  { key: "consignee", label: "Consignee" },
+  { key: "pkg",       label: "Pkg",       className: "is-num" },
+  { key: "gw",        label: "G/W",       className: "is-num" },
+  { key: "cbm",       label: "CBM",       className: "is-num" },
+  { key: "remark",    label: "Remark" },
+];
+
 export function OtherTab() {
   return (
     <div className="page-body layout-other" style={{ overflow: "auto", gap: 10 }}>
@@ -59,25 +74,11 @@ export function OtherTab() {
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th className="row-num">#</th>
-                  <th>HBL No</th>
-                  <th>Shipper</th>
-                  <th>Consignee</th>
-                  <th className="is-num">Pkg</th>
-                  <th className="is-num">G/W</th>
-                  <th className="is-num">CBM</th>
-                  <th>Remark</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={8} className="grid__empty">No co-load B/L entries</td>
-                </tr>
-              </tbody>
-            </table>
+            <GridTable
+              columns={CO_LOAD_COLS}
+              data={[]}
+              emptyMessage="No co-load B/L entries"
+            />
           </div>
         </div>
       </div>

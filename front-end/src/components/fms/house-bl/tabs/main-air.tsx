@@ -1,5 +1,85 @@
 import { Search } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+
+interface ScheduleLegRow {
+  to: string; by: string; flight: string;
+  onBoard: string; boardTime: string; arrival: string; arrTime: string;
+}
+
+interface DimensionRow {
+  length: string; width: string; height: string;
+  qty: string; cbm: string; volWt: string;
+}
+
+interface ItemRow {
+  hs: string; desc: string; qty: string; unit: string; value: string; cur: string;
+}
+
+const SCHEDULE_LEG_COLS: GridTableColumn<ScheduleLegRow>[] = [
+  { key: "_no",      label: "#",           className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "to",       label: "To *",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
+  { key: "by",       label: "By",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "flight",   label: "Flight",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "onBoard",  label: "On Board *",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "boardTime",label: "Time",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "arrival",  label: "Arrival *",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "arrTime",  label: "Time",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+];
+
+const DIMENSION_COLS: GridTableColumn<DimensionRow>[] = [
+  { key: "_no",   label: "#",          className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "length",label: "Length",     className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "width", label: "Width",      className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "height",label: "Height",     className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "qty",   label: "Qty",        className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "cbm",   label: "CBM",        className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "volWt", label: "Volume Wt.", className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+];
+
+const AIR_ITEM_COLS: GridTableColumn<ItemRow>[] = [
+  { key: "_no",   label: "#",          className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "hs",    label: "HS Code",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "desc",  label: "Description",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "qty",   label: "Qty",        className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "unit",  label: "Unit",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "value", label: "Value",      className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "cur",   label: "Cur.",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+];
+
+const SCHEDULE_LEG_DATA: ScheduleLegRow[] = [
+  { to: "PVG", by: "KE", flight: "KE851", onBoard: "26APR", boardTime: "09:30", arrival: "26APR", arrTime: "11:45" },
+];
+
+const DIMENSION_DATA: DimensionRow[] = [
+  { length: "120", width: "80", height: "90", qty: "1300", cbm: "87.5", volWt: "14,583" },
+];
+
+const AIR_ITEM_DATA: ItemRow[] = [
+  { hs: "8517.13", desc: "MOBILE PHONE PARTS", qty: "1300", unit: "CTN", value: "48,500.00", cur: "USD" },
+];
 
 interface Props { variant: BLVariantConfig }
 
@@ -75,26 +155,12 @@ export function MainTabAir({ variant }: Props) {
             <div style={{ marginTop: 8 }}>
               <div className="subhead"><div className="subhead__bar" />Schedule Legs<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ Row</button></div></div>
               <div style={{ overflowX: "auto" }}>
-                <table className="grid" style={{ fontSize: "var(--fs-xs)" }}>
-                  <thead>
-                    <tr>
-                      <th>#</th><th>To *</th><th>By</th><th>Flight</th>
-                      <th>On Board *</th><th>Time</th><th>Arrival *</th><th>Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="row-num">1</td>
-                      <td><input className="grid__cell-input" defaultValue="PVG" style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /></td>
-                      <td><input className="grid__cell-input" defaultValue="KE" /></td>
-                      <td><input className="grid__cell-input" defaultValue="KE851" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                      <td><input className="grid__cell-input" defaultValue="26APR" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                      <td><input className="grid__cell-input" defaultValue="09:30" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                      <td><input className="grid__cell-input" defaultValue="26APR" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                      <td><input className="grid__cell-input" defaultValue="11:45" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    </tr>
-                  </tbody>
-                </table>
+                <GridTable
+                  columns={SCHEDULE_LEG_COLS}
+                  data={SCHEDULE_LEG_DATA}
+                  rowKey={(_, i) => i}
+                  style={{ fontSize: "var(--fs-xs)" }}
+                />
               </div>
               {/* Derived values (read-only) */}
               <div style={{ background: "var(--bg-sunken)", borderRadius: 4, padding: "6px 10px", marginTop: 6, fontSize: 11 }}>
@@ -189,22 +255,7 @@ export function MainTabAir({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Dimension</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead>
-                <tr><th className="row-num">#</th><th className="is-num">Length</th><th className="is-num">Width</th><th className="is-num">Height</th><th className="is-num">Qty</th><th className="is-num">CBM</th><th className="is-num">Volume Wt.</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="row-num">1</td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="120" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="80"  style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="90"  style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="1300" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="87.5" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="14,583" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                </tr>
-              </tbody>
-            </table>
+            <GridTable columns={DIMENSION_COLS} data={DIMENSION_DATA} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot"><div className="grid-foot__spacer" /><span>Qty: <strong>1,300</strong></span><span>CBM: <strong>87.5</strong></span><span>Vol. Wt.: <strong>14,583</strong></span></div>
         </div>
@@ -231,20 +282,7 @@ export function MainTabAir({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead><tr><th>#</th><th>HS Code</th><th>Description</th><th className="is-num">Qty</th><th>Unit</th><th className="is-num">Value</th><th>Cur.</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td className="row-num">1</td>
-                  <td><input className="grid__cell-input" defaultValue="8517.13" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                  <td><input className="grid__cell-input" defaultValue="MOBILE PHONE PARTS" /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="1300" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td><input className="grid__cell-input" defaultValue="CTN" /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="48,500.00" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td><input className="grid__cell-input" defaultValue="USD" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                </tr>
-              </tbody>
-            </table>
+            <GridTable columns={AIR_ITEM_COLS} data={AIR_ITEM_DATA} rowKey={(_, i) => i} />
           </div>
         </div>
       </div>

@@ -1,6 +1,69 @@
 import { Search } from "lucide-react";
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
 
-const rateRows = [
+interface RateRow {
+  code: string; desc: string; qty: string; unit: string;
+  sell: string; buy: string; cur: string;
+}
+
+type AccountRow = Record<string, never>;
+
+const SELLING_COLS: GridTableColumn<RateRow>[] = [
+  { key: "_no",    label: "#",          className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "code",   label: "Charge Code", required: true,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
+  { key: "desc",   label: "Description",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "qty",    label: "Qty / Basis",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "unit",   label: "Unit",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "sell",   label: "Rate",       className: "is-num", required: true,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "_amt",   label: "Amount",     className: "is-num",
+    render: (_, row) => <input className="grid__cell-input" defaultValue={(parseFloat(row.sell) * 2).toFixed(2)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "cur",    label: "Currency",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "_krw",   label: "KRW Equiv.", className: "is-num",
+    render: (_, row) => <input className="grid__cell-input" defaultValue={(parseFloat(row.sell) * 2 * 1376.5).toFixed(0)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "_rem",   label: "Remark",
+    render: () => <input className="grid__cell-input" /> },
+];
+
+const BUYING_COLS: GridTableColumn<RateRow>[] = [
+  { key: "_no",    label: "#",          className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "code",   label: "Charge Code", required: true,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
+  { key: "desc",   label: "Description",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "qty",    label: "Qty / Basis",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "unit",   label: "Unit",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "buy",    label: "Rate",       className: "is-num", required: true,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "_amt",   label: "Amount",     className: "is-num",
+    render: (_, row) => <input className="grid__cell-input" defaultValue={(parseFloat(row.buy) * 2).toFixed(2)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "cur",    label: "Currency",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "_krw",   label: "KRW Equiv.", className: "is-num",
+    render: (_, row) => <input className="grid__cell-input" defaultValue={(parseFloat(row.buy) * 2 * 1376.5).toFixed(0)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "_rem",   label: "Remark",
+    render: () => <input className="grid__cell-input" /> },
+];
+
+const ACCOUNT_COLS: GridTableColumn<AccountRow>[] = [
+  { key: "docType",   label: "Doc Type" },
+  { key: "docNo",     label: "Doc No" },
+  { key: "issueDate", label: "Issue Date" },
+  { key: "amount",    label: "Amount",   className: "is-num" },
+  { key: "currency",  label: "Currency" },
+  { key: "status",    label: "Status" },
+];
+
+const rateRows: RateRow[] = [
   { code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
   { code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
   { code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
@@ -59,38 +122,7 @@ export function FreightTab() {
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th className="row-num">#</th>
-                  <th className="is-required">Charge Code</th>
-                  <th>Description</th>
-                  <th>Qty / Basis</th>
-                  <th>Unit</th>
-                  <th className="is-num is-required">Rate</th>
-                  <th className="is-num">Amount</th>
-                  <th>Currency</th>
-                  <th className="is-num">KRW Equiv.</th>
-                  <th>Remark</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rateRows.map((r, i) => (
-                  <tr key={i}>
-                    <td className="row-num">{i + 1}</td>
-                    <td><input className="grid__cell-input" defaultValue={r.code} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.desc} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.qty} style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.unit} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={r.sell} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={(parseFloat(r.sell) * 2).toFixed(2)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.cur} style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={(parseFloat(r.sell) * 2 * 1376.5).toFixed(0)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <GridTable columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot">
             <div className="grid-foot__spacer" />
@@ -112,38 +144,7 @@ export function FreightTab() {
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th className="row-num">#</th>
-                  <th className="is-required">Charge Code</th>
-                  <th>Description</th>
-                  <th>Qty / Basis</th>
-                  <th>Unit</th>
-                  <th className="is-num is-required">Rate</th>
-                  <th className="is-num">Amount</th>
-                  <th>Currency</th>
-                  <th className="is-num">KRW Equiv.</th>
-                  <th>Remark</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rateRows.map((r, i) => (
-                  <tr key={i}>
-                    <td className="row-num">{i + 1}</td>
-                    <td><input className="grid__cell-input" defaultValue={r.code} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.desc} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.qty} style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.unit} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={r.buy} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={(parseFloat(r.buy) * 2).toFixed(2)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.cur} style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={(parseFloat(r.buy) * 2 * 1376.5).toFixed(0)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <GridTable columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot">
             <div className="grid-foot__spacer" />
@@ -163,21 +164,11 @@ export function FreightTab() {
             <span className="panel__rowcount">0</span>
           </div>
           <div className="panel__body--flush">
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th>Doc Type</th>
-                  <th>Doc No</th>
-                  <th>Issue Date</th>
-                  <th className="is-num">Amount</th>
-                  <th>Currency</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td colSpan={6} className="grid__empty">No account documents</td></tr>
-              </tbody>
-            </table>
+            <GridTable
+              columns={ACCOUNT_COLS}
+              data={[]}
+              emptyMessage="No account documents"
+            />
           </div>
         </div>
       </div>

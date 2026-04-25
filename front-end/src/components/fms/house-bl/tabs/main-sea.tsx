@@ -2,6 +2,63 @@ import { Search } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { PartyPanel } from "./sections/party-panel";
 import { SchedulePanel } from "./sections/schedule-panel";
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+
+interface ContainerRow {
+  cno: string; type: string; seal: string; pkg: number; pkgT: string;
+  gw: string; cbm: number; vgm: string;
+}
+
+interface ItemRow {
+  hs: string; desc: string; qty: string; unit: string; value: string; cur: string;
+}
+
+const CONTAINER_COLS: GridTableColumn<ContainerRow>[] = [
+  { key: "_no", label: "#", width: 36, className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "cno",  label: "Container No *", width: 160,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
+  { key: "type", label: "Type", width: 70,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "seal", label: "Seal No", width: 110,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "pkg",  label: "Pkg", width: 70, className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "pkgT", label: "Unit", width: 60,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "gw",   label: "G/W", width: 90, className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "cbm",  label: "CBM", width: 80, className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "vgm",  label: "VGM", width: 90, className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+];
+
+const ITEM_COLS: GridTableColumn<ItemRow>[] = [
+  { key: "_no",   label: "#", width: 36, className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "hs",    label: "HS Code", width: 100,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "desc",  label: "Description", width: 200,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "qty",   label: "Qty", width: 70, className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "unit",  label: "Unit", width: 60,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
+  { key: "value", label: "Value", width: 100, className: "is-num",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
+  { key: "cur",   label: "Currency", width: 80,
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+];
+
+const CONTAINER_DATA: ContainerRow[] = [
+  { cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500, pkgT: "CTN", gw: "12,400", cbm: 22.5, vgm: "12,540" },
+  { cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800, pkgT: "CTN", gw: "18,200", cbm: 65.0, vgm: "18,380" },
+];
+
+const ITEM_DATA: ItemRow[] = [
+  { hs: "8517.13", desc: "MOBILE PHONE PARTS", qty: "1300", unit: "CTN", value: "48,500.00", cur: "USD" },
+];
 
 interface Props { variant: BLVariantConfig }
 
@@ -71,34 +128,7 @@ export function MainTabSea({ variant }: Props) {
             <div className="panel__actions"><button className="btn btn--sm">+ Add Row</button></div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th className="row-num" style={{ width: 36 }}>#</th>
-                  <th style={{ width: 160 }}>Container No *</th><th style={{ width: 70 }}>Type</th><th style={{ width: 110 }}>Seal No</th>
-                  <th className="is-num" style={{ width: 70 }}>Pkg</th><th style={{ width: 60 }}>Unit</th>
-                  <th className="is-num" style={{ width: 90 }}>G/W</th><th className="is-num" style={{ width: 80 }}>CBM</th><th className="is-num" style={{ width: 90 }}>VGM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500, pkgT: "CTN", gw: "12,400", cbm: 22.5, vgm: "12,540" },
-                  { cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800, pkgT: "CTN", gw: "18,200", cbm: 65.0, vgm: "18,380" },
-                ].map((r, i) => (
-                  <tr key={i}>
-                    <td className="row-num" style={{ width: 36 }}>{i + 1}</td>
-                    <td style={{ width: 160 }}><input className="grid__cell-input" defaultValue={r.cno} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /></td>
-                    <td style={{ width: 70 }}><input className="grid__cell-input" defaultValue={r.type} /></td>
-                    <td style={{ width: 110 }}><input className="grid__cell-input" defaultValue={r.seal} style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num" style={{ width: 70 }}><input className="grid__cell-input" defaultValue={r.pkg} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td style={{ width: 60 }}><input className="grid__cell-input" defaultValue={r.pkgT} /></td>
-                    <td className="is-num" style={{ width: 90 }}><input className="grid__cell-input" defaultValue={r.gw} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num" style={{ width: 80 }}><input className="grid__cell-input" defaultValue={r.cbm} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num" style={{ width: 90 }}><input className="grid__cell-input" defaultValue={r.vgm} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <GridTable columns={CONTAINER_COLS} data={CONTAINER_DATA} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot">
             <span>2 containers</span>
@@ -144,22 +174,7 @@ export function MainTabSea({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
-              <thead>
-                <tr><th className="row-num" style={{ width: 36 }}>#</th><th style={{ width: 100 }}>HS Code</th><th style={{ width: 200 }}>Description</th><th className="is-num" style={{ width: 70 }}>Qty</th><th style={{ width: 60 }}>Unit</th><th className="is-num" style={{ width: 100 }}>Value</th><th style={{ width: 80 }}>Currency</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="row-num" style={{ width: 36 }}>1</td>
-                  <td style={{ width: 100 }}><input className="grid__cell-input" defaultValue="8517.13" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                  <td style={{ width: 200 }}><input className="grid__cell-input" defaultValue="MOBILE PHONE PARTS" /></td>
-                  <td className="is-num" style={{ width: 70 }}><input className="grid__cell-input" defaultValue="1300" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td style={{ width: 60 }}><input className="grid__cell-input" defaultValue="CTN" /></td>
-                  <td className="is-num" style={{ width: 100 }}><input className="grid__cell-input" defaultValue="48,500.00" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td style={{ width: 80 }}><input className="grid__cell-input" defaultValue="USD" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                </tr>
-              </tbody>
-            </table>
+            <GridTable columns={ITEM_COLS} data={ITEM_DATA} rowKey={(_, i) => i} />
           </div>
         </div>
       </div>

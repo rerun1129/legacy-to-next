@@ -1,5 +1,27 @@
 import { Search } from "lucide-react";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+
+interface MasterScheduleLegRow {
+  to: string; flight: string; onBoard: string; arrival: string;
+}
+
+const MASTER_SCHED_LEG_COLS: GridTableColumn<MasterScheduleLegRow>[] = [
+  { key: "_no",     label: "#",          className: "row-num",
+    render: (_, __, i) => i + 1 },
+  { key: "to",      label: "To *",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "flight",  label: "Flight",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "onBoard", label: "On Board *",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  { key: "arrival", label: "Arrival *",
+    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
+];
+
+const MASTER_SCHED_LEG_DATA: MasterScheduleLegRow[] = [
+  { to: "PVG", flight: "KE851", onBoard: "26APR", arrival: "26APR" },
+];
 
 interface Props { variant: MasterVariantConfig }
 
@@ -143,18 +165,12 @@ export function MasterMainTab({ variant }: Props) {
                 <div className="li"><span className="li__label is-required">Departure *</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="ICN" style={{ width: 50, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} /><input defaultValue="Incheon Int'l" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }} /></div></div>
                 <div style={{ marginTop: 8, fontSize: 10.5, color: "var(--ink-3)" }}>Schedule Leg 그리드 ↓</div>
                 <div style={{ overflowX: "auto" }}>
-                  <table className="grid" style={{ fontSize: "var(--fs-xs)" }}>
-                    <thead><tr><th>#</th><th>To *</th><th>Flight</th><th>On Board *</th><th>Arrival *</th></tr></thead>
-                    <tbody>
-                      <tr>
-                        <td className="row-num">1</td>
-                        <td><input className="grid__cell-input" defaultValue="PVG" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                        <td><input className="grid__cell-input" defaultValue="KE851" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                        <td><input className="grid__cell-input" defaultValue="26APR" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                        <td><input className="grid__cell-input" defaultValue="26APR" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <GridTable
+                    columns={MASTER_SCHED_LEG_COLS}
+                    data={MASTER_SCHED_LEG_DATA}
+                    rowKey={(_, i) => i}
+                    style={{ fontSize: "var(--fs-xs)" }}
+                  />
                 </div>
                 {isExp && (
                   <>

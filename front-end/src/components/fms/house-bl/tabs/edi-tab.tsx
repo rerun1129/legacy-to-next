@@ -1,4 +1,22 @@
 import type { BLVariantConfig } from "@/lib/bl-variants";
+import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+
+// License table has no data rows (empty state only)
+type LicenseRow = Record<string, never>;
+
+const LICENSE_COLS: GridTableColumn<LicenseRow>[] = [
+  { key: "_no",       label: "#",                    className: "row-num",   render: (_, __, i) => i + 1 },
+  { key: "exportNo",  label: "수출신고번호 / 화물관리번호" },
+  { key: "qty",       label: "수량",                  className: "is-num" },
+  { key: "unit",      label: "단위" },
+  { key: "weight",    label: "중량",                  className: "is-num" },
+  { key: "symCode",   label: "동시포장: 기호" },
+  { key: "symQty",    label: "수량",                  className: "is-num" },
+  { key: "symUnit",   label: "단위" },
+  { key: "splitYn",   label: "분할여부" },
+  { key: "seq",       label: "차수" },
+  { key: "progress",  label: "진행내역" },
+];
 
 interface Props { variant?: BLVariantConfig }
 
@@ -70,20 +88,11 @@ export function EdiTab({ variant }: Props) {
               <div style={{ marginTop: 16 }}>
                 <div className="subhead"><div className="subhead__bar" />License (수출신고필증) — Korea Only<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ 추가</button></div></div>
                 <div style={{ overflowX: "auto" }}>
-                  <table className="grid">
-                    <thead>
-                      <tr>
-                        <th className="row-num">#</th>
-                        <th>수출신고번호 / 화물관리번호</th>
-                        <th className="is-num">수량</th><th>단위</th><th className="is-num">중량</th>
-                        <th>동시포장: 기호</th><th className="is-num">수량</th><th>단위</th>
-                        <th>분할여부</th><th>차수</th><th>진행내역</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr><td colSpan={11} className="grid__empty">면장 없음 — 추가 버튼으로 입력</td></tr>
-                    </tbody>
-                  </table>
+                  <GridTable
+                    columns={LICENSE_COLS}
+                    data={[]}
+                    emptyMessage="면장 없음 — 추가 버튼으로 입력"
+                  />
                 </div>
               </div>
             )}
