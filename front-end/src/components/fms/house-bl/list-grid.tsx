@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { houseBLRows } from "@/lib/mock-data";
+import { houseBLRows } from "@/adapter/out/mock/mock-data";
 
 const statusClass: Record<string, string> = {
   ok:     "pill--ok",

@@ -1,4 +1,4 @@
-import { taskData } from "@/lib/mock-data";
+import { taskData } from "@/adapter/out/mock/mock-data";
 
 export function TaskList() {
   return (
