@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
+import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
 import { MainTabAir }  from "./tabs/main-air";
 import { EdiTab }      from "./tabs/edi-tab";
@@ -49,7 +50,7 @@ export function HouseBLEntry({ variant }: Props) {
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><FileText size={14} /></div>
-          House B/L Entry
+          {getPageTitle(variant, 'House', 'Entry')}
         </div>
         <div className="page-head__meta">
           <span className="badge badge--draft">DRAFT</span>
