@@ -49,7 +49,7 @@ export function MainTabSea({ variant }: Props) {
                   <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
                     <span className="lcn__label is-required">{f.l}</span>
                     <div className="lcn__code" style={{ position: "relative" }}>
-                      <input defaultValue={f.code} style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
+                      <input defaultValue={f.code} style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
                       <Search size={12} className="lcn__icon" />
                     </div>
                     <input className="lcn__name" defaultValue={f.name} placeholder="Name" />
