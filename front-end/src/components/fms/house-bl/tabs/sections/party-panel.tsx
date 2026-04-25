@@ -31,14 +31,14 @@ export function PartyPanel({ isExp }: Props) {
                       className="text-mono"
                       placeholder="Code"
                       defaultValue={p.filled ? (p.role === "SHIPPER" ? "HJTR001" : p.role === "CONSIGNEE" ? "SHTRC001" : "") : ""}
-                      style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 20px 4px 2px", fontSize: 12, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }}
+                      style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 20px 4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }}
                     />
                     <Search size={12} style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", color: "var(--ink-4)", cursor: "pointer" }} />
                   </div>
                   <input
                     placeholder="Company Name"
                     defaultValue={p.filled ? (p.role === "SHIPPER" ? "한진무역(주)" : p.role === "CONSIGNEE" ? "SHANGHAI TRADING CO., LTD." : "") : ""}
-                    style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 12, color: "var(--ink)", outline: "none" }}
+                    style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }}
                   />
                 </div>
                 <div className="party-block__head-actions">

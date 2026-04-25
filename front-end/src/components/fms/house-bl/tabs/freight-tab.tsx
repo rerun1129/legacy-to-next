@@ -25,22 +25,22 @@ export function FreightTab() {
                 <div style={{ position: "relative", display: "flex", alignItems: "center", flex: 1 }}>
                   <input
                     defaultValue={col.code}
-                    style={{ height: 26, padding: "0 24px 0 8px", fontSize: 12, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none", width: 90, flexShrink: 0 }}
+                    style={{ height: 22, padding: "0 24px 0 8px", fontSize: 10, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none", width: 90, flexShrink: 0 }}
                   />
                   <Search size={12} style={{ position: "absolute", right: "calc(100% - 82px)", color: "var(--ink-3)" }} />
                   <input
                     defaultValue={col.name}
-                    style={{ height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none", flex: 1, marginLeft: 6, minWidth: 0 }}
+                    style={{ height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none", flex: 1, marginLeft: 6, minWidth: 0 }}
                   />
                 </div>
               </div>
-              <div className="rate-head__row" style={{ gap: 6, fontSize: 11 }}>
-                <span style={{ color: "var(--ink-3)", fontSize: 11, whiteSpace: "nowrap" }}>Cur</span>
-                <select style={{ height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none", width: 55 }}>
+              <div className="rate-head__row" style={{ gap: 6, fontSize: 10 }}>
+                <span style={{ color: "var(--ink-3)", fontSize: 10, whiteSpace: "nowrap" }}>Cur</span>
+                <select style={{ height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none", width: 55 }}>
                   <option>USD</option><option>KRW</option><option>EUR</option>
                 </select>
-                <span style={{ color: "var(--ink-3)", fontSize: 11, whiteSpace: "nowrap" }}>Ex Rate</span>
-                <input defaultValue="1,376.50" style={{ height: 26, width: 75, padding: "0 6px", fontSize: 11, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", textAlign: "right", outline: "none" }} />
+                <span style={{ color: "var(--ink-3)", fontSize: 10, whiteSpace: "nowrap" }}>Ex Rate</span>
+                <input defaultValue="1,376.50" style={{ height: 22, width: 75, padding: "0 6px", fontSize: 10, background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", textAlign: "right", outline: "none" }} />
               </div>
             </div>
           ))}
