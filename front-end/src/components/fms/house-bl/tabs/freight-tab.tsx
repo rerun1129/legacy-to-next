@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface RateRow {
   code: string; desc: string; qty: string; unit: string;
@@ -8,7 +8,7 @@ interface RateRow {
 
 type AccountRow = Record<string, never>;
 
-const SELLING_COLS: GridTableColumn<RateRow>[] = [
+const SELLING_COLS: GridColumn<RateRow>[] = [
   { key: "_no",    label: "#",          className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "code",   label: "Charge Code", required: true,
@@ -31,7 +31,7 @@ const SELLING_COLS: GridTableColumn<RateRow>[] = [
     render: () => <input className="grid__cell-input" /> },
 ];
 
-const BUYING_COLS: GridTableColumn<RateRow>[] = [
+const BUYING_COLS: GridColumn<RateRow>[] = [
   { key: "_no",    label: "#",          className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "code",   label: "Charge Code", required: true,
@@ -54,7 +54,7 @@ const BUYING_COLS: GridTableColumn<RateRow>[] = [
     render: () => <input className="grid__cell-input" /> },
 ];
 
-const ACCOUNT_COLS: GridTableColumn<AccountRow>[] = [
+const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
   { key: "docType",   label: "Doc Type" },
   { key: "docNo",     label: "Doc No" },
   { key: "issueDate", label: "Issue Date" },
@@ -122,7 +122,7 @@ export function FreightTab() {
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} />
+            <GridList columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot">
             <div className="grid-foot__spacer" />
@@ -144,7 +144,7 @@ export function FreightTab() {
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} />
+            <GridList columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot">
             <div className="grid-foot__spacer" />
@@ -164,7 +164,7 @@ export function FreightTab() {
             <span className="panel__rowcount">0</span>
           </div>
           <div className="panel__body--flush">
-            <GridTable
+            <GridList
               columns={ACCOUNT_COLS}
               data={[]}
               emptyMessage="No account documents"

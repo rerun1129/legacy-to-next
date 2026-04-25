@@ -1,10 +1,10 @@
 import type { BLVariantConfig } from "@/lib/bl-variants";
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 // License table has no data rows (empty state only)
 type LicenseRow = Record<string, never>;
 
-const LICENSE_COLS: GridTableColumn<LicenseRow>[] = [
+const LICENSE_COLS: GridColumn<LicenseRow>[] = [
   { key: "_no",       label: "#",                    className: "row-num",   render: (_, __, i) => i + 1 },
   { key: "exportNo",  label: "수출신고번호 / 화물관리번호" },
   { key: "qty",       label: "수량",                  className: "is-num" },
@@ -88,7 +88,7 @@ export function EdiTab({ variant }: Props) {
               <div style={{ marginTop: 16 }}>
                 <div className="subhead"><div className="subhead__bar" />License (수출신고필증) — Korea Only<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ 추가</button></div></div>
                 <div style={{ overflowX: "auto" }}>
-                  <GridTable
+                  <GridList
                     columns={LICENSE_COLS}
                     data={[]}
                     emptyMessage="면장 없음 — 추가 버튼으로 입력"
