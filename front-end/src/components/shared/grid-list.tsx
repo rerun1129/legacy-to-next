@@ -31,16 +31,17 @@ export function GridList<T>({
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`}>
       <table className="grid grid--list">
+        <colgroup>
+          {columns.map((col) => (
+            <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />
+          ))}
+        </colgroup>
         <thead>
           <tr>
             {columns.map((col) => (
               <th
                 key={String(col.key)}
-                style={{
-                  minWidth: col.minWidth,
-                  width: col.width,
-                  textAlign: col.align,
-                }}
+                style={{ textAlign: col.align }}
               >
                 {col.label}
               </th>

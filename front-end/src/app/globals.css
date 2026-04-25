@@ -1110,7 +1110,7 @@ td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); 
 .panel--list .panel__body--flush { flex: 1; min-height: 0; display: flex; }
 
 .list-wrap { flex: 1; min-height: 0; overflow: auto; background: var(--surface); }
-.grid--list { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; }
+.grid--list { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
 .grid--list thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-2); font-size: 10px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); border-right: 1px solid var(--divider); padding: 8px 10px; white-space: nowrap; }
 .grid--list thead th.is-sorted { background: var(--accent-soft); color: var(--accent-ink); }
 .grid--list thead th .sort-ind { margin-left: 4px; color: var(--accent); font-size: 11px; }
