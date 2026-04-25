@@ -1,9 +1,9 @@
-package com.freightos.fms.domain.masterbl.service;
+package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
-import com.freightos.fms.domain.masterbl.repository.MasterBlRepository;
+import com.freightos.fms.domain.masterbl.port.out.MasterBlPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,90 +26,75 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class MasterBlServiceImplTest {
+class MasterBlServiceTest {
 
     @Mock
-    private MasterBlRepository masterBlRepository;
+    private MasterBlPort masterBlPort;
 
     @InjectMocks
-    private MasterBlServiceImpl masterBlService;
+    private MasterBlService masterBlService;
 
     @Test
-    @DisplayName("list - Bound.EXP 조회 시 repository.findAllByBound(EXP, pageable) 위임")
-    void list_exp_delegatesToFindAllByBound() {
-        // given
+    @DisplayName("list - Bound.EXP 조회 시 port.findAllByBound(EXP) 위임")
+    void list_exp_delegatesToPort() {
         Pageable pageable = PageRequest.of(0, 50);
         MasterBl mockEntity = mock(MasterBl.class);
         Page<MasterBl> expected = new PageImpl<>(List.of(mockEntity));
-        given(masterBlRepository.findAllByBound(Bound.EXP, pageable)).willReturn(expected);
+        given(masterBlPort.findAllByBound(Bound.EXP, pageable)).willReturn(expected);
 
-        // when
         Page<MasterBl> result = masterBlService.list(Bound.EXP, pageable);
 
-        // then
         assertThat(result).isEqualTo(expected);
-        then(masterBlRepository).should().findAllByBound(Bound.EXP, pageable);
+        then(masterBlPort).should().findAllByBound(Bound.EXP, pageable);
     }
 
     @Test
-    @DisplayName("list - Bound.IMP 조회 시 repository.findAllByBound(IMP, pageable) 위임")
-    void list_imp_delegatesToFindAllByBound() {
-        // given
+    @DisplayName("list - Bound.IMP 조회 시 port.findAllByBound(IMP) 위임")
+    void list_imp_delegatesToPort() {
         Pageable pageable = PageRequest.of(0, 50);
         MasterBl mockEntity = mock(MasterBl.class);
         Page<MasterBl> expected = new PageImpl<>(List.of(mockEntity));
-        given(masterBlRepository.findAllByBound(Bound.IMP, pageable)).willReturn(expected);
+        given(masterBlPort.findAllByBound(Bound.IMP, pageable)).willReturn(expected);
 
-        // when
         Page<MasterBl> result = masterBlService.list(Bound.IMP, pageable);
 
-        // then
         assertThat(result).isEqualTo(expected);
-        then(masterBlRepository).should().findAllByBound(Bound.IMP, pageable);
+        then(masterBlPort).should().findAllByBound(Bound.IMP, pageable);
     }
 
     @Test
-    @DisplayName("getById - 존재하는 ID로 조회 시 엔티티 반환")
+    @DisplayName("getById - 존재하는 ID 조회 시 엔티티 반환")
     void getById_existingId_returnsEntity() {
-        // given
         UUID id = UUID.randomUUID();
         MasterBl mockEntity = mock(MasterBl.class);
-        given(masterBlRepository.findById(id)).willReturn(Optional.of(mockEntity));
+        given(masterBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 
-        // when
         MasterBl result = masterBlService.getById(id);
 
-        // then
         assertThat(result).isEqualTo(mockEntity);
-        then(masterBlRepository).should().findById(id);
+        then(masterBlPort).should().findById(id);
     }
 
     @Test
-    @DisplayName("getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException 발생")
+    @DisplayName("getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
     void getById_notFound_throwsResourceNotFoundException() {
-        // given
         UUID id = UUID.randomUUID();
-        given(masterBlRepository.findById(id)).willReturn(Optional.empty());
+        given(masterBlPort.findById(id)).willReturn(Optional.empty());
 
-        // when / then
         assertThatThrownBy(() -> masterBlService.getById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
-        then(masterBlRepository).should().findById(id);
     }
 
     @Test
-    @DisplayName("delete - 존재하는 ID 삭제 시 repository.delete 호출")
-    void delete_existingId_callsRepositoryDelete() {
-        // given
+    @DisplayName("delete - 존재하는 ID 삭제 시 port.delete 호출")
+    void delete_existingId_callsPortDelete() {
         UUID id = UUID.randomUUID();
         MasterBl mockEntity = mock(MasterBl.class);
-        given(masterBlRepository.findById(id)).willReturn(Optional.of(mockEntity));
+        given(masterBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 
-        // when
         masterBlService.delete(id);
 
-        // then
-        then(masterBlRepository).should().findById(id);
-        then(masterBlRepository).should().delete(mockEntity);
+        then(masterBlPort).should().findById(id);
+        then(masterBlPort).should().delete(mockEntity);
     }
 }

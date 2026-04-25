@@ -1,9 +1,10 @@
-package com.freightos.fms.domain.masterbl.service;
+package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
-import com.freightos.fms.domain.masterbl.repository.MasterBlRepository;
+import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
+import com.freightos.fms.domain.masterbl.port.out.MasterBlPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,18 +18,18 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MasterBlServiceImpl implements MasterBlService {
+public class MasterBlService implements MasterBlUseCase {
 
-    private final MasterBlRepository masterBlRepository;
+    private final MasterBlPort masterBlPort;
 
     @Override
     public Page<MasterBl> list(Bound bound, Pageable pageable) {
-        return masterBlRepository.findAllByBound(bound, pageable);
+        return masterBlPort.findAllByBound(bound, pageable);
     }
 
     @Override
     public MasterBl getById(UUID id) {
-        return masterBlRepository.findById(id)
+        return masterBlPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("MasterBl", id));
     }
 
@@ -36,7 +37,7 @@ public class MasterBlServiceImpl implements MasterBlService {
     @Transactional
     public void delete(UUID id) {
         MasterBl entity = getById(id);
-        masterBlRepository.delete(entity);
+        masterBlPort.delete(entity);
         log.info("Deleted MasterBl id={}", id);
     }
 }
