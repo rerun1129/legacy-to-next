@@ -110,7 +110,7 @@ export function EdiTab({ variant }: Props) {
                 <div key={f.label} className="li">
                   <span className="li__label">{f.label}</span>
                   <div className="li__input">
-                    <input defaultValue={f.value} placeholder={f.label} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                    <input defaultValue={f.value} placeholder={f.label} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
                   </div>
                 </div>
               ))}
@@ -125,7 +125,7 @@ export function EdiTab({ variant }: Props) {
                 <div key={f.label} className="li">
                   <span className="li__label">{f.label}</span>
                   <div className="li__input">
-                    <input defaultValue={f.value} placeholder={f.label} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                    <input defaultValue={f.value} placeholder={f.label} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
                   </div>
                 </div>
               ))}
@@ -139,7 +139,7 @@ export function EdiTab({ variant }: Props) {
                 <div key={f.label} className="li">
                   <span className="li__label">{f.label}</span>
                   <div className="li__input">
-                    <input defaultValue={f.value} placeholder={f.label} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                    <input defaultValue={f.value} placeholder={f.label} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
                   </div>
                 </div>
               ))}
