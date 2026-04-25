@@ -75,15 +75,15 @@ export function TruckBLEntry() {
                   <div className="party-block__head">
                     <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 90 }}>{p.role}</span>
                     <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
-                      <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 11, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
-                      <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 11, color: "var(--ink)", outline: "none" }} />
+                      <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
+                      <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }} />
                     </div>
                     <div className="party-block__head-actions">
                       {p.btn && <button className="party-block__head-btn">{p.btn}</button>}
                       <button className="party-block__head-btn">Clear</button>
                     </div>
                   </div>
-                  <textarea className="textarea" style={{ minHeight: 48, fontSize: 11 }} placeholder="Address" />
+                  <textarea className="textarea" style={{ minHeight: 48, fontSize: 10 }} placeholder="Address" />
                 </div>
               ))}
             </div>
@@ -94,19 +94,19 @@ export function TruckBLEntry() {
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Schedule</span></div>
             <div className="panel__body">
               <div className="sched-list">
-                <div className="li"><span className="li__label" style={{ color: "var(--ink-4)" }}>Vessel</span><div className="li__input"><input readOnly value="TRUCK" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--bg-sunken)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink-3)", fontFamily: "var(--font-mono)", outline: "none" }} /></div></div>
+                <div className="li"><span className="li__label" style={{ color: "var(--ink-4)" }}>Vessel</span><div className="li__input"><input readOnly value="TRUCK" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--bg-sunken)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink-3)", fontFamily: "var(--font-mono)", outline: "none" }} /></div></div>
                 <div className="sched-pair">
                   {[{ l: "ETD *", v: "2026-04-24" }, { l: "ETA *", v: "2026-04-25" }].map((f) => (
                     <div key={f.l} className="li">
                       <span className="li__label is-required">{f.l}</span>
-                      <div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
+                      <div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
                     </div>
                   ))}
                 </div>
                 {[{ l: "POL *", c: "KRBSAN", n: "Busan" }, { l: "POD *", c: "KRSEL", n: "Seoul" }].map((f) => (
                   <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
                     <span className="lcn__label">{f.l}</span>
-                    <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={f.c} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} /></div>
+                    <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={f.c} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} /></div>
                     <input className="lcn__name" defaultValue={f.n} placeholder="Location" />
                   </div>
                 ))}
@@ -129,7 +129,7 @@ export function TruckBLEntry() {
                   <div key={f.l} className="li">
                     <span className="li__label">{f.l}{(f as { tip?: string }).tip ? " *" : ""}</span>
                     <div className="li__input">
-                      <input defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                      <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
                     </div>
                   </div>
                 ))}
@@ -142,13 +142,13 @@ export function TruckBLEntry() {
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Document</span></div>
             <div className="panel__body">
               <div className="sched-list">
-                <div className="li"><span className="li__label">Pick-up Date</span><div className="li__input"><input type="date" defaultValue="2026-04-23" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div></div>
+                <div className="li"><span className="li__label">Pick-up Date</span><div className="li__input"><input type="date" defaultValue="2026-04-23" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div></div>
                 <div className="lcn" style={{ marginBottom: 4 }}>
                   <span className="lcn__label">Trucker</span>
-                  <div className="lcn__code" style={{ position: "relative" }}><input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} /></div>
+                  <div className="lcn__code" style={{ position: "relative" }}><input placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} /></div>
                   <input className="lcn__name" placeholder="Trucker Name" />
                 </div>
-                <div className="li"><span className="li__label">Trucker PIC</span><div className="li__input"><input placeholder="담당자 성명" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div></div>
+                <div className="li"><span className="li__label">Trucker PIC</span><div className="li__input"><input placeholder="담당자 성명" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div></div>
               </div>
             </div>
           </div>
@@ -168,7 +168,7 @@ export function TruckBLEntry() {
                 ].map((f) => (
                   <div key={f.l} className="li">
                     <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
-                    <div className="li__input"><input placeholder={f.l} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
+                    <div className="li__input"><input placeholder={f.l} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
                   </div>
                 ))}
               </div>

@@ -34,7 +34,7 @@ export function MainTabSea({ variant }: Props) {
                 <div key={f.l} className="li">
                   <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
                   <div className="li__input">
-                    <input defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                    <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
                   </div>
                 </div>
               ))}
@@ -49,7 +49,7 @@ export function MainTabSea({ variant }: Props) {
                   <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
                     <span className="lcn__label is-required">{f.l}</span>
                     <div className="lcn__code" style={{ position: "relative" }}>
-                      <input defaultValue={f.code} style={{ width: "100%", height: 26, padding: "0 24px 0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
+                      <input defaultValue={f.code} style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
                       <Search size={12} className="lcn__icon" />
                     </div>
                     <input className="lcn__name" defaultValue={f.name} placeholder="Name" />
@@ -127,7 +127,7 @@ export function MainTabSea({ variant }: Props) {
             <div className="li" style={{ marginBottom: 8 }}>
               <span className="li__label">Clause</span>
               <div className="li__input">
-                <select style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }}>
+                <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }}>
                   <option value="">-- 부지약관 --</option>
                   <option>SAID TO CONTAIN</option>
                   <option>SHIPPER&apos;S LOAD AND COUNT</option>

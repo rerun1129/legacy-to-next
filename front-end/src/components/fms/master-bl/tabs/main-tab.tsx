@@ -84,17 +84,17 @@ export function MasterMainTab({ variant }: Props) {
                   <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 80, flexShrink: 0 }}>{p.role}</span>
                   <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
                     <div style={{ position: "relative" }}>
-                      <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 18px 4px 2px", fontSize: 11, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
+                      <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 18px 4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
                       <Search size={10} style={{ position: "absolute", right: 2, top: "50%", transform: "translateY(-50%)", color: "var(--ink-4)" }} />
                     </div>
-                    <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 11, color: "var(--ink)", outline: "none" }} />
+                    <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }} />
                   </div>
                   <div className="party-block__head-actions">
                     <button className="party-block__head-btn">{p.btn}</button>
                     <button className="party-block__head-btn">Clear</button>
                   </div>
                 </div>
-                <textarea className="textarea" style={{ minHeight: 48, fontSize: 11 }} placeholder="Address" />
+                <textarea className="textarea" style={{ minHeight: 48, fontSize: 10 }} placeholder="Address" />
               </div>
             ))}
           </div>
@@ -106,15 +106,15 @@ export function MasterMainTab({ variant }: Props) {
           <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
             {isSea ? (
               <div className="sched-list">
-                <div className="li"><span className="li__label is-required">Liner</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="COSCO" style={{ width: 70, height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                <div className="li"><span className="li__label is-required">Liner</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="COSCO" style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
                 <div className="sched-pair">
                   {[{ l: "Vessel *", v: "COSCO EXCELLENCE" }, { l: "Voyage *", v: "0412E" }].map((f) => (
-                    <div key={f.l} className="li"><span className="li__label is-required">{f.l}</span><div className="li__input"><input defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                    <div key={f.l} className="li"><span className="li__label is-required">{f.l}</span><div className="li__input"><input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
                   ))}
                 </div>
                 <div className="sched-pair">
                   {[{ l: "ETD *", v: "2026-04-24" }, { l: "ETA", v: "2026-05-08" }].map((f) => (
-                    <div key={f.l} className="li"><span className="li__label is-required">{f.l}</span><div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                    <div key={f.l} className="li"><span className="li__label is-required">{f.l}</span><div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
                   ))}
                 </div>
                 {[
@@ -124,23 +124,23 @@ export function MasterMainTab({ variant }: Props) {
                 ].map((p) => (
                   <div key={p.l} className="lcn" style={{ marginBottom: 4 }}>
                     <span className="lcn__label">{p.l}</span>
-                    <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={p.code} placeholder="UNLOC" style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><Search size={10} className="lcn__icon" /></div>
-                    <input className="lcn__name" defaultValue={p.name} placeholder="Port" style={{ fontSize: 11 }} />
+                    <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={p.code} placeholder="UNLOC" style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><Search size={10} className="lcn__icon" /></div>
+                    <input className="lcn__name" defaultValue={p.name} placeholder="Port" style={{ fontSize: 10 }} />
                   </div>
                 ))}
                 {isExp && (
                   <>
                     <div className="subhead" style={{ marginTop: 8 }}><div className="subhead__bar" />Issue</div>
-                    <div className="li"><span className="li__label">Issue Date</span><div className="li__input"><input type="date" defaultValue="2026-04-20" style={{ width: "100%", height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
-                    <div className="li"><span className="li__label">Freight Term</span><div className="li__input"><input defaultValue="Prepaid" style={{ width: "100%", height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                    <div className="li"><span className="li__label">Issue Date</span><div className="li__input"><input type="date" defaultValue="2026-04-20" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                    <div className="li"><span className="li__label">Freight Term</span><div className="li__input"><input defaultValue="Prepaid" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
                   </>
                 )}
               </div>
             ) : (
               /* AIR schedule */
               <div className="sched-list">
-                <div className="li"><span className="li__label is-required">{isExp ? "Airline *" : "Carrier *"}</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="KE" style={{ width: 50, height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><input defaultValue="Korean Air" style={{ flex: 1, height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
-                <div className="li"><span className="li__label is-required">Departure *</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="ICN" style={{ width: 50, height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><input defaultValue="Incheon Int'l" style={{ flex: 1, height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                <div className="li"><span className="li__label is-required">{isExp ? "Airline *" : "Carrier *"}</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="KE" style={{ width: 50, height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><input defaultValue="Korean Air" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                <div className="li"><span className="li__label is-required">Departure *</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="ICN" style={{ width: 50, height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "var(--font-mono)", outline: "none" }} /><input defaultValue="Incheon Int'l" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
                 <div style={{ marginTop: 8, fontSize: 10.5, color: "var(--ink-3)" }}>Schedule Leg 그리드 ↓</div>
                 <div style={{ overflowX: "auto" }}>
                   <table className="grid" style={{ fontSize: "var(--fs-xs)" }}>
@@ -160,7 +160,7 @@ export function MasterMainTab({ variant }: Props) {
                   <>
                     <div className="subhead" style={{ marginTop: 8 }}><div className="subhead__bar" />Issue</div>
                     {["Issue Date", "Signature", "Issue Place"].map((f) => (
-                      <div key={f} className="li"><span className="li__label">{f}</span><div className="li__input"><input style={{ width: "100%", height: 26, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
+                      <div key={f} className="li"><span className="li__label">{f}</span><div className="li__input"><input style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, outline: "none" }} /></div></div>
                     ))}
                   </>
                 )}
@@ -186,7 +186,7 @@ export function MasterMainTab({ variant }: Props) {
                   <div key={f.l} className="li">
                     <span className="li__label">{f.l}</span>
                     <div className="li__input">
-                      <input defaultValue={f.v} style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                      <input defaultValue={f.v} style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
                     </div>
                   </div>
                 ))}
@@ -207,7 +207,7 @@ export function MasterMainTab({ variant }: Props) {
                   <div key={f.l} className="li">
                     <span className="li__label">{f.l}</span>
                     <div className="li__input">
-                      <input defaultValue={f.v} style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                      <input defaultValue={f.v} style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
                     </div>
                   </div>
                 ))}
@@ -280,7 +280,7 @@ export function MasterMainTab({ variant }: Props) {
               {isSea && p.title === "Description" && (
                 <div className="li" style={{ marginBottom: 8 }}>
                   <span className="li__label" style={{ fontSize: 10 }}>Clause 1</span>
-                  <div className="li__input"><select style={{ width: "100%", height: 24, fontSize: 11, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }}><option>-- 부지약관 --</option><option>SAID TO CONTAIN</option></select></div>
+                  <div className="li__input"><select style={{ width: "100%", height: 24, fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }}><option>-- 부지약관 --</option><option>SAID TO CONTAIN</option></select></div>
                 </div>
               )}
               <textarea className="textarea" style={{ minHeight: 80, width: "100%" }} defaultValue={p.content} placeholder={p.title} />
