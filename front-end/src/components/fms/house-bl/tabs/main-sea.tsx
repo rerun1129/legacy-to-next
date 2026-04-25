@@ -34,7 +34,7 @@ export function MainTabSea({ variant }: Props) {
                 <div key={f.l} className="li">
                   <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
                   <div className="li__input">
-                    <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                    <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
                   </div>
                 </div>
               ))}
@@ -71,7 +71,7 @@ export function MainTabSea({ variant }: Props) {
             <div className="panel__actions"><button className="btn btn--sm">+ Add Row</button></div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
+            <table className="grid" style={{ tableLayout: 'fixed' }}>
               <colgroup>
                 <col style={{ width: 36 }} />
                 <col style={{ width: 160 }} />
@@ -138,7 +138,7 @@ export function MainTabSea({ variant }: Props) {
             <div className="li" style={{ marginBottom: 8 }}>
               <span className="li__label">Clause</span>
               <div className="li__input">
-                <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }}>
+                <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}>
                   <option value="">-- 부지약관 --</option>
                   <option>SAID TO CONTAIN</option>
                   <option>SHIPPER&apos;S LOAD AND COUNT</option>
@@ -155,7 +155,7 @@ export function MainTabSea({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid">
+            <table className="grid" style={{ tableLayout: 'fixed' }}>
               <colgroup>
                 <col style={{ width: 36 }} />
                 <col style={{ width: 100 }} />
