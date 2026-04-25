@@ -1,9 +1,9 @@
-package com.freightos.fms.domain.masterbl.api;
+package com.freightos.fms.adapter.in.web.masterbl;
 
 import com.freightos.fms.common.response.ApiResponse;
 import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
-import com.freightos.fms.domain.masterbl.service.MasterBlService;
+import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MasterBlController {
 
-    private final MasterBlService masterBlService;
+    private final MasterBlUseCase masterBlUseCase;
 
     @Operation(summary = "Master B/L 리스트 조회")
     @GetMapping
@@ -30,19 +30,19 @@ public class MasterBlController {
             @RequestParam Bound bound,
             @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.of(masterBlService.list(bound, pageable)));
+        return ResponseEntity.ok(ApiResponse.of(masterBlUseCase.list(bound, pageable)));
     }
 
     @Operation(summary = "Master B/L 단건 조회")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MasterBl>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.of(masterBlService.getById(id)));
+        return ResponseEntity.ok(ApiResponse.of(masterBlUseCase.getById(id)));
     }
 
     @Operation(summary = "Master B/L 삭제")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
-        masterBlService.delete(id);
+        masterBlUseCase.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }
 }
