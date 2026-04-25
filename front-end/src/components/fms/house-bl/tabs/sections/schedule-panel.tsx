@@ -16,15 +16,15 @@ export function SchedulePanel({ variant }: Props) {
             <div className="li">
               <span className="li__label is-required">Liner</span>
               <div className="li__input" style={{ gap: 4 }}>
-                <input placeholder="Code" defaultValue="COSCO" style={{ width: 80, height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
-                <input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} />
+                <input placeholder="Code" defaultValue="COSCO" style={{ width: 80, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+                <input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
               </div>
             </div>
             <div className="sched-pair">
               {[{ l: "Vessel", v: "COSCO EXCELLENCE" }, { l: "Voyage", v: "0412E" }].map((f) => (
                 <div key={f.l} className="li">
                   <span className="li__label is-required">{f.l}</span>
-                  <div className="li__input"><input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
+                  <div className="li__input"><input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
                 </div>
               ))}
             </div>
@@ -32,11 +32,11 @@ export function SchedulePanel({ variant }: Props) {
               {[{ l: "ETD", t: "date", v: "2026-04-24" }, { l: "ETA", t: "date", v: "2026-05-08" }].map((f) => (
                 <div key={f.l} className="li">
                   <span className="li__label is-required">{f.l}</span>
-                  <div className="li__input"><input type={f.t} defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
+                  <div className="li__input"><input type={f.t} defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
                 </div>
               ))}
             </div>
-            <div className="li"><span className="li__label">On Board</span><div className="li__input"><input type="date" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div></div>
+            <div className="li"><span className="li__label">On Board</span><div className="li__input"><input type="date" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>
 
             <div style={{ marginTop: 8 }}>
               <div className="subhead"><div className="subhead__bar" />Ports</div>
@@ -67,7 +67,7 @@ export function SchedulePanel({ variant }: Props) {
                       <input
                         type={f.includes("Date") ? "date" : "text"}
                         defaultValue={f === "Issue Date" ? "2026-04-20" : f === "No. of B/L" ? "3" : f === "Issue Place" ? "BUSAN" : ""}
-                        style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }}
+                        style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}
                       />
                     </div>
                   </div>
@@ -79,7 +79,7 @@ export function SchedulePanel({ variant }: Props) {
                 <div className="subhead"><div className="subhead__bar" />D/O Date</div>
                 <div className="li">
                   <span className="li__label">D/O Date</span>
-                  <div className="li__input"><input type="date" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", outline: "none" }} /></div>
+                  <div className="li__input"><input type="date" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
                 </div>
               </div>
             )}
