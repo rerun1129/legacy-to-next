@@ -86,15 +86,15 @@ export function MainTabSea({ variant }: Props) {
                   { cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800, pkgT: "CTN", gw: "18,200", cbm: 65.0, vgm: "18,380" },
                 ].map((r, i) => (
                   <tr key={i}>
-                    <td className="row-num">{i + 1}</td>
-                    <td><input className="grid__cell-input" defaultValue={r.cno} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.type} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.seal} style={{ fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={r.pkg} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.pkgT} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={r.gw} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={r.cbm} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                    <td className="is-num"><input className="grid__cell-input" defaultValue={r.vgm} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
+                    <td className="row-num" style={{ width: 36 }}>{i + 1}</td>
+                    <td style={{ width: 160 }}><input className="grid__cell-input" defaultValue={r.cno} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /></td>
+                    <td style={{ width: 70 }}><input className="grid__cell-input" defaultValue={r.type} /></td>
+                    <td style={{ width: 110 }}><input className="grid__cell-input" defaultValue={r.seal} style={{ fontFamily: "var(--font-mono)" }} /></td>
+                    <td className="is-num" style={{ width: 70 }}><input className="grid__cell-input" defaultValue={r.pkg} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
+                    <td style={{ width: 60 }}><input className="grid__cell-input" defaultValue={r.pkgT} /></td>
+                    <td className="is-num" style={{ width: 90 }}><input className="grid__cell-input" defaultValue={r.gw} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
+                    <td className="is-num" style={{ width: 80 }}><input className="grid__cell-input" defaultValue={r.cbm} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
+                    <td className="is-num" style={{ width: 90 }}><input className="grid__cell-input" defaultValue={r.vgm} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -150,13 +150,13 @@ export function MainTabSea({ variant }: Props) {
               </thead>
               <tbody>
                 <tr>
-                  <td className="row-num">1</td>
-                  <td><input className="grid__cell-input" defaultValue="8517.13" style={{ fontFamily: "var(--font-mono)" }} /></td>
-                  <td><input className="grid__cell-input" defaultValue="MOBILE PHONE PARTS" /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="1300" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td><input className="grid__cell-input" defaultValue="CTN" /></td>
-                  <td className="is-num"><input className="grid__cell-input" defaultValue="48,500.00" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
-                  <td><input className="grid__cell-input" defaultValue="USD" style={{ fontFamily: "var(--font-mono)" }} /></td>
+                  <td className="row-num" style={{ width: 36 }}>1</td>
+                  <td style={{ width: 100 }}><input className="grid__cell-input" defaultValue="8517.13" style={{ fontFamily: "var(--font-mono)" }} /></td>
+                  <td style={{ width: 200 }}><input className="grid__cell-input" defaultValue="MOBILE PHONE PARTS" /></td>
+                  <td className="is-num" style={{ width: 70 }}><input className="grid__cell-input" defaultValue="1300" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
+                  <td style={{ width: 60 }}><input className="grid__cell-input" defaultValue="CTN" /></td>
+                  <td className="is-num" style={{ width: 100 }}><input className="grid__cell-input" defaultValue="48,500.00" style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /></td>
+                  <td style={{ width: 80 }}><input className="grid__cell-input" defaultValue="USD" style={{ fontFamily: "var(--font-mono)" }} /></td>
                 </tr>
               </tbody>
             </table>
