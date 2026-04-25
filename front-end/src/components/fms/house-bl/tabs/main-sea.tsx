@@ -71,7 +71,7 @@ export function MainTabSea({ variant }: Props) {
             <div className="panel__actions"><button className="btn btn--sm">+ Add Row</button></div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid" style={{ tableLayout: 'fixed' }}>
+            <table className="grid">
               <thead>
                 <tr>
                   <th className="row-num" style={{ width: 36 }}>#</th>
@@ -144,7 +144,7 @@ export function MainTabSea({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <table className="grid" style={{ tableLayout: 'fixed' }}>
+            <table className="grid">
               <thead>
                 <tr><th className="row-num" style={{ width: 36 }}>#</th><th style={{ width: 100 }}>HS Code</th><th style={{ width: 200 }}>Description</th><th className="is-num" style={{ width: 70 }}>Qty</th><th style={{ width: 60 }}>Unit</th><th className="is-num" style={{ width: 100 }}>Value</th><th style={{ width: 80 }}>Currency</th></tr>
               </thead>
