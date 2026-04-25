@@ -1,5 +1,5 @@
 export interface HouseBlRow {
-  no: number;
+  no?: number;
   hbl: string;
   expImp: 'EXP' | 'IMP';
   docStatus: 'ok' | 'inprog' | 'draft';
