@@ -28,9 +28,10 @@ export function GridList<T>({
   rowClassName,
   className,
 }: GridListProps<T>) {
+  const totalWidth = columns.reduce((s, c) => s + (c.width ?? c.minWidth ?? 0), 0);
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`}>
-      <table className="grid grid--list">
+      <table className="grid grid--list" style={{ width: totalWidth }}>
         <colgroup>
           {columns.map((col) => (
             <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />
