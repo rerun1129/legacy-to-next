@@ -47,7 +47,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">Shipper</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)" }} />
+                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Shipper Name" />
             </div>
@@ -56,7 +56,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">Consignee</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)" }} />
+                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Consignee Name" />
             </div>
@@ -82,7 +82,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">POL</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="UNLOC" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)" }} />
+                <input placeholder="UNLOC" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Port Name" />
             </div>
@@ -91,7 +91,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">POD</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="UNLOC" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)" }} />
+                <input placeholder="UNLOC" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Port Name" />
             </div>
@@ -100,7 +100,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">Operator</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)" }} />
+                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Name" />
             </div>

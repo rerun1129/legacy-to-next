@@ -48,7 +48,7 @@ export function SchedulePanel({ variant }: Props) {
                 <div key={p.label} className="lcn" style={{ marginBottom: 4 }}>
                   <span className={`lcn__label${p.req ? " is-required" : ""}`}>{p.label}</span>
                   <div className="lcn__code" style={{ position: "relative" }}>
-                    <input defaultValue={p.code} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
+                    <input defaultValue={p.code} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
                     <Search size={12} className="lcn__icon" />
                   </div>
                   <input className="lcn__name" defaultValue={p.name} placeholder="Port Name" />
