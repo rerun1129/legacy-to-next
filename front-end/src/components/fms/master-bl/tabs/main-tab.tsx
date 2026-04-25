@@ -1,12 +1,12 @@
 import { Search } from "lucide-react";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface MasterScheduleLegRow {
   to: string; flight: string; onBoard: string; arrival: string;
 }
 
-const MASTER_SCHED_LEG_COLS: GridTableColumn<MasterScheduleLegRow>[] = [
+const MASTER_SCHED_LEG_COLS: GridColumn<MasterScheduleLegRow>[] = [
   { key: "_no",     label: "#",          className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "to",      label: "To *",
@@ -52,7 +52,7 @@ export function MasterMainTab({ variant }: Props) {
           </div>
         </div>
         <div style={{ overflowX: "auto" }}>
-          <table className="grid--list" style={{ width: "max-content", minWidth: "100%" }}>
+          <table className="grid--list">
             <thead>
               <tr>
                 <th className="row-num">#</th>
@@ -165,11 +165,10 @@ export function MasterMainTab({ variant }: Props) {
                 <div className="li"><span className="li__label is-required">Departure *</span><div className="li__input" style={{ gap: 4 }}><input defaultValue="ICN" style={{ width: 50, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} /><input defaultValue="Incheon Int'l" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }} /></div></div>
                 <div style={{ marginTop: 8, fontSize: 10.5, color: "var(--ink-3)" }}>Schedule Leg 그리드 ↓</div>
                 <div style={{ overflowX: "auto" }}>
-                  <GridTable
+                  <GridList
                     columns={MASTER_SCHED_LEG_COLS}
                     data={MASTER_SCHED_LEG_DATA}
                     rowKey={(_, i) => i}
-                    style={{ fontSize: "var(--fs-xs)" }}
                   />
                 </div>
                 {isExp && (
