@@ -1,11 +1,11 @@
-package com.freightos.fms.domain.housebl.api;
+package com.freightos.fms.adapter.in.web.housebl;
 
+import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.common.response.ApiResponse;
-import com.freightos.fms.domain.housebl.api.dto.HouseBlSummaryResponse;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.service.HouseBlService;
+import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class HouseBlController {
 
-    private final HouseBlService houseBlService;
+    private final HouseBlUseCase houseBlUseCase;
 
     @Operation(summary = "House B/L 리스트 조회")
     @GetMapping
@@ -35,20 +35,20 @@ public class HouseBlController {
             @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
 
-        Page<HouseBlSummaryResponse> page = houseBlService.list(jobDiv, bound, pageable);
+        Page<HouseBlSummaryResponse> page = houseBlUseCase.list(jobDiv, bound, pageable);
         return ResponseEntity.ok(ApiResponse.of(page));
     }
 
     @Operation(summary = "House B/L 단건 조회")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<HouseBl>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.of(houseBlService.getById(id)));
+        return ResponseEntity.ok(ApiResponse.of(houseBlUseCase.getById(id)));
     }
 
     @Operation(summary = "House B/L 삭제")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
-        houseBlService.delete(id);
+        houseBlUseCase.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }
 }

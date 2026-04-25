@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.housebl.repository;
+package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.Bound;

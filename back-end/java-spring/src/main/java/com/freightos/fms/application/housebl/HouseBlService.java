@@ -1,11 +1,12 @@
-package com.freightos.fms.domain.housebl.service;
+package com.freightos.fms.application.housebl;
 
+import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.common.exception.ResourceNotFoundException;
-import com.freightos.fms.domain.housebl.api.dto.HouseBlSummaryResponse;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.repository.HouseBlRepository;
+import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
+import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,20 +20,20 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class HouseBlServiceImpl implements HouseBlService {
+public class HouseBlService implements HouseBlUseCase {
 
-    private final HouseBlRepository houseBlRepository;
+    private final HouseBlPort houseBlPort;
 
     @Override
     public Page<HouseBlSummaryResponse> list(JobDiv jobDiv, Bound bound, Pageable pageable) {
-        return houseBlRepository
+        return houseBlPort
                 .findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound, pageable)
                 .map(HouseBlSummaryResponse::from);
     }
 
     @Override
     public HouseBl getById(UUID id) {
-        return houseBlRepository.findById(id)
+        return houseBlPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("HouseBl", id));
     }
 
@@ -40,14 +41,14 @@ public class HouseBlServiceImpl implements HouseBlService {
     @Transactional
     public HouseBl save(HouseBl houseBl) {
         log.debug("Saving HouseBl: {}", houseBl.getHblNo());
-        return houseBlRepository.save(houseBl);
+        return houseBlPort.save(houseBl);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
         HouseBl entity = getById(id);
-        houseBlRepository.delete(entity);
+        houseBlPort.delete(entity);
         log.info("Deleted HouseBl id={}", id);
     }
 }
