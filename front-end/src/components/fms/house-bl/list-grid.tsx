@@ -48,21 +48,21 @@ export function ListGrid({ variantKey }: Props) {
             <thead>
               <tr>
                 <th className="row-num" style={{ width: 38 }}>#</th>
-                <th title="더블클릭 → Entry 이동">HBL No</th>
-                <th>Exp/Imp</th>
-                <th>Doc Status</th>
-                <th>MBL No</th>
-                <th>Type</th>
-                <th>Load</th>
-                <th>ETD</th>
-                <th>ETA</th>
-                <th>Reg. Date</th>
-                <th>POL</th>
-                <th>POD</th>
-                <th>Vessel</th>
-                <th>Voyage</th>
-                <th>Shipper</th>
-                <th>Consignee</th>
+                <th style={{ width: 140 }} title="더블클릭 → Entry 이동">HBL No</th>
+                <th style={{ width: 66 }}>Exp/Imp</th>
+                <th style={{ width: 96 }}>Doc Status</th>
+                <th style={{ width: 140 }}>MBL No</th>
+                <th style={{ width: 56 }}>Type</th>
+                <th style={{ width: 56 }}>Load</th>
+                <th style={{ width: 88 }}>ETD</th>
+                <th style={{ width: 88 }}>ETA</th>
+                <th style={{ width: 88 }}>Reg. Date</th>
+                <th style={{ width: 60 }}>POL</th>
+                <th style={{ width: 60 }}>POD</th>
+                <th style={{ width: 160 }}>Vessel</th>
+                <th style={{ width: 72 }}>Voyage</th>
+                <th style={{ width: 160 }}>Shipper</th>
+                <th style={{ width: 160 }}>Consignee</th>
               </tr>
             </thead>
             <tbody>

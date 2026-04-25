@@ -41,13 +41,13 @@ export function MainTabSea({ variant }: Props) {
               <div style={{ marginTop: 8 }}>
                 <div className="subhead"><div className="subhead__bar" />Performance</div>
                 {[
-                  { l: "Actual Customer *", code: "HJTR001", name: "한진무역(주)" },
-                  { l: "Sales Man *",       code: "LJY",     name: "이진영" },
-                  { l: "Operator *",        code: "KYS",     name: "김영선" },
-                  { l: "Team *",            code: "SEA-EXP", name: "해상수출팀" },
+                  { l: "Actual Customer", code: "HJTR001", name: "한진무역(주)" },
+                  { l: "Sales Man",       code: "LJY",     name: "이진영" },
+                  { l: "Operator",        code: "KYS",     name: "김영선" },
+                  { l: "Team",            code: "SEA-EXP", name: "해상수출팀" },
                 ].map((f) => (
                   <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
-                    <span className="lcn__label">{f.l}</span>
+                    <span className="lcn__label is-required">{f.l}</span>
                     <div className="lcn__code" style={{ position: "relative" }}>
                       <input defaultValue={f.code} style={{ width: "100%", height: 26, padding: "0 24px 0 8px", fontSize: 12, background: "var(--surface-1)", border: "1px solid var(--border)", borderRadius: 4, color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none" }} />
                       <Search size={12} className="lcn__icon" />

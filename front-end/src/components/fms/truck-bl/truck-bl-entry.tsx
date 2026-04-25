@@ -160,12 +160,12 @@ export function TruckBLEntry() {
             <div className="panel__body">
               <div className="sched-list">
                 {[
-                  { l: "Actual Customer *", req: true  },
-                  { l: "Customer PIC",      req: false },
-                  { l: "Settle Partner",    req: false },
-                  { l: "Sales Man *",       req: true  },
-                  { l: "Operator *",        req: true  },
-                  { l: "Team *",            req: true  },
+                  { l: "Actual Customer", req: true  },
+                  { l: "Customer PIC",    req: false },
+                  { l: "Settle Partner",  req: false },
+                  { l: "Sales Man",       req: true  },
+                  { l: "Operator",        req: true  },
+                  { l: "Team",            req: true  },
                 ].map((f) => (
                   <div key={f.l} className="li">
                     <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>

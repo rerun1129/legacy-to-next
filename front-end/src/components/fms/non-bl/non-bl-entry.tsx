@@ -37,8 +37,8 @@ export function NonBLEntry() {
           { l: "Work Division",v: workDiv,req: true  },
           { l: "Status",       v: "접수", req: false },
           { l: "Ref. No.",     v: "",     req: false },
-          { l: "Operator *",   v: "KYS",  req: true  },
-          { l: "Team *",       v: "OPS",  req: true  },
+          { l: "Operator",     v: "KYS",  req: true  },
+          { l: "Team",         v: "OPS",  req: true  },
         ].map((f) => (
           <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
             <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>
@@ -189,10 +189,10 @@ export function NonBLEntry() {
             <div className="panel__body">
               <div className="sched-list">
                 {[
-                  { l: "Actual Customer *", req: true  },
-                  { l: "Operator *",        req: true  },
-                  { l: "Team *",            req: true  },
-                  { l: "Sales Man",         req: false },
+                  { l: "Actual Customer", req: true  },
+                  { l: "Operator",        req: true  },
+                  { l: "Team",            req: true  },
+                  { l: "Sales Man",       req: false },
                 ].map((f) => (
                   <div key={f.l} className="li">
                     <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
