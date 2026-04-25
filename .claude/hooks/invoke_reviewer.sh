@@ -52,6 +52,11 @@ if [ -f "$APPROVED_MARKER" ]; then
   exit 0
 fi
 
+# .review_skip sentinel: /pipeline-build 누적 모드에서 Reviewer 발동 차단
+if [ -f "$CLAUDE_PROJECT_DIR/.claude/.review_skip" ]; then
+  exit 0
+fi
+
 # .review_pending 없으면 트렁크 커밋 자동 감지 후 마커 복구 시도
 if [ ! -f "$REVIEW_PENDING" ]; then
   _AHEAD=0
