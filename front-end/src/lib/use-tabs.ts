@@ -13,6 +13,7 @@ interface TabStore {
   addTab: (label: string, href: string) => void;
   removeTab: (id: string) => string; // returns href to navigate to after close
   activateTab: (id: string) => void;
+  initFromPath: (pathname: string) => void;
 }
 
 // ─── Nav label mapping (mirrors sidebar.tsx NAV data) ───────
@@ -47,17 +48,8 @@ export function inferLabelFromPath(pathname: string): string {
   return last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, " ");
 }
 
-// ─── Derive initial tabs from current URL (client-only) ─────
-function getInitialTabs(): Tab[] {
-  if (typeof window === "undefined") return []; // SSR: empty
-  const pathname = window.location.pathname;
-  // Dashboard is not included in the tab strip
-  if (!pathname || pathname === "/" || pathname === "/dashboard") return [];
-  return [{ id: pathname, label: inferLabelFromPath(pathname), href: pathname }];
-}
-
 export const useTabs = create<TabStore>((set, get) => ({
-  tabs: getInitialTabs(),
+  tabs: [],
 
   addTab(label, href) {
     // Dashboard is not tracked as a tab
@@ -80,5 +72,12 @@ export const useTabs = create<TabStore>((set, get) => ({
 
   activateTab(_id) {
     // no-op — active tab is derived from current pathname
+  },
+
+  initFromPath(pathname) {
+    if (!pathname || pathname === "/" || pathname === "/dashboard") return;
+    const { tabs } = get();
+    if (tabs.some((t) => t.id === pathname)) return;
+    set({ tabs: [{ id: pathname, label: inferLabelFromPath(pathname), href: pathname }] });
   },
 }));

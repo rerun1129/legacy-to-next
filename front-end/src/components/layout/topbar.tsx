@@ -15,8 +15,13 @@ interface Props {
 export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   const pathname   = usePathname();
   const router     = useRouter();
-  const { tabs, removeTab } = useTabs();
+  const { tabs, removeTab, initFromPath } = useTabs();
   const tabsRef    = useRef<HTMLDivElement>(null);
+
+  // CSR 마운트 시 현재 경로로 탭 초기화 (Hydration mismatch 방지)
+  useEffect(() => {
+    initFromPath(pathname);
+  }, [pathname, initFromPath]);
 
   // 마우스 휠 → 가로 스크롤 변환
   useEffect(() => {
