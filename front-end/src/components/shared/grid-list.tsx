@@ -41,7 +41,10 @@ export function GridList<T>({
             {columns.map((col) => (
               <th
                 key={String(col.key)}
-                style={{ textAlign: col.align }}
+                style={{
+                  width: col.width ?? col.minWidth,
+                  textAlign: col.align,
+                }}
               >
                 {col.label}
               </th>
