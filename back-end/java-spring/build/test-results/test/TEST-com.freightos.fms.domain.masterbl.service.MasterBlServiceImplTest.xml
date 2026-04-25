@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-04-25T06:45:15.744Z" hostname="KYS" time="0.567">
+  <properties/>
+  <testcase name="list - Bound.IMP 조회 시 repository.findAllByBound(IMP, pageable) 위임" classname="com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest" time="0.546"/>
+  <testcase name="getById - 존재하는 ID로 조회 시 엔티티 반환" classname="com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest" time="0.003"/>
+  <testcase name="getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException 발생" classname="com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest" time="0.012"/>
+  <testcase name="delete - 존재하는 ID 삭제 시 repository.delete 호출" classname="com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest" time="0.002"/>
+  <testcase name="list - Bound.EXP 조회 시 repository.findAllByBound(EXP, pageable) 위임" classname="com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest" time="0.001"/>
+  <system-out><![CDATA[15:45:16 [Test worker] INFO  c.f.f.d.m.s.MasterBlServiceImpl - Deleted MasterBl id=c3b4c81f-00aa-49d9-be90-7eb0b4a6aa1b
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

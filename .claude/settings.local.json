@@ -31,7 +31,6 @@
       "Bash(claude -p --help)",
       "Bash(claude -p --model claude-sonnet-4-6 --output-format json --permission-mode acceptEdits --allowedTools \"Read,Glob,Grep\" \"test\")",
       "Bash(claude -p --model claude-sonnet-4-6 --output-format json --permission-mode acceptEdits --allowedTools \"Read,Glob,Grep\")",
-      "Bash(claude -p --model claude-sonnet-4-6 --output-format json --permission-mode acceptEdits --add-dir \"C:/저장소/vive-coding/portfolio-legacy-to-next/legacy-to-next\" --allowedTools \"Read,Glob,Grep\")",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring test --stacktrace)",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring clean test)",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring test --info)",
@@ -40,7 +39,6 @@
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring dependencies --configuration testRuntimeClasspath)",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring clean test --debug)",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring clean test --info)",
-      "Bash(C:/dev/jdk-21.0.2/bin/java.exe -cp \"C:/저장소/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/build/classes/java/test\" -Dfile.encoding=UTF-8 com.freightos.fms.FmsApplicationTest)",
       "Bash(C:/dev/jdk-21.0.2/bin/jar tf *)",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring clean test -PexcludeLauncher=true)",
       "Bash(git stash *)",
@@ -53,9 +51,7 @@
       "Bash(back-end/java-spring/gradlew.bat *)",
       "Bash(C:/dev/jdk-21.0.2/bin/java.exe -Dfile.encoding=UTF-8 @\"/c/Users/a0102/.gradle/.tmp/gradle-worker-classpath1473719791135083236txt\" -version)",
       "Bash(C:/dev/jdk-21.0.2/bin/java.exe -Dfile.encoding=UTF-8 @\"/c/Users/a0102/.gradle/.tmp/gradle-worker-classpath1473719791135083236txt\" -cp . -version)",
-      "Bash(echo \"exit:$?\")",
-      "Bash(C:/dev/jdk-21.0.2/bin/java.exe -Dfile.encoding=UTF-8 @\"/c/Users/a0102/.gradle/.tmp/gradle-worker-classpath1473719791135083236txt\" -cp \"C:/저장소/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/build/classes/java/test\" com.freightos.fms.FmsApplicationTest)",
-      "PowerShell(robocopy \"C:\\\\저장소\\\\vive-coding\\\\portfolio-legacy-to-next\" \"C:\\\\vive-coding\\\\portfolio-legacy-to-next\" /E /XD \".git\" /NP /NFL /NDL /NJH; if \\($LASTEXITCODE -le 7\\) { Write-Host \"복사 완료\" } else { Write-Host \"복사 실패: $LASTEXITCODE\" })"
+      "Bash(echo \"exit:$?\")"
     ]
   }
 }

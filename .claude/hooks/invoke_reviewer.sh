@@ -60,9 +60,8 @@ fi
 cd "$CLAUDE_PROJECT_DIR" || exit 0
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 
-# 머지 베이스 기준으로 diff: origin/main → main → HEAD~1 순 폴백
-BASE=$(git merge-base HEAD origin/main 2>/dev/null || \
-       git merge-base HEAD main 2>/dev/null || \
+# 머지 베이스 기준으로 diff: origin/master → HEAD~1 순 폴백
+BASE=$(git merge-base HEAD origin/master 2>/dev/null || \
        git rev-parse "HEAD~1" 2>/dev/null || \
        true)
 if [ -z "$BASE" ]; then

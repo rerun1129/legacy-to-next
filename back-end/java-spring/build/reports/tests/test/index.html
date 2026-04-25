@@ -14,7 +14,7 @@
 <div class="tab-container">
 <ul class="tabLinks">
 <li>
-<a class="failureGroup" href="#">Gradle Test Run :test</a>
+<a class="successGroup" href="#">Gradle Test Run :test</a>
 </li>
 </ul>
 <div class="tab">
@@ -38,13 +38,13 @@
 <tr>
 <td>
 <div class="infoBox">
-<div class="counter">1</div>
+<div class="counter">6</div>
 <p>tests</p>
 </div>
 </td>
 <td>
 <div class="infoBox">
-<div class="counter">1</div>
+<div class="counter">0</div>
 <p>failures</p>
 </div>
 </td>
@@ -56,7 +56,7 @@
 </td>
 <td>
 <div class="infoBox duration">
-<div class="counter">0.517s</div>
+<div class="counter">8.913s</div>
 <p>duration</p>
 </div>
 </td>
@@ -65,169 +65,49 @@
 </div>
 </td>
 <td>
-<div class="infoBox failures successRate">
-<div class="percent">0%</div>
+<div class="infoBox success successRate">
+<div class="percent">100%</div>
 <p>successful</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
-<div class="result-details">
-<h3>Failure details</h3>
-<span class="code">
-<pre id="root-0-test-failure-Gradle Test Run :test">org.gradle.api.internal.tasks.testing.TestSuiteExecutionException: Could not execute test class 'com.freightos.fms.FmsApplicationTest'.
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:55)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
-	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:126)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:103)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:63)
-	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:72)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
-Caused by: org.gradle.internal.UncheckedException: java.lang.ClassNotFoundException: com.freightos.fms.FmsApplicationTest
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:69)
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:42)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:188)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.executeClass(JUnitPlatformTestDefinitionProcessor.java:154)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:145)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:122)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	... 17 more
-Caused by: java.lang.ClassNotFoundException: com.freightos.fms.FmsApplicationTest
-	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
-	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
-	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
-	at java.base/java.lang.Class.forName0(Native Method)
-	at java.base/java.lang.Class.forName(Class.java:534)
-	at java.base/java.lang.Class.forName(Class.java:513)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:186)
-	... 22 more
-Cause 1: org.gradle.internal.UncheckedException: java.lang.ClassNotFoundException: com.freightos.fms.FmsApplicationTest
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:69)
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:42)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:188)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.executeClass(JUnitPlatformTestDefinitionProcessor.java:154)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:145)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:122)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
-	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:126)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:103)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:63)
-	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:72)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
-Caused by: java.lang.ClassNotFoundException: com.freightos.fms.FmsApplicationTest
-	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
-	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
-	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
-	at java.base/java.lang.Class.forName0(Native Method)
-	at java.base/java.lang.Class.forName(Class.java:534)
-	at java.base/java.lang.Class.forName(Class.java:513)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:186)
-	... 22 more
-
-org.gradle.api.internal.tasks.testing.TestSuiteExecutionException: Could not execute test class 'com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest'.
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:55)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
-	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:126)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:103)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:63)
-	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:72)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
-Caused by: org.gradle.internal.UncheckedException: java.lang.ClassNotFoundException: com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:69)
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:42)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:188)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.executeClass(JUnitPlatformTestDefinitionProcessor.java:154)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:145)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:122)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	... 17 more
-Caused by: java.lang.ClassNotFoundException: com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest
-	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
-	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
-	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
-	at java.base/java.lang.Class.forName0(Native Method)
-	at java.base/java.lang.Class.forName(Class.java:534)
-	at java.base/java.lang.Class.forName(Class.java:513)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:186)
-	... 22 more
-Cause 1: org.gradle.internal.UncheckedException: java.lang.ClassNotFoundException: com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:69)
-	at org.gradle.internal.UncheckedException.throwAsUncheckedException(UncheckedException.java:42)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:188)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.executeClass(JUnitPlatformTestDefinitionProcessor.java:154)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:145)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.accept(JUnitPlatformTestDefinitionProcessor.java:122)
-	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
-	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
-	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:126)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:103)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:63)
-	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
-	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:72)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
-	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
-Caused by: java.lang.ClassNotFoundException: com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest
-	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
-	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
-	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
-	at java.base/java.lang.Class.forName0(Native Method)
-	at java.base/java.lang.Class.forName(Class.java:534)
-	at java.base/java.lang.Class.forName(Class.java:513)
-	at org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestDefinitionProcessor$CollectThenExecuteTestDefinitionConsumer.loadClass(JUnitPlatformTestDefinitionProcessor.java:186)
-	... 22 more
-
-</pre>
-<button class="clipboard-copy-btn" aria-label="Copy to clipboard" data-copy-element-id="root-0-test-failure-Gradle Test Run :test">Copy</button>
-</span>
-</div>
+<table class="test-results">
+<thead>
+<tr>
+<th>Child</th>
+<th>Name</th>
+<th>Tests</th>
+<th>Failures</th>
+<th>Skipped</th>
+<th>Duration</th>
+<th>Success rate</th>
+</tr>
+</thead>
+<tr>
+<td class="success">
+<a href="Wbc7lP7WSwk/index.html">MasterBlServiceImplTest</a>
+</td>
+<td class="path">com.freightos.fms.domain.masterbl.service.MasterBlServiceImplTest</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>0.567s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="WlGvZxAXRuE/index.html">FmsApplicationTest</a>
+</td>
+<td class="path">com.freightos.fms.FmsApplicationTest</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>7.595s</td>
+<td class="success">100%</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -240,7 +120,7 @@ Caused by: java.lang.ClassNotFoundException: com.freightos.fms.domain.masterbl.s
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="https://www.gradle.org">Gradle 9.4.1</a> at 2026. 4. 25. 오후 2:56:13</p>
+<a href="https://www.gradle.org">Gradle 9.4.1</a> at 2026. 4. 25. 오후 3:45:16</p>
 </div>
 </div>
 </body>

@@ -7,3 +7,4 @@
 *.pem
 .claude/.review_pending
 .claude/review_log/
+.claude/worktrees/
