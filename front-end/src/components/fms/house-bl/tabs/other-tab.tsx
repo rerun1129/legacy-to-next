@@ -1,8 +1,8 @@
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 type CoLoadRow = Record<string, never>;
 
-const CO_LOAD_COLS: GridTableColumn<CoLoadRow>[] = [
+const CO_LOAD_COLS: GridColumn<CoLoadRow>[] = [
   { key: "_no",       label: "#",         className: "row-num", render: (_, __, i) => i + 1 },
   { key: "hblNo",     label: "HBL No" },
   { key: "shipper",   label: "Shipper" },
@@ -74,7 +74,7 @@ export function OtherTab() {
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable
+            <GridList
               columns={CO_LOAD_COLS}
               data={[]}
               emptyMessage="No co-load B/L entries"

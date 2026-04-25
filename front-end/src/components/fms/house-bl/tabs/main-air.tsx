@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface ScheduleLegRow {
   to: string; by: string; flight: string;
@@ -16,7 +16,7 @@ interface ItemRow {
   hs: string; desc: string; qty: string; unit: string; value: string; cur: string;
 }
 
-const SCHEDULE_LEG_COLS: GridTableColumn<ScheduleLegRow>[] = [
+const SCHEDULE_LEG_COLS: GridColumn<ScheduleLegRow>[] = [
   { key: "_no",      label: "#",           className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "to",       label: "To *",
@@ -35,7 +35,7 @@ const SCHEDULE_LEG_COLS: GridTableColumn<ScheduleLegRow>[] = [
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
 ];
 
-const DIMENSION_COLS: GridTableColumn<DimensionRow>[] = [
+const DIMENSION_COLS: GridColumn<DimensionRow>[] = [
   { key: "_no",   label: "#",          className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "length",label: "Length",     className: "is-num",
@@ -52,7 +52,7 @@ const DIMENSION_COLS: GridTableColumn<DimensionRow>[] = [
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
 ];
 
-const AIR_ITEM_COLS: GridTableColumn<ItemRow>[] = [
+const AIR_ITEM_COLS: GridColumn<ItemRow>[] = [
   { key: "_no",   label: "#",          className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "hs",    label: "HS Code",
@@ -155,11 +155,10 @@ export function MainTabAir({ variant }: Props) {
             <div style={{ marginTop: 8 }}>
               <div className="subhead"><div className="subhead__bar" />Schedule Legs<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ Row</button></div></div>
               <div style={{ overflowX: "auto" }}>
-                <GridTable
+                <GridList
                   columns={SCHEDULE_LEG_COLS}
                   data={SCHEDULE_LEG_DATA}
                   rowKey={(_, i) => i}
-                  style={{ fontSize: "var(--fs-xs)" }}
                 />
               </div>
               {/* Derived values (read-only) */}
@@ -255,7 +254,7 @@ export function MainTabAir({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Dimension</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable columns={DIMENSION_COLS} data={DIMENSION_DATA} rowKey={(_, i) => i} />
+            <GridList columns={DIMENSION_COLS} data={DIMENSION_DATA} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot"><div className="grid-foot__spacer" /><span>Qty: <strong>1,300</strong></span><span>CBM: <strong>87.5</strong></span><span>Vol. Wt.: <strong>14,583</strong></span></div>
         </div>
@@ -282,7 +281,7 @@ export function MainTabAir({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable columns={AIR_ITEM_COLS} data={AIR_ITEM_DATA} rowKey={(_, i) => i} />
+            <GridList columns={AIR_ITEM_COLS} data={AIR_ITEM_DATA} rowKey={(_, i) => i} />
           </div>
         </div>
       </div>

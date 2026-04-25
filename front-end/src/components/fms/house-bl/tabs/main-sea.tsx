@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { PartyPanel } from "./sections/party-panel";
 import { SchedulePanel } from "./sections/schedule-panel";
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface ContainerRow {
   cno: string; type: string; seal: string; pkg: number; pkgT: string;
@@ -13,7 +13,7 @@ interface ItemRow {
   hs: string; desc: string; qty: string; unit: string; value: string; cur: string;
 }
 
-const CONTAINER_COLS: GridTableColumn<ContainerRow>[] = [
+const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
   { key: "_no", label: "#", width: 36, className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "cno",  label: "Container No *", width: 160,
@@ -34,7 +34,7 @@ const CONTAINER_COLS: GridTableColumn<ContainerRow>[] = [
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ textAlign: "right", fontFamily: "var(--font-mono)" }} /> },
 ];
 
-const ITEM_COLS: GridTableColumn<ItemRow>[] = [
+const ITEM_COLS: GridColumn<ItemRow>[] = [
   { key: "_no",   label: "#", width: 36, className: "row-num",
     render: (_, __, i) => i + 1 },
   { key: "hs",    label: "HS Code", width: 100,
@@ -128,7 +128,7 @@ export function MainTabSea({ variant }: Props) {
             <div className="panel__actions"><button className="btn btn--sm">+ Add Row</button></div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable columns={CONTAINER_COLS} data={CONTAINER_DATA} rowKey={(_, i) => i} />
+            <GridList columns={CONTAINER_COLS} data={CONTAINER_DATA} rowKey={(_, i) => i} />
           </div>
           <div className="grid-foot">
             <span>2 containers</span>
@@ -174,7 +174,7 @@ export function MainTabSea({ variant }: Props) {
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridTable columns={ITEM_COLS} data={ITEM_DATA} rowKey={(_, i) => i} />
+            <GridList columns={ITEM_COLS} data={ITEM_DATA} rowKey={(_, i) => i} />
           </div>
         </div>
       </div>
