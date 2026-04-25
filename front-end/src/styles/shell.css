@@ -1,0 +1,197 @@
+/* =========================================================
+   App shell
+   ========================================================= */
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 44px 1fr;
+  height: 100vh;
+  overflow: hidden;
+  transition: grid-template-columns 180ms ease;
+}
+.app.is-side-collapsed { grid-template-columns: 0 1fr; }
+.app.is-side-collapsed .app__side { transform: translateX(-100%); }
+
+.app__topbar {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 0;
+  padding: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden; /* 탭이 topbar 밖으로 나오지 않게 */
+  min-width: 0;
+}
+.app__brand {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600; letter-spacing: -0.01em;
+}
+.app__brand-mark {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #fff; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+}
+.app__tabs {
+  /* flex item inside topbar: takes remaining space, must not grow beyond it */
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding-left: 8px;
+  /* visible thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.app__tabs::-webkit-scrollbar { height: 3px; }
+.app__tabs::-webkit-scrollbar-track { background: transparent; }
+.app__tabs::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+/* ── 탭 쿨 톤 액센트 변수 ── */
+:root {
+  --tab-accent:      #2563eb;   /* cool blue */
+  --tab-accent-2:    #1d4ed8;   /* pressed/hover */
+  --tab-accent-soft: #eff6ff;   /* very light blue bg */
+  --tab-accent-mid:  #bfdbfe;   /* border on active */
+}
+[data-theme="dark"] {
+  --tab-accent:      #60a5fa;
+  --tab-accent-2:    #93c5fd;
+  --tab-accent-soft: #172554;
+  --tab-accent-mid:  #1e3a5f;
+}
+
+/* ── 모든 탭: 항상 동일한 아웃라인 표시 ── */
+.app__tab {
+  padding: 0 12px; height: 30px;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: var(--fs-sm); color: var(--ink-3);
+  /* 비활성도 동일한 border 형태 — top/left/right만, bottom 없음 */
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-top-left-radius: 6px; border-top-right-radius: 6px;
+  cursor: pointer; position: relative; top: 1px;
+  background: var(--surface-2);
+  flex-shrink: 0; white-space: nowrap;
+  transition: background 80ms ease, border-color 80ms ease, color 80ms ease;
+}
+.app__tab:hover:not(.is-active) {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--ink-2);
+}
+
+/* ── 활성 탭: 쿨 톤 강조 ──
+   border-top 3px(굵은 바) + border-left/right 1px(감싸기)
+   border-radius 6px가 코너에서 상단 굵은 바를 「 형태로 자연스럽게 말아줌 */
+.app__tab.is-active {
+  background: var(--tab-accent-soft);
+  color: var(--tab-accent);
+  font-weight: 600;
+  /* 상단: 3px 굵은 파란 바 */
+  border-top: 3px solid var(--tab-accent);
+  /* 좌우: 1px로 감싸기 — radius와 합쳐져 「 형태 */
+  border-left-color:  var(--tab-accent);
+  border-right-color: var(--tab-accent);
+  /* 기존 border-bottom: none 유지 */
+  /* top이 3px로 늘어나므로 top: 1px → top: -1px 보정 */
+  top: -1px;
+  padding-top: 2px; /* 내용이 올라붙지 않도록 */
+}
+
+/* ── 닫기 버튼 ── */
+.app__tab-close {
+  opacity: 0.45; font-size: 13px; line-height: 1;
+  width: 16px; height: 16px; border-radius: 3px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.app__tab-close:hover { opacity: 1; background: color-mix(in srgb, var(--tab-accent) 12%, transparent); }
+.app__tab.is-active .app__tab-close:hover { background: var(--tab-accent-mid); }
+
+/* ── 버튼 추가 색상 변형 ── */
+.btn--success {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
+  background: var(--surface);
+}
+.btn--success:hover { background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 40%, transparent); }
+.btn--info {
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 30%, var(--border));
+  background: var(--surface);
+}
+.btn--info:hover { background: var(--info-soft); border-color: color-mix(in srgb, var(--info) 40%, transparent); }
+.btn--warn {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 30%, var(--border));
+  background: var(--surface);
+}
+.btn--warn:hover { background: var(--warn-soft); }
+.app__topbar-right {
+  display: flex; align-items: center; gap: 14px;
+  color: var(--ink-3); font-size: var(--fs-sm);
+  padding-right: 16px; flex-shrink: 0;
+}
+.app__user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 10px 4px 4px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.app__user-avatar {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-ink);
+  display: grid; place-items: center; font-size: 10px; font-weight: 600;
+}
+.topbar-icons {
+  display: flex; align-items: center; gap: 2px; padding: 0 8px;
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border); height: 28px;
+}
+.topbar-icon {
+  position: relative; width: 28px; height: 28px;
+  border: 1px solid transparent; border-radius: 4px; background: transparent;
+  color: var(--ink-2); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.topbar-icon > svg { width: 15px; height: 15px; }
+.topbar-icon:hover { background: var(--surface-2); color: var(--ink); border-color: var(--border); }
+.topbar-icon__dot {
+  position: absolute; top: 4px; right: 5px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--danger); border: 1.5px solid var(--surface-0);
+}
+
+/* Sidebar */
+.app__side {
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; overflow-x: hidden; padding: 8px 0;
+  transition: transform 180ms ease; position: relative;
+}
+.side-group { padding: 2px 0; }
+.side-group__label {
+  padding: 8px 16px 4px; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-4); font-weight: 600;
+}
+.side-item {
+  display: flex; align-items: center; gap: 10px; padding: 6px 16px;
+  font-size: var(--fs-sm); color: var(--ink-2);
+  cursor: pointer; border-left: 2px solid transparent; border: none; background: transparent; width: 100%; text-align: left;
+  border-left: 2px solid transparent;
+}
+.side-item:hover { background: var(--surface-2); }
+.side-item.is-active {
+  color: var(--accent-ink); background: var(--accent-soft);
+  border-left-color: var(--accent); font-weight: 500;
+}
+.side-item__icon { width: 14px; height: 14px; display: grid; place-items: center; color: var(--ink-4); flex-shrink: 0; }
+.side-item.is-active .side-item__icon { color: var(--accent); }
+.side-toggle {
+  position: absolute; top: 0; right: -11px; top: 52px;
+  width: 20px; height: 26px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink-3);
+  border-radius: 0 6px 6px 0; display: grid; place-items: center;
+  cursor: pointer; z-index: 10; box-shadow: 2px 0 6px rgba(0,0,0,0.04);
+}
+.side-toggle:hover { color: var(--accent); border-color: var(--accent); }

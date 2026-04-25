@@ -1,0 +1,253 @@
+/* =========================================================
+   Toolbar row
+   ========================================================= */
+.toolbar {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 0;
+  padding: 10px 18px; background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.toolbar .field { padding: 0 14px; border-right: 1px dashed var(--divider); }
+.toolbar .field:last-child { border-right: none; }
+
+/* =========================================================
+   Tab bar
+   ========================================================= */
+.tabbar {
+  display: flex; align-items: flex-end; padding: 0 18px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  gap: 2px; height: 38px; flex-shrink: 0;
+}
+/* 엔트리 탭: 최상단 탭(.app__tab)과 동일한 스타일 적용 */
+.tabbar__tab {
+  position: relative; top: 1px; /* tabbar 하단 border 위로 float */
+  height: 32px; padding: 0 16px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: var(--fs-sm); color: var(--ink-3);
+  border: 1px solid var(--border); border-bottom: none;
+  border-top-left-radius: 6px; border-top-right-radius: 6px;
+  background: var(--surface-2); cursor: pointer;
+  transition: background 80ms ease, border-color 80ms ease, color 80ms ease;
+  flex-shrink: 0; white-space: nowrap;
+}
+.tabbar__tab::after { display: none; } /* 구 밑줄 제거 */
+.tabbar__tab:hover:not(.is-active) {
+  background: var(--surface); border-color: var(--border-strong); color: var(--ink-2);
+}
+/* 활성 탭: 최상단 탭과 동일한 쿨톤 강조 */
+.tabbar__tab.is-active {
+  background: var(--tab-accent-soft);
+  border-top: 3px solid var(--tab-accent);
+  border-left-color: var(--tab-accent);
+  border-right-color: var(--tab-accent);
+  color: var(--tab-accent);
+  font-weight: 600;
+  padding-top: 2px; /* 상단 border 3px 보정 */
+}
+.tabbar__tab-count {
+  font-family: var(--font-mono); font-size: 10px; padding: 1px 6px;
+  border-radius: 999px; background: var(--bg-sunken); color: var(--ink-4);
+}
+.tabbar__tab.is-active .tabbar__tab-count { background: var(--accent-soft); color: var(--accent-ink); }
+.tabbar__spacer { flex: 1; }
+.tabbar__meta { font-size: var(--fs-xs); color: var(--ink-4); display: flex; align-items: center; gap: 10px; }
+
+/* =========================================================
+   Panels / cards
+   ========================================================= */
+.panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.panel__head {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-bottom: 1px solid var(--divider); background: var(--surface-2);
+}
+.panel__title {
+  font-size: 12px;     /* 입력 필드 라벨(10.5px/11.5px)과 차별화 */
+  font-weight: 700;    /* 필드 라벨(500/600)보다 굵게 */
+  color: var(--ink);   /* 최대 대비 — 입력 라벨(ink-2/ink-3)보다 강하게 */
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.panel__title-accent { width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+.panel__hint { margin-left: auto; font-size: var(--fs-xs); color: var(--ink-4); }
+.panel__body { padding: var(--card-pad-y) var(--card-pad-x); }
+.panel__body--tight { padding: 10px 14px; }
+.panel__body--flush { padding: 0; }
+.panel__rowcount {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px;
+  background: var(--accent-soft); color: var(--accent-ink);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  margin-left: 8px;
+}
+.panel__rowcount::after {
+  content: '행';
+  font-weight: 400;
+  font-size: 10px;
+  margin-left: 2px;
+  opacity: 0.7;
+}
+.panel__actions { margin-left: auto; display: flex; gap: 4px; }
+
+/* =========================================================
+   Form fields — Material underline
+   ========================================================= */
+.field {
+  position: relative; display: flex; flex-direction: column;
+  gap: 3px; padding: 2px 0; min-width: 0;
+}
+.field__label {
+  font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-2); /* ink-3→ink-2 */
+  font-weight: 600; display: flex; align-items: center; gap: 5px; /* 500→600 */
+  text-transform: uppercase; user-select: none;
+}
+.field__label.is-required { color: var(--required); }
+.field__label.is-required::after {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--required-bar); opacity: var(--required-show-dot);
+}
+.field__input {
+  position: relative; display: flex; align-items: center; gap: 6px;
+  height: var(--field-h); padding: 0 2px;
+  border-bottom: 1px solid var(--border-strong);
+  transition: border-color 120ms ease, box-shadow 120ms ease; background: transparent;
+}
+.field__input input,
+.field__input select,
+.field__input textarea {
+  all: unset; flex: 1; min-width: 0; font-family: inherit;
+  font-size: 10px; color: var(--ink); line-height: 1.3;
+}
+.field__input input::placeholder { color: var(--ink-muted); }
+.field__input select { appearance: none; cursor: pointer; }
+.field__input:hover { border-bottom-color: var(--ink-3); }
+.field__input:focus-within { border-bottom-color: var(--focus-ring); box-shadow: 0 1px 0 0 var(--focus-ring); }
+/* ── 필수 입력 필드: 헤더(toolbar)와 바디 동일 스타일 ──────────────
+   바디 .li > .li__input 박스 스타일 기준 + 핑크 배경(헤더에서 유지).
+   border 전체(전방위) + border-radius + 붉은 왼쪽 bar + 포커스 핑크 */
+.field.is-required .field__input {
+  border: 1px solid var(--border);       /* 전방위 박스 border */
+  border-radius: 4px;                    /* body 스타일과 일치 */
+  padding: 0 8px 0 11px;                 /* 11px left = bar(3px) + gap */
+  background: transparent;
+  box-shadow: inset 3px 0 0 var(--required-bar); /* 왼쪽 bar */
+  border-bottom: 1px solid var(--border); /* border-bottom 덮어쓰기 방지 */
+}
+.field.is-required .field__input:hover {
+  border-color: var(--border-strong);
+}
+/* 포커스: bar 4px 확대 + 붉은 핑크 배경 + 붉은 계열 외곽선 */
+.field.is-required .field__input:focus-within {
+  box-shadow: inset 4px 0 0 var(--required-bar),
+              0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
+  border-color: color-mix(in srgb, var(--required-bar) 55%, var(--border));
+  background: var(--required-soft);
+}
+.field.is-required .field__input::before { display: none !important; content: none !important; }
+
+/* 레드닷(::after): 바 모드에서 숨기지만 색은 반드시 빨간색 */
+.field__label.is-required::after {
+  background: var(--required-bar); /* 확실히 빨간색 */
+  opacity: var(--required-show-dot);
+}
+.field__icon { color: var(--ink-4); display: grid; place-items: center; cursor: pointer; opacity: 0.7; flex-shrink: 0; }
+.field__icon:hover { opacity: 1; color: var(--accent); }
+.field__help { font-size: 10.5px; color: var(--ink-4); padding-top: 2px; }
+.field__suffix { font-size: 10.5px; color: var(--ink-4); font-family: var(--font-mono); }
+
+.field-row { display: grid; gap: var(--field-gap-x); }
+.field-row--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.field-row--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.field-row--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.form-grid { display: grid; gap: var(--field-gap-y) var(--field-gap-x); }
+.form-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.form-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.textarea {
+  min-height: 72px; border: 1px solid var(--border); border-radius: 5px;
+  padding: 8px 10px; background: var(--surface-2); font-family: inherit;
+  font-size: var(--fs-sm); width: 100%; resize: none;
+}
+.textarea:focus { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 3px var(--focus-glow); }
+.textarea--party { min-height: 110px; }
+.textarea--tall { min-height: 0; height: 100%; overflow-y: auto; resize: none; }
+
+/* zone-marks / zone-description: panel body를 flex column으로 만들어 textarea가 꽉 채우게 */
+.zone-marks .panel--full,
+.zone-description .panel--full {
+  overflow: hidden;
+}
+.zone-marks .panel__body,
+.zone-description .panel__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.zone-marks .textarea--tall,
+.zone-description .textarea--tall {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* =========================================================
+   LCN / LI (labeled code-name / labeled input)
+   ========================================================= */
+.lcn { display: grid; grid-template-columns: 110px 120px minmax(0, 1fr); align-items: center; gap: 8px; padding: 2px 0; }
+.lcn__label { font-size: 12px; font-weight: 500; color: var(--ink); text-align: right; padding-right: 4px; white-space: nowrap; position: relative; }
+/* lcn required: 라벨 빨간색 + 레드닷(::after) + 코드 입력 왼쪽 bar + 포커스 강조 */
+.lcn__label.is-required { color: var(--required); font-weight: 600; }
+.lcn__label.is-required::before { display: none !important; content: none !important; }
+.lcn__label.is-required::after {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--required-bar); opacity: var(--required-show-dot);
+}
+.lcn:has(.lcn__label.is-required) .lcn__code > input {
+  box-shadow: inset 3px 0 0 var(--required-bar);
+  padding-left: 11px;
+  border-color: color-mix(in srgb, var(--required-bar) 30%, var(--border));
+}
+.lcn:has(.lcn__label.is-required) .lcn__code > input:focus {
+  box-shadow: inset 4px 0 0 var(--required-bar), 0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
+  border-color: color-mix(in srgb, var(--required-bar) 55%, var(--border));
+  background: var(--required-soft);
+}
+.lcn__code { position: relative; display: flex; align-items: center; }
+.lcn__code > input { width: 100%; height: 22px; padding: 0 24px 0 8px; font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); font-family: var(--font-mono); }
+.lcn__code > input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.lcn__icon { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; color: var(--ink-3); cursor: pointer; }
+.lcn__icon:hover { color: var(--accent); }
+.lcn__name { height: 22px; padding: 0 8px; font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); min-width: 0; width: 100%; }
+.lcn__name:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.lcn__select { height: 26px; padding: 0 8px; font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
+.lcn__select:focus { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 2px var(--focus-glow); }
+
+.li { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: center; gap: 8px; padding: 2px 0; }
+.li__label { font-size: 12px; font-weight: 500; color: var(--ink); text-align: right; padding-right: 4px; white-space: nowrap; position: relative; }
+/* li required: 라벨 빨간색 + 입력 왼쪽 bar + 포커스 강조 */
+.li__label.is-required { color: var(--required); font-weight: 600; }
+.li__label.is-required::before { display: none !important; content: none !important; }
+.li__input { position: relative; display: flex; align-items: center; }
+.li:has(.li__label.is-required) .li__input > input:first-child,
+.li:has(.li__label.is-required) .li__input > select:first-child {
+  box-shadow: inset 3px 0 0 var(--required-bar);
+  padding-left: 11px;
+  border-color: color-mix(in srgb, var(--required-bar) 30%, var(--border));
+}
+.li:has(.li__label.is-required) .li__input > input:first-child:focus,
+.li:has(.li__label.is-required) .li__input > select:first-child:focus {
+  box-shadow: inset 4px 0 0 var(--required-bar), 0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
+  border-color: color-mix(in srgb, var(--required-bar) 55%, var(--border));
+  background: var(--required-soft);
+  outline: none;
+}
+.li__input > input, .li__input > select { width: 100%; height: 22px; padding: 0 26px 0 8px; font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); }
+.li:not(:has(.li__label.is-required)) .li__input > input:focus,
+.li:not(:has(.li__label.is-required)) .li__input > select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+.sched-list { display: flex; flex-direction: column; gap: 3px; }
+.sched-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

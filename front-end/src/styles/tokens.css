@@ -1,0 +1,120 @@
+/* =========================================================
+   FMS Design System — CSS Custom Properties
+   Off-white + deep navy, Material underline inputs
+   ========================================================= */
+
+:root {
+  /* Typography */
+  --font-sans: 'Inter', 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --fs-base: 13px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-lg: 15px;
+  --fs-xl: 18px;
+  --fs-2xl: 22px;
+  --lh-tight: 1.25;
+  --lh-base: 1.45;
+
+  /* Density */
+  --row-h: 24px;
+  --field-h: 22px;
+  --field-gap-y: 12px;
+  --field-gap-x: 20px;
+  --section-pad: 18px;
+  --card-pad-y: 14px;
+  --card-pad-x: 18px;
+
+  /* Tone: Neutral (default) */
+  --bg: #f5f4f0;
+  --bg-sunken: #eeece6;
+  --surface: #ffffff;
+  --surface-0: #ffffff;
+  --surface-1: #fdfcf9;
+  --surface-2: #faf9f5;
+  --surface-3: #f5f3ee;
+  --border: #e3e0d6;
+  --border-strong: #cec9b8;
+  --divider: #ecebe5;
+
+  --ink: #10182a;
+  --ink-2: #2a3347;
+  --ink-3: #5a6277;
+  --ink-4: #8a8f9e;
+  --ink-muted: #a8acb6;
+
+  --accent: #1f3a8a;
+  --accent-2: #2d4cc8;
+  --accent-soft: #e6ebf8;
+  --accent-ink: #0b1f5e;
+
+  --required: #b42e3a;
+  --required-bar: #b42e3a;
+  --required-soft: #fcecee;
+
+  --success: #0f7a3e;
+  --success-soft: #e6f4ec;
+  --warn: #b8710d;
+  --warn-soft: #fdf1de;
+  --danger: #b42e3a;
+  --danger-soft: #fcecee;
+  --info: #1f5fa8;
+  --info-soft: #e6eff8;
+
+  --focus-ring: #2d4cc8;
+  --focus-glow: rgba(45, 76, 200, 0.18);
+
+  --shadow-sm: 0 1px 0 rgba(16, 24, 42, 0.04), 0 1px 2px rgba(16, 24, 42, 0.05);
+  --shadow-md: 0 2px 6px rgba(16, 24, 42, 0.06), 0 1px 2px rgba(16, 24, 42, 0.04);
+  --shadow-pop: 0 10px 30px rgba(16, 24, 42, 0.12), 0 2px 6px rgba(16, 24, 42, 0.06);
+
+  --radius-sm: 3px;
+  --radius: 5px;
+  --radius-lg: 8px;
+
+  --required-show-bar: 1;
+  --required-show-dot: 0;
+  --required-show-bg: 0;
+}
+
+/* ---------- Tone variants ---------- */
+[data-tone="cool"] {
+  --bg: #f2f4f8; --bg-sunken: #e9ecf2; --surface: #ffffff; --surface-2: #f7f9fc;
+  --border: #dde2ec; --border-strong: #c3cadb; --divider: #e8ebf1; --ink: #0e1a33;
+}
+[data-tone="warm"] {
+  --bg: #f6f2ea; --bg-sunken: #ede7d9; --surface: #fffdf8; --surface-2: #faf6ec;
+  --border: #e3dcc9; --border-strong: #cabf9f; --divider: #ebe5d4; --ink: #1b1a12;
+}
+
+/* ---------- Density variants ---------- */
+[data-density="compact"] {
+  --fs-base: 12px; --fs-sm: 11px; --row-h: 26px; --field-h: 26px;
+  --field-gap-y: 8px; --field-gap-x: 14px; --section-pad: 12px;
+  --card-pad-y: 10px; --card-pad-x: 14px;
+}
+[data-density="cozy"] {
+  --fs-base: 14px; --fs-sm: 13px; --row-h: 36px; --field-h: 34px;
+  --field-gap-y: 16px; --field-gap-x: 24px; --section-pad: 22px;
+  --card-pad-y: 18px; --card-pad-x: 22px;
+}
+
+/* ---------- Dark mode ---------- */
+[data-theme="dark"] {
+  --bg: #0b1020; --bg-sunken: #070b18; --surface: #121830; --surface-0: #121830;
+  --surface-1: #0f1528; --surface-2: #0f1528; --surface-3: #1a2040;
+  --border: #222a44; --border-strong: #2f385a; --divider: #1a2038;
+  --ink: #e7ecf7; --ink-2: #c7cee0; --ink-3: #9ba3b8; --ink-4: #6e7690; --ink-muted: #555d77;
+  --accent: #7aa0ff; --accent-2: #a8bfff; --accent-soft: #1a2450; --accent-ink: #dbe4ff;
+  --required: #ff8a92; --required-bar: #e85560; --required-soft: #3a1218;
+  --success: #5dd693; --success-soft: #0f2a1c; --warn: #f0b65c; --warn-soft: #2e1f0a;
+  --focus-ring: #7aa0ff; --focus-glow: rgba(122, 160, 255, 0.24);
+  --shadow-sm: 0 1px 0 rgba(0,0,0,0.3); --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* ---------- Required modes ---------- */
+[data-required="bar"]    { --required-show-bar: 1; --required-show-dot: 0; --required-show-bg: 0; }
+[data-required="dot"]    { --required-show-bar: 0; --required-show-dot: 1; --required-show-bg: 0; }
+[data-required="bg"]     { --required-show-bar: 0; --required-show-dot: 0; --required-show-bg: 1; }
+[data-required="subtle"] { --required-show-bar: 0; --required-show-dot: 1; --required-show-bg: 0; --required-bar: var(--ink-4); --required: var(--ink-3); }
