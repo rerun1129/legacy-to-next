@@ -81,7 +81,7 @@ export function MasterMainTab({ variant }: Props) {
             ] as const).map((p) => (
               <div key={p.role} className="party-block">
                 <div className="party-block__head">
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", minWidth: 80, flexShrink: 0 }}>{p.role}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 80, flexShrink: 0 }}>{p.role}</span>
                   <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
                     <div style={{ position: "relative" }}>
                       <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 18px 4px 2px", fontSize: 11, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />

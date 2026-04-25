@@ -63,7 +63,6 @@ export function NonBLEntry() {
           </button>
         ))}
         <div className="tabbar__spacer" />
-        <div className="tabbar__meta"><span>Work Division: <strong>{workDiv}</strong></span></div>
       </div>
 
       {/* Main tab */}
@@ -83,7 +82,7 @@ export function NonBLEntry() {
               ] as const).map((p) => (
                 <div key={p.role} className="party-block" style={{ paddingBottom: 8 }}>
                   <div className="party-block__head">
-                    <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink)", minWidth: 120, flexShrink: 0 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 120, flexShrink: 0 }}>
                       {p.role}{p.req && <span style={{ color: "var(--required)", marginLeft: 3 }}>*</span>}
                     </span>
                     <div style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>

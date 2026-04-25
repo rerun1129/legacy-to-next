@@ -91,8 +91,6 @@ export function HouseBLEntry({ variant }: Props) {
         <div className="tabbar__spacer" />
         <div className="tabbar__meta">
           <span>Last saved: 10 min ago</span>
-          <span style={{ color: "var(--divider)" }}>|</span>
-          <span>담당: 김영선</span>
         </div>
       </div>
 

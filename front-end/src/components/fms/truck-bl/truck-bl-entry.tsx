@@ -55,7 +55,6 @@ export function TruckBLEntry() {
           </button>
         ))}
         <div className="tabbar__spacer" />
-        <div className="tabbar__meta"><span>담당: 김영선</span></div>
       </div>
 
       {/* Main tab */}
@@ -74,7 +73,7 @@ export function TruckBLEntry() {
               ].map((p) => (
                 <div key={p.role} className="party-block">
                   <div className="party-block__head">
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", minWidth: 90 }}>{p.role}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 90 }}>{p.role}</span>
                     <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
                       <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 11, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
                       <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 11, color: "var(--ink)", outline: "none" }} />

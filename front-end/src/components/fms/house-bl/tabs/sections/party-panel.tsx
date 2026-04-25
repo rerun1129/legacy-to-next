@@ -19,7 +19,7 @@ export function PartyPanel({ isExp }: Props) {
           ] as const).map((p) => (
             <div key={p.role} className="party-block">
               <div className="party-block__head">
-                <span style={{ fontSize: 12, color: "var(--ink)", minWidth: 90, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: "var(--ink)", minWidth: 90, flexShrink: 0 }}>
                   {p.role}
                   {(p as { required?: boolean }).required && (
                     <span style={{ color: "var(--required)", marginLeft: 3 }}>*</span>
