@@ -58,7 +58,9 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
           borderRight: "1px solid var(--border)",
           paddingRight: 12,
           overflow: "hidden",
+          cursor: "pointer",
         }}
+        onClick={() => router.push("/dashboard")}
       >
         <div className="app__brand-mark">FMS</div>
         <span
@@ -76,7 +78,7 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
 
       {/* ── Tab strip ─────────────────────────────────────────── */}
       <div ref={tabsRef} className="app__tabs">
-        {tabs.map((tab) => {
+        {tabs.filter((tab) => tab.href !== "/dashboard").map((tab) => {
           const active = pathname === tab.href;
           return (
             <button
