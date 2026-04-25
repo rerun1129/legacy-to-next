@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { Save, Trash2, Package, Printer } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
-import { GridTable, type GridTableColumn } from "@/components/shared/grid-table";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 type ContainerInfoRow = Record<string, never>;
 
-const CONTAINER_INFO_COLS: GridTableColumn<ContainerInfoRow>[] = [
+const CONTAINER_INFO_COLS: GridColumn<ContainerInfoRow>[] = [
   { key: "_no",  label: "#",             render: (_, __, i) => i + 1 },
   { key: "cno",  label: "Container No." },
   { key: "type", label: "Type" },
@@ -151,7 +151,7 @@ export function NonBLEntry() {
             <div className="panel__body">
               {workDiv === "Sea" && (
                 <div style={{ overflowX: "auto" }}>
-                  <GridTable
+                  <GridList
                     columns={CONTAINER_INFO_COLS}
                     data={[]}
                     emptyMessage="+ Add Container"
