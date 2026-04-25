@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(touch .claude/.review_skip)",
+      "Bash(cat .claude/.task_queue)"
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/statusline-command.sh'"

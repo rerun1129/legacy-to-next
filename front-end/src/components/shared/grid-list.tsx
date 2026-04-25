@@ -34,7 +34,7 @@ export function GridList<T>({
 }: GridListProps<T>) {
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`}>
-      <table className="grid grid--list">
+      <table className="grid--list">
         <colgroup>
           {columns.map((col) => (
             <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />

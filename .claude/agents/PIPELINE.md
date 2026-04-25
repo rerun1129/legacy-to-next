@@ -73,7 +73,7 @@
 | Reviewer APPROVED 후 QA 호출 전 | `git diff --name-only <BASE> HEAD` → 결과를 QA에 변경 파일 목록으로 전달 |
 | QA 통과 후 worktree 정리 | `git worktree list` 확인 → `git worktree remove -f -f <path>` × N회 → `git branch -D <worktree-branch>` × N회 |
 
-> **누적 모드 예외 (`/pipeline-build`)**: 위 표의 모든 `touch .claude/.review_pending`은 생략한다. 진입 시 `.claude/.review_skip` sentinel을 유지하고, `/pipeline-review` 또는 `/pipeline` 호출 시 sentinel 제거 + 마커 생성으로 정상 사이클에 진입한다.
+> **누적 모드 예외 (`/pipeline-start`)**: 위 표의 모든 `touch .claude/.review_pending`은 생략한다. 진입 시 `.claude/.review_skip` sentinel을 유지하고, `/pipeline-review` 또는 `/pipeline` 호출 시 sentinel 제거 + 마커 생성으로 정상 사이클에 진입한다.
 
 ## 공통 규칙
 
@@ -90,6 +90,7 @@
 - ESCALATE fallback: 2차 Opus 호출·파싱 실패 시 1차 ESCALATE를 APPROVED로 묵시 처리. 리뷰 차단보다 통과 우선의 안전 정책.
 - Reviewer 모델: 1차 `claude-sonnet-4-6`, 2차(ESCALATE) `claude-opus-4-7`. 환경변수 `PRIMARY_MODEL` / `ESCALATION_MODEL` 로 오버라이드 가능.
 
-## 누적 모드 (`/pipeline-build`)
+## 누적 모드 (`/pipeline-build` + `/pipeline-start`)
 
-메인 #7(`touch .claude/.review_pending`)을 건너뛰고, 진입 시 `.claude/.review_skip` sentinel을 유지한다. Stop 훅이 sentinel을 보고 즉시 exit 0 처리해 Reviewer 발동을 차단. 이후 `/pipeline-review` 호출 시 sentinel 제거 + 마커 생성으로 #8~#13 정상 사이클에 진입한다. 누적 호출 사이의 base→HEAD diff는 자연스럽게 합산되어 단일 Reviewer 호출에 전달된다.
+- `/pipeline-build`: 작업 지시를 `.claude/.task_queue`에 적재만 함. commit·sentinel·마커 모두 무관. 진입 시 `.claude/.review_skip` sentinel을 유지해 의도치 않은 Reviewer 발동을 차단.
+- `/pipeline-start`: 큐를 일괄 소비해 Planner→Coder×N→merge→commit을 실행. 메인 `touch .claude/.review_pending`(#7)은 생략하고 `.review_skip` sentinel을 유지. 이후 `/pipeline-review` 호출 시 sentinel 제거 + 마커 생성으로 #8~#13 정상 사이클에 진입한다. 반복 호출 사이의 base→HEAD diff는 자연스럽게 합산되어 단일 Reviewer 호출에 전달된다.

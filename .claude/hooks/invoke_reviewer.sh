@@ -52,7 +52,7 @@ if [ -f "$APPROVED_MARKER" ]; then
   exit 0
 fi
 
-# .review_skip sentinel: /pipeline-build 누적 모드에서 Reviewer 발동 차단
+# .review_skip sentinel: /pipeline-start 누적 모드에서 Reviewer 발동 차단
 if [ -f "$CLAUDE_PROJECT_DIR/.claude/.review_skip" ]; then
   exit 0
 fi

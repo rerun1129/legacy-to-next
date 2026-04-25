@@ -31,7 +31,7 @@ N개 worktree는 **순차 반복 머지**. 한 번에 하나씩 처리해야 충
 
 * `git add <resolved-files>`
 * `git commit -m "merge: resolve conflicts from parallel Coders"`
-* `touch .claude/.review_pending` — 단, `/pipeline-build` 누적 모드에서는 마커 미생성 (`.claude/.review_skip` sentinel 유지)
+* `touch .claude/.review_pending` — 단, `/pipeline-start` 누적 모드에서는 마커 미생성 (`.claude/.review_skip` sentinel 유지)
 
 ### 머지 중단
 

@@ -6,6 +6,7 @@
 .env*
 *.pem
 .claude/.review_pending
+.claude/.task_queue
 .claude/worktrees/
 .claude/settings.local.json
 
