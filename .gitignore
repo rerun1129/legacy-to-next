@@ -1,5 +1,6 @@
 # 전체 프로젝트 루트 gitignore
 # 백엔드/프론트엔드 공통
+# pipeline test
 
 .DS_Store
 .env*
