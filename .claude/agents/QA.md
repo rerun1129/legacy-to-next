@@ -19,7 +19,7 @@ color: green
    실행 순서:
    - `npm --prefix front-end run lint`
    - `npm --prefix front-end run build`
-   - `back-end/java-spring/gradlew.bat -p back-end/java-spring test --quiet`
+   - `back-end/java-spring/gradlew.bat -p back-end/java-spring test`
 3. 실패·경고·잠재 버그를 **블로커 / 메이저 / 마이너**로 분류해 메인에 반환.
 4. 최종 통과 여부 명시:
    - 통과: 작업 종료.

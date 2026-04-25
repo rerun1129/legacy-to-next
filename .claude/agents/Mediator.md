@@ -20,9 +20,12 @@ Mediator 호출 전후로 메인 에이전트가 실행하는 git 명령어.
 
 ### Coder worktree 머지 (Mediator 호출 전)
 
-* `git merge <worktree-branch>` — 단일 Coder 머지
-* `git merge --no-ff <branch1> <branch2>` — 복수 Coder 통합 머지
+N개 worktree는 **순차 반복 머지**. 한 번에 하나씩 처리해야 충돌 발생 위치를 정확히 파악 가능.
+
+* `git merge <worktree-branch>` — 브랜치 하나씩 반복 실행 (N회)
 * `git worktree list` — 활성 worktree 확인
+
+> `--no-ff` 옵션은 fast-forward를 막고 머지 커밋을 강제 생성할 때 사용. 복수 브랜치를 한 번에 넘기는 octopus merge(`git merge --no-ff <b1> <b2>`)는 충돌 발생 시 자동 중단되므로 N>1 케이스에는 사용하지 않는다.
 
 ### Mediator 처리 후 마무리
 

@@ -30,7 +30,7 @@
 
 * Planner - 사용자에게 받은 작업 지시를 개발이 가능한 기획으로 정리 및 승인 요청. 이후 Coder에게 흐름을 넘긴다.
 * Coder - 백엔드 및 프론트엔드 모두 DDD에 입각한 코드 개발 및 테스트 코드 시범 동작.
-* Reviewer - 서브 에이전트는 아니지만 격리된 컨텍스트를 가진 외부 메인 에이전트. 메인이 머지·커밋 완료 후 Stop 훅이 자동 호출. 2단계(Sonnet 1차 → ESCALATE 시 Opus 2차) 리뷰. REJECTED 시 메인 재개하여 Coder 재호출 후 재검토, APPROVED 시 메인 재개하여 QA 호출.
+* Reviewer - 서브 에이전트는 아니지만 격리된 컨텍스트를 가진 외부 메인 에이전트. Stop 훅은 메인 응답 종료 시마다 발화하며 `.review_pending` 마커가 있을 때만 Reviewer가 실행됨 (메인이 git commit 후 `touch .claude/.review_pending` 실행 시 다음 Stop에서 트리거). 2단계(Sonnet 1차 → ESCALATE 시 Opus 2차) 리뷰. REJECTED 시 메인 재개하여 Coder 재호출 후 재검토, APPROVED 시 메인 재개하여 QA 호출.
 * QA - 코드 오류 검수 및 테스트 코드 최종 동작
 * Mediator - 병렬 Coder의 worktree 머지 시 충돌 파일 내용 해결. 충돌 발생 시에만 호출.
 

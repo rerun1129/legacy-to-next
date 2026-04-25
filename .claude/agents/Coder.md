@@ -30,7 +30,7 @@ color: blue
    git commit -m "작업단위를 설명하는 메시지"
    ```
    커밋 메시지는 작업 단위명 기준으로 간결하게 작성 (예: `feat: add MasterBlService layer`).
-5. 종료 시 변경 파일 목록을 메인에 반환. 메인은 머지·commit 완료 후 반드시 `touch .claude/.review_pending` 실행.
+5. 종료 시 변경 파일 목록과 worktree 브랜치명을 메인에 반환. 메인의 이후 동작(머지·touch)은 PIPELINE.md 참조.
 
 ## Hard Rules
 

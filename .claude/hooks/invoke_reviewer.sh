@@ -21,6 +21,7 @@ command -v claude >/dev/null 2>&1 || { echo "[reviewer] claude CLI not found in 
 # ─── 설정 ──────────────────────────────────────────────────────────────
 PRIMARY_MODEL="${PRIMARY_MODEL:-claude-sonnet-4-6}"
 ESCALATION_MODEL="${ESCALATION_MODEL:-claude-opus-4-7}"
+USED_MODEL="$PRIMARY_MODEL"
 
 # reviewer_paths.md 에서 경로 순서대로 시도
 PATHS_FILE="$CLAUDE_PROJECT_DIR/.claude/reviewer_paths.md"
@@ -37,6 +38,7 @@ fi
 LOG_DIR="$CLAUDE_PROJECT_DIR/.claude/review_log"
 REVIEW_PENDING="$CLAUDE_PROJECT_DIR/.claude/.review_pending"
 APPROVED_MARKER="$LOG_DIR/.reviewer_approved"
+REJECT_COUNT_FILE="$LOG_DIR/.reject_count"
 
 mkdir -p "$LOG_DIR"
 
@@ -50,9 +52,17 @@ if [ -f "$APPROVED_MARKER" ]; then
   exit 0
 fi
 
-# .review_pending 없으면 중간 Stop (승인 게이트·플래닝 등) → 무시
+# .review_pending 없으면 트렁크 커밋 자동 감지 후 마커 복구 시도
 if [ ! -f "$REVIEW_PENDING" ]; then
-  exit 0
+  _AHEAD=0
+  if git -C "$CLAUDE_PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    _AHEAD=$(git -C "$CLAUDE_PROJECT_DIR" rev-list --count "origin/master..HEAD" 2>/dev/null || echo 0)
+  fi
+  if [ "$_AHEAD" -gt 0 ]; then
+    touch "$REVIEW_PENDING"
+  else
+    exit 0
+  fi
 fi
 # .review_pending은 verdict 확정 후 소비 — 그 이전 실패는 마커를 유지해 재시도 가능
 
@@ -240,6 +250,7 @@ ESCALATE_EOF
       if [ -n "$REVIEW_JSON2" ]; then
         REVIEW_JSON="$REVIEW_JSON2"
         VERDICT=$(echo "$REVIEW_JSON" | jq -r '.verdict')
+        USED_MODEL="$ESCALATION_MODEL"
         echo "[reviewer] escalated to $ESCALATION_MODEL (handoff: $HANDOFF_BYTES bytes) → $VERDICT" >&2
       else
         echo "[reviewer] 2차 응답 파싱 실패. 1차 결과로 진행." >&2
@@ -250,8 +261,40 @@ ESCALATE_EOF
   fi
 fi
 
+# ─── summary 기록 및 임시 파일 정리 ────────────────────────────────────
+_DATE="${TIMESTAMP:0:4}-${TIMESTAMP:4:2}-${TIMESTAMP:6:2}"
+_TIME="${TIMESTAMP:9:2}:${TIMESTAMP:11:2}:${TIMESTAMP:13:2}"
+_ISO="${_DATE}T${_TIME}"
+DATE_KEY="${TIMESTAMP:0:8}"
+DAILY_LOG="$LOG_DIR/${DATE_KEY}.json"
+_DURATION=$(echo "$RAW" | jq '.duration_ms // 0' 2>/dev/null || echo 0)
+
+_ENTRY=$(echo "$REVIEW_JSON" | jq \
+  --arg ts "$_ISO" \
+  --arg model "$USED_MODEL" \
+  --argjson dur "$_DURATION" \
+  '{
+    timestamp: $ts,
+    verdict: .verdict,
+    severity: (.severity // null),
+    model: $model,
+    duration_ms: $dur,
+    summary: (.summary // null),
+    violations: (.violations // []),
+    suggestions: (.suggestions // [])
+  }')
+
+if [ -f "$DAILY_LOG" ]; then
+  jq ". + [$_ENTRY]" "$DAILY_LOG" > "${DAILY_LOG}.tmp" && mv "${DAILY_LOG}.tmp" "$DAILY_LOG"
+else
+  echo "[$_ENTRY]" | jq . > "$DAILY_LOG"
+fi
+
+rm -f "$REQUEST_FILE" "$PRIMARY_RESPONSE" "$HANDOFF_FILE" "$ESCALATION_RESPONSE"
+
 # ─── 결과 처리 ─────────────────────────────────────────────────────────
 if [ "$VERDICT" = "APPROVED" ] || [ "$VERDICT" = "ESCALATE" ]; then
+  rm -f "$REJECT_COUNT_FILE"
   touch "$APPROVED_MARKER"
   {
     echo "════════════════════════════════════════════════════════"
@@ -271,10 +314,14 @@ if [ "$VERDICT" = "APPROVED" ] || [ "$VERDICT" = "ESCALATE" ]; then
   exit 2
 fi
 
+# REJECTED 카운터 증가
+_RCOUNT=$(( $(cat "$REJECT_COUNT_FILE" 2>/dev/null || echo 0) + 1 ))
+echo "$_RCOUNT" > "$REJECT_COUNT_FILE"
+
 # REJECTED → stderr로 피드백 + exit 2 (Coder 재작업 후 Reviewer 재실행)
 {
   echo "════════════════════════════════════════════════════════"
-  echo "  외부 코드 감사 결과: REJECTED"
+  echo "  외부 코드 감사 결과: REJECTED (${_RCOUNT}회차)"
   echo "════════════════════════════════════════════════════════"
   echo ""
   echo "리뷰어가 다음 문제를 지적했습니다. Coder 재작업 후 자동으로 재검토됩니다."
@@ -297,5 +344,14 @@ fi
   echo ""
   echo "(전체 응답 로그: $LOG_DIR/${TIMESTAMP}_*.json)"
 } >&2
+
+if [ "$_RCOUNT" -ge 2 ]; then
+  {
+    echo ""
+    echo "[ESCALATE_TO_USER] 동일 변경분에 대해 ${_RCOUNT}회 연속 REJECTED됐습니다."
+    echo "Coder 재작업 대신 사용자에게 직접 위반 내용을 보고하고 검토를 요청하세요."
+    rm -f "$REJECT_COUNT_FILE"
+  } >&2
+fi
 
 exit 2
