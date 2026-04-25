@@ -5,6 +5,11 @@
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/back-end/java-spring" />
         <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/back-end/java-spring" />
+          </set>
+        </option>
       </GradleProjectSettings>
     </option>
   </component>

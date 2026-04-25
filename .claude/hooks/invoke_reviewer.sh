@@ -284,11 +284,7 @@ _ENTRY=$(echo "$REVIEW_JSON" | jq \
     suggestions: (.suggestions // [])
   }')
 
-if [ -f "$DAILY_LOG" ]; then
-  jq ". + [$_ENTRY]" "$DAILY_LOG" > "${DAILY_LOG}.tmp" && mv "${DAILY_LOG}.tmp" "$DAILY_LOG"
-else
-  echo "[$_ENTRY]" | jq . > "$DAILY_LOG"
-fi
+echo "$_ENTRY" >> "$DAILY_LOG"
 
 rm -f "$REQUEST_FILE" "$PRIMARY_RESPONSE" "$HANDOFF_FILE" "$ESCALATION_RESPONSE"
 

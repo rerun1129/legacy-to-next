@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fms-java.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fms-java.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/legacy-to-next.iml" filepath="$PROJECT_DIR$/.idea/legacy-to-next.iml" />
     </modules>
   </component>
