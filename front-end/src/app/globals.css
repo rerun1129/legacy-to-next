@@ -621,7 +621,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-4); text-align: left; padding: 8px 10px;
   background: var(--surface-2);
   border: 1px solid var(--border); /* collapse: 셀 경계 공유 */
-  position: sticky; top: 0;
 }
 .grid thead th.is-required { color: var(--required); }
 .grid thead th.is-num { text-align: right; font-variant-numeric: tabular-nums; }
