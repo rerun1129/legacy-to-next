@@ -72,23 +72,12 @@ export function MainTabSea({ variant }: Props) {
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <table className="grid" style={{ tableLayout: 'fixed' }}>
-              <colgroup>
-                <col style={{ width: 36 }} />
-                <col style={{ width: 160 }} />
-                <col style={{ width: 70 }} />
-                <col style={{ width: 110 }} />
-                <col style={{ width: 70 }} />
-                <col style={{ width: 60 }} />
-                <col style={{ width: 90 }} />
-                <col style={{ width: 80 }} />
-                <col style={{ width: 90 }} />
-              </colgroup>
               <thead>
                 <tr>
-                  <th className="row-num">#</th>
-                  <th>Container No *</th><th>Type</th><th>Seal No</th>
-                  <th className="is-num">Pkg</th><th>Unit</th>
-                  <th className="is-num">G/W</th><th className="is-num">CBM</th><th className="is-num">VGM</th>
+                  <th className="row-num" style={{ width: 36 }}>#</th>
+                  <th style={{ width: 160 }}>Container No *</th><th style={{ width: 70 }}>Type</th><th style={{ width: 110 }}>Seal No</th>
+                  <th className="is-num" style={{ width: 70 }}>Pkg</th><th style={{ width: 60 }}>Unit</th>
+                  <th className="is-num" style={{ width: 90 }}>G/W</th><th className="is-num" style={{ width: 80 }}>CBM</th><th className="is-num" style={{ width: 90 }}>VGM</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,17 +145,8 @@ export function MainTabSea({ variant }: Props) {
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <table className="grid" style={{ tableLayout: 'fixed' }}>
-              <colgroup>
-                <col style={{ width: 36 }} />
-                <col style={{ width: 100 }} />
-                <col style={{ width: 200 }} />
-                <col style={{ width: 70 }} />
-                <col style={{ width: 60 }} />
-                <col style={{ width: 100 }} />
-                <col style={{ width: 80 }} />
-              </colgroup>
               <thead>
-                <tr><th className="row-num">#</th><th>HS Code</th><th>Description</th><th className="is-num">Qty</th><th>Unit</th><th className="is-num">Value</th><th>Currency</th></tr>
+                <tr><th className="row-num" style={{ width: 36 }}>#</th><th style={{ width: 100 }}>HS Code</th><th style={{ width: 200 }}>Description</th><th className="is-num" style={{ width: 70 }}>Qty</th><th style={{ width: 60 }}>Unit</th><th className="is-num" style={{ width: 100 }}>Value</th><th style={{ width: 80 }}>Currency</th></tr>
               </thead>
               <tbody>
                 <tr>
