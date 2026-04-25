@@ -1,5 +1,19 @@
+import { z } from 'zod';
 import type { MasterBlPort } from '@/application/master-bl/ports';
-import type { MasterBlRow, MasterBlFilter } from '@/domain/master-bl';
+import type { MasterBlFilter } from '@/domain/master-bl';
+import { ApiError, NotFoundError, ResponseParseError } from './errors';
+
+const MasterBlRowSchema = z.object({
+  id: z.string().optional(),
+  mblNo: z.string(),
+  bound: z.enum(['EXP', 'IMP']),
+  pol: z.string(),
+  pod: z.string(),
+  etd: z.string(),
+  eta: z.string(),
+  shipperCode: z.string(),
+  consigneeCode: z.string(),
+});
 
 function toSearchParams(filter: MasterBlFilter): URLSearchParams {
   return Object.entries(filter)
@@ -8,24 +22,26 @@ function toSearchParams(filter: MasterBlFilter): URLSearchParams {
 }
 
 export const apiMasterBlPort: MasterBlPort = {
-  async list(filter: MasterBlFilter): Promise<MasterBlRow[]> {
+  async list(filter: MasterBlFilter) {
     const res = await fetch(`/api/v1/master-bl?${toSearchParams(filter)}`);
-    if (!res.ok) throw new Error('Failed to fetch master B/L list');
+    if (!res.ok) throw new ApiError('Failed to fetch master B/L list', res.status);
     const json = await res.json();
-    if (!Array.isArray(json.data?.content)) {
-      throw new Error('Unexpected response: data.content is not an array');
-    }
-    return json.data.content as MasterBlRow[];
+    const parsed = z.array(MasterBlRowSchema).safeParse(json.data?.content);
+    if (!parsed.success) throw new ResponseParseError(`Invalid master B/L list response: ${parsed.error.message}`);
+    return parsed.data;
   },
-  async getById(id: string): Promise<MasterBlRow> {
+  async getById(id: string) {
     const res = await fetch(`/api/v1/master-bl/${id}`);
-    if (!res.ok) throw new Error(`Failed to fetch master B/L: ${id}`);
+    if (res.status === 404) throw new NotFoundError('MasterBl', id);
+    if (!res.ok) throw new ApiError(`Failed to fetch master B/L: ${id}`, res.status);
     const json = await res.json();
-    if (!json.data) throw new Error('Unexpected response: data is missing');
-    return json.data as MasterBlRow;
+    const parsed = MasterBlRowSchema.safeParse(json.data);
+    if (!parsed.success) throw new ResponseParseError(`Invalid master B/L response: ${parsed.error.message}`);
+    return parsed.data;
   },
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     const res = await fetch(`/api/v1/master-bl/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(`Failed to delete master B/L: ${id}`);
+    if (res.status === 404) throw new NotFoundError('MasterBl', id);
+    if (!res.ok) throw new ApiError(`Failed to delete master B/L: ${id}`, res.status);
   },
 };
