@@ -1,4 +1,4 @@
-import { noticeData } from "@/lib/mock-data";
+import { noticeData } from "@/adapter/out/mock/mock-data";
 
 const catClass: Record<string, string> = { urgent: "urgent", update: "update", event: "event" };
 

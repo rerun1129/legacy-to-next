@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FileText, Layers, Search, Printer, Receipt, FolderOpen } from "lucide-react";
-import { shortcutData } from "@/lib/mock-data";
+import { shortcutData } from "@/adapter/out/mock/mock-data";
 
 const icons = [FileText, Layers, Search, Printer, Receipt, FolderOpen];
 
