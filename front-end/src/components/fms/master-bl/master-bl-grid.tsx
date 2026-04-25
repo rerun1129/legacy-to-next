@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { GridList, GridColumn } from "@/components/shared/grid-list";
 
 const ROWS = [
   { mbl: "COSCO2404195",  isSea: true,  ref: "MR-2026-04195", bkg: "BKG-COSCO-0412", vessel: "COSCO EXCELLENCE", etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", houses: 2 },
@@ -10,6 +11,8 @@ const ROWS = [
   { mbl: "176-87654321",  isSea: false, ref: "MR-2026-04180", bkg: "",                vessel: "OZ741",            etd: "04/23", eta: "04/23", pol: "GMP",    pod: "NRT",    houses: 1 },
 ];
 
+type MblRow = typeof ROWS[number];
+
 interface Props { variantKey: string; isSea: boolean }
 
 export function MasterBlGrid({ variantKey, isSea }: Props) {
@@ -17,9 +20,36 @@ export function MasterBlGrid({ variantKey, isSea }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const rows = ROWS.filter((r) => r.isSea === isSea);
 
-  function handleMblDoubleClick() {
-    router.push(`/fms/master-bl/${variantKey}/new`);
-  }
+  const seaColumns: GridColumn<MblRow>[] = [
+    {
+      key: "mbl",
+      label: isSea ? "MBL No" : "MAWB No",
+      minWidth: 140,
+      render: (value) => (
+        <span
+          className="cell-hbl"
+          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/new`)}
+          style={{ cursor: "pointer" }}
+          title="더블클릭하여 Entry 열기"
+        >
+          {String(value ?? "")}
+        </span>
+      ),
+    },
+    { key: "ref",    label: "Master Ref",   minWidth: 130, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "bkg",    label: "Line Bkg. No", minWidth: 130, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "vessel", label: "Vessel / Flight", minWidth: 160 },
+    { key: "etd",    label: "ETD", minWidth: 60, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "eta",    label: "ETA", minWidth: 60, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "pol",    label: "POL", minWidth: 70, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "pod",    label: "POD", minWidth: 70, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "houses", label: "Houses", minWidth: 70, align: "right", render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
+    { key: "status", label: "Status", minWidth: 90, render: () => <span className="pill pill--ok">Confirmed</span> },
+  ];
+
+  const airColumns: GridColumn<MblRow>[] = seaColumns.filter((c) => c.key !== "bkg");
+
+  const columns = isSea ? seaColumns : airColumns;
 
   return (
     <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -29,49 +59,13 @@ export function MasterBlGrid({ variantKey, isSea }: Props) {
         <span className="panel__rowcount">{rows.length}</span>
       </div>
       <div className="list-wrap">
-        <table className="grid--list">
-          <thead>
-            <tr>
-              <th className="row-num">#</th>
-              <th title="더블클릭 → Entry 이동">{isSea ? "MBL No" : "MAWB No"}</th>
-              <th>Master Ref</th>
-              {isSea && <th>Line Bkg. No</th>}
-              <th>Vessel / Flight</th>
-              <th>ETD</th><th>ETA</th>
-              <th>POL</th><th>POD</th>
-              <th className="is-num">Houses</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr
-                key={i}
-                className={selected === i ? "is-selected" : ""}
-                onClick={() => setSelected(i)}
-              >
-                <td className="row-num">{i + 1}</td>
-                <td
-                  className="cell-hbl"
-                  onDoubleClick={handleMblDoubleClick}
-                  style={{ cursor: "pointer" }}
-                  title="더블클릭하여 Entry 열기"
-                >
-                  {r.mbl}
-                </td>
-                <td className="cell-mono">{r.ref}</td>
-                {isSea && <td className="cell-mono">{r.bkg}</td>}
-                <td>{r.vessel}</td>
-                <td className="cell-mono">{r.etd}</td>
-                <td className="cell-mono">{r.eta}</td>
-                <td className="cell-mono">{r.pol}</td>
-                <td className="cell-mono">{r.pod}</td>
-                <td className="is-num cell-mono">{r.houses}</td>
-                <td><span className="pill pill--ok">Confirmed</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <GridList<MblRow>
+          columns={columns}
+          data={rows}
+          onRowClick={(_, i) => setSelected(i)}
+          rowKey={(_, i) => i}
+          rowClassName={(_, i) => (selected === i ? "is-selected" : undefined)}
+        />
       </div>
     </div>
   );
