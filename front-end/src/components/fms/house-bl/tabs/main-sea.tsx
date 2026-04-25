@@ -72,6 +72,17 @@ export function MainTabSea({ variant }: Props) {
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <table className="grid">
+              <colgroup>
+                <col style={{ width: 36 }} />
+                <col style={{ width: 160 }} />
+                <col style={{ width: 70 }} />
+                <col style={{ width: 110 }} />
+                <col style={{ width: 70 }} />
+                <col style={{ width: 60 }} />
+                <col style={{ width: 90 }} />
+                <col style={{ width: 80 }} />
+                <col style={{ width: 90 }} />
+              </colgroup>
               <thead>
                 <tr>
                   <th className="row-num">#</th>
@@ -145,6 +156,15 @@ export function MainTabSea({ variant }: Props) {
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <table className="grid">
+              <colgroup>
+                <col style={{ width: 36 }} />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 200 }} />
+                <col style={{ width: 70 }} />
+                <col style={{ width: 60 }} />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 80 }} />
+              </colgroup>
               <thead>
                 <tr><th className="row-num">#</th><th>HS Code</th><th>Description</th><th className="is-num">Qty</th><th>Unit</th><th className="is-num">Value</th><th>Currency</th></tr>
               </thead>
