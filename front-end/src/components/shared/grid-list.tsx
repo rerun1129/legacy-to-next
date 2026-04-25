@@ -70,7 +70,7 @@ export function GridList<T>({
                   return (
                     <td
                       key={String(col.key)}
-                      style={{ textAlign: col.align }}
+                      style={{ width: col.width ?? col.minWidth, textAlign: col.align }}
                     >
                       {col.render
                         ? col.render(rawValue, row, rowIndex)
