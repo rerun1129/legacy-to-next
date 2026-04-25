@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { MasterBlPort } from '@/application/master-bl/ports';
 import type { MasterBlFilter } from '@/domain/master-bl';
 import { ApiError, NotFoundError, ResponseParseError } from './errors';
+import { toSearchParams } from './utils';
 
 const MasterBlRowSchema = z.object({
   id: z.string().optional(),
@@ -15,33 +16,39 @@ const MasterBlRowSchema = z.object({
   consigneeCode: z.string(),
 });
 
-function toSearchParams(filter: MasterBlFilter): URLSearchParams {
-  return Object.entries(filter)
-    .filter(([, v]) => v != null)
-    .reduce((p, [k, v]) => { p.set(k, String(v)); return p; }, new URLSearchParams());
+async function fetchJson(input: RequestInfo, init?: RequestInit): Promise<unknown> {
+  let res: Response;
+  try {
+    res = await fetch(input, init);
+  } catch (e) {
+    throw new ApiError('Network error', undefined, e);
+  }
+  if (res.status === 404) return null;
+  if (!res.ok) throw new ApiError(`HTTP ${res.status}`, res.status);
+  try {
+    return await res.json();
+  } catch (e) {
+    throw new ResponseParseError('Failed to parse response JSON', e);
+  }
 }
 
-export const apiMasterBlPort: MasterBlPort = {
+export const API_MASTER_BL_PORT: MasterBlPort = {
   async list(filter: MasterBlFilter) {
-    const res = await fetch(`/api/v1/master-bl?${toSearchParams(filter)}`);
-    if (!res.ok) throw new ApiError('Failed to fetch master B/L list', res.status);
-    const json = await res.json();
-    const parsed = z.array(MasterBlRowSchema).safeParse(json.data?.content);
+    const json = await fetchJson(`/api/v1/master-bl?${toSearchParams(filter as Record<string, unknown>)}`);
+    const content = (json as { data?: { content?: unknown } })?.data?.content;
+    const parsed = z.array(MasterBlRowSchema).safeParse(content);
     if (!parsed.success) throw new ResponseParseError(`Invalid master B/L list response: ${parsed.error.message}`);
     return parsed.data;
   },
   async getById(id: string) {
-    const res = await fetch(`/api/v1/master-bl/${id}`);
-    if (res.status === 404) throw new NotFoundError('MasterBl', id);
-    if (!res.ok) throw new ApiError(`Failed to fetch master B/L: ${id}`, res.status);
-    const json = await res.json();
-    const parsed = MasterBlRowSchema.safeParse(json.data);
+    const json = await fetchJson(`/api/v1/master-bl/${id}`);
+    if (json === null) throw new NotFoundError('MasterBl', id);
+    const parsed = MasterBlRowSchema.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid master B/L response: ${parsed.error.message}`);
     return parsed.data;
   },
   async delete(id: string) {
-    const res = await fetch(`/api/v1/master-bl/${id}`, { method: 'DELETE' });
-    if (res.status === 404) throw new NotFoundError('MasterBl', id);
-    if (!res.ok) throw new ApiError(`Failed to delete master B/L: ${id}`, res.status);
+    const json = await fetchJson(`/api/v1/master-bl/${id}`, { method: 'DELETE' });
+    if (json === null) throw new NotFoundError('MasterBl', id);
   },
 };

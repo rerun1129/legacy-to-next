@@ -1,6 +1,6 @@
 export class ApiError extends Error {
-  constructor(message: string, public readonly statusCode?: number) {
-    super(message);
+  constructor(message: string, public readonly statusCode?: number, cause?: unknown) {
+    super(message, { cause });
     this.name = 'ApiError';
   }
 }
@@ -13,8 +13,8 @@ export class NotFoundError extends ApiError {
 }
 
 export class ResponseParseError extends ApiError {
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, cause?: unknown) {
+    super(message, undefined, cause);
     this.name = 'ResponseParseError';
   }
 }
