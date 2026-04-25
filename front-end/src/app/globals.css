@@ -784,7 +784,8 @@ td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); 
   outline: none;
 }
 .li__input > input, .li__input > select { width: 100%; height: 22px; padding: 0 26px 0 8px; font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); }
-.li__input > input:focus, .li__input > select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.li:not(:has(.li__label.is-required)) .li__input > input:focus,
+.li:not(:has(.li__label.is-required)) .li__input > select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 
 .sched-list { display: flex; flex-direction: column; gap: 3px; }
 .sched-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
