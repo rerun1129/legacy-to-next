@@ -1,6 +1,6 @@
 import {FileText, RotateCcw, Search} from "lucide-react";
 import { ListFilter } from "@/components/fms/house-bl/list-filter";
-import { ListGrid }   from "@/components/fms/house-bl/list-grid";
+import { HouseBLListGrid } from "@/components/fms/house-bl/house-bl-list-grid";
 import { getBLVariant, getPageTitle, BL_VARIANT_KEYS } from "@/lib/bl-variants";
 
 export function generateStaticParams() {
@@ -34,7 +34,7 @@ export default async function HouseBLListPage({ params }: Props) {
         </div>
       </div>
       <ListFilter />
-      <ListGrid variantKey={variantKey} />
+      <HouseBLListGrid variantKey={variantKey} />
     </div>
   );
 }

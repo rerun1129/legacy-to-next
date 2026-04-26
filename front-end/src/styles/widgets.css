@@ -1,0 +1,201 @@
+/* ── Widget Grid Root ── */
+.widget-grid-root {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+}
+
+/* ── 편집 모드 격자 오버레이 ── */
+.widget-grid-overlay { pointer-events: none; }
+
+.widget-grid-cell-bg {
+  border-radius: 5px;
+  border: 1px dashed color-mix(in srgb, var(--tab-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--tab-accent) 4%, transparent);
+}
+
+/* ── Widget Container ── */
+.widget-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.widget-container.is-edit {
+  outline: 2px dashed var(--border-strong);
+  outline-offset: -1px;
+}
+
+.widget-container__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  height: 24px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+}
+.widget-container__bar:active { cursor: grabbing; }
+
+.widget-container__handle {
+  color: var(--ink-4);
+  display: flex;
+  align-items: center;
+  pointer-events: none; /* 바 전체가 핸들이므로 아이콘은 이벤트 통과 */
+}
+
+.widget-container__label {
+  flex: 1;
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-container__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  color: var(--ink-3);
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.widget-container__close:hover {
+  background: var(--error-soft, #fee2e2);
+  color: var(--error, #dc2626);
+}
+
+.widget-container__body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Widget Palette ── */
+.widget-palette {
+  position: fixed;
+  width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  max-height: 480px;
+}
+
+.widget-palette__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.widget-palette__title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.widget-palette__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  color: var(--ink-3);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.widget-palette__icon-btn:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
+.widget-palette__body {
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.widget-palette__card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: background 80ms;
+}
+.widget-palette__card:hover:not(.is-visible) {
+  background: var(--surface);
+  border-color: var(--tab-accent);
+  color: var(--tab-accent);
+}
+.widget-palette__card.is-visible {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.widget-palette__badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: var(--border);
+  color: var(--ink-3);
+}
+.widget-palette__badge--on {
+  background: var(--tab-accent-soft);
+  color: var(--tab-accent);
+}
+
+/* ── Sidebar widget edit button ── */
+.side-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 80ms, color 80ms;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.side-edit-btn:hover { background: var(--surface-2); color: var(--ink-1); }
+.side-edit-btn.is-active {
+  background: var(--tab-accent-soft);
+  color: var(--tab-accent);
+}

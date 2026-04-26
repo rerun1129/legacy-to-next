@@ -111,6 +111,76 @@
 .app__tab-close:hover { opacity: 1; background: color-mix(in srgb, var(--tab-accent) 12%, transparent); }
 .app__tab.is-active .app__tab-close:hover { background: var(--tab-accent-mid); }
 
+/* ── 드래그 중 탭 ── */
+.app__tabs.is-dragging-tabs { user-select: none; cursor: grabbing; }
+.app__tabs.is-dragging-tabs .app__tab { cursor: grabbing; }
+.app__tab.is-dragging {
+  opacity: 0.85;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  cursor: grabbing;
+}
+
+/* ── 유저 전환 메뉴 ── */
+.user-switch-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  min-width: 148px;
+}
+.user-switch-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  text-align: left;
+}
+.user-switch-menu__item:hover { background: var(--surface-2); color: var(--ink-1); }
+.user-switch-menu__item.is-active {
+  background: var(--tab-accent-soft);
+  color: var(--tab-accent);
+  font-weight: 600;
+}
+
+/* ── 탭 컨텍스트 메뉴 ── */
+.tab-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  min-width: 148px;
+}
+.tab-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 5px 10px;
+  text-align: left;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  border-radius: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab-context-menu button:hover {
+  background: var(--surface-2);
+  color: var(--ink-1);
+}
+
 /* ── 버튼 추가 색상 변형 ── */
 .btn--success {
   color: var(--success);

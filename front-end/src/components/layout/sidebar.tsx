@@ -1,12 +1,13 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
-  ChevronRight, List, FilePlus,
+  ChevronRight, List, FilePlus, LayoutGrid,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
+import { useWidgetLayout } from "@/lib/use-widget-layout";
 
 // ─── Types ──────────────────────────────────────────────────
 interface NavLeaf {
@@ -124,8 +125,12 @@ export function Sidebar() {
     router.push(href);
   }
 
+  const { editMode, setEditMode } = useWidgetLayout();
+
+  useEffect(() => { setEditMode(false); }, [pathname, setEditMode]);
+
   return (
-    <nav className="app__side">
+    <nav className="app__side" style={{ display: "flex", flexDirection: "column" }}>
       {/* Dashboard — 최상단 */}
       <button
         className={`side-item${pathname === DASHBOARD_HREF ? " is-active" : ""}`}
@@ -203,6 +208,19 @@ export function Sidebar() {
           </div>
         );
       })}
+
+      {/* ── 하단: 위젯 편집 토글 ── */}
+      <div style={{ flex: 1 }} />
+      <div style={{ padding: "8px 4px", borderTop: "1px solid var(--border)" }}>
+        <button
+          className={`side-edit-btn${editMode ? " is-active" : ""}`}
+          onClick={() => setEditMode(!editMode)}
+          title="위젯 편집 모드 on/off"
+        >
+          <LayoutGrid size={14} style={{ flexShrink: 0 }} />
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>Entry 위젯 편집</span>
+        </button>
+      </div>
     </nav>
   );
 }

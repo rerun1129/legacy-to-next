@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, HelpCircle, Search, ChevronLeft, LogOut } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
+import { useCurrentUser, USERS } from "@/lib/use-current-user";
 
 const SIDEBAR_W = 220;
 
@@ -12,18 +14,33 @@ interface Props {
   sidebarCollapsed: boolean;
 }
 
+interface DragState {
+  tabId: string;
+  origIndex: number;
+  deltaX: number;
+  insertIndex: number;
+  tabWidth: number;
+}
+
 export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
-  const pathname   = usePathname();
-  const router     = useRouter();
-  const { tabs, removeTab, initFromPath } = useTabs();
-  const tabsRef    = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router   = useRouter();
+  const { tabs, removeTab, initFromPath, reorderTabs, closeOtherTabs, closeTabsToRight, closeTabsToLeft } = useTabs();
+  const tabsRef  = useRef<HTMLDivElement>(null);
 
-  // CSR 마운트 시 현재 경로로 탭 초기화 (Hydration mismatch 방지)
-  useEffect(() => {
-    initFromPath(pathname);
-  }, [pathname, initFromPath]);
+  const [ctxMenu, setCtxMenu]     = useState<{ x: number; y: number; tabId: string } | null>(null);
+  const [dragState, setDragState] = useState<DragState | null>(null);
+  const didDragRef = useRef(false);
 
-  // 활성 탭을 탭 스트립 내에서 보이도록 스크롤
+  const { currentUserId, setCurrentUser } = useCurrentUser();
+  const currentUser = USERS.find(u => u.id === currentUserId) ?? USERS[0];
+  const [userMenuPos, setUserMenuPos] = useState<{ x: number; y: number } | null>(null);
+  const userRef = useRef<HTMLDivElement>(null);
+
+  const displayTabs = tabs.filter(t => t.href !== "/dashboard");
+
+  useEffect(() => { initFromPath(pathname); }, [pathname, initFromPath]);
+
   useEffect(() => {
     const container = tabsRef.current;
     if (!container) return;
@@ -31,25 +48,33 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
     activeTab?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
   }, [pathname, tabs]);
 
-  // 마우스 휠 → 가로 스크롤 변환
   useEffect(() => {
     const el = tabsRef.current;
     if (!el) return;
-
     function onWheel(e: WheelEvent) {
-      // 이미 가로 스크롤이 가능한 상태일 때만 처리
-      const canScroll = el!.scrollWidth > el!.clientWidth;
-      if (!canScroll) return;
+      if (el!.scrollWidth <= el!.clientWidth) return;
       e.preventDefault();
-      // deltaY(세로 휠)를 그대로 scrollLeft에 더함
-      // deltaX가 있으면(트랙패드 가로 스와이프) 우선 적용
       el!.scrollLeft += e.deltaX !== 0 ? e.deltaX : e.deltaY;
     }
-
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
+  useEffect(() => {
+    if (!ctxMenu) return;
+    function onMouseDown() { setCtxMenu(null); }
+    window.addEventListener("mousedown", onMouseDown);
+    return () => window.removeEventListener("mousedown", onMouseDown);
+  }, [ctxMenu]);
+
+  useEffect(() => {
+    if (!userMenuPos) return;
+    function onMouseDown() { setUserMenuPos(null); }
+    window.addEventListener("mousedown", onMouseDown);
+    return () => window.removeEventListener("mousedown", onMouseDown);
+  }, [userMenuPos]);
+
+  // ── Tab close ────────────────────────────────────────────
   function handleClose(e: React.MouseEvent, id: string) {
     e.stopPropagation();
     const isActive = id === pathname;
@@ -57,93 +82,217 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
     if (isActive) router.push(target);
   }
 
-  return (
-    <header className="app__topbar" style={{ overflow: "hidden" }}>
+  // ── Context menu ─────────────────────────────────────────
+  function handleContextMenu(e: React.MouseEvent, tabId: string) {
+    e.preventDefault();
+    setCtxMenu({ x: e.clientX, y: e.clientY, tabId });
+  }
 
-      {/* ── Brand + Toggle ────────────────────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          flexShrink: 0,
-          overflow: "hidden",
-          borderRight: "1px solid var(--border)",
-          padding: "0 4px",
-          width: sidebarCollapsed ? 68 : SIDEBAR_W,
-          minWidth: sidebarCollapsed ? 68 : SIDEBAR_W,
-          transition: "width 180ms ease, min-width 180ms ease",
-        }}
-      >
+  function handleCloseOthers(tabId: string) {
+    if (pathname !== tabId) router.push(tabId);
+    closeOtherTabs(tabId);
+    setCtxMenu(null);
+  }
+
+  function handleCloseRight(tabId: string) {
+    const tabIdx  = tabs.findIndex(t => t.id === tabId);
+    const currIdx = tabs.findIndex(t => t.id === pathname);
+    if (currIdx > tabIdx) router.push(tabId);
+    closeTabsToRight(tabId);
+    setCtxMenu(null);
+  }
+
+  function handleCloseLeft(tabId: string) {
+    const tabIdx  = tabs.findIndex(t => t.id === tabId);
+    const currIdx = tabs.findIndex(t => t.id === pathname);
+    if (currIdx < tabIdx) router.push(tabId);
+    closeTabsToLeft(tabId);
+    setCtxMenu(null);
+  }
+
+  // ── Drag animation ───────────────────────────────────────
+  //
+  // Algorithm: keep tabs in their original flex positions, apply translateX.
+  // For tab at original index `i`, remaining index ri = i < origIndex ? i : i-1
+  //   - i < origIndex AND ri >= insertIndex  →  shift right by tabWidth  (make room)
+  //   - i > origIndex AND ri < insertIndex   →  shift left by tabWidth   (fill gap)
+  //   - i === origIndex                      →  follow cursor (deltaX)
+  function getTabStyle(index: number): React.CSSProperties {
+    if (!dragState || Math.abs(dragState.deltaX) <= 4) return {};
+    const { origIndex, deltaX, insertIndex, tabWidth } = dragState;
+
+    if (index === origIndex) {
+      return { transform: `translateX(${deltaX}px)`, transition: "none", position: "relative", zIndex: 10 };
+    }
+
+    const ri = index < origIndex ? index : index - 1;
+    let shift = 0;
+    if (index < origIndex && ri >= insertIndex)  shift = tabWidth;
+    else if (index > origIndex && ri < insertIndex) shift = -tabWidth;
+
+    return { transform: `translateX(${shift}px)`, transition: "transform 150ms ease" };
+  }
+
+  function handleTabMouseDown(e: React.MouseEvent, tabId: string) {
+    if (e.button !== 0) return;
+
+    const container  = tabsRef.current!;
+    const origIndex  = displayTabs.findIndex(t => t.id === tabId);
+    const containerLeft = container.getBoundingClientRect().left;
+    const allEls     = Array.from(container.querySelectorAll<HTMLElement>(".app__tab"));
+    const centers    = allEls.map(el => {
+      const r = el.getBoundingClientRect();
+      return r.left + r.width / 2 - containerLeft;
+    });
+    const tabWidth   = allEls[origIndex]?.getBoundingClientRect().width ?? 100;
+    const startX     = e.clientX;
+
+    // 클로저 내 가변 변수로 최신값 추적 — setState 콜백 안에서 다른 setState 호출 방지
+    let latestDeltaX    = 0;
+    let latestInsertIdx = origIndex;
+
+    const handleMove = (ev: MouseEvent) => {
+      const deltaX = ev.clientX - startX;
+      latestDeltaX = deltaX;
+      if (Math.abs(deltaX) > 4) didDragRef.current = true;
+
+      const dragCenter = centers[origIndex] + deltaX;
+      const rest = centers.filter((_, i) => i !== origIndex);
+      let insertIdx = 0;
+      for (let i = 0; i < rest.length; i++) {
+        if (dragCenter > rest[i]) insertIdx = i + 1;
+      }
+      latestInsertIdx = insertIdx;
+      setDragState({ tabId, origIndex, deltaX, insertIndex: insertIdx, tabWidth });
+    };
+
+    const handleUp = () => {
+      if (latestInsertIdx !== origIndex && Math.abs(latestDeltaX) > 4) {
+        reorderTabs(tabId, latestInsertIdx);
+      }
+      setDragState(null);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+  }
+
+  function handleTabClick(e: React.MouseEvent, href: string) {
+    if (didDragRef.current) { didDragRef.current = false; return; }
+    router.push(href);
+  }
+
+  const isDragging = dragState !== null && Math.abs(dragState.deltaX) > 4;
+
+  return (
+    <>
+      <header className="app__topbar" style={{ overflow: "hidden" }}>
+
+        {/* ── Brand + Toggle ─────────────────────────────────── */}
         <div
-          className="app__brand"
-          style={{ flex: 1, overflow: "hidden", cursor: "pointer" }}
-          onClick={() => router.push("/dashboard")}
+          style={{
+            display: "flex", alignItems: "center", flexShrink: 0, overflow: "hidden",
+            borderRight: "1px solid var(--border)", padding: "0 4px",
+            width: sidebarCollapsed ? 68 : SIDEBAR_W, minWidth: sidebarCollapsed ? 68 : SIDEBAR_W,
+            transition: "width 180ms ease, min-width 180ms ease",
+          }}
         >
-          <div className="app__brand-mark">FMS</div>
-          <span
-            style={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              opacity: sidebarCollapsed ? 0 : 1,
-              transition: "opacity 160ms ease",
+          <div className="app__brand" style={{ flex: 1, overflow: "hidden", cursor: "pointer" }} onClick={() => router.push("/dashboard")}>
+            <div className="app__brand-mark">FMS</div>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", opacity: sidebarCollapsed ? 0 : 1, transition: "opacity 160ms ease" }}>
+              FreightOS
+            </span>
+          </div>
+          <button className="topbar-icon" onClick={onToggleSidebar} title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"} style={{ flexShrink: 0 }}>
+            <ChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : undefined, transition: "transform 180ms ease" }} />
+          </button>
+        </div>
+
+        {/* ── Tab strip ──────────────────────────────────────── */}
+        <div ref={tabsRef} className={`app__tabs${isDragging ? " is-dragging-tabs" : ""}`}>
+          {displayTabs.map((tab, index) => {
+            const active    = pathname === tab.href;
+            const dragged   = isDragging && dragState?.tabId === tab.id;
+            return (
+              <button
+                key={tab.id}
+                className={`app__tab${active ? " is-active" : ""}${dragged ? " is-dragging" : ""}`}
+                style={getTabStyle(index)}
+                title={tab.label}
+                onMouseDown={(e) => handleTabMouseDown(e, tab.id)}
+                onClick={(e) => handleTabClick(e, tab.href)}
+                onContextMenu={(e) => handleContextMenu(e, tab.id)}
+              >
+                <span style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {tab.label}
+                </span>
+                <span className="app__tab-close" onClick={(e) => handleClose(e, tab.id)}>×</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Right icons ────────────────────────────────────── */}
+        <div className="app__topbar-right" style={{ flexShrink: 0 }}>
+          <div className="topbar-icons">
+            <button className="topbar-icon" title="Search (⌘K)"><Search /></button>
+            <button className="topbar-icon" title="Notifications"><Bell /><span className="topbar-icon__dot" /></button>
+            <button className="topbar-icon" title="Help"><HelpCircle /></button>
+          </div>
+          <div
+            ref={userRef}
+            className="app__user"
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              const rect = userRef.current?.getBoundingClientRect();
+              if (rect) setUserMenuPos({ x: rect.left, y: rect.bottom + 4 });
             }}
           >
-            FreightOS
-          </span>
+            <div className="app__user-avatar">{currentUser.initials}</div>
+            <span>{currentUser.name}</span>
+          </div>
+          <button className="topbar-icon" title="Logout" style={{ margin: 4 }}><LogOut /></button>
         </div>
-        <button
-          className="topbar-icon"
-          onClick={onToggleSidebar}
-          title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-          style={{ flexShrink: 0 }}
-        >
-          <ChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : undefined, transition: "transform 180ms ease" }} />
-        </button>
-      </div>
+      </header>
 
-      {/* ── Tab strip ─────────────────────────────────────────── */}
-      <div ref={tabsRef} className="app__tabs">
-        {tabs.filter((tab) => tab.href !== "/dashboard").map((tab) => {
-          const active = pathname === tab.href;
-          return (
+      {/* ── Tab context menu ───────────────────────────────────── */}
+      {ctxMenu && createPortal(
+        <div
+          className="tab-context-menu"
+          style={{ left: ctxMenu.x, top: ctxMenu.y }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button onClick={() => handleCloseOthers(ctxMenu.tabId)}>다른 탭 닫기</button>
+          <button onClick={() => handleCloseRight(ctxMenu.tabId)}>우측 탭 닫기</button>
+          <button onClick={() => handleCloseLeft(ctxMenu.tabId)}>좌측 탭 닫기</button>
+        </div>,
+        document.body
+      )}
+
+      {/* ── User switcher menu ─────────────────────────────────── */}
+      {userMenuPos && createPortal(
+        <div
+          className="user-switch-menu"
+          style={{ left: userMenuPos.x, top: userMenuPos.y }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {USERS.map(u => (
             <button
-              key={tab.id}
-              className={`app__tab${active ? " is-active" : ""}`}
-              onClick={() => router.push(tab.href)}
-              title={tab.label}
+              key={u.id}
+              className={`user-switch-menu__item${u.id === currentUserId ? " is-active" : ""}`}
+              onClick={() => { setCurrentUser(u.id); setUserMenuPos(null); }}
             >
-              <span style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {tab.label}
-              </span>
-              <span className="app__tab-close" onClick={(e) => handleClose(e, tab.id)}>×</span>
+              <div className="app__user-avatar" style={{ width: 22, height: 22, fontSize: 9, flexShrink: 0 }}>
+                {u.initials}
+              </div>
+              <span>{u.name}</span>
             </button>
-          );
-        })}
-      </div>
-
-      {/* ── Right icons ───────────────────────────────────────── */}
-      <div className="app__topbar-right" style={{ flexShrink: 0 }}>
-        <div className="topbar-icons">
-          <button className="topbar-icon" title="Search (⌘K)"><Search /></button>
-          <button className="topbar-icon" title="Notifications">
-            <Bell />
-            <span className="topbar-icon__dot" />
-          </button>
-          <button className="topbar-icon" title="Help"><HelpCircle /></button>
-        </div>
-        <div className="app__user">
-          <div className="app__user-avatar">KY</div>
-          <span>김영선</span>
-        </div>
-        <button
-          className="topbar-icon"
-          title="Logout"
-          style={{ margin: 4 }}
-        >
-          <LogOut />
-        </button>
-      </div>
-    </header>
+          ))}
+        </div>,
+        document.body
+      )}
+    </>
   );
 }

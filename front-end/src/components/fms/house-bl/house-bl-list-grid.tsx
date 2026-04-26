@@ -20,7 +20,7 @@ const statusLabel: Record<string, string> = {
 
 interface Props { variantKey: string }
 
-export function ListGrid({ variantKey }: Props) {
+export function HouseBLListGrid({ variantKey }: Props) {
   const router   = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
 

@@ -5,6 +5,7 @@ interface Props { variant: MasterVariantConfig }
 
 export function MasterEdiTab({ variant }: Props) {
   const modeLabels = getModeLabels(variant.mode);
+  const isSea = variant.mode === "SEA";
   return (
     <div className="page-body" style={{ overflow: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
       <div className="panel">

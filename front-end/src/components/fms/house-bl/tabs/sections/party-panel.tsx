@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 
 interface Props { isExp: boolean }
 
@@ -46,8 +47,7 @@ export function PartyPanel({ isExp }: Props) {
                   <button className="party-block__head-btn">Clear</button>
                 </div>
               </div>
-              <textarea
-                className="textarea textarea--party"
+              <LineNumberTextarea
                 placeholder="Address (free text)"
                 defaultValue={
                   p.filled && p.role === "SHIPPER"
@@ -56,6 +56,7 @@ export function PartyPanel({ isExp }: Props) {
                     ? "1200 LUJIAZUI RING ROAD\nPUDONG NEW DISTRICT\nSHANGHAI 200120, CHINA"
                     : ""
                 }
+                style={{ height: 100 }}
               />
             </div>
           ))}

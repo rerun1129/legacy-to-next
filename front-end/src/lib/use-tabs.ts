@@ -14,6 +14,10 @@ interface TabStore {
   removeTab: (id: string) => string; // returns href to navigate to after close
   activateTab: (id: string) => void;
   initFromPath: (pathname: string) => void;
+  reorderTabs: (fromId: string, toInsertIndex: number) => void;
+  closeOtherTabs: (id: string) => void;
+  closeTabsToRight: (id: string) => void;
+  closeTabsToLeft: (id: string) => void;
 }
 
 // ─── Nav label mapping (mirrors sidebar.tsx NAV data) ───────
@@ -72,6 +76,38 @@ export const useTabs = create<TabStore>((set, get) => ({
 
   activateTab(_id) {
     // no-op — active tab is derived from current pathname
+  },
+
+  reorderTabs(fromId, toInsertIndex) {
+    const { tabs } = get();
+    const fromIdx = tabs.findIndex(t => t.id === fromId);
+    if (fromIdx === -1) return;
+    const next = [...tabs];
+    const [moved] = next.splice(fromIdx, 1);
+    const idx = Math.max(0, Math.min(toInsertIndex, next.length));
+    next.splice(idx, 0, moved);
+    set({ tabs: next });
+  },
+
+  closeOtherTabs(id) {
+    const { tabs } = get();
+    const target = tabs.find(t => t.id === id);
+    if (!target) return;
+    set({ tabs: [target] });
+  },
+
+  closeTabsToRight(id) {
+    const { tabs } = get();
+    const idx = tabs.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    set({ tabs: tabs.slice(0, idx + 1) });
+  },
+
+  closeTabsToLeft(id) {
+    const { tabs } = get();
+    const idx = tabs.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    set({ tabs: tabs.slice(idx) });
   },
 
   initFromPath(pathname) {
