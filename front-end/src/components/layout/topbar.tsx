@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, HelpCircle, Search, ChevronLeft } from "lucide-react";
+import { Bell, HelpCircle, Search, ChevronLeft, LogOut } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 
 const SIDEBAR_W = 220;
@@ -22,6 +22,14 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   useEffect(() => {
     initFromPath(pathname);
   }, [pathname, initFromPath]);
+
+  // 활성 탭을 탭 스트립 내에서 보이도록 스크롤
+  useEffect(() => {
+    const container = tabsRef.current;
+    if (!container) return;
+    const activeTab = container.querySelector<HTMLElement>(".app__tab.is-active");
+    activeTab?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+  }, [pathname, tabs]);
 
   // 마우스 휠 → 가로 스크롤 변환
   useEffect(() => {
@@ -52,33 +60,46 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   return (
     <header className="app__topbar" style={{ overflow: "hidden" }}>
 
-      {/* ── Brand ─────────────────────────────────────────────── */}
+      {/* ── Brand + Toggle ────────────────────────────────────── */}
       <div
-        className="app__brand"
         style={{
-          width: sidebarCollapsed ? 100 : SIDEBAR_W,
-          minWidth: sidebarCollapsed ? 100 : SIDEBAR_W,
+          display: "flex",
+          alignItems: "center",
           flexShrink: 0,
-          transition: "width 180ms ease, min-width 180ms ease",
-          borderRight: "1px solid var(--border)",
-          paddingRight: 12,
           overflow: "hidden",
-          cursor: "pointer",
+          borderRight: "1px solid var(--border)",
+          padding: "0 4px",
+          width: sidebarCollapsed ? 68 : SIDEBAR_W,
+          minWidth: sidebarCollapsed ? 68 : SIDEBAR_W,
+          transition: "width 180ms ease, min-width 180ms ease",
         }}
-        onClick={() => router.push("/dashboard")}
       >
-        <div className="app__brand-mark">FMS</div>
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            opacity: sidebarCollapsed ? 0 : 1,
-            transition: "opacity 160ms ease",
-          }}
+        <div
+          className="app__brand"
+          style={{ flex: 1, overflow: "hidden", cursor: "pointer" }}
+          onClick={() => router.push("/dashboard")}
         >
-          FreightOS
-        </span>
+          <div className="app__brand-mark">FMS</div>
+          <span
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              opacity: sidebarCollapsed ? 0 : 1,
+              transition: "opacity 160ms ease",
+            }}
+          >
+            FreightOS
+          </span>
+        </div>
+        <button
+          className="topbar-icon"
+          onClick={onToggleSidebar}
+          title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+          style={{ flexShrink: 0 }}
+        >
+          <ChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : undefined, transition: "transform 180ms ease" }} />
+        </button>
       </div>
 
       {/* ── Tab strip ─────────────────────────────────────────── */}
@@ -92,7 +113,7 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
               onClick={() => router.push(tab.href)}
               title={tab.label}
             >
-              <span style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {tab.label}
               </span>
               <span className="app__tab-close" onClick={(e) => handleClose(e, tab.id)}>×</span>
@@ -117,11 +138,10 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
         </div>
         <button
           className="topbar-icon"
-          onClick={onToggleSidebar}
-          title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-          style={{ marginLeft: 4 }}
+          title="Logout"
+          style={{ margin: 4 }}
         >
-          <ChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : undefined, transition: "transform 180ms ease" }} />
+          <LogOut />
         </button>
       </div>
     </header>

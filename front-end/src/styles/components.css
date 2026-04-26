@@ -16,7 +16,7 @@
 /* =========================================================
    Party block
    ========================================================= */
-.party-block { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--divider); padding-top: 10px; }
+.party-block { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--divider); padding-top: 10px; }
 .party-block:first-child { border-top: none; padding-top: 0; }
 .party-block__head {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -145,7 +145,7 @@
   position: relative; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow-sm);
 }
-.search-card__body { padding: 12px 16px 14px; }
+.search-card__body { padding: 8px 8px 12px 8px; }
 .search-card.is-collapsed .search-card__body { display: none; }
 .search-card.is-collapsed { padding: 2px 0; display: flex; justify-content: center; }
 .search-card__collapse {
@@ -160,7 +160,7 @@
 .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 22px; row-gap: 6px; align-items: center; }
 .search-card .lcn { display: grid; grid-template-columns: 92px minmax(110px, 0.85fr) minmax(0, 1.35fr); gap: 6px; padding: 0; align-items: center; }
 .search-card .lcn__label { text-align: left; padding-right: 0; font-size: var(--fs-xs); color: var(--ink-3); letter-spacing: 0.01em; }
-.search-card .lcn__select { grid-column: 2 / span 2; height: 26px; padding: 0 8px; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
+.search-card .lcn__select { grid-column: 2 / span 2; height: 22px; padding: 0 8px; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
 .lcn__daterange { grid-column: 2 / span 2; display: flex; align-items: center; gap: 4px; position: relative; min-width: 0; }
 .lcn__daterange > input { flex: 1 1 0; min-width: 0; height: 26px; padding: 0 8px; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); font-family: var(--font-mono); }
 .lcn__tilde { font-size: 11px; color: var(--ink-4); }

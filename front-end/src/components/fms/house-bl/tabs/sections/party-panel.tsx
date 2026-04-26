@@ -4,8 +4,7 @@ interface Props { isExp: boolean }
 
 export function PartyPanel({ isExp }: Props) {
   return (
-    <div className="zone-party">
-      <div className="panel panel--full">
+    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
           <span className="panel__title">Party</span>
@@ -61,7 +60,6 @@ export function PartyPanel({ isExp }: Props) {
             </div>
           ))}
         </div>
-      </div>
     </div>
   );
 }

@@ -1,8 +1,20 @@
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
-// License table has no data rows (empty state only)
-type LicenseRow = Record<string, never>;
+interface LicenseRow {
+  exportNo: string; qty: string; unit: string; weight: string;
+  symCode: string; symQty: string; symUnit: string;
+  splitYn: string; seq: string; progress: string;
+}
+
+const licenseRows: LicenseRow[] = [
+  { exportNo: "22231-26-123456X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
+  { exportNo: "22231-26-123457X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
+  { exportNo: "22231-26-123458X", qty: "200", unit: "CTN", weight: "2,480", symCode: "A1", symQty: "50", symUnit: "CTN", splitYn: "Y", seq: "1", progress: "검사지정" },
+  { exportNo: "22231-26-123459X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "2", progress: "수리"     },
+  { exportNo: "22231-26-123460X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "신고수리"  },
+  { exportNo: "22231-26-123461X", qty: "200", unit: "CTN", weight: "2,480", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"      },
+];
 
 const LICENSE_COLS: GridColumn<LicenseRow>[] = [
   { key: "_no",       label: "#",                    className: "row-num",   render: (_, __, i) => i + 1 },
@@ -24,9 +36,9 @@ export function EdiTab({ variant }: Props) {
   const isExp = variant ? variant.direction === "EXP" : true;
 
   return (
-    <div className="page-body layout-edi" style={{ overflow: "auto" }}>
-      {/* Top: EDI identifiers */}
-      <div className="zone-top">
+    <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+      {/* Row 1: EDI Identifiers (전체 너비) */}
+      <div style={{ flexShrink: 0 }}>
         <div className="panel">
           <div className="panel__head">
             <div className="panel__title-accent" />
@@ -57,7 +69,9 @@ export function EdiTab({ variant }: Props) {
       </div>
 
       {/* Left: Dangerous Goods (IMDG/UN) */}
-      <div className="zone-left">
+      {/* Row 2: Dangerous Goods | Filing Rules */}
+      <div style={{ display: "flex", gap: 10, flex: "1 1 0", minHeight: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         <div className="panel panel--full">
           <div className="panel__head">
             <div className="panel__title-accent" />
@@ -87,11 +101,10 @@ export function EdiTab({ variant }: Props) {
             {isExp && (
               <div style={{ marginTop: 16 }}>
                 <div className="subhead"><div className="subhead__bar" />License (수출신고필증) — Korea Only<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ 추가</button></div></div>
-                <div style={{ overflowX: "auto" }}>
+                <div style={{ overflow: "auto" }}>
                   <GridList
                     columns={LICENSE_COLS}
-                    data={[]}
-                    emptyMessage="면장 없음 — 추가 버튼으로 입력"
+                    data={licenseRows}
                   />
                 </div>
               </div>
@@ -101,7 +114,7 @@ export function EdiTab({ variant }: Props) {
       </div>
 
       {/* Right: Filing Rules */}
-      <div className="zone-right">
+        <div style={{ flex: 1, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         <div className="panel panel--full">
           <div className="panel__head">
             <div className="panel__title-accent" />
@@ -155,7 +168,8 @@ export function EdiTab({ variant }: Props) {
             </div>
           </div>
         </div>
-      </div>
+        </div>{/* /Filing Rules */}
+      </div>{/* /Row 2 */}
     </div>
   );
 }

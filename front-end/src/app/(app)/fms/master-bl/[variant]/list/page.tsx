@@ -1,4 +1,4 @@
-import { Download, Layers } from "lucide-react";
+import {Layers, RotateCcw, Search} from "lucide-react";
 import { getMasterVariant, getPageTitle, BL_VARIANT_KEYS } from "@/lib/bl-variants";
 import { ListFilter }   from "@/components/fms/house-bl/list-filter";
 import { MasterBlGrid } from "@/components/fms/master-bl/master-bl-grid";
@@ -21,19 +21,23 @@ export default async function MasterBLListPage({ params }: Props) {
           {getPageTitle(variant, 'Master', 'List')}
         </div>
         <div className="page-head__actions">
-          <button className="btn btn--sm"><Download size={12} />Export</button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
+                <button className="btn btn--sm btn--ghost">
+                    <RotateCcw size={12} />
+                    Reset
+                </button>
+                <button className="btn btn--sm btn--primary">
+                    <Search size={12} />
+                    Search
+                </button>
+            </div>
         </div>
       </div>
 
       <ListFilter />
 
       <div style={{ flex: 1, overflow: "auto", margin: "10px 14px 0", display: "flex", flexDirection: "column" }}>
-        <MasterBlGrid variantKey={variantKey} isSea={variant.mode === "SEA"} />
-      </div>
-
-      <div className="footbar">
-        <span style={{ color: "var(--ink-4)", fontSize: "var(--fs-xs)" }}>MBL No 더블클릭 → Entry</span>
-        <span style={{ marginLeft: "auto" }}>2 records</span>
+        <MasterBlGrid variantKey={variantKey} mode={variant.mode} />
       </div>
     </div>
   );

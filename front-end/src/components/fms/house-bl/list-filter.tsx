@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, RotateCcw, ChevronDown } from "lucide-react";
+import { ChevronUp } from "lucide-react";
 
 export function ListFilter() {
   const [collapsed, setCollapsed] = useState(false);
@@ -47,7 +47,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">Shipper</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                <input placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Shipper Name" />
             </div>
@@ -56,7 +56,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">Consignee</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                <input placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Consignee Name" />
             </div>
@@ -82,7 +82,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">POL</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="UNLOC" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                <input placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Port Name" />
             </div>
@@ -91,7 +91,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">POD</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="UNLOC" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                <input placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Port Name" />
             </div>
@@ -100,7 +100,7 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">Operator</span>
               <div className="lcn__code" style={{ position: "relative" }}>
-                <input placeholder="Code" style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                <input placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
               </div>
               <input className="lcn__name" placeholder="Name" />
             </div>
@@ -116,26 +116,15 @@ export function ListFilter() {
               </select>
             </div>
           </div>
-
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-            <button className="btn btn--sm btn--ghost">
-              <RotateCcw size={12} />
-              Reset
-            </button>
-            <button className="btn btn--sm btn--primary">
-              <Search size={12} />
-              Search
-            </button>
-          </div>
         </div>
       )}
 
       <button
         className="search-card__collapse"
         onClick={() => setCollapsed((v) => !v)}
-        title={collapsed ? "Expand filter" : "Collapse filter"}
+        title={collapsed ? "Collapse filter" : "Expand filter"}
       >
-        <ChevronDown size={12} style={{ transform: collapsed ? "rotate(180deg)" : undefined, transition: "transform 200ms" }} />
+        <ChevronUp size={12} style={{ transform: collapsed ? "rotate(180deg)" : undefined, transition: "transform 200ms" }} />
       </button>
     </div>
   );

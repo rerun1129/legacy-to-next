@@ -30,12 +30,25 @@ const DEFAULTS_AIR: Record<string, string> = {
   "B/L Type": "", "Master Ref": "",
 };
 
+function getToolbarFields(variant: BLVariantConfig) {
+  return variant.mode === "SEA" ? TOOLBAR_FIELDS_SEA : TOOLBAR_FIELDS_AIR;
+}
+
+function getToolbarDefaults(variant: BLVariantConfig) {
+  return variant.mode === "SEA" ? DEFAULTS_SEA : DEFAULTS_AIR;
+}
+
+function renderMainTab(variant: BLVariantConfig) {
+  return variant.mode === "SEA"
+    ? <MainTabSea variant={variant} />
+    : <MainTabAir variant={variant} />;
+}
+
 export function HouseBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
-  const isSea = variant.mode === "SEA";
 
-  const toolbarFields = isSea ? TOOLBAR_FIELDS_SEA : TOOLBAR_FIELDS_AIR;
-  const defaults = isSea ? DEFAULTS_SEA : DEFAULTS_AIR;
+  const toolbarFields = getToolbarFields(variant);
+  const defaults = getToolbarDefaults(variant);
 
   const tabs = [
     { key: "main",    label: "Main"    },
@@ -64,7 +77,7 @@ export function HouseBLEntry({ variant }: Props) {
           )}
           <button className="btn btn--sm btn--info"><Send size={12} />EDI</button>
           <button className="btn btn--sm btn--primary">
-            <Save size={12} />Save<span className="btn__kbd">⌘S</span>
+            <Save size={12} />Save
           </button>
         </div>
       </div>
@@ -95,24 +108,10 @@ export function HouseBLEntry({ variant }: Props) {
       </div>
 
       {/* Tab content */}
-      {tab === "main"    && (isSea ? <MainTabSea variant={variant} /> : <MainTabAir variant={variant} />)}
+      {tab === "main"    && renderMainTab(variant)}
       {tab === "edi"     && <EdiTab variant={variant} />}
       {tab === "other"   && <OtherTab />}
       {tab === "freight" && <FreightTab />}
-
-      {/* Footer */}
-      <div className="footbar">
-        <div className="footbar__shortcuts">
-          <span className="footbar__shortcut"><kbd className="kbd">⌘1</kbd> Main</span>
-          <span className="footbar__shortcut"><kbd className="kbd">⌘2</kbd> EDI</span>
-          <span className="footbar__shortcut"><kbd className="kbd">⌘3</kbd> Other</span>
-          <span className="footbar__shortcut"><kbd className="kbd">⌘4</kbd> Freight</span>
-          <span className="footbar__shortcut"><kbd className="kbd">⌘S</kbd> Save</span>
-        </div>
-        <span style={{ marginLeft: "auto" }}>
-          {isSea ? "2 containers · 1,300 PKG · 30,600 KGS · 87.5 CBM" : "1,300 PKG · 30,600 KGS · 87.5 CBM · 65.0 m³"}
-        </span>
-      </div>
     </>
   );
 }

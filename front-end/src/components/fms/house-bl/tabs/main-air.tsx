@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { BLVariantConfig, Direction } from "@/lib/bl-variants";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface ScheduleLegRow {
@@ -19,17 +19,17 @@ interface ItemRow {
 const SCHEDULE_LEG_COLS: GridColumn<ScheduleLegRow>[] = [
   { key: "_no",      label: "#",           className: "row-num",
     render: (_, __, i) => i + 1 },
-  { key: "to",       label: "To *",
+  { key: "to",       label: "To",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
   { key: "by",       label: "By",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
   { key: "flight",   label: "Flight",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "onBoard",  label: "On Board *",
+  { key: "onBoard",  label: "On Board",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
   { key: "boardTime",label: "Time",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "arrival",  label: "Arrival *",
+  { key: "arrival",  label: "Arrival",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
   { key: "arrTime",  label: "Time",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
@@ -70,28 +70,52 @@ const AIR_ITEM_COLS: GridColumn<ItemRow>[] = [
 ];
 
 const SCHEDULE_LEG_DATA: ScheduleLegRow[] = [
-  { to: "PVG", by: "KE", flight: "KE851", onBoard: "26APR", boardTime: "09:30", arrival: "26APR", arrTime: "11:45" },
+  { to: "PVG", by: "KE", flight: "KE851",  onBoard: "26APR", boardTime: "09:30", arrival: "26APR", arrTime: "11:45" },
+  { to: "NRT", by: "KE", flight: "KE701",  onBoard: "27APR", boardTime: "08:00", arrival: "27APR", arrTime: "09:20" },
+  { to: "HKG", by: "CX", flight: "CX418",  onBoard: "28APR", boardTime: "10:15", arrival: "28APR", arrTime: "12:00" },
+  { to: "SIN", by: "SQ", flight: "SQ607",  onBoard: "29APR", boardTime: "14:30", arrival: "29APR", arrTime: "19:00" },
+  { to: "LAX", by: "OZ", flight: "OZ202",  onBoard: "30APR", boardTime: "22:00", arrival: "01MAY", arrTime: "19:30" },
+  { to: "CDG", by: "AF", flight: "AF267",  onBoard: "02MAY", boardTime: "10:45", arrival: "02MAY", arrTime: "16:30" },
 ];
 
 const DIMENSION_DATA: DimensionRow[] = [
-  { length: "120", width: "80", height: "90", qty: "1300", cbm: "87.5", volWt: "14,583" },
+  { length: "120", width: "80",  height: "90",  qty: "1300", cbm: "87.5",  volWt: "14,583" },
+  { length: "100", width: "70",  height: "80",  qty: "200",  cbm: "15.0",  volWt: "2,500"  },
+  { length: "150", width: "100", height: "120", qty: "50",   cbm: "22.5",  volWt: "3,750"  },
+  { length: "60",  width: "50",  height: "40",  qty: "500",  cbm: "6.0",   volWt: "1,000"  },
+  { length: "200", width: "120", height: "150", qty: "20",   cbm: "72.0",  volWt: "12,000" },
+  { length: "80",  width: "60",  height: "50",  qty: "300",  cbm: "7.2",   volWt: "1,200"  },
 ];
 
 const AIR_ITEM_DATA: ItemRow[] = [
-  { hs: "8517.13", desc: "MOBILE PHONE PARTS", qty: "1300", unit: "CTN", value: "48,500.00", cur: "USD" },
+  { hs: "8517.13", desc: "MOBILE PHONE PARTS",        qty: "1300", unit: "CTN", value: "48,500.00", cur: "USD" },
+  { hs: "8517.62", desc: "WIRELESS MODULE PARTS",     qty: "200",  unit: "CTN", value: "12,000.00", cur: "USD" },
+  { hs: "8542.31", desc: "SEMICONDUCTOR IC CHIPS",    qty: "500",  unit: "CTN", value: "35,000.00", cur: "USD" },
+  { hs: "8504.40", desc: "POWER SUPPLY UNITS",        qty: "150",  unit: "CTN", value: "8,500.00",  cur: "USD" },
+  { hs: "8516.40", desc: "FLAT IRON HEATING ELEMENTS", qty: "200",  unit: "CTN", value: "6,200.00",  cur: "USD" },
+  { hs: "8536.20", desc: "AUTOMATIC CIRCUIT BREAKERS", qty: "80",   unit: "CTN", value: "3,200.00",  cur: "USD" },
 ];
+
+function getImportOnlyTradeFields(direction: Direction) {
+  if (direction !== "IMP") return [];
+  return [{ l: "F.H.D", v: "Not" }];
+}
 
 interface Props { variant: BLVariantConfig }
 
 export function MainTabAir({ variant }: Props) {
   const isExp = variant.direction === "EXP";
   const isImp = variant.direction === "IMP";
+  const airlineOrCarrierLabel = isExp ? "Airline" : "Carrier";
 
   return (
-    <div className="page-body" style={{ overflow: "auto", display: "grid", gridTemplateColumns: "minmax(0,0.82fr) minmax(0,0.58fr) minmax(0,0.58fr)", gridTemplateRows: "minmax(0,5fr) auto minmax(0,4fr) minmax(0,3fr)", gap: 10, gridTemplateAreas: `"party schedule trade" "party cargo cargo" "dim dim dim" "marks desc item"` }}>
+    <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
 
-      {/* PARTY */}
-      <div style={{ gridArea: "party", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      {/* Rows 1+2: Party(좌) | Schedule+Cargo(우) */}
+      <div style={{ display: "flex", gap: 10, flex: "9 1 0", minHeight: 0 }}>
+
+        {/* Party — 2행 높이 전체 */}
+        <div style={{ flex: "34 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         <div className="panel panel--full">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Party</span></div>
           <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
@@ -126,24 +150,28 @@ export function MainTabAir({ variant }: Props) {
         </div>
       </div>
 
-      {/* SCHEDULE (AIR leg grid) */}
-      <div style={{ gridArea: "schedule", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div className="panel panel--full">
+        {/* 우측: Schedule+Trade(행1) + Cargo(행2) */}
+        <div style={{ flex: "66 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+
+          {/* 행1: Schedule | Trade */}
+          <div style={{ display: "flex", gap: 10, flex: "5 1 0", minHeight: 0 }}>
+            <div style={{ flex: 1, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Schedule</span>
           </div>
-          <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+          <div className="panel__body" style={{ overflowX: "hidden", overflowY: "auto", flex: 1 }}>
             <div className="sched-list">
               <div className="li">
-                <span className="li__label is-required">{isExp ? "Airline *" : "Carrier *"}</span>
+                <span className="li__label is-required">{airlineOrCarrierLabel}</span>
                 <div className="li__input" style={{ gap: 4 }}>
                   <input placeholder="Code" defaultValue={isExp ? "KE" : "OZ"} style={{ width: 60, height: 26, padding: "0 6px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
                   <input defaultValue={isExp ? "Korean Air" : "Asiana Airlines"} style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 12 }} />
                 </div>
               </div>
               <div className="li">
-                <span className="li__label is-required">Departure *</span>
+                <span className="li__label is-required">Departure</span>
                 <div className="li__input" style={{ gap: 4 }}>
                   <input placeholder="IATA" defaultValue="ICN" style={{ width: 60, height: 26, padding: "0 6px", fontSize: 12, fontFamily: "var(--font-mono)" }} />
                   <input defaultValue="Incheon Int'l" style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 12 }} />
@@ -154,7 +182,7 @@ export function MainTabAir({ variant }: Props) {
             {/* Schedule Leg Grid */}
             <div style={{ marginTop: 8 }}>
               <div className="subhead"><div className="subhead__bar" />Schedule Legs<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ Row</button></div></div>
-              <div style={{ overflowX: "auto" }}>
+              <div style={{ overflow: "auto" }}>
                 <GridList
                   columns={SCHEDULE_LEG_COLS}
                   data={SCHEDULE_LEG_DATA}
@@ -163,7 +191,7 @@ export function MainTabAir({ variant }: Props) {
               </div>
               {/* Derived values (read-only) */}
               <div style={{ background: "var(--bg-sunken)", borderRadius: 4, padding: "6px 10px", marginTop: 6, fontSize: 11 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto 1fr auto 1fr", gap: "4px 8px", alignItems: "center" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr)", gap: "4px 8px", alignItems: "center" }}>
                   <span style={{ color: "var(--ink-3)" }}>Destination</span>
                   <input readOnly value="PVG" style={{ background: "transparent", border: "none", color: "var(--accent-ink)", fontFamily: "var(--font-mono)", fontWeight: 600, outline: "none", fontSize: 12 }} />
                   <span style={{ color: "var(--ink-3)" }}>On board</span>
@@ -192,9 +220,8 @@ export function MainTabAir({ variant }: Props) {
         </div>
       </div>
 
-      {/* TRADE (AIR) */}
-      <div style={{ gridArea: "trade", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div className="panel panel--full">
+            <div style={{ flex: 1, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Trade</span></div>
           <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
             <div className="sched-list">
@@ -207,7 +234,7 @@ export function MainTabAir({ variant }: Props) {
                 { l: "Insurance",      v: "NIL" },
                 { l: "D.V Customs",    v: "AS PER INV." },
                 { l: "Account Info",   v: "FREIGHT PREPAID" },
-                ...(isImp ? [{ l: "F.H.D", v: "Not" }] : []),
+                ...getImportOnlyTradeFields(variant.direction),
               ].map((f) => (
                 <div key={f.l} className="li">
                   <span className="li__label">{f.l}</span>
@@ -221,8 +248,10 @@ export function MainTabAir({ variant }: Props) {
         </div>
       </div>
 
-      {/* CARGO (AIR) */}
-      <div style={{ gridArea: "cargo", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          </div>{/* /행1 */}
+
+          {/* 행2: Cargo */}
+          <div style={{ flexShrink: 0 }}>
         <div className="panel">
           <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Cargo</span></div>
           <div className="panel__body">
@@ -249,38 +278,34 @@ export function MainTabAir({ variant }: Props) {
         </div>
       </div>
 
-      {/* DIMENSION Grid */}
-      <div style={{ gridArea: "dim", minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Dimension</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
-          <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridList columns={DIMENSION_COLS} data={DIMENSION_DATA} rowKey={(_, i) => i} />
+        </div>{/* /우측 */}
+      </div>{/* /Rows 1+2 */}
+
+      {/* Row 3: Dimension (전체 너비) */}
+      <div style={{ flex: "4 1 0", minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div className="panel">
+          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Dimension</span><span className="panel__rowcount">{DIMENSION_DATA.length}</span><div className="panel__actions"><button className="btn btn--sm">+</button></div></div>
+          <GridList columns={DIMENSION_COLS} data={DIMENSION_DATA} rowKey={(_, i) => i} style={{ flex: 1 }} />
+        </div>
+      </div>
+
+      {/* Row 4: Marks | Description | Item */}
+      <div style={{ display: "flex", gap: 10, flex: "3 1 0", minHeight: 0 }}>
+        <div className="zone-marks" style={{ flex: "34 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Marks & Numbers</span></div>
+            <div className="panel__body" style={{ flex: 1 }}><textarea className="textarea textarea--tall" defaultValue={"MADE IN KOREA\nCTN NO. 1-1300"} /></div>
           </div>
-          <div className="grid-foot"><div className="grid-foot__spacer" /><span>Qty: <strong>1,300</strong></span><span>CBM: <strong>87.5</strong></span><span>Vol. Wt.: <strong>14,583</strong></span></div>
         </div>
-      </div>
-
-      {/* MARKS */}
-      <div style={{ gridArea: "marks", minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Marks & Numbers</span></div>
-          <div className="panel__body" style={{ flex: 1 }}><textarea className="textarea textarea--tall" defaultValue={"MADE IN KOREA\nCTN NO. 1-1300"} /></div>
+        <div className="zone-description" style={{ flex: "33 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Nature & Quantity of Goods</span></div>
+            <div className="panel__body" style={{ flex: 1 }}><textarea className="textarea textarea--tall" defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS"} /></div>
+          </div>
         </div>
-      </div>
-
-      {/* DESCRIPTION (AIR: Nature & Quantity) */}
-      <div style={{ gridArea: "desc", minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Nature & Quantity of Goods</span></div>
-          <div className="panel__body" style={{ flex: 1 }}><textarea className="textarea textarea--tall" defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS"} /></div>
-        </div>
-      </div>
-
-      {/* ITEM */}
-      <div style={{ gridArea: "item", minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
-          <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
+        <div style={{ flex: "33 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel">
+            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">{AIR_ITEM_DATA.length}</span><div className="panel__actions"><button className="btn btn--sm">+</button></div></div>
             <GridList columns={AIR_ITEM_COLS} data={AIR_ITEM_DATA} rowKey={(_, i) => i} />
           </div>
         </div>

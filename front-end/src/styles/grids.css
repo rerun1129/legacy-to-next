@@ -32,8 +32,8 @@
   background: transparent;
   width: 100%;
   min-width: 0;
-  height: var(--row-h);
-  padding: 0 10px;
+  height: 100%;
+  padding: 0 4px;
   font-family: inherit;
   font-size: 10px;
   color: var(--ink);
@@ -41,7 +41,7 @@
 }
 .grid__cell-input:focus {
   background: var(--accent-soft);
-  box-shadow: inset 0 -2px 0 var(--focus-ring);
+  box-shadow: inset 0 0 0 var(--focus-ring);
 }
 select.grid__cell-input { cursor: pointer; }
 td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); }
@@ -71,14 +71,14 @@ td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); 
 
 .grid--list { width: max-content; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
 .grid--list thead { position: sticky; top: 0; z-index: 2; }
-.grid--list thead th { background: var(--surface-2); font-size: 10px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); border-right: 1px solid var(--divider); padding: 8px 10px; white-space: nowrap; }
+.grid--list thead th { background: var(--surface-2); font-size: 10px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); border-right: 1px solid var(--divider); padding: 4px 4px; white-space: nowrap; box-sizing: border-box; }
 .grid--list thead th.is-sorted { background: var(--accent-soft); color: var(--accent-ink); }
 .grid--list thead th .sort-ind { margin-left: 4px; color: var(--accent); font-size: 11px; }
-.grid--list tbody td { padding: 7px 10px; border-bottom: 1px solid var(--divider); border-right: 1px solid var(--divider); font-size: 10px; color: var(--ink); white-space: nowrap; background: var(--surface); }
+.grid--list tbody td { padding: 4px 4px; border-bottom: 1px solid var(--divider); border-right: 1px solid var(--divider); font-size: 10px; color: var(--ink); white-space: nowrap; background: var(--surface); box-sizing: border-box; }
 .grid--list tbody tr:hover td { background: var(--surface-2); }
 .grid--list tbody tr.is-selected td { background: var(--accent-soft); color: var(--accent-ink); }
 .grid--list tbody td.is-num { text-align: right; font-family: var(--font-mono); }
-.grid--list .row-num { color: var(--ink-4); font-family: var(--font-mono); font-size: 11px; width: 38px; text-align: right; background: var(--surface-2); }
+.grid--list .row-num { color: var(--ink-4); font-family: var(--font-mono); font-size: 11px; width: 38px; text-align: right; }
 .grid--list tbody tr { cursor: pointer; }
 .cell-hbl  { font-family: var(--font-mono); font-weight: 600; color: var(--accent-ink); }
 .cell-mono { font-family: var(--font-mono); }

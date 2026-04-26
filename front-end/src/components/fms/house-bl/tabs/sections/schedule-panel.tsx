@@ -5,8 +5,7 @@ interface Props { variant: BLVariantConfig }
 
 export function SchedulePanel({ variant }: Props) {
   return (
-    <div className="zone-schedule">
-      <div className="panel panel--full">
+    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
           <span className="panel__title">Schedule</span>
@@ -85,7 +84,6 @@ export function SchedulePanel({ variant }: Props) {
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@
 .app {
   display: grid;
   grid-template-columns: 220px 1fr;
-  grid-template-rows: 44px 1fr;
+  grid-template-rows: 40px 1fr;
   height: 100vh;
   overflow: hidden;
   transition: grid-template-columns 180ms ease;
@@ -26,7 +26,7 @@
   font-weight: 600; letter-spacing: -0.01em;
 }
 .app__brand-mark {
-  width: 22px; height: 22px; border-radius: 5px;
+  width: 28px; height: 24px; border-radius: 5px; flex-shrink: 0;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   color: #fff; display: grid; place-items: center;
   font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
@@ -37,7 +37,7 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  height: 100%;
+  height: calc(100% - 6px);
   display: flex;
   align-items: flex-end;
   gap: 2px;
@@ -65,7 +65,7 @@
 
 /* ── 모든 탭: 항상 동일한 아웃라인 표시 ── */
 .app__tab {
-  padding: 0 12px; height: 30px;
+  padding: 0 12px; height: 24px;
   display: inline-flex; align-items: center; gap: 8px;
   font-size: var(--fs-sm); color: var(--ink-3);
   /* 비활성도 동일한 border 형태 — top/left/right만, bottom 없음 */
@@ -168,12 +168,22 @@
   overflow-y: auto; overflow-x: hidden; padding: 8px 0;
   transition: transform 180ms ease; position: relative;
 }
-.side-group { padding: 2px 0; }
+.side-group { padding: 2px 0; border-top: 1px solid var(--divider); }
 .side-group__label {
   padding: 8px 16px 4px; font-size: 10px;
   text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--ink-4); font-weight: 600;
 }
+.side-group__label--toggle {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 16px; width: 100%;
+  background: none; border: none; border-left: 2px solid transparent; cursor: pointer;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-4); text-align: left;
+  transition: background 80ms ease, color 80ms ease;
+}
+.side-group__label--toggle:hover { background: var(--surface-2); color: var(--ink-3); }
+.side-group__label--toggle.is-active { color: var(--accent-ink); border-left-color: var(--accent); }
 .side-item {
   display: flex; align-items: center; gap: 10px; padding: 6px 16px;
   font-size: var(--fs-sm); color: var(--ink-2);

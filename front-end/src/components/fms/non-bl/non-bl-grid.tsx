@@ -31,7 +31,7 @@ export function NonBlGrid() {
       render: (value) => (
         <span
           className="cell-hbl"
-          onDoubleClick={() => router.push("/fms/non-bl/new")}
+          onDoubleClick={() => router.push("/fms/non-bl/entry")}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"
         >

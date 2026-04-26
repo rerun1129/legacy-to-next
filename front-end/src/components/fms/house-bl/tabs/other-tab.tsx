@@ -1,6 +1,17 @@
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
-type CoLoadRow = Record<string, never>;
+interface CoLoadRow {
+  hblNo: string; shipper: string; consignee: string; pkg: string; gw: string; cbm: string; remark: string;
+}
+
+const coLoadRows: CoLoadRow[] = [
+  { hblNo: "HBLKR24041956", shipper: "한진무역(주)",     consignee: "SHANGHAI TRADING CO.",  pkg: "500 CTN", gw: "12,400", cbm: "22.5", remark: ""           },
+  { hblNo: "HBLKR24041901", shipper: "삼성전자(주)",     consignee: "SAMSUNG EUROPE GmbH",   pkg: "800 CTN", gw: "18,200", cbm: "65.0", remark: ""           },
+  { hblNo: "HBLKR24041877", shipper: "현대상사(주)",     consignee: "HYUNDAI TRADING USA",   pkg: "300 CTN", gw: "7,500",  cbm: "30.0", remark: ""           },
+  { hblNo: "HBLKR24041823", shipper: "엘지전자(주)",     consignee: "LG ELECTRONICS INC.",  pkg: "420 CTN", gw: "9,800",  cbm: "40.5", remark: ""           },
+  { hblNo: "HBLKR24041800", shipper: "코오롱인더스트리", consignee: "KOLON GLOBAL CORP.",    pkg: "250 CTN", gw: "5,200",  cbm: "18.0", remark: "FCL 전환 예정" },
+  { hblNo: "HBLKR24041756", shipper: "SK하이닉스(주)",  consignee: "SK HYNIX INC.",        pkg: "180 CTN", gw: "4,500",  cbm: "15.0", remark: ""           },
+];
 
 const CO_LOAD_COLS: GridColumn<CoLoadRow>[] = [
   { key: "_no",       label: "#",         className: "row-num", render: (_, __, i) => i + 1 },
@@ -15,9 +26,9 @@ const CO_LOAD_COLS: GridColumn<CoLoadRow>[] = [
 
 export function OtherTab() {
   return (
-    <div className="page-body layout-other" style={{ overflow: "auto", gap: 10 }}>
-      {/* Reference Numbers */}
-      <div>
+    <div style={{ flex: 1, overflow: "hidden", padding: "12px 16px" }}>
+      <div style={{ display: "flex", gap: 10, height: "100%" }}>
+        <div style={{ flex: 1, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         <div className="panel panel--full">
           <div className="panel__head">
             <div className="panel__title-accent" />
@@ -62,26 +73,25 @@ export function OtherTab() {
         </div>
       </div>
 
-      {/* Co-Load B/L list */}
-      <div>
-        <div className="panel panel--full">
+        <div style={{ flex: 1, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel">
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Co-Load B/L</span>
-            <span className="panel__rowcount">0</span>
+            <span className="panel__rowcount">{coLoadRows.length}</span>
             <div className="panel__actions">
-              <button className="btn btn--sm">+ Add</button>
+              <button className="btn btn--sm">+</button>
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <GridList
               columns={CO_LOAD_COLS}
-              data={[]}
-              emptyMessage="No co-load B/L entries"
+              data={coLoadRows}
             />
           </div>
         </div>
-      </div>
+        </div>{/* /Co-Load B/L */}
+      </div>{/* /row */}
     </div>
   );
 }

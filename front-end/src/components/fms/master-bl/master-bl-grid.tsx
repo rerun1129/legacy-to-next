@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Mode } from "@/lib/bl-variants";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
+import { getModeLabels } from "@/lib/bl-mode-labels";
+
+function selectActiveColumns<T>(mode: Mode, seaColumns: T[], airColumns: T[]): T[] {
+  return mode === "SEA" ? seaColumns : airColumns;
+}
 
 const ROWS = [
   { mbl: "COSCO2404195",  isSea: true,  ref: "MR-2026-04195", bkg: "BKG-COSCO-0412", vessel: "COSCO EXCELLENCE", etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", houses: 2 },
@@ -13,22 +19,24 @@ const ROWS = [
 
 type MblRow = typeof ROWS[number];
 
-interface Props { variantKey: string; isSea: boolean }
+interface Props { variantKey: string; mode: Mode }
 
-export function MasterBlGrid({ variantKey, isSea }: Props) {
+export function MasterBlGrid({ variantKey, mode }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
+  const isSea = mode === "SEA";
+  const modeLabels = getModeLabels(mode);
   const rows = ROWS.filter((r) => r.isSea === isSea);
 
   const seaColumns: GridColumn<MblRow>[] = [
     {
       key: "mbl",
-      label: isSea ? "MBL No" : "MAWB No",
+      label: modeLabels.blNo,
       minWidth: 140,
       render: (value) => (
         <span
           className="cell-hbl"
-          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/new`)}
+          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/entry`)}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"
         >
@@ -49,7 +57,7 @@ export function MasterBlGrid({ variantKey, isSea }: Props) {
 
   const airColumns: GridColumn<MblRow>[] = seaColumns.filter((c) => c.key !== "bkg");
 
-  const columns = isSea ? seaColumns : airColumns;
+  const activeColumns = selectActiveColumns(mode, seaColumns, airColumns);
 
   return (
     <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -60,7 +68,7 @@ export function MasterBlGrid({ variantKey, isSea }: Props) {
       </div>
       <div className="list-wrap">
         <GridList<MblRow>
-          columns={columns}
+          columns={activeColumns}
           data={rows}
           onRowClick={(_, i) => setSelected(i)}
           rowKey={(_, i) => i}

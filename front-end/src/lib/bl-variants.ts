@@ -78,6 +78,7 @@ export function getMasterVariant(key: string): MasterVariantConfig {
 export interface MasterVariantConfig extends BLVariantConfig {
   bottomActions: string[]
   hasLineBkgNo: boolean
+  toolbarColumnCount: number
 }
 
 export const MASTER_VARIANTS: Record<BLVariantKey, MasterVariantConfig> = {
@@ -86,6 +87,7 @@ export const MASTER_VARIANTS: Record<BLVariantKey, MasterVariantConfig> = {
     blNoLabel: 'MBL No', mblNoLabel: 'Master Ref No',
     bottomActions: ['Profit/Loss', 'House B/L Load', 'Shipping Request', 'Shipping Advice', 'M/F Send', 'AFR Send', 'EDMS'],
     hasLineBkgNo: true,
+    toolbarColumnCount: 8,
     printDocs: ['S/A', 'S/R'],
   },
   'sea-imp': {
@@ -94,6 +96,7 @@ export const MASTER_VARIANTS: Record<BLVariantKey, MasterVariantConfig> = {
     hasIssueInfo: false, hasDoDate: false, issueFields: [],
     bottomActions: ['Profit/Loss', 'House B/L Load', 'M/F Send', 'AFR Send', 'EDMS'],
     hasLineBkgNo: true,
+    toolbarColumnCount: 8,
     printDocs: [],
   },
   'air-exp': {
@@ -102,6 +105,7 @@ export const MASTER_VARIANTS: Record<BLVariantKey, MasterVariantConfig> = {
     issueFields: ['Issue Date', 'Signature', 'Issue Place'],
     bottomActions: ['MAWB', 'Shipping Request', 'Shipping Advice', 'Profit/Loss', 'House B/L Load', 'M/F Send', 'AFR Send', 'EDMS'],
     hasLineBkgNo: false,
+    toolbarColumnCount: 4,
     printDocs: ['MAWB', 'S/A', 'S/R'],
   },
   'air-imp': {
@@ -109,6 +113,7 @@ export const MASTER_VARIANTS: Record<BLVariantKey, MasterVariantConfig> = {
     blNoLabel: 'MAWB No', mblNoLabel: 'Master Ref No',
     bottomActions: ['Profit/Loss', 'House B/L Load', 'M/F Send', 'AFR Send', 'EDMS'],
     hasLineBkgNo: false,
+    toolbarColumnCount: 4,
     printDocs: [],
   },
 }

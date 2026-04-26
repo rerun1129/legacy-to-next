@@ -5,8 +5,8 @@
 
 :root {
   /* Typography */
-  --font-sans: 'Inter', 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-sans: var(--font-inter), 'Malgun Gothic', sans-serif;
+  --font-mono: var(--font-inter), 'Malgun Gothic', sans-serif;
   --fs-base: 13px;
   --fs-xs: 11px;
   --fs-sm: 12px;

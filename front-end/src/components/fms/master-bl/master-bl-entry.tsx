@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
+import { getModeLabels } from "@/lib/bl-mode-labels";
 import { MasterMainTab } from "./tabs/main-tab";
 import { MasterEdiTab }  from "./tabs/edi-tab";
 import { OtherTab }      from "@/components/fms/house-bl/tabs/other-tab";
@@ -15,10 +16,14 @@ interface Props { variant: MasterVariantConfig }
 const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type", "Status"] as const;
 const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "Status", "", "", "", ""] as const;
 
+function getToolbarFields(variant: MasterVariantConfig) {
+  return variant.mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
+}
+
 export function MasterBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
-  const isSea = variant.mode === "SEA";
-  const toolbarFields = isSea ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
+  const modeLabels = getModeLabels(variant.mode);
+  const toolbarFields = getToolbarFields(variant);
 
   const tabs = [
     { key: "main",    label: "Main"    },
@@ -46,17 +51,17 @@ export function MasterBLEntry({ variant }: Props) {
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm"><Copy size={12} />Copy</button>
           <button className="btn btn--sm">
-            <RefreshCw size={12} />{isSea ? "Change B/L No" : "Change AWB No"}
+            <RefreshCw size={12} />{modeLabels.changeBLNo}
           </button>
           <button className="btn btn--sm btn--info"><Send size={12} />EDI</button>
           <button className="btn btn--sm btn--primary">
-            <Save size={12} />Save<span className="btn__kbd">⌘S</span>
+            <Save size={12} />Save
           </button>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="toolbar" style={{ gridTemplateColumns: `repeat(${isSea ? 8 : 4}, 1fr)` }}>
+      <div className="toolbar" style={{ gridTemplateColumns: `repeat(${variant.toolbarColumnCount}, 1fr)` }}>
         {toolbarFields.map((f) => (
           <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
             <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
@@ -96,25 +101,6 @@ export function MasterBLEntry({ variant }: Props) {
       {tab === "other"   && <OtherTab />}
       {tab === "freight" && <FreightTab />}
 
-      {/* Bottom action strip — Master B/L specific (§S-04) */}
-      <div className="footbar" style={{ justifyContent: "flex-start", gap: 6 }}>
-        {bottomActionsLeft.map((action) => (
-          <button key={action} className="btn btn--sm btn--warn">{action}</button>
-        ))}
-        <div style={{ flex: 1 }} />
-        {bottomActionsRight.map((action) => {
-          const isDocOutput  = ["MAWB", "Shipping Request", "Shipping Advice"].includes(action);
-          const isEdiSend    = ["M/F Send", "AFR Send"].includes(action);
-          const cls = isDocOutput
-            ? "btn btn--sm btn--success"
-            : isEdiSend
-            ? "btn btn--sm btn--info"
-            : "btn btn--sm";
-          return (
-            <button key={action} className={cls}>{action}</button>
-          );
-        })}
-      </div>
     </>
   );
 }

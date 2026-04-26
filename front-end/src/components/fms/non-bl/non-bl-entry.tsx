@@ -5,7 +5,18 @@ import { Save, Trash2, Package, Printer } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
-type ContainerInfoRow = Record<string, never>;
+interface ContainerInfoRow {
+  cno: string; type: string; pkg: string; gw: string; cbm: string;
+}
+
+const containerInfoRows: ContainerInfoRow[] = [
+  { cno: "CSNU1234567", type: "20GP", pkg: "500 CTN", gw: "12,400", cbm: "22.5" },
+  { cno: "TCKU9876543", type: "40HC", pkg: "800 CTN", gw: "18,200", cbm: "65.0" },
+  { cno: "MSKU3456789", type: "40GP", pkg: "650 CTN", gw: "15,800", cbm: "60.2" },
+  { cno: "HLXU2345678", type: "20GP", pkg: "420 CTN", gw: "10,500", cbm: "21.0" },
+  { cno: "GESU5678901", type: "40HC", pkg: "750 CTN", gw: "19,400", cbm: "67.5" },
+  { cno: "TCNU8901234", type: "20GP", pkg: "350 CTN", gw: "8,750",  cbm: "19.8" },
+];
 
 const CONTAINER_INFO_COLS: GridColumn<ContainerInfoRow>[] = [
   { key: "_no",  label: "#",             render: (_, __, i) => i + 1 },
@@ -37,7 +48,7 @@ export function NonBLEntry() {
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm btn--success"><Printer size={12} />Print</button>
           <button className="btn btn--sm btn--primary">
-            <Save size={12} />Save<span className="btn__kbd">⌘S</span>
+            <Save size={12} />Save
           </button>
         </div>
       </div>
@@ -79,10 +90,11 @@ export function NonBLEntry() {
 
       {/* Main tab */}
       {tab === "main" && (
-        <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "grid", gridTemplateColumns: "1.1fr 0.9fr 0.9fr", gap: 10, alignContent: "start" }}>
+        <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "flex", gap: 10, minHeight: 0 }}>
 
-          {/* PARTY: 5 slots, address block 생략 */}
-          <div className="panel" style={{ gridRow: "1 / 3" }}>
+          {/* 좌: Party (전체 높이) */}
+          <div style={{ flex: "34 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Party <span style={{ color: "var(--ink-3)", fontWeight: 400, fontSize: 10 }}>(주소 생략 — 거래처 코드+Name만)</span></span></div>
             <div className="panel__body">
               {([
@@ -113,22 +125,29 @@ export function NonBLEntry() {
             </div>
           </div>
 
-          {/* SCHEDULE */}
-          <div className="panel">
+          </div>{/* /Party 좌측 열 */}
+
+          {/* 우: 행1(Schedule+WorkDiv) + 행2(RefNo+Performance) */}
+          <div style={{ flex: "66 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+
+            {/* 행1: Schedule | Work Division */}
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <div className="panel">
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Schedule</span></div>
             <div className="panel__body">
               <div className="sched-list">
                 <div className="sched-pair">
-                  {[{ l: "ETD *", v: "2026-04-24" }, { l: "ETA *", v: "2026-05-08" }].map((f) => (
+                  {[{ l: "ETD", v: "2026-04-24" }, { l: "ETA", v: "2026-05-08" }].map((f) => (
                     <div key={f.l} className="li">
                       <span className="li__label is-required">{f.l}</span>
                       <div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
                     </div>
                   ))}
                 </div>
-                {[{ l: "POL *", c: "KRBSAN", n: "Busan" }, { l: "POD *", c: "CNSHA", n: "Shanghai" }].map((f) => (
+                {[{ l: "POL", c: "KRBSAN", n: "Busan" }, { l: "POD", c: "CNSHA", n: "Shanghai" }].map((f) => (
                   <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
-                    <span className="lcn__label">{f.l}</span>
+                    <span className="lcn__label is-required">{f.l}</span>
                     <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={f.c} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
                     <input className="lcn__name" defaultValue={f.n} />
                   </div>
@@ -137,8 +156,9 @@ export function NonBLEntry() {
             </div>
           </div>
 
-          {/* Work Division dynamic block */}
-          <div className="panel">
+              </div>{/* /Schedule 열 */}
+              <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <div className="panel">
             <div className="panel__head">
               <div className="panel__title-accent" />
               <span className="panel__title">
@@ -150,11 +170,10 @@ export function NonBLEntry() {
             </div>
             <div className="panel__body">
               {workDiv === "Sea" && (
-                <div style={{ overflowX: "auto" }}>
+                <div style={{ overflow: "auto" }}>
                   <GridList
                     columns={CONTAINER_INFO_COLS}
-                    data={[]}
-                    emptyMessage="+ Add Container"
+                    data={containerInfoRows}
                   />
                 </div>
               )}
@@ -185,8 +204,13 @@ export function NonBLEntry() {
             </div>
           </div>
 
-          {/* Reference Numbers */}
-          <div className="panel">
+              </div>{/* /WorkDiv 열 */}
+            </div>{/* /행1 */}
+
+            {/* 행2: Reference Numbers | Performance */}
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <div className="panel">
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Reference Numbers</span></div>
             <div className="panel__body">
               <div className="sched-list">
@@ -197,8 +221,9 @@ export function NonBLEntry() {
             </div>
           </div>
 
-          {/* Performance — Sales Man 필수 아님 */}
-          <div className="panel">
+              </div>{/* /RefNo 열 */}
+              <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <div className="panel">
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Performance</span><span style={{ fontSize: 10, color: "var(--ink-4)", marginLeft: 6 }}>Sales Man 선택</span></div>
             <div className="panel__body">
               <div className="sched-list">
@@ -216,15 +241,13 @@ export function NonBLEntry() {
               </div>
             </div>
           </div>
+              </div>{/* /Performance 열 */}
+            </div>{/* /행2 */}
+          </div>{/* /우측 열 */}
         </div>
       )}
 
       {tab === "freight" && <FreightTab />}
-
-      <div className="footbar">
-        <span className="footbar__shortcut"><kbd className="kbd">⌘S</kbd> Save</span>
-        <span style={{ marginLeft: "auto" }}>Non B/L — Work Division: {workDiv}</span>
-      </div>
     </>
   );
 }

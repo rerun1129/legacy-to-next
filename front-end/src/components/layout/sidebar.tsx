@@ -13,71 +13,83 @@ interface NavLeaf {
   label: string;
   href: string;
   icon: React.ComponentType<{ size?: number }>;
-  exact?: boolean;
 }
 
 interface NavSection {
   group: string;
   icon: React.ComponentType<{ size?: number }>;
-  href?: string;
-  children?: NavLeaf[];
+  children: NavLeaf[];
   defaultOpen?: boolean;
 }
 
+interface NavModule {
+  module: string;
+  defaultOpen?: boolean;
+  sections: NavSection[];
+}
+
 // ─── Nav data ───────────────────────────────────────────────
-const NAV: NavSection[] = [
-  { group: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+const DASHBOARD_HREF = "/dashboard";
+
+const NAV_MODULES: NavModule[] = [
   {
-    group: "House B/L", icon: FileText, defaultOpen: true,
-    children: [
-      { label: "Sea Export — List",  href: "/fms/house-bl/sea-exp",     icon: List,     exact: true },
-      { label: "Sea Export — Entry", href: "/fms/house-bl/sea-exp/new", icon: FilePlus },
-      { label: "Sea Import — List",  href: "/fms/house-bl/sea-imp",     icon: List,     exact: true },
-      { label: "Sea Import — Entry", href: "/fms/house-bl/sea-imp/new", icon: FilePlus },
-      { label: "Air Export — List",  href: "/fms/house-bl/air-exp",     icon: List,     exact: true },
-      { label: "Air Export — Entry", href: "/fms/house-bl/air-exp/new", icon: FilePlus },
-      { label: "Air Import — List",  href: "/fms/house-bl/air-imp",     icon: List,     exact: true },
-      { label: "Air Import — Entry", href: "/fms/house-bl/air-imp/new", icon: FilePlus },
-    ],
-  },
-  {
-    group: "Master B/L", icon: Layers, defaultOpen: false,
-    children: [
-      { label: "Sea Export — List",  href: "/fms/master-bl/sea-exp",     icon: List,     exact: true },
-      { label: "Sea Export — Entry", href: "/fms/master-bl/sea-exp/new", icon: FilePlus },
-      { label: "Sea Import — List",  href: "/fms/master-bl/sea-imp",     icon: List,     exact: true },
-      { label: "Sea Import — Entry", href: "/fms/master-bl/sea-imp/new", icon: FilePlus },
-      { label: "Air Export — List",  href: "/fms/master-bl/air-exp",     icon: List,     exact: true },
-      { label: "Air Export — Entry", href: "/fms/master-bl/air-exp/new", icon: FilePlus },
-      { label: "Air Import — List",  href: "/fms/master-bl/air-imp",     icon: List,     exact: true },
-      { label: "Air Import — Entry", href: "/fms/master-bl/air-imp/new", icon: FilePlus },
-    ],
-  },
-  {
-    group: "Truck B/L", icon: Truck, defaultOpen: false,
-    children: [
-      { label: "List",  href: "/fms/truck-bl",     icon: List,     exact: true },
-      { label: "Entry", href: "/fms/truck-bl/new", icon: FilePlus },
-    ],
-  },
-  {
-    group: "Non B/L", icon: Package, defaultOpen: false,
-    children: [
-      { label: "List",  href: "/fms/non-bl",     icon: List,     exact: true },
-      { label: "Entry", href: "/fms/non-bl/new", icon: FilePlus },
+    module: "FMS", defaultOpen: true,
+    sections: [
+      {
+        group: "House B/L", icon: FileText, defaultOpen: true,
+        children: [
+          { label: "Sea Export List",  href: "/fms/house-bl/sea-exp/list",  icon: List },
+          { label: "Sea Export Entry", href: "/fms/house-bl/sea-exp/entry", icon: FilePlus },
+          { label: "Sea Import List",  href: "/fms/house-bl/sea-imp/list",  icon: List },
+          { label: "Sea Import Entry", href: "/fms/house-bl/sea-imp/entry", icon: FilePlus },
+          { label: "Air Export List",  href: "/fms/house-bl/air-exp/list",  icon: List },
+          { label: "Air Export Entry", href: "/fms/house-bl/air-exp/entry", icon: FilePlus },
+          { label: "Air Import List",  href: "/fms/house-bl/air-imp/list",  icon: List },
+          { label: "Air Import Entry", href: "/fms/house-bl/air-imp/entry", icon: FilePlus },
+        ],
+      },
+      {
+        group: "Master B/L", icon: Layers, defaultOpen: false,
+        children: [
+          { label: "Sea Export List",  href: "/fms/master-bl/sea-exp/list",  icon: List },
+          { label: "Sea Export Entry", href: "/fms/master-bl/sea-exp/entry", icon: FilePlus },
+          { label: "Sea Import List",  href: "/fms/master-bl/sea-imp/list",  icon: List },
+          { label: "Sea Import Entry", href: "/fms/master-bl/sea-imp/entry", icon: FilePlus },
+          { label: "Air Export List",  href: "/fms/master-bl/air-exp/list",  icon: List },
+          { label: "Air Export Entry", href: "/fms/master-bl/air-exp/entry", icon: FilePlus },
+          { label: "Air Import List",  href: "/fms/master-bl/air-imp/list",  icon: List },
+          { label: "Air Import Entry", href: "/fms/master-bl/air-imp/entry", icon: FilePlus },
+        ],
+      },
+      {
+        group: "Truck B/L", icon: Truck, defaultOpen: false,
+        children: [
+          { label: "List",  href: "/fms/truck-bl/list",  icon: List },
+          { label: "Entry", href: "/fms/truck-bl/entry", icon: FilePlus },
+        ],
+      },
+      {
+        group: "Non B/L", icon: Package, defaultOpen: false,
+        children: [
+          { label: "List",  href: "/fms/non-bl/list",  icon: List },
+          { label: "Entry", href: "/fms/non-bl/entry", icon: FilePlus },
+        ],
+      },
     ],
   },
 ];
 
 // ─── Helpers ────────────────────────────────────────────────
 function leafActive(pathname: string, leaf: NavLeaf) {
-  if (leaf.exact) return pathname === leaf.href;
-  return pathname === leaf.href || pathname.startsWith(leaf.href.replace(/\/new$/, "/"));
+  return pathname === leaf.href;
 }
 
 function sectionActive(pathname: string, s: NavSection) {
-  if (s.href) return pathname === s.href || pathname.startsWith(s.href + "/");
-  return s.children?.some((c) => leafActive(pathname, c)) ?? false;
+  return s.children.some((c) => leafActive(pathname, c));
+}
+
+function moduleActive(pathname: string, m: NavModule) {
+  return m.sections.some((s) => sectionActive(pathname, s));
 }
 
 // ─── Component ──────────────────────────────────────────────
@@ -86,15 +98,26 @@ export function Sidebar() {
   const router   = useRouter();
   const addTab   = useTabs((s) => s.addTab);
 
-  const [open, setOpen] = useState<Record<string, boolean>>(() => {
+  const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
-    NAV.forEach((s) => {
-      if (s.children) init[s.group] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
+    NAV_MODULES.forEach((m) => {
+      init[m.module] = moduleActive(pathname, m) || (m.defaultOpen ?? false);
     });
     return init;
   });
 
-  const toggle = (group: string) => setOpen((p) => ({ ...p, [group]: !p[group] }));
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    NAV_MODULES.forEach((m) =>
+      m.sections.forEach((s) => {
+        init[s.group] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
+      })
+    );
+    return init;
+  });
+
+  const toggleModule  = (module: string)  => setOpenModules((p)  => ({ ...p, [module]:  !p[module]  }));
+  const toggleSection = (group: string)   => setOpenSections((p) => ({ ...p, [group]:   !p[group]   }));
 
   function navigate(label: string, href: string) {
     addTab(label, href);
@@ -103,67 +126,83 @@ export function Sidebar() {
 
   return (
     <nav className="app__side">
-      <div className="side-group">
-        <div className="side-group__label">FMS</div>
+      {/* Dashboard — 최상단 */}
+      <button
+        className={`side-item${pathname === DASHBOARD_HREF ? " is-active" : ""}`}
+        onClick={() => navigate("Dashboard", DASHBOARD_HREF)}
+      >
+        <span className="side-item__icon"><LayoutDashboard size={14} /></span>
+        Dashboard
+      </button>
 
-        {NAV.map((section) => {
-          const secActive = sectionActive(pathname, section);
+      {/* 최상위 모듈 (FMS, BMS …) */}
+      {NAV_MODULES.map((mod) => {
+        const modActive   = moduleActive(pathname, mod);
+        const modOpen     = openModules[mod.module];
 
-          /* Direct link */
-          if (section.href) {
-            return (
-              <button
-                key={section.group}
-                className={`side-item${secActive ? " is-active" : ""}`}
-                style={{ width: "100%" }}
-                onClick={() => navigate(section.group, section.href!)}
-              >
-                <span className="side-item__icon"><section.icon size={14} /></span>
-                {section.group}
-              </button>
-            );
-          }
+        return (
+          <div key={mod.module} className="side-group">
+            <button
+              className={`side-group__label side-group__label--toggle${modActive ? " is-active" : ""}`}
+              onClick={() => toggleModule(mod.module)}
+            >
+              <span style={{ flex: 1 }}>{mod.module}</span>
+              <ChevronRight
+                size={11}
+                style={{
+                  flexShrink: 0,
+                  color: modActive ? "var(--accent)" : "var(--ink-4)",
+                  transform: modOpen ? "rotate(90deg)" : undefined,
+                  transition: "transform 160ms ease",
+                }}
+              />
+            </button>
 
-          const isOpen = open[section.group];
+            {modOpen && mod.sections.map((section) => {
+              const secActive = sectionActive(pathname, section);
+              const secOpen   = openSections[section.group];
 
-          return (
-            <div key={section.group}>
-              <button
-                className={`side-item${secActive ? " is-active" : ""}`}
-                style={{ width: "100%" }}
-                onClick={() => toggle(section.group)}
-              >
-                <span className="side-item__icon"><section.icon size={14} /></span>
-                <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
-                <ChevronRight
-                  size={12}
-                  style={{
-                    flexShrink: 0,
-                    color: "var(--ink-4)",
-                    transform: isOpen ? "rotate(90deg)" : undefined,
-                    transition: "transform 160ms ease",
-                  }}
-                />
-              </button>
-
-              {isOpen && section.children?.map((leaf) => {
-                const active = leafActive(pathname, leaf);
-                return (
+              return (
+                <div key={section.group}>
                   <button
-                    key={leaf.href}
-                    className={`side-item${active ? " is-active" : ""}`}
-                    style={{ paddingLeft: 24, fontSize: "var(--fs-xs)", width: "100%" }}
-                    onClick={() => navigate(leaf.label, leaf.href)}
+                    className={`side-item${secActive ? " is-active" : ""}`}
+                    style={{ paddingLeft: 12 }}
+                    onClick={() => toggleSection(section.group)}
                   >
-                    <span className="side-item__icon"><leaf.icon size={11} /></span>
-                    {leaf.label}
+                    <span className="side-item__icon"><section.icon size={13} /></span>
+                    <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
+                    <ChevronRight
+                      size={11}
+                      style={{
+                        flexShrink: 0,
+                        color: secActive ? "var(--accent)" : "var(--ink-4)",
+                        transform: secOpen ? "rotate(90deg)" : undefined,
+                        transition: "transform 160ms ease",
+                        marginRight: 4,
+                      }}
+                    />
                   </button>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+
+                  {secOpen && section.children.map((leaf) => {
+                    const active = leafActive(pathname, leaf);
+                    return (
+                      <button
+                        key={leaf.href}
+                        className={`side-item${active ? " is-active" : ""}`}
+                        style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
+                        onClick={() => navigate(`${section.group} ${leaf.label}`, leaf.href)}
+                      >
+                        <span className="side-item__icon"><leaf.icon size={11} /></span>
+                        {leaf.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </nav>
   );
 }

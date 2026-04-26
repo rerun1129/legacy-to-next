@@ -16,7 +16,7 @@ interface ItemRow {
 const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
   { key: "_no", label: "#", width: 36, className: "row-num",
     render: (_, __, i) => i + 1 },
-  { key: "cno",  label: "Container No *", width: 160,
+  { key: "cno",  label: "Container No", width: 160,
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
   { key: "type", label: "Type", width: 70,
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
@@ -52,12 +52,21 @@ const ITEM_COLS: GridColumn<ItemRow>[] = [
 ];
 
 const CONTAINER_DATA: ContainerRow[] = [
-  { cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500, pkgT: "CTN", gw: "12,400", cbm: 22.5, vgm: "12,540" },
-  { cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800, pkgT: "CTN", gw: "18,200", cbm: 65.0, vgm: "18,380" },
+  { cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500,  pkgT: "CTN", gw: "12,400", cbm: 22.5, vgm: "12,540" },
+  { cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800,  pkgT: "CTN", gw: "18,200", cbm: 65.0, vgm: "18,380" },
+  { cno: "MSKU3456789", type: "40GP", seal: "SL345678", pkg: 650,  pkgT: "CTN", gw: "15,800", cbm: 60.2, vgm: "15,960" },
+  { cno: "HLXU2345678", type: "20GP", seal: "SL456789", pkg: 420,  pkgT: "CTN", gw: "10,500", cbm: 21.0, vgm: "10,640" },
+  { cno: "GESU5678901", type: "40HC", seal: "SL567890", pkg: 750,  pkgT: "CTN", gw: "19,400", cbm: 67.5, vgm: "19,580" },
+  { cno: "TCNU8901234", type: "20GP", seal: "SL678901", pkg: 350,  pkgT: "CTN", gw: "8,750",  cbm: 19.8, vgm: "8,900"  },
 ];
 
 const ITEM_DATA: ItemRow[] = [
-  { hs: "8517.13", desc: "MOBILE PHONE PARTS", qty: "1300", unit: "CTN", value: "48,500.00", cur: "USD" },
+  { hs: "8517.13", desc: "MOBILE PHONE PARTS",       qty: "1300", unit: "CTN", value: "48,500.00", cur: "USD" },
+  { hs: "8517.62", desc: "WIRELESS MODULE PARTS",    qty: "200",  unit: "CTN", value: "12,000.00", cur: "USD" },
+  { hs: "8542.31", desc: "SEMICONDUCTOR IC CHIPS",   qty: "500",  unit: "CTN", value: "35,000.00", cur: "USD" },
+  { hs: "8504.40", desc: "POWER SUPPLY UNITS",       qty: "150",  unit: "CTN", value: "8,500.00",  cur: "USD" },
+  { hs: "8516.40", desc: "FLAT IRON HEATING ELEMENTS", qty: "200", unit: "CTN", value: "6,200.00",  cur: "USD" },
+  { hs: "8536.20", desc: "AUTOMATIC CIRCUIT BREAKERS", qty: "80",  unit: "CTN", value: "3,200.00",  cur: "USD" },
 ];
 
 interface Props { variant: BLVariantConfig }
@@ -66,115 +75,111 @@ export function MainTabSea({ variant }: Props) {
   const isExp = variant.direction === "EXP";
 
   return (
-    <div className="page-body layout-main" style={{ overflow: "auto" }}>
-      {/* PARTY */}
-      <PartyPanel isExp={isExp} />
+    <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
 
-      {/* SCHEDULE */}
-      <SchedulePanel variant={variant} />
-
-      {/* TRADE */}
-      <div className="zone-trade">
-        <div className="panel panel--full">
-          <div className="panel__head">
-            <div className="panel__title-accent" />
-            <span className="panel__title">Trade & Performance</span>
-          </div>
-          <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-            <div className="sched-list">
-              {[
-                { l: "Incoterms",    v: "FOB",     req: true  },
-                { l: "Freight Term", v: "Prepaid",  req: true  },
-                { l: "Payable At",   v: "ORIGIN",   req: false },
-                { l: "Co-Load",      v: "N",        req: false },
-              ].map((f) => (
-                <div key={f.l} className="li">
-                  <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
-                  <div className="li__input">
-                    <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
-                  </div>
-                </div>
-              ))}
-              <div style={{ marginTop: 8 }}>
-                <div className="subhead"><div className="subhead__bar" />Performance</div>
+      {/* Row 1: Party | Schedule | Trade */}
+      <div style={{ display: "flex", gap: 10, flex: "7 1 0", minHeight: 0 }}>
+        <div style={{ flex: "34 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <PartyPanel isExp={isExp} />
+        </div>
+        <div style={{ flex: "33 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <SchedulePanel variant={variant} />
+        </div>
+        <div style={{ flex: "33 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div className="panel__head">
+              <div className="panel__title-accent" />
+              <span className="panel__title">Trade & Performance</span>
+            </div>
+            <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+              <div className="sched-list">
                 {[
-                  { l: "Actual Customer", code: "HJTR001", name: "한진무역(주)" },
-                  { l: "Sales Man",       code: "LJY",     name: "이진영" },
-                  { l: "Operator",        code: "KYS",     name: "김영선" },
-                  { l: "Team",            code: "SEA-EXP", name: "해상수출팀" },
+                  { l: "Incoterms",    v: "FOB",     req: true  },
+                  { l: "Freight Term", v: "Prepaid",  req: true  },
+                  { l: "Payable At",   v: "ORIGIN",   req: false },
+                  { l: "Co-Load",      v: "N",        req: false },
                 ].map((f) => (
-                  <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
-                    <span className="lcn__label is-required">{f.l}</span>
-                    <div className="lcn__code" style={{ position: "relative" }}>
-                      <input defaultValue={f.code} style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-                      <Search size={12} className="lcn__icon" />
+                  <div key={f.l} className="li">
+                    <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
+                    <div className="li__input">
+                      <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
                     </div>
-                    <input className="lcn__name" defaultValue={f.name} placeholder="Name" />
                   </div>
                 ))}
+                <div style={{ marginTop: 8 }}>
+                  <div className="subhead"><div className="subhead__bar" />Performance</div>
+                  {[
+                    { l: "Actual Customer", code: "HJTR001", name: "한진무역(주)" },
+                    { l: "Sales Man",       code: "LJY",     name: "이진영" },
+                    { l: "Operator",        code: "KYS",     name: "김영선" },
+                    { l: "Team",            code: "SEA-EXP", name: "해상수출팀" },
+                  ].map((f) => (
+                    <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
+                      <span className="lcn__label is-required">{f.l}</span>
+                      <div className="lcn__code" style={{ position: "relative" }}>
+                        <input defaultValue={f.code} style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+                        <Search size={12} className="lcn__icon" />
+                      </div>
+                      <input className="lcn__name" defaultValue={f.name} placeholder="Name" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* CONTAINER */}
-      <div className="zone-container">
-        <div className="panel panel--full">
+      {/* Row 2: Container (단독) */}
+      <div style={{ flexShrink: 0 }}>
+        <div className="panel">
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Container</span>
-            <span className="panel__rowcount">2</span>
-            <div className="panel__actions"><button className="btn btn--sm">+ Add Row</button></div>
+            <span className="panel__rowcount">{CONTAINER_DATA.length}</span>
+            <div className="panel__actions"><button className="btn btn--sm">+</button></div>
           </div>
-          <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridList columns={CONTAINER_COLS} data={CONTAINER_DATA} rowKey={(_, i) => i} />
-          </div>
-          <div className="grid-foot">
-            <span>2 containers</span>
-            <div className="grid-foot__spacer" />
-            <span>G/W: <strong className="grid-foot__total">30,600 kg</strong></span>
-            <span>CBM: <strong className="grid-foot__total">87.5</strong></span>
-          </div>
+          <GridList columns={CONTAINER_COLS} data={CONTAINER_DATA} rowKey={(_, i) => i} style={{ height: "150px" }} />
         </div>
       </div>
 
-      {/* MARKS */}
-      <div className="zone-marks">
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Marks & Numbers</span></div>
-          <div className="panel__body" style={{ flex: 1 }}>
-            <textarea className="textarea textarea--tall" defaultValue={"MADE IN KOREA\nCTN NO. 1-500\nGROSS WT: 12,400 KGS"} />
-          </div>
-        </div>
-      </div>
-
-      {/* DESCRIPTION */}
-      <div className="zone-description">
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Description</span></div>
-          <div className="panel__body" style={{ flex: 1 }}>
-            <div className="li" style={{ marginBottom: 8 }}>
-              <span className="li__label">Clause</span>
-              <div className="li__input">
-                <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}>
-                  <option value="">-- 부지약관 --</option>
-                  <option>SAID TO CONTAIN</option>
-                  <option>SHIPPER&apos;S LOAD AND COUNT</option>
-                </select>
-              </div>
+      {/* Row 3: Marks | Description | Item */}
+      <div style={{ display: "flex", gap: 10, flex: "3 1 0", minHeight: 0 }}>
+        <div className="zone-marks" style={{ flex: "34 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Marks & Numbers</span></div>
+            <div className="panel__body" style={{ flex: 1 }}>
+              <textarea className="textarea textarea--tall" defaultValue={"MADE IN KOREA\nCTN NO. 1-500\nGROSS WT: 12,400 KGS"} />
             </div>
-            <textarea className="textarea textarea--tall" defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS\nSAID TO CONTAIN"} />
           </div>
         </div>
-      </div>
-
-      {/* ITEM */}
-      <div className="zone-item">
-        <div className="panel panel--full">
-          <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Item / HS Code</span><span className="panel__rowcount">1</span><div className="panel__actions"><button className="btn btn--sm">+ Add</button></div></div>
-          <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridList columns={ITEM_COLS} data={ITEM_DATA} rowKey={(_, i) => i} />
+        <div className="zone-description" style={{ flex: "33 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Description</span></div>
+            <div className="panel__body" style={{ flex: 1 }}>
+              <div className="li" style={{ marginBottom: 8 }}>
+                <span className="li__label">Clause</span>
+                <div className="li__input">
+                  <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}>
+                    <option value="">-- 부지약관 --</option>
+                    <option>SAID TO CONTAIN</option>
+                    <option>SHIPPER&apos;S LOAD AND COUNT</option>
+                  </select>
+                </div>
+              </div>
+              <textarea className="textarea textarea--tall" defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS\nSAID TO CONTAIN"} />
+            </div>
+          </div>
+        </div>
+        <div style={{ flex: "33 1 0", minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="panel">
+            <div className="panel__head">
+              <div className="panel__title-accent" />
+              <span className="panel__title">Item / HS Code</span>
+              <span className="panel__rowcount">{ITEM_DATA.length}</span>
+              <div className="panel__actions"><button className="btn btn--sm">+</button></div>
+            </div>
+            <GridList columns={ITEM_COLS} data={ITEM_DATA} rowKey={(_, i) => i} style={{ height: "150px" }} />
           </div>
         </div>
       </div>

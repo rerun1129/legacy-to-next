@@ -6,7 +6,9 @@ interface RateRow {
   sell: string; buy: string; cur: string;
 }
 
-type AccountRow = Record<string, never>;
+interface AccountRow {
+  docType: string; docNo: string; issueDate: string; amount: string; currency: string; status: string;
+}
 
 const SELLING_COLS: GridColumn<RateRow>[] = [
   { key: "_no",    label: "#",          className: "row-num",
@@ -64,10 +66,21 @@ const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
 ];
 
 const rateRows: RateRow[] = [
-  { code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
-  { code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
-  { code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
-  { code: "LSF", desc: "Low Sulphur Fee",   qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
+  { code: "OFR", desc: "Ocean Freight",      qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
+  { code: "BAF", desc: "Bunker Adjustment",  qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
+  { code: "CAF", desc: "Currency Adj.",      qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
+  { code: "LSF", desc: "Low Sulphur Fee",    qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
+  { code: "THC", desc: "Terminal Handling",  qty: "2 CONT", unit: "CONT", sell: "95.00",  buy: "80.00",  cur: "USD" },
+  { code: "DOC", desc: "Documentation Fee", qty: "1 BL",   unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
+];
+
+const accountRows: AccountRow[] = [
+  { docType: "INVOICE",     docNo: "INV-20260415", issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
+  { docType: "C/I",         docNo: "CI-20260415",  issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
+  { docType: "DEBIT NOTE",  docNo: "DN-20260420",  issueDate: "2026-04-20", amount: "1,490.00",  currency: "USD", status: "미결"    },
+  { docType: "CREDIT NOTE", docNo: "CN-20260421",  issueDate: "2026-04-21", amount: "320.00",    currency: "USD", status: "미결"    },
+  { docType: "RECEIPT",     docNo: "REC-20260423", issueDate: "2026-04-23", amount: "1,170.00",  currency: "USD", status: "수령"    },
+  { docType: "B/L COPY",   docNo: "BLC-20260424", issueDate: "2026-04-24", amount: "0.00",      currency: "USD", status: "발행완료" },
 ];
 
 export function FreightTab() {
@@ -112,46 +125,31 @@ export function FreightTab() {
 
       {/* Selling (Debit) */}
       <div>
-        <div className="panel panel--full">
+        <div className="panel">
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Selling / Debit</span>
             <span className="panel__rowcount">{rateRows.length}</span>
             <div className="panel__actions">
-              <button className="btn btn--sm">+ Add</button>
+              <button className="btn btn--sm">+</button>
             </div>
           </div>
-          <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridList columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} />
-          </div>
-          <div className="grid-foot">
-            <div className="grid-foot__spacer" />
-            <span>Total Sell: <strong className="grid-foot__total">USD 1,300.00</strong></span>
-            <span>≈ <strong className="grid-foot__total">₩ 1,789,450</strong></span>
-          </div>
+          <GridList columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} style={{ flex: 1 }} />
         </div>
       </div>
 
       {/* Buying (Credit) */}
       <div>
-        <div className="panel panel--full">
+        <div className="panel">
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Buying / Credit</span>
             <span className="panel__rowcount">{rateRows.length}</span>
             <div className="panel__actions">
-              <button className="btn btn--sm">+ Add</button>
+              <button className="btn btn--sm">+</button>
             </div>
           </div>
-          <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
-            <GridList columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} />
-          </div>
-          <div className="grid-foot">
-            <div className="grid-foot__spacer" />
-            <span>Total Buy: <strong className="grid-foot__total">USD 1,050.00</strong></span>
-            <span>Margin: <strong className="grid-foot__total" style={{ color: "var(--success)" }}>USD 250.00</strong></span>
-            <span>≈ <strong className="grid-foot__total" style={{ color: "var(--success)" }}>₩ 344,125</strong></span>
-          </div>
+          <GridList columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} style={{ flex: 1 }} />
         </div>
       </div>
 
@@ -161,13 +159,12 @@ export function FreightTab() {
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Account Documents</span>
-            <span className="panel__rowcount">0</span>
+            <span className="panel__rowcount">{accountRows.length}</span>
           </div>
           <div className="panel__body--flush">
             <GridList
               columns={ACCOUNT_COLS}
-              data={[]}
-              emptyMessage="No account documents"
+              data={accountRows}
             />
           </div>
         </div>

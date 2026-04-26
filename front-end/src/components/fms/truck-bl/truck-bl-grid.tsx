@@ -30,7 +30,7 @@ export function TruckBlGrid() {
       render: (value) => (
         <span
           className="cell-hbl"
-          onDoubleClick={() => router.push("/fms/truck-bl/new")}
+          onDoubleClick={() => router.push("/fms/truck-bl/entry")}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"
         >

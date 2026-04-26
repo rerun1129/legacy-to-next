@@ -21,7 +21,7 @@ export function TruckBLEntry() {
         <div className="page-head__actions">
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm btn--primary">
-            <Save size={12} />Save<span className="btn__kbd">⌘S</span>
+            <Save size={12} />Save
           </button>
         </div>
       </div>
@@ -96,16 +96,16 @@ export function TruckBLEntry() {
               <div className="sched-list">
                 <div className="li"><span className="li__label" style={{ color: "var(--ink-4)" }}>Vessel</span><div className="li__input"><input readOnly value="TRUCK" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--bg-sunken)", color: "var(--ink-3)", fontFamily: "var(--font-mono)" }} /></div></div>
                 <div className="sched-pair">
-                  {[{ l: "ETD *", v: "2026-04-24" }, { l: "ETA *", v: "2026-04-25" }].map((f) => (
+                  {[{ l: "ETD", v: "2026-04-24" }, { l: "ETA", v: "2026-04-25" }].map((f) => (
                     <div key={f.l} className="li">
                       <span className="li__label is-required">{f.l}</span>
                       <div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
                     </div>
                   ))}
                 </div>
-                {[{ l: "POL *", c: "KRBSAN", n: "Busan" }, { l: "POD *", c: "KRSEL", n: "Seoul" }].map((f) => (
+                {[{ l: "POL", c: "KRBSAN", n: "Busan" }, { l: "POD", c: "KRSEL", n: "Seoul" }].map((f) => (
                   <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
-                    <span className="lcn__label">{f.l}</span>
+                    <span className="lcn__label is-required">{f.l}</span>
                     <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={f.c} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
                     <input className="lcn__name" defaultValue={f.n} placeholder="Location" />
                   </div>
@@ -178,11 +178,6 @@ export function TruckBLEntry() {
       )}
 
       {tab === "freight" && <FreightTab />}
-
-      <div className="footbar">
-        <span className="footbar__shortcut"><kbd className="kbd">⌘S</kbd> Save</span>
-        <span style={{ marginLeft: "auto" }}>Truck B/L — 내륙운송 전용</span>
-      </div>
     </>
   );
 }

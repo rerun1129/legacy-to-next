@@ -1,9 +1,10 @@
 import type { MasterVariantConfig } from "@/lib/bl-variants";
+import { getModeLabels } from "@/lib/bl-mode-labels";
 
 interface Props { variant: MasterVariantConfig }
 
 export function MasterEdiTab({ variant }: Props) {
-  const isSea = variant.mode === "SEA";
+  const modeLabels = getModeLabels(variant.mode);
   return (
     <div className="page-body" style={{ overflow: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
       <div className="panel">
@@ -11,7 +12,7 @@ export function MasterEdiTab({ variant }: Props) {
         <div className="panel__body">
           <div className="form-grid form-grid--4">
             {[
-              { label: isSea ? "Master B/L No" : "Master AWB No", value: isSea ? "COSCO2404195" : "180-12345678", req: true },
+              { label: modeLabels.masterBlNo, value: isSea ? "COSCO2404195" : "180-12345678", req: true },
               { label: "EDI Item",           value: "",     req: false },
               { label: "MRN",                value: "",     req: false },
               { label: "Cargo Type",         value: "GEN",  req: false },

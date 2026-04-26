@@ -1,4 +1,4 @@
-import { Download, Truck } from "lucide-react";
+import {RotateCcw, Search, Truck} from "lucide-react";
 import { TruckBlGrid } from "@/components/fms/truck-bl/truck-bl-grid";
 
 export default function TruckBLListPage() {
@@ -10,7 +10,16 @@ export default function TruckBLListPage() {
           Truck B/L List
         </div>
         <div className="page-head__actions">
-          <button className="btn btn--sm"><Download size={12} />Export</button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
+                <button className="btn btn--sm btn--ghost">
+                    <RotateCcw size={12} />
+                    Reset
+                </button>
+                <button className="btn btn--sm btn--primary">
+                    <Search size={12} />
+                    Search
+                </button>
+            </div>
         </div>
       </div>
 
@@ -31,19 +40,10 @@ export default function TruckBLListPage() {
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
-          <button className="btn btn--sm">Reset</button>
-          <button className="btn btn--sm btn--primary">Search</button>
-        </div>
       </div>
 
       <div style={{ flex: 1, overflow: "auto", margin: "10px 14px 0", display: "flex", flexDirection: "column" }}>
         <TruckBlGrid />
-      </div>
-
-      <div className="footbar">
-        <span style={{ color: "var(--ink-4)", fontSize: "var(--fs-xs)" }}>Truck B/L No 더블클릭 → Entry</span>
-        <span style={{ marginLeft: "auto" }}>3 records</span>
       </div>
     </div>
   );

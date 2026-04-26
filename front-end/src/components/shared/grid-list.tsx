@@ -20,6 +20,7 @@ export interface GridListProps<T> {
   rowKey?: (row: T, index: number) => string | number;
   rowClassName?: (row: T, index: number) => string | undefined;
   className?: string;
+  style?: React.CSSProperties;
   emptyMessage?: string;
 }
 
@@ -30,10 +31,11 @@ export function GridList<T>({
   rowKey,
   rowClassName,
   className,
+  style,
   emptyMessage,
 }: GridListProps<T>) {
   return (
-    <div className={`grid-wrap${className ? ` ${className}` : ""}`}>
+    <div className={`grid-wrap${className ? ` ${className}` : ""}`} style={style}>
       <table className="grid--list">
         <colgroup>
           {columns.map((col) => (

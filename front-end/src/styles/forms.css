@@ -3,7 +3,7 @@
    ========================================================= */
 .toolbar {
   display: grid; grid-template-columns: repeat(8, 1fr); gap: 0;
-  padding: 10px 18px; background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 4px 0px; background: var(--surface); border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 .toolbar .field { padding: 0 14px; border-right: 1px dashed var(--divider); }
@@ -15,12 +15,12 @@
 .tabbar {
   display: flex; align-items: flex-end; padding: 0 18px;
   background: var(--surface); border-bottom: 1px solid var(--border);
-  gap: 2px; height: 38px; flex-shrink: 0;
+  gap: 2px; height: 24px; flex-shrink: 0;
 }
 /* 엔트리 탭: 최상단 탭(.app__tab)과 동일한 스타일 적용 */
 .tabbar__tab {
   position: relative; top: 1px; /* tabbar 하단 border 위로 float */
-  height: 32px; padding: 0 16px;
+  height: 20px; padding: 0 16px;
   display: flex; align-items: center; gap: 8px;
   font-size: var(--fs-sm); color: var(--ink-3);
   border: 1px solid var(--border); border-bottom: none;
@@ -59,23 +59,24 @@
   border-radius: var(--radius-lg); overflow: hidden;
 }
 .panel__head {
-  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px; padding: 0 8px; height: 32px;
   border-bottom: 1px solid var(--divider); background: var(--surface-2);
 }
 .panel__title {
-  font-size: 12px;     /* 입력 필드 라벨(10.5px/11.5px)과 차별화 */
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px;     /* 입력 필드 라벨(10.5px/11.5px)과 차별화 */
   font-weight: 700;    /* 필드 라벨(500/600)보다 굵게 */
   color: var(--ink);   /* 최대 대비 — 입력 라벨(ink-2/ink-3)보다 강하게 */
   text-transform: uppercase; letter-spacing: 0.08em;
 }
-.panel__title-accent { width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+.panel__title-accent { width: 3px; height: 12px; background: var(--accent); border-radius: 2px; }
 .panel__hint { margin-left: auto; font-size: var(--fs-xs); color: var(--ink-4); }
 .panel__body { padding: var(--card-pad-y) var(--card-pad-x); }
 .panel__body--tight { padding: 10px 14px; }
 .panel__body--flush { padding: 0; }
 .panel__rowcount {
   font-family: var(--font-mono); font-size: 11px; font-weight: 600;
-  padding: 2px 8px; border-radius: 4px;
+  padding: 0px 4px; border-radius: 4px;
   background: var(--accent-soft); color: var(--accent-ink);
   border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
   margin-left: 8px;
