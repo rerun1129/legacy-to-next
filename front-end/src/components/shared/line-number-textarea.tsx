@@ -39,7 +39,7 @@ export function LineNumberTextarea({ defaultValue = "", placeholder, style }: Pr
         ref={gutterRef}
         aria-hidden
         style={{
-          width:         30,
+          width:         20,
           paddingTop:    8,
           paddingBottom: 8,
           paddingRight:  6,

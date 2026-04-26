@@ -3,15 +3,38 @@
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import { PackageField } from "@/components/shared/panel-fields";
 
 interface Props { variant: MasterVariantConfig }
 
-function LiField({ label, value }: { label: string; value: string }) {
+const UNIT_SEL: React.CSSProperties = {
+  height: 24, padding: "0 2px", fontSize: 10, flexShrink: 0, width: 44, outline: "none",
+  border: "1px solid var(--border)", borderRadius: 4, background: "var(--surface-0)", color: "var(--ink)",
+};
+
+function LiField({ label, value, numeric }: { label: string; value: string; numeric?: boolean }) {
   return (
     <div className="li">
       <span className="li__label">{label}</span>
       <div className="li__input">
-        <input defaultValue={value} style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 10 }} />
+        {numeric
+          ? <input type="number" step="any" defaultValue={value.replace(/,/g, "")}
+              style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 10 }} />
+          : <input defaultValue={value} style={{ width: "100%", height: 24, padding: "0 6px", fontSize: 10 }} />
+        }
+      </div>
+    </div>
+  );
+}
+
+function GWField({ value = "30600" }: { value?: string }) {
+  return (
+    <div className="li">
+      <span className="li__label">G/W</span>
+      <div className="li__input" style={{ display: "flex", gap: 4 }}>
+        <input type="number" step="any" defaultValue={value.replace(/[^0-9.]/g, "")}
+          style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }} />
+        <select style={UNIT_SEL}><option>KGS</option><option>LBS</option></select>
       </div>
     </div>
   );
@@ -24,24 +47,24 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const cargoBase: FieldItemDef[] = [
     { key: "main-item", render: () => <LiField label="Main Item" value="ELECTRONIC GOODS" /> },
     { key: "hs-code",   render: () => <LiField label="HS Code"   value="8517.13" /> },
-    { key: "package",   render: () => <LiField label="Package"   value="1300 CTN" /> },
-    { key: "gw",        render: () => <LiField label="G/W"       value="30,600 KGS" /> },
-    { key: "cbm",       render: () => <LiField label="CBM"       value="87.5" /> },
+    { key: "package",   render: () => <PackageField qty="1300" unit="CTN" height={24} /> },
+    { key: "gw",        render: () => <GWField value="30600" /> },
+    { key: "cbm",       render: () => <LiField label="CBM"       value="87.5"  numeric /> },
   ];
   const cargoExtras: FieldItemDef[] = isSea
-    ? [{ key: "r-ton", render: () => <LiField label="R/Ton" value="" /> }]
+    ? [{ key: "r-ton", render: () => <LiField label="R/Ton" value="" numeric /> }]
     : [
-        { key: "vol-wt",    render: () => <LiField label="Volume W/T" value="14,583" /> },
-        { key: "charge-wt", render: () => <LiField label="Charge W/T" value="30,600" /> },
-        { key: "rate-class",render: () => <LiField label="Rate Class" value="GCR" /> },
+        { key: "vol-wt",     render: () => <LiField label="Volume W/T" value="14583" numeric /> },
+        { key: "charge-wt",  render: () => <LiField label="Charge W/T" value="30600" numeric /> },
+        { key: "rate-class", render: () => <LiField label="Rate Class" value="GCR" /> },
       ];
   const cargoItems = [...cargoBase, ...cargoExtras];
 
   const seaDoc: FieldItemDef[] = [
-    { key: "settle",    render: () => <LiField label="Settle Partner" value="" /> },
-    { key: "co-load",   render: () => <LiField label="Co-Load Agent"  value="" /> },
-    { key: "operator",  render: () => <LiField label="Operator"       value="KYS" /> },
-    { key: "team",      render: () => <LiField label="Team"           value="SEA-EXP" /> },
+    { key: "settle",   render: () => <LiField label="Settle Partner" value="" /> },
+    { key: "co-load",  render: () => <LiField label="Co-Load Agent"  value="" /> },
+    { key: "operator", render: () => <LiField label="Operator"       value="KYS" /> },
+    { key: "team",     render: () => <LiField label="Team"           value="SEA-EXP" /> },
   ];
   const airDocBase: FieldItemDef[] = [
     { key: "co-load-type",  render: () => <LiField label="Co-Load Type"  value="" /> },
@@ -65,7 +88,6 @@ export function MasterCargoDocPanel({ variant }: Props) {
         <>
           <div className="subhead"><div className="subhead__bar" />Cargo</div>
           <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} />
-          <div style={{ marginTop: 8 }}><button className="btn btn--sm">Apply Say</button></div>
         </>
       ),
     },

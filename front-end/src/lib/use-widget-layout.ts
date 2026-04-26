@@ -3,9 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type WidgetKey =
-  | "party" | "schedule" | "trade"
-  | "container" | "marks" | "description" | "item-hs";
+export type WidgetKey = string; // 엔트리 타입별로 다른 위젯 키 사용 가능
 
 export interface WidgetPosition {
   key: WidgetKey;
@@ -23,7 +21,10 @@ export interface PageLayout {
 interface LayoutStore {
   layouts:    Record<string, PageLayout>;
   editMode:   boolean;
+  canEdit:    boolean;
   setEditMode:   (on: boolean) => void;
+  setCanEdit:    (on: boolean) => void;
+  initLayout:    (scope: string, defaults: WidgetPosition[]) => void;
   getLayout:     (scope: string, defaults: WidgetPosition[]) => PageLayout;
   moveWidget:    (scope: string, key: WidgetKey, col: number, row: number) => void;
   resizeWidget:  (scope: string, key: WidgetKey, colSpan: number, rowSpan: number) => void;
@@ -37,13 +38,20 @@ export const useWidgetLayout = create<LayoutStore>()(
     (set, get) => ({
       layouts:  {},
       editMode: false,
+      canEdit:  true,
 
-      setEditMode(on) {
-        set({ editMode: on });
+      setEditMode(on) { set({ editMode: on }); },
+      setCanEdit(on)  { set({ canEdit: on, ...(!on && { editMode: false }) }); },
+
+      // useEffect 에서만 호출 — 레이아웃이 없을 때 초기값을 스토어에 저장
+      initLayout(scope, defaults) {
+        if (get().layouts[scope]) return;
+        set(s => ({
+          layouts: { ...s.layouts, [scope]: { visible: defaults, hidden: [] } },
+        }));
       },
 
       getLayout(scope, defaults) {
-        // 렌더 중 set() 호출 금지 — 저장된 레이아웃이 없으면 defaults를 폴백으로 반환만 함
         return get().layouts[scope] ?? { visible: defaults, hidden: [] };
       },
 

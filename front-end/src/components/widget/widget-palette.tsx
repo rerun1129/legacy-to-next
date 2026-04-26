@@ -4,22 +4,23 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { RotateCcw, GripHorizontal, ChevronUp, ChevronDown, X } from "lucide-react";
 import type { WidgetKey } from "@/lib/use-widget-layout";
-import { REGISTRY_MAP, WIDGET_REGISTRY } from "./widget-registry";
+import type { WidgetDef }  from "./widget-registry";
 
 interface Props {
-  scope:   string;
-  hidden:  WidgetKey[];
-  onShow:  (key: WidgetKey) => void;
-  onReset: () => void;
-  onClose: () => void;
+  scope:    string;
+  registry: WidgetDef[];
+  hidden:   WidgetKey[];
+  onShow:   (key: WidgetKey) => void;
+  onReset:  () => void;
+  onClose:  () => void;
 }
 
-export function WidgetPalette({ hidden, onShow, onReset, onClose }: Props) {
+export function WidgetPalette({ registry, hidden, onShow, onReset, onClose }: Props) {
   const [pos, setPos]           = useState({ x: 24, y: 80 });
   const [collapsed, setCollapsed] = useState(false);
 
-  const allKeys   = WIDGET_REGISTRY.map(d => d.key);
   const hiddenSet = new Set(hidden);
+  const defMap    = Object.fromEntries(registry.map(d => [d.key, d]));
 
   function handleDragStart(e: React.MouseEvent) {
     e.preventDefault();
@@ -85,8 +86,8 @@ export function WidgetPalette({ hidden, onShow, onReset, onClose }: Props) {
       {/* 바디 — 접기 시 숨김 */}
       {!collapsed && (
         <div className="widget-palette__body">
-          {allKeys.map(key => {
-            const def      = REGISTRY_MAP[key];
+          {registry.map(({ key }) => {
+            const def      = defMap[key];
             const isHidden = hiddenSet.has(key);
             return (
               <div

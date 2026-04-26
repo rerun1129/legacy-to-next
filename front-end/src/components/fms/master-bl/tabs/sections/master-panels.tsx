@@ -3,6 +3,7 @@ import type { MasterVariantConfig } from "@/lib/bl-variants";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 
+
 interface Props { variant: MasterVariantConfig }
 
 const PARTIES = ["SHIPPER", "CONSIGNEE", "NOTIFY"] as const;
@@ -12,20 +13,20 @@ function PartyBlock({ role }: { role: string }) {
   return (
     <div className="party-block">
       <div className="party-block__head">
-        <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 80, flexShrink: 0 }}>{role}</span>
-        <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
-          <div style={{ position: "relative" }}>
-            <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 18px 4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
-            <Search size={10} style={{ position: "absolute", right: 2, top: "50%", transform: "translateY(-50%)", color: "var(--ink-4)" }} />
+        <span style={{ fontSize: 11, minWidth: 90, flexShrink: 0 }}>{role}</span>
+        <div className="party-cn">
+          <div className="party-cn__code">
+            <input className="text-mono" placeholder="Code" />
+            <Search size={12} className="party-cn__icon" />
           </div>
-          <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }} />
+          <input className="party-cn__name" placeholder="Company Name" />
         </div>
         <div className="party-block__head-actions">
           {PARTY_BTNS[role] && <button className="party-block__head-btn">{PARTY_BTNS[role]}</button>}
           <button className="party-block__head-btn">Clear</button>
         </div>
       </div>
-      <textarea className="textarea" style={{ minHeight: 48, fontSize: 10 }} placeholder="Address" />
+      <LineNumberTextarea placeholder="Address (free text)" style={{ height: 108 }} />
     </div>
   );
 }

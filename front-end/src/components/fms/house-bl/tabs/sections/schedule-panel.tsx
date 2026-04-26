@@ -1,89 +1,126 @@
 import { Search } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
+import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
+import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 
 interface Props { variant: BLVariantConfig }
 
+// ── 공통 헬퍼 ──────────────────────────────────────────────
+function SchedField({ label, value, req, type = "text" }: { label: string; value: string; req?: boolean; type?: string }) {
+  return (
+    <div className="li">
+      <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
+      <div className="li__input">
+        {type === "date"
+          ? <PanelDateInput defaultValue={value} required={req} />
+          : <input type={type} defaultValue={value} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />}
+      </div>
+    </div>
+  );
+}
+
+function LinerField() {
+  return (
+    <div className="li">
+      <span className="li__label is-required">Liner</span>
+      <div className="li__input" style={{ gap: 4 }}>
+        <input placeholder="Code" defaultValue="COSCO" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+        <input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
+      </div>
+    </div>
+  );
+}
+
+function LcnField({ label, req, code, name }: { label: string; req?: boolean; code: string; name: string }) {
+  return (
+    <div className="lcn">
+      <span className={`lcn__label${req ? " is-required" : ""}`}>{label}</span>
+      <div className="lcn__code" style={{ position: "relative" }}>
+        <input defaultValue={code} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+        <Search size={12} className="lcn__icon" />
+      </div>
+      <input className="lcn__name" defaultValue={name} placeholder="Port Name" />
+    </div>
+  );
+}
+
+// ── Field item 정의 ─────────────────────────────────────────
+const LINER_ITEMS: FieldItemDef[] = [
+  { key: "liner",    render: () => <LinerField /> },
+  { key: "vessel",   render: () => <SchedField label="Vessel"   value="COSCO EXCELLENCE" req /> },
+  { key: "voyage",   render: () => <SchedField label="Voyage"   value="0412E" req /> },
+  { key: "etd",      render: () => <SchedField label="ETD"      value="2026-04-24" req type="date" /> },
+  { key: "eta",      render: () => <SchedField label="ETA"      value="2026-05-08" req type="date" /> },
+  { key: "on-board", render: () => <SchedField label="On Board" value="" type="date" /> },
+];
+
+const PORT_ITEMS: FieldItemDef[] = [
+  { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
+  { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
+  { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
+];
+
+function IssueSection({ issueFields, panelScope }: { issueFields: string[]; panelScope: string }) {
+  const issueItems: FieldItemDef[] = issueFields.map(f => ({
+    key:    f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+    render: () => (
+      <SchedField
+        label={f}
+        value={f === "Issue Date" ? "2026-04-20" : f === "No. of B/L" ? "3" : f === "Issue Place" ? "BUSAN" : ""}
+        type={f.includes("Date") ? "date" : "text"}
+      />
+    ),
+  }));
+  return (
+    <>
+      <div className="subhead"><div className="subhead__bar" />Issue Information</div>
+      <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} />
+    </>
+  );
+}
+
+function DoDateSection() {
+  return <SchedField label="D/O Date" value="" type="date" />;
+}
+
+// ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
+  const panelScope = `schedule-panel.${variant.key}`;
+
+  const fields: FieldWidgetDef[] = [
+    {
+      key:   "liner",
+      label: "Liner & Vessel",
+      render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={LINER_ITEMS} />,
+    },
+    {
+      key:   "ports",
+      label: "Ports",
+      render: () => (
+        <>
+          <div className="subhead"><div className="subhead__bar" />Ports</div>
+          <FieldItemGrid itemScope={`${panelScope}.ports`} items={PORT_ITEMS} />
+        </>
+      ),
+    },
+    ...(variant.issueFields.length > 0
+      ? [{ key: "issue", label: "Issue Information", render: () => <IssueSection issueFields={variant.issueFields} panelScope={panelScope} /> }]
+      : []),
+    ...(variant.hasDoDate
+      ? [{ key: "do-date", label: "D/O Date",          render: () => <DoDateSection /> }]
+      : []),
+  ];
+
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div className="panel__head">
-          <div className="panel__title-accent" />
-          <span className="panel__title">Schedule</span>
-        </div>
-        <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-          <div className="sched-list">
-            <div className="li">
-              <span className="li__label is-required">Liner</span>
-              <div className="li__input" style={{ gap: 4 }}>
-                <input placeholder="Code" defaultValue="COSCO" style={{ width: 80, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-                <input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
-              </div>
-            </div>
-            <div className="sched-pair">
-              {[{ l: "Vessel", v: "COSCO EXCELLENCE" }, { l: "Voyage", v: "0412E" }].map((f) => (
-                <div key={f.l} className="li">
-                  <span className="li__label is-required">{f.l}</span>
-                  <div className="li__input"><input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
-                </div>
-              ))}
-            </div>
-            <div className="sched-pair">
-              {[{ l: "ETD", t: "date", v: "2026-04-24" }, { l: "ETA", t: "date", v: "2026-05-08" }].map((f) => (
-                <div key={f.l} className="li">
-                  <span className="li__label is-required">{f.l}</span>
-                  <div className="li__input"><input type={f.t} defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
-                </div>
-              ))}
-            </div>
-            <div className="li"><span className="li__label">On Board</span><div className="li__input"><input type="date" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>
-
-            <div style={{ marginTop: 8 }}>
-              <div className="subhead"><div className="subhead__bar" />Ports</div>
-              {[
-                { label: "POL",      req: true,  code: "KRBSAN", name: "Busan" },
-                { label: "POD",      req: true,  code: "CNSHA",  name: "Shanghai" },
-                { label: "Delivery", req: false, code: "",       name: "" },
-              ].map((p) => (
-                <div key={p.label} className="lcn" style={{ marginBottom: 4 }}>
-                  <span className={`lcn__label${p.req ? " is-required" : ""}`}>{p.label}</span>
-                  <div className="lcn__code" style={{ position: "relative" }}>
-                    <input defaultValue={p.code} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-                    <Search size={12} className="lcn__icon" />
-                  </div>
-                  <input className="lcn__name" defaultValue={p.name} placeholder="Port Name" />
-                </div>
-              ))}
-            </div>
-
-            {/* Issue Information */}
-            {variant.issueFields.length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <div className="subhead"><div className="subhead__bar" />Issue Information</div>
-                {variant.issueFields.map((f) => (
-                  <div key={f} className="li">
-                    <span className="li__label">{f}</span>
-                    <div className="li__input">
-                      <input
-                        type={f.includes("Date") ? "date" : "text"}
-                        defaultValue={f === "Issue Date" ? "2026-04-20" : f === "No. of B/L" ? "3" : f === "Issue Place" ? "BUSAN" : ""}
-                        style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {variant.hasDoDate && (
-              <div style={{ marginTop: 8 }}>
-                <div className="subhead"><div className="subhead__bar" />D/O Date</div>
-                <div className="li">
-                  <span className="li__label">D/O Date</span>
-                  <div className="li__input"><input type="date" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Schedule</span>
+      </div>
+      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+        <FieldWidgetList panelScope={panelScope} fields={fields} />
+      </div>
     </div>
   );
 }

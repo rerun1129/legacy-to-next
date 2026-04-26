@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download } from "lucide-react";
+import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
@@ -46,6 +47,12 @@ function renderMainTab(variant: BLVariantConfig) {
 
 export function HouseBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
+  const { setCanEdit } = useWidgetLayout();
+
+  function handleTabChange(key: string) {
+    setCanEdit(key === "main" || key === "freight");
+    setTab(key);
+  }
 
   const toolbarFields = getToolbarFields(variant);
   const defaults = getToolbarDefaults(variant);
@@ -97,7 +104,7 @@ export function HouseBLEntry({ variant }: Props) {
       {/* Tabbar */}
       <div className="tabbar">
         {tabs.map((t) => (
-          <button key={t.key} className={`tabbar__tab${tab === t.key ? " is-active" : ""}`} onClick={() => setTab(t.key)}>
+          <button key={t.key} className={`tabbar__tab${tab === t.key ? " is-active" : ""}`} onClick={() => handleTabChange(t.key)}>
             {t.label}
           </button>
         ))}

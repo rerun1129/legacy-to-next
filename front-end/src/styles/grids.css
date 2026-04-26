@@ -45,6 +45,9 @@
 }
 select.grid__cell-input { cursor: pointer; }
 td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .grid tbody tr:hover td { background: var(--surface-2); }
 .grid tbody tr.is-selected td { background: var(--accent-soft); }
 .grid__empty { padding: 40px 12px; text-align: center; color: var(--ink-muted); font-size: var(--fs-sm); }

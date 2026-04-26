@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Save, Trash2, Truck } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
+import { MainTruck }  from "./tabs/main-truck";
 
 export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
@@ -57,125 +58,7 @@ export function TruckBLEntry() {
         <div className="tabbar__spacer" />
       </div>
 
-      {/* Main tab */}
-      {tab === "main" && (
-        <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "auto auto auto", gap: 10, alignContent: "start" }}>
-
-          {/* PARTY: 4 slots */}
-          <div className="panel" style={{ gridColumn: "1 / 2", gridRow: "1 / 3" }}>
-            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Party</span></div>
-            <div className="panel__body" style={{ overflow: "auto" }}>
-              {[
-                { role: "SHIPPER",     btn: null            },
-                { role: "CONSIGNEE",   btn: "To Order"      },
-                { role: "NOTIFY",      btn: "Same as Cne."  },
-                { role: "DOC PARTNER", btn: null            },
-              ].map((p) => (
-                <div key={p.role} className="party-block">
-                  <div className="party-block__head">
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 90 }}>{p.role}</span>
-                    <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
-                      <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
-                      <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }} />
-                    </div>
-                    <div className="party-block__head-actions">
-                      {p.btn && <button className="party-block__head-btn">{p.btn}</button>}
-                      <button className="party-block__head-btn">Clear</button>
-                    </div>
-                  </div>
-                  <textarea className="textarea" style={{ minHeight: 48, fontSize: 10 }} placeholder="Address" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* SCHEDULE — simplified (no Liner, no POR/Delivery/Final) */}
-          <div className="panel">
-            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Schedule</span></div>
-            <div className="panel__body">
-              <div className="sched-list">
-                <div className="li"><span className="li__label" style={{ color: "var(--ink-4)" }}>Vessel</span><div className="li__input"><input readOnly value="TRUCK" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, background: "var(--bg-sunken)", color: "var(--ink-3)", fontFamily: "var(--font-mono)" }} /></div></div>
-                <div className="sched-pair">
-                  {[{ l: "ETD", v: "2026-04-24" }, { l: "ETA", v: "2026-04-25" }].map((f) => (
-                    <div key={f.l} className="li">
-                      <span className="li__label is-required">{f.l}</span>
-                      <div className="li__input"><input type="date" defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
-                    </div>
-                  ))}
-                </div>
-                {[{ l: "POL", c: "KRBSAN", n: "Busan" }, { l: "POD", c: "KRSEL", n: "Seoul" }].map((f) => (
-                  <div key={f.l} className="lcn" style={{ marginBottom: 4 }}>
-                    <span className="lcn__label is-required">{f.l}</span>
-                    <div className="lcn__code" style={{ position: "relative" }}><input defaultValue={f.c} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-                    <input className="lcn__name" defaultValue={f.n} placeholder="Location" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* CARGO — Trucking-specific (has Charge W/T) */}
-          <div className="panel">
-            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Cargo</span></div>
-            <div className="panel__body">
-              <div className="sched-list">
-                {[
-                  { l: "Package",    v: "1300" },
-                  { l: "Unit",       v: "CTN" },
-                  { l: "G/W",        v: "30,600 KGS" },
-                  { l: "CBM",        v: "87.5" },
-                  { l: "Charge W/T", v: "30,600", tip: "Trucking 전용" },
-                ].map((f) => (
-                  <div key={f.l} className="li">
-                    <span className="li__label">{f.l}{(f as { tip?: string }).tip ? " *" : ""}</span>
-                    <div className="li__input">
-                      <input defaultValue={f.v} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* DOCUMENT: Pick-up, Trucker — Truck-specific */}
-          <div className="panel">
-            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Document</span></div>
-            <div className="panel__body">
-              <div className="sched-list">
-                <div className="li"><span className="li__label">Pick-up Date</span><div className="li__input"><input type="date" defaultValue="2026-04-23" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>
-                <div className="lcn" style={{ marginBottom: 4 }}>
-                  <span className="lcn__label">Trucker</span>
-                  <div className="lcn__code" style={{ position: "relative" }}><input placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-                  <input className="lcn__name" placeholder="Trucker Name" />
-                </div>
-                <div className="li"><span className="li__label">Trucker PIC</span><div className="li__input"><input placeholder="담당자 성명" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>
-              </div>
-            </div>
-          </div>
-
-          {/* PERFORMANCE — no Sales Class */}
-          <div className="panel">
-            <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Performance</span></div>
-            <div className="panel__body">
-              <div className="sched-list">
-                {[
-                  { l: "Actual Customer", req: true  },
-                  { l: "Customer PIC",    req: false },
-                  { l: "Settle Partner",  req: false },
-                  { l: "Sales Man",       req: true  },
-                  { l: "Operator",        req: true  },
-                  { l: "Team",            req: true  },
-                ].map((f) => (
-                  <div key={f.l} className="li">
-                    <span className={`li__label${f.req ? " is-required" : ""}`}>{f.l}</span>
-                    <div className="li__input"><input placeholder={f.l} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {tab === "main" && <MainTruck />}
 
       {tab === "freight" && <FreightTab />}
     </>

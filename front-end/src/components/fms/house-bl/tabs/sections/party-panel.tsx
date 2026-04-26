@@ -1,66 +1,80 @@
 import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
+import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 
 interface Props { isExp: boolean }
 
+interface PartyConfig {
+  key:      string;
+  role:     string;
+  filled:   boolean;
+  required: boolean;
+}
+
+function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
+  const defaultCode =
+    cfg.role === "SHIPPER"    ? "HJTR001"  :
+    cfg.role === "CONSIGNEE"  ? "SHTRC001" : "";
+  const defaultName =
+    cfg.role === "SHIPPER"    ? "한진무역(주)"              :
+    cfg.role === "CONSIGNEE"  ? "SHANGHAI TRADING CO., LTD." : "";
+  const defaultAddr =
+    cfg.role === "SHIPPER"    ? "서울특별시 중구 을지로 100\n한진무역 빌딩 12층\nTEL: +82-2-1234-5678" :
+    cfg.role === "CONSIGNEE"  ? "1200 LUJIAZUI RING ROAD\nPUDONG NEW DISTRICT\nSHANGHAI 200120, CHINA" : "";
+
+  const isRequired = cfg.role === "CONSIGNEE" ? !isExp : cfg.required;
+
+  return (
+    <div className="party-block">
+      <div className="party-block__head">
+        <span className={isRequired ? "is-required" : undefined} style={{ fontSize: 11, minWidth: 90, flexShrink: 0 }}>
+          {cfg.role}
+        </span>
+        <div className="party-cn">
+          <div className="party-cn__code">
+            <input className="text-mono" placeholder="Code" defaultValue={cfg.filled ? defaultCode : ""} />
+            <Search size={12} className="party-cn__icon" />
+          </div>
+          <input className="party-cn__name" placeholder="Company Name" defaultValue={cfg.filled ? defaultName : ""} />
+        </div>
+        <div className="party-block__head-actions">
+          {cfg.role === "CONSIGNEE" && <button className="party-block__head-btn">To Order</button>}
+          {cfg.role === "NOTIFY"    && <button className="party-block__head-btn">Same as Cne.</button>}
+          <button className="party-block__head-btn">Clear</button>
+        </div>
+      </div>
+      <LineNumberTextarea
+        placeholder="Address (free text)"
+        defaultValue={cfg.filled ? defaultAddr : ""}
+        style={{ height: 108 }}
+      />
+    </div>
+  );
+}
+
 export function PartyPanel({ isExp }: Props) {
+  const PARTY_CONFIGS: PartyConfig[] = [
+    { key: "shipper",     role: "SHIPPER",     filled: true,  required: false },
+    { key: "consignee",   role: "CONSIGNEE",   filled: true,  required: !isExp },
+    { key: "notify",      role: "NOTIFY",      filled: false, required: false  },
+    { key: "doc-partner", role: "DOC PARTNER", filled: false, required: true   },
+  ];
+
+  const fields: FieldWidgetDef[] = PARTY_CONFIGS.map(cfg => ({
+    key:   cfg.key,
+    label: cfg.role,
+    render: () => <PartyBlock cfg={cfg} isExp={isExp} />,
+  }));
+
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div className="panel__head">
-          <div className="panel__title-accent" />
-          <span className="panel__title">Party</span>
-        </div>
-        <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-          {([
-            { role: "SHIPPER",     filled: true  },
-            { role: "CONSIGNEE",   filled: true, required: !isExp },
-            { role: "NOTIFY",      filled: false },
-            { role: "DOC PARTNER", filled: false, required: true  },
-          ] as const).map((p) => (
-            <div key={p.role} className="party-block">
-              <div className="party-block__head">
-                <span style={{ fontSize: 11, color: "var(--ink)", minWidth: 90, flexShrink: 0 }}>
-                  {p.role}
-                  {(p as { required?: boolean }).required && (
-                    <span style={{ color: "var(--required)", marginLeft: 3 }}>*</span>
-                  )}
-                </span>
-                <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 8, flex: "1 1 auto", alignItems: "center", minWidth: 180 }}>
-                  <div style={{ position: "relative" }}>
-                    <input
-                      className="text-mono"
-                      placeholder="Code"
-                      defaultValue={p.filled ? (p.role === "SHIPPER" ? "HJTR001" : p.role === "CONSIGNEE" ? "SHTRC001" : "") : ""}
-                      style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 20px 4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }}
-                    />
-                    <Search size={12} style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", color: "var(--ink-4)", cursor: "pointer" }} />
-                  </div>
-                  <input
-                    placeholder="Company Name"
-                    defaultValue={p.filled ? (p.role === "SHIPPER" ? "한진무역(주)" : p.role === "CONSIGNEE" ? "SHANGHAI TRADING CO., LTD." : "") : ""}
-                    style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }}
-                  />
-                </div>
-                <div className="party-block__head-actions">
-                  {p.role === "CONSIGNEE" && <button className="party-block__head-btn">To Order</button>}
-                  {p.role === "NOTIFY"    && <button className="party-block__head-btn">Same as Cne.</button>}
-                  <button className="party-block__head-btn">Clear</button>
-                </div>
-              </div>
-              <LineNumberTextarea
-                placeholder="Address (free text)"
-                defaultValue={
-                  p.filled && p.role === "SHIPPER"
-                    ? "서울특별시 중구 을지로 100\n한진무역 빌딩 12층\nTEL: +82-2-1234-5678"
-                    : p.filled && p.role === "CONSIGNEE"
-                    ? "1200 LUJIAZUI RING ROAD\nPUDONG NEW DISTRICT\nSHANGHAI 200120, CHINA"
-                    : ""
-                }
-                style={{ height: 100 }}
-              />
-            </div>
-          ))}
-        </div>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Party</span>
+      </div>
+      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+        <FieldWidgetList panelScope="party-panel" fields={fields} />
+      </div>
     </div>
   );
 }

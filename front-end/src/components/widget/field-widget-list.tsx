@@ -1,0 +1,162 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useWidgetLayout }      from "@/lib/use-widget-layout";
+import { useCurrentUser }       from "@/lib/use-current-user";
+import { useFieldLayout }       from "@/lib/use-field-layout";
+import { FieldWidgetContainer } from "./field-widget-container";
+
+export interface FieldWidgetDef {
+  key:           string;
+  label:         string;
+  render:        () => React.ReactNode;
+  alwaysVisible?: boolean;
+}
+
+interface DragState {
+  key:         string;
+  origIndex:   number;
+  deltaY:      number;
+  insertIndex: number;
+  itemHeight:  number;
+}
+
+interface Props {
+  panelScope: string;
+  fields:     FieldWidgetDef[];
+}
+
+export function FieldWidgetList({ panelScope, fields }: Props) {
+  const { editMode }      = useWidgetLayout();
+  const { currentUserId } = useCurrentUser();
+  const fullScope         = `${currentUserId}.${panelScope}`;
+  const defaultOrder      = fields.map(f => f.key);
+
+  const { getFieldLayout, initFieldLayout, reorderFields, hideField, showField, resetFieldLayout } =
+    useFieldLayout();
+
+  useEffect(() => {
+    initFieldLayout(fullScope, defaultOrder);
+  }, [fullScope]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const layout = getFieldLayout(fullScope, defaultOrder);
+
+  const visibleDefs = layout.order
+    .map(k => fields.find(f => f.key === k))
+    .filter((f): f is FieldWidgetDef => !!f);
+
+  const hiddenDefs = fields.filter(f => layout.hidden.includes(f.key));
+
+  // ── Drag state ──────────────────────────────────────────────
+  const [dragState, setDragState] = useState<DragState | null>(null);
+  const containerRef              = useRef<HTMLDivElement>(null);
+
+  // tab DnD 와 동일한 알고리즘 — 수직(Y) 방향 적용
+  // i < origIndex && remainingIndex >= insertIndex → 아래로 shift (itemHeight)
+  // i > origIndex && remainingIndex <  insertIndex → 위로  shift (-itemHeight)
+  function getItemStyle(index: number): React.CSSProperties {
+    if (!dragState || Math.abs(dragState.deltaY) <= 4) return {};
+    const { origIndex, deltaY, insertIndex, itemHeight } = dragState;
+
+    if (index === origIndex) {
+      return { transform: `translateY(${deltaY}px)`, transition: "none", position: "relative", zIndex: 10 };
+    }
+
+    const ri = index < origIndex ? index : index - 1;
+    let shift = 0;
+    if (index < origIndex && ri >= insertIndex) shift =  itemHeight;
+    else if (index > origIndex && ri < insertIndex) shift = -itemHeight;
+
+    return { transform: `translateY(${shift}px)`, transition: "transform 150ms ease" };
+  }
+
+  function handleDragStart(e: React.MouseEvent, key: string) {
+    if (e.button !== 0) return;
+
+    const container = containerRef.current!;
+    const origIndex = visibleDefs.findIndex(f => f.key === key);
+    const itemEls   = Array.from(container.querySelectorAll<HTMLElement>(".field-widget-item"));
+    const containerTop = container.getBoundingClientRect().top;
+
+    const centers    = itemEls.map(el => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2 - containerTop;
+    });
+    const itemHeight = itemEls[origIndex]?.getBoundingClientRect().height ?? 60;
+    const startY     = e.clientY;
+
+    // 클로저 내 가변 변수 — setState 콜백 안에서 다른 setState 호출 방지
+    let latestInsert = origIndex;
+    let latestDeltaY = 0;
+
+    const onMove = (ev: MouseEvent) => {
+      const deltaY  = ev.clientY - startY;
+      latestDeltaY  = deltaY;
+      const dragCenter = centers[origIndex] + deltaY;
+      const rest    = centers.filter((_, i) => i !== origIndex);
+      let   insertIdx  = 0;
+      for (let i = 0; i < rest.length; i++) {
+        if (dragCenter > rest[i]) insertIdx = i + 1;
+      }
+      latestInsert = insertIdx;
+      setDragState({ key, origIndex, deltaY, insertIndex: insertIdx, itemHeight });
+    };
+
+    const onUp = () => {
+      if (latestInsert !== origIndex && Math.abs(latestDeltaY) > 4) {
+        reorderFields(fullScope, origIndex, latestInsert);
+      }
+      setDragState(null);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup",   onUp);
+    };
+
+    setDragState({ key, origIndex, deltaY: 0, insertIndex: origIndex, itemHeight });
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup",   onUp);
+  }
+
+  return (
+    <div className="field-widget-list">
+      <div ref={containerRef}>
+        {visibleDefs.map((def, index) => (
+          <div
+            key={def.key}
+            className={`field-widget-item${dragState?.key === def.key ? " is-dragging" : ""}`}
+            style={getItemStyle(index)}
+          >
+            <FieldWidgetContainer
+              label={def.label}
+              editMode={editMode}
+              canHide={!def.alwaysVisible}
+              onHide={() => hideField(fullScope, def.key)}
+              onDragStart={ev => handleDragStart(ev, def.key)}
+            >
+              {def.render()}
+            </FieldWidgetContainer>
+          </div>
+        ))}
+      </div>
+
+      {editMode && hiddenDefs.length > 0 && (
+        <div className="field-widget-hidden-bar">
+          {hiddenDefs.map(def => (
+            <button
+              key={def.key}
+              className="field-widget-hidden-pill"
+              onClick={() => showField(fullScope, def.key)}
+            >
+              + {def.label}
+            </button>
+          ))}
+          <button
+            className="field-widget-hidden-pill field-widget-hidden-pill--reset"
+            onClick={() => resetFieldLayout(fullScope, defaultOrder)}
+          >
+            초기화
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

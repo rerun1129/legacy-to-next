@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useWidgetLayout } from "@/lib/use-widget-layout";
 import Link from "next/link";
 import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
@@ -22,6 +23,12 @@ function getToolbarFields(variant: MasterVariantConfig) {
 
 export function MasterBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
+  const { setCanEdit } = useWidgetLayout();
+
+  function handleTabChange(key: string) {
+    setCanEdit(key === "main" || key === "freight");
+    setTab(key);
+  }
   const modeLabels = getModeLabels(variant.mode);
   const toolbarFields = getToolbarFields(variant);
 
@@ -85,7 +92,7 @@ export function MasterBLEntry({ variant }: Props) {
       {/* Tabbar */}
       <div className="tabbar">
         {tabs.map((t) => (
-          <button key={t.key} className={`tabbar__tab${tab === t.key ? " is-active" : ""}`} onClick={() => setTab(t.key)}>
+          <button key={t.key} className={`tabbar__tab${tab === t.key ? " is-active" : ""}`} onClick={() => handleTabChange(t.key)}>
             {t.label}
           </button>
         ))}

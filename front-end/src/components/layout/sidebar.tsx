@@ -125,7 +125,7 @@ export function Sidebar() {
     router.push(href);
   }
 
-  const { editMode, setEditMode } = useWidgetLayout();
+  const { editMode, setEditMode, canEdit } = useWidgetLayout();
 
   useEffect(() => { setEditMode(false); }, [pathname, setEditMode]);
 
@@ -211,16 +211,19 @@ export function Sidebar() {
 
       {/* ── 하단: 위젯 편집 토글 ── */}
       <div style={{ flex: 1 }} />
-      <div style={{ padding: "8px 4px", borderTop: "1px solid var(--border)" }}>
-        <button
-          className={`side-edit-btn${editMode ? " is-active" : ""}`}
-          onClick={() => setEditMode(!editMode)}
-          title="위젯 편집 모드 on/off"
-        >
-          <LayoutGrid size={14} style={{ flexShrink: 0 }} />
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>Entry 위젯 편집</span>
-        </button>
-      </div>
+      {pathname.includes("/entry") && (
+        <div style={{ padding: "8px 4px", borderTop: "1px solid var(--border)" }}>
+          <button
+            className={`side-edit-btn${editMode ? " is-active" : ""}${!canEdit ? " is-disabled" : ""}`}
+            onClick={() => canEdit && setEditMode(!editMode)}
+            disabled={!canEdit}
+            title={canEdit ? "위젯 편집 모드 on/off" : "Main / Freight 탭에서만 사용 가능"}
+          >
+            <LayoutGrid size={14} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>Entry 위젯 편집</span>
+          </button>
+        </div>
+      )}
     </nav>
   );
 }

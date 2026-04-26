@@ -110,9 +110,12 @@ function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
     {
       key: "legs", label: "Schedule Legs",
       render: () => (
-        <div style={{ overflow: "auto" }}>
-          <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(_, i) => i} />
-        </div>
+        <>
+          <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
+          <div style={{ overflow: "auto" }}>
+            <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(_, i) => i} />
+          </div>
+        </>
       ),
     },
     ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),

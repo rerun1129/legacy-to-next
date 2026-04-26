@@ -1,6 +1,7 @@
 "use client";
 
 import { useState }        from "react";
+import { Search }          from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { PanelDateInput }  from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
@@ -31,12 +32,15 @@ function PartyBlock({ party }: { party: typeof NON_PARTIES[number] }) {
   return (
     <div className="party-block" style={{ paddingBottom: 8 }}>
       <div className="party-block__head">
-        <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)", minWidth: 120, flexShrink: 0 }}>
-          {party.role}{party.req && <span style={{ color: "var(--required)", marginLeft: 3 }}>*</span>}
+        <span className={party.req ? "is-required" : undefined} style={{ fontSize: 11, minWidth: 120, flexShrink: 0 }}>
+          {party.role}
         </span>
-        <div style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: 6, flex: "1 1 auto", alignItems: "center" }}>
-          <input placeholder="Code" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none", fontFamily: "var(--font-mono)" }} />
-          <input placeholder="Company Name" style={{ width: "100%", borderBottom: "1px solid var(--border)", background: "transparent", padding: "4px 2px", fontSize: 10, color: "var(--ink)", outline: "none" }} />
+        <div className="party-cn">
+          <div className="party-cn__code">
+            <input placeholder="Code" />
+            <Search size={12} className="party-cn__icon" />
+          </div>
+          <input className="party-cn__name" placeholder="Company Name" />
         </div>
         {party.btn && <div className="party-block__head-actions"><button className="party-block__head-btn">{party.btn}</button></div>}
       </div>
@@ -134,7 +138,30 @@ export function NonBLWorkDivPanel() {
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         {workDiv === "Sea" && <GridList columns={CONTAINER_COLS} data={CONTAINER_ROWS} />}
-        {workDiv === "Air" && <div className="sched-list">{["Package/Unit","Gross W/T","Charge W/T","Rate Class","CBM"].map(f => <div key={f} className="li"><span className="li__label">{f}</span><div className="li__input"><input placeholder={f} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>)}</div>}
+        {workDiv === "Air" && (
+          <div className="sched-list">
+            <div className="li"><span className="li__label">Package/Unit</span>
+              <div className="li__input"><input placeholder="Package/Unit" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
+            </div>
+            <div className="li"><span className="li__label">Gross W/T</span>
+              <div className="li__input" style={{ display: "flex", gap: 4 }}>
+                <input type="number" step="any" placeholder="0" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
+                <select style={{ height: 22, padding: "0 2px", fontSize: 10, flexShrink: 0, width: 44, outline: "none", border: "1px solid var(--border)", borderRadius: 4, background: "var(--surface-0)", color: "var(--ink)" }}>
+                  <option>KGS</option><option>LBS</option>
+                </select>
+              </div>
+            </div>
+            <div className="li"><span className="li__label">Charge W/T</span>
+              <div className="li__input"><input type="number" step="any" placeholder="0" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
+            </div>
+            <div className="li"><span className="li__label">Rate Class</span>
+              <div className="li__input"><input placeholder="Rate Class" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
+            </div>
+            <div className="li"><span className="li__label">CBM</span>
+              <div className="li__input"><input type="number" step="any" placeholder="0" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div>
+            </div>
+          </div>
+        )}
         {workDiv === "Warehouse" && <div className="sched-list">{["창고 코드","입고일","출고 예정일","보관 위치","면적(m²)"].map(f => <div key={f} className="li"><span className="li__label">{f}</span><div className="li__input"><input placeholder={f} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>)}</div>}
         {workDiv === "Trucking" && <div className="sched-list">{["Pick-up Date","Trucker","Trucker PIC","차량번호"].map(f => <div key={f} className="li"><span className="li__label">{f}</span><div className="li__input"><input placeholder={f} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>)}</div>}
       </div>
