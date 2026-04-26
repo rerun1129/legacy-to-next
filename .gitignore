@@ -3,6 +3,7 @@
 # pipeline test
 
 .DS_Store
+.playwright-mcp/
 .env*
 *.pem
 .claude/.review_pending

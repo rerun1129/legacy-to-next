@@ -90,7 +90,7 @@ export function MasterMainTab({ variant }: Props) {
       </div>
 
       {/* Main body: Party + Schedule + Cargo (3-column) */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr) minmax(0,0.8fr)", gap: 10, minHeight: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr) minmax(0,0.8fr)", gap: 10 }}>
 
         {/* PARTY — 3 slots (no DOC Partner) */}
         <div className="panel" style={{ display: "flex", flexDirection: "column" }}>
