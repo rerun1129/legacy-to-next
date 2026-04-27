@@ -13,7 +13,7 @@ export function ColumnVisibilityMenu<T>({
   gridId,
   defaultColumns,
 }: ColumnVisibilityMenuProps<T>): JSX.Element {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLUListElement>(null);
 
@@ -21,10 +21,10 @@ export function ColumnVisibilityMenu<T>({
 
   // ESC 키 및 외부 클릭으로 닫힘
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") setIsOpen(false);
     }
 
     function handlePointerDown(e: PointerEvent) {
@@ -33,7 +33,7 @@ export function ColumnVisibilityMenu<T>({
         !btnRef.current?.contains(target) &&
         !popoverRef.current?.contains(target)
       ) {
-        setOpen(false);
+        setIsOpen(false);
       }
     }
 
@@ -52,8 +52,8 @@ export function ColumnVisibilityMenu<T>({
         type="button"
         className="grid__column-menu-btn"
         aria-label="컬럼 표시 관리"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((v) => !v)}
       >
         {/* 햄버거 아이콘 — lucide 의존성 없이 SVG 인라인 */}
         <svg
@@ -69,7 +69,7 @@ export function ColumnVisibilityMenu<T>({
         </svg>
       </button>
 
-      {open && (
+      {isOpen && (
         <ul ref={popoverRef} className="grid__column-menu-popover" role="menu">
           {hiddenColumns.length === 0 ? (
             <li className="grid__column-menu-empty" role="none">

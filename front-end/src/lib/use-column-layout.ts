@@ -15,6 +15,7 @@ type ColumnLayoutStore = {
   layouts: Record<string, ColumnPrefs>;
   resize(gridId: string, key: string, width: number): void;
   reorder(gridId: string, activeKey: string, overKey: string): void;
+  setOrder(gridId: string, order: string[]): void;
   hide(gridId: string, key: string): void;
   show(gridId: string, key: string): void;
   reset(gridId: string): void;
@@ -48,6 +49,15 @@ const useColumnLayoutStore = create<ColumnLayoutStore>()(
               ...s.layouts,
               [gridId]: { ...prefs, order: arrayMove(prefs.order, from, to) },
             },
+          };
+        });
+      },
+
+      setOrder(gridId, order) {
+        set((s) => {
+          const prefs = s.layouts[gridId] ?? { order: [], widths: {}, hidden: [] };
+          return {
+            layouts: { ...s.layouts, [gridId]: { ...prefs, order } },
           };
         });
       },
@@ -154,7 +164,12 @@ export function useColumnLayout<T>(
     visibleColumns,
     hiddenColumns,
     resizeColumn: (key, width) => store.resize(gridId, key, width),
-    reorderColumn: (activeKey, overKey) => store.reorder(gridId, activeKey, overKey),
+    reorderColumn: (activeKey, overKey) => {
+      const from = reconciledOrder.indexOf(activeKey);
+      const to = reconciledOrder.indexOf(overKey);
+      if (from === -1 || to === -1) return;
+      store.setOrder(gridId, arrayMove(reconciledOrder, from, to));
+    },
     hideColumn: (key) => {
       const col = colMap.get(key);
       // required 컬럼은 숨김 불가

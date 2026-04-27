@@ -65,7 +65,9 @@ function ManagedGridList<T>({
             </tr>
           ) : (
             data.map((row, rowIndex) => {
-              const key = rowKey ? rowKey(row, rowIndex) : rowIndex;
+              const key = rowKey
+                ? rowKey(row, rowIndex)
+                : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
               const extraClass = rowClassName ? rowClassName(row, rowIndex) : undefined;
               return (
                 <tr
@@ -145,7 +147,9 @@ function PlainGridList<T>({
             </tr>
           ) : (
             data.map((row, rowIndex) => {
-              const key = rowKey ? rowKey(row, rowIndex) : rowIndex;
+              const key = rowKey
+                ? rowKey(row, rowIndex)
+                : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
               const extraClass = rowClassName ? rowClassName(row, rowIndex) : undefined;
               return (
                 <tr
