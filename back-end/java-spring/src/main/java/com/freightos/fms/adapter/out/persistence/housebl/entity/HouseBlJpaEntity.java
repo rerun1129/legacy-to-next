@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -107,6 +108,7 @@ public abstract class HouseBlJpaEntity extends BaseJpaEntity {
     private UUID masterBlId;
 
     @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
 
     protected HouseBlJpaEntity(JobDiv jobDiv, Bound bound) {

@@ -40,6 +40,11 @@ public class HouseBlMapper {
         HouseBlSea domain = HouseBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         copySeaFields(jpa, domain);
+        // SEA만 컨테이너 보유 — @BatchSize(50)으로 리스트 조회 시 batch fetch
+        List<HouseBlContainer> containers = jpa.getContainers().stream()
+                .map(c -> toContainerDomain(c, domain))
+                .collect(Collectors.toList());
+        domain.initContainers(containers);
         return domain;
     }
 
@@ -72,10 +77,6 @@ public class HouseBlMapper {
         if (jpa.getMasterBlId() != null) {
             domain.linkToMaster(jpa.getMasterBlId());
         }
-        List<HouseBlContainer> containers = jpa.getContainers().stream()
-                .map(c -> toContainerDomain(c, domain))
-                .collect(Collectors.toList());
-        domain.initContainers(containers);
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
