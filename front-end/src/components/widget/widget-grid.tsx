@@ -18,7 +18,7 @@ const GAP        = 8;
 
 interface Props {
   scope:    string;
-  variant:  BLVariantConfig;
+  variant?: BLVariantConfig;
   registry: WidgetDef[];       // 엔트리 타입별 레지스트리
 }
 
