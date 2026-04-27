@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function LiField({ label, value, req }: { label: string; value: string; req?: boolean }) {
@@ -42,26 +43,27 @@ const PERF_ITEMS: FieldItemDef[] = [
   { key: "team",     render: () => <LcnField label="Team"            code="SEA-EXP" name="해상수출팀" /> },
 ];
 
-// ── Field widget 정의 ───────────────────────────────────────
-const FIELDS: FieldWidgetDef[] = [
-  {
-    key:   "trade-terms",
-    label: "Trade Terms",
-    render: () => <FieldItemGrid itemScope="trade-panel.trade-terms" items={TRADE_TERM_ITEMS} />,
-  },
-  {
-    key:   "performance",
-    label: "Performance",
-    render: () => (
-      <>
-        <div className="subhead"><div className="subhead__bar" />Performance</div>
-        <FieldItemGrid itemScope="trade-panel.performance" items={PERF_ITEMS} />
-      </>
-    ),
-  },
-];
+export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
+  const panelScope = variant ? `trade-panel.${variant.key}` : "trade-panel";
 
-export function TradePanel() {
+  const fields: FieldWidgetDef[] = [
+    {
+      key:   "trade-terms",
+      label: "Trade Terms",
+      render: () => <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={TRADE_TERM_ITEMS} />,
+    },
+    {
+      key:   "performance",
+      label: "Performance",
+      render: () => (
+        <>
+          <div className="subhead"><div className="subhead__bar" />Performance</div>
+          <FieldItemGrid itemScope={`${panelScope}.performance`} items={PERF_ITEMS} />
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
@@ -69,7 +71,7 @@ export function TradePanel() {
         <span className="panel__title">Trade & Performance</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <FieldWidgetList panelScope="trade-panel" fields={FIELDS} />
+        <FieldWidgetList panelScope={panelScope} fields={fields} />
       </div>
     </div>
   );

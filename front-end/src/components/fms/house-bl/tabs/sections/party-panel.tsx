@@ -1,8 +1,9 @@
 import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
-interface Props { isExp?: boolean }
+interface Props { variant?: AnyVariantConfig; isExp?: boolean }
 
 interface PartyConfig {
   key:      string;
@@ -52,7 +53,8 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
   );
 }
 
-export function PartyPanel({ isExp = false }: Props) {
+export function PartyPanel({ variant, isExp = false }: Props) {
+  const panelScope = variant ? `party-panel.${variant.key}` : "party-panel";
   const PARTY_CONFIGS: PartyConfig[] = [
     { key: "shipper",     role: "SHIPPER",     filled: true,  required: false },
     { key: "consignee",   role: "CONSIGNEE",   filled: true,  required: !isExp },
@@ -73,7 +75,7 @@ export function PartyPanel({ isExp = false }: Props) {
         <span className="panel__title">Party</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <FieldWidgetList panelScope="party-panel" fields={fields} />
+        <FieldWidgetList panelScope={panelScope} fields={fields} />
       </div>
     </div>
   );
