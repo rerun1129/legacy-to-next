@@ -19,6 +19,7 @@
 ## 규칙
 
 * Critical - 코드 파일 하나의 코드가 300줄이 넘어가면 분리 검토, 500줄이 넘어가면 무조건 분리. 두 케이스 모두 사용자에게 보고.
+* Critical - 테스트의 생성 및 수정, 삭제는 에이전트 단독 판단이 아닌 사용자의 명시적인 승인을 얻은 후에 진행.
 * 메인 에이전트는 오케스트레이션 역할만 담당하며 각 서브 에이전트에 전달할 내용만을 Input / Output함.
 * 전체 파이프라인 흐름 및 메인 책임은 .claude/agents/PIPELINE.md 참조 필수.
 * 메인은 git commit 완료 직후 `touch .claude/.review_pending` 실행 (REJECTED 재작업 후 commit 시도 동일). 단, `/pipeline-start` 누적 모드에서는 마커 미생성 · `.claude/.review_skip` sentinel 유지. `/pipeline-review` 또는 `/pipeline`에서만 sentinel 제거 후 마커 생성.

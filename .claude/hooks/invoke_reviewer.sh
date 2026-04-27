@@ -57,17 +57,8 @@ if [ -f "$CLAUDE_PROJECT_DIR/.claude/.review_skip" ]; then
   exit 0
 fi
 
-# .review_pending 없으면 트렁크 커밋 자동 감지 후 마커 복구 시도
 if [ ! -f "$REVIEW_PENDING" ]; then
-  _AHEAD=0
-  if git -C "$CLAUDE_PROJECT_DIR" rev-parse --git-dir >/dev/null 2>&1; then
-    _AHEAD=$(git -C "$CLAUDE_PROJECT_DIR" rev-list --count "origin/master..HEAD" 2>/dev/null || echo 0)
-  fi
-  if [ "$_AHEAD" -gt 0 ]; then
-    touch "$REVIEW_PENDING"
-  else
-    exit 0
-  fi
+  exit 0
 fi
 # .review_pending은 verdict 확정 후 소비 — 그 이전 실패는 마커를 유지해 재시도 가능
 
