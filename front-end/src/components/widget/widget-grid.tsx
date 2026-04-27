@@ -36,7 +36,6 @@ function toRGLLayout(visible: { key: string; col: number; row: number; colSpan: 
 export function WidgetGrid({ scope, variant, registry }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [mounted] = useState(true);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -75,8 +74,6 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
       if (prev.colSpan !== item.w || prev.rowSpan !== item.h) resizeWidget(userScope, key, item.w, item.h);
     });
   }, [layout.visible, moveWidget, resizeWidget, userScope]);
-
-  if (!mounted) return <div ref={containerRef} className="widget-grid-root" />;
 
   const maxRow     = layout.visible.length > 0 ? Math.max(...layout.visible.map(w => w.row + w.rowSpan)) : 4;
   const overlayRows = maxRow + 2;
