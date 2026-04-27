@@ -6,7 +6,7 @@ import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
 interface Props { variant?: AnyVariantConfig }
 
-interface LegRow { to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
+interface LegRow { id: number; to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
 
 const LEG_COLS: GridColumn<LegRow>[] = [
   { key: "_no",       width: 32, align: "center", label: "#",        className: "row-num", render: (_, __, i) => i + 1 },
@@ -20,9 +20,9 @@ const LEG_COLS: GridColumn<LegRow>[] = [
 ];
 
 const LEG_DATA: LegRow[] = [
-  { to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
-  { to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
-  { to: "LAX", by: "OZ", flight: "OZ202", onBoard: "2026-04-30", boardTime: "22:00", arrival: "2026-05-01", arrTime: "19:30" },
+  { id: 1, to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
+  { id: 2, to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
+  { id: 3, to: "LAX", by: "OZ", flight: "OZ202", onBoard: "2026-04-30", boardTime: "22:00", arrival: "2026-05-01", arrTime: "19:30" },
 ];
 
 const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
@@ -91,7 +91,7 @@ export function AirSchedulePanel({ variant }: Props) {
       label: "Schedule Legs",
       render: () => (
         <div style={{ overflow: "auto" }}>
-          <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(_, i) => i} />
+          <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(row) => row.id} />
         </div>
       ),
     },
