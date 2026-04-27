@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useWidgetLayout }      from "@/lib/use-widget-layout";
 import { useCurrentUser }       from "@/lib/use-current-user";
 import { useFieldLayout }       from "@/lib/use-field-layout";
@@ -36,7 +36,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
     useFieldLayout();
 
   const initFieldLayoutRef = useRef(initFieldLayout);
-  initFieldLayoutRef.current = initFieldLayout;
+  useLayoutEffect(() => { initFieldLayoutRef.current = initFieldLayout; });
 
   useEffect(() => {
     initFieldLayoutRef.current(fullScope, defaultOrder);

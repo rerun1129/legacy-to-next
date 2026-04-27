@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect, useMemo } from "react";
+import { useCallback, useRef, useState, useEffect, useLayoutEffect, useMemo } from "react";
 import GridLayout, { type Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -37,10 +37,9 @@ function toRGLLayout(visible: { key: string; col: number; row: number; colSpan: 
 export function WidgetGrid({ scope, variant, registry }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
     const el = containerRef.current;
     if (!el) return;
     setContainerWidth(el.clientWidth);
@@ -62,7 +61,7 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
   const layout      = getLayout(userScope, defaults);
 
   const initLayoutRef = useRef(initLayout);
-  initLayoutRef.current = initLayout;
+  useLayoutEffect(() => { initLayoutRef.current = initLayout; });
 
   useEffect(() => {
     initLayoutRef.current(userScope, defaults);
