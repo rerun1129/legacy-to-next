@@ -24,7 +24,7 @@ interface Props {
   itemScope:        string;
   items:            FieldItemDef[];
   cols?:            number;   // 행당 최대 열 수, 기본 2
-  showRowControls?: boolean;  // false 이면 행 추가/삭제 버튼 숨김 (Party 패널 등)
+  shouldShowRowControls?: boolean;  // false 이면 행 추가/삭제 버튼 숨김 (Party 패널 등)
 }
 
 function inferLabel(key: string) {
@@ -39,7 +39,7 @@ const parseSlot = (k: string): [number, number] => {
   return [Number(r), Number(s)];
 };
 
-export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = true }: Props) {
+export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControls = true }: Props) {
   const { editMode }      = useWidgetLayout();
   const { currentUserId } = useCurrentUser();
   const fullScope         = `${currentUserId}.${itemScope}`;
@@ -186,7 +186,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = tr
                   onClick={() => setRowMode(fullScope, rowIdx, mode === "full" ? "split" : "full")}>
                   {mode === "full" ? "전체" : "분할"}
                 </button>
-                {showRowControls && (
+                {shouldShowRowControls && (
                   <button
                     className={`field-item-row-btn field-item-row-btn--delete${!isEmpty ? " is-disabled" : ""}`}
                     onMouseDown={e => e.stopPropagation()}
@@ -250,7 +250,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = tr
       })}
 
       {/* 행 추가 버튼 */}
-      {editMode && showRowControls && (
+      {editMode && shouldShowRowControls && (
         <button className="field-item-add-row" onClick={() => addItemRow(fullScope)}>
           <Plus size={10} /> 행 추가
         </button>

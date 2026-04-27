@@ -40,7 +40,7 @@ export function AirTradePanel({ variant }: Props) {
       key:   "trade-terms",
       label: "Trade Terms",
       render: () => (
-        <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={tradeItems} cols={1} showRowControls={false} />
+        <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={tradeItems} cols={1} shouldShowRowControls={false} />
       ),
     },
   ];

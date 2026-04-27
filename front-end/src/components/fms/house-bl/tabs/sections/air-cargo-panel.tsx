@@ -49,7 +49,7 @@ export function AirCargoPanel({ variant }: Props) {
       key:   "cargo",
       label: "Cargo",
       render: () => (
-        <FieldItemGrid itemScope={`${panelScope}.cargo`} items={CARGO_ITEMS} cols={1} showRowControls={false} />
+        <FieldItemGrid itemScope={`${panelScope}.cargo`} items={CARGO_ITEMS} cols={1} shouldShowRowControls={false} />
       ),
     },
   ];

@@ -9,7 +9,7 @@ import { useCurrentUser }  from "@/lib/use-current-user";
 import { WidgetContainer } from "./widget-container";
 import { WidgetPalette }   from "./widget-palette";
 import type { WidgetDef, AnyVariantConfig } from "./widget-registry";
-import { WIDGET_REGISTRY, REGISTRY_MAP as DEFAULT_MAP, getDefaultPositions as seaDefaults } from "./widget-registry";
+import { WIDGET_REGISTRY, REGISTRY_MAP as DEFAULT_MAP, getDefaultPositions as getSeaDefaults } from "./widget-registry";
 
 const COLS       = 6;
 const ROW_HEIGHT = 150;
@@ -132,4 +132,4 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
 }
 
 // 하위 호환 — 기존 house-bl sea 레지스트리 그대로 재내보내기
-export { WIDGET_REGISTRY, DEFAULT_MAP, seaDefaults };
+export { WIDGET_REGISTRY, DEFAULT_MAP, getSeaDefaults };

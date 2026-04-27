@@ -118,7 +118,7 @@ const TRUCK_PORT_ITEMS: FieldItemDef[] = [
 export function TruckSchedulePanel() {
   const fields: FieldWidgetDef[] = [
     { key: "vessel-dates", label: "Vessel & Dates", render: () => <FieldItemGrid itemScope="truck-schedule-panel.vessel-dates" items={VESSEL_DATE_ITEMS} /> },
-    { key: "ports",        label: "Ports",          render: () => <FieldItemGrid itemScope="truck-schedule-panel.ports" items={TRUCK_PORT_ITEMS} showRowControls={false} /> },
+    { key: "ports",        label: "Ports",          render: () => <FieldItemGrid itemScope="truck-schedule-panel.ports" items={TRUCK_PORT_ITEMS} shouldShowRowControls={false} /> },
   ];
 
   return (

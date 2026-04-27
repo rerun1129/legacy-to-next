@@ -95,7 +95,7 @@ const PORT_ITEMS: FieldItemDef[] = [
 export function NonBLSchedulePanel() {
   const fields: FieldWidgetDef[] = [
     { key: "dates", label: "Dates", render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.dates" items={DATE_ITEMS} /> },
-    { key: "ports", label: "Ports", render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={PORT_ITEMS} showRowControls={false} /> },
+    { key: "ports", label: "Ports", render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={PORT_ITEMS} shouldShowRowControls={false} /> },
   ];
 
   return (

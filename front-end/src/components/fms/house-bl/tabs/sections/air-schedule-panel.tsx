@@ -82,7 +82,7 @@ export function AirSchedulePanel({ variant }: Props) {
           itemScope={`${panelScope}.airline`}
           items={airlineItems}
           cols={1}
-          showRowControls={false}
+          shouldShowRowControls={false}
         />
       ),
     },
@@ -102,7 +102,7 @@ export function AirSchedulePanel({ variant }: Props) {
           render: () => (
             <>
               <div className="subhead"><div className="subhead__bar" />Issue Information</div>
-              <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} cols={1} showRowControls={false} />
+              <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} cols={1} shouldShowRowControls={false} />
             </>
           ),
         }]
