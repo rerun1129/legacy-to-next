@@ -11,7 +11,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 class HexagonalArchitectureTest {
 
     @ArchTest
-    static final ArchRule domain_must_not_depend_on_adapters =
+    static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_ADAPTERS =
         noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat()
@@ -19,14 +19,14 @@ class HexagonalArchitectureTest {
                 "org.springframework..", "jakarta.persistence..", "org.hibernate..");
 
     @ArchTest
-    static final ArchRule application_must_not_depend_on_adapter_impl =
+    static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_ADAPTER_IMPL =
         noClasses()
             .that().resideInAPackage("..application..")
             .should().dependOnClassesThat()
             .resideInAPackage("..adapter..");
 
     @ArchTest
-    static final ArchRule jpa_entities_only_in_persistence_adapter =
+    static final ArchRule JPA_ENTITIES_ONLY_IN_PERSISTENCE_ADAPTER =
         classes()
             .that().areAnnotatedWith(jakarta.persistence.Entity.class)
             .should().resideInAPackage("..adapter.out.persistence..");

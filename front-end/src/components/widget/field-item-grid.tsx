@@ -108,7 +108,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
       centers[k]   = { x: r.left + r.width / 2 - cr.left, y: r.top + r.height / 2 - cr.top };
     });
     slots.forEach(slot => {
-      const k = slot.dataset.toSlotKey;
+      const k = slot.dataset.slotKey;
       if (!k) return;
       const r = slot.getBoundingClientRect();
       centers[k] = { x: r.left + r.width / 2 - cr.left, y: r.top + r.height / 2 - cr.top };
