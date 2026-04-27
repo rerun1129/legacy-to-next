@@ -14,7 +14,6 @@ type ColumnPrefs = {
 type ColumnLayoutStore = {
   layouts: Record<string, ColumnPrefs>;
   resize(gridId: string, key: string, width: number): void;
-  reorder(gridId: string, activeKey: string, overKey: string): void;
   setOrder(gridId: string, order: string[]): void;
   hide(gridId: string, key: string): void;
   show(gridId: string, key: string): void;
@@ -33,21 +32,6 @@ const useColumnLayoutStore = create<ColumnLayoutStore>()(
             layouts: {
               ...s.layouts,
               [gridId]: { ...prefs, widths: { ...prefs.widths, [key]: width } },
-            },
-          };
-        });
-      },
-
-      reorder(gridId, activeKey, overKey) {
-        set((s) => {
-          const prefs = s.layouts[gridId] ?? { order: [], widths: {}, hidden: [] };
-          const from = prefs.order.indexOf(activeKey);
-          const to = prefs.order.indexOf(overKey);
-          if (from === -1 || to === -1) return s;
-          return {
-            layouts: {
-              ...s.layouts,
-              [gridId]: { ...prefs, order: arrayMove(prefs.order, from, to) },
             },
           };
         });
