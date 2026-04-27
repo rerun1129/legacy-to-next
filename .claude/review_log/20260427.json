@@ -1,0 +1,412 @@
+{
+  "timestamp": "2026-04-27T13:29:14",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 288633,
+  "summary": "HouseBlMapper·MasterBlMapper의 JPA→Domain 변환 메서드 다수가 빈 구현으로 남아 DB에서 로드된 도메인 객체에 항공·트럭·NonBL 전용 필드 및 Master B/L 기반 필드 전체가 null로 반환되는 심각한 데이터 손실 버그가 존재한다. 또한 도메인 팩토리 메서드들이 bound 파라미터를 받고도 설정하지 않는 A1 패턴이 4개 엔티티에 반복되며, 프론트엔드 두 곳에서 A5(인덱스 key) 위반이 확인되었다.",
+  "violations": [
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/masterbl/MasterBlMapper.java",
+      "line": 36,
+      "detail": "copyBaseFields() 메서드 본체가 완전히 비어 있어 DB에서 MasterBl을 로드할 때 mblNo·bound·shipperCode·polCode 등 모든 기반 필드가 null인 빈 도메인 객체가 반환된다 — toDomain() 호출 결과를 신뢰할 수 없음."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 69,
+      "detail": "copyAirFields() 메서드 본체가 비어 있어 항공 House B/L 로드 시 airlineCode·mawbNo·chargeWeightKg·rateClass 등 항공 전용 필드가 모두 null로 조회된다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 81,
+      "detail": "copyTruckFields() 메서드 본체가 비어 있어 트럭 House B/L 로드 시 truckerCode·pickupDate·chargeWeightKg 등 트럭 전용 필드가 모두 null로 조회된다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 85,
+      "detail": "copyNonBlFields() 메서드 본체가 비어 있어 Non-B/L 로드 시 workDivision·settlePartnerCode·status 등 Non-B/L 전용 필드가 모두 null로 조회된다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlAir.java",
+      "line": 47,
+      "detail": "create(Bound bound) 팩토리 메서드가 bound 파라미터를 받지만 실제로 엔티티에 설정하지 않는다 — HouseBl.bound는 private 필드이고 공개 setter가 없어 매퍼에서도 설정 불가하므로, DB 로드 후 domain.getBound()는 항상 null을 반환한다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlSea.java",
+      "line": 42,
+      "detail": "create(Bound bound) 팩토리 메서드가 bound 파라미터를 받지만 도메인 객체에 설정하지 않아 DB 로드 후 bound가 항상 null이다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBlAir.java",
+      "line": 42,
+      "detail": "create(Bound bound) 팩토리 메서드가 bound 파라미터를 받지만 도메인 객체에 설정하지 않아 DB 로드 후 bound가 항상 null이다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBlSea.java",
+      "line": 31,
+      "detail": "create(Bound bound) 팩토리 메서드가 bound 파라미터를 받지만 도메인 객체에 설정하지 않아 DB 로드 후 bound가 항상 null이다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/widget-grid.tsx",
+      "line": 93,
+      "detail": "배경 그리드 셀 렌더링에 배열 인덱스 i를 key로 사용하며, 항목이 불변이어서 허용 가능한 경우임에도 이유를 명시하는 주석이 없다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/field-item-grid.tsx",
+      "line": 172,
+      "detail": "itemRows.map의 rowIdx(배열 인덱스)를 행 컨테이너의 key로 사용하는데, 이 컴포넌트는 addItemRow/deleteItemRow로 행을 동적으로 추가·삭제할 수 있어 인덱스 key 사용 시 React reconciliation이 오동작할 수 있다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/common/entity/BaseEntity.java",
+      "issue": "id·createdAt·updatedAt·createdBy·updatedBy 필드가 private이고 setter·생성자가 없어 매퍼에서 설정 불가하다. HouseBlDetailResponse.from() 호출 시 id가 항상 null이다.",
+      "proposal": "패키지 접근 수준의 setter(예: void setBaseFields(UUID id, ...)) 또는 package-private 생성자를 BaseEntity에 추가해 Adapter 계층 매퍼가 값을 주입할 수 있도록 한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/test/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapperTest.java",
+      "issue": "HouseBlMapperTest와 MasterBlMapperTest 모두 Domain→JPA 방향(toJpa)만 검증하고, JPA→Domain 방향(toDomain) 라운드트립 테스트가 없어 위의 빈 copyXxxFields 버그를 탐지하지 못한다.",
+      "proposal": "각 타입별로 JpaEntity를 직접 생성해 toDomain()을 호출하고, 핵심 필드 값이 정확히 전달되는지 검증하는 역방향 테스트를 추가한다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T13:57:53",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 306157,
+  "summary": "프론트엔드에서 A5(인덱스 key) 위반 2건이 검출되었다: air-schedule-panel 의 LEG_DATA rowKey 에 안정적인 flight 식별자 대신 인덱스가 사용되고, widget-grid 의 배경 셀에는 예외 사유 주석이 누락되어 있다. 백엔드는 헥사고널 경계 분리 및 도메인 순수성이 잘 유지되나, Mapper 의 ID 미복사로 인한 INSERT-only 동작과 containers 미매핑이 잠재적 정확성 위험으로 제안 수준에 기록된다.",
+  "violations": [
+    {
+      "rule": "ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/air-schedule-panel.tsx",
+      "line": 94,
+      "detail": "rowKey={(_, i) => i} 가 배열 인덱스를 React key로 사용하고 있다. LEG_DATA 항목에는 flight 필드(KE851, KE701, OZ202)라는 안정적이고 유일한 식별자가 존재하므로 rowKey={(row) => row.flight} 으로 교체해야 한다."
+    },
+    {
+      "rule": "ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/widget-grid.tsx",
+      "line": 93,
+      "detail": "key={`cell-${i}`} 는 인덱스를 문자열로 감싼 것과 동일한 인덱스 기반 key다. 해당 셀들이 위치 고정 장식 요소로 예외 적용이 가능하더라도, A5 규칙은 예외 사유를 주석으로 명시하도록 요구한다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "issue": "fromAirDomain, fromSeaDomain, fromTruckDomain, fromNonBlDomain 모두 new XxxJpaEntity() 로 신규 인스턴스를 생성하고 applyBaseFields 에서 엔티티 ID를 복사하지 않는다. Spring Data JPA 는 ID가 null 인 엔티티를 신규(INSERT)로 판단하므로, 기존 도메인 객체에 save() 를 호출해도 UPDATE 가 아닌 중복 INSERT 가 발생한다.",
+      "proposal": "BaseJpaEntity 에 패키지 또는 protected 수준의 setId(UUID) 를 추가하고, applyBaseFields 에서 domain.getId() != null 이면 jpa.setId(domain.getId()) 를 호출하도록 수정한다. 또는 현재 save() 가 CREATE 전용임을 메서드 시그니처와 JavaDoc 으로 명확히 선언한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "issue": "copyBaseFields(HouseBlJpaEntity → HouseBl) 에서 @OneToMany containers 리스트가 도메인으로 매핑되지 않는다. DB에서 로드한 HouseBlSea 의 containers 는 항상 빈 ArrayList 이므로 해상 컨테이너 데이터가 조회 응답에 포함되지 않는다.",
+      "proposal": "HouseBl 에 void initContainers(List<HouseBlContainer>) 같은 패키지-레벨 초기화 메서드를 추가하고 copyBaseFields 에서 호출하거나, 컨테이너를 별도 Use Case 로 분리 조회하는 의도라면 그 이유를 주석으로 명시한다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T14:18:16",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 384546,
+  "summary": "백엔드 전역에서 BaseEntity.id/감사 필드가 매퍼에서 누락되어 모든 API 응답의 id가 null이고 delete 연산이 조용히 무시되는 심각한 정확성 버그(A1/C1)가 확인되었다. 추가로 프론트엔드의 도달 불가 mounted 가드(A9)와 양쪽 컨트롤러의 페이지네이션 파라미터 범위 미검증(A3/C3)이 발견되었다.",
+  "violations": [
+    {
+      "rule": "correctness.md:C1,ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 57,
+      "detail": "copyBaseFields가 jpa.getId(), jpa.getCreatedAt(), jpa.getUpdatedAt()를 domain에 전달하지 않는다. BaseEntity의 id/감사 필드는 private이고 setter가 없어 항상 null로 남는다. 결과: ① HouseBlSummaryResponse/DetailResponse.from()의 id, createdAt 필드가 모두 null로 응답되고 ② HouseBlPersistenceAdapter.delete()에서 toJpa()로 생성된 JpaEntity의 id가 null → Spring Data의 isNew(entity)=true 판정 → delete가 조용히 무시된다."
+    },
+    {
+      "rule": "correctness.md:C1,ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/masterbl/MasterBlMapper.java",
+      "line": 38,
+      "detail": "MasterBlMapper.copyBaseFields도 동일하게 id/감사 필드를 domain에 전달하지 않는다. MasterBlDetailResponse.from()의 id, createdAt, updatedAt가 항상 null이고 MasterBlPersistenceAdapter.delete()가 조용히 무시된다."
+    },
+    {
+      "rule": "ai_specific.md:A9",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/widget-grid.tsx",
+      "line": 39,
+      "detail": "const [mounted] = useState(true)에서 setter를 분리하지 않아 mounted가 항상 true다. line 79의 if (!mounted) 분기는 절대 실행되지 않는 도달 불가 코드(dead code)이며, 코드 흐름상 false가 될 수 없는 값에 대한 추측성 방어 코드에 해당한다."
+    },
+    {
+      "rule": "correctness.md:C3,ai_specific.md:A3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/in/web/housebl/HouseBlController.java",
+      "line": 35,
+      "detail": "쿼리 파라미터 page, size를 범위 검증 없이 PageRequest.of(page, size)에 전달한다. size=0 또는 page<0이면 org.springframework.data.domain.PageRequest.of()가 IllegalArgumentException을 던져 HTTP 500 반환. 어댑터 진입 직후 size >= 1, page >= 0 검증이 필요하다."
+    },
+    {
+      "rule": "correctness.md:C3,ai_specific.md:A3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/in/web/masterbl/MasterBlController.java",
+      "line": 32,
+      "detail": "MasterBlController.list도 page, size 범위 미검증으로 동일한 uncaught IllegalArgumentException 경로를 갖는다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/common/entity/BaseEntity.java",
+      "issue": "id와 감사 필드(createdAt, updatedAt, createdBy, updatedBy)에 setter가 전혀 없어 매퍼가 JPA→Domain 변환 시 이 값들을 채울 방법이 없다. 이것이 V1 버그의 근본 원인이다.",
+      "proposal": "protected void assignIdentity(UUID id, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy) 메서드를 추가하고, HouseBlMapper/MasterBlMapper의 copyBaseFields에서 jpa.getId(), jpa.getCreatedAt() 등을 전달하도록 수정."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/test/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapperTest.java",
+      "issue": "JPA→Domain 변환 테스트에서 id, createdAt 등 BaseEntity 필드의 매핑 여부를 검증하지 않아 V1 버그가 테스트를 통과한다.",
+      "proposal": "BaseEntity 수정 후 jpa에 id를 리플렉션으로 주입하거나 별도 메서드로 설정하여 toDomain 변환 후 domain.getId()가 기대값과 일치하는지 단언 추가."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "jobDiv 필드가 String으로 선언되어 HouseBl의 JobDiv enum 사용과 타입 일관성이 없다.",
+      "proposal": "공용 JobDiv enum을 재사용하거나 별도 MasterBlJobDiv enum으로 변경하여 컴파일 타임 타입 안전성 확보."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/field-item-grid.tsx",
+      "issue": "line 172에서 빈 행(keys.length === 0)의 key를 empty-row-${rowIdx}(인덱스 기반)로 할당한다. 아이템 이동으로 빈 행의 rowIdx가 변하면 React가 다른 빈 행으로 인식할 수 있다.",
+      "proposal": "레이아웃 상태에 행마다 안정적인 rowId를 부여하거나, 빈 행 key에도 행이 갖고 있는 슬롯 위치 같은 불변 식별자를 사용."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T14:30:46",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 272069,
+  "summary": "`HouseBlMapper.applyBaseFields`에서 `bound` 필드 매핑이 누락되어 save 경로에서 DB NOT NULL 제약 위반이 발생한다. 프론트엔드는 `field-item-grid`의 빈 행 key에 인덱스를 사용하며 A5 예외 주석이 없다. 두 항목 모두 수정이 필요하다.",
+  "violations": [
+    {
+      "rule": "rules/correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 188,
+      "detail": "`applyBaseFields`에서 `jpa.setBound(domain.getBound())` 호출이 누락되어, `toJpa()` 로 생성된 JPA 엔티티의 `bound` 필드가 항상 null이 된다. `HouseBlJpaEntity.bound`는 `@Column(nullable = false)`이므로 `save` 실행 시 DB 제약 위반이 발생한다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/field-item-grid.tsx",
+      "line": 172,
+      "detail": "빈 행(keys.length === 0)의 key로 `empty-row-${rowIdx}`(배열 인덱스)를 사용하는데 A5 예외 주석이 없다. `addItemRow`/`deleteItemRow`로 행이 추가·삭제될 때 빈 행의 rowIdx가 이동하므로 영구 불변·비정렬 조건을 충족하지 않는다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "issue": "`copyBaseFields`(JPA→Domain)에서 컨테이너 목록이 도메인 엔티티로 복사되지 않는다. `HouseBl.containers`는 항상 빈 리스트로 반환된다.",
+      "proposal": "`HouseBl`에 패키지-프라이빗 `addContainer(HouseBlContainer)` 또는 `setContainers(List<HouseBlContainer>)` 메서드를 추가하고, `copyBaseFields`에서 `jpa.getContainers().stream().map(this::toContainerDomain).forEach(domain::addContainer)`로 매핑한다. 현재 `HouseBlDetailResponse`에도 컨테이너 필드가 없으므로 함께 추가 필요."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlContainer.java",
+      "issue": "`teu()` 메서드에서 `BigDecimal.valueOf(lengthFeet)` 호출 시 `lengthFeet`이 null이면 Integer 언박싱에서 NPE가 발생한다. `lengthFeet`은 `Integer` 타입이며 `@NotNull` 제약이 없다.",
+      "proposal": "`if (lengthFeet == null) throw new IllegalStateException(\"lengthFeet is not set\");`를 메서드 첫 줄에 추가하거나, 필드 타입을 `int`(프리미티브)로 변경하여 null 가능성을 차단한다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T14:40:20",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 326211,
+  "summary": "헥사고널 아키텍처 경계(ARCH1)는 올바르게 준수됨 — 도메인 엔티티에 JPA 어노테이션 없음, Application 계층은 Port 인터페이스에만 의존, BaseJpaEntity·BaseEntity 계층 분리 정합. 프론트엔드 CONV1(`showRowControls`)·CONV2(`seaDefaults`) 두 건의 명명 위반이 존재하며 수정 후 재검토 필요.",
+  "violations": [
+    {
+      "rule": "rules/conventions.md:CONV1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/field-item-grid.tsx",
+      "line": 27,
+      "detail": "Props 인터페이스의 `showRowControls?: boolean` 필드가 허용된 의문형 접두사(`is`, `has`, `should`, `can`, `will`, `did`, `was`) 대신 동사형 `show`로 시작함. `shouldShowRowControls` 또는 `isRowControlsVisible` 등으로 변경해야 함."
+    },
+    {
+      "rule": "rules/conventions.md:CONV2",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/widget-grid.tsx",
+      "line": 135,
+      "detail": "`seaDefaults`는 `getDefaultPositions` 함수의 re-export 별칭으로 소비자 코드에서 `seaDefaults()` 형태로 호출되는 함수이나 동사구로 시작하지 않아 CONV2 위반. `getSeaDefaults` 또는 `getDefaultSeaPositions` 등 동사구로 변경."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlTruck.java",
+      "issue": "`create()` 팩토리 메서드 내 `entity.vesselName = \"TRUCK\"` 중복 할당. 동일 값이 필드 선언부(`private String vesselName = \"TRUCK\"`)에서 이미 초기화됨.",
+      "proposal": "`create()` 내 `entity.vesselName = \"TRUCK\"` 라인 제거. 의도적 명시라면 CONV6 기준 비즈니스 제약 이유 주석 추가."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/port/in/MasterBlUseCase.java",
+      "issue": "`HouseBlUseCase`에는 `save` 메서드가 있으나 `MasterBlUseCase`·`MasterBlPort`에는 save/persist 계열 메서드 없이 delete만 존재하여 두 도메인 간 포트 계약이 비대칭.",
+      "proposal": "MasterBl 생성/수정이 현재 범위 밖임을 인터페이스 JavaDoc 또는 관련 TODO(출처 포함, A11)로 명시. 예: `// TODO(#이슈번호): MasterBl save 포트 추가 예정 — 현재 조회/삭제만 구현됨`"
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T14:49:35",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 390325,
+  "summary": "HouseBlMapper의 containers 변환 누락이 핵심 위반이다. toDomain 방향에서는 조용한 데이터 손실(항상 빈 컨테이너 반환), toJpa 방향에서는 orphanRemoval로 인한 잠재적 컨테이너 전량 삭제 위험이 존재한다. 헥사고널 경계 자체는 깔끔하게 분리되어 있고 ArchUnit 테스트가 경계를 보호하고 있으나, 어댑터의 변환 완결성(ARCH4)이 미충족 상태다. 프론트엔드에서는 경미한 CONV2 위반 1건이 있다.",
+  "violations": [
+    {
+      "rule": "ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 57,
+      "detail": "copyBaseFields(JPA→Domain)에서 jpa.getContainers()를 domain에 복사하지 않아, findById 호출 시 HouseBl.containers가 항상 빈 리스트로 반환된다. DB에 컨테이너 데이터가 존재해도 조용히 버려지는 A1 패턴이다."
+    },
+    {
+      "rule": "architecture.md:ARCH4",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 188,
+      "detail": "applyBaseFields(Domain→JPA)에서 domain.getContainers()를 JPA 컬렉션으로 변환하지 않는다. HouseBlJpaEntity.containers는 orphanRemoval=true이므로, save 호출 시 기존 컨테이너 레코드가 전량 삭제되는 데이터 파괴 위험이 있다. Out 어댑터의 타입 변환 책임(ARCH4)을 완수하지 않았다."
+    },
+    {
+      "rule": "conventions.md:CONV2",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/field-item-grid.tsx",
+      "line": 35,
+      "detail": "모듈 레벨 함수 slotKey가 동사로 시작하지 않는다. 좌표 쌍을 문자열로 변환하는 함수이므로 CONV2 변환 예외 패턴인 toSlotKey 또는 buildSlotKey로 변경해야 한다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "private String jobDiv 필드가 선언되었으나 생성자에서도 MasterBlMapper.copyBaseFields에서도 값이 주입되지 않아 항상 null 반환. HouseBl의 private JobDiv jobDiv와 달리 타입도 String으로 불일치.",
+      "proposal": "HouseBl처럼 생성자에서 jobDiv를 설정하고 enum 타입(JobDiv)으로 교체하거나, 도메인에서 jobDiv를 쓰지 않는다면 필드를 제거한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/house-bl-list-grid.tsx",
+      "issue": "handleHblDoubleClick(hbl: string)에서 hbl 파라미터를 void 연산자로 무력화해 미사용 경고를 회피한다. 이는 eslint-disable 우회와 동일한 A2 인접 패턴이다.",
+      "proposal": "파라미터명을 _hbl로 변경하거나, ID 기반 라우팅 구현 전까지 파라미터를 아예 제거해 함수 시그니처와 실제 동작을 일치시킨다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/test/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapperTest.java",
+      "issue": "HouseBlMapperTest가 containers 변환을 전혀 검증하지 않는다. 컨테이너 매핑이 구현된 후에도 빈 상태로 있으면 회귀 발견이 늦어진다.",
+      "proposal": "컨테이너 매핑 구현 시 toDomain/toJpa 양방향 컨테이너 필드 복사를 검증하는 테스트 케이스를 추가한다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T15:02:25",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 608710,
+  "summary": "리스트 조회 경로에서 `HouseBlMapper.copyBaseFields`가 JOIN FETCH 없이 컨테이너 컬렉션을 지연 로드하여 N+1 쿼리가 발생한다. 헥사고널 경계(ARCH1), 도메인 순수성, 프론트엔드 A5 예외 주석 처리는 모두 규칙을 준수하며 이 항목이 유일한 위반이다.",
+  "violations": [
+    {
+      "rule": "correctness.md:C5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 75,
+      "detail": "`copyBaseFields`가 `jpa.getContainers()`를 항상 호출하지만 `HouseBlRepository.findAllByJobDivAndBoundOrderByCreatedAtDesc`에 JOIN FETCH가 없어, 리스트 조회 시 페이지 내 엔티티 수(기본 50)만큼 컨테이너 SELECT가 추가 발생하는 N+1 패턴이다. Air·Truck·NonBl 엔티티도 동일 경로를 통해 빈 컨테이너 쿼리를 불필요하게 실행한다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBlSea.java",
+      "issue": "`LoadType`이 `domain.housebl.enums`에 위치하지만 `MasterBlSea`와 `MasterBlSeaJpaEntity`에서 동시에 사용되어, 마스터 BL 도메인이 하우스 BL 도메인 하위 패키지에 의존하는 교차 결합이 발생한다.",
+      "proposal": "`LoadType`을 `Bound`·`FreightTerm`이 있는 `domain.common.enums`로 이동하면 `domain.housebl`←`domain.masterbl` 역방향 패키지 의존이 제거되고, 공유 열거형 관리 위치가 일관된다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T15:15:10",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 521948,
+  "summary": "HouseBlContainer.teu()의 IllegalStateException 메시지에 containerNo 식별자가 누락된 C1 위반 1건으로 REJECTED. 더 시급한 실질적 결함은 MasterBl.jobDiv가 항상 null로 반환되는 데이터 버그(명시 규칙 미해당으로 suggestion 처리)이며, 헥사고널 레이어 분리(도메인 순수성, JPA 어댑터 분리), @BatchSize 기반 N+1 처리, 프론트엔드 위젯 시스템의 stable key 사용은 규칙을 전반적으로 준수한다.",
+  "violations": [
+    {
+      "rule": "correctness.md:C1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlContainer.java",
+      "line": 65,
+      "detail": "throw new IllegalStateException(\"lengthFeet is not set\") — 에러 메시지에 컨테이너 식별자가 없음. containerNo 필드는 팩토리 메서드 of()에서 항상 설정되므로, `\"lengthFeet is not set for container: \" + containerNo`로 변경해야 호출자가 어느 컨테이너에서 발생한 오류인지 구별 가능하다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "자명한 데이터 버그: `private String jobDiv` 필드가 선언되어 있지만 어떤 생성자도 메서드도 이 값을 설정하지 않는다. `protected MasterBl(Bound bound)`는 bound만 초기화하며, MasterBlMapper.copyBaseFields에도 jobDiv 설정 호출이 없다. 결과적으로 `MasterBlDetailResponse.from(entity)`의 `entity.getJobDiv()`는 항상 null을 반환한다. HouseBl은 `protected HouseBl(JobDiv jobDiv, Bound bound)` 생성자로 올바르게 초기화하는 반면, MasterBl은 동일 패턴이 누락된 병렬 계층 코드다.",
+      "proposal": "MasterBl 생성자를 `protected MasterBl(String jobDiv, Bound bound)`로 수정하고 `this.jobDiv = jobDiv` 추가. MasterBlSea 생성자는 `super(\"SEA\", bound)`, MasterBlAir 생성자는 `super(\"AIR\", bound)`를 호출하도록 수정. 또는 MasterBlJpaEntity처럼 String 대신 JobDiv enum 타입으로 통일하여 HouseBl 계층과 일관성 확보."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/widget-grid.tsx",
+      "issue": "L90 주석 '개수·순서가 절대 바뀌지 않으므로 위치 인덱스를 key로 사용(A5 예외)'이 사실과 다르다. `overlayRows`는 `Math.max(...layout.visible.map(w => w.row + w.rowSpan)) + 2`로 동적 계산되므로, 위젯을 추가하거나 더 아래로 이동하면 셀 수가 증가한다. 기능적으로는 순수 장식 요소이므로 상태 유실 위험은 없지만, 주석의 근거가 틀려 미래 유지보수 시 혼동을 유발한다.",
+      "proposal": "주석을 '순수 장식 셀(CSS 배경, state 없음) — 동적 크기이지만 state 유실 위험 없으므로 A5 예외'로 교정."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlPersistenceAdapter.java",
+      "issue": "`findAllByJobDivAndBoundOrderByCreatedAtDesc`(L36-42)와 `findBySchedule`(L48-53) 두 곳에서 `org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), Sort.by(...))` 설정 코드가 인라인으로 반복된다.",
+      "proposal": "`private org.springframework.data.domain.PageRequest toSpringPage(PageRequest pr, Sort sort)` 헬퍼를 추출해 중복 제거. MasterBlPersistenceAdapter에도 동일 패턴이 존재하므로 공통 유틸로 분리 가능."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlPersistenceAdapter.java",
+      "issue": "OFFSET 기반 페이지네이션(`PageRequest.of(page, size)`) 사용. C5에 따라 대용량 데이터에서 성능 저하 가능성 검토 필요. MasterBlPersistenceAdapter도 동일 방식이다.",
+      "proposal": "운영 예상 데이터 규모가 수만 건 이상이면 `createdAt + id` keyset(cursor) 기반 페이지네이션 전환을 검토. 단기적으로는 `(job_div, bound, created_at DESC, id)` 복합 인덱스 확인으로 OFFSET 성능 일부 보완 가능."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T15:25:48",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 439714,
+  "summary": "백엔드 헥사고널 레이어 분리(Domain 순수 엔티티·JPA 엔티티 분리·Port 인터페이스 의존)와 Mapper 구현은 모두 정확하다. 프론트엔드 FieldItemGrid의 data 속성명 불일치(data-slot-key vs dataset.toSlotKey)로 빈 슬롯 드래그 기능 전체가 조용히 동작하지 않으며, ArchUnit 테스트 상수 명명이 CONV3를 위반한다.",
+  "violations": [
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/widget/field-item-grid.tsx",
+      "line": 111,
+      "detail": "slot.dataset.toSlotKey는 DOM 속성 data-to-slot-key를 읽지만 JSX L214는 data-slot-key(→ dataset.slotKey)를 설정한다. k가 항상 undefined이므로 if (!k) return이 모든 빈 슬롯 드롭 타겟 등록을 조용히 건너뛰어 drag-to-empty-slot 기능 전체가 silent no-op 상태가 된다. 수정: JSX를 data-to-slot-key={sk}로 변경하거나 L111을 slot.dataset.slotKey로 변경."
+    },
+    {
+      "rule": "rules/conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/test/java/com/freightos/fms/architecture/HexagonalArchitectureTest.java",
+      "line": 14,
+      "detail": "static final ArchRule 상수 3개(domain_must_not_depend_on_adapters, application_must_not_depend_on_adapter_impl, jpa_entities_only_in_persistence_adapter)가 lower_snake_case로 명명됨. CONV3 기준 UPPER_SNAKE_CASE 적용 필요(예: DOMAIN_MUST_NOT_DEPEND_ON_ADAPTERS)."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlPersistenceAdapter.java",
+      "issue": "delete()가 domain → JPA 변환(toJpa) 후 repository.delete(jpa)를 호출하면 Hibernate가 detached 엔티티를 merge 후 remove하는 추가 왕복이 발생한다. MasterBlPersistenceAdapter.delete()도 동일 패턴.",
+      "proposal": "houseBlRepository.deleteById(houseBl.getId())로 교체. MasterBlPersistenceAdapter도 masterBlRepository.deleteById(masterBl.getId())로 통일. toJpa 변환 불필요."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T15:35:48",
+  "verdict": "APPROVED",
+  "severity": "low",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 538157,
+  "summary": "헥사고널 아키텍처 경계가 명확히 지켜졌고(ARCH1 위반 0건), 도메인 엔티티에 JPA 어노테이션 없음, 서비스 계층은 Port 인터페이스만 의존한다. AI 안티패턴(A1~A12) 항목 중 지적할 명시적 위반은 없으며, 테스트에서 발견된 데드 변수와 MasterBl.jobDiv 미초기화 필드는 정확성보다는 유지보수성 리스크로 분류해 제안으로 처리했다.",
+  "violations": [],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/test/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapperTest.java",
+      "issue": "toDomain_airJpa_identityFieldsAreAssigned 테스트(L127-140): @DisplayName은 'id/createdAt/updatedBy 도메인 주입'을 주장하지만 assertThat은 domain.getId() 하나만 검증. 선언된 지역 변수 createdAt(L130), updatedAt(L131)은 JPA 엔티티에 설정되지도 않고 단언에도 쓰이지 않는 데드 코드.",
+      "proposal": "사용하지 않는 변수 2개를 삭제하고, @DisplayName을 'assignIdentity로 id가 도메인에 주입된다'로 수정하거나, jpa.setCreatedAt/setUpdatedAt setter가 없으므로 BaseJpaEntity.setId() 외에 검증 불가한 감사 필드를 별도 통합 테스트에서 커버할 것을 문서화할 것."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "L25의 private String jobDiv 필드는 MasterBlMapper.copyBaseFields 어디에서도 값이 채워지지 않아 항상 null을 반환한다. HouseBl.jobDiv(JobDiv enum, 생성자에서 주입)와 달리 도메인 객체가 완전하지 않은 상태가 된다.",
+      "proposal": "서브타입 정보가 필요하다면 추상 메서드 getJobDiv():String 으로 각 구상 클래스(MasterBlAir→'AIR', MasterBlSea→'SEA')에서 반환하게 하거나, 필요 없으면 필드 자체를 삭제할 것."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlPersistenceAdapter.java",
+      "issue": "delete(HouseBl) 구현이 houseBlMapper.toJpa(houseBl)를 호출해 컨테이너 컬렉션 포함 전체 JPA 엔티티 트리를 재구성한 뒤 delete(jpa)를 호출한다. Spring Data JPA는 비관리(detached) 엔티티에 대해 내부적으로 merge+remove를 수행하므로, 삭제를 위해 불필요한 컨테이너 매핑 비용이 발생한다.",
+      "proposal": "houseBlRepository.deleteById(houseBl.getId()) 로 교체하면 엔티티 재구성 없이 직접 DELETE 가능. MasterBlPersistenceAdapter.delete도 동일하게 개선 가능."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlRepository.java",
+      "issue": "findAllByJobDivAndBoundOrderByCreatedAtDesc 및 findBySchedule 모두 Spring Pageable의 OFFSET 기반 페이징을 사용한다. C5 규칙: 데이터가 수십만 건 이상으로 증가하면 OFFSET이 매우 느려진다.",
+      "proposal": "현시점 mock 규모에서는 문제없지만, 실 운영 데이터 규모를 고려해 cursor 기반 페이징(createdAt + id 기준 keyset pagination)으로의 전환 가능성을 설계 문서에 기록해 둘 것."
+    }
+  ]
+}
