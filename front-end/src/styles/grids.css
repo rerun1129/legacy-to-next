@@ -124,6 +124,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   opacity: 0.5;
 }
 .grid__drag-overlay {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: var(--surface, #fff);
   border: 1px solid var(--divider, #e0e0e0);
   padding: 0 8px;
@@ -132,6 +135,12 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   opacity: 0.9;
   cursor: grabbing;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.grid__drag-overlay--remove {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #b91c1c;
 }
 .grid__column-menu-btn {
   display: inline-flex;

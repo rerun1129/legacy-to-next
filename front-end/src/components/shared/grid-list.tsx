@@ -4,6 +4,7 @@ import React, { useRef, useState } from "react";
 import {
   DndContext,
   type DragEndEvent,
+  type DragMoveEvent,
   type DragStartEvent,
   DragOverlay,
   PointerSensor,
@@ -103,6 +104,7 @@ function ManagedGridList<T>({
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isDragOutside, setIsDragOutside] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
 
   const sensors = useSensors(
@@ -111,11 +113,25 @@ function ManagedGridList<T>({
   const ids = visibleColumns.map((c) => String(c.key));
   const activeCol = visibleColumns.find((c) => String(c.key) === activeId) ?? null;
 
+  function isOutsideTable(rect: { left: number; right: number; top: number; bottom: number }) {
+    const tableEl = tableRef.current;
+    if (!tableEl) return false;
+    const t = tableEl.getBoundingClientRect();
+    return rect.right < t.left || rect.left > t.right || rect.bottom < t.top || rect.top > t.bottom;
+  }
+
   function handleDragStart(event: DragStartEvent) {
     setActiveId(String(event.active.id));
+    setIsDragOutside(false);
+  }
+
+  function handleDragMove(event: DragMoveEvent) {
+    const rect = event.active.rect.current.translated;
+    setIsDragOutside(rect ? isOutsideTable(rect) : false);
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    setIsDragOutside(false);
     setActiveId(null);
     const { active, over } = event;
 
@@ -146,6 +162,7 @@ function ManagedGridList<T>({
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
       >
         <table ref={tableRef} className="grid--list">
@@ -174,7 +191,17 @@ function ManagedGridList<T>({
         </table>
         <DragOverlay>
           {activeCol ? (
-            <div className="grid__drag-overlay">{activeCol.label}</div>
+            <div className={`grid__drag-overlay${isDragOutside ? " grid__drag-overlay--remove" : ""}`}>
+              {isDragOutside && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+                  <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M9 6V4h6v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+              {activeCol.label}
+            </div>
           ) : null}
         </DragOverlay>
       </DndContext>
