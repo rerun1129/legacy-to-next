@@ -192,7 +192,7 @@ export function FreightSellingPanel() {
         <span className="panel__rowcount">{rateRows.length}</span>
         <div className="panel__actions"><button className="btn btn--sm">+</button></div>
       </div>
-      <GridList columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} style={{ flex: 1 }} />
+      <GridList columns={SELLING_COLS} data={rateRows} rowKey={(row) => row.code} style={{ flex: 1 }} />
     </div>
   );
 }
@@ -207,7 +207,7 @@ export function FreightBuyingPanel() {
         <span className="panel__rowcount">{rateRows.length}</span>
         <div className="panel__actions"><button className="btn btn--sm">+</button></div>
       </div>
-      <GridList columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} style={{ flex: 1 }} />
+      <GridList columns={BUYING_COLS} data={rateRows} rowKey={(row) => row.code} style={{ flex: 1 }} />
     </div>
   );
 }
