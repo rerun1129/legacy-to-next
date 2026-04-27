@@ -3,8 +3,10 @@ import type { HouseBlPort } from '@/application/house-bl/ports';
 import type { HouseBlFilter } from '@/domain/house-bl';
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
+import { formatDateDisplay } from '@/lib/date';
 
 const HOUSE_BL_ROW_SCHEMA = z.object({
+  id: z.number().optional(),
   no: z.number().optional(),
   hbl: z.string(),
   expImp: z.enum(['EXP', 'IMP']),
@@ -23,19 +25,26 @@ const HOUSE_BL_ROW_SCHEMA = z.object({
   consignee: z.string(),
 });
 
+const applyDateDisplay = (raw: z.infer<typeof HOUSE_BL_ROW_SCHEMA>) => ({
+  ...raw,
+  etd: formatDateDisplay(raw.etd),
+  eta: formatDateDisplay(raw.eta),
+  regDate: formatDateDisplay(raw.regDate),
+});
+
 export const API_HOUSE_BL_PORT: HouseBlPort = {
   async list(filter: HouseBlFilter) {
     const json = await fetchJson(`/api/v1/house-bl?${toSearchParams(filter as Record<string, unknown>)}`);
     const content = (json as { data?: { content?: unknown } })?.data?.content;
     const parsed = z.array(HOUSE_BL_ROW_SCHEMA).safeParse(content);
     if (!parsed.success) throw new ResponseParseError(`Invalid house B/L list response: ${parsed.error.message}`);
-    return parsed.data;
+    return parsed.data.map(applyDateDisplay);
   },
-  async getById(id: string) {
+  async getById(id: number) {
     const json = await fetchJson(`/api/v1/house-bl/${id}`);
     const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid house B/L response: ${parsed.error.message}`);
-    return parsed.data;
+    return applyDateDisplay(parsed.data);
   },
   async save(data) {
     const json = await fetchJson('/api/v1/house-bl', {
@@ -46,9 +55,9 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
     if (json === null) throw new ResponseParseError('Expected response body from POST /house-bl');
     const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid save response: ${parsed.error.message}`);
-    return parsed.data;
+    return applyDateDisplay(parsed.data);
   },
-  async delete(id: string) {
+  async delete(id: number) {
     await fetchJson(`/api/v1/house-bl/${id}`, { method: 'DELETE' });
   },
 };

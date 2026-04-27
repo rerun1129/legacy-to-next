@@ -9,12 +9,12 @@ export const mockMasterBlPort: MasterBlPort = {
   async list(_filter: MasterBlFilter): Promise<MasterBlRow[]> {
     return masterBlRows;
   },
-  async getById(id: string): Promise<MasterBlRow> {
+  async getById(id: number): Promise<MasterBlRow> {
     const row = masterBlRows.find((r) => r.id === id);
-    if (!row) throw new NotFoundError('MasterBl', id);
+    if (!row) throw new NotFoundError('MasterBl', String(id));
     return row;
   },
-  async delete(_id: string): Promise<void> {
+  async delete(_id: number): Promise<void> {
     // mock: no-op
   },
 };
