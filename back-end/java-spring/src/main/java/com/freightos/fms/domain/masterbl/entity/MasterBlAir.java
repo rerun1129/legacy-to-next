@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.masterbl.entity;
 
-import com.freightos.fms.domain.housebl.enums.Bound;
+import com.freightos.fms.domain.common.enums.Bound;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,10 +41,39 @@ public class MasterBlAir extends MasterBl {
     @Column(name = "issue_place", length = 50) private String issuePlace;
     @Column(name = "signature", length = 100) private String signature;
 
+    protected MasterBlAir(Bound bound) {
+        super(bound);
+    }
+
     public static MasterBlAir create(Bound bound) {
-        MasterBlAir e = new MasterBlAir();
+        MasterBlAir e = new MasterBlAir(bound);
         e.declaredValueCarriage = "N.V.D.";
         e.insurance             = "NIL";
         return e;
+    }
+
+    public void updateAirFields(String airlineCode, String departureCode, String mawbNo,
+                                BigDecimal chargeWeightKg, BigDecimal volumeWeightKg,
+                                String rateClass, String currencyCode,
+                                String declaredValueCarriage, String declaredValueCustoms,
+                                String insurance, String accountInformation,
+                                String securityStatus, String flightType,
+                                LocalDate issueDate, String issuePlace, String signature) {
+        this.airlineCode            = airlineCode;
+        this.departureCode          = departureCode;
+        this.mawbNo                 = mawbNo;
+        this.chargeWeightKg         = chargeWeightKg;
+        this.volumeWeightKg         = volumeWeightKg;
+        this.rateClass              = rateClass;
+        this.currencyCode           = currencyCode;
+        this.declaredValueCarriage  = declaredValueCarriage;
+        this.declaredValueCustoms   = declaredValueCustoms;
+        this.insurance              = insurance;
+        this.accountInformation     = accountInformation;
+        this.securityStatus         = securityStatus;
+        this.flightType             = flightType;
+        this.issueDate              = issueDate;
+        this.issuePlace             = issuePlace;
+        this.signature              = signature;
     }
 }

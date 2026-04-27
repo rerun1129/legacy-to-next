@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
-import com.freightos.fms.domain.housebl.enums.Bound;
+import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import jakarta.persistence.*;
@@ -74,17 +74,38 @@ public class HouseBlSea extends HouseBl {
     @Column(name = "mbl_no", length = 50)
     private String mblNo;              // 연결된 Master B/L No (참조용)
 
+    protected HouseBlSea(Bound bound) {
+        super(JobDiv.SEA, bound);
+    }
+
     public static HouseBlSea create(Bound bound) {
-        HouseBlSea entity = new HouseBlSea();
-        // JobDiv는 discriminator에서 자동 설정되지만 명시
-        return entity;
+        return new HouseBlSea(bound);
     }
 
     public void updateSeaSchedule(String linerCode, String vesselName, String voyageNo,
                                   LocalDate onboardDate) {
-        this.linerCode  = linerCode;
-        this.vesselName = vesselName;
-        this.voyageNo   = voyageNo;
+        this.linerCode   = linerCode;
+        this.vesselName  = vesselName;
+        this.voyageNo    = voyageNo;
         this.onboardDate = onboardDate;
+    }
+
+    public void updateSeaRouteAndFlags(String porCode, String finalDestCode,
+                                       LocalDate issueDate, Integer noOfBl, String issuePlace,
+                                       LocalDate doDate, String incoterms, String payableAt,
+                                       boolean triangle, boolean coLoad, String mblNo,
+                                       LoadType loadType) {
+        this.porCode       = porCode;
+        this.finalDestCode = finalDestCode;
+        this.issueDate     = issueDate;
+        this.noOfBl        = noOfBl;
+        this.issuePlace    = issuePlace;
+        this.doDate        = doDate;
+        this.incoterms     = incoterms;
+        this.payableAt     = payableAt;
+        this.triangle      = triangle;
+        this.coLoad        = coLoad;
+        this.mblNo         = mblNo;
+        this.loadType      = loadType;
     }
 }

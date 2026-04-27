@@ -46,4 +46,13 @@ public class HouseBlTruck extends HouseBl {
         entity.vesselName = "TRUCK";
         return entity;
     }
+
+    public void updateTruckFields(LocalDate pickupDate, String truckerCode, String truckerPic,
+                                  BigDecimal chargeWeightKg, String incoterms) {
+        this.pickupDate      = pickupDate;
+        this.truckerCode     = truckerCode;
+        this.truckerPic      = truckerPic;
+        this.chargeWeightKg  = chargeWeightKg;
+        this.incoterms       = incoterms;
+    }
 }

@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.masterbl.entity;
 
-import com.freightos.fms.domain.housebl.enums.Bound;
+import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -34,8 +34,23 @@ public class MasterBlSea extends MasterBl {
 
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
+    protected MasterBlSea(Bound bound) {
+        super(bound);
+    }
+
     public static MasterBlSea create(Bound bound) {
-        MasterBlSea e = new MasterBlSea();
-        return e;
+        return new MasterBlSea(bound);
+    }
+
+    public void updateSeaFields(LoadType loadType, String linerCode, String vesselName,
+                                String voyageNo, LocalDate onboardDate,
+                                String lineBkgNo, LocalDate issueDate) {
+        this.loadType    = loadType;
+        this.linerCode   = linerCode;
+        this.vesselName  = vesselName;
+        this.voyageNo    = voyageNo;
+        this.onboardDate = onboardDate;
+        this.lineBkgNo   = lineBkgNo;
+        this.issueDate   = issueDate;
     }
 }
