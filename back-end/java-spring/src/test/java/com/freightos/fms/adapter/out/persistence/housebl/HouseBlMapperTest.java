@@ -13,8 +13,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * House B/L 도메인 엔티티 팩토리 메서드 및 게터 검증.
- * 프로젝트 구조상 별도 Mapper/JpaEntity 계층 없이 도메인 엔티티가
- * JPA 엔티티를 겸하므로, create() 팩토리 및 기본값 필드를 직접 검증한다.
+ * 이 프로젝트에서는 도메인 엔티티가 JPA 엔티티를 직접 겸하므로
+ * 별도 Mapper/JpaEntity 계층이 없다. create() 팩토리와 기본값 필드를 검증한다.
+ *
+ * 회귀 검출 포인트:
+ *   - HouseBlSea.isTriangle() 이 NPE 없이 false 를 반환해야 한다.
+ *   - HouseBlAir.create() 에서 declaredValueCarriage / insurance 기본값이 설정되어야 한다.
+ *   - HouseBlTruck.create() 에서 vesselName 이 "TRUCK" 으로 고정되어야 한다.
  */
 class HouseBlMapperTest {
 
@@ -30,11 +35,12 @@ class HouseBlMapperTest {
     }
 
     @Test
-    @DisplayName("해상 도메인 엔티티 생성 시 triangle/coLoad 기본값이 false 이다")
+    @DisplayName("해상 도메인 엔티티 생성 시 triangle/coLoad 기본값이 false 이다 (회귀 검출)")
     void toJpa_seaDomain_mapsSeaFields() {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
 
         assertThat(sea).isInstanceOf(HouseBlSea.class);
+        // 핵심 회귀 검출 포인트: isTriangle() 이 NPE 없이 false 를 반환해야 한다
         assertThatCode(sea::isTriangle).doesNotThrowAnyException();
         assertThat(sea.isTriangle()).isFalse();
         assertThat(sea.isCoLoad()).isFalse();
