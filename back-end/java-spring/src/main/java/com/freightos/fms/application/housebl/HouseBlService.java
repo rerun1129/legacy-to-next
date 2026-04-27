@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,7 +27,7 @@ public class HouseBlService implements HouseBlUseCase {
     }
 
     @Override
-    public HouseBl getById(UUID id) {
+    public HouseBl getById(Long id) {
         return houseBlPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("HouseBl", id));
     }
@@ -43,7 +41,7 @@ public class HouseBlService implements HouseBlUseCase {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(Long id) {
         HouseBl entity = getById(id);
         houseBlPort.delete(entity);
         log.info("Deleted HouseBl id={}", id);

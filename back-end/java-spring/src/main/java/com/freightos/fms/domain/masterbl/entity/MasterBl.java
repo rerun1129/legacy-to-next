@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * E-01 Master B/L 공통 본체.
@@ -35,8 +34,8 @@ public abstract class MasterBl extends BaseEntity {
     private String podCode;
 
     // ── 일정 ──────────────────────────────────────────────────────
-    private LocalDate etd;
-    private LocalDate eta;
+    private String etd;
+    private String eta;
 
     // ── 운임 ──────────────────────────────────────────────────────
     private FreightTerm freightTerm;
@@ -66,7 +65,7 @@ public abstract class MasterBl extends BaseEntity {
         this.notifyCode    = notifyCode;
     }
 
-    public void updateSchedule(String polCode, String podCode, LocalDate etd, LocalDate eta) {
+    public void updateSchedule(String polCode, String podCode, String etd, String eta) {
         this.polCode = polCode;
         this.podCode = podCode;
         this.etd     = etd;

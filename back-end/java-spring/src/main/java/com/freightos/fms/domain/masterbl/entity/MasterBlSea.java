@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 
 /**
  * E-03 Master B/L 해상 확장.
@@ -20,11 +19,11 @@ public class MasterBlSea extends MasterBl {
     private String linerCode;
     private String vesselName;
     private String voyageNo;
-    private LocalDate onboardDate;
+    private String onboardDate;
     private String lineBkgNo;
 
     // 수출 전용
-    private LocalDate issueDate;
+    private String issueDate;
 
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
@@ -37,8 +36,8 @@ public class MasterBlSea extends MasterBl {
     }
 
     public void updateSeaFields(LoadType loadType, String linerCode, String vesselName,
-                                String voyageNo, LocalDate onboardDate,
-                                String lineBkgNo, LocalDate issueDate) {
+                                String voyageNo, String onboardDate,
+                                String lineBkgNo, String issueDate) {
         this.loadType    = loadType;
         this.linerCode   = linerCode;
         this.vesselName  = vesselName;

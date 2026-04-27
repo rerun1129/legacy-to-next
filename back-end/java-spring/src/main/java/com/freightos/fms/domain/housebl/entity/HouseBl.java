@@ -11,10 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * E-08 House B/L 공통 본체.
@@ -47,8 +45,8 @@ public abstract class HouseBl extends BaseEntity {
     private String deliveryCode;
 
     // ── 일정 ──────────────────────────────────────────────────────
-    private LocalDate etd;
-    private LocalDate eta;
+    private String etd;
+    private String eta;
 
     // ── 화물 요약 (비정규화 — 빠른 리스트 조회용) ────────────────────
     private Integer pkgQty;
@@ -63,7 +61,7 @@ public abstract class HouseBl extends BaseEntity {
     private String salesManCode;
 
     // ── Master B/L 연결 ─────────────────────────────────────────
-    private UUID masterBlId;
+    private Long masterBlId;
 
     // ── 컨테이너 (SEA 전용, 다른 모드에서는 빈 컬렉션) ──────────────
     private List<HouseBlContainer> containers = new ArrayList<>();
@@ -79,7 +77,7 @@ public abstract class HouseBl extends BaseEntity {
         this.hblNo = hblNo;
     }
 
-    public void updateSchedule(String polCode, String podCode, LocalDate etd, LocalDate eta) {
+    public void updateSchedule(String polCode, String podCode, String etd, String eta) {
         this.polCode = polCode;
         this.podCode = podCode;
         this.etd     = etd;
@@ -94,7 +92,7 @@ public abstract class HouseBl extends BaseEntity {
         this.salesManCode       = salesManCode;
     }
 
-    public void linkToMaster(UUID masterBlId) {
+    public void linkToMaster(Long masterBlId) {
         this.masterBlId = masterBlId;
     }
 

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * E-04 Master B/L 항공 확장.
@@ -35,7 +34,7 @@ public class MasterBlAir extends MasterBl {
     private String flightType;
 
     // 수출 전용 Issue
-    private LocalDate issueDate;
+    private String issueDate;
     private String issuePlace;
     private String signature;
 
@@ -56,7 +55,7 @@ public class MasterBlAir extends MasterBl {
                                 String declaredValueCarriage, String declaredValueCustoms,
                                 String insurance, String accountInformation,
                                 String securityStatus, String flightType,
-                                LocalDate issueDate, String issuePlace, String signature) {
+                                String issueDate, String issuePlace, String signature) {
         this.airlineCode            = airlineCode;
         this.departureCode          = departureCode;
         this.mawbNo                 = mawbNo;

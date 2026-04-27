@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * E-11 House B/L 항공 확장.
@@ -35,7 +34,7 @@ public class HouseBlAir extends HouseBl {
     private String otherTerm;
 
     // 수출 전용
-    private LocalDate issueDate;
+    private String issueDate;
     private String issuePlace;
     private String signature;
 
@@ -60,7 +59,7 @@ public class HouseBlAir extends HouseBl {
                                 String rateClass, String currencyCode,
                                 String declaredValueCarriage, String declaredValueCustoms,
                                 String insurance, String accountInformation, String otherTerm,
-                                LocalDate issueDate, String issuePlace, String signature,
+                                String issueDate, String issuePlace, String signature,
                                 String fhd, String incoterms, String freightTermAir) {
         this.airlineCode            = airlineCode;
         this.departureCode          = departureCode;
