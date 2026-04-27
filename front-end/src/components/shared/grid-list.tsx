@@ -65,6 +65,8 @@ function ManagedGridList<T>({
             </tr>
           ) : (
             data.map((row, rowIndex) => {
+              // rowKey 미제공 시 row.id → rowIndex 순으로 폴백.
+              // rowIndex는 이 그리드가 서버 페이지 고정 순서 데이터를 표시할 때만 허용됨(재정렬·삽입 없음).
               const key = rowKey
                 ? rowKey(row, rowIndex)
                 : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
@@ -147,6 +149,8 @@ function PlainGridList<T>({
             </tr>
           ) : (
             data.map((row, rowIndex) => {
+              // rowKey 미제공 시 row.id → rowIndex 순으로 폴백.
+              // rowIndex는 이 그리드가 서버 페이지 고정 순서 데이터를 표시할 때만 허용됨(재정렬·삽입 없음).
               const key = rowKey
                 ? rowKey(row, rowIndex)
                 : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
