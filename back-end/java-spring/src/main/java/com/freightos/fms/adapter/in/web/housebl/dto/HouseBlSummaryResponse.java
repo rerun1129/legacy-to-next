@@ -1,7 +1,7 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
+import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
-import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 
 import java.time.LocalDate;

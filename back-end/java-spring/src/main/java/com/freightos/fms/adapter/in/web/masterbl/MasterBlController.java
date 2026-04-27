@@ -1,19 +1,20 @@
 package com.freightos.fms.adapter.in.web.masterbl;
 
+import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
+import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
 import com.freightos.fms.common.response.ApiResponse;
-import com.freightos.fms.domain.housebl.enums.Bound;
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.model.PageRequest;
+import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Master B/L", description = "Master B/L CRUD — S-04/S-05")
@@ -26,17 +27,25 @@ public class MasterBlController {
 
     @Operation(summary = "Master B/L 리스트 조회")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MasterBl>>> list(
+    public ResponseEntity<ApiResponse<PagedResult<MasterBlSummaryResponse>>> list(
             @RequestParam Bound bound,
-            @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.of(masterBlUseCase.list(bound, pageable)));
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "50") int size) {
+        PagedResult<MasterBl> result = masterBlUseCase.list(bound, PageRequest.of(page, size));
+        List<MasterBlSummaryResponse> content = result.getContent().stream()
+                .map(MasterBlSummaryResponse::from)
+                .toList();
+        PagedResult<MasterBlSummaryResponse> response = PagedResult.of(
+                content, result.getTotalElements(), result.getTotalPages(),
+                result.getPage(), result.getSize());
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 
     @Operation(summary = "Master B/L 단건 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<MasterBl>> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ApiResponse.of(masterBlUseCase.getById(id)));
+    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> getById(@PathVariable UUID id) {
+        MasterBl masterBl = masterBlUseCase.getById(id);
+        return ResponseEntity.ok(ApiResponse.of(MasterBlDetailResponse.from(masterBl)));
     }
 
     @Operation(summary = "Master B/L 삭제")

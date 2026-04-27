@@ -1,7 +1,9 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
-import com.freightos.fms.domain.housebl.enums.Bound;
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.model.PageRequest;
+import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.port.out.MasterBlPort;
 import org.junit.jupiter.api.DisplayName;
@@ -10,10 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,29 +35,29 @@ class MasterBlServiceTest {
     @Test
     @DisplayName("list - Bound.EXP 조회 시 port.findAllByBound(EXP) 위임")
     void list_exp_delegatesToPort() {
-        Pageable pageable = PageRequest.of(0, 50);
+        PageRequest pageRequest = PageRequest.of(0, 50);
         MasterBl mockEntity = mock(MasterBl.class);
-        Page<MasterBl> expected = new PageImpl<>(List.of(mockEntity));
-        given(masterBlPort.findAllByBound(Bound.EXP, pageable)).willReturn(expected);
+        PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
+        given(masterBlPort.findAllByBound(Bound.EXP, pageRequest)).willReturn(expected);
 
-        Page<MasterBl> result = masterBlService.list(Bound.EXP, pageable);
+        PagedResult<MasterBl> result = masterBlService.list(Bound.EXP, pageRequest);
 
-        assertThat(result).isEqualTo(expected);
-        then(masterBlPort).should().findAllByBound(Bound.EXP, pageable);
+        assertThat(result.getContent()).hasSize(1);
+        then(masterBlPort).should().findAllByBound(Bound.EXP, pageRequest);
     }
 
     @Test
     @DisplayName("list - Bound.IMP 조회 시 port.findAllByBound(IMP) 위임")
     void list_imp_delegatesToPort() {
-        Pageable pageable = PageRequest.of(0, 50);
+        PageRequest pageRequest = PageRequest.of(0, 50);
         MasterBl mockEntity = mock(MasterBl.class);
-        Page<MasterBl> expected = new PageImpl<>(List.of(mockEntity));
-        given(masterBlPort.findAllByBound(Bound.IMP, pageable)).willReturn(expected);
+        PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
+        given(masterBlPort.findAllByBound(Bound.IMP, pageRequest)).willReturn(expected);
 
-        Page<MasterBl> result = masterBlService.list(Bound.IMP, pageable);
+        PagedResult<MasterBl> result = masterBlService.list(Bound.IMP, pageRequest);
 
-        assertThat(result).isEqualTo(expected);
-        then(masterBlPort).should().findAllByBound(Bound.IMP, pageable);
+        assertThat(result.getContent()).hasSize(1);
+        then(masterBlPort).should().findAllByBound(Bound.IMP, pageRequest);
     }
 
     @Test
