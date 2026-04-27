@@ -62,7 +62,7 @@ public class HouseBlContainer extends BaseEntity {
 
     /** TEU 환산 산식: length_feet / 20 */
     public BigDecimal teu() {
-        if (lengthFeet == null) throw new IllegalStateException("lengthFeet is not set");
+        if (lengthFeet == null) throw new IllegalStateException("lengthFeet is not set for container: " + containerNo);
         return BigDecimal.valueOf(lengthFeet).divide(BigDecimal.valueOf(20));
     }
 }

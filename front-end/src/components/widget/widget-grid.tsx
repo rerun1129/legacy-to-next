@@ -87,7 +87,7 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
           display: "grid", gridTemplateColumns: `repeat(${COLS}, 1fr)`, gridAutoRows: ROW_HEIGHT,
           gap: GAP, pointerEvents: "none", zIndex: 0,
         }}>
-          {/* 위치 고정 장식 셀 — 개수·순서가 절대 바뀌지 않으므로 위치 인덱스를 key로 사용 (A5 예외) */}
+          {/* 순수 장식 셀(CSS 배경, state 없음) — 동적 크기이지만 state 유실 위험 없으므로 A5 예외 */}
           {Array.from({ length: overlayRows * COLS }).map((_, i) => <div key={`cell-${i}`} className="widget-grid-cell-bg" />)}
         </div>
       )}
