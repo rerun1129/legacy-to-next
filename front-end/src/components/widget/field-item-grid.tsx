@@ -32,7 +32,7 @@ function inferLabel(key: string) {
 }
 
 // 빈 슬롯 key 형식: "slot-R-S" (대시 구분 — 언더스코어는 파싱 오류 위험)
-const slotKey  = (row: number, slot: number) => `slot-${row}-${slot}`;
+const toSlotKey  = (row: number, slot: number) => `slot-${row}-${slot}`;
 const isSlotKey = (k: string | null | undefined): k is string => !!k && k.startsWith("slot-");
 const parseSlot = (k: string): [number, number] => {
   const [, r, s] = k.split("-");   // ["slot", "R", "S"]
@@ -108,7 +108,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
       centers[k]   = { x: r.left + r.width / 2 - cr.left, y: r.top + r.height / 2 - cr.top };
     });
     slots.forEach(slot => {
-      const k = slot.dataset.slotKey;
+      const k = slot.dataset.toSlotKey;
       if (!k) return;
       const r = slot.getBoundingClientRect();
       centers[k] = { x: r.left + r.width / 2 - cr.left, y: r.top + r.height / 2 - cr.top };
@@ -207,7 +207,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
             >
               {slots.map((k, slotIdx) => {
                 if (k === null) {
-                  const sk = slotKey(rowIdx, slotIdx);
+                  const sk = toSlotKey(rowIdx, slotIdx);
                   return (
                     <div key={sk}
                       className={`field-item-cell field-item-cell-placeholder is-empty-slot${dragState?.dragOverKey === sk ? " is-drag-over" : ""}`}

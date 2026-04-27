@@ -137,4 +137,10 @@ public abstract class HouseBlJpaEntity extends BaseJpaEntity {
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }
     public void setGrossWeightKg(BigDecimal grossWeightKg) { this.grossWeightKg = grossWeightKg; }
     public void setCbm(BigDecimal cbm) { this.cbm = cbm; }
+
+    // orphanRemoval=true 컬렉션 동기화: 참조를 교체하지 않고 clear+addAll로 관리
+    public void syncContainers(List<HouseBlContainerJpaEntity> newContainers) {
+        this.containers.clear();
+        this.containers.addAll(newContainers);
+    }
 }

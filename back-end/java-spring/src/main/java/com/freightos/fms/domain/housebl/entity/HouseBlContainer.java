@@ -45,8 +45,24 @@ public class HouseBlContainer extends BaseEntity {
         return c;
     }
 
+    public void updateDetails(String sealNo1, String sealNo2, Integer pkgQty, String pkgUnit,
+                              BigDecimal grossWeightKg, BigDecimal netWeightKg, BigDecimal cbm,
+                              BigDecimal vgmKg, boolean isSoc, int seq) {
+        this.sealNo1       = sealNo1;
+        this.sealNo2       = sealNo2;
+        this.pkgQty        = pkgQty;
+        this.pkgUnit       = pkgUnit;
+        this.grossWeightKg = grossWeightKg;
+        this.netWeightKg   = netWeightKg;
+        this.cbm           = cbm;
+        this.vgmKg         = vgmKg;
+        this.isSoc         = isSoc;
+        this.seq           = seq;
+    }
+
     /** TEU 환산 산식: length_feet / 20 */
     public BigDecimal teu() {
+        if (lengthFeet == null) throw new IllegalStateException("lengthFeet is not set");
         return BigDecimal.valueOf(lengthFeet).divide(BigDecimal.valueOf(20));
     }
 }

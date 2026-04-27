@@ -24,10 +24,9 @@ export function HouseBLListGrid({ variantKey }: Props) {
   const router   = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
 
-  function handleHblDoubleClick(hbl: string) {
+  function handleHblDoubleClick(_hbl: string) {
     // TODO(2026-04-27): 실제 ID 기반 라우팅으로 교체 (현재는 /entry로 이동)
     router.push(`/fms/house-bl/${variantKey}/entry`);
-    void hbl;
   }
 
   const columns: GridColumn<HouseBLRow>[] = [

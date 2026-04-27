@@ -4,6 +4,9 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * JPA ↔ Domain 변환 매퍼.
  * Domain → JpaEntity 및 JpaEntity → Domain 변환 메서드 제공.
@@ -69,6 +72,10 @@ public class HouseBlMapper {
         if (jpa.getMasterBlId() != null) {
             domain.linkToMaster(jpa.getMasterBlId());
         }
+        List<HouseBlContainer> containers = jpa.getContainers().stream()
+                .map(c -> toContainerDomain(c, domain))
+                .collect(Collectors.toList());
+        domain.initContainers(containers);
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
@@ -212,5 +219,37 @@ public class HouseBlMapper {
         jpa.setPkgUnit(domain.getPkgUnit());
         jpa.setGrossWeightKg(domain.getGrossWeightKg());
         jpa.setCbm(domain.getCbm());
+        List<HouseBlContainerJpaEntity> jpaContainers = domain.getContainers().stream()
+                .map(c -> toContainerJpa(c, jpa))
+                .collect(Collectors.toList());
+        jpa.syncContainers(jpaContainers);
+    }
+
+    private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
+        HouseBlContainer c = HouseBlContainer.of(parent, jpa.getContainerNo(),
+                jpa.getContainerType(), jpa.getLengthFeet());
+        c.assignIdentity(jpa.getId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        c.updateDetails(jpa.getSealNo1(), jpa.getSealNo2(), jpa.getPkgQty(), jpa.getPkgUnit(),
+                jpa.getGrossWeightKg(), jpa.getNetWeightKg(), jpa.getCbm(),
+                jpa.getVgmKg(), jpa.isSoc(), jpa.getSeq());
+        return c;
+    }
+
+    private HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {
+        HouseBlContainerJpaEntity jpa = HouseBlContainerJpaEntity.of(jpaParent,
+                c.getContainerNo(), c.getContainerType(), c.getLengthFeet());
+        if (c.getId() != null) jpa.setId(c.getId());
+        jpa.setSealNo1(c.getSealNo1());
+        jpa.setSealNo2(c.getSealNo2());
+        jpa.setPkgQty(c.getPkgQty());
+        jpa.setPkgUnit(c.getPkgUnit());
+        jpa.setGrossWeightKg(c.getGrossWeightKg());
+        jpa.setNetWeightKg(c.getNetWeightKg());
+        jpa.setCbm(c.getCbm());
+        jpa.setVgmKg(c.getVgmKg());
+        jpa.setIsSoc(c.isSoc());
+        jpa.setSeq(c.getSeq());
+        return jpa;
     }
 }

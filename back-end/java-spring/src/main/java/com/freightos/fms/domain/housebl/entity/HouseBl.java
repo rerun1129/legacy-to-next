@@ -120,4 +120,8 @@ public abstract class HouseBl extends BaseEntity {
         this.grossWeightKg = grossWeightKg;
         this.cbm           = cbm;
     }
+
+    public void initContainers(List<HouseBlContainer> containers) {
+        this.containers = new ArrayList<>(containers);
+    }
 }
