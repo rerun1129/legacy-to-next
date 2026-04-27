@@ -1,8 +1,8 @@
 import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
-interface Props { variant: BLVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 const PARTIES = [
   { role: "SHIPPER",     req: false },
@@ -12,6 +12,7 @@ const PARTIES = [
 ] as const;
 
 export function AirPartyPanel({ variant }: Props) {
+  if (!variant) return null;
   const isImp = variant.direction === "IMP";
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>

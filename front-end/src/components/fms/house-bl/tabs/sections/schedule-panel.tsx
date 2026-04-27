@@ -1,10 +1,10 @@
 import { Search } from "lucide-react";
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 
-interface Props { variant: BLVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function SchedField({ label, value, req, type = "text" }: { label: string; value: string; req?: boolean; type?: string }) {
@@ -86,6 +86,7 @@ function DoDateSection() {
 
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
+  if (!variant) return null;
   const panelScope = `schedule-panel.${variant.key}`;
 
   const fields: FieldWidgetDef[] = [

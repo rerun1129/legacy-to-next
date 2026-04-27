@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 
-interface Props { isExp: boolean }
+interface Props { isExp?: boolean }
 
 interface PartyConfig {
   key:      string;
@@ -52,7 +52,7 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
   );
 }
 
-export function PartyPanel({ isExp }: Props) {
+export function PartyPanel({ isExp = false }: Props) {
   const PARTY_CONFIGS: PartyConfig[] = [
     { key: "shipper",     role: "SHIPPER",     filled: true,  required: false },
     { key: "consignee",   role: "CONSIGNEE",   filled: true,  required: !isExp },

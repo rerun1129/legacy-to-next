@@ -1,11 +1,11 @@
 "use client";
 
-import type { MasterVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import { PackageField } from "@/components/shared/panel-fields";
 
-interface Props { variant: MasterVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 const UNIT_SEL: React.CSSProperties = {
   height: 24, padding: "0 2px", fontSize: 10, flexShrink: 0, width: 44, outline: "none",
@@ -41,6 +41,7 @@ function GWField({ value = "30600" }: { value?: string }) {
 }
 
 export function MasterCargoDocPanel({ variant }: Props) {
+  if (!variant) return null;
   const isSea      = variant.mode === "SEA";
   const panelScope = `master-cargo-doc.${variant.key}`;
 

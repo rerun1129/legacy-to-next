@@ -1,10 +1,10 @@
 import { Search } from "lucide-react";
-import type { MasterVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 
 
-interface Props { variant: MasterVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 const PARTIES = ["SHIPPER", "CONSIGNEE", "NOTIFY"] as const;
 const PARTY_BTNS: Record<string, string> = { CONSIGNEE: "To Order", NOTIFY: "Same as Cne." };
@@ -62,6 +62,7 @@ export function MasterMarksPanel() {
 
 // ── Goods Description ──────────────────────────────────────
 export function MasterGoodsDescPanel({ variant }: Props) {
+  if (!variant) return null;
   const isSea = variant.mode === "SEA";
   const title = isSea ? "Description of Goods" : "Nature of Goods";
   const content = isSea ? "SAID TO CONTAIN\nELECTRONIC GOODS" : "CONSOLIDATION SHIPMENT\nAS PER ATTACHED MANIFEST";

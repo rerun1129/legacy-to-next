@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { WidgetKey, WidgetPosition } from "@/lib/use-widget-layout";
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { BLVariantConfig, MasterVariantConfig } from "@/lib/bl-variants";
 import { PartyPanel }         from "@/components/fms/house-bl/tabs/sections/party-panel";
 import { SchedulePanel }      from "@/components/fms/house-bl/tabs/sections/schedule-panel";
 import { TradePanel }         from "@/components/fms/house-bl/tabs/sections/trade-panel";
@@ -9,8 +9,11 @@ import { MarksPanel }         from "@/components/fms/house-bl/tabs/sections/mark
 import { DescriptionPanel }   from "@/components/fms/house-bl/tabs/sections/description-panel";
 import { ItemHsPanel }        from "@/components/fms/house-bl/tabs/sections/item-hs-panel";
 
+export type AnyVariantConfig = BLVariantConfig | MasterVariantConfig;
+
 export interface WidgetProps {
-  variant: BLVariantConfig;
+  variant?: AnyVariantConfig;
+  isExp?:   boolean;
 }
 
 export interface WidgetDef {

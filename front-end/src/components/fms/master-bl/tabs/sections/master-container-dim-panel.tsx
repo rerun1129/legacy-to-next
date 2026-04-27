@@ -1,8 +1,8 @@
 import { getModeLabels } from "@/lib/bl-mode-labels";
-import type { MasterVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 
-interface Props { variant: MasterVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 const SEA_ROWS = [
   { cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500,  unit: "CTN", gw: "12,400", cbm: "22.5" },
@@ -16,6 +16,7 @@ const AIR_ROWS = [
 ];
 
 export function MasterContainerDimPanel({ variant }: Props) {
+  if (!variant) return null;
   const isSea = variant.mode === "SEA";
   const ml    = getModeLabels(variant.mode);
   return (

@@ -8,8 +8,7 @@ import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { useCurrentUser }  from "@/lib/use-current-user";
 import { WidgetContainer } from "./widget-container";
 import { WidgetPalette }   from "./widget-palette";
-import type { WidgetDef }  from "./widget-registry";
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { WidgetDef, AnyVariantConfig } from "./widget-registry";
 import { WIDGET_REGISTRY, REGISTRY_MAP as DEFAULT_MAP, getDefaultPositions as seaDefaults } from "./widget-registry";
 
 const COLS       = 6;
@@ -18,7 +17,7 @@ const GAP        = 8;
 
 interface Props {
   scope:    string;
-  variant?: BLVariantConfig;
+  variant?: AnyVariantConfig;
   registry: WidgetDef[];       // 엔트리 타입별 레지스트리
 }
 

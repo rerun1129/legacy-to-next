@@ -11,5 +11,5 @@ const NON_BL_REGISTRY: WidgetDef[] = [
 ];
 
 export function MainNonBL() {
-  return <WidgetGrid scope="non-bl-entry.main" variant={{}} registry={NON_BL_REGISTRY} />;
+  return <WidgetGrid scope="non-bl-entry.main" registry={NON_BL_REGISTRY} />;
 }

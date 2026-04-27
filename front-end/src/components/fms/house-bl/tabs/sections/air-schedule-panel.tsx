@@ -1,8 +1,8 @@
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell } from "@/components/shared/grid-cell-inputs";
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
-interface Props { variant: BLVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 interface LegRow { to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
 
@@ -24,6 +24,7 @@ const LEG_DATA: LegRow[] = [
 ];
 
 export function AirSchedulePanel({ variant }: Props) {
+  if (!variant) return null;
   const isExp = variant.direction === "EXP";
   const label = isExp ? "Airline" : "Carrier";
   return (

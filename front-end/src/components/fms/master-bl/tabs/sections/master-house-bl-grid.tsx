@@ -1,7 +1,7 @@
 import { getModeLabels } from "@/lib/bl-mode-labels";
-import type { MasterVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
-interface Props { variant: MasterVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 const ROWS = [
   { no: 1, hbl: "HBLKR24041956", shipper: "한진무역(주)",     consignee: "SHANGHAI TRADING CO.", doc: "HJTR001", pkg: 500, unit: "CTN", gw: "12,400", cbm: "22.5" },
@@ -13,6 +13,7 @@ const ROWS = [
 ];
 
 export function MasterHouseBLGrid({ variant }: Props) {
+  if (!variant) return null;
   const isSea    = variant.mode === "SEA";
   const ml       = getModeLabels(variant.mode);
   return (

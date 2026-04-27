@@ -3,11 +3,11 @@
 import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
-import type { MasterVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 
-interface Props { variant: MasterVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 interface LegRow { to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
 
 const LEG_COLS: GridColumn<LegRow>[] = [
@@ -123,6 +123,7 @@ function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
 }
 
 export function MasterSchedulePanel({ variant }: Props) {
+  if (!variant) return null;
   const panelScope = `master-schedule-panel.${variant.key}`;
   const isExp      = variant.direction === "EXP";
   const fields     = variant.mode === "SEA"

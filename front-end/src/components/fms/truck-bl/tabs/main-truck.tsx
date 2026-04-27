@@ -11,5 +11,5 @@ const TRUCK_REGISTRY: WidgetDef[] = [
 ];
 
 export function MainTruck() {
-  return <WidgetGrid scope="truck-bl-entry.main" variant={{}} registry={TRUCK_REGISTRY} />;
+  return <WidgetGrid scope="truck-bl-entry.main" registry={TRUCK_REGISTRY} />;
 }

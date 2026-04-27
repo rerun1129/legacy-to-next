@@ -1,6 +1,6 @@
-import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
-interface Props { variant: BLVariantConfig }
+interface Props { variant?: AnyVariantConfig }
 
 const BASE_FIELDS = [
   { l: "Currency",     v: "USD" },
@@ -14,6 +14,7 @@ const BASE_FIELDS = [
 ];
 
 export function AirTradePanel({ variant }: Props) {
+  if (!variant) return null;
   const isImp = variant.direction === "IMP";
   const fields = isImp ? [...BASE_FIELDS, { l: "F.H.D", v: "Not" }] : BASE_FIELDS;
   return (
