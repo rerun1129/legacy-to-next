@@ -13,27 +13,29 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * JPA ORM 엔티티 — House B/L 공통 본체.
  * 도메인 엔티티(HouseBl)와 분리된 영속성 계층 객체.
+ * 해상/항공/트럭/Non-BL 확장은 별도 독립 테이블(@OneToOne FK).
  */
 @Entity
 @Table(name = "house_bl")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "job_div", discriminatorType = DiscriminatorType.STRING)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class HouseBlJpaEntity extends BaseJpaEntity {
+public class HouseBlJpaEntity extends BaseJpaEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "house_bl_id", updatable = false, nullable = false)
+    private Long houseBlId;
 
     @Column(name = "hbl_no", length = 50)
     private String hblNo;
 
-    @Column(name = "job_div", insertable = false, updatable = false, length = 10)
+    @Column(name = "job_div", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     private JobDiv jobDiv;
 
@@ -74,11 +76,11 @@ public abstract class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "delivery_code", length = 10)
     private String deliveryCode;
 
-    @Column(name = "etd")
-    private LocalDate etd;
+    @Column(name = "etd", length = 10)
+    private String etd;
 
-    @Column(name = "eta")
-    private LocalDate eta;
+    @Column(name = "eta", length = 10)
+    private String eta;
 
     @Column(name = "pkg_qty")
     private Integer pkgQty;
@@ -105,28 +107,37 @@ public abstract class HouseBlJpaEntity extends BaseJpaEntity {
     private String salesManCode;
 
     @Column(name = "master_bl_id")
-    private UUID masterBlId;
+    private Long masterBlId;
+
+    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
+    private HouseBlSeaJpaEntity seaExt;
+
+    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
+    private HouseBlAirJpaEntity airExt;
+
+    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
+    private HouseBlTruckJpaEntity truckExt;
+
+    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
+    private HouseBlNonBlJpaEntity nonBlExt;
 
     @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
 
-    protected HouseBlJpaEntity(JobDiv jobDiv, Bound bound) {
-        this.jobDiv = jobDiv;
-        this.bound  = bound;
-    }
-
+    public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
+    public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
     public void setHblNo(String hblNo) { this.hblNo = hblNo; }
     public void setPolCode(String polCode) { this.polCode = polCode; }
     public void setPodCode(String podCode) { this.podCode = podCode; }
-    public void setEtd(LocalDate etd) { this.etd = etd; }
-    public void setEta(LocalDate eta) { this.eta = eta; }
+    public void setEtd(String etd) { this.etd = etd; }
+    public void setEta(String eta) { this.eta = eta; }
     public void setActualCustomerCode(String code) { this.actualCustomerCode = code; }
     public void setOperatorCode(String code) { this.operatorCode = code; }
     public void setTeamCode(String code) { this.teamCode = code; }
     public void setSalesManCode(String code) { this.salesManCode = code; }
-    public void setMasterBlId(UUID masterBlId) { this.masterBlId = masterBlId; }
+    public void setMasterBlId(Long masterBlId) { this.masterBlId = masterBlId; }
     public void setShipmentType(ShipmentType shipmentType) { this.shipmentType = shipmentType; }
     public void setBlType(BlType blType) { this.blType = blType; }
     public void setFreightTerm(FreightTerm freightTerm) { this.freightTerm = freightTerm; }

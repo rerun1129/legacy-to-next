@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -52,7 +51,7 @@ class HouseBlServiceTest {
     @Test
     @DisplayName("getById - 존재하는 ID 조회 시 엔티티 반환")
     void getById_existingId_returnsEntity() {
-        UUID id = UUID.randomUUID();
+        Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
         given(houseBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 
@@ -65,7 +64,7 @@ class HouseBlServiceTest {
     @Test
     @DisplayName("getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
     void getById_notFound_throwsResourceNotFoundException() {
-        UUID id = UUID.randomUUID();
+        Long id = 999L;
         given(houseBlPort.findById(id)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> houseBlService.getById(id))
@@ -75,7 +74,7 @@ class HouseBlServiceTest {
     @Test
     @DisplayName("delete - 존재하는 ID 삭제 시 port.delete 호출")
     void delete_existingId_callsPortDelete() {
-        UUID id = UUID.randomUUID();
+        Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
         given(houseBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 

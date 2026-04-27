@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * E-20 House B/L 트럭 확장.
@@ -18,7 +17,8 @@ public class HouseBlTruck extends HouseBl {
 
     /** 고정값 "TRUCK". 사용자 입력 없이 시스템 설정. */
     private String vesselName = "TRUCK";
-    private LocalDate pickupDate;
+    // 비즈니스 날짜 — ISO 8601 문자열 (yyyy-MM-dd)
+    private String pickupDate;
     private String truckerCode;
     private String truckerPic;
     /** 트럭 전용: 청구중량 */
@@ -31,7 +31,7 @@ public class HouseBlTruck extends HouseBl {
         return entity;
     }
 
-    public void updateTruckFields(LocalDate pickupDate, String truckerCode, String truckerPic,
+    public void updateTruckFields(String pickupDate, String truckerCode, String truckerPic,
                                   BigDecimal chargeWeightKg, String incoterms) {
         this.pickupDate      = pickupDate;
         this.truckerCode     = truckerCode;

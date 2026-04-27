@@ -7,8 +7,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 /**
  * E-10 House B/L 해상 확장.
  * 순수 도메인 엔티티 — JPA 어노테이션 없음.
@@ -21,17 +19,18 @@ public class HouseBlSea extends HouseBl {
     private String linerCode;
     private String vesselName;
     private String voyageNo;
-    private LocalDate onboardDate;
+    // 비즈니스 날짜 — ISO 8601 문자열 (yyyy-MM-dd)
+    private String onboardDate;
     private String porCode;            // Place of Receipt
     private String finalDestCode;
 
     // 수출 전용
-    private LocalDate issueDate;
+    private String issueDate;
     private Integer noOfBl;
     private String issuePlace;
 
     // 수입 전용
-    private LocalDate doDate;
+    private String doDate;
 
     // 인코텀스
     private String incoterms;
@@ -49,7 +48,7 @@ public class HouseBlSea extends HouseBl {
     }
 
     public void updateSeaSchedule(String linerCode, String vesselName, String voyageNo,
-                                  LocalDate onboardDate) {
+                                  String onboardDate) {
         this.linerCode   = linerCode;
         this.vesselName  = vesselName;
         this.voyageNo    = voyageNo;
@@ -57,8 +56,8 @@ public class HouseBlSea extends HouseBl {
     }
 
     public void updateSeaRouteAndFlags(String porCode, String finalDestCode,
-                                       LocalDate issueDate, Integer noOfBl, String issuePlace,
-                                       LocalDate doDate, String incoterms, String payableAt,
+                                       String issueDate, Integer noOfBl, String issuePlace,
+                                       String doDate, String incoterms, String payableAt,
                                        boolean triangle, boolean coLoad, String mblNo,
                                        LoadType loadType) {
         this.porCode       = porCode;

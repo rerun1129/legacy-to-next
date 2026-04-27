@@ -19,7 +19,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Tag(name = "House B/L", description = "House B/L CRUD — S-02/S-03")
 @RestController
@@ -50,14 +49,14 @@ public class HouseBlController {
 
     @Operation(summary = "House B/L 단건 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> getById(@PathVariable Long id) {
         HouseBl houseBl = houseBlUseCase.getById(id);
         return ResponseEntity.ok(ApiResponse.of(HouseBlDetailResponse.from(houseBl)));
     }
 
     @Operation(summary = "House B/L 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         houseBlUseCase.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }

@@ -9,21 +9,16 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * JPA 공통 베이스 엔티티. 어댑터 계층에만 존재하며 도메인 계층에 노출되지 않는다.
+ * 각 엔티티가 자체 PK(@Id)를 정의하므로 @Id 필드는 여기서 선언하지 않는다.
  * @MappedSuperclass + @EntityListeners 보유.
  */
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseJpaEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -40,12 +35,4 @@ public abstract class BaseJpaEntity {
     @LastModifiedBy
     @Column(name = "updated_by", length = 50)
     private String updatedBy;
-
-    /**
-     * 매퍼가 Domain→JPA 변환 시 기존 엔티티의 ID를 복사할 때 사용한다.
-     * JPA @GeneratedValue 가 있으므로 신규 저장 시에는 호출하지 않는다.
-     */
-    public void setId(UUID id) {
-        this.id = id;
-    }
 }

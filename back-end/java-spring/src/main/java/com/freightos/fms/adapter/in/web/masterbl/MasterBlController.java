@@ -17,7 +17,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Tag(name = "Master B/L", description = "Master B/L CRUD — S-04/S-05")
 @RestController
@@ -46,14 +45,14 @@ public class MasterBlController {
 
     @Operation(summary = "Master B/L 단건 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> getById(@PathVariable Long id) {
         MasterBl masterBl = masterBlUseCase.getById(id);
         return ResponseEntity.ok(ApiResponse.of(MasterBlDetailResponse.from(masterBl)));
     }
 
     @Operation(summary = "Master B/L 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         masterBlUseCase.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }

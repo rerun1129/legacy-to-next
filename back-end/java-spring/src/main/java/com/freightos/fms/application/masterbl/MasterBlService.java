@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,14 +26,14 @@ public class MasterBlService implements MasterBlUseCase {
     }
 
     @Override
-    public MasterBl getById(UUID id) {
+    public MasterBl getById(Long id) {
         return masterBlPort.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("MasterBl", id));
     }
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(Long id) {
         MasterBl entity = getById(id);
         masterBlPort.delete(entity);
         log.info("Deleted MasterBl id={}", id);

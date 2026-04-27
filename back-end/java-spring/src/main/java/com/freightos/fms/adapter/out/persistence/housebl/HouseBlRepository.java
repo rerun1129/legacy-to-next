@@ -9,11 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, UUID> {
+public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, Long> {
 
     Optional<HouseBlJpaEntity> findByHblNo(String hblNo);
 
@@ -33,10 +31,10 @@ public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, UUID>
             """)
     Page<HouseBlJpaEntity> findBySchedule(@Param("jobDiv") JobDiv jobDiv,
                                           @Param("bound")  Bound  bound,
-                                          @Param("from")   LocalDate from,
-                                          @Param("to")     LocalDate to,
+                                          @Param("from")   String from,
+                                          @Param("to")     String to,
                                           Pageable pageable);
 
     /** Master B/L 연결 건수 조회 */
-    long countByMasterBlId(UUID masterBlId);
+    long countByMasterBlId(Long masterBlId);
 }

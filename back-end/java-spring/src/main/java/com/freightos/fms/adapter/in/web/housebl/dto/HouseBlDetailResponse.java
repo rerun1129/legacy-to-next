@@ -8,13 +8,11 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /** House B/L 상세 응답 DTO. 도메인 엔티티를 직접 노출하지 않는다. */
 public record HouseBlDetailResponse(
-        UUID id,
+        Long id,
         String hblNo,
         JobDiv jobDiv,
         Bound bound,
@@ -28,8 +26,8 @@ public record HouseBlDetailResponse(
         String polCode,
         String podCode,
         String deliveryCode,
-        LocalDate etd,
-        LocalDate eta,
+        String etd,
+        String eta,
         Integer pkgQty,
         String pkgUnit,
         BigDecimal grossWeightKg,
@@ -38,7 +36,7 @@ public record HouseBlDetailResponse(
         String operatorCode,
         String teamCode,
         String salesManCode,
-        UUID masterBlId,
+        Long masterBlId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

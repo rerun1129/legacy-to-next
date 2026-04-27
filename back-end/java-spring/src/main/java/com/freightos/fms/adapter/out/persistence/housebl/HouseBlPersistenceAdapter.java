@@ -1,31 +1,34 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
-import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class HouseBlPersistenceAdapter implements HouseBlPort {
 
     private final HouseBlRepository houseBlRepository;
+    private final HouseBlSeaRepository houseBlSeaRepository;
+    private final HouseBlAirRepository houseBlAirRepository;
+    private final HouseBlTruckRepository houseBlTruckRepository;
+    private final HouseBlNonBlRepository houseBlNonBlRepository;
     private final HouseBlMapper houseBlMapper;
 
     @Override
-    public Optional<HouseBl> findById(UUID id) {
+    public Optional<HouseBl> findById(Long id) {
         return houseBlRepository.findById(id)
                 .map(houseBlMapper::toDomain);
     }
@@ -43,7 +46,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     @Override
-    public PagedResult<HouseBl> findBySchedule(JobDiv jobDiv, Bound bound, LocalDate from, LocalDate to,
+    public PagedResult<HouseBl> findBySchedule(JobDiv jobDiv, Bound bound, String from, String to,
                                                 PageRequest pageRequest) {
         org.springframework.data.domain.PageRequest springPage =
                 org.springframework.data.domain.PageRequest.of(
@@ -54,21 +57,73 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     @Override
-    public long countByMasterBlId(UUID masterBlId) {
+    public long countByMasterBlId(Long masterBlId) {
         return houseBlRepository.countByMasterBlId(masterBlId);
     }
 
     @Override
-    public HouseBl save(HouseBl houseBl) {
-        HouseBlJpaEntity jpa = houseBlMapper.toJpa(houseBl);
-        HouseBlJpaEntity saved = houseBlRepository.save(jpa);
-        return houseBlMapper.toDomain(saved);
+    @Transactional
+    public HouseBl save(HouseBl domain) {
+        // 부모 엔티티 save/update
+        HouseBlJpaEntity parentJpa;
+        if (domain.getId() != null) {
+            parentJpa = houseBlRepository.findById(domain.getId()).orElseThrow();
+        } else {
+            parentJpa = new HouseBlJpaEntity();
+        }
+        houseBlMapper.applyCommonFields(domain, parentJpa);
+        parentJpa = houseBlRepository.save(parentJpa);
+
+        // extension 엔티티 save/update
+        if (domain instanceof HouseBlSea sea) {
+            HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository
+                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .orElseGet(HouseBlSeaJpaEntity::new);
+            seaJpa.setHouseBl(parentJpa);
+            houseBlMapper.applySeaFields(sea, seaJpa);
+            // 컨테이너 동기화 (SEA 전용)
+            List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream()
+                    .map(c -> houseBlMapper.toContainerJpa(c, parentJpa))
+                    .toList();
+            parentJpa.syncContainers(jpaContainers);
+            houseBlSeaRepository.save(seaJpa);
+        } else if (domain instanceof HouseBlAir air) {
+            HouseBlAirJpaEntity airJpa = houseBlAirRepository
+                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .orElseGet(HouseBlAirJpaEntity::new);
+            airJpa.setHouseBl(parentJpa);
+            houseBlMapper.applyAirFields(air, airJpa);
+            houseBlAirRepository.save(airJpa);
+        } else if (domain instanceof HouseBlTruck truck) {
+            HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository
+                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .orElseGet(HouseBlTruckJpaEntity::new);
+            truckJpa.setHouseBl(parentJpa);
+            houseBlMapper.applyTruckFields(truck, truckJpa);
+            houseBlTruckRepository.save(truckJpa);
+        } else if (domain instanceof HouseBlNonBl nonBl) {
+            HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository
+                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .orElseGet(HouseBlNonBlJpaEntity::new);
+            nonBlJpa.setHouseBl(parentJpa);
+            houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
+            houseBlNonBlRepository.save(nonBlJpa);
+        }
+
+        // reload (extension lazy 포함)
+        HouseBlJpaEntity reloaded = houseBlRepository.findById(parentJpa.getHouseBlId()).orElseThrow();
+        return houseBlMapper.toDomain(reloaded);
     }
 
     @Override
+    @Transactional
     public void delete(HouseBl houseBl) {
-        HouseBlJpaEntity jpa = houseBlMapper.toJpa(houseBl);
-        houseBlRepository.delete(jpa);
+        Long id = houseBl.getId();
+        houseBlSeaRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlSeaRepository::delete);
+        houseBlAirRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlAirRepository::delete);
+        houseBlTruckRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlTruckRepository::delete);
+        houseBlNonBlRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlNonBlRepository::delete);
+        houseBlRepository.deleteById(id);
     }
 
     private PagedResult<HouseBl> toPagedResult(Page<HouseBlJpaEntity> page) {
