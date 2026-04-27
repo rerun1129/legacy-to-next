@@ -9,11 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, UUID> {
+public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, Long> {
 
     Optional<HouseBlJpaEntity> findByHblNo(String hblNo);
 
@@ -23,7 +21,7 @@ public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, UUID>
     Page<HouseBlJpaEntity> findAllByJobDivAndBoundOrderByCreatedAtDesc(
             JobDiv jobDiv, Bound bound, Pageable pageable);
 
-    /** ETD 범위 조회 (타임라인 위젯 등) */
+    /** ETD 범위 조회 (타임라인 위젯 등). VARCHAR YYYYMMDD 사전식 정렬로 날짜 범위 비교 동작 */
     @Query("""
             SELECT h FROM HouseBlJpaEntity h
             WHERE h.jobDiv = :jobDiv
@@ -33,10 +31,10 @@ public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, UUID>
             """)
     Page<HouseBlJpaEntity> findBySchedule(@Param("jobDiv") JobDiv jobDiv,
                                           @Param("bound")  Bound  bound,
-                                          @Param("from")   LocalDate from,
-                                          @Param("to")     LocalDate to,
+                                          @Param("from")   String from,
+                                          @Param("to")     String to,
                                           Pageable pageable);
 
     /** Master B/L 연결 건수 조회 */
-    long countByMasterBlId(UUID masterBlId);
+    long countByMasterBlId(Long masterBlId);
 }

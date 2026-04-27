@@ -5,18 +5,24 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 /**
  * JPA ORM 엔티티 — Master B/L 해상 확장.
+ * @OneToOne 독립 엔티티로 MasterBlJpaEntity와 연관.
  */
 @Entity
 @Table(name = "master_bl_sea")
-@DiscriminatorValue("SEA")
-@PrimaryKeyJoinColumn(name = "master_bl_id")
 @Getter
 @NoArgsConstructor
-public class MasterBlSeaJpaEntity extends MasterBlJpaEntity {
+public class MasterBlSeaJpaEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "master_bl_sea_id", updatable = false, nullable = false)
+    private Long masterBlSeaId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "master_bl_id", nullable = false, unique = true)
+    private MasterBlJpaEntity masterBl;
 
     @Column(name = "load_type", length = 10)
     @Enumerated(EnumType.STRING)
@@ -31,20 +37,21 @@ public class MasterBlSeaJpaEntity extends MasterBlJpaEntity {
     @Column(name = "voyage_no", length = 20)
     private String voyageNo;
 
-    @Column(name = "onboard_date")
-    private LocalDate onboardDate;
+    @Column(name = "onboard_date", length = 8)
+    private String onboardDate;
 
     @Column(name = "line_bkg_no", length = 50)
     private String lineBkgNo;
 
-    @Column(name = "issue_date")
-    private LocalDate issueDate;
+    @Column(name = "issue_date", length = 8)
+    private String issueDate;
 
+    public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
     public void setVesselName(String v) { this.vesselName = v; }
     public void setVoyageNo(String v) { this.voyageNo = v; }
-    public void setOnboardDate(LocalDate v) { this.onboardDate = v; }
+    public void setOnboardDate(String v) { this.onboardDate = v; }
     public void setLineBkgNo(String v) { this.lineBkgNo = v; }
-    public void setIssueDate(LocalDate v) { this.issueDate = v; }
+    public void setIssueDate(String v) { this.issueDate = v; }
 }

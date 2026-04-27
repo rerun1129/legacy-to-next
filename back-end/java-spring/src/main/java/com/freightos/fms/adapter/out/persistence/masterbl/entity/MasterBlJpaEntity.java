@@ -9,19 +9,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * JPA ORM 엔티티 — Master B/L 공통 본체.
  * 도메인 엔티티(MasterBl)와 분리된 영속성 계층 객체.
+ * JOINED 상속에서 @OneToOne 독립 엔티티 구조로 변경.
  */
 @Entity
 @Table(name = "master_bl")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "job_div", discriminatorType = DiscriminatorType.STRING)
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class MasterBlJpaEntity extends BaseJpaEntity {
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+public class MasterBlJpaEntity extends BaseJpaEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "master_bl_id", updatable = false, nullable = false)
+    private Long masterBlId;
 
     @Column(name = "mbl_no", length = 50)
     private String mblNo;
@@ -29,7 +32,7 @@ public abstract class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_ref_no", length = 50)
     private String masterRefNo;
 
-    @Column(name = "job_div", insertable = false, updatable = false, length = 10)
+    @Column(name = "job_div", nullable = false, length = 10)
     private String jobDiv;
 
     @Column(name = "bound", nullable = false, length = 3)
@@ -51,11 +54,11 @@ public abstract class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "pod_code", length = 10)
     private String podCode;
 
-    @Column(name = "etd")
-    private LocalDate etd;
+    @Column(name = "etd", length = 8)
+    private String etd;
 
-    @Column(name = "eta")
-    private LocalDate eta;
+    @Column(name = "eta", length = 8)
+    private String eta;
 
     @Column(name = "freight_term", length = 10)
     @Enumerated(EnumType.STRING)
@@ -79,20 +82,24 @@ public abstract class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "cbm", columnDefinition = "NUMERIC(10,3)")
     private BigDecimal cbm;
 
-    protected MasterBlJpaEntity(Bound bound) {
-        this.bound = bound;
-    }
+    @OneToOne(mappedBy = "masterBl", fetch = FetchType.LAZY)
+    private MasterBlSeaJpaEntity seaExt;
 
+    @OneToOne(mappedBy = "masterBl", fetch = FetchType.LAZY)
+    private MasterBlAirJpaEntity airExt;
+
+    public void setMasterBlId(Long id) { this.masterBlId = id; }
     public void setMblNo(String v) { this.mblNo = v; }
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
+    public void setJobDiv(String v) { this.jobDiv = v; }
     public void setBound(Bound v) { this.bound = v; }
     public void setShipperCode(String v) { this.shipperCode = v; }
     public void setConsigneeCode(String v) { this.consigneeCode = v; }
     public void setNotifyCode(String v) { this.notifyCode = v; }
     public void setPolCode(String v) { this.polCode = v; }
     public void setPodCode(String v) { this.podCode = v; }
-    public void setEtd(LocalDate v) { this.etd = v; }
-    public void setEta(LocalDate v) { this.eta = v; }
+    public void setEtd(String v) { this.etd = v; }
+    public void setEta(String v) { this.eta = v; }
     public void setFreightTerm(FreightTerm v) { this.freightTerm = v; }
     public void setOperatorCode(String v) { this.operatorCode = v; }
     public void setTeamCode(String v) { this.teamCode = v; }
