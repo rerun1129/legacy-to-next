@@ -8,11 +8,13 @@ import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-
 
 // ── Types ──────────────────────────────────────────────────
 interface RateRow {
+  id: number;
   code: string; desc: string; qty: string; unit: string;
   sell: string; buy: string; cur: string;
 }
 
 interface AccountRow {
+  id: number;
   docType: string; docNo: string; issueDate: string; amount: string; currency: string; status: string;
 }
 
