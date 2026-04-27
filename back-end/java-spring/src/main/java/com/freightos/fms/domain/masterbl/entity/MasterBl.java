@@ -54,6 +54,11 @@ public abstract class MasterBl extends BaseEntity {
         this.bound = bound;
     }
 
+    protected MasterBl(String jobDiv, Bound bound) {
+        this.jobDiv = jobDiv;
+        this.bound  = bound;
+    }
+
     public void assignMblNo(String mblNo, String masterRefNo) {
         this.mblNo        = mblNo;
         this.masterRefNo  = masterRefNo;

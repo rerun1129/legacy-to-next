@@ -1,5 +1,7 @@
 package com.freightos.fms.domain.housebl.entity;
 
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,10 +25,14 @@ public class HouseBlNonBl extends HouseBl {
     private String status;              // 접수 / 처리 / 완료
     private String originalBlRef;       // 원본 B/L 참조번호 (선택)
 
-    public static HouseBlNonBl create(WorkDivision workDivision) {
-        HouseBlNonBl entity = new HouseBlNonBl();
-        entity.workDivision = workDivision;
-        entity.status       = "접수";
+    protected HouseBlNonBl(WorkDivision workDivision, Bound bound) {
+        super(JobDiv.NON_BL, bound);
+        this.workDivision = workDivision;
+    }
+
+    public static HouseBlNonBl create(WorkDivision workDivision, Bound bound) {
+        HouseBlNonBl entity = new HouseBlNonBl(workDivision, bound);
+        entity.status = "접수";
         return entity;
     }
 

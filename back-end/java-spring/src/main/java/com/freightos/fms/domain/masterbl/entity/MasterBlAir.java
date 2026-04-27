@@ -39,7 +39,7 @@ public class MasterBlAir extends MasterBl {
     private String signature;
 
     protected MasterBlAir(Bound bound) {
-        super(bound);
+        super("AIR", bound);
     }
 
     public static MasterBlAir create(Bound bound) {

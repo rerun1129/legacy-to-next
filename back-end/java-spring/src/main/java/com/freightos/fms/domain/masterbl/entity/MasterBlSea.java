@@ -28,7 +28,7 @@ public class MasterBlSea extends MasterBl {
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
     protected MasterBlSea(Bound bound) {
-        super(bound);
+        super("SEA", bound);
     }
 
     public static MasterBlSea create(Bound bound) {

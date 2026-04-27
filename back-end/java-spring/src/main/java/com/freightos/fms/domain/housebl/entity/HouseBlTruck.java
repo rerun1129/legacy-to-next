@@ -1,5 +1,7 @@
 package com.freightos.fms.domain.housebl.entity;
 
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,8 +27,12 @@ public class HouseBlTruck extends HouseBl {
     private BigDecimal chargeWeightKg;
     private String incoterms;
 
-    public static HouseBlTruck create() {
-        HouseBlTruck entity = new HouseBlTruck();
+    protected HouseBlTruck(Bound bound) {
+        super(JobDiv.TRUCK, bound);
+    }
+
+    public static HouseBlTruck create(Bound bound) {
+        HouseBlTruck entity = new HouseBlTruck(bound);
         entity.vesselName = "TRUCK";
         return entity;
     }

@@ -6,6 +6,7 @@ import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,7 +68,8 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         // 부모 엔티티 save/update
         HouseBlJpaEntity parentJpa;
         if (domain.getId() != null) {
-            parentJpa = houseBlRepository.findById(domain.getId()).orElseThrow();
+            parentJpa = houseBlRepository.findById(domain.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("HouseBl", domain.getId()));
         } else {
             parentJpa = new HouseBlJpaEntity();
         }
@@ -111,7 +113,8 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         }
 
         // reload (extension lazy 포함)
-        HouseBlJpaEntity reloaded = houseBlRepository.findById(parentJpa.getHouseBlId()).orElseThrow();
+        HouseBlJpaEntity reloaded = houseBlRepository.findById(parentJpa.getHouseBlId())
+                .orElseThrow(() -> new ResourceNotFoundException("HouseBl", parentJpa.getHouseBlId()));
         return houseBlMapper.toDomain(reloaded);
     }
 

@@ -48,14 +48,14 @@ public class HouseBlMapper {
     }
 
     private HouseBlTruck toTruckDomain(HouseBlJpaEntity jpa, HouseBlTruckJpaEntity truckJpa) {
-        HouseBlTruck domain = HouseBlTruck.create();
+        HouseBlTruck domain = HouseBlTruck.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (truckJpa != null) copyTruckFields(truckJpa, domain);
         return domain;
     }
 
     private HouseBlNonBl toNonBlDomain(HouseBlJpaEntity jpa, HouseBlNonBlJpaEntity nonBlJpa) {
-        HouseBlNonBl domain = HouseBlNonBl.create(nonBlJpa != null ? nonBlJpa.getWorkDivision() : null);
+        HouseBlNonBl domain = HouseBlNonBl.create(nonBlJpa != null ? nonBlJpa.getWorkDivision() : null, jpa.getBound());
         copyBaseFields(jpa, domain);
         if (nonBlJpa != null) copyNonBlFields(nonBlJpa, domain);
         return domain;
