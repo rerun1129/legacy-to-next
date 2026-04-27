@@ -24,7 +24,7 @@ import java.util.List;
 @Entity
 @Table(name = "house_bl")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlJpaEntity extends BaseJpaEntity {
 
     @Id
