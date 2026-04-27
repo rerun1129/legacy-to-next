@@ -8,7 +8,7 @@ interface LicenseRow {
   splitYn: string; seq: string; progress: string;
 }
 
-const licenseRows: LicenseRow[] = [
+const LICENSE_ROWS: LicenseRow[] = [
   { id: 1, exportNo: "22231-26-123456X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
   { id: 2, exportNo: "22231-26-123457X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
   { id: 3, exportNo: "22231-26-123458X", qty: "200", unit: "CTN", weight: "2,480", symCode: "A1", symQty: "50", symUnit: "CTN", splitYn: "Y", seq: "1", progress: "검사지정" },
@@ -105,7 +105,7 @@ export function EdiTab({ variant }: Props) {
                 <div style={{ overflow: "auto" }}>
                   <GridList
                     columns={LICENSE_COLS}
-                    data={licenseRows}
+                    data={LICENSE_ROWS}
                     rowKey={(row) => row.id}
                   />
                 </div>

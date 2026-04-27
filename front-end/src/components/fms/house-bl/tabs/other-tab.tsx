@@ -5,7 +5,7 @@ interface CoLoadRow {
   hblNo: string; shipper: string; consignee: string; pkg: string; gw: string; cbm: string; remark: string;
 }
 
-const coLoadRows: CoLoadRow[] = [
+const CO_LOAD_ROWS: CoLoadRow[] = [
   { id: 1, hblNo: "HBLKR24041956", shipper: "한진무역(주)",     consignee: "SHANGHAI TRADING CO.",  pkg: "500 CTN", gw: "12,400", cbm: "22.5", remark: ""           },
   { id: 2, hblNo: "HBLKR24041901", shipper: "삼성전자(주)",     consignee: "SAMSUNG EUROPE GmbH",   pkg: "800 CTN", gw: "18,200", cbm: "65.0", remark: ""           },
   { id: 3, hblNo: "HBLKR24041877", shipper: "현대상사(주)",     consignee: "HYUNDAI TRADING USA",   pkg: "300 CTN", gw: "7,500",  cbm: "30.0", remark: ""           },
@@ -79,7 +79,7 @@ export function OtherTab() {
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Co-Load B/L</span>
-            <span className="panel__rowcount">{coLoadRows.length}</span>
+            <span className="panel__rowcount">{CO_LOAD_ROWS.length}</span>
             <div className="panel__actions">
               <button className="btn btn--sm">+</button>
             </div>
@@ -87,7 +87,7 @@ export function OtherTab() {
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <GridList
               columns={CO_LOAD_COLS}
-              data={coLoadRows}
+              data={CO_LOAD_ROWS}
               rowKey={(row) => row.id}
             />
           </div>

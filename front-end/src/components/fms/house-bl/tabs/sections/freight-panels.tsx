@@ -73,7 +73,7 @@ const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
 ];
 
 // ── Sample data ────────────────────────────────────────────
-const rateRows: RateRow[] = [
+const RATE_ROWS: RateRow[] = [
   { id: 1, code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
   { id: 2, code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
   { id: 3, code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
@@ -82,7 +82,7 @@ const rateRows: RateRow[] = [
   { id: 6, code: "DOC", desc: "Documentation Fee", qty: "1 BL",  unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
 ];
 
-const accountRows: AccountRow[] = [
+const ACCOUNT_ROWS: AccountRow[] = [
   { id: 1, docType: "INVOICE",     docNo: "INV-20260415", issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
   { id: 2, docType: "C/I",         docNo: "CI-20260415",  issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
   { id: 3, docType: "DEBIT NOTE",  docNo: "DN-20260420",  issueDate: "2026-04-20", amount: "1,490.00",  currency: "USD", status: "미결"    },
@@ -191,10 +191,10 @@ export function FreightSellingPanel() {
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Selling / Debit</span>
-        <span className="panel__rowcount">{rateRows.length}</span>
+        <span className="panel__rowcount">{RATE_ROWS.length}</span>
         <div className="panel__actions"><button className="btn btn--sm">+</button></div>
       </div>
-      <GridList columns={SELLING_COLS} data={rateRows} rowKey={(row) => row.id} style={{ flex: 1 }} />
+      <GridList columns={SELLING_COLS} data={RATE_ROWS} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
   );
 }
@@ -206,10 +206,10 @@ export function FreightBuyingPanel() {
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Buying / Credit</span>
-        <span className="panel__rowcount">{rateRows.length}</span>
+        <span className="panel__rowcount">{RATE_ROWS.length}</span>
         <div className="panel__actions"><button className="btn btn--sm">+</button></div>
       </div>
-      <GridList columns={BUYING_COLS} data={rateRows} rowKey={(row) => row.id} style={{ flex: 1 }} />
+      <GridList columns={BUYING_COLS} data={RATE_ROWS} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
   );
 }
@@ -221,10 +221,10 @@ export function FreightAccountPanel() {
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Account Documents</span>
-        <span className="panel__rowcount">{accountRows.length}</span>
+        <span className="panel__rowcount">{ACCOUNT_ROWS.length}</span>
       </div>
       <div className="panel__body--flush">
-        <GridList columns={ACCOUNT_COLS} data={accountRows} rowKey={(row) => row.id} />
+        <GridList columns={ACCOUNT_COLS} data={ACCOUNT_ROWS} rowKey={(row) => row.id} />
       </div>
     </div>
   );
