@@ -4,8 +4,6 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
-
 /**
  * JPA ↔ Domain 변환 매퍼.
  * Domain → JpaEntity 및 JpaEntity → Domain 변환 메서드 제공.
@@ -61,29 +59,45 @@ public class HouseBlMapper {
         domain.updateSchedule(jpa.getPolCode(), jpa.getPodCode(), jpa.getEtd(), jpa.getEta());
         domain.assignOperator(jpa.getActualCustomerCode(), jpa.getOperatorCode(),
                 jpa.getTeamCode(), jpa.getSalesManCode());
+        domain.updateBlStatus(jpa.getShipmentType(), jpa.getBlType(), jpa.getFreightTerm());
+        domain.assignParties(jpa.getShipperCode(), jpa.getConsigneeCode(), jpa.getNotifyCode(),
+                jpa.getDocPartnerCode(), jpa.getDeliveryCode());
+        domain.updateCargoSummary(jpa.getPkgQty(), jpa.getPkgUnit(),
+                jpa.getGrossWeightKg(), jpa.getCbm());
         if (jpa.getMasterBlId() != null) {
             domain.linkToMaster(jpa.getMasterBlId());
         }
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
-        // 리플렉션 없이 필드 복사는 도메인 setter가 없으므로 불필요한 setter 노출을 피한다.
-        // 현재 구조에서 도메인은 create() 이후 추가 수정 메서드가 없으므로
-        // domain 계층에 필요 시 update 메서드를 추가하는 방향으로 확장한다.
-        // 현재는 기본 필드 복사만 수행 (추후 updateAir 메서드 추가로 확장 가능).
+        domain.updateAirFields(
+                jpa.getAirlineCode(), jpa.getDepartureCode(), jpa.getMawbNo(),
+                jpa.getChargeWeightKg(), jpa.getVolumeWeightKg(),
+                jpa.getRateClass(), jpa.getCurrencyCode(),
+                jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
+                jpa.getInsurance(), jpa.getAccountInformation(), jpa.getOtherTerm(),
+                jpa.getIssueDate(), jpa.getIssuePlace(), jpa.getSignature(),
+                jpa.getFhd(), jpa.getIncoterms(), jpa.getFreightTermAir());
     }
 
     private void copySeaFields(HouseBlSeaJpaEntity jpa, HouseBlSea domain) {
         domain.updateSeaSchedule(jpa.getLinerCode(), jpa.getVesselName(),
                 jpa.getVoyageNo(), jpa.getOnboardDate());
+        domain.updateSeaRouteAndFlags(
+                jpa.getPorCode(), jpa.getFinalDestCode(),
+                jpa.getIssueDate(), jpa.getNoOfBl(), jpa.getIssuePlace(),
+                jpa.getDoDate(), jpa.getIncoterms(), jpa.getPayableAt(),
+                jpa.isTriangle(), jpa.isCoLoad(), jpa.getMblNo(), jpa.getLoadType());
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
-        // 트럭 전용 필드 복사 (도메인 update 메서드 추가 시 확장)
+        domain.updateTruckFields(jpa.getPickupDate(), jpa.getTruckerCode(), jpa.getTruckerPic(),
+                jpa.getChargeWeightKg(), jpa.getIncoterms());
     }
 
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {
-        // NonBl 전용 필드 복사 (도메인 update 메서드 추가 시 확장)
+        domain.updateNonBlFields(jpa.getSettlePartnerCode(), jpa.getStatus(),
+                jpa.getOriginalBlRef());
     }
 
     // ── Domain → JpaEntity ─────────────────────────────────────────

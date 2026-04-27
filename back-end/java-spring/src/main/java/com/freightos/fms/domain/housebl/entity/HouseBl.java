@@ -97,4 +97,27 @@ public abstract class HouseBl extends BaseEntity {
     public void linkToMaster(UUID masterBlId) {
         this.masterBlId = masterBlId;
     }
+
+    public void updateBlStatus(ShipmentType shipmentType, BlType blType, FreightTerm freightTerm) {
+        this.shipmentType = shipmentType;
+        this.blType       = blType;
+        this.freightTerm  = freightTerm;
+    }
+
+    public void assignParties(String shipperCode, String consigneeCode, String notifyCode,
+                              String docPartnerCode, String deliveryCode) {
+        this.shipperCode     = shipperCode;
+        this.consigneeCode   = consigneeCode;
+        this.notifyCode      = notifyCode;
+        this.docPartnerCode  = docPartnerCode;
+        this.deliveryCode    = deliveryCode;
+    }
+
+    public void updateCargoSummary(Integer pkgQty, String pkgUnit,
+                                   java.math.BigDecimal grossWeightKg, java.math.BigDecimal cbm) {
+        this.pkgQty        = pkgQty;
+        this.pkgUnit       = pkgUnit;
+        this.grossWeightKg = grossWeightKg;
+        this.cbm           = cbm;
+    }
 }

@@ -44,10 +44,41 @@ public class HouseBlAir extends HouseBl {
     private String incoterms;
     private String freightTermAir;
 
+    protected HouseBlAir(Bound bound) {
+        super(JobDiv.AIR, bound);
+    }
+
     public static HouseBlAir create(Bound bound) {
-        HouseBlAir entity = new HouseBlAir();
+        HouseBlAir entity = new HouseBlAir(bound);
         entity.declaredValueCarriage = "N.V.D.";
         entity.insurance             = "NIL";
         return entity;
+    }
+
+    public void updateAirFields(String airlineCode, String departureCode, String mawbNo,
+                                java.math.BigDecimal chargeWeightKg, java.math.BigDecimal volumeWeightKg,
+                                String rateClass, String currencyCode,
+                                String declaredValueCarriage, String declaredValueCustoms,
+                                String insurance, String accountInformation, String otherTerm,
+                                LocalDate issueDate, String issuePlace, String signature,
+                                String fhd, String incoterms, String freightTermAir) {
+        this.airlineCode            = airlineCode;
+        this.departureCode          = departureCode;
+        this.mawbNo                 = mawbNo;
+        this.chargeWeightKg         = chargeWeightKg;
+        this.volumeWeightKg         = volumeWeightKg;
+        this.rateClass              = rateClass;
+        this.currencyCode           = currencyCode;
+        this.declaredValueCarriage  = declaredValueCarriage;
+        this.declaredValueCustoms   = declaredValueCustoms;
+        this.insurance              = insurance;
+        this.accountInformation     = accountInformation;
+        this.otherTerm              = otherTerm;
+        this.issueDate              = issueDate;
+        this.issuePlace             = issuePlace;
+        this.signature              = signature;
+        this.fhd                    = fhd;
+        this.incoterms              = incoterms;
+        this.freightTermAir         = freightTermAir;
     }
 }

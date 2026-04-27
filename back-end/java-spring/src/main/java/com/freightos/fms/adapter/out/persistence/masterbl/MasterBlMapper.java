@@ -24,18 +24,41 @@ public class MasterBlMapper {
     private MasterBlAir toAirDomain(MasterBlAirJpaEntity jpa) {
         MasterBlAir domain = MasterBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
+        copyAirFields(jpa, domain);
         return domain;
     }
 
     private MasterBlSea toSeaDomain(MasterBlSeaJpaEntity jpa) {
         MasterBlSea domain = MasterBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
+        copySeaFields(jpa, domain);
         return domain;
     }
 
     private void copyBaseFields(MasterBlJpaEntity jpa, MasterBl domain) {
-        // MasterBl 도메인에 update 메서드 추가 시 여기서 호출
-        // 현재는 기본 생성자 기반 복사 구조 유지
+        domain.assignMblNo(jpa.getMblNo(), jpa.getMasterRefNo());
+        domain.assignParties(jpa.getShipperCode(), jpa.getConsigneeCode(), jpa.getNotifyCode());
+        domain.updateSchedule(jpa.getPolCode(), jpa.getPodCode(), jpa.getEtd(), jpa.getEta());
+        domain.updateFreightAndOperator(jpa.getFreightTerm(), jpa.getOperatorCode(), jpa.getTeamCode());
+        domain.updateCargoSummary(jpa.getPkgQty(), jpa.getPkgUnit(),
+                jpa.getGrossWeightKg(), jpa.getCbm());
+    }
+
+    private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
+        domain.updateAirFields(
+                jpa.getAirlineCode(), jpa.getDepartureCode(), jpa.getMawbNo(),
+                jpa.getChargeWeightKg(), jpa.getVolumeWeightKg(),
+                jpa.getRateClass(), jpa.getCurrencyCode(),
+                jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
+                jpa.getInsurance(), jpa.getAccountInformation(),
+                jpa.getSecurityStatus(), jpa.getFlightType(),
+                jpa.getIssueDate(), jpa.getIssuePlace(), jpa.getSignature());
+    }
+
+    private void copySeaFields(MasterBlSeaJpaEntity jpa, MasterBlSea domain) {
+        domain.updateSeaFields(jpa.getLoadType(), jpa.getLinerCode(), jpa.getVesselName(),
+                jpa.getVoyageNo(), jpa.getOnboardDate(),
+                jpa.getLineBkgNo(), jpa.getIssueDate());
     }
 
     // ── Domain → JpaEntity ─────────────────────────────────────────

@@ -54,4 +54,37 @@ public abstract class MasterBl extends BaseEntity {
     protected MasterBl(Bound bound) {
         this.bound = bound;
     }
+
+    public void assignMblNo(String mblNo, String masterRefNo) {
+        this.mblNo        = mblNo;
+        this.masterRefNo  = masterRefNo;
+    }
+
+    public void assignParties(String shipperCode, String consigneeCode, String notifyCode) {
+        this.shipperCode   = shipperCode;
+        this.consigneeCode = consigneeCode;
+        this.notifyCode    = notifyCode;
+    }
+
+    public void updateSchedule(String polCode, String podCode, LocalDate etd, LocalDate eta) {
+        this.polCode = polCode;
+        this.podCode = podCode;
+        this.etd     = etd;
+        this.eta     = eta;
+    }
+
+    public void updateFreightAndOperator(FreightTerm freightTerm,
+                                         String operatorCode, String teamCode) {
+        this.freightTerm  = freightTerm;
+        this.operatorCode = operatorCode;
+        this.teamCode     = teamCode;
+    }
+
+    public void updateCargoSummary(Integer pkgQty, String pkgUnit,
+                                   java.math.BigDecimal grossWeightKg, java.math.BigDecimal cbm) {
+        this.pkgQty        = pkgQty;
+        this.pkgUnit       = pkgUnit;
+        this.grossWeightKg = grossWeightKg;
+        this.cbm           = cbm;
+    }
 }

@@ -30,6 +30,12 @@ public class HouseBlNonBl extends HouseBl {
         return entity;
     }
 
+    public void updateNonBlFields(String settlePartnerCode, String status, String originalBlRef) {
+        this.settlePartnerCode = settlePartnerCode;
+        this.status            = status;
+        this.originalBlRef     = originalBlRef;
+    }
+
     public enum WorkDivision {
         SEA, AIR, WAREHOUSE, TRUCKING
     }

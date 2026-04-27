@@ -114,6 +114,7 @@ public abstract class HouseBlJpaEntity extends BaseJpaEntity {
         this.bound  = bound;
     }
 
+    public void setBound(Bound bound) { this.bound = bound; }
     public void setHblNo(String hblNo) { this.hblNo = hblNo; }
     public void setPolCode(String polCode) { this.polCode = polCode; }
     public void setPodCode(String podCode) { this.podCode = podCode; }
