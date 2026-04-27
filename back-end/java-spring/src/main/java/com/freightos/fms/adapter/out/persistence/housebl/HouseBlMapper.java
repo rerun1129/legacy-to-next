@@ -130,6 +130,7 @@ public class HouseBlMapper {
         else if (domain instanceof HouseBlAir) jpa.setJobDiv(JobDiv.AIR);
         else if (domain instanceof HouseBlTruck) jpa.setJobDiv(JobDiv.TRUCK);
         else if (domain instanceof HouseBlNonBl) jpa.setJobDiv(JobDiv.NON_BL);
+        else throw new IllegalStateException("Unknown HouseBl subtype: " + domain.getClass().getSimpleName());
         jpa.setHblNo(domain.getHblNo());
         jpa.setPolCode(domain.getPolCode());
         jpa.setPodCode(domain.getPodCode());
