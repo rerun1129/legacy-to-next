@@ -44,7 +44,7 @@ public abstract class HouseBl extends BaseEntity {
     private String podCode;            // Port of Discharge
     private String deliveryCode;
 
-    // ── 일정 ──────────────────────────────────────────────────────
+    // ── 일정 (ISO 8601 문자열, yyyy-MM-dd) ───────────────────────
     private String etd;
     private String eta;
 

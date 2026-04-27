@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
+import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,27 +10,27 @@ import java.math.BigDecimal;
 /**
  * JPA ORM 엔티티 — House B/L 트럭 확장.
  * PRD §S-06: Vessel/Voyage는 "TRUCK" 고정값으로 저장.
- * @OneToOne 독립 엔티티로 HouseBlJpaEntity와 연관.
+ * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
 @Table(name = "house_bl_truck")
 @Getter
 @NoArgsConstructor
-public class HouseBlTruckJpaEntity {
+public class HouseBlTruckJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "house_bl_truck_id", updatable = false, nullable = false)
     private Long houseBlTruckId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 
     @Column(name = "vessel_name", length = 10, nullable = false)
     private String vesselName = "TRUCK";
 
-    @Column(name = "pickup_date", length = 8)
+    @Column(name = "pickup_date", length = 10)
     private String pickupDate;
 
     @Column(name = "trucker_code", length = 20)

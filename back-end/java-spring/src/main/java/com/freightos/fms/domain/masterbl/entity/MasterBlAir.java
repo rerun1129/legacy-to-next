@@ -33,7 +33,7 @@ public class MasterBlAir extends MasterBl {
     private String securityStatus;
     private String flightType;
 
-    // 수출 전용 Issue
+    // 수출 전용 Issue — ISO 8601 문자열 (yyyy-MM-dd)
     private String issueDate;
     private String issuePlace;
     private String signature;

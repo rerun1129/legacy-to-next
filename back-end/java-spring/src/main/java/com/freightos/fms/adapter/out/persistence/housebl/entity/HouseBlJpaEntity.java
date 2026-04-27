@@ -19,12 +19,12 @@ import java.util.List;
 /**
  * JPA ORM 엔티티 — House B/L 공통 본체.
  * 도메인 엔티티(HouseBl)와 분리된 영속성 계층 객체.
- * JOINED 상속에서 @OneToOne 독립 엔티티 구조로 변경.
+ * 해상/항공/트럭/Non-BL 확장은 별도 독립 테이블(@OneToOne FK).
  */
 @Entity
 @Table(name = "house_bl")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -76,10 +76,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "delivery_code", length = 10)
     private String deliveryCode;
 
-    @Column(name = "etd", length = 8)
+    @Column(name = "etd", length = 10)
     private String etd;
 
-    @Column(name = "eta", length = 8)
+    @Column(name = "eta", length = 10)
     private String eta;
 
     @Column(name = "pkg_qty")
@@ -109,10 +109,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_id")
     private Long masterBlId;
 
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
-
     @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
     private HouseBlSeaJpaEntity seaExt;
 
@@ -125,10 +121,14 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
     private HouseBlNonBlJpaEntity nonBlExt;
 
-    public void setHouseBlId(Long id) { this.houseBlId = id; }
+    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
+
+    public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
-    public void setHblNo(String hblNo) { this.hblNo = hblNo; }
     public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
+    public void setHblNo(String hblNo) { this.hblNo = hblNo; }
     public void setPolCode(String polCode) { this.polCode = polCode; }
     public void setPodCode(String podCode) { this.podCode = podCode; }
     public void setEtd(String etd) { this.etd = etd; }

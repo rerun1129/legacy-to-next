@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
+import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,20 +8,20 @@ import lombok.NoArgsConstructor;
 
 /**
  * JPA ORM 엔티티 — House B/L 해상 확장.
- * @OneToOne 독립 엔티티로 HouseBlJpaEntity와 연관.
+ * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
 @Table(name = "house_bl_sea")
 @Getter
 @NoArgsConstructor
-public class HouseBlSeaJpaEntity {
+public class HouseBlSeaJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "house_bl_sea_id", updatable = false, nullable = false)
     private Long houseBlSeaId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 
@@ -37,7 +38,7 @@ public class HouseBlSeaJpaEntity {
     @Column(name = "voyage_no", length = 20)
     private String voyageNo;
 
-    @Column(name = "onboard_date", length = 8)
+    @Column(name = "onboard_date", length = 10)
     private String onboardDate;
 
     @Column(name = "por_code", length = 10)
@@ -46,7 +47,7 @@ public class HouseBlSeaJpaEntity {
     @Column(name = "final_dest_code", length = 10)
     private String finalDestCode;
 
-    @Column(name = "issue_date", length = 8)
+    @Column(name = "issue_date", length = 10)
     private String issueDate;
 
     @Column(name = "no_of_bl")
@@ -55,7 +56,7 @@ public class HouseBlSeaJpaEntity {
     @Column(name = "issue_place", length = 50)
     private String issuePlace;
 
-    @Column(name = "do_date", length = 8)
+    @Column(name = "do_date", length = 10)
     private String doDate;
 
     @Column(name = "incoterms", length = 10)

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 
 /**
  * JPA 공통 베이스 엔티티. 어댑터 계층에만 존재하며 도메인 계층에 노출되지 않는다.
+ * 각 엔티티가 자체 PK(@Id)를 정의하므로 @Id 필드는 여기서 선언하지 않는다.
  * @MappedSuperclass + @EntityListeners 보유.
  * PK는 각 엔티티가 직접 정의한다.
  */

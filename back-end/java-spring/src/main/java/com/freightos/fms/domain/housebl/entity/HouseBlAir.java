@@ -33,7 +33,7 @@ public class HouseBlAir extends HouseBl {
     private String accountInformation;
     private String otherTerm;
 
-    // 수출 전용
+    // 수출 전용 — ISO 8601 문자열 (yyyy-MM-dd)
     private String issueDate;
     private String issuePlace;
     private String signature;

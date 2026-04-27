@@ -2,14 +2,16 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.housebl.entity.*;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * JPA ↔ Domain 변환 매퍼.
- * Domain → JpaEntity 및 JpaEntity → Domain 변환 메서드 제공.
+ * JPA ↔ Domain 변환 매퍼 — House B/L.
+ * toDomain: JobDiv enum switch로 분기 (instanceof 패턴 제거).
+ * applyXxxFields: PersistenceAdapter에서 직접 호출.
  */
 @Component
 public class HouseBlMapper {
@@ -17,29 +19,19 @@ public class HouseBlMapper {
     // ── JpaEntity → Domain ─────────────────────────────────────────
 
     public HouseBl toDomain(HouseBlJpaEntity jpa) {
-        if (jpa instanceof HouseBlAirJpaEntity air) {
-            return toAirDomain(air);
-        } else if (jpa instanceof HouseBlSeaJpaEntity sea) {
-            return toSeaDomain(sea);
-        } else if (jpa instanceof HouseBlTruckJpaEntity truck) {
-            return toTruckDomain(truck);
-        } else if (jpa instanceof HouseBlNonBlJpaEntity nonBl) {
-            return toNonBlDomain(nonBl);
-        }
-        throw new IllegalArgumentException("Unknown HouseBlJpaEntity type: " + jpa.getClass());
+        JobDiv jobDiv = jpa.getJobDiv();
+        return switch (jobDiv) {
+            case SEA    -> toSeaDomain(jpa, jpa.getSeaExt());
+            case AIR    -> toAirDomain(jpa, jpa.getAirExt());
+            case TRUCK  -> toTruckDomain(jpa, jpa.getTruckExt());
+            case NON_BL -> toNonBlDomain(jpa, jpa.getNonBlExt());
+        };
     }
 
-    private HouseBlAir toAirDomain(HouseBlAirJpaEntity jpa) {
-        HouseBlAir domain = HouseBlAir.create(jpa.getBound());
-        copyBaseFields(jpa, domain);
-        copyAirFields(jpa, domain);
-        return domain;
-    }
-
-    private HouseBlSea toSeaDomain(HouseBlSeaJpaEntity jpa) {
+    private HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa) {
         HouseBlSea domain = HouseBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
-        copySeaFields(jpa, domain);
+        if (seaJpa != null) copySeaFields(seaJpa, domain);
         // SEA만 컨테이너 보유 — @BatchSize(50)으로 리스트 조회 시 batch fetch
         List<HouseBlContainer> containers = jpa.getContainers().stream()
                 .map(c -> toContainerDomain(c, domain))
@@ -48,22 +40,29 @@ public class HouseBlMapper {
         return domain;
     }
 
-    private HouseBlTruck toTruckDomain(HouseBlTruckJpaEntity jpa) {
-        HouseBlTruck domain = HouseBlTruck.create();
+    private HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa) {
+        HouseBlAir domain = HouseBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
-        copyTruckFields(jpa, domain);
+        if (airJpa != null) copyAirFields(airJpa, domain);
         return domain;
     }
 
-    private HouseBlNonBl toNonBlDomain(HouseBlNonBlJpaEntity jpa) {
-        HouseBlNonBl domain = HouseBlNonBl.create(jpa.getWorkDivision());
+    private HouseBlTruck toTruckDomain(HouseBlJpaEntity jpa, HouseBlTruckJpaEntity truckJpa) {
+        HouseBlTruck domain = HouseBlTruck.create();
         copyBaseFields(jpa, domain);
-        copyNonBlFields(jpa, domain);
+        if (truckJpa != null) copyTruckFields(truckJpa, domain);
+        return domain;
+    }
+
+    private HouseBlNonBl toNonBlDomain(HouseBlJpaEntity jpa, HouseBlNonBlJpaEntity nonBlJpa) {
+        HouseBlNonBl domain = HouseBlNonBl.create(nonBlJpa != null ? nonBlJpa.getWorkDivision() : null);
+        copyBaseFields(jpa, domain);
+        if (nonBlJpa != null) copyNonBlFields(nonBlJpa, domain);
         return domain;
     }
 
     private void copyBaseFields(HouseBlJpaEntity jpa, HouseBl domain) {
-        domain.assignIdentity(jpa.getId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+        domain.assignIdentity(jpa.getHouseBlId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignHblNo(jpa.getHblNo());
         domain.updateSchedule(jpa.getPolCode(), jpa.getPodCode(), jpa.getEtd(), jpa.getEta());
@@ -79,6 +78,16 @@ public class HouseBlMapper {
         }
     }
 
+    private void copySeaFields(HouseBlSeaJpaEntity jpa, HouseBlSea domain) {
+        domain.updateSeaSchedule(jpa.getLinerCode(), jpa.getVesselName(),
+                jpa.getVoyageNo(), jpa.getOnboardDate());
+        domain.updateSeaRouteAndFlags(
+                jpa.getPorCode(), jpa.getFinalDestCode(),
+                jpa.getIssueDate(), jpa.getNoOfBl(), jpa.getIssuePlace(),
+                jpa.getDoDate(), jpa.getIncoterms(), jpa.getPayableAt(),
+                jpa.isTriangle(), jpa.isCoLoad(), jpa.getMblNo(), jpa.getLoadType());
+    }
+
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
         domain.updateAirFields(
                 jpa.getAirlineCode(), jpa.getDepartureCode(), jpa.getMawbNo(),
@@ -88,16 +97,6 @@ public class HouseBlMapper {
                 jpa.getInsurance(), jpa.getAccountInformation(), jpa.getOtherTerm(),
                 jpa.getIssueDate(), jpa.getIssuePlace(), jpa.getSignature(),
                 jpa.getFhd(), jpa.getIncoterms(), jpa.getFreightTermAir());
-    }
-
-    private void copySeaFields(HouseBlSeaJpaEntity jpa, HouseBlSea domain) {
-        domain.updateSeaSchedule(jpa.getLinerCode(), jpa.getVesselName(),
-                jpa.getVoyageNo(), jpa.getOnboardDate());
-        domain.updateSeaRouteAndFlags(
-                jpa.getPorCode(), jpa.getFinalDestCode(),
-                jpa.getIssueDate(), jpa.getNoOfBl(), jpa.getIssuePlace(),
-                jpa.getDoDate(), jpa.getIncoterms(), jpa.getPayableAt(),
-                jpa.isTriangle(), jpa.isCoLoad(), jpa.getMblNo(), jpa.getLoadType());
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
@@ -110,94 +109,27 @@ public class HouseBlMapper {
                 jpa.getOriginalBlRef());
     }
 
-    // ── Domain → JpaEntity ─────────────────────────────────────────
-
-    public HouseBlJpaEntity toJpa(HouseBl domain) {
-        if (domain instanceof HouseBlAir air) {
-            return fromAirDomain(air);
-        } else if (domain instanceof HouseBlSea sea) {
-            return fromSeaDomain(sea);
-        } else if (domain instanceof HouseBlTruck truck) {
-            return fromTruckDomain(truck);
-        } else if (domain instanceof HouseBlNonBl nonBl) {
-            return fromNonBlDomain(nonBl);
-        }
-        throw new IllegalArgumentException("Unknown HouseBl domain type: " + domain.getClass());
+    private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
+        HouseBlContainer c = HouseBlContainer.of(parent, jpa.getContainerNo(),
+                jpa.getContainerType(), jpa.getLengthFeet());
+        c.assignIdentity(jpa.getHouseBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        c.updateDetails(jpa.getSealNo1(), jpa.getSealNo2(), jpa.getPkgQty(), jpa.getPkgUnit(),
+                jpa.getGrossWeightKg(), jpa.getNetWeightKg(), jpa.getCbm(),
+                jpa.getVgmKg(), jpa.isSoc(), jpa.getSeq());
+        return c;
     }
 
-    private HouseBlAirJpaEntity fromAirDomain(HouseBlAir domain) {
-        HouseBlAirJpaEntity jpa = new HouseBlAirJpaEntity();
-        applyBaseFields(domain, jpa);
-        jpa.setAirlineCode(domain.getAirlineCode());
-        jpa.setDepartureCode(domain.getDepartureCode());
-        jpa.setMawbNo(domain.getMawbNo());
-        jpa.setChargeWeightKg(domain.getChargeWeightKg());
-        jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
-        jpa.setRateClass(domain.getRateClass());
-        jpa.setCurrencyCode(domain.getCurrencyCode());
-        jpa.setDeclaredValueCarriage(domain.getDeclaredValueCarriage());
-        jpa.setDeclaredValueCustoms(domain.getDeclaredValueCustoms());
-        jpa.setInsurance(domain.getInsurance());
-        jpa.setAccountInformation(domain.getAccountInformation());
-        jpa.setOtherTerm(domain.getOtherTerm());
-        jpa.setIssueDate(domain.getIssueDate());
-        jpa.setIssuePlace(domain.getIssuePlace());
-        jpa.setSignature(domain.getSignature());
-        jpa.setFhd(domain.getFhd());
-        jpa.setIncoterms(domain.getIncoterms());
-        jpa.setFreightTermAir(domain.getFreightTermAir());
-        return jpa;
-    }
+    // ── Domain → JpaEntity (PersistenceAdapter에서 호출) ──────────
 
-    private HouseBlSeaJpaEntity fromSeaDomain(HouseBlSea domain) {
-        HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
-        applyBaseFields(domain, jpa);
-        jpa.setLoadType(domain.getLoadType());
-        jpa.setLinerCode(domain.getLinerCode());
-        jpa.setVesselName(domain.getVesselName());
-        jpa.setVoyageNo(domain.getVoyageNo());
-        jpa.setOnboardDate(domain.getOnboardDate());
-        jpa.setPorCode(domain.getPorCode());
-        jpa.setFinalDestCode(domain.getFinalDestCode());
-        jpa.setIssueDate(domain.getIssueDate());
-        jpa.setNoOfBl(domain.getNoOfBl());
-        jpa.setIssuePlace(domain.getIssuePlace());
-        jpa.setDoDate(domain.getDoDate());
-        jpa.setIncoterms(domain.getIncoterms());
-        jpa.setPayableAt(domain.getPayableAt());
-        jpa.setIsTriangle(domain.isTriangle());
-        jpa.setIsCoLoad(domain.isCoLoad());
-        jpa.setMblNo(domain.getMblNo());
-        return jpa;
-    }
-
-    private HouseBlTruckJpaEntity fromTruckDomain(HouseBlTruck domain) {
-        HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
-        applyBaseFields(domain, jpa);
-        jpa.setVesselName(domain.getVesselName());
-        jpa.setPickupDate(domain.getPickupDate());
-        jpa.setTruckerCode(domain.getTruckerCode());
-        jpa.setTruckerPic(domain.getTruckerPic());
-        jpa.setChargeWeightKg(domain.getChargeWeightKg());
-        jpa.setIncoterms(domain.getIncoterms());
-        return jpa;
-    }
-
-    private HouseBlNonBlJpaEntity fromNonBlDomain(HouseBlNonBl domain) {
-        HouseBlNonBlJpaEntity jpa = new HouseBlNonBlJpaEntity();
-        applyBaseFields(domain, jpa);
-        jpa.setWorkDivision(domain.getWorkDivision());
-        jpa.setSettlePartnerCode(domain.getSettlePartnerCode());
-        jpa.setStatus(domain.getStatus());
-        jpa.setOriginalBlRef(domain.getOriginalBlRef());
-        return jpa;
-    }
-
-    private void applyBaseFields(HouseBl domain, HouseBlJpaEntity jpa) {
-        if (domain.getId() != null) {
-            jpa.setId(domain.getId());
-        }
+    public void applyCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
         jpa.setBound(domain.getBound());
+        // jobDiv는 domain 클래스 타입에서 판별
+        if (domain instanceof HouseBlSea) jpa.setJobDiv(JobDiv.SEA);
+        else if (domain instanceof HouseBlAir) jpa.setJobDiv(JobDiv.AIR);
+        else if (domain instanceof HouseBlTruck) jpa.setJobDiv(JobDiv.TRUCK);
+        else if (domain instanceof HouseBlNonBl) jpa.setJobDiv(JobDiv.NON_BL);
         jpa.setHblNo(domain.getHblNo());
         jpa.setPolCode(domain.getPolCode());
         jpa.setPodCode(domain.getPodCode());
@@ -220,27 +152,69 @@ public class HouseBlMapper {
         jpa.setPkgUnit(domain.getPkgUnit());
         jpa.setGrossWeightKg(domain.getGrossWeightKg());
         jpa.setCbm(domain.getCbm());
-        List<HouseBlContainerJpaEntity> jpaContainers = domain.getContainers().stream()
-                .map(c -> toContainerJpa(c, jpa))
-                .collect(Collectors.toList());
-        jpa.syncContainers(jpaContainers);
+        // 컨테이너는 SEA 전용, HouseBlPersistenceAdapter에서 처리 (여기서는 common 필드만)
     }
 
-    private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
-        HouseBlContainer c = HouseBlContainer.of(parent, jpa.getContainerNo(),
-                jpa.getContainerType(), jpa.getLengthFeet());
-        c.assignIdentity(jpa.getId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
-                jpa.getCreatedBy(), jpa.getUpdatedBy());
-        c.updateDetails(jpa.getSealNo1(), jpa.getSealNo2(), jpa.getPkgQty(), jpa.getPkgUnit(),
-                jpa.getGrossWeightKg(), jpa.getNetWeightKg(), jpa.getCbm(),
-                jpa.getVgmKg(), jpa.isSoc(), jpa.getSeq());
-        return c;
+    public void applySeaFields(HouseBlSea domain, HouseBlSeaJpaEntity jpa) {
+        jpa.setLoadType(domain.getLoadType());
+        jpa.setLinerCode(domain.getLinerCode());
+        jpa.setVesselName(domain.getVesselName());
+        jpa.setVoyageNo(domain.getVoyageNo());
+        jpa.setOnboardDate(domain.getOnboardDate());
+        jpa.setPorCode(domain.getPorCode());
+        jpa.setFinalDestCode(domain.getFinalDestCode());
+        jpa.setIssueDate(domain.getIssueDate());
+        jpa.setNoOfBl(domain.getNoOfBl());
+        jpa.setIssuePlace(domain.getIssuePlace());
+        jpa.setDoDate(domain.getDoDate());
+        jpa.setIncoterms(domain.getIncoterms());
+        jpa.setPayableAt(domain.getPayableAt());
+        jpa.setIsTriangle(domain.isTriangle());
+        jpa.setIsCoLoad(domain.isCoLoad());
+        jpa.setMblNo(domain.getMblNo());
     }
 
-    private HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {
+    public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
+        jpa.setAirlineCode(domain.getAirlineCode());
+        jpa.setDepartureCode(domain.getDepartureCode());
+        jpa.setMawbNo(domain.getMawbNo());
+        jpa.setChargeWeightKg(domain.getChargeWeightKg());
+        jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
+        jpa.setRateClass(domain.getRateClass());
+        jpa.setCurrencyCode(domain.getCurrencyCode());
+        jpa.setDeclaredValueCarriage(domain.getDeclaredValueCarriage());
+        jpa.setDeclaredValueCustoms(domain.getDeclaredValueCustoms());
+        jpa.setInsurance(domain.getInsurance());
+        jpa.setAccountInformation(domain.getAccountInformation());
+        jpa.setOtherTerm(domain.getOtherTerm());
+        jpa.setIssueDate(domain.getIssueDate());
+        jpa.setIssuePlace(domain.getIssuePlace());
+        jpa.setSignature(domain.getSignature());
+        jpa.setFhd(domain.getFhd());
+        jpa.setIncoterms(domain.getIncoterms());
+        jpa.setFreightTermAir(domain.getFreightTermAir());
+    }
+
+    public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
+        jpa.setVesselName(domain.getVesselName());
+        jpa.setPickupDate(domain.getPickupDate());
+        jpa.setTruckerCode(domain.getTruckerCode());
+        jpa.setTruckerPic(domain.getTruckerPic());
+        jpa.setChargeWeightKg(domain.getChargeWeightKg());
+        jpa.setIncoterms(domain.getIncoterms());
+    }
+
+    public void applyNonBlFields(HouseBlNonBl domain, HouseBlNonBlJpaEntity jpa) {
+        jpa.setWorkDivision(domain.getWorkDivision());
+        jpa.setSettlePartnerCode(domain.getSettlePartnerCode());
+        jpa.setStatus(domain.getStatus());
+        jpa.setOriginalBlRef(domain.getOriginalBlRef());
+    }
+
+    HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {
         HouseBlContainerJpaEntity jpa = HouseBlContainerJpaEntity.of(jpaParent,
                 c.getContainerNo(), c.getContainerType(), c.getLengthFeet());
-        if (c.getId() != null) jpa.setId(c.getId());
+        if (c.getId() != null) jpa.setHouseBlContainerId(c.getId());
         jpa.setSealNo1(c.getSealNo1());
         jpa.setSealNo2(c.getSealNo2());
         jpa.setPkgQty(c.getPkgQty());

@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
+import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,20 +9,20 @@ import java.math.BigDecimal;
 
 /**
  * JPA ORM 엔티티 — House B/L 항공 확장.
- * @OneToOne 독립 엔티티로 HouseBlJpaEntity와 연관.
+ * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
 @Table(name = "house_bl_air")
 @Getter
 @NoArgsConstructor
-public class HouseBlAirJpaEntity {
+public class HouseBlAirJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "house_bl_air_id", updatable = false, nullable = false)
     private Long houseBlAirId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 
@@ -61,7 +62,7 @@ public class HouseBlAirJpaEntity {
     @Column(name = "other_term", length = 100)
     private String otherTerm;
 
-    @Column(name = "issue_date", length = 8)
+    @Column(name = "issue_date", length = 10)
     private String issueDate;
 
     @Column(name = "issue_place", length = 50)
@@ -76,7 +77,7 @@ public class HouseBlAirJpaEntity {
     @Column(name = "incoterms", length = 10)
     private String incoterms;
 
-    @Column(name = "freight_term", length = 10)
+    @Column(name = "freight_term_air", length = 10)
     private String freightTermAir;
 
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }

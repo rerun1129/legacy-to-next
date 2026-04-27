@@ -1,29 +1,35 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
+import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.port.out.MasterBlPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class MasterBlPersistenceAdapter implements MasterBlPort {
 
     private final MasterBlRepository masterBlRepository;
+    private final MasterBlSeaRepository masterBlSeaRepository;
+    private final MasterBlAirRepository masterBlAirRepository;
     private final MasterBlMapper masterBlMapper;
 
     @Override
-    public Optional<MasterBl> findById(UUID id) {
+    public Optional<MasterBl> findById(Long id) {
         return masterBlRepository.findById(id)
                 .map(masterBlMapper::toDomain);
     }
@@ -54,8 +60,11 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     }
 
     @Override
+    @Transactional
     public void delete(MasterBl masterBl) {
-        MasterBlJpaEntity jpa = masterBlMapper.toJpa(masterBl);
-        masterBlRepository.delete(jpa);
+        Long id = masterBl.getId();
+        masterBlSeaRepository.findByMasterBlMasterBlId(id).ifPresent(masterBlSeaRepository::delete);
+        masterBlAirRepository.findByMasterBlMasterBlId(id).ifPresent(masterBlAirRepository::delete);
+        masterBlRepository.deleteById(id);
     }
 }

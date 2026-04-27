@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 /**
  * E-03 Master B/L 해상 확장.
  * 순수 도메인 엔티티 — JPA 어노테이션 없음.
@@ -19,6 +18,7 @@ public class MasterBlSea extends MasterBl {
     private String linerCode;
     private String vesselName;
     private String voyageNo;
+    // 비즈니스 날짜 — ISO 8601 문자열 (yyyy-MM-dd)
     private String onboardDate;
     private String lineBkgNo;
 

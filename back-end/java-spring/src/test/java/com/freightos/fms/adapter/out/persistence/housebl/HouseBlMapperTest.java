@@ -1,12 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlNonBlJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
+import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,108 +18,178 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class HouseBlMapperTest {
 
-    // ── JPA 엔티티 직접 구조 검증 ──────────────────────────────────
+    private final HouseBlMapper mapper = new HouseBlMapper();
+
+    // ── applyCommonFields ────────────────────────────────────────────
 
     @Test
-    @DisplayName("HouseBlJpaEntity: String 타입 날짜 필드와 Long PK 설정이 동작한다")
-    void houseBlJpa_stringDateAndLongPk_work() {
+    @DisplayName("applyCommonFields: AIR domain → HouseBlJpaEntity에 jobDiv=AIR, 기본값 필드 복사된다")
+    void applyCommonFields_airDomain_setsJobDivAir() {
+        HouseBlAir domain = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
-        jpa.setHouseBlId(1L);
-        jpa.setBound(Bound.EXP);
-        jpa.setJobDiv(JobDiv.SEA);
-        jpa.setHblNo("HBL-SEA-001");
-        jpa.setShipperCode("SHIPPER02");
-        jpa.setEtd("20240301");
-        jpa.setEta("20240310");
-        jpa.setMasterBlId(100L);
 
-        assertThat(jpa.getHouseBlId()).isEqualTo(1L);
-        assertThat(jpa.getEtd()).isEqualTo("20240301");
-        assertThat(jpa.getEta()).isEqualTo("20240310");
-        assertThat(jpa.getMasterBlId()).isEqualTo(100L);
+        mapper.applyCommonFields(domain, jpa);
+
+        assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.AIR);
+        assertThat(jpa.getBound()).isEqualTo(Bound.EXP);
+    }
+
+    @Test
+    @DisplayName("applyCommonFields: SEA domain → HouseBlJpaEntity에 jobDiv=SEA가 세팅된다")
+    void applyCommonFields_seaDomain_setsJobDivSea() {
+        HouseBlSea domain = HouseBlSea.create(Bound.EXP);
+        HouseBlJpaEntity jpa = new HouseBlJpaEntity();
+
+        mapper.applyCommonFields(domain, jpa);
+
         assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.SEA);
     }
 
     @Test
-    @DisplayName("HouseBlSeaJpaEntity: @OneToOne houseBl 참조와 isTriangle/isCoLoad 게터가 동작한다")
-    void houseBlSeaJpa_oneToOneRefAndBooleanFlags_work() {
-        HouseBlJpaEntity base = new HouseBlJpaEntity();
-        base.setBound(Bound.EXP);
-        base.setJobDiv(JobDiv.SEA);
+    @DisplayName("applyCommonFields: TRUCK domain → HouseBlJpaEntity에 jobDiv=TRUCK이 세팅된다")
+    void applyCommonFields_truckDomain_setsJobDivTruck() {
+        HouseBlTruck domain = HouseBlTruck.create();
+        HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        HouseBlSeaJpaEntity seaExt = new HouseBlSeaJpaEntity();
-        seaExt.setHouseBl(base);
-        seaExt.setLinerCode("MSC");
-        seaExt.setVesselName("EVER GIVEN");
-        seaExt.setVoyageNo("0001E");
-        seaExt.setMblNo("MBLNO-001");
-        seaExt.setIsTriangle(true);
-        seaExt.setIsCoLoad(false);
-        seaExt.setIssueDate("20240301");
-        seaExt.setDoDate("20240320");
+        mapper.applyCommonFields(domain, jpa);
 
-        assertThat(seaExt.getHouseBl()).isSameAs(base);
-        assertThat(seaExt.isTriangle()).isTrue();
-        assertThat(seaExt.isCoLoad()).isFalse();
-        assertThat(seaExt.getIssueDate()).isEqualTo("20240301");
-        assertThat(seaExt.getDoDate()).isEqualTo("20240320");
+        assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.TRUCK);
     }
 
     @Test
-    @DisplayName("HouseBlAirJpaEntity: @OneToOne houseBl 참조와 String 날짜 필드가 동작한다")
-    void houseBlAirJpa_oneToOneRefAndStringDate_work() {
-        HouseBlJpaEntity base = new HouseBlJpaEntity();
-        base.setBound(Bound.EXP);
-        base.setJobDiv(JobDiv.AIR);
+    @DisplayName("applyCommonFields: NON_BL domain → HouseBlJpaEntity에 jobDiv=NON_BL이 세팅된다")
+    void applyCommonFields_nonBlDomain_setsJobDivNonBl() {
+        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA);
+        HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        HouseBlAirJpaEntity airExt = new HouseBlAirJpaEntity();
-        airExt.setHouseBl(base);
-        airExt.setAirlineCode("KE");
-        airExt.setMawbNo("180-12345678");
-        airExt.setChargeWeightKg(BigDecimal.valueOf(100.5));
-        airExt.setDeclaredValueCarriage("N.V.D.");
-        airExt.setInsurance("NIL");
-        airExt.setIssueDate("20240115");
-        airExt.setIssuePlace("Seoul");
+        mapper.applyCommonFields(domain, jpa);
 
-        assertThat(airExt.getHouseBl()).isSameAs(base);
-        assertThat(airExt.getAirlineCode()).isEqualTo("KE");
-        assertThat(airExt.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
-        assertThat(airExt.getInsurance()).isEqualTo("NIL");
-        assertThat(airExt.getIssueDate()).isEqualTo("20240115");
+        assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.NON_BL);
+    }
+
+    // ── applySeaFields ───────────────────────────────────────────────
+
+    @Test
+    @DisplayName("applySeaFields: isTriangle/isCoLoad 게터가 정상 동작한다 (회귀 검출)")
+    void applySeaFields_triangleFlagsAreMapped() {
+        HouseBlSea domain = HouseBlSea.create(Bound.EXP);
+        HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
+
+        mapper.applySeaFields(domain, jpa);
+
+        assertThat(jpa.isTriangle()).isFalse();
+        assertThat(jpa.isCoLoad()).isFalse();
+    }
+
+    // ── applyTruckFields ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("applyTruckFields: vesselName이 TRUCK으로 복사된다")
+    void applyTruckFields_vesselNameIsTruck() {
+        HouseBlTruck domain = HouseBlTruck.create();
+        HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
+
+        mapper.applyTruckFields(domain, jpa);
+
+        assertThat(jpa.getVesselName()).isEqualTo("TRUCK");
+    }
+
+    // ── applyNonBlFields ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("applyNonBlFields: workDivision이 매핑된다")
+    void applyNonBlFields_workDivisionIsMapped() {
+        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA);
+        HouseBlNonBlJpaEntity jpa = new HouseBlNonBlJpaEntity();
+
+        mapper.applyNonBlFields(domain, jpa);
+
+        assertThat(jpa.getWorkDivision()).isEqualTo(HouseBlNonBl.WorkDivision.SEA);
+        assertThat(jpa.getStatus()).isEqualTo("접수");
+    }
+
+    // ── JPA → Domain ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toDomain: AIR JPA → 핵심 항공 필드가 도메인으로 복사된다")
+    void toDomain_airJpa_coreAirFieldsAreMapped() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.AIR);
+        parentJpa.setBound(Bound.EXP);
+        parentJpa.setShipperCode("SHIPPER01");
+        parentJpa.setConsigneeCode("CONSIGNEE01");
+        parentJpa.setPkgQty(10);
+        parentJpa.setGrossWeightKg(BigDecimal.valueOf(250.0));
+        // airExt null — lazy 미로드 상태 시뮬레이션
+
+        HouseBlAir domain = (HouseBlAir) mapper.toDomain(parentJpa);
+
+        assertThat(domain).isInstanceOf(HouseBlAir.class);
+        assertThat(domain.getShipperCode()).isEqualTo("SHIPPER01");
+        assertThat(domain.getConsigneeCode()).isEqualTo("CONSIGNEE01");
+        assertThat(domain.getPkgQty()).isEqualTo(10);
+        assertThat(domain.getGrossWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(250.0));
+        // create() 기본값 유지
+        assertThat(domain.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
+        assertThat(domain.getInsurance()).isEqualTo("NIL");
     }
 
     @Test
-    @DisplayName("HouseBlTruckJpaEntity: vesselName 기본값이 TRUCK이며 String 날짜 필드가 동작한다")
-    void houseBlTruckJpa_defaultVesselNameAndStringPickupDate_work() {
-        HouseBlJpaEntity base = new HouseBlJpaEntity();
-        base.setBound(Bound.EXP);
-        base.setJobDiv(JobDiv.TRUCK);
+    @DisplayName("toDomain: SEA JPA + seaExt null → 해상 공통 필드가 복사된다")
+    void toDomain_seaJpa_coreSeaFieldsAreMapped() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.SEA);
+        parentJpa.setBound(Bound.EXP);
+        parentJpa.setHblNo("HBL-SEA-001");
+        parentJpa.setShipperCode("SHIPPER02");
+        parentJpa.setPkgQty(5);
+        parentJpa.setCbm(BigDecimal.valueOf(30.0));
 
-        HouseBlTruckJpaEntity truckExt = new HouseBlTruckJpaEntity();
-        truckExt.setHouseBl(base);
-        truckExt.setPickupDate("20240301");
-        truckExt.setTruckerCode("TRUCKER01");
+        HouseBlSea domain = (HouseBlSea) mapper.toDomain(parentJpa);
 
-        assertThat(truckExt.getVesselName()).isEqualTo("TRUCK");
-        assertThat(truckExt.getPickupDate()).isEqualTo("20240301");
-        assertThat(truckExt.getHouseBl()).isSameAs(base);
+        assertThat(domain).isInstanceOf(HouseBlSea.class);
+        assertThat(domain.getHblNo()).isEqualTo("HBL-SEA-001");
+        assertThat(domain.getShipperCode()).isEqualTo("SHIPPER02");
+        assertThat(domain.getPkgQty()).isEqualTo(5);
+        assertThat(domain.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(30.0));
+        assertThat(domain.getContainers()).isEmpty();
     }
 
     @Test
-    @DisplayName("HouseBlNonBlJpaEntity: @OneToOne houseBl 참조와 workDivision 이 동작한다")
-    void houseBlNonBlJpa_oneToOneRefAndWorkDivision_work() {
-        HouseBlJpaEntity base = new HouseBlJpaEntity();
-        base.setBound(Bound.EXP);
-        base.setJobDiv(JobDiv.NON_BL);
+    @DisplayName("toDomain: TRUCK JPA → HouseBlTruck 반환된다")
+    void toDomain_truckJpa_producesTruckDomain() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.TRUCK);
+        parentJpa.setBound(Bound.EXP);
 
-        HouseBlNonBlJpaEntity nonBlExt = new HouseBlNonBlJpaEntity();
-        nonBlExt.setHouseBl(base);
-        nonBlExt.setWorkDivision(HouseBlNonBl.WorkDivision.SEA);
-        nonBlExt.setSettlePartnerCode("PARTNER01");
+        HouseBl domain = mapper.toDomain(parentJpa);
 
-        assertThat(nonBlExt.getHouseBl()).isSameAs(base);
-        assertThat(nonBlExt.getWorkDivision()).isEqualTo(HouseBlNonBl.WorkDivision.SEA);
-        assertThat(nonBlExt.getSettlePartnerCode()).isEqualTo("PARTNER01");
+        assertThat(domain).isInstanceOf(HouseBlTruck.class);
+    }
+
+    @Test
+    @DisplayName("toDomain: NON_BL JPA + nonBlExt null → workDivision null 허용")
+    void toDomain_nonBlJpa_withNullExt_workDivisionIsNull() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.NON_BL);
+        parentJpa.setBound(Bound.EXP);
+
+        HouseBl domain = mapper.toDomain(parentJpa);
+
+        assertThat(domain).isInstanceOf(HouseBlNonBl.class);
+        assertThat(((HouseBlNonBl) domain).getWorkDivision()).isNull();
+    }
+
+    @Test
+    @DisplayName("toDomain: assignIdentity로 houseBlId가 도메인에 주입된다")
+    void toDomain_airJpa_identityFieldIsAssigned() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.AIR);
+        parentJpa.setBound(Bound.EXP);
+        parentJpa.setHouseBlId(42L);
+
+        HouseBlAir domain = (HouseBlAir) mapper.toDomain(parentJpa);
+
+        assertThat(domain.getId()).isEqualTo(42L);
     }
 }

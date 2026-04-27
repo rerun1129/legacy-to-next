@@ -76,7 +76,7 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
         return c;
     }
 
-    public void setHouseBlContainerId(Long id) { this.houseBlContainerId = id; }
+    public void setHouseBlContainerId(Long v) { this.houseBlContainerId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setContainerNo(String v) { this.containerNo = v; }
     public void setContainerType(String v) { this.containerType = v; }

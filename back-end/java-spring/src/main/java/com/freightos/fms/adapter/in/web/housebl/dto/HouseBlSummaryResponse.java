@@ -4,20 +4,18 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /** 리스트 화면용 요약 DTO */
 public record HouseBlSummaryResponse(
-        UUID          id,
+        Long          id,
         String        hblNo,
         JobDiv        jobDiv,
         Bound         bound,
         String        polCode,
         String        podCode,
-        LocalDate     etd,
-        LocalDate     eta,
+        String        etd,
+        String        eta,
         String        shipperCode,
         String        consigneeCode,
         Integer       pkgQty,

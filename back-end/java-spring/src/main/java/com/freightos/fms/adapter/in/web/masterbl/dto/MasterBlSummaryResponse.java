@@ -3,13 +3,11 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /** Master B/L 리스트 화면용 요약 DTO. */
 public record MasterBlSummaryResponse(
-        UUID id,
+        Long id,
         String mblNo,
         String masterRefNo,
         String jobDiv,
@@ -18,8 +16,8 @@ public record MasterBlSummaryResponse(
         String consigneeCode,
         String polCode,
         String podCode,
-        LocalDate etd,
-        LocalDate eta,
+        String etd,
+        String eta,
         String operatorCode,
         LocalDateTime createdAt
 ) {

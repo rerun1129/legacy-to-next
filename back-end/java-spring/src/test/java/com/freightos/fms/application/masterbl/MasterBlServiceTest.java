@@ -75,7 +75,7 @@ class MasterBlServiceTest {
     @Test
     @DisplayName("getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
     void getById_notFound_throwsResourceNotFoundException() {
-        Long id = 2L;
+        Long id = 999L;
         given(masterBlPort.findById(id)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> masterBlService.getById(id))
@@ -85,7 +85,7 @@ class MasterBlServiceTest {
     @Test
     @DisplayName("delete - 존재하는 ID 삭제 시 port.delete 호출")
     void delete_existingId_callsPortDelete() {
-        Long id = 3L;
+        Long id = 1L;
         MasterBl mockEntity = mock(MasterBl.class);
         given(masterBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 

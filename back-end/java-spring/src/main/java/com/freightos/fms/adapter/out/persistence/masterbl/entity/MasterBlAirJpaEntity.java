@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
+import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,20 +9,20 @@ import java.math.BigDecimal;
 
 /**
  * JPA ORM 엔티티 — Master B/L 항공 확장.
- * @OneToOne 독립 엔티티로 MasterBlJpaEntity와 연관.
+ * MasterBlJpaEntity 와 @OneToOne(FK: master_bl_id) 관계.
  */
 @Entity
 @Table(name = "master_bl_air")
 @Getter
 @NoArgsConstructor
-public class MasterBlAirJpaEntity {
+public class MasterBlAirJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "master_bl_air_id", updatable = false, nullable = false)
     private Long masterBlAirId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "master_bl_id", nullable = false, unique = true)
     private MasterBlJpaEntity masterBl;
 
@@ -64,7 +65,7 @@ public class MasterBlAirJpaEntity {
     @Column(name = "flight_type", length = 20)
     private String flightType;
 
-    @Column(name = "issue_date", length = 8)
+    @Column(name = "issue_date", length = 10)
     private String issueDate;
 
     @Column(name = "issue_place", length = 50)

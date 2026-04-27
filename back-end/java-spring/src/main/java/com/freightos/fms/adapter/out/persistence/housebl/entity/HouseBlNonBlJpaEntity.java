@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
+import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,20 +8,20 @@ import lombok.NoArgsConstructor;
 
 /**
  * JPA ORM 엔티티 — House B/L Non-B/L 확장.
- * @OneToOne 독립 엔티티로 HouseBlJpaEntity와 연관.
+ * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
 @Table(name = "house_bl_non_bl")
 @Getter
 @NoArgsConstructor
-public class HouseBlNonBlJpaEntity {
+public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "house_bl_non_bl_id", updatable = false, nullable = false)
     private Long houseBlNonBlId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 

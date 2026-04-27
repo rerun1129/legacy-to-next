@@ -33,7 +33,7 @@ public abstract class MasterBl extends BaseEntity {
     private String polCode;
     private String podCode;
 
-    // ── 일정 ──────────────────────────────────────────────────────
+    // ── 일정 (ISO 8601 문자열, yyyy-MM-dd) ───────────────────────
     private String etd;
     private String eta;
 

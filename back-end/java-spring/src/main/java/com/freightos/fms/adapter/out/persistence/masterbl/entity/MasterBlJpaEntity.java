@@ -13,12 +13,12 @@ import java.math.BigDecimal;
 /**
  * JPA ORM 엔티티 — Master B/L 공통 본체.
  * 도메인 엔티티(MasterBl)와 분리된 영속성 계층 객체.
- * JOINED 상속에서 @OneToOne 독립 엔티티 구조로 변경.
+ * 해상/항공 확장은 별도 독립 테이블(@OneToOne FK).
  */
 @Entity
 @Table(name = "master_bl")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MasterBlJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -54,10 +54,10 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "pod_code", length = 10)
     private String podCode;
 
-    @Column(name = "etd", length = 8)
+    @Column(name = "etd", length = 10)
     private String etd;
 
-    @Column(name = "eta", length = 8)
+    @Column(name = "eta", length = 10)
     private String eta;
 
     @Column(name = "freight_term", length = 10)
@@ -88,7 +88,7 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @OneToOne(mappedBy = "masterBl", fetch = FetchType.LAZY)
     private MasterBlAirJpaEntity airExt;
 
-    public void setMasterBlId(Long id) { this.masterBlId = id; }
+    public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setMblNo(String v) { this.mblNo = v; }
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
     public void setJobDiv(String v) { this.jobDiv = v; }
