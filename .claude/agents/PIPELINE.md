@@ -27,6 +27,9 @@
           · [ESCALATE_TO_USER] 태그 있음 (2회 이상) → 메인이 사용자에게 위반 내용 직접 보고 + 작업 중단 대기
       · APPROVED → 마커 파일 생성 → exit 2로 메인 재개 → 메인이 [QA] 호출
   → [QA]                         통합 빌드·테스트 (단일)
+      · PASS → 다음 단계
+      · FAIL → [Coder × N] 재호출 (QA 실패 항목 전달) → merge → commit
+             → touch .claude/.review_pending → Reviewer 재실행
   → [메인] worktree 정리 (QA 통과 후)
       → git worktree list로 남은 worktree 확인
       → git worktree remove -f -f <path> × N회
@@ -59,6 +62,9 @@
 | Main → Coder (재작업) | REJECTED 피드백 수신 후 Main이 Agent 도구 호출 | 위반 항목 목록 + 수정 대상 파일 |
 | Main → QA | APPROVED 지시문 수신 후 Main이 Agent 도구 호출 | 변경 파일 목록 + Reviewer 종합 의견 |
 | QA → 사용자 | 메인이 결과 보고 후 종료 | 통과/미통과 명시 |
+| QA → Main (FAIL 시) | 미통과 보고 | Coder 재작업 항목 + 실패 명령어 출력 |
+| Main → Coder (재작업 — QA FAIL) | Agent 도구 호출 | 실패 항목 목록 + 수정 대상 파일 |
+| Main → Reviewer (QA 재작업 후) | git commit + touch .review_pending | base→HEAD diff |
 
 ## 메인 에이전트 참조 명령어
 
@@ -71,6 +77,7 @@
 | Mediator 충돌 해결 후 | `git add <files>` → `git commit -m "merge: resolve conflicts from parallel Coders"` → `touch .claude/.review_pending` |
 | Reviewer REJECTED 후 Coder 재작업 완료 시 | `git add <files>` → `git commit -m "fix: rework per reviewer feedback"` → `touch .claude/.review_pending` |
 | Reviewer APPROVED 후 QA 호출 전 | `git diff --name-only <BASE> HEAD` → 결과를 QA에 변경 파일 목록으로 전달 |
+| QA FAIL 후 Coder 재작업 완료 시 | `git add <files>` → `git commit -m "fix: rework per QA failure"` → `touch .claude/.review_pending` |
 | QA 통과 후 worktree 정리 | `git worktree list` 확인 → `git worktree remove -f -f <path>` × N회 → `git branch -D <worktree-branch>` × N회 |
 
 > **누적 모드 예외 (`/pipeline-start`)**: 위 표의 모든 `touch .claude/.review_pending`은 생략한다. 진입 시 `.claude/.review_skip` sentinel을 유지하고, `/pipeline-review` 또는 `/pipeline` 호출 시 sentinel 제거 + 마커 생성으로 정상 사이클에 진입한다.
@@ -86,11 +93,11 @@
 
 - Stop 훅: `.claude/settings.json` 등록 완료. `.review_pending` 파일이 있을 때만 Reviewer 실행 — 없으면 중간 Stop으로 간주하고 즉시 통과.
 - 외부 Reviewer 경로: `.claude/reviewer_paths.md` 에 경로 목록 관리. 위에서 아래로 시도하여 첫 번째 존재하는 디렉토리 사용. 모두 없으면 리뷰 중단 후 사용자에게 알림. **경로 수정은 사용자가 직접** `.claude/reviewer_paths.md` 를 편집 (메인이 임의 수정 금지).
-- diff baseline: `origin/main` → `main` → `HEAD~1` 순으로 폴백되는 merge-base. 단일 메인 에이전트 워크플로우를 가정하므로 사이클 도중 baseline 변동 없음. 재작업 사이클에서는 1차+2차 commit 누적 diff를 검토 — 의도적 설계.
+- diff baseline: `origin/master` → `HEAD~1` 순으로 폴백되는 merge-base. 단일 메인 에이전트 워크플로우를 가정하므로 사이클 도중 baseline 변동 없음. 재작업 사이클에서는 1차+2차 commit 누적 diff를 검토 — 의도적 설계.
 - ESCALATE fallback: 2차 Opus 호출·파싱 실패 시 1차 ESCALATE를 APPROVED로 묵시 처리. 리뷰 차단보다 통과 우선의 안전 정책.
 - Reviewer 모델: 1차 `claude-sonnet-4-6`, 2차(ESCALATE) `claude-opus-4-7`. 환경변수 `PRIMARY_MODEL` / `ESCALATION_MODEL` 로 오버라이드 가능.
 
 ## 누적 모드 (`/pipeline-build` + `/pipeline-start`)
 
 - `/pipeline-build`: 작업 지시를 `.claude/.task_queue`에 적재만 함. commit·sentinel·마커 모두 무관. 진입 시 `.claude/.review_skip` sentinel을 유지해 의도치 않은 Reviewer 발동을 차단.
-- `/pipeline-start`: 큐를 일괄 소비해 Planner→Coder×N→merge→commit을 실행. 메인 `touch .claude/.review_pending`(#7)은 생략하고 `.review_skip` sentinel을 유지. 이후 `/pipeline-review` 호출 시 sentinel 제거 + 마커 생성으로 #8~#13 정상 사이클에 진입한다. 반복 호출 사이의 base→HEAD diff는 자연스럽게 합산되어 단일 Reviewer 호출에 전달된다.
+- `/pipeline-start`: 큐를 일괄 소비해 Planner→Coder×N→merge→commit을 실행. 메인 `touch .claude/.review_pending`(#7)은 생략하고 `.review_skip` sentinel을 유지. 이후 `/pipeline-review` 호출 시 sentinel 제거 + 마커 생성으로 #8~#13 정상 사이클에 진입한다. 반복 호출 사이의 base→HEAD diff는 자연스럽게 합산되어 단일 Reviewer 호출에 전달된다. worktree 정리는 매 사이클의 머지/commit 직후에 즉시 수행한다 (QA 게이트 없음). `.claude/.task_queue` 파일은 사이클 완료 시 삭제한다.

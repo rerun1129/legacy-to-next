@@ -35,5 +35,6 @@ allowed-tools: Bash, Read, Agent
 - **REJECTED** → exit 2로 메인 재개 → Coder 재호출(`isolation: "worktree"`) → 재머지·재commit → `touch .claude/.review_pending` → 메인 재종료 → 재 Stop 훅
 - **REJECTED 2회 이상** → `[ESCALATE_TO_USER]` stderr 주입 → 메인이 위반 내용을 사용자에게 직접 보고 후 대기
 - **APPROVED** → APPROVED_MARKER 생성·exit 2 → 메인이 `subagent_type=QA` 호출 → worktree 정리 → 사용자 보고
+- **QA FAIL 시** → 메인이 [Coder × N] 재호출 → merge/commit → `touch .claude/.review_pending` → Reviewer 재실행 (PIPELINE.md 흐름 31-32행 참조)
 
 REJECTED 후 재작업 흐름에서 메인은 `.claude/agents/PIPELINE.md`의 "REJECTED 후 Coder 재작업" 절차를 따른다.

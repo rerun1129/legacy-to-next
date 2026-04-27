@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, HelpCircle, Search, ChevronLeft, LogOut } from "lucide-react";
+import { Bell, HelpCircle, Search, ChevronLeft, LogOut, Moon, Sun } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useCurrentUser, USERS } from "@/lib/use-current-user";
+import { useTheme } from "@/lib/use-theme";
 
 const SIDEBAR_W = 220;
 
@@ -32,6 +33,7 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const didDragRef = useRef(false);
 
+  const { dark, toggle: toggleTheme } = useTheme();
   const { currentUserId, setCurrentUser } = useCurrentUser();
   const currentUser = USERS.find(u => u.id === currentUserId) ?? USERS[0];
   const [userMenuPos, setUserMenuPos] = useState<{ x: number; y: number } | null>(null);
@@ -239,6 +241,9 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
           <div className="topbar-icons">
             <button className="topbar-icon" title="Search (⌘K)"><Search /></button>
             <button className="topbar-icon" title="Notifications"><Bell /><span className="topbar-icon__dot" /></button>
+            <button className="topbar-icon" title={dark ? "Light mode" : "Dark mode"} onClick={toggleTheme}>
+              {dark ? <Sun /> : <Moon />}
+            </button>
             <button className="topbar-icon" title="Help"><HelpCircle /></button>
           </div>
           <div

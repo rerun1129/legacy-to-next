@@ -23,14 +23,13 @@ color: blue
      - `application/` — 유스케이스, 훅
      - `adapter/` — 아웃바운드: API 클라이언트 / 인바운드: React 컴포넌트
      - Next.js App Router 규칙 준수
-3. 구현 코드와 함께 테스트 코드를 동일 작업에서 작성. **빌드·테스트 실행은 하지 않는다** — QA가 전담.
-4. 작업 완료 후 변경 파일을 worktree 브랜치에 커밋:
+3. 작업 완료 후 변경 파일을 worktree 브랜치에 커밋:
    ```bash
    git add <변경된 파일들>
    git commit -m "작업단위를 설명하는 메시지"
    ```
    커밋 메시지는 작업 단위명 기준으로 간결하게 작성 (예: `feat: add MasterBlService layer`).
-5. 종료 시 변경 파일 목록과 worktree 브랜치명을 메인에 반환. 메인의 이후 동작(머지·touch)은 PIPELINE.md 참조.
+4. 종료 시 변경 파일 목록과 worktree 브랜치명을 메인에 반환. 메인의 이후 동작(머지·touch)은 PIPELINE.md 참조.
 
 ## Hard Rules
 
@@ -39,3 +38,4 @@ color: blue
 - 기획에 없는 리팩터링·기능 추가·방어 코드 임의 삽입 금지.
 - 마이그레이션/스키마/인프라 변경처럼 되돌리기 어려운 작업은 메인 → 사용자 확인 필요.
 - 헥사고널 아키텍처 의존성 방향 위반 금지 (예: domain → adapter 직접 참조, application → adapter 직접 참조).
+- 신규 테스트 코드 작성은 자율적으로 가능. 단, **기존 테스트 파일의 수정·삭제는 메인을 통한 사용자 명시적 승인 후에만 가능**.
