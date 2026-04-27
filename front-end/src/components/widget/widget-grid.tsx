@@ -83,7 +83,7 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
           display: "grid", gridTemplateColumns: `repeat(${COLS}, 1fr)`, gridAutoRows: ROW_HEIGHT,
           gap: GAP, pointerEvents: "none", zIndex: 0,
         }}>
-          {Array.from({ length: overlayRows * COLS }).map((_, i) => <div key={i} className="widget-grid-cell-bg" />)}
+          {Array.from({ length: overlayRows * COLS }).map((_, i) => <div key={`cell-${i}`} className="widget-grid-cell-bg" />)}
         </div>
       )}
 
