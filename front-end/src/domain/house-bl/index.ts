@@ -1,4 +1,5 @@
 export interface HouseBlRow {
+  id?: number;
   no?: number;
   hbl: string;
   expImp: 'EXP' | 'IMP';

@@ -1,5 +1,5 @@
 export interface MasterBlRow {
-  id?: string;
+  id?: number;
   mblNo: string;
   bound: 'EXP' | 'IMP';
   pol: string;
