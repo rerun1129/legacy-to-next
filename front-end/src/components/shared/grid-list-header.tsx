@@ -58,6 +58,7 @@ export function SortableTh<T>({ col, onResize, isDraggingThis }: SortableThProps
     <th
       ref={setNodeRef}
       style={style}
+      suppressHydrationWarning
       className={
         [
           col.isRequired ? "is-required" : undefined,
