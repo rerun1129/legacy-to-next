@@ -12,7 +12,7 @@ interface ColumnVisibilityMenuProps<T> {
 export function ColumnVisibilityMenu<T>({
   gridId,
   defaultColumns,
-}: ColumnVisibilityMenuProps<T>): JSX.Element {
+}: ColumnVisibilityMenuProps<T>): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLUListElement>(null);

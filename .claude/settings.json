@@ -18,6 +18,21 @@
             "type": "command",
             "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/hooks/invoke_reviewer.sh'",
             "timeout": 1200
+          },
+          {
+            "type": "command",
+            "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/slack_notify.sh' 'Task completed.'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/slack_notify.sh' 'Approval required.'"
           }
         ]
       }

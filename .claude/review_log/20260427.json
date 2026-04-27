@@ -410,3 +410,347 @@
     }
   ]
 }
+{
+  "timestamp": "2026-04-27T19:05:06",
+  "verdict": "APPROVED",
+  "severity": "low",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 199035,
+  "summary": "생성자 체인을 통한 jobDiv/bound 주입과 ResourceNotFoundException 도입 모두 헥사고널 경계·도메인 순수성·에러 처리 규칙을 만족한다. 지적된 사항은 이번 diff에서 추가된 MasterBl String-jobDiv의 타입 안전성 부재와 코드 중복 두 건으로, 모두 규칙 위반이 아닌 개선 제안 수준이다.",
+  "violations": [],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlTruck.java",
+      "issue": "create() 내 entity.vesselName = \"TRUCK\" 재할당이 필드 선언부 초기값(private String vesselName = \"TRUCK\")과 중복된다.",
+      "proposal": "create() 에서 vesselName 재할당 한 줄 제거. 필드 선언부 초기값만으로 충분하며 중복 할당은 의도 파악을 흐린다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "이번 diff에서 추가된 protected MasterBl(String jobDiv, Bound bound) 생성자의 jobDiv가 raw String이어서 서브클래스에서 super(\"AIR\", bound) 형태의 리터럴을 직접 전달한다. HouseBl 계층이 JobDiv enum을 사용하는 것과 일관성이 없고, 오타 시 컴파일 단에서 잡히지 않는다.",
+      "proposal": "전용 열거형(예: MasterBlJobDiv { SEA, AIR }) 을 도입하거나 기존 JobDiv에 통합하여 super(MasterBlJobDiv.AIR, bound) 형태로 타입 안전하게 변경."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "issue": "applyCommonFields()는 instanceof 체인으로 JobDiv를 결정하는 반면 toDomain()은 jpa.getJobDiv() switch로 분기한다. 비대칭 구조로 신규 JobDiv 추가 시 두 위치를 모두 수정해야 한다.",
+      "proposal": "HouseBl이 getJobDiv()를 노출한다면 applyCommonFields() 내 instanceof 체인을 jpa.setJobDiv(domain.getJobDiv()) 한 줄로 교체하여 단일 변경 지점 확보."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:06:47",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 242371,
+  "summary": "프론트엔드 신규 코드에서 `reorder`의 `prefs.order` 미초기화로 인해 재정렬 기능이 최초 사용 시 항상 무음으로 실패하는 기능 버그가 존재하며(A1), React key 인덱스 폴백(A5)과 boolean 명명 위반(CONV1)도 확인된다. 백엔드 변경(헥사고널 계층 준수, 생성자 체인 정비, ResourceNotFoundException 추가)은 규칙 위반 없음.",
+  "violations": [
+    {
+      "rule": "rules/ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "line": 44,
+      "detail": "`reorder`가 `prefs.order`가 빈 배열일 때(최초 사용 및 reset 직후 항상 해당) `indexOf`가 -1을 반환하여 `return s`로 조용히 종료하며, `prefs.order`를 채우는 액션이 `reorder` 자체 외에 없으므로 재정렬이 UI 상 영구적으로 동작하지 않는다."
+    },
+    {
+      "rule": "rules/ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list.tsx",
+      "line": 68,
+      "detail": "`rowKey` prop이 제공되지 않을 때 `rowIndex`(배열 인덱스)를 React key로 폴백하며, PlainGridList(L148)에도 동일 패턴이 존재한다."
+    },
+    {
+      "rule": "rules/conventions.md:CONV1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/column-visibility-menu.tsx",
+      "line": 16,
+      "detail": "boolean 상태 변수 `open`은 의문형 접두사 규칙에 따라 `isOpen`으로 명명해야 한다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "issue": "`reorder` 데드락: `prefs.order`는 `reorder`가 성공할 때만 채워지지만, `reorder`는 `prefs.order`가 비어 있으면 성공하지 못한다.",
+      "proposal": "`from === -1 || to === -1` 분기에서 `return s`로 종료하지 말고, `prefs.order`가 비어 있을 경우 `defaultKeys`(defaultColumns의 키 배열)를 base order로 초기화한 뒤 `arrayMove`를 적용하도록 수정. 단, `reorder` 시그니처에 `defaultKeys`를 추가해야 하며 `useColumnLayout`의 `reorderColumn` 클로저에서 주입 가능."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlTruck.java",
+      "issue": "`create()` 내 `entity.vesselName = \"TRUCK\"` 이중 초기화.",
+      "proposal": "필드 선언부(L21)에 이미 `private String vesselName = \"TRUCK\"`으로 초기화되어 있으므로 `create()` 안의 재할당(L36)은 삭제 권장."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:14:08",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 156255,
+  "summary": "column-visibility-menu.tsx의 useEffect 의존성 배열 오타([open]이 window.open을 참조)로 인해 ESC·외부 클릭 닫힘이 런타임에서 완전히 동작하지 않는다. 백엔드 변경(생성자 접근 수준 조정, savedJpa로 람다 effectively-final 해결)과 프론트엔드 컬럼 커스터마이징 아키텍처(Zustand persist + reconcile + DnD)는 해당 버그를 제외하면 구조적으로 이상이 없다.",
+  "violations": [
+    {
+      "rule": "correctness.md:C6",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/column-visibility-menu.tsx",
+      "line": 46,
+      "detail": "useEffect 의존성 배열이 [isOpen] 대신 [open](전역 window.open 함수)으로 잘못 지정되어, isOpen이 true가 되어도 이펙트가 재실행되지 않아 ESC 키·외부 클릭 닫힘 리스너가 절대 등록되지 않는다. 컴포넌트 마운트 시 isOpen은 false이므로 'if (!isOpen) return'에서 즉시 반환되며, 이후 isOpen이 변해도 이펙트가 재실행되지 않는다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list.tsx",
+      "issue": "ManagedGridList와 PlainGridList의 tbody 렌더링 코드(row key 계산 포함 약 35줄)가 거의 동일하게 이중으로 존재한다.",
+      "proposal": "tbody 내부 렌더링 부분을 renderRows 같은 별도 함수로 추출하고 두 컴포넌트에서 공유하면 향후 변경이 한 곳에만 적용된다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:18:23",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 225188,
+  "summary": "백엔드(JPA·도메인·매퍼·어댑터·테스트) 전 파일은 ARCH1 레이어 경계·정확성·컨벤션 모두 이상 없음. 프론트엔드에서 grid-list.tsx의 row key 폴백이 A5(index key 금지) 규칙을 위반 — rowKey 미제공 시 rowIndex가 key로 사용되나 예외 조건 주석이 없어 REJECTED.",
+  "violations": [
+    {
+      "rule": "ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list.tsx",
+      "line": 70,
+      "detail": "ManagedGridList(L70)·PlainGridList(L152) 모두 rowKey 미제공·row.id 미존재 시 rowIndex를 React key로 사용하는 폴백이 있으나, 해당 데이터가 '영구 불변·정렬 불가' 임을 명시한 주석이 없어 A5 위반."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "issue": "import type { GridColumn } from \"@/components/shared/grid-list\" — lib/(application 후보 계층)가 components/(adapter 후보 계층)를 향해 의존하고 있어 ARCH6 의존 방향에 잠재적 긴장이 존재.",
+      "proposal": "GridColumn 인터페이스를 lib/types/grid.ts 또는 types/grid.ts 같은 공유 타입 파일로 추출하면, use-column-layout과 grid-list 양쪽이 타입을 import하되 방향 문제가 사라짐."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list.tsx",
+      "issue": "ManagedGridList(L67-99)와 PlainGridList(L149-185)의 tbody 렌더링 로직이 거의 동일하게 중복.",
+      "proposal": "공통 tbody를 GridTableBody<T> 컴포넌트로 추출하면 두 분기 모두 재사용 가능. 단, 현재 라인 수(194줄) 자체는 ARCH2 임계 이하이므로 기능 정합성 확인 후 리팩토링 검토."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "protected MasterBl(Bound bound) 생성자(L53)가 jobDiv를 설정하지 않으며, 현재 서브클래스(MasterBlSea·MasterBlAir)는 모두 super(\"SEA\"/\"AIR\", bound)를 호출해 이 생성자를 사용하지 않는 것으로 보임.",
+      "proposal": "실제 호출처가 없다면 제거해 dead constructor로 인한 혼란을 방지. 혹은 jobDiv 파라미터 없는 생성이 의도된 경우라면 주석으로 용도를 명시."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:22:39",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 402254,
+  "summary": "프론트엔드 신규 코드(grid-list.tsx, grid-list-header.tsx, use-column-layout.ts) 전반에 걸쳐 컬럼 숨김 제어용으로 추가된 `required?: boolean` 필드가 CONV1(Boolean 명명 규칙)을 3개 파일에서 일관되게 위반하고 있다. 백엔드 변경(도메인 엔티티 생성자 체인 정비, JPA 엔티티 접근자 개방, PersistenceAdapter parentJpa→savedJpa 수정)은 아키텍처·정확성 규칙 위반 없이 깔끔하게 처리됨.",
+  "violations": [
+    {
+      "rule": "rules/conventions.md:CONV1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list.tsx",
+      "line": 13,
+      "detail": "GridColumn<T> 인터페이스에 새로 추가된 `required?: boolean` 필드가 Boolean 명명 규칙을 위반함. 접두사 없는 `required`는 허용되지 않으며 `isRequired?: boolean`으로 변경해야 한다."
+    },
+    {
+      "rule": "rules/conventions.md:CONV1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list-header.tsx",
+      "line": 75,
+      "detail": "신규 파일에서 GridColumn의 `col.required`를 그대로 참조. CONV1 위반 필드명이 새 코드 전체에 전파됨. `isRequired`로 통일 수정 필요."
+    },
+    {
+      "rule": "rules/conventions.md:CONV1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "line": 131,
+      "detail": "신규 파일에서 `c.required`(line 131), `!c.required`(line 161), `col?.required`(line 176) 세 곳이 동일하게 CONV1 위반 필드명을 참조. `isRequired`로 통일 수정 필요."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "issue": "line 6에서 `GridColumn` 타입을 `@/components/shared/grid-list`(adapter/in 레이어)로부터 `import type`으로 가져옴. `lib/`(application 레이어)가 `components/`(adapter 레이어) 타입을 직접 참조하는 방향으로, ARCH6이 완화하더라도 타입 소유권 측면에서 바람직하지 않음.",
+      "proposal": "`GridColumn` 인터페이스를 `src/lib/types.ts` 같은 공유 타입 파일로 이동하고, `grid-list.tsx`와 `use-column-layout.ts` 양쪽이 거기서 import하도록 변경."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list-header.tsx",
+      "issue": "`handleResizePointerDown`(line 44)에서 `pointermove`/`pointerup` 리스너를 추가하지만 `pointercancel`을 처리하지 않음. 포인터가 취소(OS 제스처 인터럽트, 브라우저 focus 이동 등)되면 `pointerup` 대신 `pointercancel`이 발생하고 리스너가 누적됨.",
+      "proposal": "`onPointerUp` 핸들러를 `pointercancel` 이벤트에도 동시 등록: `target.addEventListener('pointercancel', onPointerUp)`."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/house-bl-list-grid.tsx",
+      "issue": "`columns` 배열이 컴포넌트 바디 안에 정의되어 리렌더마다 새 참조로 교체됨. `ColumnVisibilityMenu`와 `GridList` 양쪽에 `defaultColumns`로 전달되어 `useColumnLayout` reconciliation 로직이 매 렌더마다 재실행되고, 같은 패턴이 master-bl-grid.tsx / non-bl-grid.tsx / truck-bl-grid.tsx에도 반복됨.",
+      "proposal": "render 간에 변하지 않는 정적 컬럼 정의는 컴포넌트 외부 모듈 레벨 상수로 올리거나, 클로저가 필요한 경우 `useMemo`로 메모이제이션."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlTruck.java",
+      "issue": "필드 선언 시 `private String vesselName = \"TRUCK\"`(line 21)으로 이미 초기화됐음에도 `create()` 메서드(line 36)에서 `entity.vesselName = \"TRUCK\"`을 재할당.",
+      "proposal": "`create()` 내부의 `entity.vesselName = \"TRUCK\";` 라인 제거."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:33:17",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 414414,
+  "summary": "컬럼 resize/reorder/hide 커스터마이징 신규 기능은 아키텍처 경계·훅 패턴·Boolean 명명이 모두 규칙에 부합함. 그러나 변경 파일 freight-panels.tsx의 FreightSellingPanel·FreightBuyingPanel이 rowKey로 인덱스를 명시적으로 사용하면서 A5 예외 조건(주석 필수)을 충족하지 않아 REJECTED.",
+  "violations": [
+    {
+      "rule": "ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "line": 195,
+      "detail": "FreightSellingPanel의 rowKey={(_, i) => i}가 인덱스를 React key로 사용하며, A5 예외 조건(영구 불변 + 주석 필수) 중 주석이 없음. GridList 내부 rowIndex 폴백에는 동일 커밋(47ca9a6)에서 예외 주석이 추가됐으나 이 호출부는 누락됨. + 버튼 존재로 향후 행 추가 가능성이 있어 reconciliation 오류 위험이 남아 있음."
+    },
+    {
+      "rule": "ai_specific.md:A5",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "line": 210,
+      "detail": "FreightBuyingPanel의 rowKey={(_, i) => i}가 동일하게 인덱스를 React key로 사용하며 예외 주석이 없음. rateRows는 현재 모듈 상수이나 코드 중에 + 버튼이 존재해 영구 불변 보장이 깨질 수 있음."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "issue": "SELLING_COLS와 BUYING_COLS 10개 컬럼 중 8개가 동일(A6). sell/buy 키 차이만 있으나 별도 배열로 복붙되어 있음.",
+      "proposal": "공통 컬럼을 baseRateCols(rateKey: 'sell' | 'buy') 팩토리로 추출하고, SELLING_COLS = baseRateCols('sell'), BUYING_COLS = baseRateCols('buy') 형태로 통합."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "issue": "Zustand store의 resize, hide, show 메서드가 const prefs = s.layouts[gridId] ?? {...}; return { layouts: {...s.layouts, [gridId]: {...prefs, ...}} } 패턴을 각각 반복(A6 경계).",
+      "proposal": "helper: (s: State, gridId: string, patch: Partial<ColumnPrefs>) => ({ layouts: {...s.layouts, [gridId]: {...(s.layouts[gridId] ?? DEFAULT_PREFS), ...patch}} })를 store 내부에 추출하면 중복 줄임. 단 reorder/reset은 로직 차이가 있어 별도 유지."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlTruck.java",
+      "issue": "create() 내부 entity.vesselName = \"TRUCK\" (L35)이 필드 초기화식 private String vesselName = \"TRUCK\" (L21)과 중복 할당.",
+      "proposal": "create() 에서 entity.vesselName 재할당 제거. 필드 초기화식이 보증을 담당하므로 불필요한 구문."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:52:27",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 272719,
+  "summary": "백엔드 레이어 경계(ARCH1)·정확성(C1–C7)·AI 안티패턴은 모두 양호. 프론트엔드 신규 추가 모의 데이터 배열 4개(rateRows, accountRows, licenseRows, coLoadRows)가 동일 파일 내 다른 UPPER_SNAKE_CASE 상수와 혼용되어 CONV3를 위반함.",
+  "violations": [
+    {
+      "rule": "conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "line": 76,
+      "detail": "모듈 레벨 불변 배열 상수 `rateRows`가 camelCase 사용 — UPPER_SNAKE_CASE 필요. 동일 파일 내 SELLING_COLS·BUYING_COLS·CUSTOMER_ITEMS 등은 이미 UPPER_SNAKE_CASE 적용 중이어서 혼용 상태임. `RATE_ROWS`로 변경할 것."
+    },
+    {
+      "rule": "conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "line": 85,
+      "detail": "모듈 레벨 불변 배열 상수 `accountRows`가 camelCase 사용 — UPPER_SNAKE_CASE 필요. `ACCOUNT_ROWS`로 변경할 것."
+    },
+    {
+      "rule": "conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/edi-tab.tsx",
+      "line": 11,
+      "detail": "모듈 레벨 불변 배열 상수 `licenseRows`가 camelCase 사용 — `LICENSE_ROWS`로 변경할 것."
+    },
+    {
+      "rule": "conventions.md:CONV3",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/other-tab.tsx",
+      "line": 8,
+      "detail": "모듈 레벨 불변 배열 상수 `coLoadRows`가 camelCase 사용 — `CO_LOAD_ROWS`로 변경할 것."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "issue": "SELLING_COLS와 BUYING_COLS가 `sell`/`buy` 키 하나만 다른 거의 동일한 구조(각 10개 항목 중 3개 차이). 현재 2개여서 A6 임계값(3+) 미달이나, 열 사양 변경 시 양쪽을 동시에 수정해야 하는 유지비용이 발생.",
+      "proposal": "`createRateCols(rateKey: 'sell' | 'buy'): GridColumn<RateRow>[]` 팩토리 함수로 통합하여 `_amt`·`_krw` 렌더러 내부의 `row.sell` / `row.buy` 참조도 동적으로 처리."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlPersistenceAdapter.java",
+      "issue": "save() L116-118에서 저장 직후 `findById`로 무조건 재조회하여 모든 저장마다 추가 SELECT 쿼리가 발생함.",
+      "proposal": "재조회 목적이 extension lazy 필드 초기화라면, SEA 케이스(컨테이너 포함)에만 한정하거나 `savedJpa`를 직접 `toDomain`에 전달 후 extension을 별도 로드하는 방식으로 불필요한 재조회를 줄일 것."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T22:59:46",
+  "verdict": "REJECTED",
+  "severity": "medium",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 265228,
+  "summary": "HouseBlMapper.applyCommonFields의 instanceof 분기에 else-throw가 없어 미등록 서브타입 입력 시 jobDiv가 null로 저장되는 묵시적 실패 경로가 존재한다. 프론트엔드(컬럼 리사이즈·재정렬·숨김·복원 기능)는 규칙 위반 없이 구현됐다.",
+  "violations": [
+    {
+      "rule": "ai_specific.md:A1",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "line": 129,
+      "detail": "applyCommonFields의 instanceof 분기(L129-132)에 else 절이 없어, 등록되지 않은 HouseBl 서브클래스가 인자로 들어오면 jobDiv가 세팅되지 않고 null인 채로 JPA 엔티티가 저장되는 조용한 실패 경로가 존재한다."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/adapter/out/persistence/housebl/HouseBlMapper.java",
+      "issue": "instanceof 분기 L129-132 는 exhaustive 보장이 없다. toDomain은 JobDiv enum switch 로 컴파일 타임 완전성을 보장하는 반면, applyCommonFields 역방향 경로는 그렇지 않다.",
+      "proposal": "분기 끝에 else { throw new IllegalStateException(\"Unknown HouseBl subtype: \" + domain.getClass().getSimpleName()); } 를 추가하거나, Java 21 sealed interface + pattern switch 로 교체해 컴파일러가 exhaustiveness를 강제하도록 한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/shared/grid-list.tsx",
+      "issue": "ManagedGridList와 PlainGridList가 colgroup·tbody·cell 렌더링 약 50줄을 그대로 복제하고 있다. 유일한 차이는 컬럼 소스(useColumnLayout 훅 vs 직접 prop)뿐이다.",
+      "proposal": "공유 렌더 로직을 내부 함수 renderGridBody(columns, data, rowKey, rowClassName, onRowClick) 또는 <GridBody> 서브컴포넌트로 추출하고, ManagedGridList/PlainGridList는 컬럼 소스만 다르게 준비한 뒤 공통 렌더러를 호출한다."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "issue": "SELLING_COLS와 BUYING_COLS가 10개 컬럼 정의 중 key('sell'/'buy')와 render 내 참조 필드만 다르고 나머지 8개 컬럼은 동일한 복사본이다.",
+      "proposal": "buildRateColumns(rateKey: 'sell' | 'buy'): GridColumn<RateRow>[] 팩토리 함수를 만들고 SELLING_COLS = buildRateColumns('sell'), BUYING_COLS = buildRateColumns('buy') 로 교체한다."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T23:04:53",
+  "verdict": "REJECTED",
+  "severity": "low",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 355335,
+  "summary": "전반적으로 헥사고널 경계·네이밍 컨벤션·React 정확성 규칙을 잘 준수하고 있음. house-bl-list-grid.tsx의 TODO 주석에 작성자가 누락된 단일 A11 위반이 존재하며, 신규 컬럼 커스터마이징 스토어에 dead code 정리가 필요함.",
+  "violations": [
+    {
+      "rule": "rules/ai_specific.md:A11",
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/house-bl-list-grid.tsx",
+      "line": 29,
+      "detail": "// TODO(2026-04-27): 실제 ID 기반 라우팅으로 교체 — 날짜만 있고 작성자가 없음. A11은 이슈 번호, 작성자+날짜, 조건 중 하나를 요구하며 날짜 단독은 '작성자/날짜' 패턴을 충족하지 않음."
+    }
+  ],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/lib/use-column-layout.ts",
+      "issue": "store 내 reorder 액션(L41-54)이 dead code임. 내보내진 useColumnLayout 훅의 reorderColumn은 store.reorder를 호출하지 않고 store.setOrder를 직접 호출함. reorder는 또한 prefs.order가 빈 초기 상태일 때 조용히 no-op하는 잠재적 버그를 내포함.",
+      "proposal": "store.reorder 액션을 제거하거나, reorderColumn이 store.reorder를 호출하도록 변경. 후자 선택 시 초기 빈 order 문제를 reconciledOrder로 대체 처리해야 함."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "issue": "SELLING_COLS(L22-41)와 BUYING_COLS(L44-63)가 sell/buy 키 하나만 다른 near-duplicate. A6 임계(3개)에는 미달하나 rate key·derived cell(Amount, KRW Equiv.)이 모두 중복되어 향후 유지보수 비용이 높음.",
+      "proposal": "buildRateCols(rateKey: 'sell' | 'buy'): GridColumn<RateRow>[] 팩토리 함수로 추출하고, SELLING_COLS = buildRateCols('sell'), BUYING_COLS = buildRateCols('buy')로 선언."
+    }
+  ]
+}
+{
+  "timestamp": "2026-04-27T23:16:37",
+  "verdict": "APPROVED",
+  "severity": "low",
+  "model": "claude-sonnet-4-6",
+  "duration_ms": 284176,
+  "summary": "백엔드에서 HouseBl 서브타입 else-throw 가드 추가·lambda effectively-final 수정·JPA 기본 생성자 접근 수준 정정, 프론트엔드에서 컬럼 리사이즈/재정렬/숨김 기능이 헥사고널 경계·명명 규칙(CONV1-4)·React 정확성(C6·A5) 모두 준수하여 규칙 위반은 발견되지 않음. 프리이트 패널 컬럼 정의 복붙과 도메인 엔티티 중복 초기화는 제거 권장.",
+  "violations": [],
+  "suggestions": [
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/front-end/src/components/fms/house-bl/tabs/sections/freight-panels.tsx",
+      "issue": "SELLING_COLS(L22-41)와 BUYING_COLS(L44-63)가 key: 'sell' vs 'buy' 한 곳만 다른 10-컬럼 배열로 복붙 중. A6 기준(3개 이상 함수)에는 미달이지만, 향후 컬럼 변경 시 두 배열을 동시에 수정해야 하는 유지보수 부채가 존재.",
+      "proposal": "makeRateCols(rateKey: 'sell' | 'buy'): GridColumn<RateRow>[] 팩토리 함수를 추출하고, SELLING_COLS = makeRateCols('sell'), BUYING_COLS = makeRateCols('buy')로 교체."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/housebl/entity/HouseBlTruck.java",
+      "issue": "vesselName 필드가 선언 시 = \"TRUCK\"(L21)으로 초기화되고, create() 팩토리 메서드에서 entity.vesselName = \"TRUCK\"(L37)으로 중복 초기화됨.",
+      "proposal": "create() 내부의 entity.vesselName = \"TRUCK\" 라인 제거. 필드 기본값 선언만으로 충분."
+    },
+    {
+      "file": "/c/vive-coding/portfolio-legacy-to-next/legacy-to-next/back-end/java-spring/src/main/java/com/freightos/fms/domain/masterbl/entity/MasterBl.java",
+      "issue": "updateCargoSummary 메서드(L88-89) 파라미터가 java.math.BigDecimal 전체 경로로 선언되어 있으나 파일 상단 L11에 이미 import java.math.BigDecimal이 존재.",
+      "proposal": "파라미터 타입을 BigDecimal로 단축."
+    }
+  ]
+}

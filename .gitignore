@@ -10,6 +10,7 @@
 .claude/.task_queue
 .claude/worktrees/
 .claude/settings.local.json
+.claude/slack_notify.sh
 
 # Gradle
 .gradle/
