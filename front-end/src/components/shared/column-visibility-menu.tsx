@@ -43,7 +43,7 @@ export function ColumnVisibilityMenu<T>({
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, [open]);
+  }, [isOpen]);
 
   return (
     <span style={{ position: "relative", display: "inline-flex" }}>
