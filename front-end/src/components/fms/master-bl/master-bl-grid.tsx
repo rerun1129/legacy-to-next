@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Mode } from "@/lib/bl-variants";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 
 function selectActiveColumns<T>(mode: Mode, seaColumns: T[], airColumns: T[]): T[] {
@@ -65,6 +66,7 @@ export function MasterBlGrid({ variantKey, mode }: Props) {
         <div className="panel__title-accent" />
         <span className="panel__title">Master B/L</span>
         <span className="panel__rowcount">{rows.length}</span>
+        <ColumnVisibilityMenu<MblRow> gridId="master-bl" defaultColumns={activeColumns} />
       </div>
       <div className="list-wrap">
         <GridList<MblRow>
@@ -73,6 +75,7 @@ export function MasterBlGrid({ variantKey, mode }: Props) {
           onRowClick={(row) => setSelected(row.mbl)}
           rowKey={(row) => row.mbl}
           rowClassName={(row) => (selected === row.mbl ? "is-selected" : undefined)}
+          gridId="master-bl"
         />
       </div>
     </div>

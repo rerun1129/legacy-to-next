@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { HOUSE_BL_ROWS } from "@/lib/mock-data";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
 type HouseBLRow = (typeof HOUSE_BL_ROWS)[number];
 
@@ -96,6 +97,7 @@ export function HouseBLListGrid({ variantKey }: Props) {
           House B/L
           <span className="panel__rowcount">{HOUSE_BL_ROWS.length}</span>
         </div>
+        <ColumnVisibilityMenu<HouseBLRow> gridId="house-bl-list" defaultColumns={columns} />
       </div>
 
       <div className="panel__body panel__body--flush" style={{ flex: 1, minHeight: 0, display: "flex" }}>
@@ -106,6 +108,7 @@ export function HouseBLListGrid({ variantKey }: Props) {
             rowKey={(row) => row.no}
             onRowClick={(row) => setSelected(row.no)}
             rowClassName={(row) => selected === row.no ? "is-selected" : undefined}
+            gridId="house-bl-list"
           />
         </div>
       </div>

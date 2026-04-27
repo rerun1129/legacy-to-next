@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
 const ROWS = [
   { tbl: "TRUCK-2026-04-001", status: "배차완료", cust: "한진무역(주)", shipper: "한진무역(주)", cons: "서울물류센터", etd: "04/24", eta: "04/25", pol: "KRBSAN", pod: "KRSEL", pickup: "04/23", trucker: "(주)부산트럭", op: "KYS" },
@@ -65,6 +66,7 @@ export function TruckBlGrid() {
         <div className="panel__title-accent" />
         <span className="panel__title">Truck B/L</span>
         <span className="panel__rowcount">{ROWS.length}</span>
+        <ColumnVisibilityMenu<TruckBlRow> gridId="truck-bl" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
         <GridList<TruckBlRow>
@@ -73,6 +75,7 @@ export function TruckBlGrid() {
           onRowClick={(row) => setSelected(row.tbl)}
           rowKey={(row) => row.tbl}
           rowClassName={(row) => (selected === row.tbl ? "is-selected" : undefined)}
+          gridId="truck-bl"
         />
       </div>
     </div>
