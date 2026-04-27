@@ -18,6 +18,11 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlContainerJpaEntity extends BaseJpaEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "house_bl_container_id", updatable = false, nullable = false)
+    private Long houseBlContainerId;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_id", nullable = false)
     private HouseBlJpaEntity houseBl;
@@ -71,6 +76,7 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
         return c;
     }
 
+    public void setHouseBlContainerId(Long id) { this.houseBlContainerId = id; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setContainerNo(String v) { this.containerNo = v; }
     public void setContainerType(String v) { this.containerType = v; }
