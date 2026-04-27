@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GripHorizontal, X, Plus, Trash2 } from "lucide-react";
 import { useWidgetLayout }  from "@/lib/use-widget-layout";
 import { useCurrentUser }   from "@/lib/use-current-user";
@@ -43,7 +43,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = tr
   const { editMode }      = useWidgetLayout();
   const { currentUserId } = useCurrentUser();
   const fullScope         = `${currentUserId}.${itemScope}`;
-  const defaultOrder      = items.map(i => i.key);
+  const defaultOrder      = useMemo(() => items.map(i => i.key), [items]);
 
   const {
     getFieldLayout, initFieldLayout, initItemRows,
@@ -53,11 +53,11 @@ export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = tr
 
   useEffect(() => {
     initFieldLayout(fullScope, defaultOrder);
-  }, [fullScope]); // eslint-disable-line
+  }, [fullScope, defaultOrder, initFieldLayout]);
 
   useEffect(() => {
     initItemRows(fullScope, defaultOrder, cols);
-  }, [fullScope]); // eslint-disable-line
+  }, [fullScope, defaultOrder, cols, initItemRows]);
 
   const layout    = getFieldLayout(fullScope, defaultOrder);
   const rowModes  = layout.rowModes  ?? {};
