@@ -9,8 +9,13 @@ export interface FieldLayout {
   rowModes?:  Record<number, "full" | "split">;
   splitCols?: Record<number, number>;
   itemRows?:  string[][];        // FieldItemGrid 전용: 명시적 행 배치
+  rowIds?:    string[];          // FieldItemGrid 전용: 행마다 stable React key
   cols?:      number;            // FieldItemGrid 전용: 행당 최대 열 수 (기본 2)
 }
+
+// 모듈-레벨 단조 증가 카운터 — stable React key 생성용 (Math.random/crypto 미사용)
+let _rowSeq = 0;
+function nextRowId() { return `r${++_rowSeq}`; }
 
 interface FieldLayoutStore {
   layouts:          Record<string, FieldLayout>;
@@ -55,9 +60,10 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         if (layout?.itemRows) return;
         const rows: string[][] = [];
         for (let i = 0; i < items.length; i += cols) rows.push(items.slice(i, i + cols));
+        const rowIds = rows.map(() => nextRowId());
         set(s => {
           const base = s.layouts[scope] ?? { order: items, hidden: [] };
-          return { layouts: { ...s.layouts, [scope]: { ...base, itemRows: rows, cols } } };
+          return { layouts: { ...s.layouts, [scope]: { ...base, itemRows: rows, rowIds, cols } } };
         });
       },
 
@@ -111,7 +117,16 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         set(s => {
           const layout = s.layouts[scope];
           if (!layout?.itemRows) return s;
-          return { layouts: { ...s.layouts, [scope]: { ...layout, itemRows: [...layout.itemRows, []] } } };
+          return {
+            layouts: {
+              ...s.layouts,
+              [scope]: {
+                ...layout,
+                itemRows: [...layout.itemRows, []],
+                rowIds:   [...(layout.rowIds ?? layout.itemRows.map(() => nextRowId())), nextRowId()],
+              },
+            },
+          };
         });
       },
 
@@ -134,10 +149,12 @@ export const useFieldLayout = create<FieldLayoutStore>()(
             if (idx === rowIdx) return;
             shiftCols[idx > rowIdx ? idx - 1 : idx] = v as 1 | 2;
           });
+          const rowIds = (layout.rowIds ?? layout.itemRows.map(() => nextRowId()))
+            .filter((_, i) => i !== rowIdx);
           return {
             layouts: {
               ...s.layouts,
-              [scope]: { ...layout, itemRows: rows, rowModes: shiftModes, splitCols: shiftCols },
+              [scope]: { ...layout, itemRows: rows, rowIds, rowModes: shiftModes, splitCols: shiftCols },
             },
           };
         });

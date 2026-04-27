@@ -62,6 +62,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = tr
   const layout    = getFieldLayout(fullScope, defaultOrder);
   const rowModes  = layout.rowModes  ?? {};
   const splitCols = layout.splitCols ?? {};
+  const rowIds    = layout.rowIds    ?? [];
   const itemRows  = layout.itemRows  ?? (() => {
     const rows: string[][] = [];
     for (let i = 0; i < defaultOrder.length; i += cols) rows.push(defaultOrder.slice(i, i + cols));
@@ -169,7 +170,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, showRowControls = tr
         }
 
         return (
-          <div key={keys.length > 0 ? keys.join('|') : `empty-row-${rowIdx}`} style={{ marginBottom: 2 }}>
+          <div key={rowIds[rowIdx] ?? keys.join('|')} style={{ marginBottom: 2 }}>
             {/* 행 컨트롤 바 */}
             {editMode && (
               <div className="field-item-row-bar">

@@ -189,6 +189,7 @@ public class HouseBlMapper {
         if (domain.getId() != null) {
             jpa.setId(domain.getId());
         }
+        jpa.setBound(domain.getBound());
         jpa.setHblNo(domain.getHblNo());
         jpa.setPolCode(domain.getPolCode());
         jpa.setPodCode(domain.getPodCode());
