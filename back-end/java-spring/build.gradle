@@ -1,7 +1,7 @@
 plugins {
     id 'java'
-    // PRD 스펙: Spring Boot 4.0.x (Spring Framework 7).
-    // 4.0 GA 확인 후 버전 업그레이드. 현재는 최신 안정 3.4.x 사용.
+    // PRD 스펙: Spring Boot 4.0.x (Spring Framework 7). TODO (2026-04-27): 4.0 GA 확인 후 버전 업그레이드.
+    // 현재는 최신 안정 3.4.x 사용.
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
 }

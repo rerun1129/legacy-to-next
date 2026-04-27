@@ -1,9 +1,10 @@
 package com.freightos.fms.application.housebl;
 
-import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.model.PageRequest;
+import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
-import com.freightos.fms.domain.housebl.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import org.junit.jupiter.api.DisplayName;
@@ -12,10 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,18 +34,19 @@ class HouseBlServiceTest {
     private HouseBlService houseBlService;
 
     @Test
-    @DisplayName("list - jobDiv+bound 조건으로 port 위임 후 DTO 변환")
+    @DisplayName("list - jobDiv+bound 조건으로 port 위임 후 PagedResult 반환")
     void list_delegatesToPort() {
-        Pageable pageable = PageRequest.of(0, 50);
+        PageRequest pageRequest = PageRequest.of(0, 50);
         HouseBl mockEntity = mock(HouseBl.class);
-        Page<HouseBl> portResult = new PageImpl<>(List.of(mockEntity));
-        given(houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageable))
+        PagedResult<HouseBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
+        given(houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageRequest))
                 .willReturn(portResult);
 
-        Page<HouseBlSummaryResponse> result = houseBlService.list(JobDiv.SEA, Bound.EXP, pageable);
+        PagedResult<HouseBl> result = houseBlService.list(JobDiv.SEA, Bound.EXP, pageRequest);
 
-        assertThat(result).hasSize(1);
-        then(houseBlPort).should().findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageable);
+        assertThat(result.getContent()).hasSize(1);
+        then(houseBlPort).should()
+                .findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageRequest);
     }
 
     @Test
