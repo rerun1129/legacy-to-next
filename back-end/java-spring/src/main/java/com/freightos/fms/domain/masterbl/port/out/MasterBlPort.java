@@ -6,10 +6,9 @@ import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface MasterBlPort {
-    Optional<MasterBl> findById(UUID id);
+    Optional<MasterBl> findById(Long id);
     PagedResult<MasterBl> findAllByBound(Bound bound, PageRequest pageRequest);
     Optional<MasterBl> findByMblNo(String mblNo);
     boolean existsByMblNo(String mblNo);
