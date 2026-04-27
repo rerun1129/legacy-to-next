@@ -17,4 +17,17 @@ public abstract class BaseEntity {
     private LocalDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
+
+    /**
+     * 매퍼가 JPA→Domain 변환 시 식별자 및 감사 필드를 주입할 때 사용한다.
+     * 도메인 외부(어댑터 계층)에서만 호출해야 한다.
+     */
+    public void assignIdentity(UUID id, LocalDateTime createdAt, LocalDateTime updatedAt,
+                               String createdBy, String updatedBy) {
+        this.id        = id;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+    }
 }

@@ -55,6 +55,8 @@ public class HouseBlMapper {
     }
 
     private void copyBaseFields(HouseBlJpaEntity jpa, HouseBl domain) {
+        domain.assignIdentity(jpa.getId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignHblNo(jpa.getHblNo());
         domain.updateSchedule(jpa.getPolCode(), jpa.getPodCode(), jpa.getEtd(), jpa.getEta());
         domain.assignOperator(jpa.getActualCustomerCode(), jpa.getOperatorCode(),
@@ -184,6 +186,9 @@ public class HouseBlMapper {
     }
 
     private void applyBaseFields(HouseBl domain, HouseBlJpaEntity jpa) {
+        if (domain.getId() != null) {
+            jpa.setId(domain.getId());
+        }
         jpa.setHblNo(domain.getHblNo());
         jpa.setPolCode(domain.getPolCode());
         jpa.setPodCode(domain.getPodCode());

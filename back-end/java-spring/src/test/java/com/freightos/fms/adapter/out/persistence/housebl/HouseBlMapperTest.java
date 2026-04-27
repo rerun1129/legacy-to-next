@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -99,7 +101,11 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("항공 JPA→Domain 변환: 공통 기본 필드(shipperCode, pkgQty 등)도 복사된다")
     void toDomain_airJpa_baseFieldsAreMapped() {
+        UUID expectedId = UUID.randomUUID();
+        LocalDateTime now = LocalDateTime.of(2024, 6, 1, 12, 0);
+
         HouseBlAirJpaEntity jpa = new HouseBlAirJpaEntity();
+        jpa.setId(expectedId);
         jpa.setBound(Bound.IMP);
         jpa.setHblNo("HBL-001");
         jpa.setShipperCode("SHIPPER01");
@@ -109,11 +115,28 @@ class HouseBlMapperTest {
 
         HouseBlAir domain = (HouseBlAir) mapper.toDomain(jpa);
 
+        assertThat(domain.getId()).isEqualTo(expectedId);
         assertThat(domain.getHblNo()).isEqualTo("HBL-001");
         assertThat(domain.getShipperCode()).isEqualTo("SHIPPER01");
         assertThat(domain.getConsigneeCode()).isEqualTo("CONSIGNEE01");
         assertThat(domain.getPkgQty()).isEqualTo(10);
         assertThat(domain.getGrossWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(250.0));
+    }
+
+    @Test
+    @DisplayName("항공 JPA→Domain 변환: assignIdentity로 id/createdAt/updatedBy 가 도메인에 주입된다")
+    void toDomain_airJpa_identityFieldsAreAssigned() {
+        UUID expectedId = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.of(2024, 1, 1, 9, 0);
+        LocalDateTime updatedAt = LocalDateTime.of(2024, 6, 1, 12, 0);
+
+        HouseBlAirJpaEntity jpa = new HouseBlAirJpaEntity();
+        jpa.setId(expectedId);
+        jpa.setBound(Bound.EXP);
+
+        HouseBlAir domain = (HouseBlAir) mapper.toDomain(jpa);
+
+        assertThat(domain.getId()).isEqualTo(expectedId);
     }
 
     @Test

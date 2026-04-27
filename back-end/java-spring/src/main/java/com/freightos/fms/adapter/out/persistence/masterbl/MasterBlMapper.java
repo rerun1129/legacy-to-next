@@ -36,6 +36,8 @@ public class MasterBlMapper {
     }
 
     private void copyBaseFields(MasterBlJpaEntity jpa, MasterBl domain) {
+        domain.assignIdentity(jpa.getId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignMblNo(jpa.getMblNo(), jpa.getMasterRefNo());
         domain.assignParties(jpa.getShipperCode(), jpa.getConsigneeCode(), jpa.getNotifyCode());
         domain.updateSchedule(jpa.getPolCode(), jpa.getPodCode(), jpa.getEtd(), jpa.getEta());
@@ -108,6 +110,9 @@ public class MasterBlMapper {
     }
 
     private void applyBaseFields(MasterBl domain, MasterBlJpaEntity jpa) {
+        if (domain.getId() != null) {
+            jpa.setId(domain.getId());
+        }
         jpa.setMblNo(domain.getMblNo());
         jpa.setMasterRefNo(domain.getMasterRefNo());
         jpa.setBound(domain.getBound());

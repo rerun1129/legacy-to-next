@@ -40,4 +40,12 @@ public abstract class BaseJpaEntity {
     @LastModifiedBy
     @Column(name = "updated_by", length = 50)
     private String updatedBy;
+
+    /**
+     * 매퍼가 Domain→JPA 변환 시 기존 엔티티의 ID를 복사할 때 사용한다.
+     * JPA @GeneratedValue 가 있으므로 신규 저장 시에는 호출하지 않는다.
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
 }

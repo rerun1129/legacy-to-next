@@ -10,8 +10,10 @@ import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/master-bl")
 @RequiredArgsConstructor
+@Validated
 public class MasterBlController {
 
     private final MasterBlUseCase masterBlUseCase;
@@ -29,8 +32,8 @@ public class MasterBlController {
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResult<MasterBlSummaryResponse>>> list(
             @RequestParam Bound bound,
-            @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestParam(defaultValue = "0")  @Min(0) int page,
+            @RequestParam(defaultValue = "50") @Min(1) int size) {
         PagedResult<MasterBl> result = masterBlUseCase.list(bound, PageRequest.of(page, size));
         List<MasterBlSummaryResponse> content = result.getContent().stream()
                 .map(MasterBlSummaryResponse::from)

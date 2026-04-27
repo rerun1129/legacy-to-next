@@ -12,8 +12,10 @@ import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/house-bl")
 @RequiredArgsConstructor
+@Validated
 public class HouseBlController {
 
     private final HouseBlUseCase houseBlUseCase;
@@ -32,8 +35,8 @@ public class HouseBlController {
     public ResponseEntity<ApiResponse<PagedResult<HouseBlSummaryResponse>>> list(
             @Parameter(description = "운송 모드") @RequestParam JobDiv jobDiv,
             @Parameter(description = "방향")     @RequestParam Bound  bound,
-            @RequestParam(defaultValue = "0")    int page,
-            @RequestParam(defaultValue = "50")   int size) {
+            @RequestParam(defaultValue = "0")  @Min(0)  int page,
+            @RequestParam(defaultValue = "50") @Min(1)  int size) {
 
         PagedResult<HouseBl> result = houseBlUseCase.list(jobDiv, bound, PageRequest.of(page, size));
         List<HouseBlSummaryResponse> content = result.getContent().stream()
