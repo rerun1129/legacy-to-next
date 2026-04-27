@@ -48,7 +48,7 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("applyCommonFields: TRUCK domain → HouseBlJpaEntity에 jobDiv=TRUCK이 세팅된다")
     void applyCommonFields_truckDomain_setsJobDivTruck() {
-        HouseBlTruck domain = HouseBlTruck.create();
+        HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
         mapper.applyCommonFields(domain, jpa);
@@ -59,7 +59,7 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("applyCommonFields: NON_BL domain → HouseBlJpaEntity에 jobDiv=NON_BL이 세팅된다")
     void applyCommonFields_nonBlDomain_setsJobDivNonBl() {
-        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA);
+        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
         mapper.applyCommonFields(domain, jpa);
@@ -86,7 +86,7 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("applyTruckFields: vesselName이 TRUCK으로 복사된다")
     void applyTruckFields_vesselNameIsTruck() {
-        HouseBlTruck domain = HouseBlTruck.create();
+        HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
         HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
 
         mapper.applyTruckFields(domain, jpa);
@@ -99,7 +99,7 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("applyNonBlFields: workDivision이 매핑된다")
     void applyNonBlFields_workDivisionIsMapped() {
-        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA);
+        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlNonBlJpaEntity jpa = new HouseBlNonBlJpaEntity();
 
         mapper.applyNonBlFields(domain, jpa);

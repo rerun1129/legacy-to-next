@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "master_bl")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class MasterBlJpaEntity extends BaseJpaEntity {
 
     @Id

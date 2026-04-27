@@ -4,6 +4,8 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
