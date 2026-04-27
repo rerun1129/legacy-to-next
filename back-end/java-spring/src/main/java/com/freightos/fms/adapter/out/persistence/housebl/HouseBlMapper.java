@@ -141,8 +141,8 @@ public class HouseBlMapper {
         jpa.setDoDate(domain.getDoDate());
         jpa.setIncoterms(domain.getIncoterms());
         jpa.setPayableAt(domain.getPayableAt());
-        jpa.setIsTriangle(domain.isIsTriangle());
-        jpa.setIsCoLoad(domain.isIsCoLoad());
+        jpa.setIsTriangle(domain.isTriangle());
+        jpa.setIsCoLoad(domain.isCoLoad());
         jpa.setMblNo(domain.getMblNo());
         return jpa;
     }

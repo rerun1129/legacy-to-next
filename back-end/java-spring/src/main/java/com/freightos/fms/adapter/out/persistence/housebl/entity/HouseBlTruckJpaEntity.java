@@ -1,7 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +16,7 @@ import java.time.LocalDate;
 @DiscriminatorValue("TRUCK")
 @PrimaryKeyJoinColumn(name = "house_bl_id")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlTruckJpaEntity extends HouseBlJpaEntity {
 
     @Column(name = "vessel_name", length = 10, nullable = false)

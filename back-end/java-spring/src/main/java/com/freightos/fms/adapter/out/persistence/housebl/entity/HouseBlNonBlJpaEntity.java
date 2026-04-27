@@ -2,7 +2,6 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 @DiscriminatorValue("NON_BL")
 @PrimaryKeyJoinColumn(name = "house_bl_id")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlNonBlJpaEntity extends HouseBlJpaEntity {
 
     @Column(name = "work_division", nullable = false, length = 15)

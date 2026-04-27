@@ -2,7 +2,6 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 @DiscriminatorValue("SEA")
 @PrimaryKeyJoinColumn(name = "house_bl_id")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlSeaJpaEntity extends HouseBlJpaEntity {
 
     @Column(name = "load_type", length = 10)

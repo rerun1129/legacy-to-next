@@ -1,7 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 @DiscriminatorValue("AIR")
 @PrimaryKeyJoinColumn(name = "master_bl_id")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class MasterBlAirJpaEntity extends MasterBlJpaEntity {
 
     @Column(name = "airline_code", length = 10)
