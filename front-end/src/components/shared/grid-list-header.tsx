@@ -72,7 +72,7 @@ function SortableTh<T>({ col, onResize, isDraggingThis }: SortableThProps<T>) {
       ref={setNodeRef}
       style={style}
       className={[
-        col.required ? "is-required" : undefined,
+        col.isRequired ? "is-required" : undefined,
         isDraggingThis ? "grid__th--dragging" : undefined,
       ]
         .filter(Boolean)

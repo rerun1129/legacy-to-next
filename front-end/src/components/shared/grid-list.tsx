@@ -10,7 +10,7 @@ export interface GridColumn<T> {
   minWidth?: number;
   width?: number;
   align?: "left" | "center" | "right";
-  required?: boolean;
+  isRequired?: boolean;
   className?: string;
   render?: (value: unknown, row: T, index: number) => React.ReactNode;
 }
@@ -133,7 +133,7 @@ function PlainGridList<T>({
                   width: col.width ?? col.minWidth,
                   textAlign: col.align,
                 }}
-                className={col.required ? "is-required" : undefined}
+                className={col.isRequired ? "is-required" : undefined}
               >
                 {col.label}
               </th>

@@ -128,7 +128,7 @@ export function useColumnLayout<T>(
 
   // required 컬럼이 hidden에 있으면 제거 (자동 복구)
   const requiredKeys = defaultColumns
-    .filter((c) => c.required)
+    .filter((c) => c.isRequired)
     .map((c) => String(c.key));
   const effectiveHidden = savedHidden.filter(
     (k) => !requiredKeys.includes(k) && defaultKeys.includes(k)
@@ -158,7 +158,7 @@ export function useColumnLayout<T>(
   // required:true 컬럼은 hiddenColumns에서 제외
   const hiddenColumns = effectiveHidden
     .map((k) => colMap.get(k))
-    .filter((c): c is GridColumn<T> => c !== undefined && !c.required);
+    .filter((c): c is GridColumn<T> => c !== undefined && !c.isRequired);
 
   return {
     visibleColumns,
@@ -173,7 +173,7 @@ export function useColumnLayout<T>(
     hideColumn: (key) => {
       const col = colMap.get(key);
       // required 컬럼은 숨김 불가
-      if (col?.required) return;
+      if (col?.isRequired) return;
       store.hide(gridId, key);
     },
     showColumn: (key) => store.show(gridId, key),

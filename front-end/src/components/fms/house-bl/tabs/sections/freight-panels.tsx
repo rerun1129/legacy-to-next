@@ -19,7 +19,7 @@ interface AccountRow {
 // ── Selling columns ────────────────────────────────────────
 const SELLING_COLS: GridColumn<RateRow>[] = [
   { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "code", label: "Charge Code", required: true,
+  { key: "code", label: "Charge Code", isRequired: true,
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
   { key: "desc", label: "Description",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
@@ -27,7 +27,7 @@ const SELLING_COLS: GridColumn<RateRow>[] = [
     render: (v) => <NumericCell defaultValue={String(v)} /> },
   { key: "unit", label: "Unit",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "sell", label: "Rate",        className: "is-num", required: true,
+  { key: "sell", label: "Rate",        className: "is-num", isRequired: true,
     render: (v) => <NumericCell defaultValue={String(v)} /> },
   { key: "_amt", label: "Amount",      className: "is-num",
     render: (_, row) => <NumericCell defaultValue={(parseFloat(row.sell) * 2).toFixed(2)} /> },
@@ -41,7 +41,7 @@ const SELLING_COLS: GridColumn<RateRow>[] = [
 // ── Buying columns ─────────────────────────────────────────
 const BUYING_COLS: GridColumn<RateRow>[] = [
   { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "code", label: "Charge Code", required: true,
+  { key: "code", label: "Charge Code", isRequired: true,
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
   { key: "desc", label: "Description",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
@@ -49,7 +49,7 @@ const BUYING_COLS: GridColumn<RateRow>[] = [
     render: (v) => <NumericCell defaultValue={String(v)} /> },
   { key: "unit", label: "Unit",
     render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "buy",  label: "Rate",        className: "is-num", required: true,
+  { key: "buy",  label: "Rate",        className: "is-num", isRequired: true,
     render: (v) => <NumericCell defaultValue={String(v)} /> },
   { key: "_amt", label: "Amount",      className: "is-num",
     render: (_, row) => <NumericCell defaultValue={(parseFloat(row.buy) * 2).toFixed(2)} /> },
