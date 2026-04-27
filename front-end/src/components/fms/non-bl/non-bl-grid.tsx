@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
 const ROWS = [
   { nbl: "NBL-2026-04-001", div: "Sea",       status: "처리중", cust: "한진무역(주)", sh: "한진무역(주)", cn: "SHANGHAI CO.",    etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", ref: "HBLKR24041956",  op: "KYS" },
@@ -71,6 +72,7 @@ export function NonBlGrid() {
         <div className="panel__title-accent" />
         <span className="panel__title">Non B/L</span>
         <span className="panel__rowcount">{ROWS.length}</span>
+        <ColumnVisibilityMenu<NonBlRow> gridId="non-bl" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
         <GridList<NonBlRow>
@@ -79,6 +81,7 @@ export function NonBlGrid() {
           onRowClick={(row) => setSelected(row.nbl)}
           rowKey={(row) => row.nbl}
           rowClassName={(row) => (selected === row.nbl ? "is-selected" : undefined)}
+          gridId="non-bl"
         />
       </div>
     </div>
