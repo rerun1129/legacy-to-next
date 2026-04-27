@@ -74,47 +74,47 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             parentJpa = new HouseBlJpaEntity();
         }
         houseBlMapper.applyCommonFields(domain, parentJpa);
-        parentJpa = houseBlRepository.save(parentJpa);
+        final HouseBlJpaEntity savedJpa = houseBlRepository.save(parentJpa);
 
         // extension 엔티티 save/update
         if (domain instanceof HouseBlSea sea) {
             HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository
-                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
                     .orElseGet(HouseBlSeaJpaEntity::new);
-            seaJpa.setHouseBl(parentJpa);
+            seaJpa.setHouseBl(savedJpa);
             houseBlMapper.applySeaFields(sea, seaJpa);
             // 컨테이너 동기화 (SEA 전용)
             List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream()
-                    .map(c -> houseBlMapper.toContainerJpa(c, parentJpa))
+                    .map(c -> houseBlMapper.toContainerJpa(c, savedJpa))
                     .toList();
-            parentJpa.syncContainers(jpaContainers);
+            savedJpa.syncContainers(jpaContainers);
             houseBlSeaRepository.save(seaJpa);
         } else if (domain instanceof HouseBlAir air) {
             HouseBlAirJpaEntity airJpa = houseBlAirRepository
-                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
                     .orElseGet(HouseBlAirJpaEntity::new);
-            airJpa.setHouseBl(parentJpa);
+            airJpa.setHouseBl(savedJpa);
             houseBlMapper.applyAirFields(air, airJpa);
             houseBlAirRepository.save(airJpa);
         } else if (domain instanceof HouseBlTruck truck) {
             HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository
-                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
                     .orElseGet(HouseBlTruckJpaEntity::new);
-            truckJpa.setHouseBl(parentJpa);
+            truckJpa.setHouseBl(savedJpa);
             houseBlMapper.applyTruckFields(truck, truckJpa);
             houseBlTruckRepository.save(truckJpa);
         } else if (domain instanceof HouseBlNonBl nonBl) {
             HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository
-                    .findByHouseBlHouseBlId(parentJpa.getHouseBlId())
+                    .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
                     .orElseGet(HouseBlNonBlJpaEntity::new);
-            nonBlJpa.setHouseBl(parentJpa);
+            nonBlJpa.setHouseBl(savedJpa);
             houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
             houseBlNonBlRepository.save(nonBlJpa);
         }
 
         // reload (extension lazy 포함)
-        HouseBlJpaEntity reloaded = houseBlRepository.findById(parentJpa.getHouseBlId())
-                .orElseThrow(() -> new ResourceNotFoundException("HouseBl", parentJpa.getHouseBlId()));
+        HouseBlJpaEntity reloaded = houseBlRepository.findById(savedJpa.getHouseBlId())
+                .orElseThrow(() -> new ResourceNotFoundException("HouseBl", savedJpa.getHouseBlId()));
         return houseBlMapper.toDomain(reloaded);
     }
 
