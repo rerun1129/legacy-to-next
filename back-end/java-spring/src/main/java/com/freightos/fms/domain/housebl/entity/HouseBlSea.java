@@ -69,8 +69,8 @@ public class HouseBlSea extends HouseBl {
         this.doDate        = doDate;
         this.incoterms     = incoterms;
         this.payableAt     = payableAt;
-        this.triangle      = triangle;
-        this.coLoad        = coLoad;
+        this.isTriangle    = triangle;
+        this.isCoLoad      = coLoad;
         this.mblNo         = mblNo;
         this.loadType      = loadType;
     }
