@@ -8,7 +8,7 @@ import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 
 interface Props { variant?: AnyVariantConfig }
-interface LegRow { to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
+interface LegRow { id: number; to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
 
 const LEG_COLS: GridColumn<LegRow>[] = [
   { key: "_no",       width: 32, align: "center", label: "#",        className: "row-num", render: (_, __, i) => i + 1 },
@@ -21,8 +21,8 @@ const LEG_COLS: GridColumn<LegRow>[] = [
   { key: "arrTime",   width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
 ];
 const LEG_DATA: LegRow[] = [
-  { to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
-  { to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
+  { id: 1, to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
+  { id: 2, to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
 ];
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
@@ -113,7 +113,7 @@ function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
         <>
           <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
           <div style={{ overflow: "auto" }}>
-            <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(_, i) => i} />
+            <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(row) => row.id} />
           </div>
         </>
       ),

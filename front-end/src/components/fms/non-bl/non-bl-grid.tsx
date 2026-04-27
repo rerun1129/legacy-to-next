@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 
 const ROWS = [
-  { nbl: "NBL-2026-04-001", div: "Sea",       status: "처리중", cust: "한진무역(주)", sh: "한진무역(주)", cn: "SHANGHAI CO.",    etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", ref: "HBLKR24041956",  op: "KYS" },
-  { nbl: "NBL-2026-04-002", div: "Air",       status: "완료",   cust: "LG전자(주)",  sh: "LG전자(주)",  cn: "LG JAPAN K.K.", etd: "04/22", eta: "04/23", pol: "ICN",    pod: "NRT",   ref: "HAWBKR24041002", op: "PKH" },
-  { nbl: "NBL-2026-04-003", div: "Warehouse", status: "접수",   cust: "삼성전자",    sh: "-",          cn: "-",             etd: "04/20", eta: "04/20", pol: "KRICN",  pod: "KRICN", ref: "",               op: "LJY" },
-  { nbl: "NBL-2026-04-004", div: "Trucking",  status: "접수",   cust: "포스코",      sh: "포스코",      cn: "평택항",         etd: "04/25", eta: "04/25", pol: "KRSEL",  pod: "KRPTK", ref: "",               op: "KYS" },
+  { id: 1, nbl: "NBL-2026-04-001", div: "Sea",       status: "처리중", cust: "한진무역(주)", sh: "한진무역(주)", cn: "SHANGHAI CO.",    etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", ref: "HBLKR24041956",  op: "KYS" },
+  { id: 2, nbl: "NBL-2026-04-002", div: "Air",       status: "완료",   cust: "LG전자(주)",  sh: "LG전자(주)",  cn: "LG JAPAN K.K.", etd: "04/22", eta: "04/23", pol: "ICN",    pod: "NRT",   ref: "HAWBKR24041002", op: "PKH" },
+  { id: 3, nbl: "NBL-2026-04-003", div: "Warehouse", status: "접수",   cust: "삼성전자",    sh: "-",          cn: "-",             etd: "04/20", eta: "04/20", pol: "KRICN",  pod: "KRICN", ref: "",               op: "LJY" },
+  { id: 4, nbl: "NBL-2026-04-004", div: "Trucking",  status: "접수",   cust: "포스코",      sh: "포스코",      cn: "평택항",         etd: "04/25", eta: "04/25", pol: "KRSEL",  pod: "KRPTK", ref: "",               op: "KYS" },
 ];
 
 type NonBlRow = typeof ROWS[number];
@@ -77,7 +77,7 @@ export function NonBlGrid() {
           columns={columns}
           data={ROWS}
           onRowClick={(row) => setSelected(row.nbl)}
-          rowKey={(row) => row.nbl}
+          rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.nbl ? "is-selected" : undefined)}
         />
       </div>

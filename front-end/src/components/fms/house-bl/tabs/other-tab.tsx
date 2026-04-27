@@ -1,16 +1,17 @@
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface CoLoadRow {
+  id: number;
   hblNo: string; shipper: string; consignee: string; pkg: string; gw: string; cbm: string; remark: string;
 }
 
 const coLoadRows: CoLoadRow[] = [
-  { hblNo: "HBLKR24041956", shipper: "한진무역(주)",     consignee: "SHANGHAI TRADING CO.",  pkg: "500 CTN", gw: "12,400", cbm: "22.5", remark: ""           },
-  { hblNo: "HBLKR24041901", shipper: "삼성전자(주)",     consignee: "SAMSUNG EUROPE GmbH",   pkg: "800 CTN", gw: "18,200", cbm: "65.0", remark: ""           },
-  { hblNo: "HBLKR24041877", shipper: "현대상사(주)",     consignee: "HYUNDAI TRADING USA",   pkg: "300 CTN", gw: "7,500",  cbm: "30.0", remark: ""           },
-  { hblNo: "HBLKR24041823", shipper: "엘지전자(주)",     consignee: "LG ELECTRONICS INC.",  pkg: "420 CTN", gw: "9,800",  cbm: "40.5", remark: ""           },
-  { hblNo: "HBLKR24041800", shipper: "코오롱인더스트리", consignee: "KOLON GLOBAL CORP.",    pkg: "250 CTN", gw: "5,200",  cbm: "18.0", remark: "FCL 전환 예정" },
-  { hblNo: "HBLKR24041756", shipper: "SK하이닉스(주)",  consignee: "SK HYNIX INC.",        pkg: "180 CTN", gw: "4,500",  cbm: "15.0", remark: ""           },
+  { id: 1, hblNo: "HBLKR24041956", shipper: "한진무역(주)",     consignee: "SHANGHAI TRADING CO.",  pkg: "500 CTN", gw: "12,400", cbm: "22.5", remark: ""           },
+  { id: 2, hblNo: "HBLKR24041901", shipper: "삼성전자(주)",     consignee: "SAMSUNG EUROPE GmbH",   pkg: "800 CTN", gw: "18,200", cbm: "65.0", remark: ""           },
+  { id: 3, hblNo: "HBLKR24041877", shipper: "현대상사(주)",     consignee: "HYUNDAI TRADING USA",   pkg: "300 CTN", gw: "7,500",  cbm: "30.0", remark: ""           },
+  { id: 4, hblNo: "HBLKR24041823", shipper: "엘지전자(주)",     consignee: "LG ELECTRONICS INC.",  pkg: "420 CTN", gw: "9,800",  cbm: "40.5", remark: ""           },
+  { id: 5, hblNo: "HBLKR24041800", shipper: "코오롱인더스트리", consignee: "KOLON GLOBAL CORP.",    pkg: "250 CTN", gw: "5,200",  cbm: "18.0", remark: "FCL 전환 예정" },
+  { id: 6, hblNo: "HBLKR24041756", shipper: "SK하이닉스(주)",  consignee: "SK HYNIX INC.",        pkg: "180 CTN", gw: "4,500",  cbm: "15.0", remark: ""           },
 ];
 
 const CO_LOAD_COLS: GridColumn<CoLoadRow>[] = [
@@ -87,6 +88,7 @@ export function OtherTab() {
             <GridList
               columns={CO_LOAD_COLS}
               data={coLoadRows}
+              rowKey={(row) => row.id}
             />
           </div>
         </div>

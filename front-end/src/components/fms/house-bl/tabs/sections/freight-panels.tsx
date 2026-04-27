@@ -8,11 +8,13 @@ import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-
 
 // ── Types ──────────────────────────────────────────────────
 interface RateRow {
+  id: number;
   code: string; desc: string; qty: string; unit: string;
   sell: string; buy: string; cur: string;
 }
 
 interface AccountRow {
+  id: number;
   docType: string; docNo: string; issueDate: string; amount: string; currency: string; status: string;
 }
 
@@ -72,21 +74,21 @@ const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
 
 // ── Sample data ────────────────────────────────────────────
 const rateRows: RateRow[] = [
-  { code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
-  { code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
-  { code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
-  { code: "LSF", desc: "Low Sulphur Fee",   qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
-  { code: "THC", desc: "Terminal Handling", qty: "2 CONT", unit: "CONT", sell: "95.00",  buy: "80.00",  cur: "USD" },
-  { code: "DOC", desc: "Documentation Fee", qty: "1 BL",  unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
+  { id: 1, code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
+  { id: 2, code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
+  { id: 3, code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
+  { id: 4, code: "LSF", desc: "Low Sulphur Fee",   qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
+  { id: 5, code: "THC", desc: "Terminal Handling", qty: "2 CONT", unit: "CONT", sell: "95.00",  buy: "80.00",  cur: "USD" },
+  { id: 6, code: "DOC", desc: "Documentation Fee", qty: "1 BL",  unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
 ];
 
 const accountRows: AccountRow[] = [
-  { docType: "INVOICE",     docNo: "INV-20260415", issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
-  { docType: "C/I",         docNo: "CI-20260415",  issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
-  { docType: "DEBIT NOTE",  docNo: "DN-20260420",  issueDate: "2026-04-20", amount: "1,490.00",  currency: "USD", status: "미결"    },
-  { docType: "CREDIT NOTE", docNo: "CN-20260421",  issueDate: "2026-04-21", amount: "320.00",    currency: "USD", status: "미결"    },
-  { docType: "RECEIPT",     docNo: "REC-20260423", issueDate: "2026-04-23", amount: "1,170.00",  currency: "USD", status: "수령"    },
-  { docType: "B/L COPY",   docNo: "BLC-20260424", issueDate: "2026-04-24", amount: "0.00",      currency: "USD", status: "발행완료" },
+  { id: 1, docType: "INVOICE",     docNo: "INV-20260415", issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
+  { id: 2, docType: "C/I",         docNo: "CI-20260415",  issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
+  { id: 3, docType: "DEBIT NOTE",  docNo: "DN-20260420",  issueDate: "2026-04-20", amount: "1,490.00",  currency: "USD", status: "미결"    },
+  { id: 4, docType: "CREDIT NOTE", docNo: "CN-20260421",  issueDate: "2026-04-21", amount: "320.00",    currency: "USD", status: "미결"    },
+  { id: 5, docType: "RECEIPT",     docNo: "REC-20260423", issueDate: "2026-04-23", amount: "1,170.00",  currency: "USD", status: "수령"    },
+  { id: 6, docType: "B/L COPY",   docNo: "BLC-20260424", issueDate: "2026-04-24", amount: "0.00",      currency: "USD", status: "발행완료" },
 ];
 
 // ── Rate input styles ──────────────────────────────────────
@@ -192,7 +194,7 @@ export function FreightSellingPanel() {
         <span className="panel__rowcount">{rateRows.length}</span>
         <div className="panel__actions"><button className="btn btn--sm">+</button></div>
       </div>
-      <GridList columns={SELLING_COLS} data={rateRows} rowKey={(_, i) => i} style={{ flex: 1 }} />
+      <GridList columns={SELLING_COLS} data={rateRows} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
   );
 }
@@ -207,7 +209,7 @@ export function FreightBuyingPanel() {
         <span className="panel__rowcount">{rateRows.length}</span>
         <div className="panel__actions"><button className="btn btn--sm">+</button></div>
       </div>
-      <GridList columns={BUYING_COLS} data={rateRows} rowKey={(_, i) => i} style={{ flex: 1 }} />
+      <GridList columns={BUYING_COLS} data={rateRows} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
   );
 }
@@ -222,7 +224,7 @@ export function FreightAccountPanel() {
         <span className="panel__rowcount">{accountRows.length}</span>
       </div>
       <div className="panel__body--flush">
-        <GridList columns={ACCOUNT_COLS} data={accountRows} />
+        <GridList columns={ACCOUNT_COLS} data={accountRows} rowKey={(row) => row.id} />
       </div>
     </div>
   );

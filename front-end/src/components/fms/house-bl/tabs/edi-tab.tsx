@@ -2,18 +2,19 @@ import type { BLVariantConfig } from "@/lib/bl-variants";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface LicenseRow {
+  id: number;
   exportNo: string; qty: string; unit: string; weight: string;
   symCode: string; symQty: string; symUnit: string;
   splitYn: string; seq: string; progress: string;
 }
 
 const licenseRows: LicenseRow[] = [
-  { exportNo: "22231-26-123456X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
-  { exportNo: "22231-26-123457X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
-  { exportNo: "22231-26-123458X", qty: "200", unit: "CTN", weight: "2,480", symCode: "A1", symQty: "50", symUnit: "CTN", splitYn: "Y", seq: "1", progress: "검사지정" },
-  { exportNo: "22231-26-123459X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "2", progress: "수리"     },
-  { exportNo: "22231-26-123460X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "신고수리"  },
-  { exportNo: "22231-26-123461X", qty: "200", unit: "CTN", weight: "2,480", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"      },
+  { id: 1, exportNo: "22231-26-123456X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
+  { id: 2, exportNo: "22231-26-123457X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
+  { id: 3, exportNo: "22231-26-123458X", qty: "200", unit: "CTN", weight: "2,480", symCode: "A1", symQty: "50", symUnit: "CTN", splitYn: "Y", seq: "1", progress: "검사지정" },
+  { id: 4, exportNo: "22231-26-123459X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "2", progress: "수리"     },
+  { id: 5, exportNo: "22231-26-123460X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "신고수리"  },
+  { id: 6, exportNo: "22231-26-123461X", qty: "200", unit: "CTN", weight: "2,480", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"      },
 ];
 
 const LICENSE_COLS: GridColumn<LicenseRow>[] = [
@@ -105,6 +106,7 @@ export function EdiTab({ variant }: Props) {
                   <GridList
                     columns={LICENSE_COLS}
                     data={licenseRows}
+                    rowKey={(row) => row.id}
                   />
                 </div>
               </div>
