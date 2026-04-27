@@ -12,10 +12,10 @@ function selectActiveColumns<T>(mode: Mode, seaColumns: T[], airColumns: T[]): T
 }
 
 const ROWS = [
-  { mbl: "COSCO2404195",  isSea: true,  ref: "MR-2026-04195", bkg: "BKG-COSCO-0412", vessel: "COSCO EXCELLENCE", etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", houses: 2 },
-  { mbl: "HAPAG0418011",  isSea: true,  ref: "MR-2026-04180", bkg: "BKG-HAPAG-0419", vessel: "HAPAG EXPRESS",    etd: "04/23", eta: "05/12", pol: "KRICN",  pod: "DEHAM",  houses: 1 },
-  { mbl: "180-12345678",  isSea: false, ref: "MR-2026-04195", bkg: "",                vessel: "KE851",            etd: "04/24", eta: "04/24", pol: "ICN",    pod: "PVG",    houses: 2 },
-  { mbl: "176-87654321",  isSea: false, ref: "MR-2026-04180", bkg: "",                vessel: "OZ741",            etd: "04/23", eta: "04/23", pol: "GMP",    pod: "NRT",    houses: 1 },
+  { id: 1, mbl: "COSCO2404195",  isSea: true,  ref: "MR-2026-04195", bkg: "BKG-COSCO-0412", vessel: "COSCO EXCELLENCE", etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", houses: 2 },
+  { id: 2, mbl: "HAPAG0418011",  isSea: true,  ref: "MR-2026-04180", bkg: "BKG-HAPAG-0419", vessel: "HAPAG EXPRESS",    etd: "04/23", eta: "05/12", pol: "KRICN",  pod: "DEHAM",  houses: 1 },
+  { id: 3, mbl: "180-12345678",  isSea: false, ref: "MR-2026-04195", bkg: "",                vessel: "KE851",            etd: "04/24", eta: "04/24", pol: "ICN",    pod: "PVG",    houses: 2 },
+  { id: 4, mbl: "176-87654321",  isSea: false, ref: "MR-2026-04180", bkg: "",                vessel: "OZ741",            etd: "04/23", eta: "04/23", pol: "GMP",    pod: "NRT",    houses: 1 },
 ];
 
 type MblRow = typeof ROWS[number];
@@ -73,7 +73,7 @@ export function MasterBlGrid({ variantKey, mode }: Props) {
           columns={activeColumns}
           data={rows}
           onRowClick={(row) => setSelected(row.mbl)}
-          rowKey={(row) => row.mbl}
+          rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.mbl ? "is-selected" : undefined)}
           gridId="master-bl"
         />

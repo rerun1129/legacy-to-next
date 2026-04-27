@@ -6,9 +6,9 @@ import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
 const ROWS = [
-  { tbl: "TRUCK-2026-04-001", status: "배차완료", cust: "한진무역(주)", shipper: "한진무역(주)", cons: "서울물류센터", etd: "04/24", eta: "04/25", pol: "KRBSAN", pod: "KRSEL", pickup: "04/23", trucker: "(주)부산트럭", op: "KYS" },
-  { tbl: "TRUCK-2026-04-002", status: "운송중",   cust: "LG전자(주)",  shipper: "LG전자(주)",  cons: "수원창고",    etd: "04/23", eta: "04/23", pol: "KRICN", pod: "KRSWN", pickup: "04/23", trucker: "경기운수",   op: "PKH" },
-  { tbl: "TRUCK-2026-04-003", status: "접수",     cust: "삼성전자",    shipper: "삼성전자",    cons: "평택항",      etd: "04/25", eta: "04/25", pol: "KRSEL", pod: "KRPTK", pickup: "04/25", trucker: "",          op: "LJY" },
+  { id: 1, tbl: "TRUCK-2026-04-001", status: "배차완료", cust: "한진무역(주)", shipper: "한진무역(주)", cons: "서울물류센터", etd: "04/24", eta: "04/25", pol: "KRBSAN", pod: "KRSEL", pickup: "04/23", trucker: "(주)부산트럭", op: "KYS" },
+  { id: 2, tbl: "TRUCK-2026-04-002", status: "운송중",   cust: "LG전자(주)",  shipper: "LG전자(주)",  cons: "수원창고",    etd: "04/23", eta: "04/23", pol: "KRICN", pod: "KRSWN", pickup: "04/23", trucker: "경기운수",   op: "PKH" },
+  { id: 3, tbl: "TRUCK-2026-04-003", status: "접수",     cust: "삼성전자",    shipper: "삼성전자",    cons: "평택항",      etd: "04/25", eta: "04/25", pol: "KRSEL", pod: "KRPTK", pickup: "04/25", trucker: "",          op: "LJY" },
 ];
 
 type TruckBlRow = typeof ROWS[number];
@@ -73,7 +73,7 @@ export function TruckBlGrid() {
           columns={columns}
           data={ROWS}
           onRowClick={(row) => setSelected(row.tbl)}
-          rowKey={(row) => row.tbl}
+          rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.tbl ? "is-selected" : undefined)}
           gridId="truck-bl"
         />

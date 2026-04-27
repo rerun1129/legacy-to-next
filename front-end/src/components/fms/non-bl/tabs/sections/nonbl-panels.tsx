@@ -111,10 +111,10 @@ export function NonBLSchedulePanel() {
 // ── Work Division (dynamic) ────────────────────────────────
 type WorkDiv = "Sea" | "Air" | "Warehouse" | "Trucking";
 
-interface ContainerRow { cno: string; type: string; pkg: string; gw: string; cbm: string; }
+interface ContainerRow { id: number; cno: string; type: string; pkg: string; gw: string; cbm: string; }
 const CONTAINER_ROWS: ContainerRow[] = [
-  { cno: "CSNU1234567", type: "20GP", pkg: "500 CTN", gw: "12,400", cbm: "22.5" },
-  { cno: "TCKU9876543", type: "40HC", pkg: "800 CTN", gw: "18,200", cbm: "65.0" },
+  { id: 1, cno: "CSNU1234567", type: "20GP", pkg: "500 CTN", gw: "12,400", cbm: "22.5" },
+  { id: 2, cno: "TCKU9876543", type: "40HC", pkg: "800 CTN", gw: "18,200", cbm: "65.0" },
 ];
 const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
   { key: "_no", label: "#", render: (_, __, i) => i + 1 },
@@ -137,7 +137,7 @@ export function NonBLWorkDivPanel() {
         </div>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        {workDiv === "Sea" && <GridList columns={CONTAINER_COLS} data={CONTAINER_ROWS} />}
+        {workDiv === "Sea" && <GridList columns={CONTAINER_COLS} data={CONTAINER_ROWS} rowKey={(row) => row.id} />}
         {workDiv === "Air" && (
           <div className="sched-list">
             <div className="li"><span className="li__label">Package/Unit</span>

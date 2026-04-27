@@ -105,9 +105,9 @@ export function HouseBLListGrid({ variantKey }: Props) {
           <GridList
             columns={columns}
             data={HOUSE_BL_ROWS}
-            rowKey={(row) => row.no}
-            onRowClick={(row) => setSelected(row.no)}
-            rowClassName={(row) => selected === row.no ? "is-selected" : undefined}
+            rowKey={(row) => row.id}
+            onRowClick={(row) => setSelected(row.id)}
+            rowClassName={(row) => selected === row.id ? "is-selected" : undefined}
             gridId="house-bl-list"
           />
         </div>
