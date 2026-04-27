@@ -43,7 +43,7 @@ describe("Scope 분리 회귀 — variant 별 별개 store key 생성 검증", (
   it("PartyPanel: sea-exp와 air-exp는 별개 scope key를 생성한다", () => {
     // sea-exp variant 기준 렌더 (isExp: true)
     const { unmount } = render(
-      <PartyPanel isExp={BL_VARIANTS["sea-exp"].direction === "EXP"} />
+      <PartyPanel variant={BL_VARIANTS["sea-exp"]} isExp={true} />
     );
     unmount();
     const layouts1 = useFieldLayout.getState().layouts;
@@ -51,7 +51,7 @@ describe("Scope 분리 회귀 — variant 별 별개 store key 생성 검증", (
     expect(seaExpKey).toBeDefined();
 
     // air-exp variant 기준 렌더 (isExp: true)
-    render(<PartyPanel isExp={BL_VARIANTS["air-exp"].direction === "EXP"} />);
+    render(<PartyPanel variant={BL_VARIANTS["air-exp"]} isExp={true} />);
     const layouts2 = useFieldLayout.getState().layouts;
     const airExpKey = Object.keys(layouts2).find(k => k.includes("air-exp"));
     expect(airExpKey).toBeDefined();

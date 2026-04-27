@@ -26,8 +26,7 @@ describe("패널 위젯화 회귀 — FieldWidgetList 클래스 존재 검증", 
   });
 
   it("PartyPanel with sea-exp variant renders FieldWidgetList", () => {
-    // PartyPanel의 실제 Props는 isExp: boolean
-    render(<PartyPanel isExp={BL_VARIANTS["sea-exp"].direction === "EXP"} />);
+    render(<PartyPanel variant={BL_VARIANTS["sea-exp"]} isExp={true} />);
     expect(document.querySelector(".field-widget-list")).toBeInTheDocument();
   });
 
