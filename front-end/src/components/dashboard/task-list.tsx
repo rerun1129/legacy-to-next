@@ -1,4 +1,4 @@
-import { taskData } from "@/lib/mock-data";
+import { TASK_DATA } from "@/lib/mock-data";
 
 export function TaskList() {
   return (
@@ -9,13 +9,13 @@ export function TaskList() {
           My Tasks
         </div>
         <div className="dash-panel__meta" style={{ marginLeft: "auto", fontSize: 10.5 }}>
-          {taskData.length} items
+          {TASK_DATA.length} items
         </div>
       </div>
       <div className="dash-panel__body dash-panel__body--flush">
         <div className="task-list" style={{ padding: "4px 14px" }}>
-          {taskData.map((task, i) => (
-            <div key={i} className="task">
+          {TASK_DATA.map((task) => (
+            <div key={task.ref} className="task">
               <div className={`task__pri ${task.pri}`}>{task.pri.toUpperCase()}</div>
               <div className="task__body">
                 <div className="task__title">{task.title}</div>

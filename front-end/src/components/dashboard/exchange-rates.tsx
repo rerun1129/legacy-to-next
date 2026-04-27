@@ -1,4 +1,4 @@
-import { fxData } from "@/lib/mock-data";
+import { FX_DATA } from "@/lib/mock-data";
 
 export function ExchangeRates() {
   return (
@@ -11,7 +11,7 @@ export function ExchangeRates() {
         <div className="dash-panel__meta">KRW base · Daily fix</div>
       </div>
       <div className="fx-list">
-        {fxData.map((fx) => (
+        {FX_DATA.map((fx) => (
           <div key={fx.pair} className="fx-row">
             <div className="fx-row__pair">{fx.pair.split("/")[0]}</div>
             <div>

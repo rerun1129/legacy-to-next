@@ -1,9 +1,9 @@
 "use client";
 
-import { weeklyVolumeData } from "@/lib/mock-data";
+import { WEEKLY_VOLUME_DATA } from "@/lib/mock-data";
 
 export function WeeklyVolume() {
-  const maxTotal = Math.max(...weeklyVolumeData.map((d) => d.total));
+  const maxTotal = Math.max(...WEEKLY_VOLUME_DATA.map((d) => d.total));
 
   return (
     <div className="dash-panel">
@@ -15,7 +15,7 @@ export function WeeklyVolume() {
         <div className="dash-panel__meta">Last 7 days</div>
       </div>
       <div className="wk-chart">
-        {weeklyVolumeData.map((d) => {
+        {WEEKLY_VOLUME_DATA.map((d) => {
           const height = (d.total / maxTotal) * 100;
           const fclH = (d.fcl / d.total) * height;
           const lclH = (d.lcl / d.total) * height;

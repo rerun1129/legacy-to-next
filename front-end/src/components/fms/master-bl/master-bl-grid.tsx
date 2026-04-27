@@ -23,7 +23,7 @@ interface Props { variantKey: string; mode: Mode }
 
 export function MasterBlGrid({ variantKey, mode }: Props) {
   const router = useRouter();
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const isSea = mode === "SEA";
   const modeLabels = getModeLabels(mode);
   const rows = ROWS.filter((r) => r.isSea === isSea);
@@ -70,9 +70,9 @@ export function MasterBlGrid({ variantKey, mode }: Props) {
         <GridList<MblRow>
           columns={activeColumns}
           data={rows}
-          onRowClick={(_, i) => setSelected(i)}
-          rowKey={(_, i) => i}
-          rowClassName={(_, i) => (selected === i ? "is-selected" : undefined)}
+          onRowClick={(row) => setSelected(row.mbl)}
+          rowKey={(row) => row.mbl}
+          rowClassName={(row) => (selected === row.mbl ? "is-selected" : undefined)}
         />
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useWidgetLayout }      from "@/lib/use-widget-layout";
 import { useCurrentUser }       from "@/lib/use-current-user";
 import { useFieldLayout }       from "@/lib/use-field-layout";
@@ -30,14 +30,17 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
   const { editMode }      = useWidgetLayout();
   const { currentUserId } = useCurrentUser();
   const fullScope         = `${currentUserId}.${panelScope}`;
-  const defaultOrder      = fields.map(f => f.key);
+  const defaultOrder      = useMemo(() => fields.map(f => f.key), [fields]);
 
   const { getFieldLayout, initFieldLayout, reorderFields, hideField, showField, resetFieldLayout } =
     useFieldLayout();
 
+  const initFieldLayoutRef = useRef(initFieldLayout);
+  initFieldLayoutRef.current = initFieldLayout;
+
   useEffect(() => {
-    initFieldLayout(fullScope, defaultOrder);
-  }, [fullScope]); // eslint-disable-line react-hooks/exhaustive-deps
+    initFieldLayoutRef.current(fullScope, defaultOrder);
+  }, [fullScope, defaultOrder]);
 
   const layout = getFieldLayout(fullScope, defaultOrder);
 

@@ -1,4 +1,4 @@
-import { noticeData } from "@/lib/mock-data";
+import { NOTICE_DATA } from "@/lib/mock-data";
 
 const catClass: Record<string, string> = { urgent: "urgent", update: "update", event: "event" };
 
@@ -21,8 +21,8 @@ export function Notices() {
             </tr>
           </thead>
           <tbody>
-            {noticeData.map((n, i) => (
-              <tr key={i}>
+            {NOTICE_DATA.map((n) => (
+              <tr key={n.title}>
                 <td>
                   {n.pinned && <span className="pin" style={{ marginRight: 4 }}>📌</span>}
                   <span className={`cat ${catClass[n.cat]}`}>{n.cat}</span>

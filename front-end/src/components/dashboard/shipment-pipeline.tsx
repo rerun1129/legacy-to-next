@@ -1,4 +1,4 @@
-import { pipelineData } from "@/lib/mock-data";
+import { PIPELINE_DATA } from "@/lib/mock-data";
 
 export function ShipmentPipeline() {
   return (
@@ -11,7 +11,7 @@ export function ShipmentPipeline() {
         <div className="dash-panel__meta">SEA + AIR</div>
       </div>
       <div className="pipeline">
-        {pipelineData.map((stage) => (
+        {PIPELINE_DATA.map((stage) => (
           <div key={stage.label} className={`pipe-stage ${stage.variant}`}>
             <div className="pipe-stage__label">{stage.label}</div>
             <div className="pipe-stage__count">{stage.count}</div>

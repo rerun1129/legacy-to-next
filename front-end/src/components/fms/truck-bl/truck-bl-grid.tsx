@@ -12,7 +12,7 @@ const ROWS = [
 
 type TruckBlRow = typeof ROWS[number];
 
-const statusPill: Record<string, string> = {
+const STATUS_PILL: Record<string, string> = {
   "배차완료": "pill--sent",
   "운송중":   "pill--ok",
   "접수":     "pill--draft",
@@ -20,7 +20,7 @@ const statusPill: Record<string, string> = {
 
 export function TruckBlGrid() {
   const router = useRouter();
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
 
   const columns: GridColumn<TruckBlRow>[] = [
     {
@@ -44,7 +44,7 @@ export function TruckBlGrid() {
       minWidth: 80,
       render: (v) => {
         const s = String(v ?? "");
-        return <span className={`pill ${statusPill[s] ?? ""}`}>{s}</span>;
+        return <span className={`pill ${STATUS_PILL[s] ?? ""}`}>{s}</span>;
       },
     },
     { key: "cust",    label: "Actual Customer", minWidth: 130 },
@@ -70,9 +70,9 @@ export function TruckBlGrid() {
         <GridList<TruckBlRow>
           columns={columns}
           data={ROWS}
-          onRowClick={(_, i) => setSelected(i)}
-          rowKey={(_, i) => i}
-          rowClassName={(_, i) => (selected === i ? "is-selected" : undefined)}
+          onRowClick={(row) => setSelected(row.tbl)}
+          rowKey={(row) => row.tbl}
+          rowClassName={(row) => (selected === row.tbl ? "is-selected" : undefined)}
         />
       </div>
     </div>

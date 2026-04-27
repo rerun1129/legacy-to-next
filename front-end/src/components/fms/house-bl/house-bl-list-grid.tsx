@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { houseBLRows } from "@/lib/mock-data";
+import { HOUSE_BL_ROWS } from "@/lib/mock-data";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
-type HouseBLRow = (typeof houseBLRows)[number];
+type HouseBLRow = (typeof HOUSE_BL_ROWS)[number];
 
-const statusClass: Record<string, string> = {
+const STATUS_CLASS: Record<string, string> = {
   ok:     "pill--ok",
   inprog: "pill--draft",
   draft:  "pill--hold",
 };
-const statusLabel: Record<string, string> = {
+const STATUS_LABEL: Record<string, string> = {
   ok:     "Confirmed",
   inprog: "In Progress",
   draft:  "Draft",
@@ -25,7 +25,7 @@ export function HouseBLListGrid({ variantKey }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
 
   function handleHblDoubleClick(hbl: string) {
-    // TODO: 실제 ID 기반 라우팅으로 교체 (현재는 /entry로 이동)
+    // TODO(2026-04-27): 실제 ID 기반 라우팅으로 교체 (현재는 /entry로 이동)
     router.push(`/fms/house-bl/${variantKey}/entry`);
     void hbl;
   }
@@ -70,8 +70,8 @@ export function HouseBLListGrid({ variantKey }: Props) {
       minWidth: 96,
       align: "center",
       render: (_v, row) => (
-        <span className={`pill ${statusClass[row.docStatus]}`}>
-          {statusLabel[row.docStatus]}
+        <span className={`pill ${STATUS_CLASS[row.docStatus]}`}>
+          {STATUS_LABEL[row.docStatus]}
         </span>
       ),
     },
@@ -95,7 +95,7 @@ export function HouseBLListGrid({ variantKey }: Props) {
         <div className="panel__title">
           <div className="panel__title-accent" />
           House B/L
-          <span className="panel__rowcount">{houseBLRows.length}</span>
+          <span className="panel__rowcount">{HOUSE_BL_ROWS.length}</span>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export function HouseBLListGrid({ variantKey }: Props) {
         <div className="list-wrap">
           <GridList
             columns={columns}
-            data={houseBLRows}
+            data={HOUSE_BL_ROWS}
             rowKey={(row) => row.no}
             onRowClick={(row) => setSelected(row.no)}
             rowClassName={(row) => selected === row.no ? "is-selected" : undefined}

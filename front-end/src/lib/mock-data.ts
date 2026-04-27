@@ -1,6 +1,6 @@
 // Mock data for FMS frontend
 
-export const kpiData = [
+export const KPI_DATA = [
   { label: "Active Shipments", value: "284", delta: "+12 this week", trend: "up", variant: "default" },
   { label: "ETD This Week",    value: "47",  delta: "+8 vs last wk", trend: "up", variant: "ok" },
   { label: "Docs Pending",     value: "23",  delta: "3 overdue",     trend: "down", variant: "warn" },
@@ -8,7 +8,7 @@ export const kpiData = [
   { label: "On-Time %",        value: "91.4", delta: "-0.6pp MoM",  trend: "down", variant: "neutral" },
 ];
 
-export const pipelineData = [
+export const PIPELINE_DATA = [
   { label: "Booked",  count: 84, pct: 78, variant: "default" },
   { label: "Docs",    count: 61, pct: 56, variant: "default" },
   { label: "Gate-In", count: 48, pct: 44, variant: "warn"    },
@@ -16,7 +16,7 @@ export const pipelineData = [
   { label: "Sailed",  count: 39, pct: 36, variant: "ok"      },
 ];
 
-export const weeklyVolumeData = [
+export const WEEKLY_VOLUME_DATA = [
   { label: "4/14", fcl: 42, lcl: 18, bulk: 5,  total: 65 },
   { label: "4/15", fcl: 38, lcl: 22, bulk: 3,  total: 63 },
   { label: "4/16", fcl: 51, lcl: 14, bulk: 8,  total: 73 },
@@ -26,7 +26,7 @@ export const weeklyVolumeData = [
   { label: "4/22", fcl: 47, lcl: 21, bulk: 5,  total: 73 },
 ];
 
-export const timelineData = [
+export const TIMELINE_DATA = [
   {
     dow: "MON", date: "21", mo: "APR", today: false,
     items: [
@@ -57,7 +57,7 @@ export const timelineData = [
   },
 ];
 
-export const taskData = [
+export const TASK_DATA = [
   { pri: "hi", title: "HBLKR24041801 — B/L Draft 확인 요청", ref: "HBLKR24041801", assignee: "KYS", age: "2h" },
   { pri: "hi", title: "MBLSCO240418 Master B/L 발급 승인 대기", ref: "MBLSCO240418", assignee: "LJY", age: "3h" },
   { pri: "md", title: "HBLKR24041734 S/I 미제출 — 내일 Cut-off", ref: "HBLKR24041734", assignee: "PKH", age: "5h", overdue: false },
@@ -65,7 +65,7 @@ export const taskData = [
   { pri: "lo", title: "4월 MTD 리포트 작성", ref: "-", assignee: "LJY", age: "2d" },
 ];
 
-export const noticeData = [
+export const NOTICE_DATA = [
   { pinned: true,  cat: "urgent", title: "KRBSAN 터미널 파업 예고 — 4/28-29 선적 지연 가능", date: "04/24" },
   { pinned: true,  cat: "update", title: "CMA CGM 운임 인상 공지 — 5월 1일부터 적용",       date: "04/23" },
   { pinned: false, cat: "event",  title: "[연결] 4월 결산 마감 — 4/30 18:00",               date: "04/23" },
@@ -73,7 +73,7 @@ export const noticeData = [
   { pinned: false, cat: "update", title: "항만 혼잡 서차지 개정 — USLAX / USLGB",            date: "04/21" },
 ];
 
-export const traceData = [
+export const TRACE_DATA = [
   { state: "done",    label: "Booking Confirmed",       meta: "CMA CGM GRACE / VOY 0412E", time: "04/15 14:22" },
   { state: "done",    label: "S/I Received",            meta: "EDI 315 수신 완료",           time: "04/17 09:08" },
   { state: "done",    label: "B/L Draft Approved",      meta: "담당자: 김영선",              time: "04/18 16:45" },
@@ -82,7 +82,7 @@ export const traceData = [
   { state: "future",  label: "Arrival at POD",          meta: "ETA: 05/08 CNSHA",           time: "" },
 ];
 
-export const activityData = [
+export const ACTIVITY_DATA = [
   { initials: "KY", name: "김영선", action: "updated", ref: "HBLKR24041801", detail: "B/L status → Confirmed", time: "10m" },
   { initials: "LJ", name: "이진영", action: "created",  ref: "HBLKR24041956", detail: "New House B/L", time: "28m" },
   { initials: "PK", name: "박경훈", action: "uploaded", ref: "HBLKR24041734", detail: "S/I document", time: "1h" },
@@ -90,7 +90,7 @@ export const activityData = [
   { initials: "SY", name: "서유나", action: "approved", ref: "HBLKR24041623", detail: "D/O issuance", time: "3h" },
 ];
 
-export const fxData = [
+export const FX_DATA = [
   { pair: "USD/KRW", name: "US Dollar",          rate: "1,376.50", chg: "+4.20",  dir: "up"   },
   { pair: "CNY/KRW", name: "Chinese Yuan",        rate: "189.34",  chg: "-0.82",  dir: "down" },
   { pair: "JPY/KRW", name: "Japanese Yen",        rate: "9.18",    chg: "+0.12",  dir: "up"   },
@@ -98,7 +98,7 @@ export const fxData = [
   { pair: "VND/KRW", name: "Vietnamese Dong",    rate: "0.054",   chg: "+0.001", dir: "up"   },
 ];
 
-export const shortcutData = [
+export const SHORTCUT_DATA = [
   { label: "New House B/L", hint: "⌘N", href: "/fms/house-bl/new" },
   { label: "New Master B/L", hint: "⌘M", href: "/fms/master-bl/new" },
   { label: "Cargo Trace", hint: "⌘T", href: "/dashboard" },
@@ -107,7 +107,7 @@ export const shortcutData = [
   { label: "EDMS", hint: "⌘E", href: "#" },
 ];
 
-export const holidayData = [
+export const HOLIDAY_DATA = [
   { date: "04/25", label: "Việt Nam Liberation Day", country: "VN" },
   { date: "05/01", label: "Labour Day",              country: "KR" },
   { date: "05/05", label: "Children's Day",          country: "KR" },
@@ -115,7 +115,7 @@ export const holidayData = [
 ];
 
 // House B/L list mock rows
-export const houseBLRows = [
+export const HOUSE_BL_ROWS = [
   { no: 1,  hbl: "HBLKR24041956", expImp: "EXP", docStatus: "ok",    mbl: "COSCO2404195",  sType: "FCL", lType: "CY/CY", etd: "04/24", eta: "05/08", regDate: "04/20", pol: "KRBSAN", pod: "CNSHA", vessel: "COSCO EXCELLENCE", voyage: "0412E", shipper: "한진무역(주)", consignee: "SHANGHAI TRADING CO.", },
   { no: 2,  hbl: "HBLKR24041901", expImp: "EXP", docStatus: "inprog", mbl: "HAPAG0418011", sType: "FCL", lType: "CY/CY", etd: "04/23", eta: "05/12", regDate: "04/19", pol: "KRICN", pod: "DEHAM", vessel: "HAPAG EXPRESS", voyage: "0419W", shipper: "삼성전자(주)", consignee: "SAMSUNG EUROPE GMBH", },
   { no: 3,  hbl: "HBLKR24041845", expImp: "EXP", docStatus: "ok",    mbl: "ONL240418045", sType: "LCL", lType: "CFS/CFS", etd: "04/22", eta: "04/28", regDate: "04/18", pol: "KRBSAN", pod: "JPYOK", vessel: "ONE CRANE",      voyage: "0041N", shipper: "현대상사",      consignee: "NIPPON TRADING K.K.", },
@@ -127,7 +127,7 @@ export const houseBLRows = [
 ];
 
 // Sidebar navigation structure
-export const navItems = [
+export const NAV_ITEMS = [
   {
     group: "FMS",
     items: [

@@ -1,4 +1,4 @@
-import { timelineData } from "@/lib/mock-data";
+import { TIMELINE_DATA } from "@/lib/mock-data";
 
 export function Timeline() {
   return (
@@ -11,7 +11,7 @@ export function Timeline() {
         <div className="dash-panel__meta">Next 7 days</div>
       </div>
       <div className="timeline">
-        {timelineData.map((day) => (
+        {TIMELINE_DATA.map((day) => (
           <div key={day.date} className={`tl-day${day.today ? " today" : ""}`}>
             <div className="tl-day__when">
               <div className="tl-day__dow">{day.dow}</div>
@@ -19,8 +19,8 @@ export function Timeline() {
               <div className="tl-day__mo">{day.mo}</div>
             </div>
             <div className="tl-items">
-              {day.items.map((item, i) => (
-                <div key={i} className="tl-item">
+              {day.items.map((item) => (
+                <div key={item.hbl} className="tl-item">
                   <div className={`tl-item__tag ${item.tag}`}>{item.tag.toUpperCase()}</div>
                   <div>
                     <span className="tl-item__hbl">{item.hbl}</span>

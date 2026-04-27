@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { holidayData } from "@/lib/mock-data";
+import { HOLIDAY_DATA } from "@/lib/mock-data";
 
 const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -60,7 +60,7 @@ export function HolidayCalendar() {
             const dow = i % 7;
             return (
               <div
-                key={i}
+                key={`${cell.current ? "cur" : "out"}-${i}-${cell.day}`}
                 className={[
                   "mini-cal__day",
                   !cell.current ? "other" : "",
@@ -75,8 +75,8 @@ export function HolidayCalendar() {
           })}
         </div>
         <div className="holiday-list">
-          {holidayData.map((h, i) => (
-            <div key={i} className="holiday-item">
+          {HOLIDAY_DATA.map((h) => (
+            <div key={`${h.date}-${h.country}`} className="holiday-item">
               <span className="holiday-item__date">{h.date}</span>
               <span className="holiday-item__label">{h.label}</span>
               <span className="holiday-item__country">{h.country}</span>

@@ -1,4 +1,4 @@
-import { kpiData } from "@/lib/mock-data";
+import { KPI_DATA } from "@/lib/mock-data";
 
 const variantClass: Record<string, string> = {
   default: "",
@@ -11,7 +11,7 @@ const variantClass: Record<string, string> = {
 export function KpiStrip() {
   return (
     <div className="kpi-strip">
-      {kpiData.map((kpi) => (
+      {KPI_DATA.map((kpi) => (
         <div key={kpi.label} className={`kpi ${variantClass[kpi.variant]}`}>
           <div className="kpi__label">{kpi.label}</div>
           <div className="kpi__value">{kpi.value}</div>

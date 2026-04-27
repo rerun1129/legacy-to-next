@@ -16,8 +16,7 @@ export interface WidgetProps {
 export interface WidgetDef {
   key:             string;    // 엔트리 타입별로 자유롭게 지정
   label:           string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  component:       ComponentType<any>;
+  component:       ComponentType<WidgetProps>;
   defaultPosition: Omit<WidgetPosition, "key">;
   minColSpan:      number;
   minRowSpan:      number;

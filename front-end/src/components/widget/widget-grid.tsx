@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import GridLayout, { type Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -9,6 +9,7 @@ import { useCurrentUser }  from "@/lib/use-current-user";
 import { WidgetContainer } from "./widget-container";
 import { WidgetPalette }   from "./widget-palette";
 import type { WidgetDef }  from "./widget-registry";
+import type { BLVariantConfig } from "@/lib/bl-variants";
 import { WIDGET_REGISTRY, REGISTRY_MAP as DEFAULT_MAP, getDefaultPositions as seaDefaults } from "./widget-registry";
 
 const COLS       = 6;
@@ -17,7 +18,7 @@ const GAP        = 8;
 
 interface Props {
   scope:    string;
-  variant:  unknown;           // 각 패널 컴포넌트가 자체 타입 처리
+  variant:  BLVariantConfig;
   registry: WidgetDef[];       // 엔트리 타입별 레지스트리
 }
 
@@ -54,10 +55,18 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
   const { editMode, initLayout, getLayout, moveWidget, resizeWidget, hideWidget, showWidget, resetLayout } = useWidgetLayout();
 
   const registryMap = buildRegistryMap(registry);
-  const defaults    = registry.map(d => ({ key: d.key, ...d.defaultPosition }));
+  const defaults    = useMemo(
+    () => registry.map(d => ({ key: d.key, ...d.defaultPosition })),
+    [registry]
+  );
   const layout      = getLayout(userScope, defaults);
 
-  useEffect(() => { initLayout(userScope, defaults); }, [userScope]); // eslint-disable-line
+  const initLayoutRef = useRef(initLayout);
+  initLayoutRef.current = initLayout;
+
+  useEffect(() => {
+    initLayoutRef.current(userScope, defaults);
+  }, [userScope, defaults]);
 
   const handleLayoutChange = useCallback((next: Layout) => {
     next.forEach(item => {
@@ -67,7 +76,7 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
       if (prev.col !== item.x || prev.row !== item.y) moveWidget(userScope, key, item.x, item.y);
       if (prev.colSpan !== item.w || prev.rowSpan !== item.h) resizeWidget(userScope, key, item.w, item.h);
     });
-  }, [layout.visible, moveWidget, resizeWidget, scope]); // eslint-disable-line
+  }, [layout.visible, moveWidget, resizeWidget, userScope]);
 
   if (!mounted) return <div ref={containerRef} className="widget-grid-root" />;
 
@@ -101,12 +110,10 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
             const def = registryMap[w.key];
             if (!def) return null;
             const Component = def.component;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const v = variant as any;
             return (
               <div key={w.key} style={{ display: "flex", flexDirection: "column" }}>
                 <WidgetContainer label={def.label} editMode={editMode} onHide={() => hideWidget(userScope, w.key)}>
-                  <Component variant={v} isExp={v?.direction === "EXP"} />
+                  <Component variant={variant} isExp={variant?.direction === "EXP"} />
                 </WidgetContainer>
               </div>
             );

@@ -1,4 +1,4 @@
-import { activityData } from "@/lib/mock-data";
+import { ACTIVITY_DATA } from "@/lib/mock-data";
 
 export function ActivityFeed() {
   return (
@@ -10,8 +10,8 @@ export function ActivityFeed() {
         </div>
       </div>
       <div className="activity">
-        {activityData.map((a, i) => (
-          <div key={i} className="activity__item">
+        {ACTIVITY_DATA.map((a) => (
+          <div key={`${a.ref}-${a.time}`} className="activity__item">
             <div className="activity__avatar">{a.initials}</div>
             <div className="activity__text">
               <strong>{a.name}</strong> {a.action}{" "}

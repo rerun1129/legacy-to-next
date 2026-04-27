@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { traceData } from "@/lib/mock-data";
+import { TRACE_DATA } from "@/lib/mock-data";
 
 export function CargoTrace() {
   const [query, setQuery] = useState("HBLKR24041801");
@@ -27,8 +27,8 @@ export function CargoTrace() {
         </button>
       </div>
       <div className="trace-steps">
-        {traceData.map((step, i) => (
-          <div key={i} className={`trace-step ${step.state}`}>
+        {TRACE_DATA.map((step) => (
+          <div key={step.label} className={`trace-step ${step.state}`}>
             <div className="trace-step__dot" />
             <div>
               <div className="trace-step__label">{step.label}</div>

@@ -46,7 +46,7 @@ export function MasterContainerDimPanel({ variant }: Props) {
             <thead><tr><th className="row-num">#</th><th className="is-num">Length</th><th className="is-num">Width</th><th className="is-num">Height</th><th className="is-num">Qty</th><th className="is-num">CBM</th><th className="is-num">Vol. Wt.</th></tr></thead>
             <tbody>
               {AIR_ROWS.map((r, i) => (
-                <tr key={i}>
+                <tr key={`${r.length}-${r.width}-${r.height}`}>
                   <td className="row-num">{i + 1}</td>
                   {(["length","width","height","qty","cbm","volWt"] as const).map(k => (
                     <td key={k} className="is-num"><NumericCell defaultValue={r[k]} /></td>
