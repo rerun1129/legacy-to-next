@@ -42,3 +42,7 @@ rm -f .claude/.review_skip
 ## 이후 자동 진행
 
 `/pipeline-review`와 동일한 Reviewer→QA 자동 사이클이 진행된다.
+
+- **REJECTED (blocking ≥ 1)** → exit 2 → Coder 재호출(`isolation: "worktree"`) → 재머지·재commit → `touch .claude/.review_pending` → Stop 훅 재실행 (PIPELINE.md 참조)
+- **REJECTED (blocking = 0, deferrable만)** → `.claude/deferred_review.json` 누적 → APPROVED 등가 → QA 자동 진행. 누적 임계 도달 시 메인이 QA 완료 후 사용자에게 일괄 처리 위임.
+- **APPROVED** → APPROVED_MARKER 생성·exit 2 → 메인이 `subagent_type=QA` 호출 → worktree 정리 → 사용자 보고

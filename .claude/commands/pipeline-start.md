@@ -41,6 +41,8 @@ touch .claude/.review_skip
 
 `touch .claude/.review_pending` — 이 명령을 실행하면 메인 종료 시 Stop 훅이 Reviewer를 즉시 발동시킨다.
 
+누적 모드에서는 Reviewer가 발동되지 않으므로 `.claude/deferred_review.json`에 deferrable 위반이 누적되지 않는다. `/pipeline-review` 또는 `/pipeline` 호출 시 Reviewer가 실행되어 해당 사이클에서 처음 deferrable 누적이 발생한다.
+
 ## 종료
 
 사용자에게 다음 안내 후 응답을 종료한다:
