@@ -1,0 +1,27 @@
+# Master Coding Rules
+
+사용자 검수 라운드에서 도출된 코딩 규칙을 누적 기록한다.
+
+## Adapter(in-port) 계층
+- Controller는 응답 데이터의 매핑·변환을 직접 호출하지 않는다 (`.map(Dto::from)`, `Dto.from(domain)` 금지). 도메인 → DTO 변환은 별도 어셈블러/매퍼 컴포넌트에 위임하고, 컨트롤러는 어셈블러 메서드 한 번 호출로 끝낸다.
+- URL 경로에 버전을 포함하지 않는다 (`/api/v1/...` 금지). 버저닝이 필요하면 헤더로 처리한다.
+
+## Adapter(out-port) 계층
+- Adapter는 도메인 타입 ↔ 인프라 타입 변환을 담당한다. 도메인 PageRequest → Spring Pageable 변환, 엔티티 매핑 등 인프라 특화 처리는 어댑터 책임이다.
+- 비즈니스 정책 결정(정렬 기준·방향, 필터 조건 등)은 어플리케이션 계층(서비스)이 도메인 개념으로 결정하고 포트에 전달한다. 어댑터는 그 결정을 인프라 타입(Spring Sort 등)으로 변환할 뿐이다.
+- 어플리케이션 계층은 JPA·Spring 등 인프라 세부사항을 알 필요가 없다.
+
+## 명명
+- 메서드명은 동작 + 대상 + 조건으로 구성한다. 같은 클래스·인터페이스 내에서도 대상을 생략하지 않는다.
+  - ❌ `getById`, `findAll`, `deleteById`, `list`, `search`, `process`, `handle`
+  - ✅ `getHouseBlById`, `getHouseBlsByJobDivAndBound`, `deleteHouseBlById`
+- 조회 메서드 접두어: `find`는 0..1 (없을 수 있음), `get`은 1..n (반드시 있거나 여러 개).
+
+## 가독성
+- 1회만 참조되는 지역 변수는 인라인한다.
+
+## 응답 메시지
+- 사용자 노출 문자열을 코드에 하드코딩하지 않는다. 메시지 코드(`enum`) + `MessageSource` 기반 i18n으로 처리한다.
+
+## 테스트
+- Mockito BDD 스타일에서 인터페이스 메서드명을 변경할 때 `given(port.method(` 패턴과 `then(port).should().method(` 패턴을 모두 교체한다. 한쪽만 바꾸면 컴파일 오류가 발생한다.
