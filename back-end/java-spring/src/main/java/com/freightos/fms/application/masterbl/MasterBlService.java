@@ -1,7 +1,9 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
@@ -21,21 +23,21 @@ public class MasterBlService implements MasterBlUseCase {
     private final MasterBlPort masterBlPort;
 
     @Override
-    public PagedResult<MasterBl> list(Bound bound, PageRequest pageRequest) {
-        return masterBlPort.findAllByBound(bound, pageRequest);
+    public PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest) {
+        return masterBlPort.getMasterBlsByBound(bound,
+                PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
     }
 
     @Override
-    public MasterBl getById(Long id) {
-        return masterBlPort.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MasterBl", id));
+    public MasterBl findMasterBlById(Long id) {
+        return masterBlPort.findMasterBlById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
     }
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        MasterBl entity = getById(id);
-        masterBlPort.delete(entity);
+    public void deleteMasterBlById(Long id) {
+        masterBlPort.deleteMasterBl(findMasterBlById(id));
         log.info("Deleted MasterBl id={}", id);
     }
 }

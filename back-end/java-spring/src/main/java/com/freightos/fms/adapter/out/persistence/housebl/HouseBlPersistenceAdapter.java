@@ -37,23 +37,22 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     @Override
     public PagedResult<HouseBl> findAllByJobDivAndBoundOrderByCreatedAtDesc(
             JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
-        org.springframework.data.domain.PageRequest springPage =
-                org.springframework.data.domain.PageRequest.of(
-                        pageRequest.getPage(), pageRequest.getSize(),
-                        Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<HouseBlJpaEntity> page = houseBlRepository
-                .findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound, springPage);
+        Page<HouseBlJpaEntity> page = houseBlRepository.findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound,
+                org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
+                        pageRequest.getSortBy() != null
+                                ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy())
+                                : Sort.unsorted()));
         return toPagedResult(page);
     }
 
     @Override
     public PagedResult<HouseBl> findBySchedule(JobDiv jobDiv, Bound bound, String from, String to,
                                                 PageRequest pageRequest) {
-        org.springframework.data.domain.PageRequest springPage =
-                org.springframework.data.domain.PageRequest.of(
-                        pageRequest.getPage(), pageRequest.getSize(),
-                        Sort.by(Sort.Direction.ASC, "etd"));
-        Page<HouseBlJpaEntity> page = houseBlRepository.findBySchedule(jobDiv, bound, from, to, springPage);
+        Page<HouseBlJpaEntity> page = houseBlRepository.findBySchedule(jobDiv, bound, from, to,
+                org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
+                        pageRequest.getSortBy() != null
+                                ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy())
+                                : Sort.unsorted()));
         return toPagedResult(page);
     }
 

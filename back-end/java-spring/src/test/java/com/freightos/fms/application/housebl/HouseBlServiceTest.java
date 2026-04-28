@@ -33,15 +33,15 @@ class HouseBlServiceTest {
     private HouseBlService houseBlService;
 
     @Test
-    @DisplayName("list - jobDiv+bound 조건으로 port 위임 후 PagedResult 반환")
-    void list_delegatesToPort() {
+    @DisplayName("getHouseBlsByJobDivAndBound - jobDiv+bound 조건으로 port 위임 후 PagedResult 반환")
+    void getHouseBlsByJobDivAndBound_delegatesToPort() {
         PageRequest pageRequest = PageRequest.of(0, 50);
         HouseBl mockEntity = mock(HouseBl.class);
         PagedResult<HouseBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
         given(houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageRequest))
                 .willReturn(portResult);
 
-        PagedResult<HouseBl> result = houseBlService.list(JobDiv.SEA, Bound.EXP, pageRequest);
+        PagedResult<HouseBl> result = houseBlService.getHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         then(houseBlPort).should()
@@ -49,36 +49,36 @@ class HouseBlServiceTest {
     }
 
     @Test
-    @DisplayName("getById - 존재하는 ID 조회 시 엔티티 반환")
-    void getById_existingId_returnsEntity() {
+    @DisplayName("findHouseBlById - 존재하는 ID 조회 시 엔티티 반환")
+    void findHouseBlById_existingId_returnsEntity() {
         Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
         given(houseBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 
-        HouseBl result = houseBlService.getById(id);
+        HouseBl result = houseBlService.findHouseBlById(id);
 
         assertThat(result).isEqualTo(mockEntity);
         then(houseBlPort).should().findById(id);
     }
 
     @Test
-    @DisplayName("getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
-    void getById_notFound_throwsResourceNotFoundException() {
+    @DisplayName("findHouseBlById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
+    void findHouseBlById_notFound_throwsResourceNotFoundException() {
         Long id = 999L;
         given(houseBlPort.findById(id)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> houseBlService.getById(id))
+        assertThatThrownBy(() -> houseBlService.findHouseBlById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    @DisplayName("delete - 존재하는 ID 삭제 시 port.delete 호출")
-    void delete_existingId_callsPortDelete() {
+    @DisplayName("deleteHouseBlById - 존재하는 ID 삭제 시 port.delete 호출")
+    void deleteHouseBlById_existingId_callsPortDelete() {
         Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
         given(houseBlPort.findById(id)).willReturn(Optional.of(mockEntity));
 
-        houseBlService.delete(id);
+        houseBlService.deleteHouseBlById(id);
 
         then(houseBlPort).should().findById(id);
         then(houseBlPort).should().delete(mockEntity);

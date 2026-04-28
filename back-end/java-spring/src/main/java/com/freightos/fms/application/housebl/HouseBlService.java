@@ -1,7 +1,9 @@
 package com.freightos.fms.application.housebl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
@@ -22,14 +24,15 @@ public class HouseBlService implements HouseBlUseCase {
     private final HouseBlPort houseBlPort;
 
     @Override
-    public PagedResult<HouseBl> list(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
-        return houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound, pageRequest);
+    public PagedResult<HouseBl> getHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
+        return houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound,
+                PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
     }
 
     @Override
-    public HouseBl getById(Long id) {
+    public HouseBl findHouseBlById(Long id) {
         return houseBlPort.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("HouseBl", id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
     }
 
     @Override
@@ -41,8 +44,8 @@ public class HouseBlService implements HouseBlUseCase {
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        HouseBl entity = getById(id);
+    public void deleteHouseBlById(Long id) {
+        HouseBl entity = findHouseBlById(id);
         houseBlPort.delete(entity);
         log.info("Deleted HouseBl id={}", id);
     }

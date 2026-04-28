@@ -37,12 +37,12 @@ class MasterBlServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 50);
         MasterBl mockEntity = mock(MasterBl.class);
         PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(masterBlPort.findAllByBound(Bound.EXP, pageRequest)).willReturn(expected);
+        given(masterBlPort.getMasterBlsByBound(Bound.EXP, pageRequest)).willReturn(expected);
 
-        PagedResult<MasterBl> result = masterBlService.list(Bound.EXP, pageRequest);
+        PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.EXP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
-        then(masterBlPort).should().findAllByBound(Bound.EXP, pageRequest);
+        then(masterBlPort).should().getMasterBlsByBound(Bound.EXP, pageRequest);
     }
 
     @Test
@@ -51,12 +51,12 @@ class MasterBlServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 50);
         MasterBl mockEntity = mock(MasterBl.class);
         PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(masterBlPort.findAllByBound(Bound.IMP, pageRequest)).willReturn(expected);
+        given(masterBlPort.getMasterBlsByBound(Bound.IMP, pageRequest)).willReturn(expected);
 
-        PagedResult<MasterBl> result = masterBlService.list(Bound.IMP, pageRequest);
+        PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.IMP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
-        then(masterBlPort).should().findAllByBound(Bound.IMP, pageRequest);
+        then(masterBlPort).should().getMasterBlsByBound(Bound.IMP, pageRequest);
     }
 
     @Test
@@ -64,21 +64,21 @@ class MasterBlServiceTest {
     void getById_existingId_returnsEntity() {
         Long id = 1L;
         MasterBl mockEntity = mock(MasterBl.class);
-        given(masterBlPort.findById(id)).willReturn(Optional.of(mockEntity));
+        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(mockEntity));
 
-        MasterBl result = masterBlService.getById(id);
+        MasterBl result = masterBlService.findMasterBlById(id);
 
         assertThat(result).isEqualTo(mockEntity);
-        then(masterBlPort).should().findById(id);
+        then(masterBlPort).should().findMasterBlById(id);
     }
 
     @Test
     @DisplayName("getById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
     void getById_notFound_throwsResourceNotFoundException() {
         Long id = 999L;
-        given(masterBlPort.findById(id)).willReturn(Optional.empty());
+        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> masterBlService.getById(id))
+        assertThatThrownBy(() -> masterBlService.findMasterBlById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -87,11 +87,11 @@ class MasterBlServiceTest {
     void delete_existingId_callsPortDelete() {
         Long id = 1L;
         MasterBl mockEntity = mock(MasterBl.class);
-        given(masterBlPort.findById(id)).willReturn(Optional.of(mockEntity));
+        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(mockEntity));
 
-        masterBlService.delete(id);
+        masterBlService.deleteMasterBlById(id);
 
-        then(masterBlPort).should().findById(id);
-        then(masterBlPort).should().delete(mockEntity);
+        then(masterBlPort).should().findMasterBlById(id);
+        then(masterBlPort).should().deleteMasterBl(mockEntity);
     }
 }

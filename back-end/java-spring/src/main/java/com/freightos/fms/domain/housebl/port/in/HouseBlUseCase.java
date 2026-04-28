@@ -7,8 +7,8 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 
 public interface HouseBlUseCase {
-    PagedResult<HouseBl> list(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
-    HouseBl getById(Long id);
+    PagedResult<HouseBl> getHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
+    HouseBl findHouseBlById(Long id);
     HouseBl save(HouseBl houseBl);
-    void delete(Long id);
+    void deleteHouseBlById(Long id);
 }

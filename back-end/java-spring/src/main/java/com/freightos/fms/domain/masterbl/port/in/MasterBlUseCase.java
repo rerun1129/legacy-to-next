@@ -6,7 +6,7 @@ import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 
 public interface MasterBlUseCase {
-    PagedResult<MasterBl> list(Bound bound, PageRequest pageRequest);
-    MasterBl getById(Long id);
-    void delete(Long id);
+    PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest);
+    MasterBl findMasterBlById(Long id);
+    void deleteMasterBlById(Long id);
 }

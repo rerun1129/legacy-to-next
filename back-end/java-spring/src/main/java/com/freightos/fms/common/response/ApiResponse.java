@@ -38,4 +38,8 @@ public class ApiResponse<T> {
     public static ApiResponse<Void> ok(String message) {
         return of(null, message);
     }
+
+    public static ApiResponse<Void> ok(MessageCode code) {
+        return of(null, code.message());
+    }
 }

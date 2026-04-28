@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.common.model;
 
 import java.util.List;
+import java.util.function.Function;
 
 /** 도메인 계층용 페이징 결과 모델. Spring Page에 의존하지 않는다. */
 public class PagedResult<T> {
@@ -42,5 +43,11 @@ public class PagedResult<T> {
 
     public int getSize() {
         return size;
+    }
+
+    public <R> PagedResult<R> map(Function<? super T, ? extends R> mapper) {
+        return new PagedResult<>(
+                content.stream().<R>map(mapper).toList(),
+                totalElements, totalPages, page, size);
     }
 }
