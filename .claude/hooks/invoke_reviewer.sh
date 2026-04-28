@@ -39,6 +39,8 @@ LOG_DIR="$CLAUDE_PROJECT_DIR/.claude/review_log"
 REVIEW_PENDING="$CLAUDE_PROJECT_DIR/.claude/.review_pending"
 APPROVED_MARKER="$LOG_DIR/.reviewer_approved"
 REJECT_COUNT_FILE="$LOG_DIR/.reject_count"
+DEFERRED_FILE="$CLAUDE_PROJECT_DIR/.claude/deferred_review.json"
+DEFERRED_THRESHOLD="${REVIEWER_DEFERRED_THRESHOLD:-5}"
 
 mkdir -p "$LOG_DIR"
 
@@ -156,6 +158,20 @@ $FILES_ABS
 - $CLAUDE_PROJECT_DIR/CLAUDE.md 의 규칙을 기준으로 리뷰하세요.
 - 인프라·스크립트·마이그레이션·설정 파일 등 비도메인 파일은 ARCH 규칙 적용 대상 외입니다.
 EOF
+
+# 누적된 deferrable 위반이 있으면 Reviewer에 사전 고지 (재보고·재탐색 방지)
+if [ -f "$DEFERRED_FILE" ]; then
+  _DEFERRED_COUNT=$(jq '.cycles | length' "$DEFERRED_FILE" 2>/dev/null || echo 0)
+  if [ "$_DEFERRED_COUNT" -gt 0 ]; then
+    {
+      echo ""
+      echo "## 이미 누적된 deferrable 위반 (재보고 금지)"
+      echo "다음 항목들은 사용자가 일괄 처리를 보류 중입니다. violations 배열에 다시 포함하지 마세요. 해당 파일을 Read 도구로 추가 탐색하지도 마세요. 새로 발견되는 위반만 보고하세요."
+      echo ""
+      jq -r '.cycles[].violations[] | "- [\(.rule)] \(.file):\(.line // "null") — \(.detail)"' "$DEFERRED_FILE"
+    } >> "$REQUEST_FILE"
+  fi
+fi
 
 # ─── 1차: Sonnet ───────────────────────────────────────────────────────
 RAW=$(claude -p \
@@ -277,7 +293,9 @@ _ENTRY=$(echo "$REVIEW_JSON" | jq \
     duration_ms: $dur,
     summary: (.summary // null),
     violations: (.violations // []),
-    suggestions: (.suggestions // [])
+    suggestions: (.suggestions // []),
+    blocking_count: ([.violations[]? | select(.blocking == true)] | length),
+    deferrable_count: ([.violations[]? | select(.blocking != true)] | length)
   }')
 
 echo "$_ENTRY" >> "$DAILY_LOG"
@@ -306,44 +324,141 @@ if [ "$VERDICT" = "APPROVED" ] || [ "$VERDICT" = "ESCALATE" ]; then
   exit 2
 fi
 
-# REJECTED 카운터 증가
-_RCOUNT=$(( $(cat "$REJECT_COUNT_FILE" 2>/dev/null || echo 0) + 1 ))
-echo "$_RCOUNT" > "$REJECT_COUNT_FILE"
+# ─── REJECTED 분기 — blocking/deferrable 분류 ──────────────────────────
+BLOCKING_JSON=$(echo "$REVIEW_JSON" | jq -c '[.violations[] | select(.blocking == true)]')
+DEFERRABLE_JSON=$(echo "$REVIEW_JSON" | jq -c '[.violations[] | select(.blocking != true)]')
+BLOCKING_COUNT=$(echo "$BLOCKING_JSON" | jq 'length')
+DEFERRABLE_COUNT=$(echo "$DEFERRABLE_JSON" | jq 'length')
 
-# REJECTED → stderr로 피드백 + exit 2 (Coder 재작업 후 Reviewer 재실행)
-{
-  echo "════════════════════════════════════════════════════════"
-  echo "  외부 코드 감사 결과: REJECTED (${_RCOUNT}회차)"
-  echo "════════════════════════════════════════════════════════"
-  echo ""
-  echo "리뷰어가 다음 문제를 지적했습니다. Coder 재작업 후 자동으로 재검토됩니다."
-  echo ""
-  echo "$REVIEW_JSON" | jq -r '
-    if (.violations | length) > 0 then
-      "## 규칙 위반\n" + (.violations | map(
-        "- [\(.rule)] \(.file):\(.line // "?") — \(.detail)"
-      ) | join("\n"))
-    else "" end,
-    "",
-    if (.suggestions | length) > 0 then
-      "## 구조 개선 제안\n" + (.suggestions | map(
-        "- \(.file): \(.issue)\n  → \(.proposal)"
-      ) | join("\n"))
-    else "" end,
-    "",
-    if .summary then "## 종합\n\(.summary)" else "" end
-  '
-  echo ""
-  echo "(전체 응답 로그: $LOG_DIR/${TIMESTAMP}_*.json)"
-} >&2
-
-if [ "$_RCOUNT" -ge 2 ]; then
-  {
-    echo ""
-    echo "[ESCALATE_TO_USER] 동일 변경분에 대해 ${_RCOUNT}회 연속 REJECTED됐습니다."
-    echo "Coder 재작업 대신 사용자에게 직접 위반 내용을 보고하고 검토를 요청하세요."
-    rm -f "$REJECT_COUNT_FILE"
-  } >&2
+# 이전 스키마(blocking 필드 없음) 폴백: 전부 blocking 처리
+_TOTAL_VIOL=$(echo "$REVIEW_JSON" | jq '.violations | length')
+_HAS_BLOCKING=$(echo "$REVIEW_JSON" | jq '[.violations[]? | has("blocking")] | any')
+if [ "$_HAS_BLOCKING" != "true" ] && [ "$_TOTAL_VIOL" -gt 0 ]; then
+  echo "[reviewer] schema warning: blocking 필드 누락 — 전부 blocking 처리." >&2
+  BLOCKING_JSON=$(echo "$REVIEW_JSON" | jq -c '.violations')
+  BLOCKING_COUNT="$_TOTAL_VIOL"
+  DEFERRABLE_JSON='[]'
+  DEFERRABLE_COUNT=0
 fi
 
+# dedup 안전망: 이미 누적된 violations와 (rule, file, line) 중복 제거
+if [ -f "$DEFERRED_FILE" ] && [ "$DEFERRABLE_COUNT" -gt 0 ]; then
+  _EXISTING_KEYS=$(jq -r '[.cycles[].violations[] | "\(.rule)|\(.file)|\(.line // "null")"] | .[]' "$DEFERRED_FILE" 2>/dev/null | jq -R . | jq -s .)
+  DEFERRABLE_JSON=$(echo "$DEFERRABLE_JSON" | jq -c --argjson keys "$_EXISTING_KEYS" \
+    '[.[] | select(("\(.rule)|\(.file)|\(.line // "null")") as $k | ($keys | index($k)) == null)]')
+  DEFERRABLE_COUNT=$(echo "$DEFERRABLE_JSON" | jq 'length')
+fi
+
+# ─── Case A: blocking ≥ 1 → 즉시 REJECTED 처리 ───────────────────────
+if [ "$BLOCKING_COUNT" -gt 0 ]; then
+  _RCOUNT=$(( $(cat "$REJECT_COUNT_FILE" 2>/dev/null || echo 0) + 1 ))
+  echo "$_RCOUNT" > "$REJECT_COUNT_FILE"
+
+  {
+    echo "════════════════════════════════════════════════════════"
+    echo "  외부 코드 감사 결과: REJECTED (${_RCOUNT}회차, blocking ${BLOCKING_COUNT}건)"
+    echo "════════════════════════════════════════════════════════"
+    echo ""
+    echo "## 즉시 수정 필요 (blocking)"
+    echo "$BLOCKING_JSON" | jq -r '.[] | "- [\(.rule)] \(.file):\(.line // "?") — \(.detail)"'
+    if [ "$DEFERRABLE_COUNT" -gt 0 ]; then
+      echo ""
+      echo "## 같은 사이클에 함께 처리 권장 (deferrable)"
+      echo "$DEFERRABLE_JSON" | jq -r '.[] | "- [\(.rule)] \(.file):\(.line // "?") — \(.detail)"'
+    fi
+    echo "$REVIEW_JSON" | jq -r '
+      if (.suggestions | length) > 0 then
+        "\n## 구조 개선 제안\n" + (.suggestions | map("- \(.file): \(.issue)\n  → \(.proposal)") | join("\n"))
+      else "" end,
+      if .summary then "\n## 종합\n\(.summary)" else "" end
+    '
+    echo ""
+    echo "(전체 응답 로그: $LOG_DIR/${TIMESTAMP}_*.json)"
+    if [ "$_RCOUNT" -ge 2 ]; then
+      echo ""
+      echo "[ESCALATE_TO_USER] blocking 위반에 대해 ${_RCOUNT}회 연속 REJECTED됐습니다."
+      echo "Coder 재작업 대신 사용자에게 직접 위반 내용을 보고하고 검토를 요청하세요."
+      rm -f "$REJECT_COUNT_FILE"
+    fi
+  } >&2
+  exit 2
+fi
+
+# ─── Case B: blocking = 0 ─────────────────────────────────────────────
+rm -f "$REJECT_COUNT_FILE"
+
+if [ "$DEFERRABLE_COUNT" -eq 0 ]; then
+  # dedup 후 신규 위반 없음 → APPROVED 등가
+  touch "$APPROVED_MARKER"
+  {
+    echo "════════════════════════════════════════════════════════"
+    echo "  외부 코드 감사 결과: APPROVED (deferrable 전부 기존 누적분, 신규 없음)"
+    echo "════════════════════════════════════════════════════════"
+    echo ""
+    echo "QA 단계를 진행하세요."
+    echo "  git diff --name-only $BASE HEAD"
+  } >&2
+  exit 2
+fi
+
+# 신규 deferrable 있음 → 누적
+COMMIT_HASH=$(cd "$CLAUDE_PROJECT_DIR" && git rev-parse --short HEAD 2>/dev/null || echo "?")
+NEW_ENTRY=$(jq -n \
+  --arg ts "$_ISO" \
+  --arg commit "$COMMIT_HASH" \
+  --arg model "$USED_MODEL" \
+  --argjson viol "$DEFERRABLE_JSON" \
+  --argjson sugg "$(echo "$REVIEW_JSON" | jq -c '.suggestions // []')" \
+  --arg summary "$(echo "$REVIEW_JSON" | jq -r '.summary // ""')" \
+  '{timestamp: $ts, commit: $commit, model: $model, violations: $viol, suggestions: $sugg, summary: $summary}')
+
+if [ ! -f "$DEFERRED_FILE" ]; then
+  echo '{"cycles":[]}' > "$DEFERRED_FILE"
+fi
+_TMP=$(mktemp)
+jq --argjson e "$NEW_ENTRY" '.cycles += [$e]' "$DEFERRED_FILE" > "$_TMP" && mv "$_TMP" "$DEFERRED_FILE"
+
+_SNOOZE=$(cat "$CLAUDE_PROJECT_DIR/.claude/.deferred_snooze" 2>/dev/null || echo 0)
+_EFFECTIVE_THRESHOLD=$(( DEFERRED_THRESHOLD + _SNOOZE ))
+CYCLE_COUNT=$(jq '.cycles | length' "$DEFERRED_FILE")
+
+if [ "$CYCLE_COUNT" -lt "$_EFFECTIVE_THRESHOLD" ]; then
+  touch "$APPROVED_MARKER"
+  {
+    echo "════════════════════════════════════════════════════════"
+    echo "  외부 코드 감사 결과: APPROVED (deferrable ${DEFERRABLE_COUNT}건 누적)"
+    echo "════════════════════════════════════════════════════════"
+    echo ""
+    echo "blocking 위반 없음. ${DEFERRABLE_COUNT}건은 .claude/deferred_review.json에 누적됩니다."
+    echo "(${CYCLE_COUNT}/${_EFFECTIVE_THRESHOLD} 사이클)"
+    echo ""
+    echo "## 누적된 위반 (이번 사이클)"
+    echo "$DEFERRABLE_JSON" | jq -r '.[] | "- [\(.rule)] \(.file):\(.line // "?") — \(.detail)"'
+    echo ""
+    echo "QA 단계를 진행하세요."
+    echo "  git diff --name-only $BASE HEAD"
+  } >&2
+  exit 2
+fi
+
+# 임계 도달
+touch "$APPROVED_MARKER"
+{
+  echo "════════════════════════════════════════════════════════"
+  echo "  외부 코드 감사 결과: APPROVED (deferrable 누적 임계 도달 ${CYCLE_COUNT}/${_EFFECTIVE_THRESHOLD})"
+  echo "════════════════════════════════════════════════════════"
+  echo ""
+  echo "blocking 위반 없음 — QA는 계속 진행됩니다."
+  echo ""
+  echo "[ESCALATE_TO_USER:DEFERRED_BATCH] deferrable 위반이 ${CYCLE_COUNT}사이클 누적됐습니다."
+  echo "QA 종료 후 사용자에게 .claude/deferred_review.json의 일괄 처리 여부를 확인하세요."
+  echo ""
+  echo "## 누적 요약 (사이클 ${CYCLE_COUNT}개)"
+  jq -r '.cycles | to_entries[] |
+    "### [\(.key+1)] \(.value.timestamp) (commit \(.value.commit))\n" +
+    (.value.violations | map("  - [\(.rule)] \(.file):\(.line // "?") — \(.detail)") | join("\n"))
+  ' "$DEFERRED_FILE"
+  echo ""
+  echo "(전체 로그: $DEFERRED_FILE)"
+} >&2
 exit 2
