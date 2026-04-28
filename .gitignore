@@ -7,6 +7,10 @@
 .env*
 *.pem
 .claude/.review_pending
+.claude/.review_skip
+.claude/.deferred_snooze
+.claude/review_log/.reviewer_approved
+.claude/review_log/.reject_count
 .claude/.task_queue
 .claude/worktrees/
 .claude/settings.local.json
