@@ -89,6 +89,9 @@
 | QA FAIL 후 Coder 재작업 완료 시 | `git add <files>` → `git commit -m "fix: rework per QA failure"` → `touch .claude/.review_pending` |
 | QA 통과 후 worktree 정리 | `git worktree list` 확인 → `git worktree remove -f -f <path>` × N회 → `git branch -D <worktree-branch>` × N회 |
 | [ESCALATE_TO_USER:DEFERRED_BATCH] 수신 + QA 완료 후 | `.claude/deferred_review.json` Read → 사용자에게 누적 목록 출력 → 옵션 제시: 1) `/pipeline-deferred-flush` 2) 계속 누적(`.claude/.deferred_snooze`에 +5 기록) 3) 취소 |
+| /pipeline-coder-qa 진입 | `touch .claude/.review_skip` |
+| /pipeline-coder-qa 종료 (모든 경로) | `rm -f .claude/.review_skip` |
+| /pipeline-coder-qa QA FAIL 1회차 후 | Coder 재호출(`isolation: "worktree"`) → merge → commit → QA 재호출 (`touch .review_pending` 절대 금지) |
 
 > **누적 모드 예외 (`/pipeline-start`)**: 위 표의 모든 `touch .claude/.review_pending`은 생략한다. 진입 시 `.claude/.review_skip` sentinel을 유지하고, `/pipeline-review` 또는 `/pipeline` 호출 시 sentinel 제거 + 마커 생성으로 정상 사이클에 진입한다.
 
@@ -111,6 +114,16 @@
 
 - `/pipeline-build`: 작업 지시를 `.claude/.task_queue`에 적재만 함. commit·sentinel·마커 모두 무관. 진입 시 `.claude/.review_skip` sentinel을 유지해 의도치 않은 Reviewer 발동을 차단.
 - `/pipeline-start`: 큐를 일괄 소비해 Planner→Coder×N→merge→commit을 실행. 메인 `touch .claude/.review_pending`(#7)은 생략하고 `.review_skip` sentinel을 유지. 이후 `/pipeline-review` 호출 시 sentinel 제거 + 마커 생성으로 #8~#13 정상 사이클에 진입한다. 반복 호출 사이의 base→HEAD diff는 자연스럽게 합산되어 단일 Reviewer 호출에 전달된다. worktree 정리는 매 사이클의 머지/commit 직후에 즉시 수행한다 (QA 게이트 없음). `.claude/.task_queue` 파일은 사이클 완료 시 삭제한다.
+
+## Coder→QA 독립 흐름 (`/pipeline-coder-qa`)
+
+- 작은 수정·빠른 검증을 위한 단축 사이클. **Planner와 Reviewer 모두 건너뜀**.
+- 진입 시 `.claude/.review_skip` sentinel 생성으로 Stop 훅이 Reviewer를 호출하지 않게 차단.
+- 흐름: Coder × N (worktree) → merge → commit → QA → worktree 정리 → sentinel 정리 → 종료.
+- QA FAIL: 동일 변경분에 대해 최대 2회까지 Coder 재작업·QA 재실행. 2회 연속 FAIL 시 사용자 개입 대기.
+- **모든 종료 경로에서 `.review_skip` 정리** — 다음 일반 작업(`/pipeline` 등)에서 Reviewer가 정상 발동하도록.
+- `touch .claude/.review_pending` 절대 금지.
+- `.claude/deferred_review.json` 변화 없음 (Reviewer 미호출).
 
 ## Deferrable 위반 누적 처리
 

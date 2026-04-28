@@ -25,6 +25,7 @@
 * 메인은 git commit 완료 직후 `touch .claude/.review_pending` 실행 (REJECTED 재작업 후 commit 시도 동일). 단, `/pipeline-start` 누적 모드에서는 마커 미생성 · `.claude/.review_skip` sentinel 유지. `/pipeline-review` 또는 `/pipeline`에서만 sentinel 제거 후 마커 생성.
 * 백엔드/프론트엔드 코드는 헥사고널(Ports & Adapters) 아키텍처 적용. 인프라·스크립트·마이그레이션 등 비도메인 파일은 아키텍처 규칙 적용 대상 외.
 * Reviewer가 violations 항목에 `blocking: false`로 분류한 deferrable 위반(기본값: conventions.md만)은 즉시 Coder 재작업 대신 `.claude/deferred_review.json`에 누적된다. 누적이 `REVIEWER_DEFERRED_THRESHOLD`(기본 5) 사이클에 도달하면 메인은 사용자에게 일괄 처리 여부를 묻는다. 자세한 흐름은 `.claude/agents/PIPELINE.md`의 "Deferrable 위반 누적 처리" 절 참조.
+* `/pipeline-coder-qa`는 Planner와 Reviewer를 건너뛰고 Coder→QA만 실행하는 단축 흐름. 작은 수정·빠른 검증용. 진입 시 `.claude/.review_skip` 생성, 모든 종료 경로에서 정리. `touch .claude/.review_pending` 금지. 상세 흐름은 `.claude/agents/PIPELINE.md`의 "Coder→QA 독립 흐름" 절 참조.
 
 
 
