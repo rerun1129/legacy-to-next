@@ -36,6 +36,6 @@ allowed-tools: Bash, Read, Agent
 - **REJECTED (blocking = 0, deferrable만)** → `.claude/deferred_review.json` 누적 → APPROVED_MARKER 생성 → exit 2 → 메인이 QA 진행. 누적 임계 도달 시(`[ESCALATE_TO_USER:DEFERRED_BATCH]`) 메인이 QA 완료 후 사용자에게 일괄 처리 위임.
 - **REJECTED (blocking) 2회 이상** → `[ESCALATE_TO_USER]` stderr 주입 → 메인이 위반 내용을 사용자에게 직접 보고 후 대기
 - **APPROVED** → APPROVED_MARKER 생성·exit 2 → 메인이 `subagent_type=QA` 호출 → worktree 정리 → 사용자 보고
-- **QA FAIL 시** → 메인이 [Coder × N] 재호출 → merge/commit → `touch .claude/.review_pending` → Reviewer 재실행 (PIPELINE.md 흐름 31-32행 참조)
+- **QA FAIL 시** → 메인이 [Coder × N] 재호출 → 사전 감지 + 머지 → commit → `touch .claude/.review_pending` → Reviewer 재실행 (PIPELINE.md 흐름 참조)
 
-REJECTED 후 재작업 흐름에서 메인은 `.claude/agents/PIPELINE.md`의 "REJECTED 후 Coder 재작업" 절차를 따른다.
+REJECTED 후 재작업 흐름에서 메인은 `.claude/agents/PIPELINE.md` 흐름 다이어그램의 REJECTED 재작업 분기를 따른다.

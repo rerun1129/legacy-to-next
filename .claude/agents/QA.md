@@ -23,7 +23,7 @@ color: green
 3. 실패·경고·잠재 버그를 **블로커 / 메이저 / 마이너**로 분류해 메인에 반환.
 4. 최종 통과 여부 명시:
    - 통과: 작업 종료.
-   - 미통과: Coder 재작업 항목 명시 (어떤 파일·어떤 함수·어떤 케이스). 메인은 이 보고를 받아 [Coder × N] 재호출 → merge → commit → `touch .claude/.review_pending` 수행 (PIPELINE.md 흐름 31-32행 참조).
+   - 미통과: Coder 재작업 항목 명시 (어떤 파일·어떤 함수·어떤 케이스). 메인은 이 보고를 받아 [Coder × N] 재호출 → 사전 감지 + 머지 → commit → `touch .claude/.review_pending` 수행 (PIPELINE.md QA FAIL 분기 참조).
 
 ## Hard Rules
 

@@ -19,9 +19,15 @@ allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
 
 1. **Coder × N 호출**: 작업 단위가 단일이면 Coder 1개, 명확히 독립 분할 가능하면 `subagent_type=Coder`, `isolation: "worktree"`로 병렬 호출. **Planner 호출하지 않음**. 작업 지시(`$ARGUMENTS`) + 관련 파일 경로를 직접 전달.
 
-2. **트렁크 머지**: 각 worktree 브랜치를 순차 `git merge <branch>` × N 회.
-   - 충돌 없음 → 계속
-   - 충돌 발생 → `git merge --abort` → `subagent_type=Mediator` 호출 → 해결 후 `git add <resolved-files>` + `git commit -m "merge: resolve conflicts from parallel Coders"` → 나머지 브랜치 계속
+2. **트렁크 머지 (사전 충돌 감지 적용)**:
+
+   2-1. **시뮬레이션**: 각 worktree 브랜치에 대해 `git merge-tree --write-tree --name-only --messages <TRUNK_HEAD> <branch>` 실행. exit 0 = 클린, 1 = 충돌, ≥2 = 오류(사용자 보고 후 중단). 결과로 CLEAN/CONFLICT 목록 분류.
+
+   2-2. **클린 일괄 머지**: `git merge --ff-only <branch>` × CLEAN_N 회 (ff 불가 시 `git merge <branch>` 폴백).
+
+   2-3. **충돌 브랜치 1개씩 처리**: CONFLICT 목록을 순회하며 `git merge --no-ff --no-commit <branch>` → 워킹트리에 충돌 마커 생성. `git diff --name-only --diff-filter=U`로 unmerged 파일 확인. unmerged가 비어있으면 즉시 commit하고 다음 브랜치. 그렇지 않으면 `subagent_type=Mediator` 호출 (충돌 파일 목록 + 머지 중인 브랜치의 Coder 의도 + 잔여 CONFLICT 브랜치 의도 요약 전달). Mediator 종료 후 `git diff --name-only --diff-filter=U`가 비어 있는지 재확인 → `git add <resolved-files>` + `git commit -m "merge: resolve conflicts from parallel Coders (<branch>)"` → 다음 충돌 브랜치 반복.
+
+   2-4. **비정상 시**: Mediator 1회 재호출 후에도 unmerged 잔존 / 시뮬레이션 rc≥2 / 머지 실패 → `git merge --abort`로 복구 + 사용자 보고 후 중단.
 
 3. **변경 파일 수집**:
    ```bash
@@ -51,6 +57,8 @@ allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
 
 - `touch .claude/.review_pending` — Reviewer 미발동이 이 커맨드의 핵심. 마커 생성 금지.
 - `subagent_type=Planner` 호출 — 기획이 필요하면 `/pipeline` 사용.
+
+> Reviewer 미호출이므로 `.claude/deferred_review.json`은 이 사이클에서 변하지 않는다.
 
 ## 종료 메시지
 
