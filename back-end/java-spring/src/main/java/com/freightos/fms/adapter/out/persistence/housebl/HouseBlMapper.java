@@ -1,7 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
-import com.freightos.fms.domain.common.enums.FreightCondition;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.PackageUnit;
@@ -96,7 +95,7 @@ public class HouseBlMapper {
                 BlDate.of(jpa.getIssueDate()), NoOfBl.fromNumber(jpa.getNoOfBl()), PortCode.of(jpa.getIssuePlace()),
                 BlDate.of(jpa.getDoDate()), Incoterms.fromCode(jpa.getIncoterms()), PortCode.of(jpa.getPayableAt()),
                 jpa.isTriangle(), jpa.isCoLoad(), BlNumber.of(jpa.getMblNo()),
-                jpa.getLoadType(), FreightCondition.fromCode(jpa.getFreightTermSea())));
+                jpa.getLoadType()));
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
@@ -108,8 +107,7 @@ public class HouseBlMapper {
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(), FreightTerm.fromCode(jpa.getOtherTerm()),
                 BlDate.of(jpa.getIssueDate()), PortCode.of(jpa.getIssuePlace()), jpa.getSignature(),
-                Fhd.fromCode(jpa.getFhd()), Incoterms.fromCode(jpa.getIncoterms()),
-                FreightCondition.fromCode(jpa.getFreightTermAir())));
+                Fhd.fromCode(jpa.getFhd()), Incoterms.fromCode(jpa.getIncoterms())));
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
@@ -195,7 +193,6 @@ public class HouseBlMapper {
         jpa.setIsTriangle(domain.isTriangle());
         jpa.setIsCoLoad(domain.isCoLoad());
         jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
-        jpa.setFreightTermSea(mapOrNull(domain.getFreightTermSea(), FreightCondition::name));
     }
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
@@ -216,7 +213,6 @@ public class HouseBlMapper {
         jpa.setSignature(domain.getSignature());
         jpa.setFhd(mapOrNull(domain.getFhd(), Fhd::name));
         jpa.setIncoterms(mapOrNull(domain.getIncoterms(), Incoterms::name));
-        jpa.setFreightTermAir(mapOrNull(domain.getFreightTermAir(), FreightCondition::name));
     }
 
     public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {

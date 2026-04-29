@@ -84,9 +84,6 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "incoterms", length = 10)
     private String incoterms;
 
-    @Column(name = "freight_term_air", length = 10)
-    private String freightTermAir;
-
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setDepartureCode(String v) { this.departureCode = v; }
@@ -106,5 +103,4 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void setFhd(String v) { this.fhd = v; }
     public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
     public void setIncoterms(String v) { this.incoterms = v; }
-    public void setFreightTermAir(String v) { this.freightTermAir = v; }
 }

@@ -78,9 +78,6 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "mbl_no", length = 50)
     private String mblNo;
 
-    @Column(name = "freight_term_sea", length = 1)
-    private String freightTermSea;
-
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -98,5 +95,4 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setIsTriangle(boolean v) { this.isTriangle = v; }
     public void setIsCoLoad(boolean v) { this.isCoLoad = v; }
     public void setMblNo(String v) { this.mblNo = v; }
-    public void setFreightTermSea(String v) { this.freightTermSea = v; }
 }

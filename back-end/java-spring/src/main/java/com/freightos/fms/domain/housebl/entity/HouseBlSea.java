@@ -1,7 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightCondition;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
@@ -37,7 +36,6 @@ public class HouseBlSea extends HouseBl {
 
     // 인코텀스
     private Incoterms incoterms;
-    private FreightCondition freightTermSea;
     private PortCode payableAt;
     private boolean isTriangle = false;
     private boolean isCoLoad = false;
@@ -62,7 +60,7 @@ public class HouseBlSea extends HouseBl {
             BlDate issueDate, NoOfBl noOfBl, PortCode issuePlace,
             BlDate doDate, Incoterms incoterms, PortCode payableAt,
             boolean triangle, boolean coLoad, BlNumber mblNo,
-            LoadType loadType, FreightCondition freightTermSea) {}
+            LoadType loadType) {}
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
         this.porCode       = f.porCode();
@@ -77,6 +75,5 @@ public class HouseBlSea extends HouseBl {
         this.isCoLoad      = f.coLoad();
         this.mblNo          = f.mblNo();
         this.loadType       = f.loadType();
-        this.freightTermSea = f.freightTermSea();
     }
 }
