@@ -263,20 +263,16 @@ class MasterBlMapperTest {
 
         MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
         descJpa.setMasterBl(masterBlJpa);
-        descJpa.setMarksLeft("ML");
-        descJpa.setMarksRight("MR");
-        descJpa.setDescriptionLeft("DL");
-        descJpa.setDescriptionRight("DR");
+        descJpa.setMarks("MARKS");
+        descJpa.setDescription("DESCRIPTION");
         descJpa.setDescClause1("CLAUSE1");
         descJpa.setDescClause2("CLAUSE2");
         descJpa.setRemark("REMARK");
 
         MasterBlDesc domain = mapper.toDescDomain(descJpa);
 
-        assertThat(domain.getMarksLeft()).isEqualTo("ML");
-        assertThat(domain.getMarksRight()).isEqualTo("MR");
-        assertThat(domain.getDescriptionLeft()).isEqualTo("DL");
-        assertThat(domain.getDescriptionRight()).isEqualTo("DR");
+        assertThat(domain.getMarks()).isEqualTo("MARKS");
+        assertThat(domain.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(domain.getDescClause1()).isEqualTo("CLAUSE1");
         assertThat(domain.getDescClause2()).isEqualTo("CLAUSE2");
         assertThat(domain.getRemark()).isEqualTo("REMARK");
@@ -289,12 +285,13 @@ class MasterBlMapperTest {
         masterBlJpa.setMasterBlId(2L);
 
         MasterBlDesc domain = MasterBlDesc.create(2L);
-        domain.updateContent("ML", "MR", "DL", "DR", "CLAUSE1", "CLAUSE2", "REMARK");
+        domain.updateContent("MARKS", "DESCRIPTION", "CLAUSE1", "CLAUSE2", "REMARK");
         MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
 
         mapper.applyDescFields(domain, descJpa, masterBlJpa);
 
-        assertThat(descJpa.getDescriptionLeft()).isEqualTo("DL");
+        assertThat(descJpa.getMarks()).isEqualTo("MARKS");
+        assertThat(descJpa.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(descJpa.getDescClause1()).isEqualTo("CLAUSE1");
         assertThat(descJpa.getRemark()).isEqualTo("REMARK");
         assertThat(descJpa.getMasterBl()).isSameAs(masterBlJpa);
