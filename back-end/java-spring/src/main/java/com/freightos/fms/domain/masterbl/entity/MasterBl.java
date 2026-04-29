@@ -50,6 +50,8 @@ public abstract class MasterBl extends BaseEntity {
     private PackageUnit pkgUnit;
     private Weight grossWeightKg;
     private Volume cbm;
+    //TODO : HSCode를 추가하는 필드가 없음
+    //TODO : Main Item Code를 추가하는 필드가 없음
 
     protected MasterBl(Bound bound) {
         this.bound = bound;

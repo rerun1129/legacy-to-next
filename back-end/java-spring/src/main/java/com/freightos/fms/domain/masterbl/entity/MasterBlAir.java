@@ -20,7 +20,7 @@ public class MasterBlAir extends MasterBl {
 
     private AirlineCode airlineCode;
     private AirportCode departureCode;
-    private BlNumber mawbNo;
+    private BlNumber mawbNo; //TODO : MasterBl의 mblNo와 중복 필드. 만약 인덱싱을 위한 후보키라면 필드명을 맞출것
 
     private Weight chargeWeightKg;
     private Weight volumeWeightKg;

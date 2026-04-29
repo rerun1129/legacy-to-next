@@ -7,17 +7,6 @@
 --   4. FK ON DELETE CASCADE 제거
 --   5. 인라인 -- 컬럼 설명 제거, COMMENT ON COLUMN으로 이전
 -- =============================================================================
-
--- -----------------------------------------------------------------------------
--- 공통: 확장 타입
--- -----------------------------------------------------------------------------
--- CREATE TYPE job_div      AS ENUM ('SEA', 'AIR', 'TRUCK', 'NON_BL');
--- CREATE TYPE bound        AS ENUM ('EXP', 'IMP');
--- CREATE TYPE load_type    AS ENUM ('FCL', 'LCL', 'BULK');
--- CREATE TYPE bl_type      AS ENUM ('ORIGINAL', 'SURRENDER', 'SEAWAY', 'NORMAL', 'EXPRESS');
--- CREATE TYPE freight_term AS ENUM ('PREPAID', 'COLLECT');
--- CREATE TYPE shipment_type AS ENUM ('HOUSE', 'DIRECT');
-
 -- =============================================================================
 -- E-01 Master B/L 공통 본체
 -- =============================================================================
@@ -71,14 +60,18 @@ COMMENT ON COLUMN master_bl.cbm           IS '용적(CBM)';
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS master_bl_sea (
     master_bl_sea_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    master_bl_id      BIGINT       NOT NULL REFERENCES master_bl(master_bl_id),
+    master_bl_id      BIGINT       NOT NULL UNIQUE REFERENCES master_bl(master_bl_id),
     load_type         VARCHAR(10),
     liner_code        VARCHAR(20),
     vessel_name       VARCHAR(100),
     voyage_no         VARCHAR(20),
     onboard_date      VARCHAR(8),
     line_bkg_no       VARCHAR(50),
-    issue_date        VARCHAR(8)
+    issue_date        VARCHAR(8),
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by        VARCHAR(50),
+    updated_by        VARCHAR(50)
 );
 
 COMMENT ON COLUMN master_bl_sea.master_bl_id  IS 'Master B/L 참조 FK';
@@ -95,7 +88,7 @@ COMMENT ON COLUMN master_bl_sea.issue_date    IS 'B/L 발행일 YYYYMMDD';
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS master_bl_air (
     master_bl_air_id          BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    master_bl_id              BIGINT       NOT NULL REFERENCES master_bl(master_bl_id),
+    master_bl_id              BIGINT       NOT NULL UNIQUE REFERENCES master_bl(master_bl_id),
     airline_code              VARCHAR(10),
     departure_code            VARCHAR(10),
     mawb_no                   VARCHAR(50),
@@ -107,11 +100,15 @@ CREATE TABLE IF NOT EXISTS master_bl_air (
     declared_value_customs    VARCHAR(50),
     insurance                 VARCHAR(20)  DEFAULT 'NIL',
     account_information       VARCHAR(100),
-    security_status           VARCHAR(20),
-    flight_type               VARCHAR(20),
+    security_status           VARCHAR(3),
+    flight_type               VARCHAR(1),
     issue_date                VARCHAR(8),
     issue_place               VARCHAR(50),
-    signature                 VARCHAR(100)
+    signature                 VARCHAR(100),
+    created_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by                VARCHAR(50),
+    updated_by                VARCHAR(50)
 );
 
 COMMENT ON COLUMN master_bl_air.master_bl_id             IS 'Master B/L 참조 FK';
@@ -201,7 +198,7 @@ CREATE INDEX IF NOT EXISTS idx_house_bl_master_bl_id  ON house_bl(master_bl_id);
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_sea (
     house_bl_sea_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id      BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_id      BIGINT       NOT NULL UNIQUE REFERENCES house_bl(house_bl_id),
     load_type        VARCHAR(10),
     liner_code       VARCHAR(20),
     vessel_name      VARCHAR(100),
@@ -217,7 +214,8 @@ CREATE TABLE IF NOT EXISTS house_bl_sea (
     payable_at       VARCHAR(50),
     triangle         BOOLEAN      NOT NULL DEFAULT FALSE,
     co_load          BOOLEAN      NOT NULL DEFAULT FALSE,
-    mbl_no           VARCHAR(50)
+    mbl_no           VARCHAR(50),
+    freight_term_sea VARCHAR(1)
 );
 
 COMMENT ON COLUMN house_bl_sea.house_bl_id      IS 'House B/L 참조 FK';
@@ -237,13 +235,14 @@ COMMENT ON COLUMN house_bl_sea.payable_at       IS '운임 지급지';
 COMMENT ON COLUMN house_bl_sea.triangle         IS '삼각무역 여부';
 COMMENT ON COLUMN house_bl_sea.co_load          IS '공동적재(Co-Load) 여부';
 COMMENT ON COLUMN house_bl_sea.mbl_no           IS '연결 Master B/L 번호 (표시용)';
+COMMENT ON COLUMN house_bl_sea.freight_term_sea IS '해상 운임조건 코드 (P=Prepaid, C=Collect 등 단일문자)';
 
 -- =============================================================================
 -- E-11 House B/L 항공 확장
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_air (
     house_bl_air_id           BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id               BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_id               BIGINT       NOT NULL UNIQUE REFERENCES house_bl(house_bl_id),
     airline_code              VARCHAR(10),
     departure_code            VARCHAR(10),
     mawb_no                   VARCHAR(50),
@@ -289,7 +288,7 @@ COMMENT ON COLUMN house_bl_air.fhd                      IS '수입 인도 방법
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_truck (
     house_bl_truck_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id        BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_id        BIGINT       NOT NULL UNIQUE REFERENCES house_bl(house_bl_id),
     vessel_name        VARCHAR(10)  NOT NULL DEFAULT 'TRUCK',
     pickup_date        VARCHAR(8),
     trucker_code       VARCHAR(20),
@@ -311,17 +310,15 @@ COMMENT ON COLUMN house_bl_truck.incoterms         IS '인코텀즈 조건';
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_non_bl (
     house_bl_non_bl_id   BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id          BIGINT      NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_id          BIGINT      NOT NULL UNIQUE REFERENCES house_bl(house_bl_id),
     work_division        VARCHAR(15) NOT NULL,
     settle_partner_code  VARCHAR(20),
-    status               VARCHAR(20) DEFAULT '접수',
     original_bl_ref      VARCHAR(50)
 );
 
 COMMENT ON COLUMN house_bl_non_bl.house_bl_id         IS 'House B/L 참조 FK';
 COMMENT ON COLUMN house_bl_non_bl.work_division        IS '업무구분: SEA | AIR | WAREHOUSE | TRUCKING';
 COMMENT ON COLUMN house_bl_non_bl.settle_partner_code  IS '정산 파트너 거래처 코드';
-COMMENT ON COLUMN house_bl_non_bl.status               IS '처리상태 (기본값: 접수)';
 COMMENT ON COLUMN house_bl_non_bl.original_bl_ref      IS '원 B/L 참조번호';
 
 -- =============================================================================
