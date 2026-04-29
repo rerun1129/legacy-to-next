@@ -2,6 +2,8 @@ package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.BlNumber;
+import com.freightos.fms.domain.common.vo.Rton;
+import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,6 +25,8 @@ public class HouseBlNonBl extends HouseBl {
      */
     private WorkDivision workDivision;
     private BlNumber originalBlRef;
+    private Rton rton;
+    private Weight volumeWtKg;
 
     protected HouseBlNonBl(WorkDivision workDivision, Bound bound) {
         super(JobDiv.NON_BL, bound);
@@ -33,8 +37,10 @@ public class HouseBlNonBl extends HouseBl {
         return new HouseBlNonBl(workDivision, bound);
     }
 
-    public void updateNonBlFields(BlNumber originalBlRef) {
+    public void updateNonBlFields(BlNumber originalBlRef, Rton rton, Weight volumeWtKg) {
         this.originalBlRef = originalBlRef;
+        this.rton          = rton;
+        this.volumeWtKg    = volumeWtKg;
     }
 
     public enum WorkDivision {

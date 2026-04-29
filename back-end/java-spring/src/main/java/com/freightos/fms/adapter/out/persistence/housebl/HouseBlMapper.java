@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.vo.Rton;
 import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
@@ -118,7 +119,8 @@ public class HouseBlMapper {
     }
 
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {
-        domain.updateNonBlFields(BlNumber.of(jpa.getOriginalBlRef()));
+        domain.updateNonBlFields(BlNumber.of(jpa.getOriginalBlRef()),
+                Rton.of(jpa.getRton()), Weight.of(jpa.getVolumeWtKg()));
     }
 
     private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
@@ -229,6 +231,8 @@ public class HouseBlMapper {
     public void applyNonBlFields(HouseBlNonBl domain, HouseBlNonBlJpaEntity jpa) {
         jpa.setWorkDivision(domain.getWorkDivision());
         jpa.setOriginalBlRef(mapOrNull(domain.getOriginalBlRef(), BlNumber::value));
+        jpa.setRton(mapOrNull(domain.getRton(), Rton::ton));
+        jpa.setVolumeWtKg(mapOrNull(domain.getVolumeWtKg(), Weight::kg));
     }
 
     HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {

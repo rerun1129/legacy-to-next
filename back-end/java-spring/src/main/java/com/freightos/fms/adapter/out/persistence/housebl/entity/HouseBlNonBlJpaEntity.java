@@ -6,6 +6,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * JPA ORM 엔티티 — House B/L Non-B/L 확장.
  * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
@@ -29,6 +34,10 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_id", referencedColumnName = "house_bl_id", insertable = false, updatable = false)
     private HouseBlDescJpaEntity desc;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_bl_id", referencedColumnName = "house_bl_id", insertable = false, updatable = false)
+    private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
+
     @Column(name = "work_division", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     private HouseBlNonBl.WorkDivision workDivision;
@@ -36,7 +45,15 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @Column(name = "original_bl_ref", length = 50)
     private String originalBlRef;
 
+    @Column(name = "rton", columnDefinition = "NUMERIC(10,3)")
+    private BigDecimal rton;
+
+    @Column(name = "volume_wt_kg", columnDefinition = "NUMERIC(12,3)")
+    private BigDecimal volumeWtKg;
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setWorkDivision(HouseBlNonBl.WorkDivision v) { this.workDivision = v; }
     public void setOriginalBlRef(String v) { this.originalBlRef = v; }
+    public void setRton(BigDecimal v) { this.rton = v; }
+    public void setVolumeWtKg(BigDecimal v) { this.volumeWtKg = v; }
 }
