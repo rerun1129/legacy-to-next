@@ -26,6 +26,10 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_bl_id", referencedColumnName = "house_bl_id", insertable = false, updatable = false)
+    private HouseBlDescJpaEntity desc;
+
     @Column(name = "airline_code", length = 10)
     private String airlineCode;
 
