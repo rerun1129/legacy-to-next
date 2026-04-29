@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -190,5 +192,284 @@ class HouseBlMapperTest {
         HouseBlAir domain = (HouseBlAir) mapper.toDomain(parentJpa);
 
         assertThat(domain.getId()).isEqualTo(42L);
+    }
+
+    // ── E-12 DIM ────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toDimDomain: 모든 치수 필드가 도메인으로 복사된다")
+    void toDimDomain_mapsAllFields() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlDimJpaEntity dimJpa = new HouseBlDimJpaEntity();
+        dimJpa.setHouseBl(houseBlJpa);
+        dimJpa.setLengthCm(50.0);
+        dimJpa.setWidthCm(40.0);
+        dimJpa.setHeightCm(30.0);
+        dimJpa.setQuantity(2);
+        dimJpa.setCbm(0.06);
+        dimJpa.setVolumeWeightKg(10.0);
+        dimJpa.setSeq(1);
+
+        HouseBlDim domain = mapper.toDimDomain(dimJpa);
+
+        assertThat(domain.getHouseBlId()).isEqualTo(1L);
+        assertThat(domain.getLengthCm()).isEqualTo(50.0);
+        assertThat(domain.getWidthCm()).isEqualTo(40.0);
+        assertThat(domain.getHeightCm()).isEqualTo(30.0);
+        assertThat(domain.getQuantity()).isEqualTo(2);
+        assertThat(domain.getCbm()).isEqualTo(0.06);
+        assertThat(domain.getVolumeWeightKg()).isEqualTo(10.0);
+        assertThat(domain.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("applyDimFields: 도메인 → JPA 모든 치수 필드가 세팅된다")
+    void applyDimFields_setsAllFieldsToJpa() {
+        HouseBlDim domain = HouseBlDim.create(1L, 50.0, 40.0, 30.0, 2, 0.06, 10.0, 1);
+        HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
+
+        mapper.applyDimFields(domain, jpa);
+
+        assertThat(jpa.getLengthCm()).isEqualTo(50.0);
+        assertThat(jpa.getWidthCm()).isEqualTo(40.0);
+        assertThat(jpa.getHeightCm()).isEqualTo(30.0);
+        assertThat(jpa.getQuantity()).isEqualTo(2);
+        assertThat(jpa.getCbm()).isEqualTo(0.06);
+        assertThat(jpa.getVolumeWeightKg()).isEqualTo(10.0);
+        assertThat(jpa.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("toDimDomainList: 2개 JPA 엔티티 → 크기 2인 도메인 리스트 반환")
+    void toDimDomainList_returnsCorrectSize() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlDimJpaEntity dim1 = new HouseBlDimJpaEntity();
+        dim1.setHouseBl(houseBlJpa);
+        dim1.setSeq(1);
+        HouseBlDimJpaEntity dim2 = new HouseBlDimJpaEntity();
+        dim2.setHouseBl(houseBlJpa);
+        dim2.setSeq(2);
+
+        List<HouseBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
+
+        assertThat(result).hasSize(2);
+    }
+
+    // ── E-13 DESC ───────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toDescDomain: marks/description/descClause/remark 필드가 도메인으로 복사된다")
+    void toDescDomain_mapsAllTextFields() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlDescJpaEntity descJpa = new HouseBlDescJpaEntity();
+        descJpa.setHouseBl(houseBlJpa);
+        descJpa.setMarks("MARKS-001");
+        descJpa.setDescription("DESCRIPTION TEXT");
+        descJpa.setDescClause("CLAUSE TEXT");
+        descJpa.setRemark("REMARK TEXT");
+
+        HouseBlDesc domain = mapper.toDescDomain(descJpa);
+
+        assertThat(domain.getHouseBlId()).isEqualTo(1L);
+        assertThat(domain.getMarks()).isEqualTo("MARKS-001");
+        assertThat(domain.getDescription()).isEqualTo("DESCRIPTION TEXT");
+        assertThat(domain.getDescClause1()).isEqualTo("CLAUSE TEXT");
+        assertThat(domain.getRemark()).isEqualTo("REMARK TEXT");
+    }
+
+    @Test
+    @DisplayName("applyDescFields: 도메인 → JPA 모든 텍스트 필드가 세팅된다")
+    void applyDescFields_setsAllTextFieldsToJpa() {
+        HouseBlDesc domain = HouseBlDesc.create(1L);
+        domain.updateContent("MARKS-001", "DESCRIPTION TEXT", "CLAUSE TEXT", "REMARK TEXT");
+        HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
+
+        mapper.applyDescFields(domain, jpa);
+
+        assertThat(jpa.getMarks()).isEqualTo("MARKS-001");
+        assertThat(jpa.getDescription()).isEqualTo("DESCRIPTION TEXT");
+        assertThat(jpa.getDescClause()).isEqualTo("CLAUSE TEXT");
+        assertThat(jpa.getRemark()).isEqualTo("REMARK TEXT");
+    }
+
+    @Test
+    @DisplayName("toDescDomain(Optional.empty): Optional이 비어있으면 empty Optional 반환")
+    void toDescDomain_optionalEmpty_returnsEmpty() {
+        Optional<HouseBlDesc> result = mapper.toDescDomain(Optional.empty());
+
+        assertThat(result.isEmpty()).isTrue();
+    }
+
+    // ── E-17 LICENSE ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toLicenseDomain: 수출면장 모든 필드가 도메인으로 복사된다")
+    void toLicenseDomain_mapsAllFields() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlLicenseJpaEntity licJpa = new HouseBlLicenseJpaEntity();
+        licJpa.setHouseBl(houseBlJpa);
+        licJpa.setLicenseNo("LC-001");
+        licJpa.setPkgQty(10);
+        licJpa.setPkgUnit("CTN");
+        licJpa.setGrossWeightKg(100.0);
+        licJpa.setPartialShipment(true);
+        licJpa.setPartialShipmentSeq(2);
+        licJpa.setHsnNo("1234.56");
+        licJpa.setSeq(1);
+
+        HouseBlLicense domain = mapper.toLicenseDomain(licJpa);
+
+        assertThat(domain.getLicenseNo()).isEqualTo("LC-001");
+        assertThat(domain.getPkgQty()).isEqualTo(10);
+        assertThat(domain.isPartialShipment()).isTrue();
+        assertThat(domain.getPartialShipmentSeq()).isEqualTo(2);
+        assertThat(domain.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("applyLicenseFields: 도메인 → JPA 모든 수출면장 필드가 세팅된다")
+    void applyLicenseFields_setsAllFieldsToJpa() {
+        HouseBlLicense domain = HouseBlLicense.create(1L, "LC-001", 10, "CTN", 100.0, true, 2, "1234.56", 1);
+        HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
+
+        mapper.applyLicenseFields(domain, jpa);
+
+        assertThat(jpa.getLicenseNo()).isEqualTo("LC-001");
+        assertThat(jpa.getPkgQty()).isEqualTo(10);
+        assertThat(jpa.getPkgUnit()).isEqualTo("CTN");
+        assertThat(jpa.getGrossWeightKg()).isEqualTo(100.0);
+        assertThat(jpa.isPartialShipment()).isTrue();
+        assertThat(jpa.getPartialShipmentSeq()).isEqualTo(2);
+        assertThat(jpa.getHsnNo()).isEqualTo("1234.56");
+        assertThat(jpa.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("toLicenseDomainList: 3개 JPA 엔티티 → 크기 3인 도메인 리스트 반환")
+    void toLicenseDomainList_returnsCorrectSize() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlLicenseJpaEntity lic1 = new HouseBlLicenseJpaEntity();
+        lic1.setHouseBl(houseBlJpa);
+        lic1.setSeq(1);
+        HouseBlLicenseJpaEntity lic2 = new HouseBlLicenseJpaEntity();
+        lic2.setHouseBl(houseBlJpa);
+        lic2.setSeq(2);
+        HouseBlLicenseJpaEntity lic3 = new HouseBlLicenseJpaEntity();
+        lic3.setHouseBl(houseBlJpa);
+        lic3.setSeq(3);
+
+        List<HouseBlLicense> result = mapper.toLicenseDomainList(List.of(lic1, lic2, lic3));
+
+        assertThat(result).hasSize(3);
+    }
+
+    // ── E-18 REFERENCE ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toReferenceDomain: referenceType / referenceNo가 도메인으로 복사된다")
+    void toReferenceDomain_mapsTypeAndNo() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlReferenceJpaEntity refJpa = new HouseBlReferenceJpaEntity();
+        refJpa.setHouseBl(houseBlJpa);
+        refJpa.setReferenceType("PO");
+        refJpa.setReferenceNo("PO-20240310-001");
+        refJpa.setSeq(1);
+
+        HouseBlReference domain = mapper.toReferenceDomain(refJpa);
+
+        assertThat(domain.getReferenceType()).isEqualTo("PO");
+        assertThat(domain.getReferenceNo()).isEqualTo("PO-20240310-001");
+    }
+
+    @Test
+    @DisplayName("applyReferenceFields: 도메인 → JPA referenceType / referenceNo가 세팅된다")
+    void applyReferenceFields_setsTypeAndNoToJpa() {
+        HouseBlReference domain = HouseBlReference.create(1L, "PO", "PO-001", 1);
+        HouseBlReferenceJpaEntity jpa = new HouseBlReferenceJpaEntity();
+
+        mapper.applyReferenceFields(domain, jpa);
+
+        assertThat(jpa.getReferenceType()).isEqualTo("PO");
+        assertThat(jpa.getReferenceNo()).isEqualTo("PO-001");
+    }
+
+    // ── E-19 SCHEDULE LEG ───────────────────────────────────────────
+
+    @Test
+    @DisplayName("toScheduleLegDomain: 항공 스케줄 레그 모든 필드가 도메인으로 복사된다")
+    void toScheduleLegDomain_mapsAllFields() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlScheduleLegJpaEntity legJpa = new HouseBlScheduleLegJpaEntity();
+        legJpa.setHouseBl(houseBlJpa);
+        legJpa.setToCode("NRT");
+        legJpa.setByCarrier("OZ");
+        legJpa.setFlightNo("OZ102");
+        legJpa.setOnBoardDt("20240315");
+        legJpa.setOnBoardTm("1800");
+        legJpa.setArrivalDt("20240316");
+        legJpa.setArrivalTm("0700");
+        legJpa.setSeq(2);
+
+        HouseBlScheduleLeg domain = mapper.toScheduleLegDomain(legJpa);
+
+        assertThat(domain.getToCode()).isEqualTo("NRT");
+        assertThat(domain.getByCarrier()).isEqualTo("OZ");
+        assertThat(domain.getFlightNo()).isEqualTo("OZ102");
+        assertThat(domain.getOnBoardDt()).isEqualTo("20240315");
+        assertThat(domain.getOnBoardTm()).isEqualTo("1800");
+        assertThat(domain.getArrivalDt()).isEqualTo("20240316");
+        assertThat(domain.getArrivalTm()).isEqualTo("0700");
+        assertThat(domain.getSeq()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("applyScheduleLegFields: 도메인 → JPA 모든 스케줄 레그 필드가 세팅된다")
+    void applyScheduleLegFields_setsAllFieldsToJpa() {
+        HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(1L, "NRT", "20240315", "20240316", 2);
+        domain.updateDetails("OZ", "OZ102", "1800", "0700");
+        HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
+
+        mapper.applyScheduleLegFields(domain, jpa);
+
+        assertThat(jpa.getToCode()).isEqualTo("NRT");
+        assertThat(jpa.getByCarrier()).isEqualTo("OZ");
+        assertThat(jpa.getFlightNo()).isEqualTo("OZ102");
+        assertThat(jpa.getOnBoardDt()).isEqualTo("20240315");
+        assertThat(jpa.getOnBoardTm()).isEqualTo("1800");
+        assertThat(jpa.getArrivalDt()).isEqualTo("20240316");
+        assertThat(jpa.getArrivalTm()).isEqualTo("0700");
+        assertThat(jpa.getSeq()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("toScheduleLegDomainList: 2개 JPA 엔티티 → 크기 2인 도메인 리스트 반환")
+    void toScheduleLegDomainList_returnsCorrectSize() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(1L);
+
+        HouseBlScheduleLegJpaEntity leg1 = new HouseBlScheduleLegJpaEntity();
+        leg1.setHouseBl(houseBlJpa);
+        leg1.setSeq(1);
+        HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
+        leg2.setHouseBl(houseBlJpa);
+        leg2.setSeq(2);
+
+        List<HouseBlScheduleLeg> result = mapper.toScheduleLegDomainList(List.of(leg1, leg2));
+
+        assertThat(result).hasSize(2);
     }
 }
