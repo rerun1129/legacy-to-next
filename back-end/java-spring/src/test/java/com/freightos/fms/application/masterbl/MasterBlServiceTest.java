@@ -2,6 +2,7 @@ package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
@@ -32,31 +33,33 @@ class MasterBlServiceTest {
     private MasterBlService masterBlService;
 
     @Test
-    @DisplayName("list - Bound.EXP 조회 시 port.findAllByBound(EXP) 위임")
+    @DisplayName("list - Bound.EXP 조회 시 port.getMasterBlsByBound(EXP) 위임")
     void list_exp_delegatesToPort() {
         PageRequest pageRequest = PageRequest.of(0, 50);
+        PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
         MasterBl mockEntity = mock(MasterBl.class);
         PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(masterBlPort.getMasterBlsByBound(Bound.EXP, pageRequest)).willReturn(expected);
+        given(masterBlPort.getMasterBlsByBound(Bound.EXP, sortedRequest)).willReturn(expected);
 
         PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.EXP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
-        then(masterBlPort).should().getMasterBlsByBound(Bound.EXP, pageRequest);
+        then(masterBlPort).should().getMasterBlsByBound(Bound.EXP, sortedRequest);
     }
 
     @Test
-    @DisplayName("list - Bound.IMP 조회 시 port.findAllByBound(IMP) 위임")
+    @DisplayName("list - Bound.IMP 조회 시 port.getMasterBlsByBound(IMP) 위임")
     void list_imp_delegatesToPort() {
         PageRequest pageRequest = PageRequest.of(0, 50);
+        PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
         MasterBl mockEntity = mock(MasterBl.class);
         PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(masterBlPort.getMasterBlsByBound(Bound.IMP, pageRequest)).willReturn(expected);
+        given(masterBlPort.getMasterBlsByBound(Bound.IMP, sortedRequest)).willReturn(expected);
 
         PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.IMP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
-        then(masterBlPort).should().getMasterBlsByBound(Bound.IMP, pageRequest);
+        then(masterBlPort).should().getMasterBlsByBound(Bound.IMP, sortedRequest);
     }
 
     @Test

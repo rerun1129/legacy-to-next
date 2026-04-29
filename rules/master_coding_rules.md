@@ -15,10 +15,14 @@
 - 메서드명은 동작 + 대상 + 조건으로 구성한다. 같은 클래스·인터페이스 내에서도 대상을 생략하지 않는다.
   - ❌ `getById`, `findAll`, `deleteById`, `list`, `search`, `process`, `handle`
   - ✅ `getHouseBlById`, `getHouseBlsByJobDivAndBound`, `deleteHouseBlById`
+- 정렬 기준·방향은 메서드명에 포함하지 않는다(`OrderByCreatedAtDesc` 등 금지). 정렬은 `PageRequest` 등 파라미터로 전달한다.
 - 조회 메서드 접두어: `find`는 0..1 (없을 수 있음), `get`은 1..n (반드시 있거나 여러 개).
 
 ## 가독성
 - 1회만 참조되는 지역 변수는 인라인한다.
+- if-else 분기가 3개 이상 체이닝되면 switch 문(또는 switch 표현식)으로 교체한다. default(예외 처리 포함)도 분기 수에 포함한다.
+- pattern matching switch에서 패턴 변수를 사용하지 않을 경우 `ignored`로 명명한다(`case Type ignored ->`).
+- 여러 줄로 분리된 식(메서드 체이닝, 삼항 연산자, 파라미터 목록 등)은 합쳤을 때 **180열 이하**이면 한 줄로 작성한다. 180열을 초과할 때만 개행한다.
 
 ## 응답 메시지
 - 사용자 노출 문자열을 코드에 하드코딩하지 않는다. 메시지 코드(`enum`) + `MessageSource` 기반 i18n으로 처리한다.

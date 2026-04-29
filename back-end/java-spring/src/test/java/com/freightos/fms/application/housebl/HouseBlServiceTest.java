@@ -2,6 +2,7 @@ package com.freightos.fms.application.housebl;
 
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
@@ -36,16 +37,17 @@ class HouseBlServiceTest {
     @DisplayName("getHouseBlsByJobDivAndBound - jobDiv+bound 조건으로 port 위임 후 PagedResult 반환")
     void getHouseBlsByJobDivAndBound_delegatesToPort() {
         PageRequest pageRequest = PageRequest.of(0, 50);
+        PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
         HouseBl mockEntity = mock(HouseBl.class);
         PagedResult<HouseBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageRequest))
+        given(houseBlPort.findHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, sortedRequest))
                 .willReturn(portResult);
 
         PagedResult<HouseBl> result = houseBlService.getHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         then(houseBlPort).should()
-                .findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv.SEA, Bound.EXP, pageRequest);
+                .findHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, sortedRequest);
     }
 
     @Test
@@ -53,19 +55,19 @@ class HouseBlServiceTest {
     void findHouseBlById_existingId_returnsEntity() {
         Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
-        given(houseBlPort.findById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
 
         HouseBl result = houseBlService.findHouseBlById(id);
 
         assertThat(result).isEqualTo(mockEntity);
-        then(houseBlPort).should().findById(id);
+        then(houseBlPort).should().findHouseBlById(id);
     }
 
     @Test
     @DisplayName("findHouseBlById - 존재하지 않는 ID 조회 시 ResourceNotFoundException")
     void findHouseBlById_notFound_throwsResourceNotFoundException() {
         Long id = 999L;
-        given(houseBlPort.findById(id)).willReturn(Optional.empty());
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> houseBlService.findHouseBlById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -76,11 +78,11 @@ class HouseBlServiceTest {
     void deleteHouseBlById_existingId_callsPortDelete() {
         Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
-        given(houseBlPort.findById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
 
         houseBlService.deleteHouseBlById(id);
 
-        then(houseBlPort).should().findById(id);
-        then(houseBlPort).should().delete(mockEntity);
+        then(houseBlPort).should().findHouseBlById(id);
+        then(houseBlPort).should().deleteHouseBl(mockEntity);
     }
 }

@@ -30,29 +30,22 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
 
     @Override
     public Optional<HouseBl> findHouseBlById(Long id) {
-        return houseBlRepository.findById(id)
-                .map(houseBlMapper::toDomain);
+        return houseBlRepository.findById(id).map(houseBlMapper::toDomain);
     }
 
     @Override
-    public PagedResult<HouseBl> findHouseBlsByJobDivAndBound(
-            JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
+    public PagedResult<HouseBl> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
         Page<HouseBlJpaEntity> page = houseBlRepository.findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound,
                 org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
-                        pageRequest.getSortBy() != null
-                                ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy())
-                                : Sort.unsorted()));
+                        pageRequest.getSortBy() != null ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy()) : Sort.unsorted()));
         return toPagedResult(page);
     }
 
     @Override
-    public PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to,
-                                                PageRequest pageRequest) {
+    public PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest) {
         Page<HouseBlJpaEntity> page = houseBlRepository.findBySchedule(jobDiv, bound, from, to,
                 org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
-                        pageRequest.getSortBy() != null
-                                ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy())
-                                : Sort.unsorted()));
+                        pageRequest.getSortBy() != null ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy()) : Sort.unsorted()));
         return toPagedResult(page);
     }
 
@@ -67,8 +60,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         // 부모 엔티티 save/update
         HouseBlJpaEntity parentJpa;
         if (domain.getId() != null) {
-            parentJpa = houseBlRepository.findById(domain.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("HouseBl", domain.getId()));
+            parentJpa = houseBlRepository.findById(domain.getId()).orElseThrow(() -> new ResourceNotFoundException("HouseBl", domain.getId()));
         } else {
             parentJpa = new HouseBlJpaEntity();
         }
@@ -78,38 +70,28 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         // extension 엔티티 save/update
         switch (domain) {
             case HouseBlSea sea -> {
-                HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository
-                        .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
-                        .orElseGet(HouseBlSeaJpaEntity::new);
+                HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlSeaJpaEntity::new);
                 seaJpa.setHouseBl(savedJpa);
                 houseBlMapper.applySeaFields(sea, seaJpa);
                 // 컨테이너 동기화 (SEA 전용)
-                List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream()
-                        .map(c -> houseBlMapper.toContainerJpa(c, savedJpa))
-                        .toList();
+                List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
                 houseBlSeaRepository.save(seaJpa);
             }
             case HouseBlAir air -> {
-                HouseBlAirJpaEntity airJpa = houseBlAirRepository
-                        .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
-                        .orElseGet(HouseBlAirJpaEntity::new);
+                HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlAirJpaEntity::new);
                 airJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyAirFields(air, airJpa);
                 houseBlAirRepository.save(airJpa);
             }
             case HouseBlTruck truck -> {
-                HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository
-                        .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
-                        .orElseGet(HouseBlTruckJpaEntity::new);
+                HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlTruckJpaEntity::new);
                 truckJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyTruckFields(truck, truckJpa);
                 houseBlTruckRepository.save(truckJpa);
             }
             case HouseBlNonBl nonBl -> {
-                HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository
-                        .findByHouseBlHouseBlId(savedJpa.getHouseBlId())
-                        .orElseGet(HouseBlNonBlJpaEntity::new);
+                HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlNonBlJpaEntity::new);
                 nonBlJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
                 houseBlNonBlRepository.save(nonBlJpa);
@@ -118,8 +100,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         }
 
         // reload (extension lazy 포함)
-        HouseBlJpaEntity reloaded = houseBlRepository.findById(savedJpa.getHouseBlId())
-                .orElseThrow(() -> new ResourceNotFoundException("HouseBl", savedJpa.getHouseBlId()));
+        HouseBlJpaEntity reloaded = houseBlRepository.findById(savedJpa.getHouseBlId()).orElseThrow(() -> new ResourceNotFoundException("HouseBl", savedJpa.getHouseBlId()));
         return houseBlMapper.toDomain(reloaded);
     }
 
@@ -135,10 +116,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     private PagedResult<HouseBl> toPagedResult(Page<HouseBlJpaEntity> page) {
-        List<HouseBl> content = page.getContent().stream()
-                .map(houseBlMapper::toDomain)
-                .toList();
-        return PagedResult.of(content, page.getTotalElements(), page.getTotalPages(),
-                page.getNumber(), page.getSize());
+        List<HouseBl> content = page.getContent().stream().map(houseBlMapper::toDomain).toList();
+        return PagedResult.of(content, page.getTotalElements(), page.getTotalPages(), page.getNumber(), page.getSize());
     }
 }

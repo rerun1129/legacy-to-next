@@ -20,12 +20,11 @@ public class MasterBlMapper {
 
     public MasterBl toDomain(MasterBlJpaEntity jpa) {
         String jobDiv = jpa.getJobDiv();
-        if ("SEA".equals(jobDiv)) {
-            return toSeaDomain(jpa, jpa.getSeaExt());
-        } else if ("AIR".equals(jobDiv)) {
-            return toAirDomain(jpa, jpa.getAirExt());
-        }
-        throw new IllegalArgumentException("Unknown jobDiv: " + jobDiv);
+        return switch (jobDiv) {
+            case "SEA" -> toSeaDomain(jpa, jpa.getSeaExt());
+            case "AIR" -> toAirDomain(jpa, jpa.getAirExt());
+            default    -> throw new IllegalArgumentException("Unknown jobDiv: " + jobDiv);
+        };
     }
 
     private MasterBlSea toSeaDomain(MasterBlJpaEntity jpa, MasterBlSeaJpaEntity seaJpa) {
@@ -77,9 +76,11 @@ public class MasterBlMapper {
         jpa.setMblNo(domain.getMblNo());
         jpa.setMasterRefNo(domain.getMasterRefNo());
         jpa.setBound(domain.getBound());
-        // jobDiv는 domain 클래스 타입에서 판별
-        if (domain instanceof MasterBlSea) jpa.setJobDiv("SEA");
-        else if (domain instanceof MasterBlAir) jpa.setJobDiv("AIR");
+        jpa.setJobDiv(switch (domain) {
+            case MasterBlSea ignored -> "SEA";
+            case MasterBlAir ignored -> "AIR";
+            default -> throw new IllegalStateException("Unknown MasterBl subtype: " + domain.getClass().getSimpleName());
+        });
         jpa.setShipperCode(domain.getShipperCode());
         jpa.setConsigneeCode(domain.getConsigneeCode());
         jpa.setNotifyCode(domain.getNotifyCode());

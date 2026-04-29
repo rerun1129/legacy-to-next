@@ -126,11 +126,13 @@ public class HouseBlMapper {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
         jpa.setBound(domain.getBound());
         // jobDiv는 domain 클래스 타입에서 판별
-        if (domain instanceof HouseBlSea) jpa.setJobDiv(JobDiv.SEA);
-        else if (domain instanceof HouseBlAir) jpa.setJobDiv(JobDiv.AIR);
-        else if (domain instanceof HouseBlTruck) jpa.setJobDiv(JobDiv.TRUCK);
-        else if (domain instanceof HouseBlNonBl) jpa.setJobDiv(JobDiv.NON_BL);
-        else throw new IllegalStateException("Unknown HouseBl subtype: " + domain.getClass().getSimpleName());
+        jpa.setJobDiv(switch (domain) {
+            case HouseBlSea    ignored -> JobDiv.SEA;
+            case HouseBlAir    ignored -> JobDiv.AIR;
+            case HouseBlTruck  ignored -> JobDiv.TRUCK;
+            case HouseBlNonBl  ignored -> JobDiv.NON_BL;
+            default -> throw new IllegalStateException("Unknown HouseBl subtype: " + domain.getClass().getSimpleName());
+        });
         jpa.setHblNo(domain.getHblNo());
         jpa.setPolCode(domain.getPolCode());
         jpa.setPodCode(domain.getPodCode());

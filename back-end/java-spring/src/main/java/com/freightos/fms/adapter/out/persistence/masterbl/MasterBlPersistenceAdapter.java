@@ -25,8 +25,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
 
     @Override
     public Optional<MasterBl> findMasterBlById(Long id) {
-        return masterBlRepository.findById(id)
-                .map(masterBlMapper::toDomain);
+        return masterBlRepository.findById(id).map(masterBlMapper::toDomain);
     }
 
     @Override
@@ -44,8 +43,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
 
     @Override
     public Optional<MasterBl> findMasterBlByMblNo(String mblNo) {
-        return masterBlRepository.findByMblNo(mblNo)
-                .map(masterBlMapper::toDomain);
+        return masterBlRepository.findByMblNo(mblNo).map(masterBlMapper::toDomain);
     }
 
     @Override

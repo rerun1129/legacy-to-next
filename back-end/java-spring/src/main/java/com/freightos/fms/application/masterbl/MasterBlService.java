@@ -24,14 +24,12 @@ public class MasterBlService implements MasterBlUseCase {
 
     @Override
     public PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest) {
-        return masterBlPort.getMasterBlsByBound(bound,
-                PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
+        return masterBlPort.getMasterBlsByBound(bound,PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
     }
 
     @Override
     public MasterBl findMasterBlById(Long id) {
-        return masterBlPort.findMasterBlById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
+        return masterBlPort.findMasterBlById(id).orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
     }
 
     @Override
