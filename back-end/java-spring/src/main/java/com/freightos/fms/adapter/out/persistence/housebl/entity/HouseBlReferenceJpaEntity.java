@@ -1,4 +1,4 @@
-package com.freightos.fms.adapter.out.persistence.housebl.entity;
+﻿package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * JPA ORM 엔티티 — House B/L 참조 번호 (E-18).
+ * JPA ORM ?뷀떚????House B/L 李몄“ 踰덊샇 (E-18).
  */
 @Entity
 @Table(name = "house_bl_reference")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlReferenceJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -39,3 +39,4 @@ public class HouseBlReferenceJpaEntity extends BaseJpaEntity {
     public void setReferenceNo(String v) { this.referenceNo = v; }
     public void setSeq(int v) { this.seq = v; }
 }
+

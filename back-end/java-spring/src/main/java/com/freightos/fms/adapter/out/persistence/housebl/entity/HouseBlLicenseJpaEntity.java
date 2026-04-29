@@ -1,4 +1,4 @@
-package com.freightos.fms.adapter.out.persistence.housebl.entity;
+﻿package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * JPA ORM 엔티티 — House B/L 라이선스 / 패킹 명세 (E-17).
+ * JPA ORM ?뷀떚????House B/L ?쇱씠?좎뒪 / ?⑦궧 紐낆꽭 (E-17).
  */
 @Entity
 @Table(name = "house_bl_license")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlLicenseJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -73,3 +73,4 @@ public class HouseBlLicenseJpaEntity extends BaseJpaEntity {
     public void setHsnNo(String v) { this.hsnNo = v; }
     public void setSeq(int v) { this.seq = v; }
 }
+

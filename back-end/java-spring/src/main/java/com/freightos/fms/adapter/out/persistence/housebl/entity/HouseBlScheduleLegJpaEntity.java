@@ -1,4 +1,4 @@
-package com.freightos.fms.adapter.out.persistence.housebl.entity;
+﻿package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * JPA ORM 엔티티 — House B/L 구간별 운항 스케줄 (E-19).
+ * JPA ORM ?뷀떚????House B/L 援ш컙蹂??댄빆 ?ㅼ?以?(E-19).
  */
 @Entity
 @Table(name = "house_bl_schedule_leg")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -59,3 +59,4 @@ public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {
     public void setArrivalTm(String v) { this.arrivalTm = v; }
     public void setSeq(int v) { this.seq = v; }
 }
+

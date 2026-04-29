@@ -1,4 +1,4 @@
-package com.freightos.fms.adapter.out.persistence.housebl.entity;
+﻿package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
@@ -7,13 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * JPA ORM 엔티티 — House B/L 화물 표시 및 품목 설명 (E-13).
- * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
+ * JPA ORM ?뷀떚????House B/L ?붾Ъ ?쒖떆 諛??덈ぉ ?ㅻ챸 (E-13).
+ * HouseBlJpaEntity ? @OneToOne(FK: house_bl_id) 愿怨?
  */
 @Entity
 @Table(name = "house_bl_desc")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlDescJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -56,3 +56,4 @@ public class HouseBlDescJpaEntity extends BaseJpaEntity {
     public void setDescClause2(String v) { this.descClause2 = v; }
     public void setRemark(String v) { this.remark = v; }
 }
+
