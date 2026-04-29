@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,15 +16,14 @@ import lombok.NoArgsConstructor;
 public class MasterBlSea extends MasterBl {
 
     private LoadType loadType;
-    private String linerCode;
-    private String vesselName;
-    private String voyageNo;
-    // 비즈니스 날짜 — 8자 문자열 (yyyyMMdd)
-    private String onboardDate;
-    private String lineBkgNo;
+    private PartyCode linerCode;
+    private VesselVoyage vesselVoyage;
+    // 비즈니스 날짜
+    private BlDate onboardDate;
+    private BlNumber lineBkgNo;
 
     // 수출 전용
-    private String issueDate;
+    private BlDate issueDate;
 
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
@@ -35,15 +35,13 @@ public class MasterBlSea extends MasterBl {
         return new MasterBlSea(bound);
     }
 
-    public void updateSeaFields(LoadType loadType, String linerCode, String vesselName,
-                                String voyageNo, String onboardDate,
-                                String lineBkgNo, String issueDate) {
-        this.loadType    = loadType;
-        this.linerCode   = linerCode;
-        this.vesselName  = vesselName;
-        this.voyageNo    = voyageNo;
-        this.onboardDate = onboardDate;
-        this.lineBkgNo   = lineBkgNo;
-        this.issueDate   = issueDate;
+    public void updateSeaFields(LoadType loadType, PartyCode linerCode, VesselVoyage vesselVoyage,
+                                BlDate onboardDate, BlNumber lineBkgNo, BlDate issueDate) {
+        this.loadType     = loadType;
+        this.linerCode    = linerCode;
+        this.vesselVoyage = vesselVoyage;
+        this.onboardDate  = onboardDate;
+        this.lineBkgNo    = lineBkgNo;
+        this.issueDate    = issueDate;
     }
 }

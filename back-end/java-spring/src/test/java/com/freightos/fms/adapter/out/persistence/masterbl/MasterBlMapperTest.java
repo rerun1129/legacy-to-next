@@ -4,9 +4,10 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
-import com.freightos.fms.domain.common.enums.FreightTerm;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +55,8 @@ class MasterBlMapperTest {
     @DisplayName("applySeaFields: SEA 도메인 필드가 MasterBlSeaJpaEntity에 복사된다")
     void applySeaFields_copiesSeaFieldsToJpa() {
         MasterBlSea domain = MasterBlSea.create(Bound.EXP);
-        domain.updateSeaFields(null, "MSC", "MSC OSCAR", "0012W", "2024-03-10", "BKG-001", "2024-03-01");
+        domain.updateSeaFields(null, PartyCode.of("MSC"), VesselVoyage.of("MSC OSCAR", "0012W"),
+                BlDate.of("20240310"), BlNumber.of("BKG-001"), BlDate.of("20240301"));
         MasterBlSeaJpaEntity jpa = new MasterBlSeaJpaEntity();
 
         mapper.applySeaFields(domain, jpa);
@@ -62,18 +64,19 @@ class MasterBlMapperTest {
         assertThat(jpa.getLinerCode()).isEqualTo("MSC");
         assertThat(jpa.getVesselName()).isEqualTo("MSC OSCAR");
         assertThat(jpa.getVoyageNo()).isEqualTo("0012W");
-        assertThat(jpa.getOnboardDate()).isEqualTo("2024-03-10");
-        assertThat(jpa.getIssueDate()).isEqualTo("2024-03-01");
+        assertThat(jpa.getOnboardDate()).isEqualTo("20240310");
+        assertThat(jpa.getIssueDate()).isEqualTo("20240301");
     }
 
     @Test
     @DisplayName("applyAirFields: AIR 도메인 필드가 MasterBlAirJpaEntity에 복사된다")
     void applyAirFields_copiesAirFieldsToJpa() {
         MasterBlAir domain = MasterBlAir.create(Bound.EXP);
-        domain.updateAirFields(new MasterBlAir.AirFields("KE", "ICN", "180-12345678",
-                BigDecimal.valueOf(100.5), BigDecimal.valueOf(90.0),
-                "Q", "KRW", "N.V.D.", null, "NIL", null, null, null,
-                "2024-03-01", "Seoul", "Signature"));
+        domain.updateAirFields(new MasterBlAir.AirFields(
+                PartyCode.of("KE"), AirportCode.of("ICN"), BlNumber.of("180-12345678"),
+                Weight.of(BigDecimal.valueOf(100.5)), Weight.of(BigDecimal.valueOf(90.0)),
+                "Q", CurrencyCode.of("KRW"), "N.V.D.", null, "NIL", null, null, null,
+                BlDate.of("20240301"), "Seoul", "Signature"));
         MasterBlAirJpaEntity jpa = new MasterBlAirJpaEntity();
 
         mapper.applyAirFields(domain, jpa);
@@ -82,7 +85,7 @@ class MasterBlMapperTest {
         assertThat(jpa.getMawbNo()).isEqualTo("180-12345678");
         assertThat(jpa.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
         assertThat(jpa.getInsurance()).isEqualTo("NIL");
-        assertThat(jpa.getIssueDate()).isEqualTo("2024-03-01");
+        assertThat(jpa.getIssueDate()).isEqualTo("20240301");
     }
 
     // ── JPA → Domain ────────────────────────────────────────────────
@@ -105,11 +108,11 @@ class MasterBlMapperTest {
         MasterBlSea domain = (MasterBlSea) mapper.toDomain(parentJpa);
 
         assertThat(domain).isInstanceOf(MasterBlSea.class);
-        assertThat(domain.getMblNo()).isEqualTo("MBLNO-SEA-001");
-        assertThat(domain.getShipperCode()).isEqualTo("SHIPPER-SEA");
-        assertThat(domain.getPolCode()).isEqualTo("PUS");
-        assertThat(domain.getPkgQty()).isEqualTo(20);
-        assertThat(domain.getGrossWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(5000.0));
+        assertThat(domain.getMblNo().value()).isEqualTo("MBLNO-SEA-001");
+        assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER-SEA");
+        assertThat(domain.getPolCode().value()).isEqualTo("PUS");
+        assertThat(domain.getPkgQty().count()).isEqualTo(20);
+        assertThat(domain.getGrossWeightKg().kg()).isEqualByComparingTo(BigDecimal.valueOf(5000.0));
         assertThat(domain.getFreightTerm()).isEqualTo(FreightTerm.PREPAID);
     }
 
@@ -132,11 +135,11 @@ class MasterBlMapperTest {
         MasterBlAir domain = (MasterBlAir) mapper.toDomain(parentJpa);
 
         assertThat(domain).isInstanceOf(MasterBlAir.class);
-        assertThat(domain.getMblNo()).isEqualTo("MAWB-001");
-        assertThat(domain.getShipperCode()).isEqualTo("SHIPPER01");
-        assertThat(domain.getPolCode()).isEqualTo("ICN");
+        assertThat(domain.getMblNo().value()).isEqualTo("MAWB-001");
+        assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER01");
+        assertThat(domain.getPolCode().value()).isEqualTo("ICN");
         assertThat(domain.getFreightTerm()).isEqualTo(FreightTerm.PREPAID);
-        assertThat(domain.getPkgQty()).isEqualTo(5);
+        assertThat(domain.getPkgQty().count()).isEqualTo(5);
         // create() 기본값 유지 (airExt null 이므로 copyAirFields 미호출)
         assertThat(domain.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
         assertThat(domain.getInsurance()).isEqualTo("NIL");

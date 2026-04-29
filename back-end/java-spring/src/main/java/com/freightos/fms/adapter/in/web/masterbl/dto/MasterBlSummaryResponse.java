@@ -24,17 +24,17 @@ public record MasterBlSummaryResponse(
     public static MasterBlSummaryResponse from(MasterBl entity) {
         return new MasterBlSummaryResponse(
                 entity.getId(),
-                entity.getMblNo(),
-                entity.getMasterRefNo(),
+                entity.getMblNo() != null ? entity.getMblNo().value() : null,
+                entity.getMasterRefNo() != null ? entity.getMasterRefNo().value() : null,
                 entity.getJobDiv(),
                 entity.getBound(),
-                entity.getShipperCode(),
-                entity.getConsigneeCode(),
-                entity.getPolCode(),
-                entity.getPodCode(),
-                entity.getEtd(),
-                entity.getEta(),
-                entity.getOperatorCode(),
+                entity.getShipperCode() != null ? entity.getShipperCode().value() : null,
+                entity.getConsigneeCode() != null ? entity.getConsigneeCode().value() : null,
+                entity.getPolCode() != null ? entity.getPolCode().value() : null,
+                entity.getPodCode() != null ? entity.getPodCode().value() : null,
+                entity.getEtd() != null ? entity.getEtd().asString() : null,
+                entity.getEta() != null ? entity.getEta().asString() : null,
+                entity.getOperatorCode() != null ? entity.getOperatorCode().value() : null,
                 entity.getCreatedAt()
         );
     }

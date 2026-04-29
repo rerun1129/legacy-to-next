@@ -25,16 +25,16 @@ public record HouseBlSummaryResponse(
     public static HouseBlSummaryResponse from(HouseBl entity) {
         return new HouseBlSummaryResponse(
                 entity.getId(),
-                entity.getHblNo(),
+                entity.getHblNo() != null ? entity.getHblNo().value() : null,
                 entity.getJobDiv(),
                 entity.getBound(),
-                entity.getPolCode(),
-                entity.getPodCode(),
-                entity.getEtd(),
-                entity.getEta(),
-                entity.getShipperCode(),
-                entity.getConsigneeCode(),
-                entity.getPkgQty(),
+                entity.getPolCode() != null ? entity.getPolCode().value() : null,
+                entity.getPodCode() != null ? entity.getPodCode().value() : null,
+                entity.getEtd() != null ? entity.getEtd().asString() : null,
+                entity.getEta() != null ? entity.getEta().asString() : null,
+                entity.getShipperCode() != null ? entity.getShipperCode().value() : null,
+                entity.getConsigneeCode() != null ? entity.getConsigneeCode().value() : null,
+                entity.getPkgQty() != null ? entity.getPkgQty().count() : null,
                 entity.getPkgUnit(),
                 entity.getCreatedAt()
         );

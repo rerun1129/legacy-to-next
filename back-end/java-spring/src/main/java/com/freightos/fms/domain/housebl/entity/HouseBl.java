@@ -3,6 +3,7 @@ package com.freightos.fms.domain.housebl.entity;
 import com.freightos.fms.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
@@ -10,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,41 +24,41 @@ import java.util.List;
 public abstract class HouseBl extends BaseEntity {
 
     // ── 식별 ──────────────────────────────────────────────────────
-    private String hblNo;              // EXP: Auto on save / IMP: 필수 입력 (§S-02 PRD)
+    private BlNumber hblNo;             // EXP: Auto on save / IMP: 필수 입력 (§S-02 PRD)
     private JobDiv jobDiv;
-    private Bound bound;               // EXP / IMP
+    private Bound bound;                // EXP / IMP
 
     // ── 상태 ──────────────────────────────────────────────────────
-    private ShipmentType shipmentType; // HOUSE / DIRECT
-    private BlType blType;             // SEA 수출만 적용
+    private ShipmentType shipmentType;  // HOUSE / DIRECT
+    private BlType blType;              // SEA 수출만 적용
     private FreightTerm freightTerm;
 
     // ── 당사자 (코드 참조) ─────────────────────────────────────────
-    private String shipperCode;
-    private String consigneeCode;
-    private String notifyCode;
-    private String docPartnerCode;     // SEA/AIR House 전용
+    private PartyCode shipperCode;
+    private PartyCode consigneeCode;
+    private PartyCode notifyCode;
+    private PartyCode docPartnerCode;   // SEA/AIR House 전용
 
     // ── 경로 ──────────────────────────────────────────────────────
-    private String polCode;            // Port of Loading (UNLOC)
-    private String podCode;            // Port of Discharge
-    private String deliveryCode;
+    private PortCode polCode;           // Port of Loading (UNLOC)
+    private PortCode podCode;           // Port of Discharge
+    private PortCode deliveryCode;
 
-    // ── 일정 (yyyyMMdd) ──────────────────────────────────────────
-    private String etd;
-    private String eta;
+    // ── 일정 ──────────────────────────────────────────────────────
+    private BlDate etd;
+    private BlDate eta;
 
     // ── 화물 요약 (비정규화 — 빠른 리스트 조회용) ────────────────────
-    private Integer pkgQty;
+    private Quantity pkgQty;
     private String pkgUnit;
-    private BigDecimal grossWeightKg;
-    private BigDecimal cbm;
+    private Weight grossWeightKg;
+    private Volume cbm;
 
     // ── 영업·담당 ──────────────────────────────────────────────────
-    private String actualCustomerCode;
-    private String operatorCode;
-    private String teamCode;
-    private String salesManCode;
+    private PartyCode actualCustomerCode;
+    private EmployeeCode operatorCode;
+    private TeamCode teamCode;
+    private EmployeeCode salesManCode;
 
     // ── Master B/L 연결 ─────────────────────────────────────────
     private Long masterBlId;
@@ -73,19 +73,22 @@ public abstract class HouseBl extends BaseEntity {
         this.bound  = bound;
     }
 
-    public void assignHblNo(String hblNo) {
+    public void assignHblNo(BlNumber hblNo) {
         this.hblNo = hblNo;
     }
 
-    public void updateSchedule(String polCode, String podCode, String etd, String eta) {
+    public void updateSchedule(PortCode polCode, PortCode podCode, BlDate etd, BlDate eta) {
+        if (etd != null && eta != null && !etd.isBeforeOrEqual(eta)) {
+            throw new IllegalArgumentException("etd must be before or equal to eta");
+        }
         this.polCode = polCode;
         this.podCode = podCode;
         this.etd     = etd;
         this.eta     = eta;
     }
 
-    public void assignOperator(String actualCustomerCode, String operatorCode,
-                               String teamCode, String salesManCode) {
+    public void assignOperator(PartyCode actualCustomerCode, EmployeeCode operatorCode,
+                               TeamCode teamCode, EmployeeCode salesManCode) {
         this.actualCustomerCode = actualCustomerCode;
         this.operatorCode       = operatorCode;
         this.teamCode           = teamCode;
@@ -102,21 +105,20 @@ public abstract class HouseBl extends BaseEntity {
         this.freightTerm  = freightTerm;
     }
 
-    public void assignParties(String shipperCode, String consigneeCode, String notifyCode,
-                              String docPartnerCode, String deliveryCode) {
-        this.shipperCode     = shipperCode;
-        this.consigneeCode   = consigneeCode;
-        this.notifyCode      = notifyCode;
-        this.docPartnerCode  = docPartnerCode;
-        this.deliveryCode    = deliveryCode;
+    public void assignParties(PartyCode shipperCode, PartyCode consigneeCode, PartyCode notifyCode,
+                              PartyCode docPartnerCode, PortCode deliveryCode) {
+        this.shipperCode    = shipperCode;
+        this.consigneeCode  = consigneeCode;
+        this.notifyCode     = notifyCode;
+        this.docPartnerCode = docPartnerCode;
+        this.deliveryCode   = deliveryCode;
     }
 
-    public void updateCargoSummary(Integer pkgQty, String pkgUnit,
-                                   java.math.BigDecimal grossWeightKg, java.math.BigDecimal cbm) {
-        this.pkgQty        = pkgQty;
-        this.pkgUnit       = pkgUnit;
-        this.grossWeightKg = grossWeightKg;
-        this.cbm           = cbm;
+    public void updateCargoSummary(CargoSummary cargo) {
+        this.pkgQty        = cargo.packageCount();
+        this.pkgUnit       = cargo.packageUnit();
+        this.grossWeightKg = cargo.grossWeight();
+        this.cbm           = cargo.volume();
     }
 
     public void initContainers(List<HouseBlContainer> containers) {

@@ -1,12 +1,11 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 /**
  * E-11 House B/L 항공 확장.
@@ -16,30 +15,30 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlAir extends HouseBl {
 
-    private String airlineCode;
-    private String departureCode;       // 출발 공항 IATA
-    private String mawbNo;
+    private PartyCode airlineCode;
+    private AirportCode departureCode;  // 출발 공항 IATA
+    private BlNumber mawbNo;
 
     // 청구중량 (Chargeable Weight = max(grossWeight, volumeWeight))
-    private BigDecimal chargeWeightKg;
-    private BigDecimal volumeWeightKg;
+    private Weight chargeWeightKg;
+    private Weight volumeWeightKg;
     private String rateClass;           // GCR / SCR / CCR 등 IATA 운임 분류
 
     // 항공 Trade 필드
-    private String currencyCode;
-    private String declaredValueCarriage;  // D.V Carriage, 기본값 N.V.D.
+    private CurrencyCode currencyCode;
+    private String declaredValueCarriage;   // D.V Carriage, 기본값 N.V.D.
     private String declaredValueCustoms;
-    private String insurance;              // 기본값 NIL
+    private String insurance;               // 기본값 NIL
     private String accountInformation;
     private String otherTerm;
 
-    // 수출 전용 — yyyyMMdd
-    private String issueDate;
+    // 수출 전용
+    private BlDate issueDate;
     private String issuePlace;
     private String signature;
 
     // 수입 전용
-    private String fhd;                // Not / F.H.D / To Door
+    private String fhd;                 // Not / F.H.D / To Door
     private String incoterms;
     private String freightTermAir;
 
@@ -55,12 +54,12 @@ public class HouseBlAir extends HouseBl {
     }
 
     public static record AirFields(
-            String airlineCode, String departureCode, String mawbNo,
-            BigDecimal chargeWeightKg, BigDecimal volumeWeightKg,
-            String rateClass, String currencyCode,
+            PartyCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
+            Weight chargeWeightKg, Weight volumeWeightKg,
+            String rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
             String insurance, String accountInformation, String otherTerm,
-            String issueDate, String issuePlace, String signature,
+            BlDate issueDate, String issuePlace, String signature,
             String fhd, String incoterms, String freightTermAir) {}
 
     public void updateAirFields(AirFields f) {

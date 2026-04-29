@@ -1,11 +1,10 @@
 package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 /**
  * E-04 Master B/L 항공 확장.
@@ -15,15 +14,15 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MasterBlAir extends MasterBl {
 
-    private String airlineCode;
-    private String departureCode;
-    private String mawbNo;
+    private PartyCode airlineCode;
+    private AirportCode departureCode;
+    private BlNumber mawbNo;
 
-    private BigDecimal chargeWeightKg;
-    private BigDecimal volumeWeightKg;
+    private Weight chargeWeightKg;
+    private Weight volumeWeightKg;
     private String rateClass;
 
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String declaredValueCarriage;
     private String declaredValueCustoms;
     private String insurance;
@@ -33,8 +32,8 @@ public class MasterBlAir extends MasterBl {
     private String securityStatus;
     private String flightType;
 
-    // 수출 전용 Issue — yyyyMMdd
-    private String issueDate;
+    // 수출 전용 Issue
+    private BlDate issueDate;
     private String issuePlace;
     private String signature;
 
@@ -50,13 +49,13 @@ public class MasterBlAir extends MasterBl {
     }
 
     public static record AirFields(
-            String airlineCode, String departureCode, String mawbNo,
-            BigDecimal chargeWeightKg, BigDecimal volumeWeightKg,
-            String rateClass, String currencyCode,
+            PartyCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
+            Weight chargeWeightKg, Weight volumeWeightKg,
+            String rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
             String insurance, String accountInformation,
             String securityStatus, String flightType,
-            String issueDate, String issuePlace, String signature) {}
+            BlDate issueDate, String issuePlace, String signature) {}
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();

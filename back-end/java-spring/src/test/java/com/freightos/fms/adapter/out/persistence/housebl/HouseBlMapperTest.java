@@ -125,10 +125,10 @@ class HouseBlMapperTest {
         HouseBlAir domain = (HouseBlAir) mapper.toDomain(parentJpa);
 
         assertThat(domain).isInstanceOf(HouseBlAir.class);
-        assertThat(domain.getShipperCode()).isEqualTo("SHIPPER01");
-        assertThat(domain.getConsigneeCode()).isEqualTo("CONSIGNEE01");
-        assertThat(domain.getPkgQty()).isEqualTo(10);
-        assertThat(domain.getGrossWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(250.0));
+        assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER01");
+        assertThat(domain.getConsigneeCode().value()).isEqualTo("CONSIGNEE01");
+        assertThat(domain.getPkgQty().count()).isEqualTo(10);
+        assertThat(domain.getGrossWeightKg().kg()).isEqualByComparingTo(BigDecimal.valueOf(250.0));
         // create() 기본값 유지
         assertThat(domain.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
         assertThat(domain.getInsurance()).isEqualTo("NIL");
@@ -148,10 +148,10 @@ class HouseBlMapperTest {
         HouseBlSea domain = (HouseBlSea) mapper.toDomain(parentJpa);
 
         assertThat(domain).isInstanceOf(HouseBlSea.class);
-        assertThat(domain.getHblNo()).isEqualTo("HBL-SEA-001");
-        assertThat(domain.getShipperCode()).isEqualTo("SHIPPER02");
-        assertThat(domain.getPkgQty()).isEqualTo(5);
-        assertThat(domain.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(30.0));
+        assertThat(domain.getHblNo().value()).isEqualTo("HBL-SEA-001");
+        assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER02");
+        assertThat(domain.getPkgQty().count()).isEqualTo(5);
+        assertThat(domain.getCbm().cbm()).isEqualByComparingTo(BigDecimal.valueOf(30.0));
         assertThat(domain.getContainers()).isEmpty();
     }
 

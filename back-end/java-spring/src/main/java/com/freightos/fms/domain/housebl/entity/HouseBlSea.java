@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import lombok.AccessLevel;
@@ -15,29 +16,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlSea extends HouseBl {
 
-    private LoadType loadType;         // FCL / LCL / BULK
-    private String linerCode;
-    private String vesselName;
-    private String voyageNo;
-    // 비즈니스 날짜 — yyyyMMdd
-    private String onboardDate;
-    private String porCode;            // Place of Receipt
-    private String finalDestCode;
+    private LoadType loadType;          // FCL / LCL / BULK
+    private PartyCode linerCode;
+    private VesselVoyage vesselVoyage;
+    // 비즈니스 날짜
+    private BlDate onboardDate;
+    private PortCode porCode;           // Place of Receipt
+    private PortCode finalDestCode;
 
     // 수출 전용
-    private String issueDate;
+    private BlDate issueDate;
     private Integer noOfBl;
     private String issuePlace;
 
     // 수입 전용
-    private String doDate;
+    private BlDate doDate;
 
     // 인코텀스
     private String incoterms;
     private String payableAt;
     private boolean isTriangle = false;
     private boolean isCoLoad = false;
-    private String mblNo;              // 연결된 Master B/L No (참조용)
+    private BlNumber mblNo;             // 연결된 Master B/L No (참조용)
 
     protected HouseBlSea(Bound bound) {
         super(JobDiv.SEA, bound);
@@ -47,19 +47,17 @@ public class HouseBlSea extends HouseBl {
         return new HouseBlSea(bound);
     }
 
-    public void updateSeaSchedule(String linerCode, String vesselName, String voyageNo,
-                                  String onboardDate) {
-        this.linerCode   = linerCode;
-        this.vesselName  = vesselName;
-        this.voyageNo    = voyageNo;
-        this.onboardDate = onboardDate;
+    public void updateSeaSchedule(PartyCode linerCode, VesselVoyage vesselVoyage, BlDate onboardDate) {
+        this.linerCode    = linerCode;
+        this.vesselVoyage = vesselVoyage;
+        this.onboardDate  = onboardDate;
     }
 
     public static record SeaRouteAndFlags(
-            String porCode, String finalDestCode,
-            String issueDate, Integer noOfBl, String issuePlace,
-            String doDate, String incoterms, String payableAt,
-            boolean triangle, boolean coLoad, String mblNo,
+            PortCode porCode, PortCode finalDestCode,
+            BlDate issueDate, Integer noOfBl, String issuePlace,
+            BlDate doDate, String incoterms, String payableAt,
+            boolean triangle, boolean coLoad, BlNumber mblNo,
             LoadType loadType) {}
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
