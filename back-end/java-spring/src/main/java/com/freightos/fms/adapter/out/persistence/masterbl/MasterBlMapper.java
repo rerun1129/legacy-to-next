@@ -63,8 +63,10 @@ public class MasterBlMapper {
         domain.assignIdentity(jpa.getMasterBlId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignMblNo(BlNumber.of(jpa.getMblNo()), BlNumber.of(jpa.getMasterRefNo()));
-        domain.assignParties(CustomerCode.of(jpa.getShipperCode()), CustomerCode.of(jpa.getConsigneeCode()),
-                CustomerCode.of(jpa.getNotifyCode()));
+        domain.assignParties(
+                CustomerCode.of(jpa.getShipperCode(), jpa.getShipperAddress()),
+                CustomerCode.of(jpa.getConsigneeCode(), jpa.getConsigneeAddress()),
+                CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()));
         domain.updateSchedule(PortCode.of(jpa.getPolCode()), PortCode.of(jpa.getPodCode()),
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
@@ -101,8 +103,11 @@ public class MasterBlMapper {
         jpa.setBound(domain.getBound());
         jpa.setJobDiv(mapOrNull(domain.getJobDiv(), MasterBlJobDiv::name));
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
         jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
         jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
         jpa.setPolCode(mapOrNull(domain.getPolCode(), PortCode::value));
         jpa.setPodCode(mapOrNull(domain.getPodCode(), PortCode::value));
         jpa.setEtd(mapOrNull(domain.getEtd(), BlDate::asString));

@@ -58,14 +58,26 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "shipper_code", length = 20)
     private String shipperCode;
 
+    @Column(name = "shipper_address", length = 500)
+    private String shipperAddress;
+
     @Column(name = "consignee_code", length = 20)
     private String consigneeCode;
+
+    @Column(name = "consignee_address", length = 500)
+    private String consigneeAddress;
 
     @Column(name = "notify_code", length = 20)
     private String notifyCode;
 
+    @Column(name = "notify_address", length = 500)
+    private String notifyAddress;
+
     @Column(name = "doc_partner_code", length = 20)
     private String docPartnerCode;
+
+    @Column(name = "doc_partner_address", length = 500)
+    private String docPartnerAddress;
 
     @Column(name = "pol_code", length = 10)
     private String polCode;
@@ -130,9 +142,13 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setBlType(BlType blType) { this.blType = blType; }
     public void setFreightTerm(FreightTerm freightTerm) { this.freightTerm = freightTerm; }
     public void setShipperCode(String shipperCode) { this.shipperCode = shipperCode; }
+    public void setShipperAddress(String shipperAddress) { this.shipperAddress = shipperAddress; }
     public void setConsigneeCode(String consigneeCode) { this.consigneeCode = consigneeCode; }
+    public void setConsigneeAddress(String consigneeAddress) { this.consigneeAddress = consigneeAddress; }
     public void setNotifyCode(String notifyCode) { this.notifyCode = notifyCode; }
+    public void setNotifyAddress(String notifyAddress) { this.notifyAddress = notifyAddress; }
     public void setDocPartnerCode(String docPartnerCode) { this.docPartnerCode = docPartnerCode; }
+    public void setDocPartnerAddress(String docPartnerAddress) { this.docPartnerAddress = docPartnerAddress; }
     public void setDeliveryCode(String deliveryCode) { this.deliveryCode = deliveryCode; }
     public void setPkgQty(Integer pkgQty) { this.pkgQty = pkgQty; }
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }
