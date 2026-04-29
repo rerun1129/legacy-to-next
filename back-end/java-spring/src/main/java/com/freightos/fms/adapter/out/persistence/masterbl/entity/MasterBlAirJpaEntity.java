@@ -74,6 +74,9 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "signature", length = 100)
     private String signature;
 
+    @Column(name = "volume_divisor", length = 10)
+    private String volumeDivisor;
+
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setDepartureCode(String v) { this.departureCode = v; }
@@ -91,4 +94,5 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setIssueDate(String v) { this.issueDate = v; }
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setSignature(String v) { this.signature = v; }
+    public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
 }
