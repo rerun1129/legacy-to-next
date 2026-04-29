@@ -1,7 +1,10 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.PackageUnit;
@@ -10,9 +13,15 @@ import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
+import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
+import com.freightos.fms.domain.masterbl.entity.MasterBlScheduleLeg;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 
@@ -135,5 +144,87 @@ public class MasterBlMapper {
         jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
         jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setSignature(domain.getSignature());
+    }
+
+    // ── E-05 DIM ───────────────────────────────────────────────────
+
+    public MasterBlDim toDimDomain(MasterBlDimJpaEntity jpa) {
+        MasterBlDim domain = MasterBlDim.create(
+                jpa.getMasterBl().getMasterBlId(),
+                jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
+                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg(),
+                jpa.getSeq());
+        return domain;
+    }
+
+    public List<MasterBlDim> toDimDomainList(List<MasterBlDimJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toDimDomain).toList();
+    }
+
+    public void applyDimFields(MasterBlDim domain, MasterBlDimJpaEntity jpa,
+                               MasterBlJpaEntity masterBlJpa) {
+        jpa.setLengthCm(domain.getLengthCm());
+        jpa.setWidthCm(domain.getWidthCm());
+        jpa.setHeightCm(domain.getHeightCm());
+        jpa.setQuantity(domain.getQuantity());
+        jpa.setCbm(domain.getCbm());
+        jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
+        jpa.setSeq(domain.getSeq());
+        jpa.setMasterBl(masterBlJpa);
+    }
+
+    // ── E-06 DESC ──────────────────────────────────────────────────
+
+    public MasterBlDesc toDescDomain(MasterBlDescJpaEntity jpa) {
+        MasterBlDesc domain = MasterBlDesc.create(jpa.getMasterBl().getMasterBlId());
+        domain.updateContent(jpa.getMarksLeft(), jpa.getMarksRight(),
+                jpa.getDescriptionLeft(), jpa.getDescriptionRight(),
+                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+        return domain;
+    }
+
+    public Optional<MasterBlDesc> toDescDomain(Optional<MasterBlDescJpaEntity> jpaOpt) {
+        return jpaOpt.map(this::toDescDomain);
+    }
+
+    public void applyDescFields(MasterBlDesc domain, MasterBlDescJpaEntity jpa,
+                                MasterBlJpaEntity masterBlJpa) {
+        jpa.setMarksLeft(domain.getMarksLeft());
+        jpa.setMarksRight(domain.getMarksRight());
+        jpa.setDescriptionLeft(domain.getDescriptionLeft());
+        jpa.setDescriptionRight(domain.getDescriptionRight());
+        jpa.setDescClause1(domain.getDescClause1());
+        jpa.setDescClause2(domain.getDescClause2());
+        jpa.setRemark(domain.getRemark());
+        jpa.setMasterBl(masterBlJpa);
+    }
+
+    // ── E-07 SCHEDULE LEG ──────────────────────────────────────────
+
+    public MasterBlScheduleLeg toScheduleLegDomain(MasterBlScheduleLegJpaEntity jpa) {
+        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(
+                jpa.getMasterBl().getMasterBlId(),
+                jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt(), jpa.getSeq());
+        domain.updateDetails(jpa.getToCode(), jpa.getByCarrier(), jpa.getFlightNo(),
+                jpa.getOnBoardDt(), jpa.getOnBoardTm(), jpa.getArrivalDt(), jpa.getArrivalTm(),
+                jpa.getSeq());
+        return domain;
+    }
+
+    public List<MasterBlScheduleLeg> toScheduleLegDomainList(List<MasterBlScheduleLegJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toScheduleLegDomain).toList();
+    }
+
+    public void applyScheduleLegFields(MasterBlScheduleLeg domain, MasterBlScheduleLegJpaEntity jpa,
+                                       MasterBlJpaEntity masterBlJpa) {
+        jpa.setToCode(domain.getToCode());
+        jpa.setByCarrier(domain.getByCarrier());
+        jpa.setFlightNo(domain.getFlightNo());
+        jpa.setOnBoardDt(domain.getOnBoardDt());
+        jpa.setOnBoardTm(domain.getOnBoardTm());
+        jpa.setArrivalDt(domain.getArrivalDt());
+        jpa.setArrivalTm(domain.getArrivalTm());
+        jpa.setSeq(domain.getSeq());
+        jpa.setMasterBl(masterBlJpa);
     }
 }

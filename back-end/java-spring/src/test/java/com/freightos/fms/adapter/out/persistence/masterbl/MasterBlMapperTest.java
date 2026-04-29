@@ -1,7 +1,10 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FlightType;
@@ -10,13 +13,19 @@ import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
+import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
+import com.freightos.fms.domain.masterbl.entity.MasterBlScheduleLeg;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -158,5 +167,246 @@ class MasterBlMapperTest {
         assertThatThrownBy(() -> mapper.toDomain(parentJpa))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown jobDiv: UNKNOWN");
+    }
+
+    // ── E-05 DIM ────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toDimDomain: JPA → 도메인 전체 필드가 복사된다")
+    void toDimDomain_mapsAllFields() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(1L);
+
+        MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
+        dimJpa.setMasterBl(masterBlJpa);
+        dimJpa.setLengthCm(BigDecimal.valueOf(100.5));
+        dimJpa.setWidthCm(BigDecimal.valueOf(80.0));
+        dimJpa.setHeightCm(BigDecimal.valueOf(60.0));
+        dimJpa.setQuantity(3);
+        dimJpa.setCbm(BigDecimal.valueOf(0.485));
+        dimJpa.setVolumeWeightKg(BigDecimal.valueOf(80.8));
+        dimJpa.setSeq(1);
+
+        MasterBlDim domain = mapper.toDimDomain(dimJpa);
+
+        assertThat(domain.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(100.5));
+        assertThat(domain.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(80.0));
+        assertThat(domain.getHeightCm()).isEqualByComparingTo(BigDecimal.valueOf(60.0));
+        assertThat(domain.getQuantity()).isEqualTo(3);
+        assertThat(domain.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.485));
+        assertThat(domain.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(80.8));
+        assertThat(domain.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("applyDimFields: 도메인 → JPA 전체 필드가 세팅된다")
+    void applyDimFields_setsAllFieldsToJpa() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(1L);
+
+        MasterBlDim domain = MasterBlDim.create(1L,
+                BigDecimal.valueOf(100.5), BigDecimal.valueOf(80.0), BigDecimal.valueOf(60.0),
+                3, BigDecimal.valueOf(0.485), BigDecimal.valueOf(80.8), 1);
+        MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
+
+        mapper.applyDimFields(domain, dimJpa, masterBlJpa);
+
+        assertThat(dimJpa.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(100.5));
+        assertThat(dimJpa.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(80.0));
+        assertThat(dimJpa.getHeightCm()).isEqualByComparingTo(BigDecimal.valueOf(60.0));
+        assertThat(dimJpa.getQuantity()).isEqualTo(3);
+        assertThat(dimJpa.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.485));
+        assertThat(dimJpa.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(80.8));
+        assertThat(dimJpa.getSeq()).isEqualTo(1);
+        assertThat(dimJpa.getMasterBl()).isSameAs(masterBlJpa);
+    }
+
+    @Test
+    @DisplayName("toDimDomainList: JPA 엔티티 리스트 → 도메인 리스트로 변환된다")
+    void toDimDomainList_convertsMultipleEntities() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(1L);
+
+        MasterBlDimJpaEntity dim1 = new MasterBlDimJpaEntity();
+        dim1.setMasterBl(masterBlJpa);
+        dim1.setSeq(1);
+
+        MasterBlDimJpaEntity dim2 = new MasterBlDimJpaEntity();
+        dim2.setMasterBl(masterBlJpa);
+        dim2.setSeq(2);
+
+        List<MasterBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
+
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("applyDimFields: null 허용 필드가 null이어도 NPE 없이 동작한다")
+    void applyDimFields_nullValues_doesNotThrow() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(1L);
+
+        MasterBlDim domain = MasterBlDim.create(1L, null, null, null, null, null, null, 1);
+        MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
+
+        assertThatCode(() -> mapper.applyDimFields(domain, dimJpa, masterBlJpa))
+                .doesNotThrowAnyException();
+    }
+
+    // ── E-06 DESC ────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toDescDomain: JPA → 도메인 텍스트 필드 전체가 복사된다")
+    void toDescDomain_mapsAllTextFields() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(2L);
+
+        MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
+        descJpa.setMasterBl(masterBlJpa);
+        descJpa.setMarksLeft("ML");
+        descJpa.setMarksRight("MR");
+        descJpa.setDescriptionLeft("DL");
+        descJpa.setDescriptionRight("DR");
+        descJpa.setDescClause1("CLAUSE1");
+        descJpa.setDescClause2("CLAUSE2");
+        descJpa.setRemark("REMARK");
+
+        MasterBlDesc domain = mapper.toDescDomain(descJpa);
+
+        assertThat(domain.getMarksLeft()).isEqualTo("ML");
+        assertThat(domain.getMarksRight()).isEqualTo("MR");
+        assertThat(domain.getDescriptionLeft()).isEqualTo("DL");
+        assertThat(domain.getDescriptionRight()).isEqualTo("DR");
+        assertThat(domain.getDescClause1()).isEqualTo("CLAUSE1");
+        assertThat(domain.getDescClause2()).isEqualTo("CLAUSE2");
+        assertThat(domain.getRemark()).isEqualTo("REMARK");
+    }
+
+    @Test
+    @DisplayName("applyDescFields: 도메인 → JPA 텍스트 필드 전체가 세팅된다")
+    void applyDescFields_setsAllTextFieldsToJpa() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(2L);
+
+        MasterBlDesc domain = MasterBlDesc.create(2L);
+        domain.updateContent("ML", "MR", "DL", "DR", "CLAUSE1", "CLAUSE2", "REMARK");
+        MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
+
+        mapper.applyDescFields(domain, descJpa, masterBlJpa);
+
+        assertThat(descJpa.getDescriptionLeft()).isEqualTo("DL");
+        assertThat(descJpa.getDescClause1()).isEqualTo("CLAUSE1");
+        assertThat(descJpa.getRemark()).isEqualTo("REMARK");
+        assertThat(descJpa.getMasterBl()).isSameAs(masterBlJpa);
+    }
+
+    @Test
+    @DisplayName("toDescDomain(Optional.empty): 빈 Optional을 넘기면 빈 Optional이 반환된다")
+    void toDescDomain_optionalEmpty_returnsEmpty() {
+        Optional<MasterBlDesc> result = mapper.toDescDomain(Optional.empty());
+
+        assertThat(result).isEmpty();
+    }
+
+    // ── E-07 SCHEDULE LEG ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toScheduleLegDomain: JPA → 도메인 전체 필드가 복사된다")
+    void toScheduleLegDomain_mapsAllFields() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(3L);
+
+        MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
+        legJpa.setMasterBl(masterBlJpa);
+        legJpa.setToCode("NRT");
+        legJpa.setByCarrier("KE");
+        legJpa.setFlightNo("KE101");
+        legJpa.setOnBoardDt("20240310");
+        legJpa.setOnBoardTm("1430");
+        legJpa.setArrivalDt("20240311");
+        legJpa.setArrivalTm("0615");
+        legJpa.setSeq(1);
+
+        MasterBlScheduleLeg domain = mapper.toScheduleLegDomain(legJpa);
+
+        assertThat(domain.getToCode()).isEqualTo("NRT");
+        assertThat(domain.getByCarrier()).isEqualTo("KE");
+        assertThat(domain.getFlightNo()).isEqualTo("KE101");
+        assertThat(domain.getOnBoardDt()).isEqualTo("20240310");
+        assertThat(domain.getOnBoardTm()).isEqualTo("1430");
+        assertThat(domain.getArrivalDt()).isEqualTo("20240311");
+        assertThat(domain.getArrivalTm()).isEqualTo("0615");
+        assertThat(domain.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("applyScheduleLegFields: 도메인 → JPA 전체 필드가 세팅된다")
+    void applyScheduleLegFields_setsAllFieldsToJpa() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(3L);
+
+        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311", 1);
+        domain.updateDetails("NRT", "KE", "KE101", "20240310", "1430", "20240311", "0615", 1);
+        MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
+
+        mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa);
+
+        assertThat(legJpa.getToCode()).isEqualTo("NRT");
+        assertThat(legJpa.getByCarrier()).isEqualTo("KE");
+        assertThat(legJpa.getFlightNo()).isEqualTo("KE101");
+        assertThat(legJpa.getOnBoardDt()).isEqualTo("20240310");
+        assertThat(legJpa.getOnBoardTm()).isEqualTo("1430");
+        assertThat(legJpa.getArrivalDt()).isEqualTo("20240311");
+        assertThat(legJpa.getArrivalTm()).isEqualTo("0615");
+        assertThat(legJpa.getSeq()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("toScheduleLegDomainList: JPA 엔티티 3개 리스트 → 도메인 리스트로 변환된다")
+    void toScheduleLegDomainList_convertsMultipleLegs() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(3L);
+
+        MasterBlScheduleLegJpaEntity leg1 = new MasterBlScheduleLegJpaEntity();
+        leg1.setMasterBl(masterBlJpa);
+        leg1.setToCode("HKG");
+        leg1.setOnBoardDt("20240310");
+        leg1.setArrivalDt("20240310");
+        leg1.setSeq(1);
+
+        MasterBlScheduleLegJpaEntity leg2 = new MasterBlScheduleLegJpaEntity();
+        leg2.setMasterBl(masterBlJpa);
+        leg2.setToCode("NRT");
+        leg2.setOnBoardDt("20240311");
+        leg2.setArrivalDt("20240311");
+        leg2.setSeq(2);
+
+        MasterBlScheduleLegJpaEntity leg3 = new MasterBlScheduleLegJpaEntity();
+        leg3.setMasterBl(masterBlJpa);
+        leg3.setToCode("LAX");
+        leg3.setOnBoardDt("20240312");
+        leg3.setArrivalDt("20240312");
+        leg3.setSeq(3);
+
+        List<MasterBlScheduleLeg> result = mapper.toScheduleLegDomainList(List.of(leg1, leg2, leg3));
+
+        assertThat(result).hasSize(3);
+        assertThat(result.get(0).getSeq()).isEqualTo(1);
+        assertThat(result.get(1).getSeq()).isEqualTo(2);
+        assertThat(result.get(2).getSeq()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("applyScheduleLegFields: byCarrier와 flightNo가 null이어도 NPE 없이 동작한다")
+    void applyScheduleLegFields_nullCarrierAndFlight_doesNotThrow() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(3L);
+
+        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311", 1);
+        domain.updateDetails("NRT", null, null, "20240310", "1430", "20240311", "0615", 1);
+        MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
+
+        assertThatCode(() -> mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa))
+                .doesNotThrowAnyException();
     }
 }
