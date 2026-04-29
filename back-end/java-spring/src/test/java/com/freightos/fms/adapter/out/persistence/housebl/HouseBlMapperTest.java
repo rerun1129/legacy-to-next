@@ -121,9 +121,7 @@ class HouseBlMapperTest {
         parentJpa.setConsigneeCode("CONSIGNEE01");
         parentJpa.setPkgQty(10);
         parentJpa.setGrossWeightKg(BigDecimal.valueOf(250.0));
-        // airExt null — lazy 미로드 상태 시뮬레이션
-
-        HouseBlAir domain = (HouseBlAir) mapper.toDomain(parentJpa);
+        HouseBlAir domain = mapper.toAirDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlAir.class);
         assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER01");
@@ -146,7 +144,7 @@ class HouseBlMapperTest {
         parentJpa.setPkgQty(5);
         parentJpa.setCbm(BigDecimal.valueOf(30.0));
 
-        HouseBlSea domain = (HouseBlSea) mapper.toDomain(parentJpa);
+        HouseBlSea domain = mapper.toSeaDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlSea.class);
         assertThat(domain.getHblNo().value()).isEqualTo("HBL-SEA-001");
@@ -163,7 +161,7 @@ class HouseBlMapperTest {
         parentJpa.setJobDiv(JobDiv.TRUCK);
         parentJpa.setBound(Bound.EXP);
 
-        HouseBl domain = mapper.toDomain(parentJpa);
+        HouseBl domain = mapper.toTruckDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlTruck.class);
     }
@@ -175,7 +173,7 @@ class HouseBlMapperTest {
         parentJpa.setJobDiv(JobDiv.NON_BL);
         parentJpa.setBound(Bound.EXP);
 
-        HouseBl domain = mapper.toDomain(parentJpa);
+        HouseBl domain = mapper.toNonBlDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlNonBl.class);
         assertThat(((HouseBlNonBl) domain).getWorkDivision()).isNull();
@@ -189,7 +187,7 @@ class HouseBlMapperTest {
         parentJpa.setBound(Bound.EXP);
         parentJpa.setHouseBlId(42L);
 
-        HouseBlAir domain = (HouseBlAir) mapper.toDomain(parentJpa);
+        HouseBlAir domain = mapper.toAirDomain(parentJpa, null);
 
         assertThat(domain.getId()).isEqualTo(42L);
     }

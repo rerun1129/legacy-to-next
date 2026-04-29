@@ -30,7 +30,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
 
     @Override
     public Optional<HouseBl> findHouseBlById(Long id) {
-        return houseBlRepository.findById(id).map(houseBlMapper::toDomain);
+        return houseBlRepository.findById(id).map(this::loadWithExt);
     }
 
     @Override
@@ -94,14 +94,14 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlNonBlJpaEntity::new);
                 nonBlJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
+                List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlMapper.toContainerJpa(c, savedJpa)).toList();
+                savedJpa.syncContainers(jpaContainers);
                 houseBlNonBlRepository.save(nonBlJpa);
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
         }
 
-        // reload (extension lazy 포함)
-        HouseBlJpaEntity reloaded = houseBlRepository.findById(savedJpa.getHouseBlId()).orElseThrow(() -> new ResourceNotFoundException("HouseBl", savedJpa.getHouseBlId()));
-        return houseBlMapper.toDomain(reloaded);
+        return loadWithExt(savedJpa);
     }
 
     @Override
@@ -116,7 +116,17 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     private PagedResult<HouseBl> toPagedResult(Page<HouseBlJpaEntity> page) {
-        List<HouseBl> content = page.getContent().stream().map(houseBlMapper::toDomain).toList();
+        List<HouseBl> content = page.getContent().stream().map(this::loadWithExt).toList();
         return PagedResult.of(content, page.getTotalElements(), page.getTotalPages(), page.getNumber(), page.getSize());
+    }
+
+    private HouseBl loadWithExt(HouseBlJpaEntity jpa) {
+        Long id = jpa.getHouseBlId();
+        return switch (jpa.getJobDiv()) {
+            case SEA    -> houseBlMapper.toSeaDomain(jpa, houseBlSeaRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case AIR    -> houseBlMapper.toAirDomain(jpa, houseBlAirRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case TRUCK  -> houseBlMapper.toTruckDomain(jpa, houseBlTruckRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case NON_BL -> houseBlMapper.toNonBlDomain(jpa, houseBlNonBlRepository.findByHouseBlHouseBlId(id).orElse(null));
+        };
     }
 }

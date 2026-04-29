@@ -109,18 +109,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_id")
     private Long masterBlId;
 
-    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
-    private HouseBlSeaJpaEntity seaExt;
-
-    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
-    private HouseBlAirJpaEntity airExt;
-
-    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
-    private HouseBlTruckJpaEntity truckExt;
-
-    @OneToOne(mappedBy = "houseBl", fetch = FetchType.LAZY)
-    private HouseBlNonBlJpaEntity nonBlExt;
-
     @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();

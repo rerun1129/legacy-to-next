@@ -64,7 +64,7 @@ public abstract class HouseBl extends BaseEntity {
     // ── Master B/L 연결 ─────────────────────────────────────────
     private Long masterBlId;
 
-    // ── 컨테이너 (SEA 전용, 다른 모드에서는 빈 컬렉션) ──────────────
+    // ── 컨테이너 (SEA/NON_BL 전용, 다른 모드에서는 빈 컬렉션) ─────────
     private List<HouseBlContainer> containers = new ArrayList<>();
 
     // ── 도메인 메서드 ────────────────────────────────────────────

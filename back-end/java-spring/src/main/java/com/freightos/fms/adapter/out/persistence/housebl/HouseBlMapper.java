@@ -30,21 +30,11 @@ public class HouseBlMapper {
 
     // ── JpaEntity → Domain ─────────────────────────────────────────
 
-    public HouseBl toDomain(HouseBlJpaEntity jpa) {
-        JobDiv jobDiv = jpa.getJobDiv();
-        return switch (jobDiv) {
-            case SEA    -> toSeaDomain(jpa, jpa.getSeaExt());
-            case AIR    -> toAirDomain(jpa, jpa.getAirExt());
-            case TRUCK  -> toTruckDomain(jpa, jpa.getTruckExt());
-            case NON_BL -> toNonBlDomain(jpa, jpa.getNonBlExt());
-        };
-    }
-
-    private HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa) {
+    public HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa) {
         HouseBlSea domain = HouseBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
-        // SEA만 컨테이너 보유 — @BatchSize(50)으로 리스트 조회 시 batch fetch
+        // @BatchSize(50)으로 리스트 조회 시 batch fetch
         List<HouseBlContainer> containers = jpa.getContainers().stream()
                 .map(c -> toContainerDomain(c, domain))
                 .collect(Collectors.toList());
@@ -52,24 +42,28 @@ public class HouseBlMapper {
         return domain;
     }
 
-    private HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa) {
+    public HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa) {
         HouseBlAir domain = HouseBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
         return domain;
     }
 
-    private HouseBlTruck toTruckDomain(HouseBlJpaEntity jpa, HouseBlTruckJpaEntity truckJpa) {
+    public HouseBlTruck toTruckDomain(HouseBlJpaEntity jpa, HouseBlTruckJpaEntity truckJpa) {
         HouseBlTruck domain = HouseBlTruck.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (truckJpa != null) copyTruckFields(truckJpa, domain);
         return domain;
     }
 
-    private HouseBlNonBl toNonBlDomain(HouseBlJpaEntity jpa, HouseBlNonBlJpaEntity nonBlJpa) {
+    public HouseBlNonBl toNonBlDomain(HouseBlJpaEntity jpa, HouseBlNonBlJpaEntity nonBlJpa) {
         HouseBlNonBl domain = HouseBlNonBl.create(nonBlJpa != null ? nonBlJpa.getWorkDivision() : null, jpa.getBound());
         copyBaseFields(jpa, domain);
         if (nonBlJpa != null) copyNonBlFields(nonBlJpa, domain);
+        List<HouseBlContainer> containers = jpa.getContainers().stream()
+                .map(c -> toContainerDomain(c, domain))
+                .collect(Collectors.toList());
+        domain.initContainers(containers);
         return domain;
     }
 

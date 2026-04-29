@@ -23,33 +23,6 @@
 * 메인 에이전트는 오케스트레이션 역할만 담당하며 각 서브 에이전트에 전달할 내용만을 Input / Output함.
 * 전체 파이프라인 흐름 및 메인 책임은 .claude/agents/PIPELINE.md 참조 필수.
 * 메인은 git commit 완료 직후 `touch .claude/.review_pending` 실행 (REJECTED 재작업 후 commit 시도 동일). 단, `/pipeline-start` 누적 모드에서는 마커 미생성 · `.claude/.review_skip` sentinel 유지. `/pipeline-review` 또는 `/pipeline`에서만 sentinel 제거 후 마커 생성.
-* 백엔드/프론트엔드 코드는 헥사고널(Ports & Adapters) 아키텍처 적용. 인프라·스크립트·마이그레이션 등 비도메인 파일은 아키텍처 규칙 적용 대상 외.
-* Reviewer가 violations 항목에 `blocking: false`로 분류한 deferrable 위반(기본값: conventions.md만)은 즉시 Coder 재작업 대신 `.claude/deferred_review.json`에 누적된다. 누적이 `REVIEWER_DEFERRED_THRESHOLD`(기본 5) 사이클에 도달하면 메인은 사용자에게 일괄 처리 여부를 묻는다. 자세한 흐름은 `.claude/agents/PIPELINE_DEFERRED.md` 참조.
-* `/pipeline-coder-qa`는 Planner와 Reviewer를 건너뛰고 Coder→QA만 실행하는 단축 흐름. 작은 수정·빠른 검증용. 진입 시 `.claude/.review_skip` 생성, 모든 종료 경로에서 정리. `touch .claude/.review_pending` 금지. 상세 흐름은 `.claude/commands/pipeline-coder-qa.md` 참조.
-* `/refactor-by-rules`는 master_coding_rules.md를 SSOT로 삼아 Haiku Refactorer가 단순 패턴 치환만 수행한다. git commit·QA·Reviewer 모두 미수행(변경 후 사용자가 직접 검토·commit). 상세는 `.claude/commands/refactor-by-rules.md` 참조.
-
-
-
-## 서브 에이전트
-
-* Planner - 사용자에게 받은 작업 지시를 개발이 가능한 기획으로 정리 및 승인 요청. 이후 Coder에게 흐름을 넘긴다.
-* Coder - 백엔드 및 프론트엔드 모두 DDD에 입각한 코드 개발 및 테스트 코드 작성(빌드·실행은 QA 전담, 기존 테스트 수정·삭제는 사용자 승인 필요).
-* Reviewer - 서브 에이전트는 아니지만 격리된 컨텍스트를 가진 외부 메인 에이전트. Stop 훅은 메인 응답 종료 시마다 발화하며 `.review_pending` 마커가 있을 때만 Reviewer가 실행됨 (메인이 git commit 후 `touch .claude/.review_pending` 실행 시 다음 Stop에서 트리거). 2단계(Sonnet 1차 → ESCALATE 시 Opus 2차) 리뷰. REJECTED 시 메인 재개하여 Coder 재호출 후 재검토, APPROVED 시 메인 재개하여 QA 호출.
-* QA - 코드 오류 검수 및 테스트 코드 최종 동작
-* Mediator - 병렬 Coder의 worktree 머지 시 충돌 파일 내용 해결. 충돌 발생 시에만 호출.
-* Refactorer - rules/master_coding_rules.md 기반 패턴 리팩토링 전담(Haiku). 신규 클래스 생성·메서드명 결정·아키텍처 판단은 메인이 처리.
-
-
-
-## 서브 에이전트 파일 경로
-
-* 파이프라인 정의: .claude/agents/PIPELINE.md
-* Deferrable 위반 처리: .claude/agents/PIPELINE_DEFERRED.md
-* Planner: .claude/agents/Planner.md
-* Coder: .claude/agents/Coder.md
-* Mediator: .claude/agents/Mediator.md
-* QA: .claude/agents/QA.md
-* Refactorer: .claude/agents/Refactorer.md
 
 
 
