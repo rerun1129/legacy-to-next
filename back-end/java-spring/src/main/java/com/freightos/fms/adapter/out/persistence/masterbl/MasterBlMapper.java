@@ -150,15 +150,13 @@ public class MasterBlMapper {
     // ── E-05 DIM ──────────────────────────────────────────────────────
 
     public MasterBlDim toDimDomain(MasterBlDimJpaEntity jpa) {
-        MasterBlDim domain = MasterBlDim.create(jpa.getMasterBl().getMasterBlId());
+        MasterBlDim domain = MasterBlDim.create(
+                jpa.getMasterBl().getMasterBlId(),
+                jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
+                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg(),
+                jpa.getSeq());
         domain.assignIdentity(jpa.getMasterBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
-        domain.updateFields(
-                jpa.getLength(), jpa.getWidth(), jpa.getHeight(),
-                Quantity.of(jpa.getQty()),
-                Volume.of(jpa.getCbm()),
-                Weight.of(jpa.getVolumeWt()),
-                jpa.getDivisor(), jpa.getSeq());
         return domain;
     }
 
@@ -168,13 +166,12 @@ public class MasterBlMapper {
 
     public void applyDimFields(MasterBlDim domain, MasterBlDimJpaEntity jpa, MasterBlJpaEntity masterBlJpa) {
         jpa.setMasterBl(masterBlJpa);
-        jpa.setLength(domain.getLength());
-        jpa.setWidth(domain.getWidth());
-        jpa.setHeight(domain.getHeight());
-        jpa.setQty(mapOrNull(domain.getQty(), Quantity::count));
-        jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
-        jpa.setVolumeWt(mapOrNull(domain.getVolumeWt(), Weight::kg));
-        jpa.setDivisor(domain.getDivisor());
+        jpa.setLengthCm(domain.getLengthCm());
+        jpa.setWidthCm(domain.getWidthCm());
+        jpa.setHeightCm(domain.getHeightCm());
+        jpa.setQuantity(domain.getQuantity());
+        jpa.setCbm(domain.getCbm());
+        jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
         jpa.setSeq(domain.getSeq());
     }
 
@@ -184,8 +181,9 @@ public class MasterBlMapper {
         MasterBlDesc domain = MasterBlDesc.create(jpa.getMasterBl().getMasterBlId());
         domain.assignIdentity(jpa.getMasterBlDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
-        domain.updateFields(jpa.getMarksLeft(), jpa.getMarksRight(),
-                jpa.getDescLeft(), jpa.getDescRight());
+        domain.updateContent(jpa.getMarksLeft(), jpa.getMarksRight(),
+                jpa.getDescriptionLeft(), jpa.getDescriptionRight(),
+                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
         return domain;
     }
 
@@ -197,23 +195,24 @@ public class MasterBlMapper {
         jpa.setMasterBl(masterBlJpa);
         jpa.setMarksLeft(domain.getMarksLeft());
         jpa.setMarksRight(domain.getMarksRight());
-        jpa.setDescLeft(domain.getDescLeft());
-        jpa.setDescRight(domain.getDescRight());
+        jpa.setDescriptionLeft(domain.getDescriptionLeft());
+        jpa.setDescriptionRight(domain.getDescriptionRight());
+        jpa.setDescClause1(domain.getDescClause1());
+        jpa.setDescClause2(domain.getDescClause2());
+        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-07 SCHEDULE LEG ─────────────────────────────────────────────
 
     public MasterBlScheduleLeg toScheduleLegDomain(MasterBlScheduleLegJpaEntity jpa) {
-        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(jpa.getMasterBl().getMasterBlId());
+        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(
+                jpa.getMasterBl().getMasterBlId(),
+                jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt(), jpa.getSeq());
         domain.assignIdentity(jpa.getMasterBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
-        domain.updateFields(
-                PortCode.of(jpa.getToCode()),
-                AirlineCode.of(jpa.getByAirline()),
-                jpa.getFlightNo(),
-                BlDate.of(jpa.getOnBoardDate()), jpa.getOnBoardTime(),
-                BlDate.of(jpa.getArrivalDate()), jpa.getArrivalTime(),
-                jpa.getSeq());
+        domain.updateDetails(jpa.getToCode(), jpa.getByCarrier(), jpa.getFlightNo(),
+                jpa.getOnBoardDt(), jpa.getOnBoardTm(),
+                jpa.getArrivalDt(), jpa.getArrivalTm(), jpa.getSeq());
         return domain;
     }
 
@@ -224,13 +223,13 @@ public class MasterBlMapper {
     public void applyScheduleLegFields(MasterBlScheduleLeg domain, MasterBlScheduleLegJpaEntity jpa,
                                        MasterBlJpaEntity masterBlJpa) {
         jpa.setMasterBl(masterBlJpa);
-        jpa.setToCode(mapOrNull(domain.getToCode(), PortCode::value));
-        jpa.setByAirline(mapOrNull(domain.getByAirline(), AirlineCode::value));
+        jpa.setToCode(domain.getToCode());
+        jpa.setByCarrier(domain.getByCarrier());
         jpa.setFlightNo(domain.getFlightNo());
-        jpa.setOnBoardDate(mapOrNull(domain.getOnBoardDate(), BlDate::asString));
-        jpa.setOnBoardTime(domain.getOnBoardTime());
-        jpa.setArrivalDate(mapOrNull(domain.getArrivalDate(), BlDate::asString));
-        jpa.setArrivalTime(domain.getArrivalTime());
+        jpa.setOnBoardDt(domain.getOnBoardDt());
+        jpa.setOnBoardTm(domain.getOnBoardTm());
+        jpa.setArrivalDt(domain.getArrivalDt());
+        jpa.setArrivalTm(domain.getArrivalTm());
         jpa.setSeq(domain.getSeq());
     }
 }
