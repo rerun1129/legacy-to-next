@@ -25,13 +25,13 @@ public class HouseBlService implements HouseBlUseCase {
 
     @Override
     public PagedResult<HouseBl> getHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
-        return houseBlPort.findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound,
+        return houseBlPort.findHouseBlsByJobDivAndBound(jobDiv, bound,
                 PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
     }
 
     @Override
     public HouseBl findHouseBlById(Long id) {
-        return houseBlPort.findById(id)
+        return houseBlPort.findHouseBlById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
     }
 
@@ -39,14 +39,14 @@ public class HouseBlService implements HouseBlUseCase {
     @Transactional
     public HouseBl save(HouseBl houseBl) {
         log.debug("Saving HouseBl: {}", houseBl.getHblNo());
-        return houseBlPort.save(houseBl);
+        return houseBlPort.saveHouseBl(houseBl);
     }
 
     @Override
     @Transactional
     public void deleteHouseBlById(Long id) {
         HouseBl entity = findHouseBlById(id);
-        houseBlPort.delete(entity);
+        houseBlPort.deleteHouseBl(entity);
         log.info("Deleted HouseBl id={}", id);
     }
 }

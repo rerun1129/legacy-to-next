@@ -9,10 +9,10 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import java.util.Optional;
 
 public interface HouseBlPort {
-    Optional<HouseBl> findById(Long id);
-    PagedResult<HouseBl> findAllByJobDivAndBoundOrderByCreatedAtDesc(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
-    PagedResult<HouseBl> findBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest);
-    long countByMasterBlId(Long masterBlId);
-    HouseBl save(HouseBl houseBl);
-    void delete(HouseBl houseBl);
+    Optional<HouseBl> findHouseBlById(Long id);
+    PagedResult<HouseBl> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
+    PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest);
+    long countHouseBlsByMasterBlId(Long masterBlId);
+    HouseBl saveHouseBl(HouseBl houseBl);
+    void deleteHouseBl(HouseBl houseBl);
 }
