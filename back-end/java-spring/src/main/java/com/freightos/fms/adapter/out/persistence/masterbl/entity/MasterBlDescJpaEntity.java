@@ -24,17 +24,11 @@ public class MasterBlDescJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "master_bl_id", nullable = false, unique = true)
     private MasterBlJpaEntity masterBl;
 
-    @Column(name = "marks_left", columnDefinition = "TEXT")
-    private String marksLeft;
+    @Column(name = "marks", columnDefinition = "TEXT")
+    private String marks;
 
-    @Column(name = "marks_right", columnDefinition = "TEXT")
-    private String marksRight;
-
-    @Column(name = "description_left", columnDefinition = "TEXT")
-    private String descriptionLeft;
-
-    @Column(name = "description_right", columnDefinition = "TEXT")
-    private String descriptionRight;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "desc_clause_1", length = 50)
     private String descClause1;
@@ -46,10 +40,8 @@ public class MasterBlDescJpaEntity extends BaseJpaEntity {
     private String remark;
 
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
-    public void setMarksLeft(String v) { this.marksLeft = v; }
-    public void setMarksRight(String v) { this.marksRight = v; }
-    public void setDescriptionLeft(String v) { this.descriptionLeft = v; }
-    public void setDescriptionRight(String v) { this.descriptionRight = v; }
+    public void setMarks(String v) { this.marks = v; }
+    public void setDescription(String v) { this.description = v; }
     public void setDescClause1(String v) { this.descClause1 = v; }
     public void setDescClause2(String v) { this.descClause2 = v; }
     public void setRemark(String v) { this.remark = v; }

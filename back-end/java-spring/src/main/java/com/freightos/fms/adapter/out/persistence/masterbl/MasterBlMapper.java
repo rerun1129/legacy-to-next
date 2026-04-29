@@ -181,8 +181,7 @@ public class MasterBlMapper {
         MasterBlDesc domain = MasterBlDesc.create(jpa.getMasterBl().getMasterBlId());
         domain.assignIdentity(jpa.getMasterBlDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
-        domain.updateContent(jpa.getMarksLeft(), jpa.getMarksRight(),
-                jpa.getDescriptionLeft(), jpa.getDescriptionRight(),
+        domain.updateContent(jpa.getMarks(), jpa.getDescription(),
                 jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
         return domain;
     }
@@ -193,10 +192,8 @@ public class MasterBlMapper {
 
     public void applyDescFields(MasterBlDesc domain, MasterBlDescJpaEntity jpa, MasterBlJpaEntity masterBlJpa) {
         jpa.setMasterBl(masterBlJpa);
-        jpa.setMarksLeft(domain.getMarksLeft());
-        jpa.setMarksRight(domain.getMarksRight());
-        jpa.setDescriptionLeft(domain.getDescriptionLeft());
-        jpa.setDescriptionRight(domain.getDescriptionRight());
+        jpa.setMarks(domain.getMarks());
+        jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
         jpa.setRemark(domain.getRemark());
