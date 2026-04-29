@@ -233,6 +233,135 @@ public class HouseBlMapper {
         jpa.setOriginalBlRef(mapOrNull(domain.getOriginalBlRef(), BlNumber::value));
     }
 
+    // ── E-12 DIM ──────────────────────────────────────────────────────
+
+    public HouseBlDim toDimDomain(HouseBlDimJpaEntity jpa) {
+        HouseBlDim dim = HouseBlDim.create(
+                jpa.getHouseBl().getHouseBlId(),
+                jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
+                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg(),
+                jpa.getSeq());
+        dim.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return dim;
+    }
+
+    public List<HouseBlDim> toDimDomainList(List<HouseBlDimJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toDimDomain).collect(Collectors.toList());
+    }
+
+    public void applyDimFields(HouseBlDim domain, HouseBlDimJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlDimId(domain.getId());
+        jpa.setLengthCm(domain.getLengthCm());
+        jpa.setWidthCm(domain.getWidthCm());
+        jpa.setHeightCm(domain.getHeightCm());
+        jpa.setQuantity(domain.getQuantity());
+        jpa.setCbm(domain.getCbm());
+        jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
+        jpa.setSeq(domain.getSeq());
+    }
+
+    // ── E-13 DESC ─────────────────────────────────────────────────────
+
+    public HouseBlDesc toDescDomain(HouseBlDescJpaEntity jpa) {
+        HouseBlDesc desc = HouseBlDesc.create(jpa.getHouseBl().getHouseBlId());
+        desc.updateContent(jpa.getMarks(), jpa.getDescription(), jpa.getDescClause(), jpa.getRemark());
+        desc.assignIdentity(jpa.getHouseBlDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return desc;
+    }
+
+    public Optional<HouseBlDesc> toDescDomain(Optional<HouseBlDescJpaEntity> jpaOpt) {
+        return jpaOpt.map(this::toDescDomain);
+    }
+
+    public void applyDescFields(HouseBlDesc domain, HouseBlDescJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlDescId(domain.getId());
+        jpa.setMarks(domain.getMarks());
+        jpa.setDescription(domain.getDescription());
+        jpa.setDescClause(domain.getDescClause1());
+        jpa.setRemark(domain.getRemark());
+    }
+
+    // ── E-17 LICENSE ──────────────────────────────────────────────────
+
+    public HouseBlLicense toLicenseDomain(HouseBlLicenseJpaEntity jpa) {
+        HouseBlLicense license = HouseBlLicense.create(
+                jpa.getHouseBl().getHouseBlId(),
+                jpa.getLicenseNo(), jpa.getPkgQty(), jpa.getPkgUnit(),
+                jpa.getGrossWeightKg(), jpa.isPartialShipment(),
+                jpa.getPartialShipmentSeq(), jpa.getHsnNo(), jpa.getSeq());
+        license.assignIdentity(jpa.getHouseBlLicenseId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return license;
+    }
+
+    public List<HouseBlLicense> toLicenseDomainList(List<HouseBlLicenseJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toLicenseDomain).collect(Collectors.toList());
+    }
+
+    public void applyLicenseFields(HouseBlLicense domain, HouseBlLicenseJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlLicenseId(domain.getId());
+        jpa.setLicenseNo(domain.getLicenseNo());
+        jpa.setPkgQty(domain.getPkgQty());
+        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setGrossWeightKg(domain.getGrossWeightKg());
+        jpa.setPartialShipment(domain.isPartialShipment());
+        jpa.setPartialShipmentSeq(domain.getPartialShipmentSeq());
+        jpa.setHsnNo(domain.getHsnNo());
+        jpa.setSeq(domain.getSeq());
+    }
+
+    // ── E-18 REFERENCE ────────────────────────────────────────────────
+
+    public HouseBlReference toReferenceDomain(HouseBlReferenceJpaEntity jpa) {
+        HouseBlReference ref = HouseBlReference.create(
+                jpa.getHouseBl().getHouseBlId(),
+                jpa.getReferenceType(), jpa.getReferenceNo(), jpa.getSeq());
+        ref.assignIdentity(jpa.getHouseBlReferenceId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return ref;
+    }
+
+    public List<HouseBlReference> toReferenceDomainList(List<HouseBlReferenceJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toReferenceDomain).collect(Collectors.toList());
+    }
+
+    public void applyReferenceFields(HouseBlReference domain, HouseBlReferenceJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlReferenceId(domain.getId());
+        jpa.setReferenceType(domain.getReferenceType());
+        jpa.setReferenceNo(domain.getReferenceNo());
+        jpa.setSeq(domain.getSeq());
+    }
+
+    // ── E-19 SCHEDULE LEG ─────────────────────────────────────────────
+
+    public HouseBlScheduleLeg toScheduleLegDomain(HouseBlScheduleLegJpaEntity jpa) {
+        HouseBlScheduleLeg leg = HouseBlScheduleLeg.create(
+                jpa.getHouseBl().getHouseBlId(),
+                jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt(), jpa.getSeq());
+        leg.updateDetails(jpa.getByCarrier(), jpa.getFlightNo(), jpa.getOnBoardTm(), jpa.getArrivalTm());
+        leg.assignIdentity(jpa.getHouseBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return leg;
+    }
+
+    public List<HouseBlScheduleLeg> toScheduleLegDomainList(List<HouseBlScheduleLegJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toScheduleLegDomain).collect(Collectors.toList());
+    }
+
+    public void applyScheduleLegFields(HouseBlScheduleLeg domain, HouseBlScheduleLegJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlScheduleLegId(domain.getId());
+        jpa.setToCode(domain.getToCode());
+        jpa.setByCarrier(domain.getByCarrier());
+        jpa.setFlightNo(domain.getFlightNo());
+        jpa.setOnBoardDt(domain.getOnBoardDt());
+        jpa.setOnBoardTm(domain.getOnBoardTm());
+        jpa.setArrivalDt(domain.getArrivalDt());
+        jpa.setArrivalTm(domain.getArrivalTm());
+        jpa.setSeq(domain.getSeq());
+    }
+
     HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {
         HouseBlContainerJpaEntity jpa = HouseBlContainerJpaEntity.of(jpaParent,
                 mapOrNull(c.getContainerNo(), ContainerNumber::value),
