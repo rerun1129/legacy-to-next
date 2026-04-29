@@ -1,6 +1,10 @@
 package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.FlightType;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,13 +18,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MasterBlAir extends MasterBl {
 
-    private PartyCode airlineCode;
+    private AirlineCode airlineCode;
     private AirportCode departureCode;
     private BlNumber mawbNo;
 
     private Weight chargeWeightKg;
     private Weight volumeWeightKg;
-    private String rateClass;
+    private RateClass rateClass;
 
     private CurrencyCode currencyCode;
     private String declaredValueCarriage;
@@ -28,17 +32,16 @@ public class MasterBlAir extends MasterBl {
     private String insurance;
     private String accountInformation;
 
-    // 보안검색 (항공 수출 전용)
-    private String securityStatus;
-    private String flightType;
+    private SecurityStatus securityStatus;
+    private FlightType flightType;
 
     // 수출 전용 Issue
     private BlDate issueDate;
-    private String issuePlace;
+    private PortCode issuePlace;
     private String signature;
 
     protected MasterBlAir(Bound bound) {
-        super("AIR", bound);
+        super(MasterBlJobDiv.AIR, bound);
     }
 
     public static MasterBlAir create(Bound bound) {
@@ -49,13 +52,13 @@ public class MasterBlAir extends MasterBl {
     }
 
     public static record AirFields(
-            PartyCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
+            AirlineCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
             Weight chargeWeightKg, Weight volumeWeightKg,
-            String rateClass, CurrencyCode currencyCode,
+            RateClass rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
             String insurance, String accountInformation,
-            String securityStatus, String flightType,
-            BlDate issueDate, String issuePlace, String signature) {}
+            SecurityStatus securityStatus, FlightType flightType,
+            BlDate issueDate, PortCode issuePlace, String signature) {}
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();

@@ -1,6 +1,11 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.FreightCondition;
+import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.Incoterms;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
@@ -15,14 +20,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlAir extends HouseBl {
 
-    private PartyCode airlineCode;
+    private AirlineCode airlineCode;
     private AirportCode departureCode;  // 출발 공항 IATA
     private BlNumber mawbNo;
 
     // 청구중량 (Chargeable Weight = max(grossWeight, volumeWeight))
     private Weight chargeWeightKg;
     private Weight volumeWeightKg;
-    private String rateClass;           // GCR / SCR / CCR 등 IATA 운임 분류
+    private RateClass rateClass;
 
     // 항공 Trade 필드
     private CurrencyCode currencyCode;
@@ -30,17 +35,17 @@ public class HouseBlAir extends HouseBl {
     private String declaredValueCustoms;
     private String insurance;               // 기본값 NIL
     private String accountInformation;
-    private String otherTerm;
+    private FreightTerm otherTerm;
 
     // 수출 전용
     private BlDate issueDate;
-    private String issuePlace;
+    private PortCode issuePlace;
     private String signature;
 
     // 수입 전용
-    private String fhd;                 // Not / F.H.D / To Door
-    private String incoterms;
-    private String freightTermAir;
+    private Fhd fhd;
+    private Incoterms incoterms;
+    private FreightCondition freightTermAir;
 
     protected HouseBlAir(Bound bound) {
         super(JobDiv.AIR, bound);
@@ -54,13 +59,13 @@ public class HouseBlAir extends HouseBl {
     }
 
     public static record AirFields(
-            PartyCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
+            AirlineCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
             Weight chargeWeightKg, Weight volumeWeightKg,
-            String rateClass, CurrencyCode currencyCode,
+            RateClass rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
-            String insurance, String accountInformation, String otherTerm,
-            BlDate issueDate, String issuePlace, String signature,
-            String fhd, String incoterms, String freightTermAir) {}
+            String insurance, String accountInformation, FreightTerm otherTerm,
+            BlDate issueDate, PortCode issuePlace, String signature,
+            Fhd fhd, Incoterms incoterms, FreightCondition freightTermAir) {}
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();

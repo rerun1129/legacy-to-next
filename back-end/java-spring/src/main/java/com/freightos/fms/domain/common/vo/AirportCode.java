@@ -4,7 +4,7 @@ public record AirportCode(String value) {
 
     public AirportCode {
         if (value == null || value.isBlank()) throw new IllegalArgumentException("AirportCode value must not be blank");
-        if (!value.matches("^[A-Z]{3}$")) throw new IllegalArgumentException("Invalid IATA airport code (expected 3 uppercase letters): " + value);
+        // IATA 2~3자 혼재 가능 — 형식 강제 없음
     }
 
     public static AirportCode of(String value) {

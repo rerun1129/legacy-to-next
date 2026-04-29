@@ -3,6 +3,7 @@ package com.freightos.fms.domain.masterbl.entity;
 import com.freightos.fms.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.vo.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,13 +21,13 @@ public abstract class MasterBl extends BaseEntity {
 
     private BlNumber mblNo;             // 해상 수출: 미입력 허용 / 기타: 필수
     private BlNumber masterRefNo;       // 해상 수출 자동 채번
-    private String jobDiv;
+    private MasterBlJobDiv jobDiv;
     private Bound bound;
 
     // ── 당사자 (3슬롯) ──────────────────────────────────────────
-    private PartyCode shipperCode;
-    private PartyCode consigneeCode;
-    private PartyCode notifyCode;
+    private CustomerCode shipperCode;
+    private CustomerCode consigneeCode;
+    private CustomerCode notifyCode;
 
     // ── 경로 ──────────────────────────────────────────────────────
     private PortCode polCode;
@@ -53,7 +54,7 @@ public abstract class MasterBl extends BaseEntity {
         this.bound = bound;
     }
 
-    protected MasterBl(String jobDiv, Bound bound) {
+    protected MasterBl(MasterBlJobDiv jobDiv, Bound bound) {
         this.jobDiv = jobDiv;
         this.bound  = bound;
     }
@@ -63,7 +64,7 @@ public abstract class MasterBl extends BaseEntity {
         this.masterRefNo = masterRefNo;
     }
 
-    public void assignParties(PartyCode shipperCode, PartyCode consigneeCode, PartyCode notifyCode) {
+    public void assignParties(CustomerCode shipperCode, CustomerCode consigneeCode, CustomerCode notifyCode) {
         this.shipperCode   = shipperCode;
         this.consigneeCode = consigneeCode;
         this.notifyCode    = notifyCode;

@@ -32,6 +32,7 @@
 - 도메인 값이 (a) 자기 검증·연산이 있거나 (b) 동일 의미 primitive가 2곳 이상이면 `domain/common/vo/`에 record VO로 정의한다. 검증은 compact constructor 또는 `static of(...)` 팩토리에서 수행하며, null/blank 입력은 null 반환으로 처리한다.
 - VO에는 jakarta·JPA 어노테이션을 두지 않는다. `@Embeddable` 금지. JPA 매핑은 어댑터 매퍼에서 `VO.of(jpa.getString())` / `vo != null ? vo.value() : null`로 처리하고, JpaEntity는 인프라 타입(String/BigDecimal)을 유지한다.
 - 외부 API DTO는 인터페이스 호환을 위해 primitive(String 등)를 유지한다. 도메인 진입 시 `VO.of(...)`, 도메인 이탈 시 `vo.asString()` / `vo.value()`로 변환한다.
+- 어댑터 매퍼에서 VO → JPA 타입 null-safe 변환은 삼항 연산자 대신 `VoMapper.mapOrNull(vo, VO::method)`를 사용한다 (`adapter/out/persistence/common/VoMapper.java`).
 
 ## 테스트
 - Mockito BDD 스타일에서 인터페이스 메서드명을 변경할 때 `given(port.method(` 패턴과 `then(port).should().method(` 패턴을 모두 교체한다. 한쪽만 바꾸면 컴파일 오류가 발생한다.

@@ -36,7 +36,7 @@ public record MasterBlDetailResponse(
                 entity.getId(),
                 entity.getMblNo() != null ? entity.getMblNo().value() : null,
                 entity.getMasterRefNo() != null ? entity.getMasterRefNo().value() : null,
-                entity.getJobDiv(),
+                entity.getJobDiv() != null ? entity.getJobDiv().name() : null,
                 entity.getBound(),
                 entity.getShipperCode() != null ? entity.getShipperCode().value() : null,
                 entity.getConsigneeCode() != null ? entity.getConsigneeCode().value() : null,

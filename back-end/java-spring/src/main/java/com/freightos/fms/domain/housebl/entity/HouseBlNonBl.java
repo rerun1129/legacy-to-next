@@ -1,6 +1,8 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.BlNumber;
+import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,9 +23,8 @@ public class HouseBlNonBl extends HouseBl {
      * 미선택 시 저장 차단. JOB_DIV(운송 모드)와 다른 계층의 개념.
      */
     private WorkDivision workDivision;
-    private String settlePartnerCode;
-    private String status;              // 접수 / 처리 / 완료
-    private String originalBlRef;       // 원본 B/L 참조번호 (선택)
+    private CustomerCode settlePartnerCode;
+    private BlNumber originalBlRef;
 
     protected HouseBlNonBl(WorkDivision workDivision, Bound bound) {
         super(JobDiv.NON_BL, bound);
@@ -31,14 +32,11 @@ public class HouseBlNonBl extends HouseBl {
     }
 
     public static HouseBlNonBl create(WorkDivision workDivision, Bound bound) {
-        HouseBlNonBl entity = new HouseBlNonBl(workDivision, bound);
-        entity.status = "접수";
-        return entity;
+        return new HouseBlNonBl(workDivision, bound);
     }
 
-    public void updateNonBlFields(String settlePartnerCode, String status, String originalBlRef) {
+    public void updateNonBlFields(CustomerCode settlePartnerCode, BlNumber originalBlRef) {
         this.settlePartnerCode = settlePartnerCode;
-        this.status            = status;
         this.originalBlRef     = originalBlRef;
     }
 

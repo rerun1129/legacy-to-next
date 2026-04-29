@@ -32,15 +32,11 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @Column(name = "settle_partner_code", length = 20)
     private String settlePartnerCode;
 
-    @Column(name = "status", length = 20)
-    private String status;
-
     @Column(name = "original_bl_ref", length = 50)
     private String originalBlRef;
 
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setWorkDivision(HouseBlNonBl.WorkDivision v) { this.workDivision = v; }
     public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }
-    public void setStatus(String v) { this.status = v; }
     public void setOriginalBlRef(String v) { this.originalBlRef = v; }
 }

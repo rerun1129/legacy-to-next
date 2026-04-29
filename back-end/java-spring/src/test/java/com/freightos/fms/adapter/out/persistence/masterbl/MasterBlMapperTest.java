@@ -4,7 +4,10 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
@@ -55,7 +58,7 @@ class MasterBlMapperTest {
     @DisplayName("applySeaFields: SEA 도메인 필드가 MasterBlSeaJpaEntity에 복사된다")
     void applySeaFields_copiesSeaFieldsToJpa() {
         MasterBlSea domain = MasterBlSea.create(Bound.EXP);
-        domain.updateSeaFields(null, PartyCode.of("MSC"), VesselVoyage.of("MSC OSCAR", "0012W"),
+        domain.updateSeaFields(null, LinerCode.of("MSC"), VesselVoyage.of("MSC OSCAR", "0012W"),
                 BlDate.of("20240310"), BlNumber.of("BKG-001"), BlDate.of("20240301"));
         MasterBlSeaJpaEntity jpa = new MasterBlSeaJpaEntity();
 
@@ -73,10 +76,10 @@ class MasterBlMapperTest {
     void applyAirFields_copiesAirFieldsToJpa() {
         MasterBlAir domain = MasterBlAir.create(Bound.EXP);
         domain.updateAirFields(new MasterBlAir.AirFields(
-                PartyCode.of("KE"), AirportCode.of("ICN"), BlNumber.of("180-12345678"),
+                AirlineCode.of("KE"), AirportCode.of("ICN"), BlNumber.of("180-12345678"),
                 Weight.of(BigDecimal.valueOf(100.5)), Weight.of(BigDecimal.valueOf(90.0)),
-                "Q", CurrencyCode.of("KRW"), "N.V.D.", null, "NIL", null, null, null,
-                BlDate.of("20240301"), "Seoul", "Signature"));
+                RateClass.Q, CurrencyCode.of("KRW"), "N.V.D.", null, "NIL", null, null, null,
+                BlDate.of("20240301"), PortCode.of("Seoul"), "Signature"));
         MasterBlAirJpaEntity jpa = new MasterBlAirJpaEntity();
 
         mapper.applyAirFields(domain, jpa);

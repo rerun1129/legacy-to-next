@@ -105,7 +105,6 @@ class HouseBlMapperTest {
         mapper.applyNonBlFields(domain, jpa);
 
         assertThat(jpa.getWorkDivision()).isEqualTo(HouseBlNonBl.WorkDivision.SEA);
-        assertThat(jpa.getStatus()).isEqualTo("접수");
     }
 
     // ── JPA → Domain ────────────────────────────────────────────────

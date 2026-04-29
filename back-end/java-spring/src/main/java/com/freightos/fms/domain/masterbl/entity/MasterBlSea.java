@@ -2,6 +2,7 @@ package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class MasterBlSea extends MasterBl {
 
     private LoadType loadType;
-    private PartyCode linerCode;
+    private LinerCode linerCode;
     private VesselVoyage vesselVoyage;
     // 비즈니스 날짜
     private BlDate onboardDate;
@@ -28,14 +29,14 @@ public class MasterBlSea extends MasterBl {
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
     protected MasterBlSea(Bound bound) {
-        super("SEA", bound);
+        super(MasterBlJobDiv.SEA, bound);
     }
 
     public static MasterBlSea create(Bound bound) {
         return new MasterBlSea(bound);
     }
 
-    public void updateSeaFields(LoadType loadType, PartyCode linerCode, VesselVoyage vesselVoyage,
+    public void updateSeaFields(LoadType loadType, LinerCode linerCode, VesselVoyage vesselVoyage,
                                 BlDate onboardDate, BlNumber lineBkgNo, BlDate issueDate) {
         this.loadType     = loadType;
         this.linerCode    = linerCode;

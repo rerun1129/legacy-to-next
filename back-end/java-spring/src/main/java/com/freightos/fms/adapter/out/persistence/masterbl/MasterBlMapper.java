@@ -3,11 +3,17 @@ package com.freightos.fms.adapter.out.persistence.masterbl;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
+import com.freightos.fms.domain.common.enums.FlightType;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.springframework.stereotype.Component;
+
+import static com.freightos.fms.adapter.out.persistence.common.VoMapper.mapOrNull;
 
 /**
  * JPA ↔ Domain 변환 매퍼 — Master B/L.
@@ -20,11 +26,11 @@ public class MasterBlMapper {
     // ── JpaEntity → Domain ─────────────────────────────────────────
 
     public MasterBl toDomain(MasterBlJpaEntity jpa) {
-        String jobDiv = jpa.getJobDiv();
+        MasterBlJobDiv jobDiv = MasterBlJobDiv.fromCode(jpa.getJobDiv());
+        if (jobDiv == null) throw new IllegalArgumentException("Unknown jobDiv: " + jpa.getJobDiv());
         return switch (jobDiv) {
-            case "SEA" -> toSeaDomain(jpa, jpa.getSeaExt());
-            case "AIR" -> toAirDomain(jpa, jpa.getAirExt());
-            default    -> throw new IllegalArgumentException("Unknown jobDiv: " + jobDiv);
+            case SEA -> toSeaDomain(jpa, jpa.getSeaExt());
+            case AIR -> toAirDomain(jpa, jpa.getAirExt());
         };
     }
 
@@ -46,8 +52,8 @@ public class MasterBlMapper {
         domain.assignIdentity(jpa.getMasterBlId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignMblNo(BlNumber.of(jpa.getMblNo()), BlNumber.of(jpa.getMasterRefNo()));
-        domain.assignParties(PartyCode.of(jpa.getShipperCode()), PartyCode.of(jpa.getConsigneeCode()),
-                PartyCode.of(jpa.getNotifyCode()));
+        domain.assignParties(CustomerCode.of(jpa.getShipperCode()), CustomerCode.of(jpa.getConsigneeCode()),
+                CustomerCode.of(jpa.getNotifyCode()));
         domain.updateSchedule(PortCode.of(jpa.getPolCode()), PortCode.of(jpa.getPodCode()),
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
@@ -57,7 +63,7 @@ public class MasterBlMapper {
     }
 
     private void copySeaFields(MasterBlSeaJpaEntity jpa, MasterBlSea domain) {
-        domain.updateSeaFields(jpa.getLoadType(), PartyCode.of(jpa.getLinerCode()),
+        domain.updateSeaFields(jpa.getLoadType(), LinerCode.of(jpa.getLinerCode()),
                 VesselVoyage.of(jpa.getVesselName(), jpa.getVoyageNo()),
                 BlDate.of(jpa.getOnboardDate()), BlNumber.of(jpa.getLineBkgNo()),
                 BlDate.of(jpa.getIssueDate()));
@@ -65,72 +71,68 @@ public class MasterBlMapper {
 
     private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
         domain.updateAirFields(new MasterBlAir.AirFields(
-                PartyCode.of(jpa.getAirlineCode()), AirportCode.of(jpa.getDepartureCode()),
+                AirlineCode.of(jpa.getAirlineCode()), AirportCode.of(jpa.getDepartureCode()),
                 BlNumber.of(jpa.getMawbNo()),
                 Weight.of(jpa.getChargeWeightKg()), Weight.of(jpa.getVolumeWeightKg()),
-                jpa.getRateClass(), CurrencyCode.of(jpa.getCurrencyCode()),
+                RateClass.fromCode(jpa.getRateClass()), CurrencyCode.of(jpa.getCurrencyCode()),
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(),
-                jpa.getSecurityStatus(), jpa.getFlightType(),
-                BlDate.of(jpa.getIssueDate()), jpa.getIssuePlace(), jpa.getSignature()));
+                SecurityStatus.fromCode(jpa.getSecurityStatus()), FlightType.fromCode(jpa.getFlightType()),
+                BlDate.of(jpa.getIssueDate()), PortCode.of(jpa.getIssuePlace()), jpa.getSignature()));
     }
 
     // ── Domain → JpaEntity (PersistenceAdapter에서 호출) ──────────
 
     public void applyCommonFields(MasterBl domain, MasterBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setMasterBlId(domain.getId());
-        jpa.setMblNo(domain.getMblNo() != null ? domain.getMblNo().value() : null);
-        jpa.setMasterRefNo(domain.getMasterRefNo() != null ? domain.getMasterRefNo().value() : null);
+        jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
+        jpa.setMasterRefNo(mapOrNull(domain.getMasterRefNo(), BlNumber::value));
         jpa.setBound(domain.getBound());
-        jpa.setJobDiv(switch (domain) {
-            case MasterBlSea ignored -> "SEA";
-            case MasterBlAir ignored -> "AIR";
-            default -> throw new IllegalStateException("Unknown MasterBl subtype: " + domain.getClass().getSimpleName());
-        });
-        jpa.setShipperCode(domain.getShipperCode() != null ? domain.getShipperCode().value() : null);
-        jpa.setConsigneeCode(domain.getConsigneeCode() != null ? domain.getConsigneeCode().value() : null);
-        jpa.setNotifyCode(domain.getNotifyCode() != null ? domain.getNotifyCode().value() : null);
-        jpa.setPolCode(domain.getPolCode() != null ? domain.getPolCode().value() : null);
-        jpa.setPodCode(domain.getPodCode() != null ? domain.getPodCode().value() : null);
-        jpa.setEtd(domain.getEtd() != null ? domain.getEtd().asString() : null);
-        jpa.setEta(domain.getEta() != null ? domain.getEta().asString() : null);
+        jpa.setJobDiv(mapOrNull(domain.getJobDiv(), MasterBlJobDiv::name));
+        jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setPolCode(mapOrNull(domain.getPolCode(), PortCode::value));
+        jpa.setPodCode(mapOrNull(domain.getPodCode(), PortCode::value));
+        jpa.setEtd(mapOrNull(domain.getEtd(), BlDate::asString));
+        jpa.setEta(mapOrNull(domain.getEta(), BlDate::asString));
         jpa.setFreightTerm(domain.getFreightTerm());
-        jpa.setOperatorCode(domain.getOperatorCode() != null ? domain.getOperatorCode().value() : null);
-        jpa.setTeamCode(domain.getTeamCode() != null ? domain.getTeamCode().value() : null);
-        jpa.setPkgQty(domain.getPkgQty() != null ? domain.getPkgQty().count() : null);
+        jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
+        jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
+        jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(domain.getPkgUnit());
-        jpa.setGrossWeightKg(domain.getGrossWeightKg() != null ? domain.getGrossWeightKg().kg() : null);
-        jpa.setCbm(domain.getCbm() != null ? domain.getCbm().cbm() : null);
+        jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
+        jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
     }
 
     public void applySeaFields(MasterBlSea domain, MasterBlSeaJpaEntity jpa) {
         jpa.setLoadType(domain.getLoadType());
-        jpa.setLinerCode(domain.getLinerCode() != null ? domain.getLinerCode().value() : null);
+        jpa.setLinerCode(mapOrNull(domain.getLinerCode(), LinerCode::value));
         if (domain.getVesselVoyage() != null) {
             jpa.setVesselName(domain.getVesselVoyage().vesselName());
             jpa.setVoyageNo(domain.getVesselVoyage().voyageNo());
         }
-        jpa.setOnboardDate(domain.getOnboardDate() != null ? domain.getOnboardDate().asString() : null);
-        jpa.setLineBkgNo(domain.getLineBkgNo() != null ? domain.getLineBkgNo().value() : null);
-        jpa.setIssueDate(domain.getIssueDate() != null ? domain.getIssueDate().asString() : null);
+        jpa.setOnboardDate(mapOrNull(domain.getOnboardDate(), BlDate::asString));
+        jpa.setLineBkgNo(mapOrNull(domain.getLineBkgNo(), BlNumber::value));
+        jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
     }
 
     public void applyAirFields(MasterBlAir domain, MasterBlAirJpaEntity jpa) {
-        jpa.setAirlineCode(domain.getAirlineCode() != null ? domain.getAirlineCode().value() : null);
-        jpa.setDepartureCode(domain.getDepartureCode() != null ? domain.getDepartureCode().value() : null);
-        jpa.setMawbNo(domain.getMawbNo() != null ? domain.getMawbNo().value() : null);
-        jpa.setChargeWeightKg(domain.getChargeWeightKg() != null ? domain.getChargeWeightKg().kg() : null);
-        jpa.setVolumeWeightKg(domain.getVolumeWeightKg() != null ? domain.getVolumeWeightKg().kg() : null);
-        jpa.setRateClass(domain.getRateClass());
-        jpa.setCurrencyCode(domain.getCurrencyCode() != null ? domain.getCurrencyCode().value() : null);
+        jpa.setAirlineCode(mapOrNull(domain.getAirlineCode(), AirlineCode::value));
+        jpa.setDepartureCode(mapOrNull(domain.getDepartureCode(), AirportCode::value));
+        jpa.setMawbNo(mapOrNull(domain.getMawbNo(), BlNumber::value));
+        jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        jpa.setVolumeWeightKg(mapOrNull(domain.getVolumeWeightKg(), Weight::kg));
+        jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
+        jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
         jpa.setDeclaredValueCarriage(domain.getDeclaredValueCarriage());
         jpa.setDeclaredValueCustoms(domain.getDeclaredValueCustoms());
         jpa.setInsurance(domain.getInsurance());
         jpa.setAccountInformation(domain.getAccountInformation());
-        jpa.setSecurityStatus(domain.getSecurityStatus());
-        jpa.setFlightType(domain.getFlightType());
-        jpa.setIssueDate(domain.getIssueDate() != null ? domain.getIssueDate().asString() : null);
-        jpa.setIssuePlace(domain.getIssuePlace());
+        jpa.setSecurityStatus(mapOrNull(domain.getSecurityStatus(), SecurityStatus::name));
+        jpa.setFlightType(mapOrNull(domain.getFlightType(), FlightType::name));
+        jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
+        jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setSignature(domain.getSignature());
     }
 }

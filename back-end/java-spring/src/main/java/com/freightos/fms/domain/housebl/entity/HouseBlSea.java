@@ -1,6 +1,8 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.FreightCondition;
+import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class HouseBlSea extends HouseBl {
 
     private LoadType loadType;          // FCL / LCL / BULK
-    private PartyCode linerCode;
+    private LinerCode linerCode;
     private VesselVoyage vesselVoyage;
     // 비즈니스 날짜
     private BlDate onboardDate;
@@ -27,14 +29,15 @@ public class HouseBlSea extends HouseBl {
     // 수출 전용
     private BlDate issueDate;
     private Integer noOfBl;
-    private String issuePlace;
+    private PortCode issuePlace;
 
     // 수입 전용
     private BlDate doDate;
 
     // 인코텀스
-    private String incoterms;
-    private String payableAt;
+    private Incoterms incoterms;
+    private FreightCondition freightTermSea;
+    private PortCode payableAt;
     private boolean isTriangle = false;
     private boolean isCoLoad = false;
     private BlNumber mblNo;             // 연결된 Master B/L No (참조용)
@@ -47,7 +50,7 @@ public class HouseBlSea extends HouseBl {
         return new HouseBlSea(bound);
     }
 
-    public void updateSeaSchedule(PartyCode linerCode, VesselVoyage vesselVoyage, BlDate onboardDate) {
+    public void updateSeaSchedule(LinerCode linerCode, VesselVoyage vesselVoyage, BlDate onboardDate) {
         this.linerCode    = linerCode;
         this.vesselVoyage = vesselVoyage;
         this.onboardDate  = onboardDate;
@@ -55,10 +58,10 @@ public class HouseBlSea extends HouseBl {
 
     public static record SeaRouteAndFlags(
             PortCode porCode, PortCode finalDestCode,
-            BlDate issueDate, Integer noOfBl, String issuePlace,
-            BlDate doDate, String incoterms, String payableAt,
+            BlDate issueDate, Integer noOfBl, PortCode issuePlace,
+            BlDate doDate, Incoterms incoterms, PortCode payableAt,
             boolean triangle, boolean coLoad, BlNumber mblNo,
-            LoadType loadType) {}
+            LoadType loadType, FreightCondition freightTermSea) {}
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
         this.porCode       = f.porCode();
@@ -71,7 +74,8 @@ public class HouseBlSea extends HouseBl {
         this.payableAt     = f.payableAt();
         this.isTriangle    = f.triangle();
         this.isCoLoad      = f.coLoad();
-        this.mblNo         = f.mblNo();
-        this.loadType      = f.loadType();
+        this.mblNo          = f.mblNo();
+        this.loadType       = f.loadType();
+        this.freightTermSea = f.freightTermSea();
     }
 }

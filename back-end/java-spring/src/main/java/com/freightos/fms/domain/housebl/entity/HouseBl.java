@@ -34,10 +34,10 @@ public abstract class HouseBl extends BaseEntity {
     private FreightTerm freightTerm;
 
     // ── 당사자 (코드 참조) ─────────────────────────────────────────
-    private PartyCode shipperCode;
-    private PartyCode consigneeCode;
-    private PartyCode notifyCode;
-    private PartyCode docPartnerCode;   // SEA/AIR House 전용
+    private CustomerCode shipperCode;
+    private CustomerCode consigneeCode;
+    private CustomerCode notifyCode;
+    private CustomerCode docPartnerCode;   // SEA/AIR House 전용
 
     // ── 경로 ──────────────────────────────────────────────────────
     private PortCode polCode;           // Port of Loading (UNLOC)
@@ -55,7 +55,7 @@ public abstract class HouseBl extends BaseEntity {
     private Volume cbm;
 
     // ── 영업·담당 ──────────────────────────────────────────────────
-    private PartyCode actualCustomerCode;
+    private CustomerCode actualCustomerCode;
     private EmployeeCode operatorCode;
     private TeamCode teamCode;
     private EmployeeCode salesManCode;
@@ -87,7 +87,7 @@ public abstract class HouseBl extends BaseEntity {
         this.eta     = eta;
     }
 
-    public void assignOperator(PartyCode actualCustomerCode, EmployeeCode operatorCode,
+    public void assignOperator(CustomerCode actualCustomerCode, EmployeeCode operatorCode,
                                TeamCode teamCode, EmployeeCode salesManCode) {
         this.actualCustomerCode = actualCustomerCode;
         this.operatorCode       = operatorCode;
@@ -105,8 +105,8 @@ public abstract class HouseBl extends BaseEntity {
         this.freightTerm  = freightTerm;
     }
 
-    public void assignParties(PartyCode shipperCode, PartyCode consigneeCode, PartyCode notifyCode,
-                              PartyCode docPartnerCode, PortCode deliveryCode) {
+    public void assignParties(CustomerCode shipperCode, CustomerCode consigneeCode, CustomerCode notifyCode,
+                              CustomerCode docPartnerCode, PortCode deliveryCode) {
         this.shipperCode    = shipperCode;
         this.consigneeCode  = consigneeCode;
         this.notifyCode     = notifyCode;
