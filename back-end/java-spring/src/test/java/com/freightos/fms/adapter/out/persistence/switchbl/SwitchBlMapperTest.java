@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.switchbl;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlDescriptionJpaEntity;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlJpaEntity;
+import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
 import org.junit.jupiter.api.DisplayName;
@@ -20,8 +21,9 @@ class SwitchBlMapperTest {
     @Test
     @DisplayName("applyFields: 도메인 필수·선택 필드가 모두 JPA 엔티티에 복사된다")
     void applyFields_setsAllMandatoryFields() {
-        SwitchBl domain = SwitchBl.create(10L, "SHIP01");
-        domain.updateDetails("SBL-001", "ORIGINAL", "FOB", "SHIP01", "CONS01", "NOTIF01");
+        SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
+        domain.updateDetails("SBL-001", "ORIGINAL", "FOB",
+                CustomerCode.of("SHIP01"), CustomerCode.of("CONS01"), CustomerCode.of("NOTIF01"));
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
         HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
@@ -42,8 +44,8 @@ class SwitchBlMapperTest {
     @Test
     @DisplayName("applyFields: consigneeCode/notifyCode/blType/incoterms null 이어도 NPE 없이 동작한다")
     void applyFields_nullOptionalFields_doesNotThrow() {
-        SwitchBl domain = SwitchBl.create(10L, "SHIP01");
-        domain.updateDetails(null, null, null, "SHIP01", null, null);
+        SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
+        domain.updateDetails(null, null, null, CustomerCode.of("SHIP01"), null, null);
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
 
@@ -60,8 +62,8 @@ class SwitchBlMapperTest {
     @Test
     @DisplayName("applyFields: blType=ORIGINAL 이 JPA 엔티티에 그대로 세팅된다")
     void applyFields_blTypeOriginal_copiedToJpa() {
-        SwitchBl domain = SwitchBl.create(5L, "SHIP05");
-        domain.updateDetails("SBL-005", "ORIGINAL", null, "SHIP05", null, null);
+        SwitchBl domain = SwitchBl.create(5L, CustomerCode.of("SHIP05"));
+        domain.updateDetails("SBL-005", "ORIGINAL", null, CustomerCode.of("SHIP05"), null, null);
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
 
@@ -92,9 +94,9 @@ class SwitchBlMapperTest {
         assertThat(domain.getSwitchBlNo()).isEqualTo("SBL-001");
         assertThat(domain.getBlType()).isEqualTo("SURRENDER");
         assertThat(domain.getIncoterms()).isEqualTo("FOB");
-        assertThat(domain.getShipperCode()).isEqualTo("SHIP01");
-        assertThat(domain.getConsigneeCode()).isEqualTo("CONS01");
-        assertThat(domain.getNotifyCode()).isEqualTo("NOTIF01");
+        assertThat(domain.getShipperCode().value()).isEqualTo("SHIP01");
+        assertThat(domain.getConsigneeCode().value()).isEqualTo("CONS01");
+        assertThat(domain.getNotifyCode().value()).isEqualTo("NOTIF01");
         assertThat(domain.getHouseBlId()).isEqualTo(20L);
     }
 
@@ -107,11 +109,10 @@ class SwitchBlMapperTest {
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
         jpa.setHouseBl(houseBlJpa);
         jpa.setShipperCode("SHIP02");
-        // switchBlNo, blType, incoterms, consigneeCode, notifyCode → null (미설정)
 
         SwitchBl domain = mapper.toDomain(jpa);
 
-        assertThat(domain.getShipperCode()).isEqualTo("SHIP02");
+        assertThat(domain.getShipperCode().value()).isEqualTo("SHIP02");
         assertThat(domain.getSwitchBlNo()).isNull();
         assertThat(domain.getBlType()).isNull();
         assertThat(domain.getIncoterms()).isNull();
@@ -128,7 +129,6 @@ class SwitchBlMapperTest {
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
         jpa.setHouseBl(houseBlJpa);
         jpa.setShipperCode("SHIP03");
-        // description @OneToOne lazy, 미설정 → null
 
         SwitchBl domain = mapper.toDomain(jpa);
 
@@ -170,12 +170,9 @@ class SwitchBlMapperTest {
         assertThat(jpa.getNatureQuantityRight()).isNull();
     }
 
-    // ── toDescriptionJpa 왕복(round-trip) 검증 ───────────────────────
-
     @Test
     @DisplayName("toDescriptionJpa: 도메인 description 으로 생성한 JPA 엔티티를 다시 도메인으로 역매핑하면 동일 값이 유지된다")
     void toDescriptionJpa_roundTrip_preservesAllTextFields() {
-        // domain → JPA
         SwitchBlDescription desc = SwitchBlDescription.create(50L);
         desc.updateContent("ML", "MR", "NQL", "NQR");
 
@@ -187,7 +184,6 @@ class SwitchBlMapperTest {
 
         SwitchBlDescriptionJpaEntity descJpa = mapper.toDescriptionJpa(desc, switchBlJpa);
 
-        // JPA 값이 원본과 동일한지 검증 (toDescriptionDomain 은 private 이므로 JPA 필드 직접 확인)
         assertThat(descJpa.getMarksLeft()).isEqualTo("ML");
         assertThat(descJpa.getMarksRight()).isEqualTo("MR");
         assertThat(descJpa.getNatureQuantityLeft()).isEqualTo("NQL");
@@ -200,7 +196,6 @@ class SwitchBlMapperTest {
     void toDomain_nullHouseBl_throwsNullPointerException() {
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
         jpa.setShipperCode("SHIP05");
-        // houseBl 미설정 → null
 
         assertThatThrownBy(() -> mapper.toDomain(jpa))
                 .isInstanceOf(NullPointerException.class);
