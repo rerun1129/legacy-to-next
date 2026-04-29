@@ -1,15 +1,15 @@
-﻿package com.freightos.fms.adapter.out.persistence.housebl.entity;
+package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 /**
- * JPA ORM ?뷀떚????House B/L ?ъ옣 移섏닔 紐낆꽭 (E-12).
+ * JPA ORM 엔티티 — House B/L 포장 치수 명세 (E-12).
+ * HouseBlJpaEntity 와 @ManyToOne(FK: house_bl_id) 관계.
  */
 @Entity
 @Table(name = "house_bl_dim")
@@ -57,4 +57,3 @@ public class HouseBlDimJpaEntity extends BaseJpaEntity {
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
     public void setSeq(int v) { this.seq = v; }
 }
-

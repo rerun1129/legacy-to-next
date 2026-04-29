@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * JPA ORM ?뷀떚????House B/L 援ш컙蹂??댄빆 ?ㅼ?以?(E-19).
+ * JPA ORM 엔티티 — House B/L 구간별 운항 스케줄 (E-19).
  */
 @Entity
 @Table(name = "house_bl_schedule_leg")
