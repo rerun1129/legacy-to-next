@@ -83,6 +83,7 @@ public class HouseBlMapper {
                 PortCode.of(jpa.getDeliveryCode()));
         domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), PackageUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
+        domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());
     }
 
@@ -117,7 +118,7 @@ public class HouseBlMapper {
     }
 
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {
-        domain.updateNonBlFields(CustomerCode.of(jpa.getSettlePartnerCode()), BlNumber.of(jpa.getOriginalBlRef()));
+        domain.updateNonBlFields(BlNumber.of(jpa.getOriginalBlRef()));
     }
 
     private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
@@ -171,6 +172,7 @@ public class HouseBlMapper {
         jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), PackageUnit::name));
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
+        jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
         // 컨테이너는 SEA 전용, HouseBlPersistenceAdapter에서 처리 (여기서는 common 필드만)
     }
 
@@ -226,7 +228,6 @@ public class HouseBlMapper {
 
     public void applyNonBlFields(HouseBlNonBl domain, HouseBlNonBlJpaEntity jpa) {
         jpa.setWorkDivision(domain.getWorkDivision());
-        jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
         jpa.setOriginalBlRef(mapOrNull(domain.getOriginalBlRef(), BlNumber::value));
     }
 

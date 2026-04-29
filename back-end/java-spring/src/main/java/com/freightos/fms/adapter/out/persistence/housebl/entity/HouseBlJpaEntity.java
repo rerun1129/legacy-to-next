@@ -79,6 +79,9 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "doc_partner_address", length = 500)
     private String docPartnerAddress;
 
+    @Column(name = "settle_partner_code", length = 20)
+    private String settlePartnerCode;
+
     @Column(name = "pol_code", length = 10)
     private String polCode;
 
@@ -149,6 +152,7 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setNotifyAddress(String notifyAddress) { this.notifyAddress = notifyAddress; }
     public void setDocPartnerCode(String docPartnerCode) { this.docPartnerCode = docPartnerCode; }
     public void setDocPartnerAddress(String docPartnerAddress) { this.docPartnerAddress = docPartnerAddress; }
+    public void setSettlePartnerCode(String settlePartnerCode) { this.settlePartnerCode = settlePartnerCode; }
     public void setDeliveryCode(String deliveryCode) { this.deliveryCode = deliveryCode; }
     public void setPkgQty(Integer pkgQty) { this.pkgQty = pkgQty; }
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }

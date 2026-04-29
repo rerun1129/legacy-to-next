@@ -39,6 +39,7 @@ public abstract class HouseBl extends BaseEntity {
     private CustomerCode consigneeCode;
     private CustomerCode notifyCode;
     private CustomerCode docPartnerCode;   // SEA/AIR House 전용
+    private CustomerCode settlePartnerCode;
 
     // ── 경로 ──────────────────────────────────────────────────────
     private PortCode polCode;           // Port of Loading (UNLOC)
@@ -113,6 +114,10 @@ public abstract class HouseBl extends BaseEntity {
         this.notifyCode     = notifyCode;
         this.docPartnerCode = docPartnerCode;
         this.deliveryCode   = deliveryCode;
+    }
+
+    public void assignSettlePartner(CustomerCode settlePartnerCode) {
+        this.settlePartnerCode = settlePartnerCode;
     }
 
     public void updateCargoSummary(CargoSummary cargo) {
