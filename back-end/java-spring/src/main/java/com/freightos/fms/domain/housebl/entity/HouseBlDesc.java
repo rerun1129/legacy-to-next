@@ -15,10 +15,8 @@ public class HouseBlDesc extends BaseEntity {
 
     private Long houseBlDescId;
     private Long houseBlId;
-    private String marksLeft;
-    private String marksRight;
-    private String descriptionLeft;
-    private String descriptionRight;
+    private String marks;
+    private String description;
     private String descClause1;
     private String descClause2;
     private String remark;
@@ -29,15 +27,12 @@ public class HouseBlDesc extends BaseEntity {
         return d;
     }
 
-    public void updateContent(String marksLeft, String marksRight, String descriptionLeft,
-                              String descriptionRight, String descClause1, String descClause2,
-                              String remark) {
-        this.marksLeft        = marksLeft;
-        this.marksRight       = marksRight;
-        this.descriptionLeft  = descriptionLeft;
-        this.descriptionRight = descriptionRight;
-        this.descClause1      = descClause1;
-        this.descClause2      = descClause2;
-        this.remark           = remark;
+    public void updateContent(String marks, String description,
+                              String descClause1, String descClause2, String remark) {
+        this.marks       = marks;
+        this.description = description;
+        this.descClause1 = descClause1;
+        this.descClause2 = descClause2;
+        this.remark      = remark;
     }
 }
