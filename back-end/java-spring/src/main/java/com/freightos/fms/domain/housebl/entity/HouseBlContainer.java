@@ -45,19 +45,22 @@ public class HouseBlContainer extends BaseEntity {
         return c;
     }
 
-    public void updateDetails(String sealNo1, String sealNo2, Integer pkgQty, String pkgUnit,
-                              BigDecimal grossWeightKg, BigDecimal netWeightKg, BigDecimal cbm,
-                              BigDecimal vgmKg, boolean isSoc, int seq) {
-        this.sealNo1       = sealNo1;
-        this.sealNo2       = sealNo2;
-        this.pkgQty        = pkgQty;
-        this.pkgUnit       = pkgUnit;
-        this.grossWeightKg = grossWeightKg;
-        this.netWeightKg   = netWeightKg;
-        this.cbm           = cbm;
-        this.vgmKg         = vgmKg;
-        this.isSoc         = isSoc;
-        this.seq           = seq;
+    public static record Details(
+            String sealNo1, String sealNo2, Integer pkgQty, String pkgUnit,
+            BigDecimal grossWeightKg, BigDecimal netWeightKg, BigDecimal cbm,
+            BigDecimal vgmKg, boolean isSoc, int seq) {}
+
+    public void updateDetails(Details d) {
+        this.sealNo1       = d.sealNo1();
+        this.sealNo2       = d.sealNo2();
+        this.pkgQty        = d.pkgQty();
+        this.pkgUnit       = d.pkgUnit();
+        this.grossWeightKg = d.grossWeightKg();
+        this.netWeightKg   = d.netWeightKg();
+        this.cbm           = d.cbm();
+        this.vgmKg         = d.vgmKg();
+        this.isSoc         = d.isSoc();
+        this.seq           = d.seq();
     }
 
     /** TEU 환산 산식: length_feet / 20 */

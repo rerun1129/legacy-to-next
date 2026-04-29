@@ -59,14 +59,14 @@ public class MasterBlMapper {
     }
 
     private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
-        domain.updateAirFields(
+        domain.updateAirFields(new MasterBlAir.AirFields(
                 jpa.getAirlineCode(), jpa.getDepartureCode(), jpa.getMawbNo(),
                 jpa.getChargeWeightKg(), jpa.getVolumeWeightKg(),
                 jpa.getRateClass(), jpa.getCurrencyCode(),
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(),
                 jpa.getSecurityStatus(), jpa.getFlightType(),
-                jpa.getIssueDate(), jpa.getIssuePlace(), jpa.getSignature());
+                jpa.getIssueDate(), jpa.getIssuePlace(), jpa.getSignature()));
     }
 
     // ── Domain → JpaEntity (PersistenceAdapter에서 호출) ──────────

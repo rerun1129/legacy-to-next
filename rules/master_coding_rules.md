@@ -23,6 +23,7 @@
 - if-else 분기가 3개 이상 체이닝되면 switch 문(또는 switch 표현식)으로 교체한다. default(예외 처리 포함)도 분기 수에 포함한다.
 - pattern matching switch에서 패턴 변수를 사용하지 않을 경우 `ignored`로 명명한다(`case Type ignored ->`).
 - 여러 줄로 분리된 식(메서드 체이닝, 삼항 연산자, 파라미터 목록 등)은 합쳤을 때 **180열 이하**이면 한 줄로 작성한다. 180열을 초과할 때만 개행한다.
+- 도메인 엔티티의 update/assign 메서드는 **파라미터 8개 이상일 때** 엔티티 내부 `public static record XxxFields` 로 그룹화한다. 5~7개는 의미 단위가 응집되어 있으면 그대로 둔다. record 명명은 `XxxFields` 접미사로 통일.
 
 ## 응답 메시지
 - 사용자 노출 문자열을 코드에 하드코딩하지 않는다. 메시지 코드(`enum`) + `MessageSource` 기반 i18n으로 처리한다.

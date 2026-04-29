@@ -70,10 +70,10 @@ class MasterBlMapperTest {
     @DisplayName("applyAirFields: AIR 도메인 필드가 MasterBlAirJpaEntity에 복사된다")
     void applyAirFields_copiesAirFieldsToJpa() {
         MasterBlAir domain = MasterBlAir.create(Bound.EXP);
-        domain.updateAirFields("KE", "ICN", "180-12345678",
+        domain.updateAirFields(new MasterBlAir.AirFields("KE", "ICN", "180-12345678",
                 BigDecimal.valueOf(100.5), BigDecimal.valueOf(90.0),
                 "Q", "KRW", "N.V.D.", null, "NIL", null, null, null,
-                "2024-03-01", "Seoul", "Signature");
+                "2024-03-01", "Seoul", "Signature"));
         MasterBlAirJpaEntity jpa = new MasterBlAirJpaEntity();
 
         mapper.applyAirFields(domain, jpa);

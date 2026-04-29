@@ -81,22 +81,22 @@ public class HouseBlMapper {
     private void copySeaFields(HouseBlSeaJpaEntity jpa, HouseBlSea domain) {
         domain.updateSeaSchedule(jpa.getLinerCode(), jpa.getVesselName(),
                 jpa.getVoyageNo(), jpa.getOnboardDate());
-        domain.updateSeaRouteAndFlags(
+        domain.updateSeaRouteAndFlags(new HouseBlSea.SeaRouteAndFlags(
                 jpa.getPorCode(), jpa.getFinalDestCode(),
                 jpa.getIssueDate(), jpa.getNoOfBl(), jpa.getIssuePlace(),
                 jpa.getDoDate(), jpa.getIncoterms(), jpa.getPayableAt(),
-                jpa.isTriangle(), jpa.isCoLoad(), jpa.getMblNo(), jpa.getLoadType());
+                jpa.isTriangle(), jpa.isCoLoad(), jpa.getMblNo(), jpa.getLoadType()));
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
-        domain.updateAirFields(
+        domain.updateAirFields(new HouseBlAir.AirFields(
                 jpa.getAirlineCode(), jpa.getDepartureCode(), jpa.getMawbNo(),
                 jpa.getChargeWeightKg(), jpa.getVolumeWeightKg(),
                 jpa.getRateClass(), jpa.getCurrencyCode(),
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(), jpa.getOtherTerm(),
                 jpa.getIssueDate(), jpa.getIssuePlace(), jpa.getSignature(),
-                jpa.getFhd(), jpa.getIncoterms(), jpa.getFreightTermAir());
+                jpa.getFhd(), jpa.getIncoterms(), jpa.getFreightTermAir()));
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
@@ -114,9 +114,10 @@ public class HouseBlMapper {
                 jpa.getContainerType(), jpa.getLengthFeet());
         c.assignIdentity(jpa.getHouseBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
-        c.updateDetails(jpa.getSealNo1(), jpa.getSealNo2(), jpa.getPkgQty(), jpa.getPkgUnit(),
+        c.updateDetails(new HouseBlContainer.Details(
+                jpa.getSealNo1(), jpa.getSealNo2(), jpa.getPkgQty(), jpa.getPkgUnit(),
                 jpa.getGrossWeightKg(), jpa.getNetWeightKg(), jpa.getCbm(),
-                jpa.getVgmKg(), jpa.isSoc(), jpa.getSeq());
+                jpa.getVgmKg(), jpa.isSoc(), jpa.getSeq()));
         return c;
     }
 

@@ -55,22 +55,25 @@ public class HouseBlSea extends HouseBl {
         this.onboardDate = onboardDate;
     }
 
-    public void updateSeaRouteAndFlags(String porCode, String finalDestCode,
-                                       String issueDate, Integer noOfBl, String issuePlace,
-                                       String doDate, String incoterms, String payableAt,
-                                       boolean triangle, boolean coLoad, String mblNo,
-                                       LoadType loadType) {
-        this.porCode       = porCode;
-        this.finalDestCode = finalDestCode;
-        this.issueDate     = issueDate;
-        this.noOfBl        = noOfBl;
-        this.issuePlace    = issuePlace;
-        this.doDate        = doDate;
-        this.incoterms     = incoterms;
-        this.payableAt     = payableAt;
-        this.isTriangle    = triangle;
-        this.isCoLoad      = coLoad;
-        this.mblNo         = mblNo;
-        this.loadType      = loadType;
+    public static record SeaRouteAndFlags(
+            String porCode, String finalDestCode,
+            String issueDate, Integer noOfBl, String issuePlace,
+            String doDate, String incoterms, String payableAt,
+            boolean triangle, boolean coLoad, String mblNo,
+            LoadType loadType) {}
+
+    public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
+        this.porCode       = f.porCode();
+        this.finalDestCode = f.finalDestCode();
+        this.issueDate     = f.issueDate();
+        this.noOfBl        = f.noOfBl();
+        this.issuePlace    = f.issuePlace();
+        this.doDate        = f.doDate();
+        this.incoterms     = f.incoterms();
+        this.payableAt     = f.payableAt();
+        this.isTriangle    = f.triangle();
+        this.isCoLoad      = f.coLoad();
+        this.mblNo         = f.mblNo();
+        this.loadType      = f.loadType();
     }
 }

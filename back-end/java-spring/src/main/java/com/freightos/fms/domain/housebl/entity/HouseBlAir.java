@@ -54,30 +54,33 @@ public class HouseBlAir extends HouseBl {
         return entity;
     }
 
-    public void updateAirFields(String airlineCode, String departureCode, String mawbNo,
-                                java.math.BigDecimal chargeWeightKg, java.math.BigDecimal volumeWeightKg,
-                                String rateClass, String currencyCode,
-                                String declaredValueCarriage, String declaredValueCustoms,
-                                String insurance, String accountInformation, String otherTerm,
-                                String issueDate, String issuePlace, String signature,
-                                String fhd, String incoterms, String freightTermAir) {
-        this.airlineCode            = airlineCode;
-        this.departureCode          = departureCode;
-        this.mawbNo                 = mawbNo;
-        this.chargeWeightKg         = chargeWeightKg;
-        this.volumeWeightKg         = volumeWeightKg;
-        this.rateClass              = rateClass;
-        this.currencyCode           = currencyCode;
-        this.declaredValueCarriage  = declaredValueCarriage;
-        this.declaredValueCustoms   = declaredValueCustoms;
-        this.insurance              = insurance;
-        this.accountInformation     = accountInformation;
-        this.otherTerm              = otherTerm;
-        this.issueDate              = issueDate;
-        this.issuePlace             = issuePlace;
-        this.signature              = signature;
-        this.fhd                    = fhd;
-        this.incoterms              = incoterms;
-        this.freightTermAir         = freightTermAir;
+    public static record AirFields(
+            String airlineCode, String departureCode, String mawbNo,
+            BigDecimal chargeWeightKg, BigDecimal volumeWeightKg,
+            String rateClass, String currencyCode,
+            String declaredValueCarriage, String declaredValueCustoms,
+            String insurance, String accountInformation, String otherTerm,
+            String issueDate, String issuePlace, String signature,
+            String fhd, String incoterms, String freightTermAir) {}
+
+    public void updateAirFields(AirFields f) {
+        this.airlineCode           = f.airlineCode();
+        this.departureCode         = f.departureCode();
+        this.mawbNo                = f.mawbNo();
+        this.chargeWeightKg        = f.chargeWeightKg();
+        this.volumeWeightKg        = f.volumeWeightKg();
+        this.rateClass             = f.rateClass();
+        this.currencyCode          = f.currencyCode();
+        this.declaredValueCarriage = f.declaredValueCarriage();
+        this.declaredValueCustoms  = f.declaredValueCustoms();
+        this.insurance             = f.insurance();
+        this.accountInformation    = f.accountInformation();
+        this.otherTerm             = f.otherTerm();
+        this.issueDate             = f.issueDate();
+        this.issuePlace            = f.issuePlace();
+        this.signature             = f.signature();
+        this.fhd                   = f.fhd();
+        this.incoterms             = f.incoterms();
+        this.freightTermAir        = f.freightTermAir();
     }
 }
