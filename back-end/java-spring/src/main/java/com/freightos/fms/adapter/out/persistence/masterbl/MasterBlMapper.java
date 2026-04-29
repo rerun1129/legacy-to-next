@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.FlightType;
+import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
@@ -13,7 +14,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.springframework.stereotype.Component;
 
-import static com.freightos.fms.adapter.out.persistence.common.VoMapper.mapOrNull;
+import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 
 /**
  * JPA ↔ Domain 변환 매퍼 — Master B/L.
@@ -58,7 +59,7 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()));
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), jpa.getPkgUnit(),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), PackageUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
     }
 
@@ -100,7 +101,7 @@ public class MasterBlMapper {
         jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
         jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), PackageUnit::name));
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
     }

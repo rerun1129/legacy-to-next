@@ -1,4 +1,6 @@
 package com.freightos.fms.domain.common.vo;
 
-public record CargoSummary(Quantity packageCount, String packageUnit, Weight grossWeight, Volume volume) {
+import com.freightos.fms.domain.common.enums.PackageUnit;
+
+public record CargoSummary(Quantity packageCount, PackageUnit packageUnit, Weight grossWeight, Volume volume) {
 }

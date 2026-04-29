@@ -4,8 +4,10 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.FreightCondition;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
+import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.housebl.enums.Fhd;
+import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.freightos.fms.adapter.out.persistence.common.VoMapper.mapOrNull;
+import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 
 /**
  * JPA ↔ Domain 변환 매퍼 — House B/L.
@@ -82,7 +84,7 @@ public class HouseBlMapper {
         domain.assignParties(CustomerCode.of(jpa.getShipperCode()), CustomerCode.of(jpa.getConsigneeCode()),
                 CustomerCode.of(jpa.getNotifyCode()), CustomerCode.of(jpa.getDocPartnerCode()),
                 PortCode.of(jpa.getDeliveryCode()));
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), jpa.getPkgUnit(),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), PackageUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());
     }
@@ -93,7 +95,7 @@ public class HouseBlMapper {
                 BlDate.of(jpa.getOnboardDate()));
         domain.updateSeaRouteAndFlags(new HouseBlSea.SeaRouteAndFlags(
                 PortCode.of(jpa.getPorCode()), PortCode.of(jpa.getFinalDestCode()),
-                BlDate.of(jpa.getIssueDate()), jpa.getNoOfBl(), PortCode.of(jpa.getIssuePlace()),
+                BlDate.of(jpa.getIssueDate()), NoOfBl.fromNumber(jpa.getNoOfBl()), PortCode.of(jpa.getIssuePlace()),
                 BlDate.of(jpa.getDoDate()), Incoterms.fromCode(jpa.getIncoterms()), PortCode.of(jpa.getPayableAt()),
                 jpa.isTriangle(), jpa.isCoLoad(), BlNumber.of(jpa.getMblNo()),
                 jpa.getLoadType(), FreightCondition.fromCode(jpa.getFreightTermSea())));
@@ -129,7 +131,7 @@ public class HouseBlMapper {
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new HouseBlContainer.Details(
                 SealNumber.of(jpa.getSealNo1()), SealNumber.of(jpa.getSealNo2()),
-                Quantity.of(jpa.getPkgQty()), jpa.getPkgUnit(),
+                Quantity.of(jpa.getPkgQty()), PackageUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Weight.of(jpa.getNetWeightKg()),
                 Volume.of(jpa.getCbm()), Weight.of(jpa.getVgmKg()), jpa.isSoc(), jpa.getSeq()));
         return c;
@@ -166,7 +168,7 @@ public class HouseBlMapper {
         jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
         jpa.setDeliveryCode(mapOrNull(domain.getDeliveryCode(), PortCode::value));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), PackageUnit::name));
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
         // 컨테이너는 SEA 전용, HouseBlPersistenceAdapter에서 처리 (여기서는 common 필드만)
@@ -183,7 +185,7 @@ public class HouseBlMapper {
         jpa.setPorCode(mapOrNull(domain.getPorCode(), PortCode::value));
         jpa.setFinalDestCode(mapOrNull(domain.getFinalDestCode(), PortCode::value));
         jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
-        jpa.setNoOfBl(domain.getNoOfBl());
+        jpa.setNoOfBl(mapOrNull(domain.getNoOfBl(), NoOfBl::getNumber));
         jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setDoDate(mapOrNull(domain.getDoDate(), BlDate::asString));
         jpa.setIncoterms(mapOrNull(domain.getIncoterms(), Incoterms::name));
@@ -239,7 +241,7 @@ public class HouseBlMapper {
         jpa.setSealNo1(mapOrNull(c.getSealNo1(), SealNumber::value));
         jpa.setSealNo2(mapOrNull(c.getSealNo2(), SealNumber::value));
         jpa.setPkgQty(mapOrNull(c.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(c.getPkgUnit());
+        jpa.setPkgUnit(mapOrNull(c.getPkgUnit(), PackageUnit::name));
         jpa.setGrossWeightKg(mapOrNull(c.getGrossWeightKg(), Weight::kg));
         jpa.setNetWeightKg(mapOrNull(c.getNetWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(c.getCbm(), Volume::cbm));

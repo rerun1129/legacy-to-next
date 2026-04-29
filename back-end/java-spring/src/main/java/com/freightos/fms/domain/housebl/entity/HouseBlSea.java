@@ -3,6 +3,7 @@ package com.freightos.fms.domain.housebl.entity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightCondition;
 import com.freightos.fms.domain.common.enums.Incoterms;
+import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
@@ -28,7 +29,7 @@ public class HouseBlSea extends HouseBl {
 
     // 수출 전용
     private BlDate issueDate;
-    private Integer noOfBl;
+    private NoOfBl noOfBl;
     private PortCode issuePlace;
 
     // 수입 전용
@@ -58,7 +59,7 @@ public class HouseBlSea extends HouseBl {
 
     public static record SeaRouteAndFlags(
             PortCode porCode, PortCode finalDestCode,
-            BlDate issueDate, Integer noOfBl, PortCode issuePlace,
+            BlDate issueDate, NoOfBl noOfBl, PortCode issuePlace,
             BlDate doDate, Incoterms incoterms, PortCode payableAt,
             boolean triangle, boolean coLoad, BlNumber mblNo,
             LoadType loadType, FreightCondition freightTermSea) {}

@@ -1,10 +1,14 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 
 import java.time.LocalDateTime;
+
+import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 
 /** 리스트 화면용 요약 DTO */
 public record HouseBlSummaryResponse(
@@ -25,17 +29,17 @@ public record HouseBlSummaryResponse(
     public static HouseBlSummaryResponse from(HouseBl entity) {
         return new HouseBlSummaryResponse(
                 entity.getId(),
-                entity.getHblNo() != null ? entity.getHblNo().value() : null,
+                mapOrNull(entity.getHblNo(), BlNumber::value),
                 entity.getJobDiv(),
                 entity.getBound(),
-                entity.getPolCode() != null ? entity.getPolCode().value() : null,
-                entity.getPodCode() != null ? entity.getPodCode().value() : null,
-                entity.getEtd() != null ? entity.getEtd().asString() : null,
-                entity.getEta() != null ? entity.getEta().asString() : null,
-                entity.getShipperCode() != null ? entity.getShipperCode().value() : null,
-                entity.getConsigneeCode() != null ? entity.getConsigneeCode().value() : null,
-                entity.getPkgQty() != null ? entity.getPkgQty().count() : null,
-                entity.getPkgUnit(),
+                mapOrNull(entity.getPolCode(), PortCode::value),
+                mapOrNull(entity.getPodCode(), PortCode::value),
+                mapOrNull(entity.getEtd(), BlDate::asString),
+                mapOrNull(entity.getEta(), BlDate::asString),
+                mapOrNull(entity.getShipperCode(), CustomerCode::value),
+                mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
+                mapOrNull(entity.getPkgQty(), Quantity::count),
+                mapOrNull(entity.getPkgUnit(), PackageUnit::name),
                 entity.getCreatedAt()
         );
     }

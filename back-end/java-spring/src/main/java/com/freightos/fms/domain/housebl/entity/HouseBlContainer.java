@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import lombok.AccessLevel;
@@ -27,7 +28,7 @@ public class HouseBlContainer extends BaseEntity {
     private SealNumber sealNo1;
     private SealNumber sealNo2;
     private Quantity pkgQty;
-    private String pkgUnit;
+    private PackageUnit pkgUnit;
     private Weight grossWeightKg;
     private Weight netWeightKg;
     private Volume cbm;
@@ -48,7 +49,7 @@ public class HouseBlContainer extends BaseEntity {
     }
 
     public static record Details(
-            SealNumber sealNo1, SealNumber sealNo2, Quantity pkgQty, String pkgUnit,
+            SealNumber sealNo1, SealNumber sealNo2, Quantity pkgQty, PackageUnit pkgUnit,
             Weight grossWeightKg, Weight netWeightKg, Volume cbm,
             Weight vgmKg, boolean isSoc, int seq) {}
 

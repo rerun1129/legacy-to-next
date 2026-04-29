@@ -1,4 +1,4 @@
-package com.freightos.fms.adapter.out.persistence.common;
+package com.freightos.fms.common.util;
 
 import java.util.function.Function;
 
