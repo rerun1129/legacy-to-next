@@ -24,17 +24,11 @@ public class HouseBlDescJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 
-    @Column(name = "marks_left", columnDefinition = "TEXT")
-    private String marksLeft;
+    @Column(name = "marks", columnDefinition = "TEXT")
+    private String marks;
 
-    @Column(name = "marks_right", columnDefinition = "TEXT")
-    private String marksRight;
-
-    @Column(name = "description_left", columnDefinition = "TEXT")
-    private String descriptionLeft;
-
-    @Column(name = "description_right", columnDefinition = "TEXT")
-    private String descriptionRight;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "desc_clause_1", length = 50)
     private String descClause1;
@@ -45,12 +39,9 @@ public class HouseBlDescJpaEntity extends BaseJpaEntity {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
-    public void setHouseBlDescId(Long v) { this.houseBlDescId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
-    public void setMarksLeft(String v) { this.marksLeft = v; }
-    public void setMarksRight(String v) { this.marksRight = v; }
-    public void setDescriptionLeft(String v) { this.descriptionLeft = v; }
-    public void setDescriptionRight(String v) { this.descriptionRight = v; }
+    public void setMarks(String v) { this.marks = v; }
+    public void setDescription(String v) { this.description = v; }
     public void setDescClause1(String v) { this.descClause1 = v; }
     public void setDescClause2(String v) { this.descClause2 = v; }
     public void setRemark(String v) { this.remark = v; }

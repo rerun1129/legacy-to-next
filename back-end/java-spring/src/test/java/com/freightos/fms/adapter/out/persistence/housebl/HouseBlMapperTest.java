@@ -275,10 +275,8 @@ class HouseBlMapperTest {
 
         HouseBlDescJpaEntity descJpa = new HouseBlDescJpaEntity();
         descJpa.setHouseBl(houseBlJpa);
-        descJpa.setMarksLeft("MARKS-LEFT");
-        descJpa.setMarksRight("MARKS-RIGHT");
-        descJpa.setDescriptionLeft("DESC-LEFT");
-        descJpa.setDescriptionRight("DESC-RIGHT");
+        descJpa.setMarks("MARKS");
+        descJpa.setDescription("DESCRIPTION");
         descJpa.setDescClause1("CLAUSE1");
         descJpa.setDescClause2("CLAUSE2");
         descJpa.setRemark("REMARK TEXT");
@@ -286,8 +284,8 @@ class HouseBlMapperTest {
         HouseBlDesc domain = mapper.toDescDomain(descJpa);
 
         assertThat(domain.getHouseBlId()).isEqualTo(1L);
-        assertThat(domain.getMarksLeft()).isEqualTo("MARKS-LEFT");
-        assertThat(domain.getDescriptionLeft()).isEqualTo("DESC-LEFT");
+        assertThat(domain.getMarks()).isEqualTo("MARKS");
+        assertThat(domain.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(domain.getDescClause1()).isEqualTo("CLAUSE1");
         assertThat(domain.getRemark()).isEqualTo("REMARK TEXT");
     }
@@ -299,14 +297,13 @@ class HouseBlMapperTest {
         houseBlJpa.setHouseBlId(1L);
 
         HouseBlDesc domain = HouseBlDesc.create(1L);
-        domain.updateContent("MARKS-LEFT", "MARKS-RIGHT", "DESC-LEFT", "DESC-RIGHT",
-                "CLAUSE1", "CLAUSE2", "REMARK TEXT");
+        domain.updateContent("MARKS", "DESCRIPTION", "CLAUSE1", "CLAUSE2", "REMARK TEXT");
         HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
 
         mapper.applyDescFields(domain, jpa, houseBlJpa);
 
-        assertThat(jpa.getMarksLeft()).isEqualTo("MARKS-LEFT");
-        assertThat(jpa.getDescriptionLeft()).isEqualTo("DESC-LEFT");
+        assertThat(jpa.getMarks()).isEqualTo("MARKS");
+        assertThat(jpa.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(jpa.getDescClause1()).isEqualTo("CLAUSE1");
         assertThat(jpa.getRemark()).isEqualTo("REMARK TEXT");
         assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
