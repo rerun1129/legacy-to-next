@@ -82,8 +82,11 @@ public class HouseBlMapper {
         domain.assignOperator(CustomerCode.of(jpa.getActualCustomerCode()), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()), EmployeeCode.of(jpa.getSalesManCode()));
         domain.updateBlStatus(jpa.getShipmentType(), jpa.getBlType(), jpa.getFreightTerm());
-        domain.assignParties(CustomerCode.of(jpa.getShipperCode()), CustomerCode.of(jpa.getConsigneeCode()),
-                CustomerCode.of(jpa.getNotifyCode()), CustomerCode.of(jpa.getDocPartnerCode()),
+        domain.assignParties(
+                CustomerCode.of(jpa.getShipperCode(), jpa.getShipperAddress()),
+                CustomerCode.of(jpa.getConsigneeCode(), jpa.getConsigneeAddress()),
+                CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()),
+                CustomerCode.of(jpa.getDocPartnerCode(), jpa.getDocPartnerAddress()),
                 PortCode.of(jpa.getDeliveryCode()));
         domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), PackageUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
@@ -164,9 +167,13 @@ public class HouseBlMapper {
         jpa.setBlType(domain.getBlType());
         jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
         jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
         jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
         jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
+        jpa.setDocPartnerAddress(mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
         jpa.setDeliveryCode(mapOrNull(domain.getDeliveryCode(), PortCode::value));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), PackageUnit::name));

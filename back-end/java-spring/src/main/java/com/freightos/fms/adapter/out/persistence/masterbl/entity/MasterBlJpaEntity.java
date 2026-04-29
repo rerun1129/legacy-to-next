@@ -42,11 +42,20 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "shipper_code", length = 20)
     private String shipperCode;
 
+    @Column(name = "shipper_address", length = 500)
+    private String shipperAddress;
+
     @Column(name = "consignee_code", length = 20)
     private String consigneeCode;
 
+    @Column(name = "consignee_address", length = 500)
+    private String consigneeAddress;
+
     @Column(name = "notify_code", length = 20)
     private String notifyCode;
+
+    @Column(name = "notify_address", length = 500)
+    private String notifyAddress;
 
     @Column(name = "pol_code", length = 10)
     private String polCode;
@@ -94,8 +103,11 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setJobDiv(String v) { this.jobDiv = v; }
     public void setBound(Bound v) { this.bound = v; }
     public void setShipperCode(String v) { this.shipperCode = v; }
+    public void setShipperAddress(String v) { this.shipperAddress = v; }
     public void setConsigneeCode(String v) { this.consigneeCode = v; }
+    public void setConsigneeAddress(String v) { this.consigneeAddress = v; }
     public void setNotifyCode(String v) { this.notifyCode = v; }
+    public void setNotifyAddress(String v) { this.notifyAddress = v; }
     public void setPolCode(String v) { this.polCode = v; }
     public void setPodCode(String v) { this.podCode = v; }
     public void setEtd(String v) { this.etd = v; }
