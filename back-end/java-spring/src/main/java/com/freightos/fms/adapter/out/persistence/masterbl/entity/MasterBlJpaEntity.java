@@ -54,10 +54,10 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "pod_code", length = 10)
     private String podCode;
 
-    @Column(name = "etd", length = 10)
+    @Column(name = "etd", length = 8)
     private String etd;
 
-    @Column(name = "eta", length = 10)
+    @Column(name = "eta", length = 8)
     private String eta;
 
     @Column(name = "freight_term", length = 10)

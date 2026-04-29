@@ -20,8 +20,7 @@ public class PagedResult<T> {
         this.size          = size;
     }
 
-    public static <T> PagedResult<T> of(List<T> content, long totalElements, int totalPages,
-                                         int page, int size) {
+    public static <T> PagedResult<T> of(List<T> content, long totalElements, int totalPages, int page, int size) {
         return new PagedResult<>(content, totalElements, totalPages, page, size);
     }
 
@@ -46,8 +45,6 @@ public class PagedResult<T> {
     }
 
     public <R> PagedResult<R> map(Function<? super T, ? extends R> mapper) {
-        return new PagedResult<>(
-                content.stream().<R>map(mapper).toList(),
-                totalElements, totalPages, page, size);
+        return new PagedResult<>(content.stream().<R>map(mapper).toList(),totalElements, totalPages, page, size);
     }
 }

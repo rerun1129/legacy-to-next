@@ -62,7 +62,7 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "other_term", length = 100)
     private String otherTerm;
 
-    @Column(name = "issue_date", length = 10)
+    @Column(name = "issue_date", length = 8)
     private String issueDate;
 
     @Column(name = "issue_place", length = 50)

@@ -36,9 +36,7 @@ public class PageRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PageRequest that)) return false;
-        return page == that.page && size == that.size
-                && Objects.equals(sortBy, that.sortBy)
-                && sortDirection == that.sortDirection;
+        return page == that.page && size == that.size && Objects.equals(sortBy, that.sortBy) && sortDirection == that.sortDirection;
     }
 
     @Override

@@ -19,7 +19,7 @@ public class HouseBlTruck extends HouseBl {
 
     /** 고정값 "TRUCK". 사용자 입력 없이 시스템 설정. */
     private String vesselName = "TRUCK";
-    // 비즈니스 날짜 — ISO 8601 문자열 (yyyy-MM-dd)
+    // 비즈니스 날짜 — yyyyMMdd
     private String pickupDate;
     private String truckerCode;
     private String truckerPic;

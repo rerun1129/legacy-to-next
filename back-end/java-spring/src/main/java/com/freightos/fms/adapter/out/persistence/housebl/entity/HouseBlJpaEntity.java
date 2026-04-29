@@ -76,10 +76,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "delivery_code", length = 10)
     private String deliveryCode;
 
-    @Column(name = "etd", length = 10)
+    @Column(name = "etd", length = 8)
     private String etd;
 
-    @Column(name = "eta", length = 10)
+    @Column(name = "eta", length = 8)
     private String eta;
 
     @Column(name = "pkg_qty")

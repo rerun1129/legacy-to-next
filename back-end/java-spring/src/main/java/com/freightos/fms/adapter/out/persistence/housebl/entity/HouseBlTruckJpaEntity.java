@@ -30,7 +30,7 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Column(name = "vessel_name", length = 10, nullable = false)
     private String vesselName = "TRUCK";
 
-    @Column(name = "pickup_date", length = 10)
+    @Column(name = "pickup_date", length = 8)
     private String pickupDate;
 
     @Column(name = "trucker_code", length = 20)

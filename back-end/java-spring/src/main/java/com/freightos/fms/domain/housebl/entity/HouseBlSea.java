@@ -19,7 +19,7 @@ public class HouseBlSea extends HouseBl {
     private String linerCode;
     private String vesselName;
     private String voyageNo;
-    // 비즈니스 날짜 — ISO 8601 문자열 (yyyy-MM-dd)
+    // 비즈니스 날짜 — yyyyMMdd
     private String onboardDate;
     private String porCode;            // Place of Receipt
     private String finalDestCode;

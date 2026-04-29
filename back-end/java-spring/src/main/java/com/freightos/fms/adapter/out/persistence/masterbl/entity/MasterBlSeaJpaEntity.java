@@ -38,13 +38,13 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "voyage_no", length = 20)
     private String voyageNo;
 
-    @Column(name = "onboard_date", length = 10)
+    @Column(name = "onboard_date", length = 8)
     private String onboardDate;
 
     @Column(name = "line_bkg_no", length = 50)
     private String lineBkgNo;
 
-    @Column(name = "issue_date", length = 10)
+    @Column(name = "issue_date", length = 8)
     private String issueDate;
 
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }

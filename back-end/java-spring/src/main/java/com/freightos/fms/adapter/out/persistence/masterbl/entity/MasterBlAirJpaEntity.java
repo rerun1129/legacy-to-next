@@ -65,7 +65,7 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "flight_type", length = 20)
     private String flightType;
 
-    @Column(name = "issue_date", length = 10)
+    @Column(name = "issue_date", length = 8)
     private String issueDate;
 
     @Column(name = "issue_place", length = 50)

@@ -38,7 +38,7 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "voyage_no", length = 20)
     private String voyageNo;
 
-    @Column(name = "onboard_date", length = 10)
+    @Column(name = "onboard_date", length = 8)
     private String onboardDate;
 
     @Column(name = "por_code", length = 10)
@@ -47,7 +47,7 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "final_dest_code", length = 10)
     private String finalDestCode;
 
-    @Column(name = "issue_date", length = 10)
+    @Column(name = "issue_date", length = 8)
     private String issueDate;
 
     @Column(name = "no_of_bl")
@@ -56,7 +56,7 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "issue_place", length = 50)
     private String issuePlace;
 
-    @Column(name = "do_date", length = 10)
+    @Column(name = "do_date", length = 8)
     private String doDate;
 
     @Column(name = "incoterms", length = 10)
