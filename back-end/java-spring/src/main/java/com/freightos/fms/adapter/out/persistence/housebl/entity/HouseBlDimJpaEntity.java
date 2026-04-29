@@ -44,9 +44,6 @@ public class HouseBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal volumeWeightKg;
 
-    @Column(name = "seq", nullable = false)
-    private int seq;
-
     public void setHouseBlDimId(Long v) { this.houseBlDimId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLengthCm(BigDecimal v) { this.lengthCm = v; }
@@ -55,5 +52,4 @@ public class HouseBlDimJpaEntity extends BaseJpaEntity {
     public void setQuantity(Integer v) { this.quantity = v; }
     public void setCbm(BigDecimal v) { this.cbm = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
-    public void setSeq(int v) { this.seq = v; }
 }

@@ -22,16 +22,14 @@ public class HouseBlScheduleLeg extends BaseEntity {
     private String onBoardTm;
     private String arrivalDt;
     private String arrivalTm;
-    private int seq;
 
     public static HouseBlScheduleLeg create(Long houseBlId, String toCode,
-                                            String onBoardDt, String arrivalDt, int seq) {
+                                            String onBoardDt, String arrivalDt) {
         HouseBlScheduleLeg s = new HouseBlScheduleLeg();
         s.houseBlId  = houseBlId;
         s.toCode     = toCode;
         s.onBoardDt  = onBoardDt;
         s.arrivalDt  = arrivalDt;
-        s.seq        = seq;
         return s;
     }
 

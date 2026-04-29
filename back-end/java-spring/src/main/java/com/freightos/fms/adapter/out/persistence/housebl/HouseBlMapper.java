@@ -256,8 +256,7 @@ public class HouseBlMapper {
         HouseBlDim domain = HouseBlDim.create(
                 jpa.getHouseBl().getHouseBlId(),
                 jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
-                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg(),
-                jpa.getSeq());
+                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
         domain.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         return domain;
@@ -275,7 +274,6 @@ public class HouseBlMapper {
         jpa.setQuantity(domain.getQuantity());
         jpa.setCbm(domain.getCbm());
         jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
-        jpa.setSeq(domain.getSeq());
     }
 
     // ── E-13 DESC ─────────────────────────────────────────────────────
@@ -362,7 +360,7 @@ public class HouseBlMapper {
     public HouseBlScheduleLeg toScheduleLegDomain(HouseBlScheduleLegJpaEntity jpa) {
         HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(
                 jpa.getHouseBl().getHouseBlId(),
-                jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt(), jpa.getSeq());
+                jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt());
         domain.assignIdentity(jpa.getHouseBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateDetails(jpa.getToCode(), jpa.getByCarrier(), jpa.getFlightNo(),
@@ -383,6 +381,5 @@ public class HouseBlMapper {
         jpa.setOnBoardTm(domain.getOnBoardTm());
         jpa.setArrivalDt(domain.getArrivalDt());
         jpa.setArrivalTm(domain.getArrivalTm());
-        jpa.setSeq(domain.getSeq());
     }
 }

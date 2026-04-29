@@ -44,9 +44,6 @@ public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "arrival_tm", length = 4)
     private String arrivalTm;
 
-    @Column(name = "seq", nullable = false)
-    private int seq;
-
     public void setHouseBlScheduleLegId(Long v) { this.houseBlScheduleLegId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setToCode(String v) { this.toCode = v; }
@@ -56,6 +53,5 @@ public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {
     public void setOnBoardTm(String v) { this.onBoardTm = v; }
     public void setArrivalDt(String v) { this.arrivalDt = v; }
     public void setArrivalTm(String v) { this.arrivalTm = v; }
-    public void setSeq(int v) { this.seq = v; }
 }
 

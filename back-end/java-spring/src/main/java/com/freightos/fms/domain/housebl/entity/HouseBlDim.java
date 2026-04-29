@@ -23,11 +23,10 @@ public class HouseBlDim extends BaseEntity {
     private Integer quantity;
     private BigDecimal cbm;
     private BigDecimal volumeWeightKg;
-    private int seq;
 
     public static HouseBlDim create(Long houseBlId, BigDecimal lengthCm, BigDecimal widthCm,
                                     BigDecimal heightCm, Integer quantity, BigDecimal cbm,
-                                    BigDecimal volumeWeightKg, int seq) {
+                                    BigDecimal volumeWeightKg) {
         HouseBlDim d = new HouseBlDim();
         d.houseBlId      = houseBlId;
         d.lengthCm       = lengthCm;
@@ -36,7 +35,6 @@ public class HouseBlDim extends BaseEntity {
         d.quantity       = quantity;
         d.cbm            = cbm;
         d.volumeWeightKg = volumeWeightKg;
-        d.seq            = seq;
         return d;
     }
 

@@ -208,7 +208,6 @@ class HouseBlMapperTest {
         dimJpa.setQuantity(2);
         dimJpa.setCbm(BigDecimal.valueOf(0.06));
         dimJpa.setVolumeWeightKg(BigDecimal.valueOf(10.0));
-        dimJpa.setSeq(1);
 
         HouseBlDim domain = mapper.toDimDomain(dimJpa);
 
@@ -219,7 +218,6 @@ class HouseBlMapperTest {
         assertThat(domain.getQuantity()).isEqualTo(2);
         assertThat(domain.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.06));
         assertThat(domain.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(10.0));
-        assertThat(domain.getSeq()).isEqualTo(1);
     }
 
     @Test
@@ -230,7 +228,7 @@ class HouseBlMapperTest {
 
         HouseBlDim domain = HouseBlDim.create(1L,
                 BigDecimal.valueOf(50.0), BigDecimal.valueOf(40.0), BigDecimal.valueOf(30.0),
-                2, BigDecimal.valueOf(0.06), BigDecimal.valueOf(10.0), 1);
+                2, BigDecimal.valueOf(0.06), BigDecimal.valueOf(10.0));
         HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
 
         mapper.applyDimFields(domain, jpa, houseBlJpa);
@@ -241,7 +239,6 @@ class HouseBlMapperTest {
         assertThat(jpa.getQuantity()).isEqualTo(2);
         assertThat(jpa.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.06));
         assertThat(jpa.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(10.0));
-        assertThat(jpa.getSeq()).isEqualTo(1);
         assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }
 
@@ -253,10 +250,8 @@ class HouseBlMapperTest {
 
         HouseBlDimJpaEntity dim1 = new HouseBlDimJpaEntity();
         dim1.setHouseBl(houseBlJpa);
-        dim1.setSeq(1);
         HouseBlDimJpaEntity dim2 = new HouseBlDimJpaEntity();
         dim2.setHouseBl(houseBlJpa);
-        dim2.setSeq(2);
 
         List<HouseBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
 
@@ -441,7 +436,6 @@ class HouseBlMapperTest {
         legJpa.setOnBoardTm("1800");
         legJpa.setArrivalDt("20240316");
         legJpa.setArrivalTm("0700");
-        legJpa.setSeq(2);
 
         HouseBlScheduleLeg domain = mapper.toScheduleLegDomain(legJpa);
 
@@ -452,7 +446,6 @@ class HouseBlMapperTest {
         assertThat(domain.getOnBoardTm()).isEqualTo("1800");
         assertThat(domain.getArrivalDt()).isEqualTo("20240316");
         assertThat(domain.getArrivalTm()).isEqualTo("0700");
-        assertThat(domain.getSeq()).isEqualTo(2);
     }
 
     @Test
@@ -461,7 +454,7 @@ class HouseBlMapperTest {
         HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
         houseBlJpa.setHouseBlId(1L);
 
-        HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(1L, "NRT", "20240315", "20240316", 2);
+        HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(1L, "NRT", "20240315", "20240316");
         domain.updateDetails("NRT", "OZ", "OZ102", "20240315", "1800", "20240316", "0700");
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
 
@@ -474,7 +467,6 @@ class HouseBlMapperTest {
         assertThat(jpa.getOnBoardTm()).isEqualTo("1800");
         assertThat(jpa.getArrivalDt()).isEqualTo("20240316");
         assertThat(jpa.getArrivalTm()).isEqualTo("0700");
-        assertThat(jpa.getSeq()).isEqualTo(2);
         assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }
 
@@ -486,10 +478,8 @@ class HouseBlMapperTest {
 
         HouseBlScheduleLegJpaEntity leg1 = new HouseBlScheduleLegJpaEntity();
         leg1.setHouseBl(houseBlJpa);
-        leg1.setSeq(1);
         HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
         leg2.setHouseBl(houseBlJpa);
-        leg2.setSeq(2);
 
         List<HouseBlScheduleLeg> result = mapper.toScheduleLegDomainList(List.of(leg1, leg2));
 
