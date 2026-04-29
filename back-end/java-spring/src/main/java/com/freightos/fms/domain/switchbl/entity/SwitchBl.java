@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.switchbl.entity;
 
 import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.fms.domain.common.vo.CustomerCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,19 +19,19 @@ public class SwitchBl extends BaseEntity {
     private String switchBlNo;
     private String blType;
     private String incoterms;
-    private String shipperCode;
-    private String consigneeCode;
-    private String notifyCode;
+    private CustomerCode shipperCode;
+    private CustomerCode consigneeCode;
+    private CustomerCode notifyCode;
 
     private SwitchBlDescription description;
 
-    protected SwitchBl(Long houseBlId, String shipperCode) {
+    protected SwitchBl(Long houseBlId, CustomerCode shipperCode) {
         this.houseBlId   = houseBlId;
         this.shipperCode = shipperCode;
     }
 
     /** 필수값(houseBlId, shipperCode)만으로 생성. 나머지 상세는 updateDetails로 채운다. */
-    public static SwitchBl create(Long houseBlId, String shipperCode) {
+    public static SwitchBl create(Long houseBlId, CustomerCode shipperCode) {
         return new SwitchBl(houseBlId, shipperCode);
     }
 
@@ -43,7 +44,7 @@ public class SwitchBl extends BaseEntity {
     }
 
     public void updateDetails(String switchBlNo, String blType, String incoterms,
-                              String shipperCode, String consigneeCode, String notifyCode) {
+                              CustomerCode shipperCode, CustomerCode consigneeCode, CustomerCode notifyCode) {
         this.switchBlNo    = switchBlNo;
         this.blType        = blType;
         this.incoterms     = incoterms;

@@ -40,17 +40,29 @@ public class SwitchBlJpaEntity extends BaseJpaEntity {
     @Column(name = "shipper_code", nullable = false, length = 20)
     private String shipperCode;
 
+    @Column(name = "shipper_address", length = 500)
+    private String shipperAddress;
+
     @Column(name = "consignee_code", length = 20)
     private String consigneeCode;
+
+    @Column(name = "consignee_address", length = 500)
+    private String consigneeAddress;
 
     @Column(name = "notify_code", length = 20)
     private String notifyCode;
 
-    public void setHouseBl(HouseBlJpaEntity v)  { this.houseBl      = v; }
-    public void setSwitchBlNo(String v)          { this.switchBlNo   = v; }
-    public void setBlType(String v)              { this.blType       = v; }
-    public void setIncoterms(String v)           { this.incoterms    = v; }
-    public void setShipperCode(String v)         { this.shipperCode  = v; }
-    public void setConsigneeCode(String v)       { this.consigneeCode = v; }
-    public void setNotifyCode(String v)          { this.notifyCode   = v; }
+    @Column(name = "notify_address", length = 500)
+    private String notifyAddress;
+
+    public void setHouseBl(HouseBlJpaEntity v)       { this.houseBl          = v; }
+    public void setSwitchBlNo(String v)              { this.switchBlNo       = v; }
+    public void setBlType(String v)                  { this.blType           = v; }
+    public void setIncoterms(String v)               { this.incoterms        = v; }
+    public void setShipperCode(String v)             { this.shipperCode      = v; }
+    public void setShipperAddress(String v)          { this.shipperAddress   = v; }
+    public void setConsigneeCode(String v)           { this.consigneeCode    = v; }
+    public void setConsigneeAddress(String v)        { this.consigneeAddress = v; }
+    public void setNotifyCode(String v)              { this.notifyCode       = v; }
+    public void setNotifyAddress(String v)           { this.notifyAddress    = v; }
 }

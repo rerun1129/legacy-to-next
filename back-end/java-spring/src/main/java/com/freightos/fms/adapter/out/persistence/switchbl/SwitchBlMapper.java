@@ -2,9 +2,12 @@ package com.freightos.fms.adapter.out.persistence.switchbl;
 
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlDescriptionJpaEntity;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlJpaEntity;
+import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
 import org.springframework.stereotype.Component;
+
+import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 
 /**
  * JPA ↔ Domain 변환 매퍼 — Switch B/L.
@@ -15,12 +18,16 @@ import org.springframework.stereotype.Component;
 public class SwitchBlMapper {
 
     public SwitchBl toDomain(SwitchBlJpaEntity jpa) {
-        SwitchBl domain = SwitchBl.create(jpa.getHouseBl().getHouseBlId(), jpa.getShipperCode());
+        SwitchBl domain = SwitchBl.create(
+                jpa.getHouseBl().getHouseBlId(),
+                CustomerCode.of(jpa.getShipperCode(), jpa.getShipperAddress()));
         domain.assignIdentity(jpa.getSwitchBlId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignSwitchBlId(jpa.getSwitchBlId());
         domain.updateDetails(jpa.getSwitchBlNo(), jpa.getBlType(), jpa.getIncoterms(),
-                jpa.getShipperCode(), jpa.getConsigneeCode(), jpa.getNotifyCode());
+                CustomerCode.of(jpa.getShipperCode(), jpa.getShipperAddress()),
+                CustomerCode.of(jpa.getConsigneeCode(), jpa.getConsigneeAddress()),
+                CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()));
 
         SwitchBlDescriptionJpaEntity descJpa = jpa.getDescription();
         if (descJpa != null) {
@@ -43,9 +50,12 @@ public class SwitchBlMapper {
         jpa.setSwitchBlNo(domain.getSwitchBlNo());
         jpa.setBlType(domain.getBlType());
         jpa.setIncoterms(domain.getIncoterms());
-        jpa.setShipperCode(domain.getShipperCode());
-        jpa.setConsigneeCode(domain.getConsigneeCode());
-        jpa.setNotifyCode(domain.getNotifyCode());
+        jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
+        jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
+        jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
     }
 
     public SwitchBlDescriptionJpaEntity toDescriptionJpa(SwitchBlDescription desc, SwitchBlJpaEntity switchBlJpa) {
