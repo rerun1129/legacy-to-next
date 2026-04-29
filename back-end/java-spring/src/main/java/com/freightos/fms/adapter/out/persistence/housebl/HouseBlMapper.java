@@ -371,7 +371,7 @@ public class HouseBlMapper {
         domain.assignIdentity(jpa.getHouseBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateDetails(jpa.getToCode(), jpa.getByCarrier(), jpa.getFlightNo(),
-                jpa.getOnBoardDt(), jpa.getOnBoardTm(), jpa.getArrivalDt(), jpa.getArrivalTm(), jpa.getSeq());
+                jpa.getOnBoardDt(), jpa.getOnBoardTm(), jpa.getArrivalDt(), jpa.getArrivalTm());
         return domain;
     }
 
