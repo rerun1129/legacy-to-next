@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
@@ -93,6 +94,10 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .map(l -> masterBlMapper.toScheduleLegJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncScheduleLegs(jpaLegs);
+                MasterBlDescJpaEntity airDescJpa = (air.getDesc() != null)
+                        ? masterBlMapper.toDescJpa(air.getDesc(), savedJpa)
+                        : null;
+                savedJpa.replaceDesc(airDescJpa);
                 masterBlAirRepository.save(airJpa);
             }
             case MasterBlSea sea -> {
@@ -101,6 +106,10 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .orElseGet(MasterBlSeaJpaEntity::new);
                 seaJpa.setMasterBl(savedJpa);
                 masterBlMapper.applySeaFields(sea, seaJpa);
+                MasterBlDescJpaEntity seaDescJpa = (sea.getDesc() != null)
+                        ? masterBlMapper.toDescJpa(sea.getDesc(), savedJpa)
+                        : null;
+                savedJpa.replaceDesc(seaDescJpa);
                 masterBlSeaRepository.save(seaJpa);
             }
             default -> throw new IllegalArgumentException(

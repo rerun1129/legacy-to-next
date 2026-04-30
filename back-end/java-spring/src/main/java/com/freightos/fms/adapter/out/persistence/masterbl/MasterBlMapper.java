@@ -44,6 +44,9 @@ public class MasterBlMapper {
         MasterBlSea domain = MasterBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
+        if (jpa.getDesc() != null) {
+            domain.initDesc(toDescDomain(jpa.getDesc()));
+        }
         return domain;
     }
 
@@ -57,6 +60,9 @@ public class MasterBlMapper {
         domain.initAirCharges(airCharges);
         domain.initDims(toDimDomainList(jpa.getDims()));
         domain.initScheduleLegs(toScheduleLegDomainList(jpa.getScheduleLegs()));
+        if (jpa.getDesc() != null) {
+            domain.initDesc(toDescDomain(jpa.getDesc()));
+        }
         return domain;
     }
 
@@ -278,6 +284,12 @@ public class MasterBlMapper {
     public MasterBlAirChargeJpaEntity toAirChargeJpa(MasterBlAirCharge c, MasterBlJpaEntity masterBl) {
         MasterBlAirChargeJpaEntity jpa = new MasterBlAirChargeJpaEntity();
         applyAirChargeFields(c, jpa, masterBl);
+        return jpa;
+    }
+
+    public MasterBlDescJpaEntity toDescJpa(MasterBlDesc d, MasterBlJpaEntity masterBl) {
+        MasterBlDescJpaEntity jpa = new MasterBlDescJpaEntity();
+        applyDescFields(d, jpa, masterBl);
         return jpa;
     }
 }
