@@ -3,6 +3,8 @@ package com.freightos.fms.domain.housebl.entity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,10 +18,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlTruck extends HouseBl {
 
-    /** 고정값 "TRUCK". 사용자 입력 없이 시스템 설정. */
-    private String vesselName = "TRUCK";
-    // 비즈니스 날짜
+    private VesselVoyage vesselVoyage;
     private BlDate pickupDate;
+    private String pickupTm;
+    private String etdTm;
+    private String etaTm;
+    private LoadType loadType;
+    private ServiceTerm serviceTerm;
     private CustomerCode truckerCode;
     private EmployeeCode truckerPic;
     /** 트럭 전용: 청구중량 */
@@ -31,15 +36,33 @@ public class HouseBlTruck extends HouseBl {
 
     public static HouseBlTruck create(Bound bound) {
         HouseBlTruck entity = new HouseBlTruck(bound);
-        entity.vesselName = "TRUCK";
+        entity.vesselVoyage = VesselVoyage.of("TRUCK", null);
         return entity;
     }
 
-    public void updateTruckFields(BlDate pickupDate, CustomerCode truckerCode, EmployeeCode truckerPic,
-                                  Weight chargeWeightKg) {
-        this.pickupDate     = pickupDate;
-        this.truckerCode    = truckerCode;
-        this.truckerPic     = truckerPic;
-        this.chargeWeightKg = chargeWeightKg;
+    public String getVesselName() {
+        return vesselVoyage != null ? vesselVoyage.vesselName() : "TRUCK";
+    }
+
+    public record TruckFields(
+            VesselVoyage vesselVoyage,
+            BlDate pickupDate, String pickupTm,
+            String etdTm, String etaTm,
+            LoadType loadType, ServiceTerm serviceTerm,
+            CustomerCode truckerCode, EmployeeCode truckerPic,
+            Weight chargeWeightKg) {}
+
+    public void updateTruckFields(TruckFields f) {
+        this.vesselVoyage   = VesselVoyage.of("TRUCK",
+                f.vesselVoyage != null ? f.vesselVoyage.voyageNo() : null);
+        this.pickupDate     = f.pickupDate;
+        this.pickupTm       = f.pickupTm;
+        this.etdTm          = f.etdTm;
+        this.etaTm          = f.etaTm;
+        this.loadType       = f.loadType;
+        this.serviceTerm    = f.serviceTerm;
+        this.truckerCode    = f.truckerCode;
+        this.truckerPic     = f.truckerPic;
+        this.chargeWeightKg = f.chargeWeightKg;
     }
 }

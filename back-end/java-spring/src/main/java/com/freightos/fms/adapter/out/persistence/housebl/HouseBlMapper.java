@@ -13,6 +13,8 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -164,8 +166,14 @@ public class HouseBlMapper {
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
-        domain.updateTruckFields(BlDate.of(jpa.getPickupDate()), CustomerCode.of(jpa.getTruckerCode()),
-                EmployeeCode.of(jpa.getTruckerPic()), Weight.of(jpa.getChargeWeightKg()));
+        domain.updateTruckFields(new HouseBlTruck.TruckFields(
+                VesselVoyage.of(jpa.getVesselName(), jpa.getVoyageNo()),
+                BlDate.of(jpa.getPickupDate()), jpa.getPickupTm(),
+                jpa.getEtdTm(), jpa.getEtaTm(),
+                jpa.getLoadType(), jpa.getServiceTerm(),
+                CustomerCode.of(jpa.getTruckerCode()),
+                EmployeeCode.of(jpa.getTruckerPic()),
+                Weight.of(jpa.getChargeWeightKg())));
     }
 
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {
@@ -270,8 +278,15 @@ public class HouseBlMapper {
     }
 
     public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
-        jpa.setVesselName(domain.getVesselName());
+        VesselVoyage vv = domain.getVesselVoyage();
+        jpa.setVesselName(vv != null ? vv.vesselName() : "TRUCK");
+        jpa.setVoyageNo(vv != null ? vv.voyageNo() : null);
         jpa.setPickupDate(mapOrNull(domain.getPickupDate(), BlDate::asString));
+        jpa.setPickupTm(domain.getPickupTm());
+        jpa.setEtdTm(domain.getEtdTm());
+        jpa.setEtaTm(domain.getEtaTm());
+        jpa.setLoadType(domain.getLoadType());
+        jpa.setServiceTerm(domain.getServiceTerm());
         jpa.setTruckerCode(mapOrNull(domain.getTruckerCode(), CustomerCode::value));
         jpa.setTruckerPic(mapOrNull(domain.getTruckerPic(), EmployeeCode::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));

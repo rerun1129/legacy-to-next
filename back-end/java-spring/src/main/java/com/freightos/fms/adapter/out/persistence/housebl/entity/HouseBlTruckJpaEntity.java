@@ -1,6 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +32,20 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Column(name = "vessel_name", length = 10, nullable = false)
     private String vesselName = "TRUCK";
 
+    @Column(name = "voyage_no", length = 20)
+    private String voyageNo;
+
     @Column(name = "pickup_date", length = 8)
     private String pickupDate;
+
+    @Column(name = "pickup_tm", length = 4)
+    private String pickupTm;
+
+    @Column(name = "etd_tm", length = 4)
+    private String etdTm;
+
+    @Column(name = "eta_tm", length = 4)
+    private String etaTm;
 
     @Column(name = "trucker_code", length = 20)
     private String truckerCode;
@@ -42,10 +56,24 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Column(name = "charge_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal chargeWeightKg;
 
+    @Column(name = "load_type", length = 10)
+    @Enumerated(EnumType.STRING)
+    private LoadType loadType;
+
+    @Column(name = "service_term", length = 15)
+    @Enumerated(EnumType.STRING)
+    private ServiceTerm serviceTerm;
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setVesselName(String v) { this.vesselName = v; }
+    public void setVoyageNo(String v) { this.voyageNo = v; }
     public void setPickupDate(String v) { this.pickupDate = v; }
+    public void setPickupTm(String v) { this.pickupTm = v; }
+    public void setEtdTm(String v) { this.etdTm = v; }
+    public void setEtaTm(String v) { this.etaTm = v; }
     public void setTruckerCode(String v) { this.truckerCode = v; }
     public void setTruckerPic(String v) { this.truckerPic = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
+    public void setLoadType(LoadType v) { this.loadType = v; }
+    public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
 }
