@@ -11,7 +11,9 @@ import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
+import com.freightos.fms.domain.housebl.enums.CargoType;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
+import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import com.freightos.fms.domain.housebl.enums.ServiceTerm;
@@ -156,13 +158,17 @@ public class HouseBlMapper {
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
         domain.updateAirFields(new HouseBlAir.AirFields(
                 AirlineCode.of(jpa.getAirlineCode()),
-                BlNumber.of(jpa.getMawbNo()),
                 Weight.of(jpa.getChargeWeightKg()), Weight.of(jpa.getVolumeWeightKg()),
                 RateClass.fromCode(jpa.getRateClass()), CurrencyCode.of(jpa.getCurrencyCode()),
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(), FreightTerm.fromCode(jpa.getOtherTerm()),
                 BlDate.of(jpa.getIssueDate()), PortCode.of(jpa.getIssuePlace()), jpa.getSignature(),
-                Fhd.fromCode(jpa.getFhd())));
+                Fhd.fromCode(jpa.getFhd()),
+                HandlingInformation.of(
+                        HandlingInfoCode.fromCode(jpa.getHandlingInfoCode()),
+                        jpa.getHandlingInfoText()),
+                jpa.getOriginOfGoods(),
+                CargoType.fromCode(jpa.getCargoType())));
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
@@ -261,7 +267,6 @@ public class HouseBlMapper {
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
         jpa.setAirlineCode(mapOrNull(domain.getAirlineCode(), AirlineCode::value));
-        jpa.setMawbNo(mapOrNull(domain.getMawbNo(), BlNumber::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
         jpa.setVolumeWeightKg(mapOrNull(domain.getVolumeWeightKg(), Weight::kg));
         jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
@@ -275,6 +280,11 @@ public class HouseBlMapper {
         jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setSignature(domain.getSignature());
         jpa.setFhd(mapOrNull(domain.getFhd(), Fhd::name));
+        HandlingInformation hi = domain.getHandlingInformation();
+        jpa.setHandlingInfoCode(hi == null ? null : mapOrNull(hi.code(), HandlingInfoCode::getCode));
+        jpa.setHandlingInfoText(hi == null ? null : hi.description());
+        jpa.setOriginOfGoods(domain.getOriginOfGoods());
+        jpa.setCargoType(mapOrNull(domain.getCargoType(), CargoType::getCode));
     }
 
     public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {

@@ -29,9 +29,6 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "airline_code", length = 10)
     private String airlineCode;
 
-    @Column(name = "mawb_no", length = 50)
-    private String mawbNo;
-
     @Column(name = "charge_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal chargeWeightKg;
 
@@ -74,9 +71,22 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_divisor", length = 10)
     private String volumeDivisor;
 
+    // HandlingInformation VO 평탄화 — HandlingInfoCode.code 문자열 저장 (@Enumerated 미사용)
+    @Column(name = "handling_info_code", length = 5)
+    private String handlingInfoCode;
+
+    @Column(name = "handling_info_text", length = 500)
+    private String handlingInfoText;
+
+    @Column(name = "origin_of_goods", length = 100)
+    private String originOfGoods;
+
+    // CargoType.code 문자열 저장 (@Enumerated 미사용)
+    @Column(name = "cargo_type", length = 5)
+    private String cargoType;
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
-    public void setMawbNo(String v) { this.mawbNo = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
     public void setRateClass(String v) { this.rateClass = v; }
@@ -91,4 +101,8 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void setSignature(String v) { this.signature = v; }
     public void setFhd(String v) { this.fhd = v; }
     public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
+    public void setHandlingInfoCode(String v) { this.handlingInfoCode = v; }
+    public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
+    public void setOriginOfGoods(String v) { this.originOfGoods = v; }
+    public void setCargoType(String v) { this.cargoType = v; }
 }

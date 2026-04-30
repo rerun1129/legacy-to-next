@@ -3,6 +3,7 @@ package com.freightos.fms.domain.housebl.entity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.housebl.enums.CargoType;
 import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -19,7 +20,6 @@ import lombok.NoArgsConstructor;
 public class HouseBlAir extends HouseBl {
 
     private AirlineCode airlineCode;
-    private BlNumber mawbNo;
 
     // 청구중량 (Chargeable Weight = max(grossWeight, volumeWeight))
     private Weight chargeWeightKg;
@@ -42,6 +42,10 @@ public class HouseBlAir extends HouseBl {
     // 수입 전용
     private Fhd fhd;
 
+    private HandlingInformation handlingInformation;
+    private String originOfGoods;
+    private CargoType cargoType;
+
     protected HouseBlAir(Bound bound) {
         super(JobDiv.AIR, bound);
     }
@@ -54,17 +58,19 @@ public class HouseBlAir extends HouseBl {
     }
 
     public static record AirFields(
-            AirlineCode airlineCode, BlNumber mawbNo,
+            AirlineCode airlineCode,
             Weight chargeWeightKg, Weight volumeWeightKg,
             RateClass rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
             String insurance, String accountInformation, FreightTerm otherTerm,
             BlDate issueDate, PortCode issuePlace, String signature,
-            Fhd fhd) {}
+            Fhd fhd,
+            HandlingInformation handlingInformation,
+            String originOfGoods,
+            CargoType cargoType) {}
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();
-        this.mawbNo                = f.mawbNo();
         this.chargeWeightKg        = f.chargeWeightKg();
         this.volumeWeightKg        = f.volumeWeightKg();
         this.rateClass             = f.rateClass();
@@ -78,5 +84,8 @@ public class HouseBlAir extends HouseBl {
         this.issuePlace            = f.issuePlace();
         this.signature             = f.signature();
         this.fhd                   = f.fhd();
+        this.handlingInformation   = f.handlingInformation();
+        this.originOfGoods         = f.originOfGoods();
+        this.cargoType             = f.cargoType();
     }
 }
