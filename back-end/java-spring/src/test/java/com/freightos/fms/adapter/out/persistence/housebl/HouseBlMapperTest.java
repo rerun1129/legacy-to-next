@@ -383,42 +383,6 @@ class HouseBlMapperTest {
         assertThat(result).hasSize(3);
     }
 
-    // ── E-18 REFERENCE ──────────────────────────────────────────────
-
-    @Test
-    @DisplayName("toReferenceDomain: referenceType / referenceNo가 도메인으로 복사된다")
-    void toReferenceDomain_mapsTypeAndNo() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
-        HouseBlReferenceJpaEntity refJpa = new HouseBlReferenceJpaEntity();
-        refJpa.setHouseBl(houseBlJpa);
-        refJpa.setReferenceType("PO");
-        refJpa.setReferenceNo("PO-20240310-001");
-        refJpa.setSeq(1);
-
-        HouseBlReference domain = mapper.toReferenceDomain(refJpa);
-
-        assertThat(domain.getReferenceType()).isEqualTo("PO");
-        assertThat(domain.getReferenceNo()).isEqualTo("PO-20240310-001");
-    }
-
-    @Test
-    @DisplayName("applyReferenceFields: 도메인 → JPA referenceType / referenceNo가 세팅된다")
-    void applyReferenceFields_setsTypeAndNoToJpa() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
-        HouseBlReference domain = HouseBlReference.create(1L, "PO", "PO-001", 1);
-        HouseBlReferenceJpaEntity jpa = new HouseBlReferenceJpaEntity();
-
-        mapper.applyReferenceFields(domain, jpa, houseBlJpa);
-
-        assertThat(jpa.getReferenceType()).isEqualTo("PO");
-        assertThat(jpa.getReferenceNo()).isEqualTo("PO-001");
-        assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
-    }
-
     // ── E-19 SCHEDULE LEG ───────────────────────────────────────────
 
     @Test

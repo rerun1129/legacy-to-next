@@ -373,28 +373,6 @@ public class HouseBlMapper {
         return jpa;
     }
 
-    // ── E-18 REFERENCE ────────────────────────────────────────────────
-
-    public HouseBlReference toReferenceDomain(HouseBlReferenceJpaEntity jpa) {
-        HouseBlReference domain = HouseBlReference.create(
-                jpa.getHouseBl().getHouseBlId(),
-                jpa.getReferenceType(), jpa.getReferenceNo(), jpa.getSeq());
-        domain.assignIdentity(jpa.getHouseBlReferenceId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
-                jpa.getCreatedBy(), jpa.getUpdatedBy());
-        return domain;
-    }
-
-    public List<HouseBlReference> toReferenceDomainList(List<HouseBlReferenceJpaEntity> jpaList) {
-        return jpaList.stream().map(this::toReferenceDomain).collect(Collectors.toList());
-    }
-
-    public void applyReferenceFields(HouseBlReference domain, HouseBlReferenceJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
-        jpa.setReferenceType(domain.getReferenceType());
-        jpa.setReferenceNo(domain.getReferenceNo());
-        jpa.setSeq(domain.getSeq());
-    }
-
     // ── E-19 SCHEDULE LEG ─────────────────────────────────────────────
 
     public HouseBlScheduleLeg toScheduleLegDomain(HouseBlScheduleLegJpaEntity jpa) {
