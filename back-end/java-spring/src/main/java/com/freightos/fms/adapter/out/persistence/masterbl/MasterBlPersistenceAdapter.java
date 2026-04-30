@@ -2,7 +2,9 @@ package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -83,6 +85,14 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .map(c -> masterBlMapper.toAirChargeJpa(c, savedJpa))
                         .toList();
                 savedJpa.syncAirCharges(jpaCharges);
+                List<MasterBlDimJpaEntity> jpaDims = air.getDims().stream()
+                        .map(d -> masterBlMapper.toDimJpa(d, savedJpa))
+                        .toList();
+                savedJpa.syncDims(jpaDims);
+                List<MasterBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
+                        .map(l -> masterBlMapper.toScheduleLegJpa(l, savedJpa))
+                        .toList();
+                savedJpa.syncScheduleLegs(jpaLegs);
                 masterBlAirRepository.save(airJpa);
             }
             case MasterBlSea sea -> {

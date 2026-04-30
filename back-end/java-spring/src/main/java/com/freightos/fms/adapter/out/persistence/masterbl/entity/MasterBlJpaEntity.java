@@ -125,4 +125,24 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
         this.airCharges.clear();
         if (v != null) this.airCharges.addAll(v);
     }
+
+    // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
+
+    // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<MasterBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
+
+    public void syncDims(List<MasterBlDimJpaEntity> v) {
+        this.dims.clear();
+        if (v != null) this.dims.addAll(v);
+    }
+
+    public void syncScheduleLegs(List<MasterBlScheduleLegJpaEntity> v) {
+        this.scheduleLegs.clear();
+        if (v != null) this.scheduleLegs.addAll(v);
+    }
 }

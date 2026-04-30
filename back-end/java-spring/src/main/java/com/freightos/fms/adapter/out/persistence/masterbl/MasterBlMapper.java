@@ -55,6 +55,8 @@ public class MasterBlMapper {
                 .map(this::toAirChargeDomain)
                 .collect(Collectors.toList());
         domain.initAirCharges(airCharges);
+        domain.initDims(toDimDomainList(jpa.getDims()));
+        domain.initScheduleLegs(toScheduleLegDomainList(jpa.getScheduleLegs()));
         return domain;
     }
 
@@ -228,6 +230,18 @@ public class MasterBlMapper {
         jpa.setOnBoardTm(domain.getOnBoardTm());
         jpa.setArrivalDt(domain.getArrivalDt());
         jpa.setArrivalTm(domain.getArrivalTm());
+    }
+
+    public MasterBlDimJpaEntity toDimJpa(MasterBlDim domain, MasterBlJpaEntity masterBl) {
+        MasterBlDimJpaEntity jpa = new MasterBlDimJpaEntity();
+        applyDimFields(domain, jpa, masterBl);
+        return jpa;
+    }
+
+    public MasterBlScheduleLegJpaEntity toScheduleLegJpa(MasterBlScheduleLeg domain, MasterBlJpaEntity masterBl) {
+        MasterBlScheduleLegJpaEntity jpa = new MasterBlScheduleLegJpaEntity();
+        applyScheduleLegFields(domain, jpa, masterBl);
+        return jpa;
     }
 
     // ── AIR CHARGE ───────────────────────────────────────────────────

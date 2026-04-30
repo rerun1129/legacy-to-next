@@ -103,8 +103,18 @@ public abstract class MasterBl extends BaseEntity {
     // ── AirCharge (AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상.
     //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
     private List<MasterBlAirCharge> airCharges = new ArrayList<>();
+    private List<MasterBlDim> dims = new ArrayList<>();
+    private List<MasterBlScheduleLeg> scheduleLegs = new ArrayList<>();
 
     public void initAirCharges(List<MasterBlAirCharge> airCharges) {
         this.airCharges = new ArrayList<>(airCharges);
+    }
+
+    public void initDims(List<MasterBlDim> dims) {
+        this.dims = new ArrayList<>(dims);
+    }
+
+    public void initScheduleLegs(List<MasterBlScheduleLeg> scheduleLegs) {
+        this.scheduleLegs = new ArrayList<>(scheduleLegs);
     }
 }
