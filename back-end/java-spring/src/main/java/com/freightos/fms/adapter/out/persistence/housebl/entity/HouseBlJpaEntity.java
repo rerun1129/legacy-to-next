@@ -144,6 +144,11 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @BatchSize(size = 50)
     private List<HouseBlLicenseJpaEntity> licenses = new ArrayList<>();
 
+    // AIR/SEA/NON_BL에서 채워짐, TRUCK은 null이 정상
+    @OneToOne(mappedBy = "houseBl", cascade = CascadeType.ALL,
+              orphanRemoval = true, fetch = FetchType.LAZY)
+    private HouseBlDescJpaEntity desc;
+
     public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
     public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
@@ -194,5 +199,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void syncLicenses(List<HouseBlLicenseJpaEntity> newLicenses) {
         this.licenses.clear();
         this.licenses.addAll(newLicenses);
+    }
+
+    public void replaceDesc(HouseBlDescJpaEntity newDesc) {
+        if (this.desc != null) this.desc.setHouseBl(null);
+        this.desc = newDesc;
     }
 }

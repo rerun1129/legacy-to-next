@@ -80,6 +80,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncLicenses(jpaLicenses);
+                HouseBlDescJpaEntity seaDescJpa = (sea.getDesc() != null)
+                        ? houseBlMapper.toDescJpa(sea.getDesc(), savedJpa)
+                        : null;
+                savedJpa.replaceDesc(seaDescJpa);
                 houseBlSeaRepository.save(seaJpa);
             }
             case HouseBlAir air -> {
@@ -98,6 +102,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncLicenses(jpaLicenses);
+                HouseBlDescJpaEntity airDescJpa = (air.getDesc() != null)
+                        ? houseBlMapper.toDescJpa(air.getDesc(), savedJpa)
+                        : null;
+                savedJpa.replaceDesc(airDescJpa);
                 houseBlAirRepository.save(airJpa);
             }
             case HouseBlTruck truck -> {
@@ -120,6 +128,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(nonBlDims);
+                HouseBlDescJpaEntity nonBlDescJpa = (nonBl.getDesc() != null)
+                        ? houseBlMapper.toDescJpa(nonBl.getDesc(), savedJpa)
+                        : null;
+                savedJpa.replaceDesc(nonBlDescJpa);
                 houseBlNonBlRepository.save(nonBlJpa);
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());

@@ -43,6 +43,9 @@ public class HouseBlMapper {
                 .map(this::toLicenseDomain)
                 .collect(Collectors.toList());
         domain.initLicenses(licenses);
+        if (jpa.getDesc() != null) {
+            domain.initDesc(toDescDomain(jpa.getDesc()));
+        }
         return domain;
     }
 
@@ -62,6 +65,9 @@ public class HouseBlMapper {
                 .map(this::toLicenseDomain)
                 .collect(Collectors.toList());
         domain.initLicenses(licenses);
+        if (jpa.getDesc() != null) {
+            domain.initDesc(toDescDomain(jpa.getDesc()));
+        }
         return domain;
     }
 
@@ -88,6 +94,9 @@ public class HouseBlMapper {
                 .map(this::toDimDomain)
                 .collect(Collectors.toList());
         domain.initDims(dims);
+        if (jpa.getDesc() != null) {
+            domain.initDesc(toDescDomain(jpa.getDesc()));
+        }
         return domain;
     }
 
@@ -332,6 +341,12 @@ public class HouseBlMapper {
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
         jpa.setRemark(domain.getRemark());
+    }
+
+    public HouseBlDescJpaEntity toDescJpa(HouseBlDesc d, HouseBlJpaEntity houseBl) {
+        HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
+        applyDescFields(d, jpa, houseBl);
+        return jpa;
     }
 
     // ── E-17 LICENSE ──────────────────────────────────────────────────

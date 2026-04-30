@@ -27,10 +27,6 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
     private HouseBlJpaEntity houseBl;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "house_bl_id", referencedColumnName = "house_bl_id", insertable = false, updatable = false)
-    private HouseBlDescJpaEntity desc;
-
     @Column(name = "work_division", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     private HouseBlNonBl.WorkDivision workDivision;

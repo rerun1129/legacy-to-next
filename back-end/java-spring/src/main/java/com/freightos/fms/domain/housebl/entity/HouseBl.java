@@ -81,6 +81,10 @@ public abstract class HouseBl extends BaseEntity {
     //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
     private List<HouseBlLicense> licenses = new ArrayList<>();
 
+    // ── Desc (AIR/SEA/NON_BL에서 채워짐, TRUCK은 null이 정상.
+    //    본체 위치는 @OneToOne mappedBy 정합성 + 구조 일관성 확보) ───
+    private HouseBlDesc desc;
+
     // ── 도메인 메서드 ────────────────────────────────────────────
 
     protected HouseBl(JobDiv jobDiv, Bound bound) {
@@ -154,5 +158,9 @@ public abstract class HouseBl extends BaseEntity {
 
     public void initLicenses(List<HouseBlLicense> licenses) {
         this.licenses = new ArrayList<>(licenses);
+    }
+
+    public void initDesc(HouseBlDesc desc) {
+        this.desc = desc;
     }
 }
