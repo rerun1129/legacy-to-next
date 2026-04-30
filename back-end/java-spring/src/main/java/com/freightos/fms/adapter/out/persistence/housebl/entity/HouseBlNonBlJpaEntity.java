@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * JPA ORM 엔티티 — House B/L Non-B/L 확장.
  * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
@@ -33,10 +30,6 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_bl_id", referencedColumnName = "house_bl_id", insertable = false, updatable = false)
     private HouseBlDescJpaEntity desc;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "house_bl_id", referencedColumnName = "house_bl_id", insertable = false, updatable = false)
-    private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
 
     @Column(name = "work_division", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)

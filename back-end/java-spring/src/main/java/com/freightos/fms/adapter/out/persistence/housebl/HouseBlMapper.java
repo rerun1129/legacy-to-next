@@ -46,6 +46,10 @@ public class HouseBlMapper {
         HouseBlAir domain = HouseBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
+        List<HouseBlDim> dims = jpa.getDims().stream()
+                .map(this::toDimDomain)
+                .collect(Collectors.toList());
+        domain.initDims(dims);
         return domain;
     }
 
@@ -53,6 +57,10 @@ public class HouseBlMapper {
         HouseBlTruck domain = HouseBlTruck.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (truckJpa != null) copyTruckFields(truckJpa, domain);
+        List<HouseBlDim> dims = jpa.getDims().stream()
+                .map(this::toDimDomain)
+                .collect(Collectors.toList());
+        domain.initDims(dims);
         return domain;
     }
 
@@ -64,6 +72,10 @@ public class HouseBlMapper {
                 .map(c -> toContainerDomain(c, domain))
                 .collect(Collectors.toList());
         domain.initContainers(containers);
+        List<HouseBlDim> dims = jpa.getDims().stream()
+                .map(this::toDimDomain)
+                .collect(Collectors.toList());
+        domain.initDims(dims);
         return domain;
     }
 
@@ -278,6 +290,12 @@ public class HouseBlMapper {
         jpa.setQuantity(domain.getQuantity());
         jpa.setCbm(domain.getCbm());
         jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
+    }
+
+    public HouseBlDimJpaEntity toDimJpa(HouseBlDim d, HouseBlJpaEntity houseBl) {
+        HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
+        applyDimFields(d, jpa, houseBl);
+        return jpa;
     }
 
     // ── E-13 DESC ─────────────────────────────────────────────────────

@@ -65,8 +65,13 @@ public abstract class HouseBl extends BaseEntity {
     // ── Master B/L 연결 ─────────────────────────────────────────
     private Long masterBlId;
 
-    // ── 컨테이너 (SEA/NON_BL 전용, 다른 모드에서는 빈 컬렉션) ─────────
+    // ── 컨테이너 (SEA/NON_BL에서 채워짐, AIR/TRUCK은 빈 컬렉션이 정상.
+    //    본체 위치는 @OneToMany mappedBy 정합성 확보를 위한 설계 결정) ───
     private List<HouseBlContainer> containers = new ArrayList<>();
+
+    // ── Dim (AIR/NON_BL/TRUCK에서 채워짐, SEA는 빈 컬렉션이 정상.
+    //    본체 위치는 @OneToMany mappedBy 정합성 확보를 위한 설계 결정) ───
+    private List<HouseBlDim> dims = new ArrayList<>();
 
     // ── 도메인 메서드 ────────────────────────────────────────────
 
@@ -129,5 +134,9 @@ public abstract class HouseBl extends BaseEntity {
 
     public void initContainers(List<HouseBlContainer> containers) {
         this.containers = new ArrayList<>(containers);
+    }
+
+    public void initDims(List<HouseBlDim> dims) {
+        this.dims = new ArrayList<>(dims);
     }
 }

@@ -124,9 +124,15 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_id")
     private Long masterBlId;
 
+    // SEA/NON_BL에서 채워짐, AIR/TRUCK은 LAZY이므로 미사용 모드 영향 없음
     @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
+
+    // AIR/NON_BL/TRUCK에서 채워짐, SEA는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
 
     public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
@@ -163,5 +169,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void syncContainers(List<HouseBlContainerJpaEntity> newContainers) {
         this.containers.clear();
         this.containers.addAll(newContainers);
+    }
+
+    public void syncDims(List<HouseBlDimJpaEntity> newDims) {
+        this.dims.clear();
+        this.dims.addAll(newDims);
     }
 }

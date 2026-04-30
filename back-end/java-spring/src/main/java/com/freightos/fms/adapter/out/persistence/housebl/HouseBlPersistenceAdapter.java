@@ -82,12 +82,20 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlAirJpaEntity::new);
                 airJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyAirFields(air, airJpa);
+                List<HouseBlDimJpaEntity> airDims = air.getDims().stream()
+                        .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
+                        .toList();
+                savedJpa.syncDims(airDims);
                 houseBlAirRepository.save(airJpa);
             }
             case HouseBlTruck truck -> {
                 HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlTruckJpaEntity::new);
                 truckJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyTruckFields(truck, truckJpa);
+                List<HouseBlDimJpaEntity> truckDims = truck.getDims().stream()
+                        .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
+                        .toList();
+                savedJpa.syncDims(truckDims);
                 houseBlTruckRepository.save(truckJpa);
             }
             case HouseBlNonBl nonBl -> {
@@ -96,6 +104,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
                 List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
+                List<HouseBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
+                        .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
+                        .toList();
+                savedJpa.syncDims(nonBlDims);
                 houseBlNonBlRepository.save(nonBlJpa);
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
