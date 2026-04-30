@@ -4,11 +4,14 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
+import com.freightos.fms.domain.masterbl.MasterBlDetail;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 
@@ -34,9 +37,11 @@ public record MasterBlDetailResponse(
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<ConsoledHouseBlSummary> consolidatedHouseBls
 ) {
-    public static MasterBlDetailResponse from(MasterBl entity) {
+    public static MasterBlDetailResponse from(MasterBlDetail detail) {
+        MasterBl entity = detail.masterBl();
         return new MasterBlDetailResponse(
                 entity.getId(),
                 mapOrNull(entity.getMblNo(), BlNumber::value),
@@ -58,7 +63,8 @@ public record MasterBlDetailResponse(
                 mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 mapOrNull(entity.getCbm(), Volume::cbm),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                detail.consolidatedHouseBls()
         );
     }
 }

@@ -39,7 +39,7 @@ public class MasterBlController {
     @Operation(summary = "Master B/L 단건 조회")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> findMasterBlById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlById(id))));
+        return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(id))));
     }
 
     @Operation(summary = "Master B/L 삭제")

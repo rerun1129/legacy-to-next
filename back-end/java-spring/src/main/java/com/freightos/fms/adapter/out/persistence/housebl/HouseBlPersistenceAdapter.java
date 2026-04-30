@@ -6,6 +6,8 @@ import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
@@ -164,6 +166,16 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     private PagedResult<HouseBl> toPagedResult(Page<HouseBlJpaEntity> page) {
         List<HouseBl> content = page.getContent().stream().map(this::loadWithExt).toList();
         return PagedResult.of(content, page.getTotalElements(), page.getTotalPages(), page.getNumber(), page.getSize());
+    }
+
+    @Override
+    public List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId) {
+        return houseBlRepository.findConsoledSeaSummariesByMasterBlId(masterBlId);
+    }
+
+    @Override
+    public List<ConsoledHouseBlAirSummary> findConsoledAirSummariesByMasterBlId(Long masterBlId) {
+        return houseBlRepository.findConsoledAirSummariesByMasterBlId(masterBlId);
     }
 
     private HouseBl loadWithExt(HouseBlJpaEntity jpa) {
