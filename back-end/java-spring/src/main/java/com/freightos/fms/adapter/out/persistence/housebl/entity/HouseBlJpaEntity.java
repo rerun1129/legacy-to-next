@@ -7,7 +7,6 @@ import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;

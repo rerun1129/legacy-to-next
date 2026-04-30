@@ -19,7 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class HouseBlMapperModeTest {
 
-    private final HouseBlMapper mapper = new HouseBlMapper();
+    private final HouseBlCargoMapper cargoMapper = new HouseBlCargoMapper();
+    private final HouseBlDocMapper docMapper = new HouseBlDocMapper();
+    private final HouseBlMapper mapper = new HouseBlMapper(cargoMapper, docMapper);
 
     // ── AIR ──────────────────────────────────────────────────────────
 

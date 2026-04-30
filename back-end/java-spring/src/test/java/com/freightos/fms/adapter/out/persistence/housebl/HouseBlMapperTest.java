@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class HouseBlMapperTest {
 
-    private final HouseBlMapper mapper = new HouseBlMapper();
+    private final HouseBlCargoMapper cargoMapper = new HouseBlCargoMapper();
+    private final HouseBlDocMapper docMapper = new HouseBlDocMapper();
+    private final HouseBlMapper mapper = new HouseBlMapper(cargoMapper, docMapper);
 
     // ── applyCommonFields ────────────────────────────────────────────
 
@@ -209,7 +211,7 @@ class HouseBlMapperTest {
         dimJpa.setCbm(BigDecimal.valueOf(0.06));
         dimJpa.setVolumeWeightKg(BigDecimal.valueOf(10.0));
 
-        HouseBlDim domain = mapper.toDimDomain(dimJpa);
+        HouseBlDim domain = cargoMapper.toDimDomain(dimJpa);
 
         assertThat(domain.getHouseBlId()).isEqualTo(1L);
         assertThat(domain.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(50.0));
@@ -231,7 +233,7 @@ class HouseBlMapperTest {
                 2, BigDecimal.valueOf(0.06), BigDecimal.valueOf(10.0));
         HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
 
-        mapper.applyDimFields(domain, jpa, houseBlJpa);
+        cargoMapper.applyDimFields(domain, jpa, houseBlJpa);
 
         assertThat(jpa.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(50.0));
         assertThat(jpa.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(40.0));
@@ -253,7 +255,7 @@ class HouseBlMapperTest {
         HouseBlDimJpaEntity dim2 = new HouseBlDimJpaEntity();
         dim2.setHouseBl(houseBlJpa);
 
-        List<HouseBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
+        List<HouseBlDim> result = cargoMapper.toDimDomainList(List.of(dim1, dim2));
 
         assertThat(result).hasSize(2);
     }
@@ -274,7 +276,7 @@ class HouseBlMapperTest {
         descJpa.setDescClause2("CLAUSE2");
         descJpa.setRemark("REMARK TEXT");
 
-        HouseBlDesc domain = mapper.toDescDomain(descJpa);
+        HouseBlDesc domain = docMapper.toDescDomain(descJpa);
 
         assertThat(domain.getHouseBlId()).isEqualTo(1L);
         assertThat(domain.getMarks()).isEqualTo("MARKS");
@@ -293,7 +295,7 @@ class HouseBlMapperTest {
         domain.updateContent("MARKS", "DESCRIPTION", "CLAUSE1", "CLAUSE2", "REMARK TEXT");
         HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
 
-        mapper.applyDescFields(domain, jpa, houseBlJpa);
+        docMapper.applyDescFields(domain, jpa, houseBlJpa);
 
         assertThat(jpa.getMarks()).isEqualTo("MARKS");
         assertThat(jpa.getDescription()).isEqualTo("DESCRIPTION");
@@ -305,7 +307,7 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("toDescDomain(Optional.empty): Optional이 비어있으면 empty Optional 반환")
     void toDescDomain_optionalEmpty_returnsEmpty() {
-        Optional<HouseBlDesc> result = mapper.toDescDomain(Optional.empty());
+        Optional<HouseBlDesc> result = docMapper.toDescDomain(Optional.empty());
 
         assertThat(result.isEmpty()).isTrue();
     }
@@ -329,7 +331,7 @@ class HouseBlMapperTest {
         licJpa.setHsnNo("1234.56");
         licJpa.setSeq(1);
 
-        HouseBlLicense domain = mapper.toLicenseDomain(licJpa);
+        HouseBlLicense domain = cargoMapper.toLicenseDomain(licJpa);
 
         assertThat(domain.getLicenseNo()).isEqualTo("LC-001");
         assertThat(domain.getPkgQty()).isEqualTo(10);
@@ -349,7 +351,7 @@ class HouseBlMapperTest {
                 null, null, null, true, 2, "1234.56");
         HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
 
-        mapper.applyLicenseFields(domain, jpa, houseBlJpa);
+        cargoMapper.applyLicenseFields(domain, jpa, houseBlJpa);
 
         assertThat(jpa.getLicenseNo()).isEqualTo("LC-001");
         assertThat(jpa.getPkgQty()).isEqualTo(10);
@@ -378,7 +380,7 @@ class HouseBlMapperTest {
         lic3.setHouseBl(houseBlJpa);
         lic3.setSeq(3);
 
-        List<HouseBlLicense> result = mapper.toLicenseDomainList(List.of(lic1, lic2, lic3));
+        List<HouseBlLicense> result = cargoMapper.toLicenseDomainList(List.of(lic1, lic2, lic3));
 
         assertThat(result).hasSize(3);
     }
@@ -401,7 +403,7 @@ class HouseBlMapperTest {
         legJpa.setArrivalDt("20240316");
         legJpa.setArrivalTm("0700");
 
-        HouseBlScheduleLeg domain = mapper.toScheduleLegDomain(legJpa);
+        HouseBlScheduleLeg domain = docMapper.toScheduleLegDomain(legJpa);
 
         assertThat(domain.getToCode()).isEqualTo("NRT");
         assertThat(domain.getByCarrier()).isEqualTo("OZ");
@@ -422,7 +424,7 @@ class HouseBlMapperTest {
         domain.updateDetails("NRT", "OZ", "OZ102", "20240315", "1800", "20240316", "0700");
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
 
-        mapper.applyScheduleLegFields(domain, jpa, houseBlJpa);
+        docMapper.applyScheduleLegFields(domain, jpa, houseBlJpa);
 
         assertThat(jpa.getToCode()).isEqualTo("NRT");
         assertThat(jpa.getByCarrier()).isEqualTo("OZ");
@@ -445,7 +447,7 @@ class HouseBlMapperTest {
         HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
         leg2.setHouseBl(houseBlJpa);
 
-        List<HouseBlScheduleLeg> result = mapper.toScheduleLegDomainList(List.of(leg1, leg2));
+        List<HouseBlScheduleLeg> result = docMapper.toScheduleLegDomainList(List.of(leg1, leg2));
 
         assertThat(result).hasSize(2);
     }

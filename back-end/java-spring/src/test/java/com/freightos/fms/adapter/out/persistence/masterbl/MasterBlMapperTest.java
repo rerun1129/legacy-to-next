@@ -7,10 +7,8 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEnti
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
-import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
