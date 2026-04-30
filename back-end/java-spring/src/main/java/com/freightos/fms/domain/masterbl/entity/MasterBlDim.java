@@ -23,11 +23,10 @@ public class MasterBlDim extends BaseEntity {
     private Integer quantity;
     private BigDecimal cbm;
     private BigDecimal volumeWeightKg;
-    private int seq;
 
     public static MasterBlDim create(Long masterBlId, BigDecimal lengthCm, BigDecimal widthCm,
                                      BigDecimal heightCm, Integer quantity, BigDecimal cbm,
-                                     BigDecimal volumeWeightKg, int seq) {
+                                     BigDecimal volumeWeightKg) {
         MasterBlDim d = new MasterBlDim();
         d.masterBlId     = masterBlId;
         d.lengthCm       = lengthCm;
@@ -36,7 +35,6 @@ public class MasterBlDim extends BaseEntity {
         d.quantity       = quantity;
         d.cbm            = cbm;
         d.volumeWeightKg = volumeWeightKg;
-        d.seq            = seq;
         return d;
     }
 

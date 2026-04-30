@@ -170,7 +170,6 @@ class MasterBlMapperTest {
         dimJpa.setQuantity(3);
         dimJpa.setCbm(BigDecimal.valueOf(0.485));
         dimJpa.setVolumeWeightKg(BigDecimal.valueOf(80.8));
-        dimJpa.setSeq(1);
 
         MasterBlDim domain = mapper.toDimDomain(dimJpa);
 
@@ -180,7 +179,6 @@ class MasterBlMapperTest {
         assertThat(domain.getQuantity()).isEqualTo(3);
         assertThat(domain.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.485));
         assertThat(domain.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(80.8));
-        assertThat(domain.getSeq()).isEqualTo(1);
     }
 
     @Test
@@ -191,7 +189,7 @@ class MasterBlMapperTest {
 
         MasterBlDim domain = MasterBlDim.create(1L,
                 BigDecimal.valueOf(100.5), BigDecimal.valueOf(80.0), BigDecimal.valueOf(60.0),
-                3, BigDecimal.valueOf(0.485), BigDecimal.valueOf(80.8), 1);
+                3, BigDecimal.valueOf(0.485), BigDecimal.valueOf(80.8));
         MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
 
         mapper.applyDimFields(domain, dimJpa, masterBlJpa);
@@ -202,7 +200,6 @@ class MasterBlMapperTest {
         assertThat(dimJpa.getQuantity()).isEqualTo(3);
         assertThat(dimJpa.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.485));
         assertThat(dimJpa.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(80.8));
-        assertThat(dimJpa.getSeq()).isEqualTo(1);
         assertThat(dimJpa.getMasterBl()).isSameAs(masterBlJpa);
     }
 
@@ -214,11 +211,9 @@ class MasterBlMapperTest {
 
         MasterBlDimJpaEntity dim1 = new MasterBlDimJpaEntity();
         dim1.setMasterBl(masterBlJpa);
-        dim1.setSeq(1);
 
         MasterBlDimJpaEntity dim2 = new MasterBlDimJpaEntity();
         dim2.setMasterBl(masterBlJpa);
-        dim2.setSeq(2);
 
         List<MasterBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
 
@@ -231,7 +226,7 @@ class MasterBlMapperTest {
         MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
         masterBlJpa.setMasterBlId(1L);
 
-        MasterBlDim domain = MasterBlDim.create(1L, null, null, null, null, null, null, 1);
+        MasterBlDim domain = MasterBlDim.create(1L, null, null, null, null, null, null);
         MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
 
         assertThatCode(() -> mapper.applyDimFields(domain, dimJpa, masterBlJpa))
@@ -307,7 +302,6 @@ class MasterBlMapperTest {
         legJpa.setOnBoardTm("1430");
         legJpa.setArrivalDt("20240311");
         legJpa.setArrivalTm("0615");
-        legJpa.setSeq(1);
 
         MasterBlScheduleLeg domain = mapper.toScheduleLegDomain(legJpa);
 
@@ -318,7 +312,6 @@ class MasterBlMapperTest {
         assertThat(domain.getOnBoardTm()).isEqualTo("1430");
         assertThat(domain.getArrivalDt()).isEqualTo("20240311");
         assertThat(domain.getArrivalTm()).isEqualTo("0615");
-        assertThat(domain.getSeq()).isEqualTo(1);
     }
 
     @Test
@@ -327,8 +320,8 @@ class MasterBlMapperTest {
         MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
         masterBlJpa.setMasterBlId(3L);
 
-        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311", 1);
-        domain.updateDetails("NRT", "KE", "KE101", "20240310", "1430", "20240311", "0615", 1);
+        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311");
+        domain.updateDetails("NRT", "KE", "KE101", "20240310", "1430", "20240311", "0615");
         MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
 
         mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa);
@@ -340,7 +333,6 @@ class MasterBlMapperTest {
         assertThat(legJpa.getOnBoardTm()).isEqualTo("1430");
         assertThat(legJpa.getArrivalDt()).isEqualTo("20240311");
         assertThat(legJpa.getArrivalTm()).isEqualTo("0615");
-        assertThat(legJpa.getSeq()).isEqualTo(1);
     }
 
     @Test
@@ -354,28 +346,22 @@ class MasterBlMapperTest {
         leg1.setToCode("HKG");
         leg1.setOnBoardDt("20240310");
         leg1.setArrivalDt("20240310");
-        leg1.setSeq(1);
 
         MasterBlScheduleLegJpaEntity leg2 = new MasterBlScheduleLegJpaEntity();
         leg2.setMasterBl(masterBlJpa);
         leg2.setToCode("NRT");
         leg2.setOnBoardDt("20240311");
         leg2.setArrivalDt("20240311");
-        leg2.setSeq(2);
 
         MasterBlScheduleLegJpaEntity leg3 = new MasterBlScheduleLegJpaEntity();
         leg3.setMasterBl(masterBlJpa);
         leg3.setToCode("LAX");
         leg3.setOnBoardDt("20240312");
         leg3.setArrivalDt("20240312");
-        leg3.setSeq(3);
 
         List<MasterBlScheduleLeg> result = mapper.toScheduleLegDomainList(List.of(leg1, leg2, leg3));
 
         assertThat(result).hasSize(3);
-        assertThat(result.get(0).getSeq()).isEqualTo(1);
-        assertThat(result.get(1).getSeq()).isEqualTo(2);
-        assertThat(result.get(2).getSeq()).isEqualTo(3);
     }
 
     @Test
@@ -384,8 +370,8 @@ class MasterBlMapperTest {
         MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
         masterBlJpa.setMasterBlId(3L);
 
-        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311", 1);
-        domain.updateDetails("NRT", null, null, "20240310", "1430", "20240311", "0615", 1);
+        MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311");
+        domain.updateDetails("NRT", null, null, "20240310", "1430", "20240311", "0615");
         MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
 
         assertThatCode(() -> mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa))

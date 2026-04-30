@@ -45,9 +45,6 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "arrival_tm", length = 4)
     private String arrivalTm;
 
-    @Column(name = "seq", nullable = false)
-    private int seq;
-
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setToCode(String v) { this.toCode = v; }
     public void setByCarrier(String v) { this.byCarrier = v; }
@@ -56,5 +53,4 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     public void setOnBoardTm(String v) { this.onBoardTm = v; }
     public void setArrivalDt(String v) { this.arrivalDt = v; }
     public void setArrivalTm(String v) { this.arrivalTm = v; }
-    public void setSeq(int v) { this.seq = v; }
 }

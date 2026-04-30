@@ -44,9 +44,6 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal volumeWeightKg;
 
-    @Column(name = "seq", nullable = false)
-    private int seq;
-
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setLengthCm(BigDecimal v) { this.lengthCm = v; }
     public void setWidthCm(BigDecimal v) { this.widthCm = v; }
@@ -54,5 +51,4 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     public void setQuantity(Integer v) { this.quantity = v; }
     public void setCbm(BigDecimal v) { this.cbm = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
-    public void setSeq(int v) { this.seq = v; }
 }

@@ -22,22 +22,20 @@ public class MasterBlScheduleLeg extends BaseEntity {
     private String onBoardTm;
     private String arrivalDt;
     private String arrivalTm;
-    private int seq;
 
     public static MasterBlScheduleLeg create(Long masterBlId, String toCode,
-                                             String onBoardDt, String arrivalDt, int seq) {
+                                             String onBoardDt, String arrivalDt) {
         MasterBlScheduleLeg leg = new MasterBlScheduleLeg();
         leg.masterBlId = masterBlId;
         leg.toCode     = toCode;
         leg.onBoardDt  = onBoardDt;
         leg.arrivalDt  = arrivalDt;
-        leg.seq        = seq;
         return leg;
     }
 
     public void updateDetails(String toCode, String byCarrier, String flightNo,
                               String onBoardDt, String onBoardTm,
-                              String arrivalDt, String arrivalTm, int seq) {
+                              String arrivalDt, String arrivalTm) {
         this.toCode    = toCode;
         this.byCarrier = byCarrier;
         this.flightNo  = flightNo;
@@ -45,6 +43,5 @@ public class MasterBlScheduleLeg extends BaseEntity {
         this.onBoardTm = onBoardTm;
         this.arrivalDt = arrivalDt;
         this.arrivalTm = arrivalTm;
-        this.seq       = seq;
     }
 }
