@@ -117,4 +117,11 @@ public abstract class MasterBl extends BaseEntity {
     public void initScheduleLegs(List<MasterBlScheduleLeg> scheduleLegs) {
         this.scheduleLegs = new ArrayList<>(scheduleLegs);
     }
+
+    // DESC (SEA/AIR 모두 채워질 수 있음, null 허용)
+    private MasterBlDesc desc;
+
+    public void initDesc(MasterBlDesc desc) {
+        this.desc = desc;
+    }
 }

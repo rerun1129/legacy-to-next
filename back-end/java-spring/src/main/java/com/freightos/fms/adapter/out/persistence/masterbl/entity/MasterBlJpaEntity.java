@@ -145,4 +145,13 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
         this.scheduleLegs.clear();
         if (v != null) this.scheduleLegs.addAll(v);
     }
+
+    // SEA/AIR 모두 채워질 수 있음, null 허용
+    @OneToOne(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private MasterBlDescJpaEntity desc;
+
+    public void replaceDesc(MasterBlDescJpaEntity newDesc) {
+        if (this.desc != null) this.desc.setMasterBl(null);
+        this.desc = newDesc;
+    }
 }
