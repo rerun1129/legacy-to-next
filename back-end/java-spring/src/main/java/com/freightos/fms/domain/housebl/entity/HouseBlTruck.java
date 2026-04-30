@@ -1,7 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
@@ -25,7 +24,6 @@ public class HouseBlTruck extends HouseBl {
     private EmployeeCode truckerPic;
     /** 트럭 전용: 청구중량 */
     private Weight chargeWeightKg;
-    private Incoterms incoterms;
 
     protected HouseBlTruck(Bound bound) {
         super(JobDiv.TRUCK, bound);
@@ -38,11 +36,10 @@ public class HouseBlTruck extends HouseBl {
     }
 
     public void updateTruckFields(BlDate pickupDate, CustomerCode truckerCode, EmployeeCode truckerPic,
-                                  Weight chargeWeightKg, Incoterms incoterms) {
+                                  Weight chargeWeightKg) {
         this.pickupDate     = pickupDate;
         this.truckerCode    = truckerCode;
         this.truckerPic     = truckerPic;
         this.chargeWeightKg = chargeWeightKg;
-        this.incoterms      = incoterms;
     }
 }

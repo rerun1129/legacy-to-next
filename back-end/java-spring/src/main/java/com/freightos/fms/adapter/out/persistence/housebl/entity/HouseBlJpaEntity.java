@@ -123,6 +123,18 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_id")
     private Long masterBlId;
 
+    @Column(name = "incoterms", length = 10)
+    private String incoterms;
+
+    @Column(name = "sales_class", length = 1)
+    private String salesClass;
+
+    @Column(name = "main_item_name", length = 100)
+    private String mainItemName;
+
+    @Column(name = "hs_code", length = 12)
+    private String hsCode;
+
     // SEA/NON_BL에서 채워짐, AIR/TRUCK은 LAZY이므로 미사용 모드 영향 없음
     @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -183,6 +195,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }
     public void setGrossWeightKg(BigDecimal grossWeightKg) { this.grossWeightKg = grossWeightKg; }
     public void setCbm(BigDecimal cbm) { this.cbm = cbm; }
+    public void setIncoterms(String incoterms) { this.incoterms = incoterms; }
+    public void setSalesClass(String salesClass) { this.salesClass = salesClass; }
+    public void setMainItemName(String mainItemName) { this.mainItemName = mainItemName; }
+    public void setHsCode(String hsCode) { this.hsCode = hsCode; }
 
     // orphanRemoval=true 컬렉션 동기화: 참조를 교체하지 않고 clear+addAll로 관리
     public void syncContainers(List<HouseBlContainerJpaEntity> newContainers) {

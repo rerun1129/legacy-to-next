@@ -3,10 +3,12 @@ package com.freightos.fms.domain.housebl.entity;
 import com.freightos.fms.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -65,6 +67,12 @@ public abstract class HouseBl extends BaseEntity {
     // ── Master B/L 연결 ─────────────────────────────────────────
     private Long masterBlId;
 
+    // ── 거래 조건 ─────────────────────────────────────────────────
+    private Incoterms incoterms;
+    private SalesClass salesClass;
+    private String mainItemName;
+    private String hsCode;
+
     // ── 컨테이너 (SEA/NON_BL에서 채워짐, AIR/TRUCK은 빈 컬렉션이 정상.
     //    본체 위치는 @OneToMany mappedBy 정합성 확보를 위한 설계 결정) ───
     private List<HouseBlContainer> containers = new ArrayList<>();
@@ -120,6 +128,13 @@ public abstract class HouseBl extends BaseEntity {
 
     public void linkToMaster(Long masterBlId) {
         this.masterBlId = masterBlId;
+    }
+
+    public void updateTradeInfo(Incoterms incoterms, SalesClass salesClass, String mainItemName, String hsCode) {
+        this.incoterms    = incoterms;
+        this.salesClass   = salesClass;
+        this.mainItemName = mainItemName;
+        this.hsCode       = hsCode;
     }
 
     public void updateBlStatus(ShipmentType shipmentType, BlType blType, FreightTerm freightTerm) {

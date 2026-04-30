@@ -2,7 +2,6 @@ package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.common.vo.*;
@@ -43,7 +42,6 @@ public class HouseBlAir extends HouseBl {
 
     // 수입 전용
     private Fhd fhd;
-    private Incoterms incoterms;
 
     protected HouseBlAir(Bound bound) {
         super(JobDiv.AIR, bound);
@@ -63,7 +61,7 @@ public class HouseBlAir extends HouseBl {
             String declaredValueCarriage, String declaredValueCustoms,
             String insurance, String accountInformation, FreightTerm otherTerm,
             BlDate issueDate, PortCode issuePlace, String signature,
-            Fhd fhd, Incoterms incoterms) {}
+            Fhd fhd) {}
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();
@@ -82,6 +80,5 @@ public class HouseBlAir extends HouseBl {
         this.issuePlace            = f.issuePlace();
         this.signature             = f.signature();
         this.fhd                   = f.fhd();
-        this.incoterms             = f.incoterms();
     }
 }

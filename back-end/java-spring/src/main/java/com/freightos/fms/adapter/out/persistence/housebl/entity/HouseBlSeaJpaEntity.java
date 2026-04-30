@@ -59,17 +59,11 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "do_date", length = 8)
     private String doDate;
 
-    @Column(name = "incoterms", length = 10)
-    private String incoterms;
-
     @Column(name = "payable_at", length = 50)
     private String payableAt;
 
     @Column(name = "triangle", nullable = false)
     private boolean isTriangle = false;
-
-    @Column(name = "co_load", nullable = false)
-    private boolean isCoLoad = false;
 
     @Column(name = "mbl_no", length = 50)
     private String mblNo;
@@ -86,9 +80,7 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setNoOfBl(Integer v) { this.noOfBl = v; }
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setDoDate(String v) { this.doDate = v; }
-    public void setIncoterms(String v) { this.incoterms = v; }
     public void setPayableAt(String v) { this.payableAt = v; }
     public void setIsTriangle(boolean v) { this.isTriangle = v; }
-    public void setIsCoLoad(boolean v) { this.isCoLoad = v; }
     public void setMblNo(String v) { this.mblNo = v; }
 }

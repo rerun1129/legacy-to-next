@@ -1,7 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -34,11 +33,8 @@ public class HouseBlSea extends HouseBl {
     // 수입 전용
     private BlDate doDate;
 
-    // 인코텀스
-    private Incoterms incoterms;
     private PortCode payableAt;
     private boolean isTriangle = false;
-    private boolean isCoLoad = false;
     private BlNumber mblNo;             // 연결된 Master B/L No (참조용)
 
     protected HouseBlSea(Bound bound) {
@@ -58,8 +54,8 @@ public class HouseBlSea extends HouseBl {
     public static record SeaRouteAndFlags(
             PortCode porCode, PortCode finalDestCode,
             BlDate issueDate, NoOfBl noOfBl, PortCode issuePlace,
-            BlDate doDate, Incoterms incoterms, PortCode payableAt,
-            boolean triangle, boolean coLoad, BlNumber mblNo,
+            BlDate doDate, PortCode payableAt,
+            boolean triangle, BlNumber mblNo,
             LoadType loadType) {}
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
@@ -69,11 +65,9 @@ public class HouseBlSea extends HouseBl {
         this.noOfBl        = f.noOfBl();
         this.issuePlace    = f.issuePlace();
         this.doDate        = f.doDate();
-        this.incoterms     = f.incoterms();
         this.payableAt     = f.payableAt();
         this.isTriangle    = f.triangle();
-        this.isCoLoad      = f.coLoad();
-        this.mblNo          = f.mblNo();
-        this.loadType       = f.loadType();
+        this.mblNo         = f.mblNo();
+        this.loadType      = f.loadType();
     }
 }

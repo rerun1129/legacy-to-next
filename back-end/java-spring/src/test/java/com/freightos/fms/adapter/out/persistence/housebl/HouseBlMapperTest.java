@@ -74,7 +74,7 @@ class HouseBlMapperTest {
     // ── applySeaFields ───────────────────────────────────────────────
 
     @Test
-    @DisplayName("applySeaFields: isTriangle/isCoLoad 게터가 정상 동작한다 (회귀 검출)")
+    @DisplayName("applySeaFields: isTriangle 게터가 정상 동작한다 (회귀 검출)")
     void applySeaFields_triangleFlagsAreMapped() {
         HouseBlSea domain = HouseBlSea.create(Bound.EXP);
         HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
@@ -82,7 +82,6 @@ class HouseBlMapperTest {
         mapper.applySeaFields(domain, jpa);
 
         assertThat(jpa.isTriangle()).isFalse();
-        assertThat(jpa.isCoLoad()).isFalse();
     }
 
     // ── applyTruckFields ─────────────────────────────────────────────

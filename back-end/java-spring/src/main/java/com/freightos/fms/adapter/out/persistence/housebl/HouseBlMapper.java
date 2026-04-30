@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.vo.Rton;
 import com.freightos.fms.domain.housebl.enums.Fhd;
@@ -131,6 +132,11 @@ public class HouseBlMapper {
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());
+        domain.updateTradeInfo(
+                Incoterms.fromCode(jpa.getIncoterms()),
+                SalesClass.fromCode(jpa.getSalesClass()),
+                jpa.getMainItemName(),
+                jpa.getHsCode());
     }
 
     private void copySeaFields(HouseBlSeaJpaEntity jpa, HouseBlSea domain) {
@@ -140,8 +146,8 @@ public class HouseBlMapper {
         domain.updateSeaRouteAndFlags(new HouseBlSea.SeaRouteAndFlags(
                 PortCode.of(jpa.getPorCode()), PortCode.of(jpa.getFinalDestCode()),
                 BlDate.of(jpa.getIssueDate()), NoOfBl.fromNumber(jpa.getNoOfBl()), PortCode.of(jpa.getIssuePlace()),
-                BlDate.of(jpa.getDoDate()), Incoterms.fromCode(jpa.getIncoterms()), PortCode.of(jpa.getPayableAt()),
-                jpa.isTriangle(), jpa.isCoLoad(), BlNumber.of(jpa.getMblNo()),
+                BlDate.of(jpa.getDoDate()), PortCode.of(jpa.getPayableAt()),
+                jpa.isTriangle(), BlNumber.of(jpa.getMblNo()),
                 jpa.getLoadType()));
     }
 
@@ -154,13 +160,12 @@ public class HouseBlMapper {
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(), FreightTerm.fromCode(jpa.getOtherTerm()),
                 BlDate.of(jpa.getIssueDate()), PortCode.of(jpa.getIssuePlace()), jpa.getSignature(),
-                Fhd.fromCode(jpa.getFhd()), Incoterms.fromCode(jpa.getIncoterms())));
+                Fhd.fromCode(jpa.getFhd())));
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
         domain.updateTruckFields(BlDate.of(jpa.getPickupDate()), CustomerCode.of(jpa.getTruckerCode()),
-                EmployeeCode.of(jpa.getTruckerPic()), Weight.of(jpa.getChargeWeightKg()),
-                Incoterms.fromCode(jpa.getIncoterms()));
+                EmployeeCode.of(jpa.getTruckerPic()), Weight.of(jpa.getChargeWeightKg()));
     }
 
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {
@@ -220,6 +225,10 @@ public class HouseBlMapper {
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
         jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
+        jpa.setIncoterms(mapOrNull(domain.getIncoterms(), Incoterms::name));
+        jpa.setSalesClass(mapOrNull(domain.getSalesClass(), SalesClass::getCode));
+        jpa.setMainItemName(domain.getMainItemName());
+        jpa.setHsCode(domain.getHsCode());
         // 컨테이너는 SEA 전용, HouseBlPersistenceAdapter에서 처리 (여기서는 common 필드만)
     }
 
@@ -237,10 +246,8 @@ public class HouseBlMapper {
         jpa.setNoOfBl(mapOrNull(domain.getNoOfBl(), NoOfBl::getNumber));
         jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setDoDate(mapOrNull(domain.getDoDate(), BlDate::asString));
-        jpa.setIncoterms(mapOrNull(domain.getIncoterms(), Incoterms::name));
         jpa.setPayableAt(mapOrNull(domain.getPayableAt(), PortCode::value));
         jpa.setIsTriangle(domain.isTriangle());
-        jpa.setIsCoLoad(domain.isCoLoad());
         jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
     }
 
@@ -261,7 +268,6 @@ public class HouseBlMapper {
         jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setSignature(domain.getSignature());
         jpa.setFhd(mapOrNull(domain.getFhd(), Fhd::name));
-        jpa.setIncoterms(mapOrNull(domain.getIncoterms(), Incoterms::name));
     }
 
     public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
@@ -270,7 +276,6 @@ public class HouseBlMapper {
         jpa.setTruckerCode(mapOrNull(domain.getTruckerCode(), CustomerCode::value));
         jpa.setTruckerPic(mapOrNull(domain.getTruckerPic(), EmployeeCode::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
-        jpa.setIncoterms(mapOrNull(domain.getIncoterms(), Incoterms::name));
     }
 
     public void applyNonBlFields(HouseBlNonBl domain, HouseBlNonBlJpaEntity jpa) {

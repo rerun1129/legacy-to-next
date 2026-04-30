@@ -42,14 +42,10 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Column(name = "charge_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal chargeWeightKg;
 
-    @Column(name = "incoterms", length = 10)
-    private String incoterms;
-
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setVesselName(String v) { this.vesselName = v; }
     public void setPickupDate(String v) { this.pickupDate = v; }
     public void setTruckerCode(String v) { this.truckerCode = v; }
     public void setTruckerPic(String v) { this.truckerPic = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
-    public void setIncoterms(String v) { this.incoterms = v; }
 }
