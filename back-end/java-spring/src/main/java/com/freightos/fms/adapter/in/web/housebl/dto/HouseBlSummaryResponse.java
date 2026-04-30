@@ -1,7 +1,7 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -40,7 +40,7 @@ public record HouseBlSummaryResponse(
                 mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 mapOrNull(entity.getPkgQty(), Quantity::count),
-                mapOrNull(entity.getPkgUnit(), PackageUnit::name),
+                mapOrNull(entity.getPkgUnit(), WeightUnit::name),
                 entity.getCreatedAt()
         );
     }

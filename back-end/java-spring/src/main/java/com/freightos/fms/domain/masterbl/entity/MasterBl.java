@@ -3,7 +3,7 @@ package com.freightos.fms.domain.masterbl.entity;
 import com.freightos.fms.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.vo.*;
 import lombok.AccessLevel;
@@ -47,7 +47,7 @@ public abstract class MasterBl extends BaseEntity {
 
     // ── Cargo 요약 ─────────────────────────────────────────────
     private Quantity pkgQty;
-    private PackageUnit pkgUnit;
+    private WeightUnit pkgUnit;
     private Weight grossWeightKg;
     private Volume cbm;
     //TODO : HSCode를 추가하는 필드가 없음

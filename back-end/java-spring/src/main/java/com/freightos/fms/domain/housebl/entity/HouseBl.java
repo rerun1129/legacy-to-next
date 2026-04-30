@@ -4,7 +4,7 @@ import com.freightos.fms.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
-import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -54,7 +54,7 @@ public abstract class HouseBl extends BaseEntity {
 
     // ── 화물 요약 (비정규화 — 빠른 리스트 조회용) ────────────────────
     private Quantity pkgQty;
-    private PackageUnit pkgUnit;
+    private WeightUnit pkgUnit;
     private Weight grossWeightKg;
     private Volume cbm;
 

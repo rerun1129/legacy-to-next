@@ -1,7 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
-import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
@@ -27,7 +27,7 @@ public class HouseBlCargoMapper {
         jpa.setSealNo1(mapOrNull(c.getSealNo1(), SealNumber::value));
         jpa.setSealNo2(mapOrNull(c.getSealNo2(), SealNumber::value));
         jpa.setPkgQty(mapOrNull(c.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(mapOrNull(c.getPkgUnit(), PackageUnit::name));
+        jpa.setPkgUnit(mapOrNull(c.getPkgUnit(), WeightUnit::name));
         jpa.setGrossWeightKg(mapOrNull(c.getGrossWeightKg(), Weight::kg));
         jpa.setNetWeightKg(mapOrNull(c.getNetWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(c.getCbm(), Volume::cbm));

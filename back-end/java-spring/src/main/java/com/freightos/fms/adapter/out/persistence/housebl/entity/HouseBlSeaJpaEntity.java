@@ -1,8 +1,11 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -65,6 +68,29 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "triangle", nullable = false)
     private boolean isTriangle = false;
 
+    @Column(name = "service_term", length = 20)
+    @Enumerated(EnumType.STRING)
+    private ServiceTerm serviceTerm;
+
+    @Column(name = "vessel_code", length = 20)
+    private String vesselCode;
+
+    @Column(name = "vessel_nationality", length = 50)
+    private String vesselNationality;
+
+    @Column(name = "weight_unit", length = 5)
+    @Enumerated(EnumType.STRING)
+    private WeightUnit weightUnit;
+
+    @Column(name = "rton", columnDefinition = "NUMERIC(10,3)")
+    private BigDecimal rton;
+
+    @Column(name = "say_information", length = 500)
+    private String sayInformation;
+
+    @Column(name = "no_of_container_or_packages", length = 100)
+    private String noOfContainerOrPackages;
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -79,4 +105,11 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setDoDate(String v) { this.doDate = v; }
     public void setPayableAt(String v) { this.payableAt = v; }
     public void setIsTriangle(boolean v) { this.isTriangle = v; }
+    public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
+    public void setVesselCode(String v) { this.vesselCode = v; }
+    public void setVesselNationality(String v) { this.vesselNationality = v; }
+    public void setWeightUnit(WeightUnit v) { this.weightUnit = v; }
+    public void setRton(BigDecimal v) { this.rton = v; }
+    public void setSayInformation(String v) { this.sayInformation = v; }
+    public void setNoOfContainerOrPackages(String v) { this.noOfContainerOrPackages = v; }
 }

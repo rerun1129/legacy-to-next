@@ -1,10 +1,12 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +38,13 @@ public class HouseBlSea extends HouseBl {
     private PortCode payableAt;
     private boolean isTriangle = false;
 
+    private ServiceTerm serviceTerm;
+    private String vesselNationality;
+    private WeightUnit weightUnit;
+    private Rton rton;
+    private String sayInformation;
+    private String noOfContainerOrPackages;
+
     protected HouseBlSea(Bound bound) {
         super(JobDiv.SEA, bound);
     }
@@ -56,6 +65,19 @@ public class HouseBlSea extends HouseBl {
             BlDate doDate, PortCode payableAt,
             boolean triangle,
             LoadType loadType) {}
+
+    public void updateSeaCargoTerms(ServiceTerm serviceTerm, WeightUnit weightUnit, Rton rton,
+                                    String sayInformation, String noOfContainerOrPackages) {
+        this.serviceTerm = serviceTerm;
+        this.weightUnit = weightUnit;
+        this.rton = rton;
+        this.sayInformation = sayInformation;
+        this.noOfContainerOrPackages = noOfContainerOrPackages;
+    }
+
+    public void updateVesselNationality(String vesselNationality) {
+        this.vesselNationality = vesselNationality;
+    }
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
         this.porCode       = f.porCode();

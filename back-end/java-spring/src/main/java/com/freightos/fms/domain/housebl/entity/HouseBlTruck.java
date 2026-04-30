@@ -36,7 +36,7 @@ public class HouseBlTruck extends HouseBl {
 
     public static HouseBlTruck create(Bound bound) {
         HouseBlTruck entity = new HouseBlTruck(bound);
-        entity.vesselVoyage = VesselVoyage.of("TRUCK", null);
+        entity.vesselVoyage = VesselVoyage.of(null, "TRUCK", null);
         return entity;
     }
 
@@ -53,7 +53,7 @@ public class HouseBlTruck extends HouseBl {
             Weight chargeWeightKg) {}
 
     public void updateTruckFields(TruckFields f) {
-        this.vesselVoyage   = VesselVoyage.of("TRUCK",
+        this.vesselVoyage   = VesselVoyage.of(null, "TRUCK",
                 f.vesselVoyage != null ? f.vesselVoyage.voyageNo() : null);
         this.pickupDate     = f.pickupDate;
         this.pickupTm       = f.pickupTm;

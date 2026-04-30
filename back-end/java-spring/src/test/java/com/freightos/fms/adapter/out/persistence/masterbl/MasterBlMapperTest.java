@@ -65,7 +65,7 @@ class MasterBlMapperTest {
     @DisplayName("applySeaFields: SEA 도메인 필드가 MasterBlSeaJpaEntity에 복사된다")
     void applySeaFields_copiesSeaFieldsToJpa() {
         MasterBlSea domain = MasterBlSea.create(Bound.EXP);
-        domain.updateSeaFields(null, LinerCode.of("MSC"), VesselVoyage.of("MSC OSCAR", "0012W"),
+        domain.updateSeaFields(null, LinerCode.of("MSC"), VesselVoyage.of(null, "MSC OSCAR", "0012W"),
                 BlDate.of("20240310"), BlNumber.of("BKG-001"), BlDate.of("20240301"));
         MasterBlSeaJpaEntity jpa = new MasterBlSeaJpaEntity();
 

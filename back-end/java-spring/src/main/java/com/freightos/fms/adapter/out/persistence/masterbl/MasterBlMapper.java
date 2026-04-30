@@ -7,7 +7,7 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEnti
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.FlightType;
-import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.vo.*;
@@ -71,13 +71,13 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()));
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), PackageUnit.fromCode(jpa.getPkgUnit()),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), WeightUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
     }
 
     private void copySeaFields(MasterBlSeaJpaEntity jpa, MasterBlSea domain) {
         domain.updateSeaFields(jpa.getLoadType(), LinerCode.of(jpa.getLinerCode()),
-                VesselVoyage.of(jpa.getVesselName(), jpa.getVoyageNo()),
+                VesselVoyage.of(null, jpa.getVesselName(), jpa.getVoyageNo()),
                 BlDate.of(jpa.getOnboardDate()), BlNumber.of(jpa.getLineBkgNo()),
                 BlDate.of(jpa.getIssueDate()));
     }
@@ -116,7 +116,7 @@ public class MasterBlMapper {
         jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
         jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), PackageUnit::name));
+        jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), WeightUnit::name));
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
     }

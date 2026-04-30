@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.PackageUnit;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
@@ -54,7 +54,7 @@ public record MasterBlDetailResponse(
                 mapOrNull(entity.getOperatorCode(), EmployeeCode::value),
                 mapOrNull(entity.getTeamCode(), TeamCode::value),
                 mapOrNull(entity.getPkgQty(), Quantity::count),
-                mapOrNull(entity.getPkgUnit(), PackageUnit::name),
+                mapOrNull(entity.getPkgUnit(), WeightUnit::name),
                 mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 mapOrNull(entity.getCbm(), Volume::cbm),
                 entity.getCreatedAt(),
