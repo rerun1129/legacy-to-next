@@ -10,6 +10,8 @@ import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlCargoMapper;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDocMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,8 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     private final HouseBlTruckRepository houseBlTruckRepository;
     private final HouseBlNonBlRepository houseBlNonBlRepository;
     private final HouseBlMapper houseBlMapper;
+    private final HouseBlCargoMapper houseBlCargoMapper;
+    private final HouseBlDocMapper houseBlDocMapper;
 
     @Override
     public Optional<HouseBl> findHouseBlById(Long id) {
@@ -72,14 +76,14 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 seaJpa.setHouseBl(savedJpa);
                 houseBlMapper.applySeaFields(sea, seaJpa);
                 // 컨테이너 동기화 (SEA 전용)
-                List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlMapper.toContainerJpa(c, savedJpa)).toList();
+                List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
                 List<HouseBlLicenseJpaEntity> jpaLicenses = sea.getLicenses().stream()
-                        .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
+                        .map(l -> houseBlCargoMapper.toLicenseJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncLicenses(jpaLicenses);
                 HouseBlDescJpaEntity seaDescJpa = (sea.getDesc() != null)
-                        ? houseBlMapper.toDescJpa(sea.getDesc(), savedJpa)
+                        ? houseBlDocMapper.toDescJpa(sea.getDesc(), savedJpa)
                         : null;
                 savedJpa.replaceDesc(seaDescJpa);
                 houseBlSeaRepository.save(seaJpa);
@@ -89,23 +93,23 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 airJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyAirFields(air, airJpa);
                 List<HouseBlDimJpaEntity> airDims = air.getDims().stream()
-                        .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
+                        .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(airDims);
                 List<HouseBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
-                        .map(l -> houseBlMapper.toScheduleLegJpa(l, savedJpa))
+                        .map(l -> houseBlDocMapper.toScheduleLegJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncScheduleLegs(jpaLegs);
                 List<HouseBlLicenseJpaEntity> jpaLicenses = air.getLicenses().stream()
-                        .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
+                        .map(l -> houseBlCargoMapper.toLicenseJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncLicenses(jpaLicenses);
                 List<HouseBlAirChargeJpaEntity> airCharges = air.getAirCharges().stream()
-                        .map(c -> houseBlMapper.toAirChargeJpa(c, savedJpa))
+                        .map(c -> houseBlDocMapper.toAirChargeJpa(c, savedJpa))
                         .toList();
                 savedJpa.syncAirCharges(airCharges);
                 HouseBlDescJpaEntity airDescJpa = (air.getDesc() != null)
-                        ? houseBlMapper.toDescJpa(air.getDesc(), savedJpa)
+                        ? houseBlDocMapper.toDescJpa(air.getDesc(), savedJpa)
                         : null;
                 savedJpa.replaceDesc(airDescJpa);
                 houseBlAirRepository.save(airJpa);
@@ -115,11 +119,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 truckJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyTruckFields(truck, truckJpa);
                 List<HouseBlDimJpaEntity> truckDims = truck.getDims().stream()
-                        .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
+                        .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(truckDims);
                 List<HouseBlTruckOrderJpaEntity> truckOrders = truck.getTruckOrders().stream()
-                        .map(o -> houseBlMapper.toTruckOrderJpa(o, savedJpa))
+                        .map(o -> houseBlDocMapper.toTruckOrderJpa(o, savedJpa))
                         .toList();
                 savedJpa.syncTruckOrders(truckOrders);
                 houseBlTruckRepository.save(truckJpa);
@@ -128,14 +132,14 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlNonBlJpaEntity::new);
                 nonBlJpa.setHouseBl(savedJpa);
                 houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
-                List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlMapper.toContainerJpa(c, savedJpa)).toList();
+                List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
                 List<HouseBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
-                        .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
+                        .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(nonBlDims);
                 HouseBlDescJpaEntity nonBlDescJpa = (nonBl.getDesc() != null)
-                        ? houseBlMapper.toDescJpa(nonBl.getDesc(), savedJpa)
+                        ? houseBlDocMapper.toDescJpa(nonBl.getDesc(), savedJpa)
                         : null;
                 savedJpa.replaceDesc(nonBlDescJpa);
                 houseBlNonBlRepository.save(nonBlJpa);
