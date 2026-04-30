@@ -4,6 +4,8 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -240,5 +244,45 @@ class HouseBlPersistenceAdapterTest {
 
         assertThat(result).isEmpty();
         then(houseBlMapper).shouldHaveNoInteractions();
+    }
+
+    // ── findConsoledSeaSummariesByMasterBlId 위임 ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("findConsoledSeaSummariesByMasterBlId: repository 위임, 결과 가공 없이 반환")
+    void findConsoledSeaSummariesByMasterBlId_delegatesToRepositoryAndReturnsAsIs() {
+        Long masterBlId = 123L;
+        ConsoledHouseBlSeaSummary summary = new ConsoledHouseBlSeaSummary(
+                1L, "HBL-001", "SHIP01", "CONS01", "DOC01",
+                10, "CTN", BigDecimal.valueOf(100), BigDecimal.valueOf(1),
+                "20251130", "20251201", "VESSEL A", "V001", "KRPUS", "USNYC"
+        );
+        List<ConsoledHouseBlSeaSummary> expected = List.of(summary);
+
+        given(houseBlRepository.findConsoledSeaSummariesByMasterBlId(masterBlId)).willReturn(expected);
+
+        List<ConsoledHouseBlSeaSummary> result = adapter.findConsoledSeaSummariesByMasterBlId(masterBlId);
+
+        assertThat(result).isSameAs(expected);
+        then(houseBlRepository).should().findConsoledSeaSummariesByMasterBlId(masterBlId);
+    }
+
+    @Test
+    @DisplayName("findConsoledAirSummariesByMasterBlId: repository 위임, 결과 가공 없이 반환")
+    void findConsoledAirSummariesByMasterBlId_delegatesToRepositoryAndReturnsAsIs() {
+        Long masterBlId = 123L;
+        ConsoledHouseBlAirSummary summary = new ConsoledHouseBlAirSummary(
+                1L, "HBL-002", "SHIP02", "CONS02", "DOC02",
+                5, "PCS", BigDecimal.valueOf(50), BigDecimal.valueOf(2),
+                BigDecimal.valueOf(55)
+        );
+        List<ConsoledHouseBlAirSummary> expected = List.of(summary);
+
+        given(houseBlRepository.findConsoledAirSummariesByMasterBlId(masterBlId)).willReturn(expected);
+
+        List<ConsoledHouseBlAirSummary> result = adapter.findConsoledAirSummariesByMasterBlId(masterBlId);
+
+        assertThat(result).isSameAs(expected);
+        then(houseBlRepository).should().findConsoledAirSummariesByMasterBlId(masterBlId);
     }
 }
