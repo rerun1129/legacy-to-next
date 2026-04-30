@@ -35,7 +35,6 @@ public class HouseBlSea extends HouseBl {
 
     private PortCode payableAt;
     private boolean isTriangle = false;
-    private BlNumber mblNo;             // 연결된 Master B/L No (참조용)
 
     protected HouseBlSea(Bound bound) {
         super(JobDiv.SEA, bound);
@@ -55,7 +54,7 @@ public class HouseBlSea extends HouseBl {
             PortCode porCode, PortCode finalDestCode,
             BlDate issueDate, NoOfBl noOfBl, PortCode issuePlace,
             BlDate doDate, PortCode payableAt,
-            boolean triangle, BlNumber mblNo,
+            boolean triangle,
             LoadType loadType) {}
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
@@ -67,7 +66,6 @@ public class HouseBlSea extends HouseBl {
         this.doDate        = f.doDate();
         this.payableAt     = f.payableAt();
         this.isTriangle    = f.triangle();
-        this.mblNo         = f.mblNo();
         this.loadType      = f.loadType();
     }
 }

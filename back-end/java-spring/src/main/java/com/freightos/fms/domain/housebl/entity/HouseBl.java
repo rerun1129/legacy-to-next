@@ -66,6 +66,8 @@ public abstract class HouseBl extends BaseEntity {
 
     // ── Master B/L 연결 ─────────────────────────────────────────
     private Long masterBlId;
+    private MblNo mblNo;
+    private String masterRefNo;
 
     // ── 거래 조건 ─────────────────────────────────────────────────
     private Incoterms incoterms;
@@ -128,6 +130,11 @@ public abstract class HouseBl extends BaseEntity {
 
     public void linkToMaster(Long masterBlId) {
         this.masterBlId = masterBlId;
+    }
+
+    public void assignMasterReference(MblNo mblNo, String masterRefNo) {
+        this.mblNo = mblNo;
+        this.masterRefNo = masterRefNo;
     }
 
     public void updateTradeInfo(Incoterms incoterms, SalesClass salesClass, String mainItemName, String hsCode) {

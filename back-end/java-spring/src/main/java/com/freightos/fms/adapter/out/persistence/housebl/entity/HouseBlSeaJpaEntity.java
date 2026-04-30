@@ -65,9 +65,6 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "triangle", nullable = false)
     private boolean isTriangle = false;
 
-    @Column(name = "mbl_no", length = 50)
-    private String mblNo;
-
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -82,5 +79,4 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setDoDate(String v) { this.doDate = v; }
     public void setPayableAt(String v) { this.payableAt = v; }
     public void setIsTriangle(boolean v) { this.isTriangle = v; }
-    public void setMblNo(String v) { this.mblNo = v; }
 }

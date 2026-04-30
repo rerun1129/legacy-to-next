@@ -141,6 +141,7 @@ public class HouseBlMapper {
                 SalesClass.fromCode(jpa.getSalesClass()),
                 jpa.getMainItemName(),
                 jpa.getHsCode());
+        domain.assignMasterReference(MblNo.of(jpa.getMblNo()), jpa.getMasterRefNo());
     }
 
     private void copySeaFields(HouseBlSeaJpaEntity jpa, HouseBlSea domain) {
@@ -151,7 +152,7 @@ public class HouseBlMapper {
                 PortCode.of(jpa.getPorCode()), PortCode.of(jpa.getFinalDestCode()),
                 BlDate.of(jpa.getIssueDate()), NoOfBl.fromNumber(jpa.getNoOfBl()), PortCode.of(jpa.getIssuePlace()),
                 BlDate.of(jpa.getDoDate()), PortCode.of(jpa.getPayableAt()),
-                jpa.isTriangle(), BlNumber.of(jpa.getMblNo()),
+                jpa.isTriangle(),
                 jpa.getLoadType()));
     }
 
@@ -243,6 +244,8 @@ public class HouseBlMapper {
         jpa.setSalesClass(mapOrNull(domain.getSalesClass(), SalesClass::getCode));
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
+        jpa.setMblNo(mapOrNull(domain.getMblNo(), MblNo::value));
+        jpa.setMasterRefNo(domain.getMasterRefNo());
         // 컨테이너는 SEA 전용, HouseBlPersistenceAdapter에서 처리 (여기서는 common 필드만)
     }
 
@@ -262,7 +265,6 @@ public class HouseBlMapper {
         jpa.setDoDate(mapOrNull(domain.getDoDate(), BlDate::asString));
         jpa.setPayableAt(mapOrNull(domain.getPayableAt(), PortCode::value));
         jpa.setIsTriangle(domain.isTriangle());
-        jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
     }
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {

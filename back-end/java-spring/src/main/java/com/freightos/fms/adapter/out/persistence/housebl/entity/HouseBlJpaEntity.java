@@ -135,6 +135,12 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "hs_code", length = 12)
     private String hsCode;
 
+    @Column(name = "mbl_no", length = 50)
+    private String mblNo;
+
+    @Column(name = "master_ref_no", length = 50)
+    private String masterRefNo;
+
     // SEA/NON_BL에서 채워짐, AIR/TRUCK은 LAZY이므로 미사용 모드 영향 없음
     @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -199,6 +205,8 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setSalesClass(String salesClass) { this.salesClass = salesClass; }
     public void setMainItemName(String mainItemName) { this.mainItemName = mainItemName; }
     public void setHsCode(String hsCode) { this.hsCode = hsCode; }
+    public void setMblNo(String mblNo) { this.mblNo = mblNo; }
+    public void setMasterRefNo(String masterRefNo) { this.masterRefNo = masterRefNo; }
 
     // orphanRemoval=true 컬렉션 동기화: 참조를 교체하지 않고 clear+addAll로 관리
     public void syncContainers(List<HouseBlContainerJpaEntity> newContainers) {
