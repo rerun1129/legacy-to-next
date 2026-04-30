@@ -50,6 +50,10 @@ public class HouseBlMapper {
                 .map(this::toDimDomain)
                 .collect(Collectors.toList());
         domain.initDims(dims);
+        List<HouseBlScheduleLeg> scheduleLegs = jpa.getScheduleLegs().stream()
+                .map(this::toScheduleLegDomain)
+                .collect(Collectors.toList());
+        domain.initScheduleLegs(scheduleLegs);
         return domain;
     }
 
@@ -403,5 +407,11 @@ public class HouseBlMapper {
         jpa.setOnBoardTm(domain.getOnBoardTm());
         jpa.setArrivalDt(domain.getArrivalDt());
         jpa.setArrivalTm(domain.getArrivalTm());
+    }
+
+    public HouseBlScheduleLegJpaEntity toScheduleLegJpa(HouseBlScheduleLeg leg, HouseBlJpaEntity houseBl) {
+        HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
+        applyScheduleLegFields(leg, jpa, houseBl);
+        return jpa;
     }
 }

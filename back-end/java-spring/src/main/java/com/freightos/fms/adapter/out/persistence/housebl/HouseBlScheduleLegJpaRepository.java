@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface HouseBlScheduleLegJpaRepository extends JpaRepository<HouseBlScheduleLegJpaEntity, Long> {
 
-    List<HouseBlScheduleLegJpaEntity> findByHouseBlHouseBlIdOrderBySeqAsc(Long houseBlId);
-
-    void deleteByHouseBlHouseBlId(Long houseBlId);
+    // seq 필드 없음 — PK 오름차순으로 삽입 순서 보장
+    List<HouseBlScheduleLegJpaEntity> findByHouseBlHouseBlIdOrderByHouseBlScheduleLegIdAsc(Long houseBlId);
 }

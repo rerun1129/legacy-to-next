@@ -86,6 +86,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(airDims);
+                List<HouseBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
+                        .map(l -> houseBlMapper.toScheduleLegJpa(l, savedJpa))
+                        .toList();
+                savedJpa.syncScheduleLegs(jpaLegs);
                 houseBlAirRepository.save(airJpa);
             }
             case HouseBlTruck truck -> {

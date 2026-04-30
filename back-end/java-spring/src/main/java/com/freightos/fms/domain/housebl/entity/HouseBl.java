@@ -73,6 +73,10 @@ public abstract class HouseBl extends BaseEntity {
     //    본체 위치는 @OneToMany mappedBy 정합성 확보를 위한 설계 결정) ───
     private List<HouseBlDim> dims = new ArrayList<>();
 
+    // ── ScheduleLeg (AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상.
+    //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
+    private List<HouseBlScheduleLeg> scheduleLegs = new ArrayList<>();
+
     // ── 도메인 메서드 ────────────────────────────────────────────
 
     protected HouseBl(JobDiv jobDiv, Bound bound) {
@@ -138,5 +142,9 @@ public abstract class HouseBl extends BaseEntity {
 
     public void initDims(List<HouseBlDim> dims) {
         this.dims = new ArrayList<>(dims);
+    }
+
+    public void initScheduleLegs(List<HouseBlScheduleLeg> scheduleLegs) {
+        this.scheduleLegs = new ArrayList<>(scheduleLegs);
     }
 }

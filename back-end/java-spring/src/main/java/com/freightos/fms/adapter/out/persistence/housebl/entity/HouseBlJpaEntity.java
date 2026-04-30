@@ -134,6 +134,11 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @BatchSize(size = 50)
     private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
 
+    // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<HouseBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
+
     public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
     public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
@@ -174,5 +179,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void syncDims(List<HouseBlDimJpaEntity> newDims) {
         this.dims.clear();
         this.dims.addAll(newDims);
+    }
+
+    public void syncScheduleLegs(List<HouseBlScheduleLegJpaEntity> newLegs) {
+        this.scheduleLegs.clear();
+        this.scheduleLegs.addAll(newLegs);
     }
 }
