@@ -83,7 +83,7 @@ class MasterBlMapperTest {
     void applyAirFields_copiesAirFieldsToJpa() {
         MasterBlAir domain = MasterBlAir.create(Bound.EXP);
         domain.updateAirFields(new MasterBlAir.AirFields(
-                AirlineCode.of("KE"), AirportCode.of("ICN"), BlNumber.of("180-12345678"),
+                AirlineCode.of("KE"), BlNumber.of("180-12345678"),
                 Weight.of(BigDecimal.valueOf(100.5)), Weight.of(BigDecimal.valueOf(90.0)),
                 RateClass.Q, CurrencyCode.of("KRW"), "N.V.D.", null, "NIL", null, null, null,
                 BlDate.of("20240301"), PortCode.of("Seoul"), "Signature"));

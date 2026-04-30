@@ -153,7 +153,7 @@ public class HouseBlMapper {
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
         domain.updateAirFields(new HouseBlAir.AirFields(
-                AirlineCode.of(jpa.getAirlineCode()), AirportCode.of(jpa.getDepartureCode()),
+                AirlineCode.of(jpa.getAirlineCode()),
                 BlNumber.of(jpa.getMawbNo()),
                 Weight.of(jpa.getChargeWeightKg()), Weight.of(jpa.getVolumeWeightKg()),
                 RateClass.fromCode(jpa.getRateClass()), CurrencyCode.of(jpa.getCurrencyCode()),
@@ -253,7 +253,6 @@ public class HouseBlMapper {
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
         jpa.setAirlineCode(mapOrNull(domain.getAirlineCode(), AirlineCode::value));
-        jpa.setDepartureCode(mapOrNull(domain.getDepartureCode(), AirportCode::value));
         jpa.setMawbNo(mapOrNull(domain.getMawbNo(), BlNumber::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
         jpa.setVolumeWeightKg(mapOrNull(domain.getVolumeWeightKg(), Weight::kg));

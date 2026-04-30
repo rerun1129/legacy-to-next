@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 public class HouseBlAir extends HouseBl {
 
     private AirlineCode airlineCode;
-    private AirportCode departureCode;  // 출발 공항 IATA
     private BlNumber mawbNo;
 
     // 청구중량 (Chargeable Weight = max(grossWeight, volumeWeight))
@@ -55,7 +54,7 @@ public class HouseBlAir extends HouseBl {
     }
 
     public static record AirFields(
-            AirlineCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
+            AirlineCode airlineCode, BlNumber mawbNo,
             Weight chargeWeightKg, Weight volumeWeightKg,
             RateClass rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
@@ -65,7 +64,6 @@ public class HouseBlAir extends HouseBl {
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();
-        this.departureCode         = f.departureCode();
         this.mawbNo                = f.mawbNo();
         this.chargeWeightKg        = f.chargeWeightKg();
         this.volumeWeightKg        = f.volumeWeightKg();

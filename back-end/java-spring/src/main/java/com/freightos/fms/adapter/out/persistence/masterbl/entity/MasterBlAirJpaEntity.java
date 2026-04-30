@@ -29,9 +29,6 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "airline_code", length = 10)
     private String airlineCode;
 
-    @Column(name = "departure_code", length = 10)
-    private String departureCode;
-
     @Column(name = "mawb_no", length = 50)
     private String mawbNo;
 
@@ -79,7 +76,6 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
 
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
-    public void setDepartureCode(String v) { this.departureCode = v; }
     public void setMawbNo(String v) { this.mawbNo = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }

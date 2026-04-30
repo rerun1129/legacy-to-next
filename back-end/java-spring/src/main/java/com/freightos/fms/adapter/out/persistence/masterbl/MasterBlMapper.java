@@ -84,7 +84,7 @@ public class MasterBlMapper {
 
     private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
         domain.updateAirFields(new MasterBlAir.AirFields(
-                AirlineCode.of(jpa.getAirlineCode()), AirportCode.of(jpa.getDepartureCode()),
+                AirlineCode.of(jpa.getAirlineCode()),
                 BlNumber.of(jpa.getMawbNo()),
                 Weight.of(jpa.getChargeWeightKg()), Weight.of(jpa.getVolumeWeightKg()),
                 RateClass.fromCode(jpa.getRateClass()), CurrencyCode.of(jpa.getCurrencyCode()),
@@ -135,7 +135,6 @@ public class MasterBlMapper {
 
     public void applyAirFields(MasterBlAir domain, MasterBlAirJpaEntity jpa) {
         jpa.setAirlineCode(mapOrNull(domain.getAirlineCode(), AirlineCode::value));
-        jpa.setDepartureCode(mapOrNull(domain.getDepartureCode(), AirportCode::value));
         jpa.setMawbNo(mapOrNull(domain.getMawbNo(), BlNumber::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
         jpa.setVolumeWeightKg(mapOrNull(domain.getVolumeWeightKg(), Weight::kg));

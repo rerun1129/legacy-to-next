@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 public class MasterBlAir extends MasterBl {
 
     private AirlineCode airlineCode;
-    private AirportCode departureCode;
     private BlNumber mawbNo; //TODO : MasterBl의 mblNo와 중복 필드. 만약 인덱싱을 위한 후보키라면 필드명을 맞출것
 
     private Weight chargeWeightKg;
@@ -52,7 +51,7 @@ public class MasterBlAir extends MasterBl {
     }
 
     public static record AirFields(
-            AirlineCode airlineCode, AirportCode departureCode, BlNumber mawbNo,
+            AirlineCode airlineCode, BlNumber mawbNo,
             Weight chargeWeightKg, Weight volumeWeightKg,
             RateClass rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
@@ -62,7 +61,6 @@ public class MasterBlAir extends MasterBl {
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();
-        this.departureCode         = f.departureCode();
         this.mawbNo                = f.mawbNo();
         this.chargeWeightKg        = f.chargeWeightKg();
         this.volumeWeightKg        = f.volumeWeightKg();
