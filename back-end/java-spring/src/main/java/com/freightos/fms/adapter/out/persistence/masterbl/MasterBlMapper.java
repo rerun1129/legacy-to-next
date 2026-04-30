@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
@@ -7,12 +8,15 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEnti
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.FlightType;
-import com.freightos.fms.domain.common.enums.WeightUnit;
+import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.housebl.enums.Per;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlAirCharge;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
 import com.freightos.fms.domain.masterbl.entity.MasterBlScheduleLeg;
@@ -47,6 +51,10 @@ public class MasterBlMapper {
         MasterBlAir domain = MasterBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
+        List<MasterBlAirCharge> airCharges = jpa.getAirCharges().stream()
+                .map(this::toAirChargeDomain)
+                .collect(Collectors.toList());
+        domain.initAirCharges(airCharges);
         return domain;
     }
 
@@ -220,5 +228,42 @@ public class MasterBlMapper {
         jpa.setOnBoardTm(domain.getOnBoardTm());
         jpa.setArrivalDt(domain.getArrivalDt());
         jpa.setArrivalTm(domain.getArrivalTm());
+    }
+
+    // ── AIR CHARGE ───────────────────────────────────────────────────
+
+    public MasterBlAirCharge toAirChargeDomain(MasterBlAirChargeJpaEntity jpa) {
+        MasterBlAirCharge c = MasterBlAirCharge.create(jpa.getMasterBl().getMasterBlId());
+        c.assignIdentity(jpa.getMasterBlAirChargeId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        c.updateDetails(new MasterBlAirCharge.Details(
+                jpa.getFreightCode(), CurrencyCode.of(jpa.getCurrencyCode()),
+                Per.fromCode(jpa.getPer()), FreightTerm.fromCode(jpa.getFreightTerm()),
+                Weight.of(jpa.getGrossWeightKg()), RateClass.fromCode(jpa.getRateClass()),
+                Weight.of(jpa.getChargeWeightKg()), jpa.getRate()));
+        return c;
+    }
+
+    public List<MasterBlAirCharge> toAirChargeDomainList(List<MasterBlAirChargeJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toAirChargeDomain).collect(Collectors.toList());
+    }
+
+    public void applyAirChargeFields(MasterBlAirCharge domain, MasterBlAirChargeJpaEntity jpa,
+                                     MasterBlJpaEntity masterBlJpa) {
+        jpa.setMasterBl(masterBlJpa);
+        jpa.setFreightCode(domain.getFreightCode());
+        jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
+        jpa.setPer(mapOrNull(domain.getPer(), Per::getCode));
+        jpa.setFreightTerm(mapOrNull(domain.getFreightTerm(), FreightTerm::name));
+        jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
+        jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
+        jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        jpa.setRate(domain.getRate());
+    }
+
+    public MasterBlAirChargeJpaEntity toAirChargeJpa(MasterBlAirCharge c, MasterBlJpaEntity masterBl) {
+        MasterBlAirChargeJpaEntity jpa = new MasterBlAirChargeJpaEntity();
+        applyAirChargeFields(c, jpa, masterBl);
+        return jpa;
     }
 }

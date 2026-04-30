@@ -10,6 +10,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * E-01 Master B/L 공통 본체.
  * House B/L 계층과 별개 엔티티 계층.
@@ -95,5 +98,13 @@ public abstract class MasterBl extends BaseEntity {
         this.pkgUnit       = cargo.packageUnit();
         this.grossWeightKg = cargo.grossWeight();
         this.cbm           = cargo.volume();
+    }
+
+    // ── AirCharge (AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상.
+    //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
+    private List<MasterBlAirCharge> airCharges = new ArrayList<>();
+
+    public void initAirCharges(List<MasterBlAirCharge> airCharges) {
+        this.airCharges = new ArrayList<>(airCharges);
     }
 }

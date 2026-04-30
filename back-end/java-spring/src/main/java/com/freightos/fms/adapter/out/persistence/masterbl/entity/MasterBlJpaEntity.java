@@ -6,8 +6,11 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JPA ORM 엔티티 — Master B/L 공통 본체.
@@ -112,4 +115,14 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setPkgUnit(String v) { this.pkgUnit = v; }
     public void setGrossWeightKg(BigDecimal v) { this.grossWeightKg = v; }
     public void setCbm(BigDecimal v) { this.cbm = v; }
+
+    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
+
+    public void syncAirCharges(List<MasterBlAirChargeJpaEntity> v) {
+        this.airCharges.clear();
+        if (v != null) this.airCharges.addAll(v);
+    }
 }

@@ -12,5 +12,6 @@ public interface MasterBlPort {
     PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest);
     Optional<MasterBl> findMasterBlByMblNo(String mblNo);
     boolean existsByMblNo(String mblNo);
+    MasterBl saveMasterBl(MasterBl domain);
     void deleteMasterBl(MasterBl masterBl);
 }

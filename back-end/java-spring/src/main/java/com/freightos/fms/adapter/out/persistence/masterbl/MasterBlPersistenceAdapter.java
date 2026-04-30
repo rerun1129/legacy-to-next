@@ -1,10 +1,16 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
+import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
+import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.masterbl.port.out.MasterBlPort;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -50,6 +57,47 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     @Override
     public boolean existsByMblNo(String mblNo) {
         return masterBlRepository.existsByMblNo(mblNo);
+    }
+
+    @Override
+    @Transactional
+    public MasterBl saveMasterBl(MasterBl domain) {
+        MasterBlJpaEntity parentJpa;
+        if (domain.getId() != null) {
+            parentJpa = masterBlRepository.findById(domain.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("MasterBl", domain.getId()));
+        } else {
+            parentJpa = new MasterBlJpaEntity();
+        }
+        masterBlMapper.applyCommonFields(domain, parentJpa);
+        final MasterBlJpaEntity savedJpa = masterBlRepository.save(parentJpa);
+
+        switch (domain) {
+            case MasterBlAir air -> {
+                MasterBlAirJpaEntity airJpa = masterBlAirRepository
+                        .findByMasterBlMasterBlId(savedJpa.getMasterBlId())
+                        .orElseGet(MasterBlAirJpaEntity::new);
+                airJpa.setMasterBl(savedJpa);
+                masterBlMapper.applyAirFields(air, airJpa);
+                List<MasterBlAirChargeJpaEntity> jpaCharges = air.getAirCharges().stream()
+                        .map(c -> masterBlMapper.toAirChargeJpa(c, savedJpa))
+                        .toList();
+                savedJpa.syncAirCharges(jpaCharges);
+                masterBlAirRepository.save(airJpa);
+            }
+            case MasterBlSea sea -> {
+                MasterBlSeaJpaEntity seaJpa = masterBlSeaRepository
+                        .findByMasterBlMasterBlId(savedJpa.getMasterBlId())
+                        .orElseGet(MasterBlSeaJpaEntity::new);
+                seaJpa.setMasterBl(savedJpa);
+                masterBlMapper.applySeaFields(sea, seaJpa);
+                masterBlSeaRepository.save(seaJpa);
+            }
+            default -> throw new IllegalArgumentException(
+                    "Unsupported MasterBl type: " + domain.getClass().getSimpleName());
+        }
+
+        return loadWithExt(savedJpa);
     }
 
     @Override
