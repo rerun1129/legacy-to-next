@@ -76,6 +76,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 // 컨테이너 동기화 (SEA 전용)
                 List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
+                List<HouseBlLicenseJpaEntity> jpaLicenses = sea.getLicenses().stream()
+                        .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
+                        .toList();
+                savedJpa.syncLicenses(jpaLicenses);
                 houseBlSeaRepository.save(seaJpa);
             }
             case HouseBlAir air -> {
@@ -90,6 +94,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(l -> houseBlMapper.toScheduleLegJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncScheduleLegs(jpaLegs);
+                List<HouseBlLicenseJpaEntity> jpaLicenses = air.getLicenses().stream()
+                        .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
+                        .toList();
+                savedJpa.syncLicenses(jpaLicenses);
                 houseBlAirRepository.save(airJpa);
             }
             case HouseBlTruck truck -> {

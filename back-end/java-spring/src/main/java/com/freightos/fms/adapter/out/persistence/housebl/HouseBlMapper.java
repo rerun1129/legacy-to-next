@@ -39,6 +39,10 @@ public class HouseBlMapper {
                 .map(c -> toContainerDomain(c, domain))
                 .collect(Collectors.toList());
         domain.initContainers(containers);
+        List<HouseBlLicense> licenses = jpa.getLicenses().stream()
+                .map(this::toLicenseDomain)
+                .collect(Collectors.toList());
+        domain.initLicenses(licenses);
         return domain;
     }
 
@@ -54,6 +58,10 @@ public class HouseBlMapper {
                 .map(this::toScheduleLegDomain)
                 .collect(Collectors.toList());
         domain.initScheduleLegs(scheduleLegs);
+        List<HouseBlLicense> licenses = jpa.getLicenses().stream()
+                .map(this::toLicenseDomain)
+                .collect(Collectors.toList());
+        domain.initLicenses(licenses);
         return domain;
     }
 
@@ -357,6 +365,12 @@ public class HouseBlMapper {
         jpa.setPartialShipmentSeq(domain.getPartialShipmentSeq());
         jpa.setHsnNo(domain.getHsnNo());
         jpa.setSeq(domain.getSeq());
+    }
+
+    public HouseBlLicenseJpaEntity toLicenseJpa(HouseBlLicense l, HouseBlJpaEntity houseBl) {
+        HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
+        applyLicenseFields(l, jpa, houseBl);
+        return jpa;
     }
 
     // ── E-18 REFERENCE ────────────────────────────────────────────────
