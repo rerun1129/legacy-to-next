@@ -24,7 +24,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * MasterBl JPA 엔티티 구조 검증 테스트.
@@ -115,7 +114,7 @@ class MasterBlMapperTest {
         parentJpa.setCbm(BigDecimal.valueOf(25.0));
         parentJpa.setFreightTerm(FreightTerm.PREPAID);
 
-        MasterBlSea domain = (MasterBlSea) mapper.toDomain(parentJpa);
+        MasterBlSea domain = mapper.toSeaDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(MasterBlSea.class);
         assertThat(domain.getMblNo().value()).isEqualTo("MBLNO-SEA-001");
@@ -142,7 +141,7 @@ class MasterBlMapperTest {
         parentJpa.setCbm(BigDecimal.valueOf(2.5));
         // airExt null — seaExt/airExt 는 @OneToOne lazy, 직접 조립 불가
 
-        MasterBlAir domain = (MasterBlAir) mapper.toDomain(parentJpa);
+        MasterBlAir domain = mapper.toAirDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(MasterBlAir.class);
         assertThat(domain.getMblNo().value()).isEqualTo("MAWB-001");
@@ -153,18 +152,6 @@ class MasterBlMapperTest {
         // create() 기본값 유지 (airExt null 이므로 copyAirFields 미호출)
         assertThat(domain.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
         assertThat(domain.getInsurance()).isEqualTo("NIL");
-    }
-
-    @Test
-    @DisplayName("toDomain: 알 수 없는 jobDiv → IllegalArgumentException")
-    void toDomain_unknownJobDiv_throwsException() {
-        MasterBlJpaEntity parentJpa = new MasterBlJpaEntity();
-        parentJpa.setJobDiv("UNKNOWN");
-        parentJpa.setBound(Bound.EXP);
-
-        assertThatThrownBy(() -> mapper.toDomain(parentJpa))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unknown jobDiv: UNKNOWN");
     }
 
     // ── E-05 DIM ────────────────────────────────────────────────────────
