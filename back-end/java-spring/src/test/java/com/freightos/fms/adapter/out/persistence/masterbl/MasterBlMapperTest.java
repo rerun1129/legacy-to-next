@@ -377,4 +377,25 @@ class MasterBlMapperTest {
         assertThatCode(() -> mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa))
                 .doesNotThrowAnyException();
     }
+
+    // ── E-06 DESC toDescJpa ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toDescJpa: 도메인과 부모 JPA를 받아 필드가 채워진 새 JpaEntity를 반환한다")
+    void toDescJpa_returnsNewJpaWithFieldsAndParent() {
+        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
+        masterBlJpa.setMasterBlId(1L);
+
+        MasterBlDesc domain = MasterBlDesc.create(1L);
+        domain.updateContent("MARKS", "DESC", "CLAUSE1", "CLAUSE2", "REMARK");
+
+        MasterBlDescJpaEntity result = mapper.toDescJpa(domain, masterBlJpa);
+
+        assertThat(result.getMasterBl()).isSameAs(masterBlJpa);
+        assertThat(result.getMarks()).isEqualTo("MARKS");
+        assertThat(result.getDescription()).isEqualTo("DESC");
+        assertThat(result.getDescClause1()).isEqualTo("CLAUSE1");
+        assertThat(result.getDescClause2()).isEqualTo("CLAUSE2");
+        assertThat(result.getRemark()).isEqualTo("REMARK");
+    }
 }
