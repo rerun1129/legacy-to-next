@@ -12,6 +12,7 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.TruckType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -79,6 +80,10 @@ public class HouseBlMapper {
                 .map(this::toDimDomain)
                 .collect(Collectors.toList());
         domain.initDims(dims);
+        List<HouseBlTruckOrder> truckOrders = jpa.getTruckOrders().stream()
+                .map(this::toTruckOrderDomain)
+                .collect(Collectors.toList());
+        domain.initTruckOrders(truckOrders);
         return domain;
     }
 
@@ -419,6 +424,50 @@ public class HouseBlMapper {
     public HouseBlScheduleLegJpaEntity toScheduleLegJpa(HouseBlScheduleLeg leg, HouseBlJpaEntity houseBl) {
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
         applyScheduleLegFields(leg, jpa, houseBl);
+        return jpa;
+    }
+
+    // ── E-20 TRUCK ORDER ──────────────────────────────────────────────
+
+    public HouseBlTruckOrder toTruckOrderDomain(HouseBlTruckOrderJpaEntity jpa) {
+        HouseBlTruckOrder o = HouseBlTruckOrder.create(jpa.getHouseBl().getHouseBlId());
+        o.assignIdentity(jpa.getHouseBlTruckOrderId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        o.updateDetails(new HouseBlTruckOrder.Details(
+                jpa.getTruckOrderNo(), jpa.getPkgQty(), jpa.getPkgUnit(),
+                Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm()),
+                jpa.getTruckNo(), TruckType.fromCode(jpa.getTruckType()),
+                jpa.getDriver(), jpa.getMobileNo(),
+                ContainerNumber.of(jpa.getContainerNo()), ContainerType.fromCode(jpa.getContainerType()),
+                SealNumber.of(jpa.getSealNo1()), SealNumber.of(jpa.getSealNo2()), SealNumber.of(jpa.getSealNo3())));
+        return o;
+    }
+
+    public List<HouseBlTruckOrder> toTruckOrderDomainList(List<HouseBlTruckOrderJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toTruckOrderDomain).collect(Collectors.toList());
+    }
+
+    public void applyTruckOrderFields(HouseBlTruckOrder domain, HouseBlTruckOrderJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
+        jpa.setHouseBl(houseBlJpa);
+        jpa.setTruckOrderNo(domain.getTruckOrderNo());
+        jpa.setPkgQty(domain.getPkgQty());
+        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
+        jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
+        jpa.setTruckNo(domain.getTruckNo());
+        jpa.setTruckType(mapOrNull(domain.getTruckType(), TruckType::getCode));
+        jpa.setDriver(domain.getDriver());
+        jpa.setMobileNo(domain.getMobileNo());
+        jpa.setContainerNo(mapOrNull(domain.getContainerNo(), ContainerNumber::value));
+        jpa.setContainerType(mapOrNull(domain.getContainerType(), ContainerType::getCode));
+        jpa.setSealNo1(mapOrNull(domain.getSealNo1(), SealNumber::value));
+        jpa.setSealNo2(mapOrNull(domain.getSealNo2(), SealNumber::value));
+        jpa.setSealNo3(mapOrNull(domain.getSealNo3(), SealNumber::value));
+    }
+
+    public HouseBlTruckOrderJpaEntity toTruckOrderJpa(HouseBlTruckOrder o, HouseBlJpaEntity houseBl) {
+        HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
+        applyTruckOrderFields(o, jpa, houseBl);
         return jpa;
     }
 }

@@ -114,6 +114,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(d -> houseBlMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(truckDims);
+                List<HouseBlTruckOrderJpaEntity> truckOrders = truck.getTruckOrders().stream()
+                        .map(o -> houseBlMapper.toTruckOrderJpa(o, savedJpa))
+                        .toList();
+                savedJpa.syncTruckOrders(truckOrders);
                 houseBlTruckRepository.save(truckJpa);
             }
             case HouseBlNonBl nonBl -> {
