@@ -4,7 +4,6 @@ import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -90,12 +89,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
 
     @Column(name = "cbm", columnDefinition = "NUMERIC(10,3)")
     private BigDecimal cbm;
-
-    @OneToOne(mappedBy = "masterBl", fetch = FetchType.LAZY)
-    private MasterBlSeaJpaEntity seaExt;
-
-    @OneToOne(mappedBy = "masterBl", fetch = FetchType.LAZY)
-    private MasterBlAirJpaEntity airExt;
 
     public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setMblNo(String v) { this.mblNo = v; }

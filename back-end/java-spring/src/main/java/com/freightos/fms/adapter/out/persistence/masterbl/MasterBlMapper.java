@@ -36,23 +36,14 @@ public class MasterBlMapper {
 
     // ── JpaEntity → Domain ─────────────────────────────────────────
 
-    public MasterBl toDomain(MasterBlJpaEntity jpa) {
-        MasterBlJobDiv jobDiv = MasterBlJobDiv.fromCode(jpa.getJobDiv());
-        if (jobDiv == null) throw new IllegalArgumentException("Unknown jobDiv: " + jpa.getJobDiv());
-        return switch (jobDiv) {
-            case SEA -> toSeaDomain(jpa, jpa.getSeaExt());
-            case AIR -> toAirDomain(jpa, jpa.getAirExt());
-        };
-    }
-
-    private MasterBlSea toSeaDomain(MasterBlJpaEntity jpa, MasterBlSeaJpaEntity seaJpa) {
+    public MasterBlSea toSeaDomain(MasterBlJpaEntity jpa, MasterBlSeaJpaEntity seaJpa) {
         MasterBlSea domain = MasterBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
         return domain;
     }
 
-    private MasterBlAir toAirDomain(MasterBlJpaEntity jpa, MasterBlAirJpaEntity airJpa) {
+    public MasterBlAir toAirDomain(MasterBlJpaEntity jpa, MasterBlAirJpaEntity airJpa) {
         MasterBlAir domain = MasterBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
