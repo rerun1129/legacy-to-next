@@ -168,6 +168,14 @@ public abstract class HouseBl extends BaseEntity {
         this.truckOrders = new ArrayList<>(truckOrders);
     }
 
+    // ── AirCharge (AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상.
+    //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
+    private List<HouseBlAirCharge> airCharges = new ArrayList<>();
+
+    public void initAirCharges(List<HouseBlAirCharge> airCharges) {
+        this.airCharges = new ArrayList<>(airCharges);
+    }
+
     public void initDesc(HouseBlDesc desc) {
         this.desc = desc;
     }

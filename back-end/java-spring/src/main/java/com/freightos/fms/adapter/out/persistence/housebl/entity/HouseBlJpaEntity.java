@@ -211,6 +211,16 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
         this.truckOrders.addAll(newOrders);
     }
 
+    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
+
+    public void syncAirCharges(List<HouseBlAirChargeJpaEntity> newCharges) {
+        this.airCharges.clear();
+        this.airCharges.addAll(newCharges);
+    }
+
     public void replaceDesc(HouseBlDescJpaEntity newDesc) {
         if (this.desc != null) this.desc.setHouseBl(null);
         this.desc = newDesc;

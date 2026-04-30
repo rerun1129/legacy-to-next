@@ -100,6 +100,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(l -> houseBlMapper.toLicenseJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncLicenses(jpaLicenses);
+                List<HouseBlAirChargeJpaEntity> airCharges = air.getAirCharges().stream()
+                        .map(c -> houseBlMapper.toAirChargeJpa(c, savedJpa))
+                        .toList();
+                savedJpa.syncAirCharges(airCharges);
                 HouseBlDescJpaEntity airDescJpa = (air.getDesc() != null)
                         ? houseBlMapper.toDescJpa(air.getDesc(), savedJpa)
                         : null;

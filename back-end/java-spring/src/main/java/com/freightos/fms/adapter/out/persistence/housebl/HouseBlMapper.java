@@ -12,6 +12,7 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.Per;
 import com.freightos.fms.domain.housebl.enums.TruckType;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +67,10 @@ public class HouseBlMapper {
                 .map(this::toLicenseDomain)
                 .collect(Collectors.toList());
         domain.initLicenses(licenses);
+        List<HouseBlAirCharge> airCharges = jpa.getAirCharges().stream()
+                .map(this::toAirChargeDomain)
+                .collect(Collectors.toList());
+        domain.initAirCharges(airCharges);
         if (jpa.getDesc() != null) {
             domain.initDesc(toDescDomain(jpa.getDesc()));
         }
@@ -468,6 +473,42 @@ public class HouseBlMapper {
     public HouseBlTruckOrderJpaEntity toTruckOrderJpa(HouseBlTruckOrder o, HouseBlJpaEntity houseBl) {
         HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
         applyTruckOrderFields(o, jpa, houseBl);
+        return jpa;
+    }
+
+    // ── E-21 AIR CHARGE ──────────────────────────────────────────────
+
+    public HouseBlAirCharge toAirChargeDomain(HouseBlAirChargeJpaEntity jpa) {
+        HouseBlAirCharge c = HouseBlAirCharge.create(jpa.getHouseBl().getHouseBlId());
+        c.assignIdentity(jpa.getHouseBlAirChargeId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        c.updateDetails(new HouseBlAirCharge.Details(
+                jpa.getFreightCode(), CurrencyCode.of(jpa.getCurrencyCode()),
+                Per.fromCode(jpa.getPer()), FreightTerm.fromCode(jpa.getFreightTerm()),
+                Weight.of(jpa.getGrossWeightKg()), RateClass.fromCode(jpa.getRateClass()),
+                Weight.of(jpa.getChargeWeightKg()), jpa.getRate()));
+        return c;
+    }
+
+    public List<HouseBlAirCharge> toAirChargeDomainList(List<HouseBlAirChargeJpaEntity> jpaList) {
+        return jpaList.stream().map(this::toAirChargeDomain).collect(Collectors.toList());
+    }
+
+    public void applyAirChargeFields(HouseBlAirCharge domain, HouseBlAirChargeJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
+        jpa.setHouseBl(houseBlJpa);
+        jpa.setFreightCode(domain.getFreightCode());
+        jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
+        jpa.setPer(mapOrNull(domain.getPer(), Per::getCode));
+        jpa.setFreightTerm(mapOrNull(domain.getFreightTerm(), FreightTerm::name));
+        jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
+        jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
+        jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        jpa.setRate(domain.getRate());
+    }
+
+    public HouseBlAirChargeJpaEntity toAirChargeJpa(HouseBlAirCharge c, HouseBlJpaEntity houseBl) {
+        HouseBlAirChargeJpaEntity jpa = new HouseBlAirChargeJpaEntity();
+        applyAirChargeFields(c, jpa, houseBl);
         return jpa;
     }
 }
