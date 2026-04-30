@@ -2,7 +2,6 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "house_bl_truck_order")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlTruckOrderJpaEntity extends BaseJpaEntity {
 
     @Id
