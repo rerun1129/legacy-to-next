@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 
 import java.time.LocalDateTime;
 
@@ -41,6 +42,25 @@ public record HouseBlSummaryResponse(
                 mapOrNull(entity.getPkgQty(), Quantity::count),
                 mapOrNull(entity.getPkgUnit(), PackageUnit::name),
                 entity.getCreatedAt()
+        );
+    }
+
+    /** QueryDSL projection 결과로부터 응답 DTO 생성. HouseBlSummary 필드는 이미 raw 타입. */
+    public static HouseBlSummaryResponse from(HouseBlSummary summary) {
+        return new HouseBlSummaryResponse(
+                summary.houseBlId(),
+                summary.hblNo(),
+                summary.jobDiv(),
+                summary.bound(),
+                summary.polCode(),
+                summary.podCode(),
+                summary.etd(),
+                summary.eta(),
+                summary.shipperCode(),
+                summary.consigneeCode(),
+                summary.pkgQty(),
+                summary.pkgUnit(),
+                summary.createdAt()
         );
     }
 }

@@ -6,6 +6,7 @@ import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +35,8 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     @Override
-    public PagedResult<HouseBl> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
-        Page<HouseBlJpaEntity> page = houseBlRepository.findAllByJobDivAndBoundOrderByCreatedAtDesc(jobDiv, bound,
-                org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
-                        pageRequest.getSortBy() != null ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy()) : Sort.unsorted()));
-        return toPagedResult(page);
+    public PagedResult<HouseBlSummary> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
+        return houseBlRepository.findSummariesByJobDivAndBound(jobDiv, bound, pageRequest);
     }
 
     @Override

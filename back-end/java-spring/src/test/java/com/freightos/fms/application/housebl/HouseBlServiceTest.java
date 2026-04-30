@@ -8,6 +8,7 @@ import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
+import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,12 +39,12 @@ class HouseBlServiceTest {
     void getHouseBlsByJobDivAndBound_delegatesToPort() {
         PageRequest pageRequest = PageRequest.of(0, 50);
         PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
-        HouseBl mockEntity = mock(HouseBl.class);
-        PagedResult<HouseBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
+        HouseBlSummary mockSummary = mock(HouseBlSummary.class);
+        PagedResult<HouseBlSummary> portResult = PagedResult.of(List.of(mockSummary), 1L, 1, 0, 50);
         given(houseBlPort.findHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, sortedRequest))
                 .willReturn(portResult);
 
-        PagedResult<HouseBl> result = houseBlService.getHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, pageRequest);
+        PagedResult<HouseBlSummary> result = houseBlService.getHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         then(houseBlPort).should()

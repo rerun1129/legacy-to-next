@@ -10,6 +10,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
+import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class HouseBlService implements HouseBlUseCase {
     private final HouseBlPort houseBlPort;
 
     @Override
-    public PagedResult<HouseBl> getHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
+    public PagedResult<HouseBlSummary> getHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
         return houseBlPort.findHouseBlsByJobDivAndBound(jobDiv, bound, PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
     }
 

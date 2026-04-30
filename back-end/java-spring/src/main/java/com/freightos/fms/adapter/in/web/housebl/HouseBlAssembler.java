@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HouseBlAssembler {
 
-    public PagedResult<HouseBlSummaryResponse> toSummaryPage(PagedResult<HouseBl> source) {
+    public PagedResult<HouseBlSummaryResponse> toSummaryPage(PagedResult<HouseBlSummary> source) {
         return source.map(HouseBlSummaryResponse::from);
     }
 

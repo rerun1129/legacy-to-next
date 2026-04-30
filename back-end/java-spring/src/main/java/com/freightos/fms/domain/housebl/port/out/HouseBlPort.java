@@ -5,12 +5,13 @@ import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 
 import java.util.Optional;
 
 public interface HouseBlPort {
     Optional<HouseBl> findHouseBlById(Long id);
-    PagedResult<HouseBl> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
+    PagedResult<HouseBlSummary> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
     PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest);
     long countHouseBlsByMasterBlId(Long masterBlId);
     HouseBl saveHouseBl(HouseBl houseBl);

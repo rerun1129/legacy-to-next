@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, Long> {
+public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, Long>, HouseBlRepositoryCustom {
 
     Optional<HouseBlJpaEntity> findByHblNo(String hblNo);
 
