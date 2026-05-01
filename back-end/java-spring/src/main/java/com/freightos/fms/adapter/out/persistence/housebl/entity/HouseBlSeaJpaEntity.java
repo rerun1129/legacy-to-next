@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -53,8 +54,9 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "issue_date", length = 8)
     private String issueDate;
 
-    @Column(name = "no_of_bl")
-    private Integer noOfBl;
+    @Column(name = "no_of_bl", length = 10)
+    @Enumerated(EnumType.STRING)
+    private NoOfBl noOfBl;
 
     @Column(name = "issue_place", length = 50)
     private String issuePlace;
@@ -100,7 +102,7 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setPorCode(String v) { this.porCode = v; }
     public void setFinalDestCode(String v) { this.finalDestCode = v; }
     public void setIssueDate(String v) { this.issueDate = v; }
-    public void setNoOfBl(Integer v) { this.noOfBl = v; }
+    public void setNoOfBl(NoOfBl v) { this.noOfBl = v; }
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setDoDate(String v) { this.doDate = v; }
     public void setPayableAt(String v) { this.payableAt = v; }

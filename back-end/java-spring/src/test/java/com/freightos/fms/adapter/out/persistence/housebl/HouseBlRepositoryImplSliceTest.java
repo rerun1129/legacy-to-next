@@ -9,6 +9,7 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
@@ -171,7 +172,7 @@ class HouseBlRepositoryImplSliceTest {
         return jpa;
     }
 
-    private MasterBlJpaEntity persistMasterBl(String jobDiv, Bound bound) {
+    private MasterBlJpaEntity persistMasterBl(MasterBlJobDiv jobDiv, Bound bound) {
         MasterBlJpaEntity master = new MasterBlJpaEntity();
         master.setJobDiv(jobDiv);
         master.setBound(bound);
@@ -245,7 +246,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledSeaSummariesByMasterBlId: PreparedStatement 정확히 1회 (단건 INNER JOIN)")
     void findConsoledSeaSummariesByMasterBlId_emitsExactlySingleStatement() {
-        MasterBlJpaEntity master = persistMasterBl("SEA", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.SEA, Bound.EXP);
         em.flush();
 
         persistHouseBlWithSeaExt(master, Bound.EXP, "HBL-001");
@@ -262,9 +263,9 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledSeaSummariesByMasterBlId: 다른 masterBlId의 HouseBl은 제외된다")
     void findConsoledSeaSummariesByMasterBlId_filtersByMasterBlIdExactly() {
-        MasterBlJpaEntity masterA = persistMasterBl("SEA", Bound.EXP);
+        MasterBlJpaEntity masterA = persistMasterBl(MasterBlJobDiv.SEA, Bound.EXP);
         em.flush();
-        MasterBlJpaEntity masterB = persistMasterBl("SEA", Bound.EXP);
+        MasterBlJpaEntity masterB = persistMasterBl(MasterBlJobDiv.SEA, Bound.EXP);
         em.flush();
 
         persistHouseBlWithSeaExt(masterA, Bound.EXP, "HBL-A-001");
@@ -282,7 +283,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledSeaSummariesByMasterBlId: HouseBlSea 확장 없는 HouseBl은 결과에서 제외된다 (INNER JOIN)")
     void findConsoledSeaSummariesByMasterBlId_excludesHouseBlWithoutSeaExt() {
-        MasterBlJpaEntity master = persistMasterBl("SEA", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.SEA, Bound.EXP);
         em.flush();
 
         persistHouseBlWithSeaExt(master, Bound.EXP, "HBL-WITH-SEA");
@@ -299,7 +300,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledSeaSummariesByMasterBlId: createdAt 내림차순 정렬 (나중에 생성된 것이 먼저 반환된다)")
     void findConsoledSeaSummariesByMasterBlId_sortedByHouseBlCreatedAtDesc() {
-        MasterBlJpaEntity master = persistMasterBl("SEA", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.SEA, Bound.EXP);
         em.flush();
 
         persistHouseBlWithSeaExt(master, Bound.EXP, "HBL-FIRST");
@@ -319,7 +320,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledSeaSummariesByMasterBlId: 15개 필드(houseBlId, hblNo, shipperCode, consigneeCode, docPartnerCode, pkgQty, pkgUnit, grossWeightKg, cbm, etd, eta, vesselName, voyageNo, polCode, podCode)가 올바른 위치에 매핑된다")
     void findConsoledSeaSummariesByMasterBlId_returnsAllFifteenFieldsCorrectly() {
-        MasterBlJpaEntity master = persistMasterBl("SEA", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.SEA, Bound.EXP);
         em.flush();
 
         persistHouseBlWithSeaExt(master, Bound.EXP, "HBL-FULL");
@@ -359,7 +360,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledAirSummariesByMasterBlId: PreparedStatement 정확히 1회 (단건 INNER JOIN)")
     void findConsoledAirSummariesByMasterBlId_emitsExactlySingleStatement() {
-        MasterBlJpaEntity master = persistMasterBl("AIR", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.AIR, Bound.EXP);
         em.flush();
 
         persistHouseBlWithAirExt(master, Bound.EXP, "HBL-AIR-001");
@@ -376,9 +377,9 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledAirSummariesByMasterBlId: 다른 masterBlId의 HouseBl은 제외된다")
     void findConsoledAirSummariesByMasterBlId_filtersByMasterBlIdExactly() {
-        MasterBlJpaEntity masterA = persistMasterBl("AIR", Bound.EXP);
+        MasterBlJpaEntity masterA = persistMasterBl(MasterBlJobDiv.AIR, Bound.EXP);
         em.flush();
-        MasterBlJpaEntity masterB = persistMasterBl("AIR", Bound.EXP);
+        MasterBlJpaEntity masterB = persistMasterBl(MasterBlJobDiv.AIR, Bound.EXP);
         em.flush();
 
         persistHouseBlWithAirExt(masterA, Bound.EXP, "HBL-AIR-A-001");
@@ -396,7 +397,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledAirSummariesByMasterBlId: HouseBlAir 확장 없는 HouseBl은 결과에서 제외된다 (INNER JOIN)")
     void findConsoledAirSummariesByMasterBlId_excludesHouseBlWithoutAirExt() {
-        MasterBlJpaEntity master = persistMasterBl("AIR", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.AIR, Bound.EXP);
         em.flush();
 
         persistHouseBlWithAirExt(master, Bound.EXP, "HBL-WITH-AIR");
@@ -413,7 +414,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledAirSummariesByMasterBlId: createdAt 내림차순 정렬 (나중에 생성된 것이 먼저 반환된다)")
     void findConsoledAirSummariesByMasterBlId_sortedByHouseBlCreatedAtDesc() {
-        MasterBlJpaEntity master = persistMasterBl("AIR", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.AIR, Bound.EXP);
         em.flush();
 
         persistHouseBlWithAirExt(master, Bound.EXP, "HBL-AIR-FIRST");
@@ -433,7 +434,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("findConsoledAirSummariesByMasterBlId: 10개 필드(houseBlId, hblNo, shipperCode, consigneeCode, docPartnerCode, pkgQty, pkgUnit, grossWeightKg, cbm, chargeWeightKg)가 올바르게 매핑된다")
     void findConsoledAirSummariesByMasterBlId_returnsAllTenFieldsCorrectly() {
-        MasterBlJpaEntity master = persistMasterBl("AIR", Bound.EXP);
+        MasterBlJpaEntity master = persistMasterBl(MasterBlJobDiv.AIR, Bound.EXP);
         em.flush();
 
         persistHouseBlWithAirExt(master, Bound.EXP, "HBL-AIR-FULL");

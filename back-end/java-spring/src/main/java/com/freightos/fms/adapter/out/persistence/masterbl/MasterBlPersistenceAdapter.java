@@ -129,8 +129,8 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     }
 
     private MasterBl loadWithExt(MasterBlJpaEntity jpa) {
-        MasterBlJobDiv jobDiv = MasterBlJobDiv.fromCode(jpa.getJobDiv());
-        if (jobDiv == null) throw new IllegalArgumentException("Unknown jobDiv: " + jpa.getJobDiv());
+        MasterBlJobDiv jobDiv = jpa.getJobDiv();
+        if (jobDiv == null) throw new IllegalArgumentException("jobDiv is null for masterBlId: " + jpa.getMasterBlId());
         return switch (jobDiv) {
             case SEA -> masterBlMapper.toSeaDomain(jpa,
                     masterBlSeaRepository.findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null));

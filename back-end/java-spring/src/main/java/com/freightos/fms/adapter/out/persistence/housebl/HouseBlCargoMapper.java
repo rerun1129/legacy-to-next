@@ -4,7 +4,6 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
-import com.freightos.fms.domain.housebl.enums.ContainerType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class HouseBlCargoMapper {
     HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {
         HouseBlContainerJpaEntity jpa = HouseBlContainerJpaEntity.of(jpaParent,
                 mapOrNull(c.getContainerNo(), ContainerNumber::value),
-                mapOrNull(c.getContainerType(), ContainerType::getCode),
+                c.getContainerType(),
                 c.getLengthFeet());
         if (c.getId() != null) jpa.setHouseBlContainerId(c.getId());
         jpa.setSealNo1(mapOrNull(c.getSealNo1(), SealNumber::value));

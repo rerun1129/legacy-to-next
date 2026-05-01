@@ -1,6 +1,11 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.housebl.enums.CargoType;
+import com.freightos.fms.domain.housebl.enums.Fhd;
+import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,7 +41,8 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     private BigDecimal volumeWeightKg;
 
     @Column(name = "rate_class", length = 10)
-    private String rateClass;
+    @Enumerated(EnumType.STRING)
+    private RateClass rateClass;
 
     @Column(name = "currency_code", length = 5)
     private String currencyCode;
@@ -54,7 +60,8 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     private String accountInformation;
 
     @Column(name = "other_term", length = 100)
-    private String otherTerm;
+    @Enumerated(EnumType.STRING)
+    private FreightTerm otherTerm;
 
     @Column(name = "issue_date", length = 8)
     private String issueDate;
@@ -66,14 +73,15 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     private String signature;
 
     @Column(name = "fhd", length = 10)
-    private String fhd;
+    @Enumerated(EnumType.STRING)
+    private Fhd fhd;
 
     @Column(name = "volume_divisor", length = 10)
     private String volumeDivisor;
 
-    // HandlingInformation VO 평탄화 — HandlingInfoCode.code 문자열 저장 (@Enumerated 미사용)
-    @Column(name = "handling_info_code", length = 5)
-    private String handlingInfoCode;
+    @Column(name = "handling_info_code", length = 30)
+    @Enumerated(EnumType.STRING)
+    private HandlingInfoCode handlingInfoCode;
 
     @Column(name = "handling_info_text", length = 500)
     private String handlingInfoText;
@@ -81,28 +89,28 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "origin_of_goods", length = 100)
     private String originOfGoods;
 
-    // CargoType.code 문자열 저장 (@Enumerated 미사용)
-    @Column(name = "cargo_type", length = 5)
-    private String cargoType;
+    @Column(name = "cargo_type", length = 30)
+    @Enumerated(EnumType.STRING)
+    private CargoType cargoType;
 
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
-    public void setRateClass(String v) { this.rateClass = v; }
+    public void setRateClass(RateClass v) { this.rateClass = v; }
     public void setCurrencyCode(String v) { this.currencyCode = v; }
     public void setDeclaredValueCarriage(String v) { this.declaredValueCarriage = v; }
     public void setDeclaredValueCustoms(String v) { this.declaredValueCustoms = v; }
     public void setInsurance(String v) { this.insurance = v; }
     public void setAccountInformation(String v) { this.accountInformation = v; }
-    public void setOtherTerm(String v) { this.otherTerm = v; }
+    public void setOtherTerm(FreightTerm v) { this.otherTerm = v; }
     public void setIssueDate(String v) { this.issueDate = v; }
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setSignature(String v) { this.signature = v; }
-    public void setFhd(String v) { this.fhd = v; }
+    public void setFhd(Fhd v) { this.fhd = v; }
     public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
-    public void setHandlingInfoCode(String v) { this.handlingInfoCode = v; }
+    public void setHandlingInfoCode(HandlingInfoCode v) { this.handlingInfoCode = v; }
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setOriginOfGoods(String v) { this.originOfGoods = v; }
-    public void setCargoType(String v) { this.cargoType = v; }
+    public void setCargoType(CargoType v) { this.cargoType = v; }
 }

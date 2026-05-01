@@ -7,13 +7,8 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
-import com.freightos.fms.domain.common.enums.FlightType;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.RateClass;
-import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
-import com.freightos.fms.domain.housebl.enums.Per;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAirCharge;
@@ -21,7 +16,6 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
 import com.freightos.fms.domain.masterbl.entity.MasterBlScheduleLeg;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -98,10 +92,10 @@ public class MasterBlMapper {
                 AirlineCode.of(jpa.getAirlineCode()),
                 BlNumber.of(jpa.getMawbNo()),
                 Weight.of(jpa.getChargeWeightKg()), Weight.of(jpa.getVolumeWeightKg()),
-                RateClass.fromCode(jpa.getRateClass()), CurrencyCode.of(jpa.getCurrencyCode()),
+                jpa.getRateClass(), CurrencyCode.of(jpa.getCurrencyCode()),
                 jpa.getDeclaredValueCarriage(), jpa.getDeclaredValueCustoms(),
                 jpa.getInsurance(), jpa.getAccountInformation(),
-                SecurityStatus.fromCode(jpa.getSecurityStatus()), FlightType.fromCode(jpa.getFlightType()),
+                jpa.getSecurityStatus(), jpa.getFlightType(),
                 BlDate.of(jpa.getIssueDate()), PortCode.of(jpa.getIssuePlace()), jpa.getSignature()));
     }
 
@@ -112,7 +106,7 @@ public class MasterBlMapper {
         jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
         jpa.setMasterRefNo(mapOrNull(domain.getMasterRefNo(), BlNumber::value));
         jpa.setBound(domain.getBound());
-        jpa.setJobDiv(mapOrNull(domain.getJobDiv(), MasterBlJobDiv::name));
+        jpa.setJobDiv(domain.getJobDiv());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
         jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
         jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
@@ -154,14 +148,14 @@ public class MasterBlMapper {
         jpa.setMawbNo(mapOrNull(domain.getMawbNo(), BlNumber::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
         jpa.setVolumeWeightKg(mapOrNull(domain.getVolumeWeightKg(), Weight::kg));
-        jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
+        jpa.setRateClass(domain.getRateClass());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
         jpa.setDeclaredValueCarriage(domain.getDeclaredValueCarriage());
         jpa.setDeclaredValueCustoms(domain.getDeclaredValueCustoms());
         jpa.setInsurance(domain.getInsurance());
         jpa.setAccountInformation(domain.getAccountInformation());
-        jpa.setSecurityStatus(mapOrNull(domain.getSecurityStatus(), SecurityStatus::name));
-        jpa.setFlightType(mapOrNull(domain.getFlightType(), FlightType::name));
+        jpa.setSecurityStatus(domain.getSecurityStatus());
+        jpa.setFlightType(domain.getFlightType());
         jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
         jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
         jpa.setSignature(domain.getSignature());
@@ -267,8 +261,8 @@ public class MasterBlMapper {
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new MasterBlAirCharge.Details(
                 jpa.getFreightCode(), CurrencyCode.of(jpa.getCurrencyCode()),
-                Per.fromCode(jpa.getPer()), FreightTerm.fromCode(jpa.getFreightTerm()),
-                Weight.of(jpa.getGrossWeightKg()), RateClass.fromCode(jpa.getRateClass()),
+                jpa.getPer(), jpa.getFreightTerm(),
+                Weight.of(jpa.getGrossWeightKg()), jpa.getRateClass(),
                 Weight.of(jpa.getChargeWeightKg()), jpa.getRate()));
         return c;
     }
@@ -282,10 +276,10 @@ public class MasterBlMapper {
         jpa.setMasterBl(masterBlJpa);
         jpa.setFreightCode(domain.getFreightCode());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
-        jpa.setPer(mapOrNull(domain.getPer(), Per::getCode));
-        jpa.setFreightTerm(mapOrNull(domain.getFreightTerm(), FreightTerm::name));
+        jpa.setPer(domain.getPer());
+        jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
-        jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
+        jpa.setRateClass(domain.getRateClass());
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
         jpa.setRate(domain.getRate());
     }

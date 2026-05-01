@@ -1,6 +1,9 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.common.enums.FlightType;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.enums.SecurityStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +42,8 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     private BigDecimal volumeWeightKg;
 
     @Column(name = "rate_class", length = 10)
-    private String rateClass;
+    @Enumerated(EnumType.STRING)
+    private RateClass rateClass;
 
     @Column(name = "currency_code", length = 5)
     private String currencyCode;
@@ -57,10 +61,12 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     private String accountInformation;
 
     @Column(name = "security_status", length = 3)
-    private String securityStatus;
+    @Enumerated(EnumType.STRING)
+    private SecurityStatus securityStatus;
 
-    @Column(name = "flight_type", length = 1)
-    private String flightType;
+    @Column(name = "flight_type", length = 30)
+    @Enumerated(EnumType.STRING)
+    private FlightType flightType;
 
     @Column(name = "issue_date", length = 8)
     private String issueDate;
@@ -79,14 +85,14 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setMawbNo(String v) { this.mawbNo = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
-    public void setRateClass(String v) { this.rateClass = v; }
+    public void setRateClass(RateClass v) { this.rateClass = v; }
     public void setCurrencyCode(String v) { this.currencyCode = v; }
     public void setDeclaredValueCarriage(String v) { this.declaredValueCarriage = v; }
     public void setDeclaredValueCustoms(String v) { this.declaredValueCustoms = v; }
     public void setInsurance(String v) { this.insurance = v; }
     public void setAccountInformation(String v) { this.accountInformation = v; }
-    public void setSecurityStatus(String v) { this.securityStatus = v; }
-    public void setFlightType(String v) { this.flightType = v; }
+    public void setSecurityStatus(SecurityStatus v) { this.securityStatus = v; }
+    public void setFlightType(FlightType v) { this.flightType = v; }
     public void setIssueDate(String v) { this.issueDate = v; }
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setSignature(String v) { this.signature = v; }

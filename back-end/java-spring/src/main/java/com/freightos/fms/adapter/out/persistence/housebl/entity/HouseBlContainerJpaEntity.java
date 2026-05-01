@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.housebl.enums.ContainerType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,7 +32,8 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     private String containerNo;
 
     @Column(name = "container_type", length = 10)
-    private String containerType;
+    @Enumerated(EnumType.STRING)
+    private ContainerType containerType;
 
     @Column(name = "length_feet", nullable = false)
     private Integer lengthFeet;
@@ -67,7 +69,7 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     private int seq = 1;
 
     public static HouseBlContainerJpaEntity of(HouseBlJpaEntity houseBl, String containerNo,
-                                               String containerType, int lengthFeet) {
+                                               ContainerType containerType, int lengthFeet) {
         HouseBlContainerJpaEntity c = new HouseBlContainerJpaEntity();
         c.houseBl       = houseBl;
         c.containerNo   = containerNo;
@@ -79,7 +81,7 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     public void setHouseBlContainerId(Long v) { this.houseBlContainerId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setContainerNo(String v) { this.containerNo = v; }
-    public void setContainerType(String v) { this.containerType = v; }
+    public void setContainerType(ContainerType v) { this.containerType = v; }
     public void setLengthFeet(Integer v) { this.lengthFeet = v; }
     public void setSealNo1(String v) { this.sealNo1 = v; }
     public void setSealNo2(String v) { this.sealNo2 = v; }

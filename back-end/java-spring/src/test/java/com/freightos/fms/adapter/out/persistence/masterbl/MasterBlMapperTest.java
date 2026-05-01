@@ -8,6 +8,7 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSchedul
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
@@ -44,7 +45,7 @@ class MasterBlMapperTest {
 
         mapper.applyCommonFields(domain, jpa);
 
-        assertThat(jpa.getJobDiv()).isEqualTo("SEA");
+        assertThat(jpa.getJobDiv()).isEqualTo(MasterBlJobDiv.SEA);
         assertThat(jpa.getBound()).isEqualTo(Bound.EXP);
     }
 
@@ -56,7 +57,7 @@ class MasterBlMapperTest {
 
         mapper.applyCommonFields(domain, jpa);
 
-        assertThat(jpa.getJobDiv()).isEqualTo("AIR");
+        assertThat(jpa.getJobDiv()).isEqualTo(MasterBlJobDiv.AIR);
         assertThat(jpa.getBound()).isEqualTo(Bound.IMP);
     }
 
@@ -103,7 +104,7 @@ class MasterBlMapperTest {
     @DisplayName("toDomain: jobDiv=SEA → MasterBlSea 반환, 공통 필드가 복사된다")
     void toDomain_seaJobDiv_producesSeaDomain() {
         MasterBlJpaEntity parentJpa = new MasterBlJpaEntity();
-        parentJpa.setJobDiv("SEA");
+        parentJpa.setJobDiv(MasterBlJobDiv.SEA);
         parentJpa.setBound(Bound.EXP);
         parentJpa.setMblNo("MBLNO-SEA-001");
         parentJpa.setShipperCode("SHIPPER-SEA");
@@ -129,7 +130,7 @@ class MasterBlMapperTest {
     @DisplayName("toDomain: jobDiv=AIR + seaExt null → MasterBlAir 반환, 항공 필드 복사된다")
     void toDomain_airJobDiv_producesAirDomain() {
         MasterBlJpaEntity parentJpa = new MasterBlJpaEntity();
-        parentJpa.setJobDiv("AIR");
+        parentJpa.setJobDiv(MasterBlJobDiv.AIR);
         parentJpa.setBound(Bound.EXP);
         parentJpa.setMblNo("MAWB-001");
         parentJpa.setShipperCode("SHIPPER01");

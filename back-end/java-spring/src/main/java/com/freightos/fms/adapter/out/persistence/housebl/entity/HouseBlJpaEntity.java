@@ -3,8 +3,10 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -124,10 +126,12 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     private Long masterBlId;
 
     @Column(name = "incoterms", length = 10)
-    private String incoterms;
+    @Enumerated(EnumType.STRING)
+    private Incoterms incoterms;
 
-    @Column(name = "sales_class", length = 1)
-    private String salesClass;
+    @Column(name = "sales_class", length = 30)
+    @Enumerated(EnumType.STRING)
+    private SalesClass salesClass;
 
     @Column(name = "main_item_name", length = 100)
     private String mainItemName;
@@ -201,8 +205,8 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }
     public void setGrossWeightKg(BigDecimal grossWeightKg) { this.grossWeightKg = grossWeightKg; }
     public void setCbm(BigDecimal cbm) { this.cbm = cbm; }
-    public void setIncoterms(String incoterms) { this.incoterms = incoterms; }
-    public void setSalesClass(String salesClass) { this.salesClass = salesClass; }
+    public void setIncoterms(Incoterms incoterms) { this.incoterms = incoterms; }
+    public void setSalesClass(SalesClass salesClass) { this.salesClass = salesClass; }
     public void setMainItemName(String mainItemName) { this.mainItemName = mainItemName; }
     public void setHsCode(String hsCode) { this.hsCode = hsCode; }
     public void setMblNo(String mblNo) { this.mblNo = mblNo; }

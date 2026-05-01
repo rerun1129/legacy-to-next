@@ -1,13 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
-import com.freightos.fms.domain.housebl.enums.ContainerType;
-import com.freightos.fms.domain.housebl.enums.Per;
-import com.freightos.fms.domain.housebl.enums.TruckType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -95,9 +90,9 @@ public class HouseBlDocMapper {
         o.updateDetails(new HouseBlTruckOrder.Details(
                 jpa.getTruckOrderNo(), jpa.getPkgQty(), jpa.getPkgUnit(),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm()),
-                jpa.getTruckNo(), TruckType.fromCode(jpa.getTruckType()),
+                jpa.getTruckNo(), jpa.getTruckType(),
                 jpa.getDriver(), jpa.getMobileNo(),
-                ContainerNumber.of(jpa.getContainerNo()), ContainerType.fromCode(jpa.getContainerType()),
+                ContainerNumber.of(jpa.getContainerNo()), jpa.getContainerType(),
                 SealNumber.of(jpa.getSealNo1()), SealNumber.of(jpa.getSealNo2()), SealNumber.of(jpa.getSealNo3())));
         return o;
     }
@@ -114,11 +109,11 @@ public class HouseBlDocMapper {
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
         jpa.setTruckNo(domain.getTruckNo());
-        jpa.setTruckType(mapOrNull(domain.getTruckType(), TruckType::getCode));
+        jpa.setTruckType(domain.getTruckType());
         jpa.setDriver(domain.getDriver());
         jpa.setMobileNo(domain.getMobileNo());
         jpa.setContainerNo(mapOrNull(domain.getContainerNo(), ContainerNumber::value));
-        jpa.setContainerType(mapOrNull(domain.getContainerType(), ContainerType::getCode));
+        jpa.setContainerType(domain.getContainerType());
         jpa.setSealNo1(mapOrNull(domain.getSealNo1(), SealNumber::value));
         jpa.setSealNo2(mapOrNull(domain.getSealNo2(), SealNumber::value));
         jpa.setSealNo3(mapOrNull(domain.getSealNo3(), SealNumber::value));
@@ -138,8 +133,8 @@ public class HouseBlDocMapper {
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new HouseBlAirCharge.Details(
                 jpa.getFreightCode(), CurrencyCode.of(jpa.getCurrencyCode()),
-                Per.fromCode(jpa.getPer()), FreightTerm.fromCode(jpa.getFreightTerm()),
-                Weight.of(jpa.getGrossWeightKg()), RateClass.fromCode(jpa.getRateClass()),
+                jpa.getPer(), jpa.getFreightTerm(),
+                Weight.of(jpa.getGrossWeightKg()), jpa.getRateClass(),
                 Weight.of(jpa.getChargeWeightKg()), jpa.getRate()));
         return c;
     }
@@ -152,10 +147,10 @@ public class HouseBlDocMapper {
         jpa.setHouseBl(houseBlJpa);
         jpa.setFreightCode(domain.getFreightCode());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
-        jpa.setPer(mapOrNull(domain.getPer(), Per::getCode));
-        jpa.setFreightTerm(mapOrNull(domain.getFreightTerm(), FreightTerm::name));
+        jpa.setPer(domain.getPer());
+        jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
-        jpa.setRateClass(mapOrNull(domain.getRateClass(), RateClass::name));
+        jpa.setRateClass(domain.getRateClass());
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
         jpa.setRate(domain.getRate());
     }
