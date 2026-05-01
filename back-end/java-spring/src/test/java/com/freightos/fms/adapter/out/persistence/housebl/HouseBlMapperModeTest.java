@@ -213,7 +213,6 @@ class HouseBlMapperModeTest {
     private HouseBlLicenseJpaEntity licenseJpa(HouseBlJpaEntity parent) {
         HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
         jpa.setHouseBl(parent);
-        jpa.setSeq(1);
         return jpa;
     }
 

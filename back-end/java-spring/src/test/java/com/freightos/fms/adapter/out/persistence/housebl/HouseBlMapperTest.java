@@ -328,7 +328,6 @@ class HouseBlMapperTest {
         licJpa.setPartialShipment(true);
         licJpa.setPartialShipmentSeq(2);
         licJpa.setHsnNo("1234.56");
-        licJpa.setSeq(1);
 
         HouseBlLicense domain = cargoMapper.toLicenseDomain(licJpa);
 
@@ -336,7 +335,6 @@ class HouseBlMapperTest {
         assertThat(domain.getPkgQty()).isEqualTo(10);
         assertThat(domain.isPartialShipment()).isTrue();
         assertThat(domain.getPartialShipmentSeq()).isEqualTo(2);
-        assertThat(domain.getSeq()).isEqualTo(1);
     }
 
     @Test
@@ -345,7 +343,7 @@ class HouseBlMapperTest {
         HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
         houseBlJpa.setHouseBlId(1L);
 
-        HouseBlLicense domain = HouseBlLicense.create(1L, 1);
+        HouseBlLicense domain = HouseBlLicense.create(1L);
         domain.updateDetails("LC-001", 10, "CTN", BigDecimal.valueOf(100.0),
                 null, null, null, true, 2, "1234.56");
         HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
@@ -359,7 +357,6 @@ class HouseBlMapperTest {
         assertThat(jpa.isPartialShipment()).isTrue();
         assertThat(jpa.getPartialShipmentSeq()).isEqualTo(2);
         assertThat(jpa.getHsnNo()).isEqualTo("1234.56");
-        assertThat(jpa.getSeq()).isEqualTo(1);
         assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }
 
@@ -371,13 +368,10 @@ class HouseBlMapperTest {
 
         HouseBlLicenseJpaEntity lic1 = new HouseBlLicenseJpaEntity();
         lic1.setHouseBl(houseBlJpa);
-        lic1.setSeq(1);
         HouseBlLicenseJpaEntity lic2 = new HouseBlLicenseJpaEntity();
         lic2.setHouseBl(houseBlJpa);
-        lic2.setSeq(2);
         HouseBlLicenseJpaEntity lic3 = new HouseBlLicenseJpaEntity();
         lic3.setHouseBl(houseBlJpa);
-        lic3.setSeq(3);
 
         List<HouseBlLicense> result = cargoMapper.toLicenseDomainList(List.of(lic1, lic2, lic3));
 

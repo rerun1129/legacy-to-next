@@ -56,9 +56,6 @@ public class HouseBlLicenseJpaEntity extends BaseJpaEntity {
     @Column(name = "hsn_no", length = 30)
     private String hsnNo;
 
-    @Column(name = "seq", nullable = false)
-    private int seq;
-
     public void setHouseBlLicenseId(Long v) { this.houseBlLicenseId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLicenseNo(String v) { this.licenseNo = v; }
@@ -71,5 +68,4 @@ public class HouseBlLicenseJpaEntity extends BaseJpaEntity {
     public void setPartialShipment(boolean v) { this.partialShipment = v; }
     public void setPartialShipmentSeq(Integer v) { this.partialShipmentSeq = v; }
     public void setHsnNo(String v) { this.hsnNo = v; }
-    public void setSeq(int v) { this.seq = v; }
 }

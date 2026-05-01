@@ -27,12 +27,10 @@ public class HouseBlLicense extends BaseEntity {
     private boolean partialShipment;
     private Integer partialShipmentSeq;
     private String hsnNo;
-    private int seq;
 
-    public static HouseBlLicense create(Long houseBlId, int seq) {
+    public static HouseBlLicense create(Long houseBlId) {
         HouseBlLicense l = new HouseBlLicense();
         l.houseBlId = houseBlId;
-        l.seq       = seq;
         return l;
     }
 

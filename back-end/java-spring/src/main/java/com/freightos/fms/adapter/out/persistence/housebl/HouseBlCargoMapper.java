@@ -72,7 +72,7 @@ public class HouseBlCargoMapper {
 
     public HouseBlLicense toLicenseDomain(HouseBlLicenseJpaEntity jpa) {
         HouseBlLicense domain = HouseBlLicense.create(
-                jpa.getHouseBl().getHouseBlId(), jpa.getSeq());
+                jpa.getHouseBl().getHouseBlId());
         domain.assignIdentity(jpa.getHouseBlLicenseId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateDetails(jpa.getLicenseNo(), jpa.getPkgQty(), jpa.getPkgUnit(),
@@ -98,7 +98,6 @@ public class HouseBlCargoMapper {
         jpa.setPartialShipment(domain.isPartialShipment());
         jpa.setPartialShipmentSeq(domain.getPartialShipmentSeq());
         jpa.setHsnNo(domain.getHsnNo());
-        jpa.setSeq(domain.getSeq());
     }
 
     public HouseBlLicenseJpaEntity toLicenseJpa(HouseBlLicense l, HouseBlJpaEntity houseBl) {
