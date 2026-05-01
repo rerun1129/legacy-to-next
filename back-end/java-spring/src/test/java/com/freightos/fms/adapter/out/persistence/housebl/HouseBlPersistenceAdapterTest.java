@@ -1,7 +1,10 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.SortDirection;
+import com.freightos.fms.domain.common.model.PageRequest;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
@@ -13,12 +16,16 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -284,5 +291,116 @@ class HouseBlPersistenceAdapterTest {
 
         assertThat(result).isSameAs(expected);
         then(houseBlRepository).should().findConsoledAirSummariesByMasterBlId(masterBlId);
+    }
+
+    // ── saveHouseBl(TRUCK) — syncTruckOrders 호출 검증 ────────────────
+
+    @Test
+    @DisplayName("saveHouseBl(TRUCK): syncDims→syncTruckOrders 호출, SEA 전용 sync는 미호출")
+    void saveHouseBl_truck_callsSyncTruckOrders() {
+        HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
+        HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
+        savedJpa.setJobDiv(JobDiv.TRUCK);
+        given(houseBlRepository.save(any())).willReturn(savedJpa);
+        given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
+
+        adapter.saveHouseBl(truck);
+
+        then(savedJpa).should().syncDims(any());
+        then(savedJpa).should().syncTruckOrders(any());
+        // SEA 전용 sync는 호출하지 않음
+        then(savedJpa).should(never()).syncContainers(any());
+        then(savedJpa).should(never()).syncScheduleLegs(any());
+        then(savedJpa).should(never()).syncLicenses(any());
+    }
+
+    // ── deleteHouseBl — ext 삭제 후 본체 삭제 순서 ────────────────────
+
+    @Test
+    @DisplayName("deleteHouseBl: sea/air/truck/nonBl ext 삭제 후 houseBlRepository.deleteById 호출 (InOrder)")
+    void deleteHouseBl_deletesExtAndChildrenThenBase() {
+        HouseBlSea sea = HouseBlSea.create(Bound.EXP);
+        sea.assignIdentity(50L, null, null, null, null);
+        given(houseBlSeaRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
+        given(houseBlAirRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
+        given(houseBlTruckRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
+        given(houseBlNonBlRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
+
+        adapter.deleteHouseBl(sea);
+
+        InOrder order = inOrder(houseBlSeaRepository, houseBlAirRepository,
+                houseBlTruckRepository, houseBlNonBlRepository, houseBlRepository);
+        order.verify(houseBlSeaRepository).findByHouseBlHouseBlId(50L);
+        order.verify(houseBlAirRepository).findByHouseBlHouseBlId(50L);
+        order.verify(houseBlTruckRepository).findByHouseBlHouseBlId(50L);
+        order.verify(houseBlNonBlRepository).findByHouseBlHouseBlId(50L);
+        order.verify(houseBlRepository).deleteById(50L);
+    }
+
+    // ── findHouseBlsBySchedule — sortBy null ──────────────────────────
+
+    @Test
+    @DisplayName("findHouseBlsBySchedule: sortBy == null → Sort.unsorted() 기반 repository 호출")
+    void findHouseBlsBySchedule_sortByNull_usesUnsortedSort() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        Page<HouseBlJpaEntity> emptyPage = new PageImpl<>(List.of());
+        given(houseBlRepository.findBySchedule(
+                eq(JobDiv.AIR), eq(Bound.EXP), eq("20250101"), eq("20250131"),
+                any(Pageable.class))).willReturn(emptyPage);
+
+        adapter.findHouseBlsBySchedule(JobDiv.AIR, Bound.EXP, "20250101", "20250131", pageRequest);
+
+        then(houseBlRepository).should().findBySchedule(
+                eq(JobDiv.AIR), eq(Bound.EXP), eq("20250101"), eq("20250131"),
+                argThat(pageable -> pageable.getSort().isUnsorted())
+        );
+    }
+
+    // ── findHouseBlsBySchedule — sortBy 있을 때 ───────────────────────
+
+    @Test
+    @DisplayName("findHouseBlsBySchedule: sortBy != null → 지정 Sort로 repository 호출")
+    void findHouseBlsBySchedule_sortByNonNull_usesSort() {
+        PageRequest pageRequest = PageRequest.of(0, 10, "etd", SortDirection.ASC);
+        Page<HouseBlJpaEntity> emptyPage = new PageImpl<>(List.of());
+        given(houseBlRepository.findBySchedule(
+                eq(JobDiv.SEA), eq(Bound.IMP), eq("20250201"), eq("20250228"),
+                any(Pageable.class))).willReturn(emptyPage);
+
+        adapter.findHouseBlsBySchedule(JobDiv.SEA, Bound.IMP, "20250201", "20250228", pageRequest);
+
+        then(houseBlRepository).should().findBySchedule(
+                eq(JobDiv.SEA), eq(Bound.IMP), eq("20250201"), eq("20250228"),
+                argThat(pageable ->
+                        pageable.getSort().isSorted()
+                                && pageable.getSort().getOrderFor("etd") != null)
+        );
+    }
+
+    // ── saveHouseBl — 기존 ID 없을 때 ResourceNotFoundException ────────
+
+    @Test
+    @DisplayName("saveHouseBl: domain.getId() != null + repository empty → ResourceNotFoundException")
+    void saveHouseBl_withExistingId_whenNotFound_throwsResourceNotFound() {
+        HouseBlSea sea = HouseBlSea.create(Bound.EXP);
+        sea.assignIdentity(777L, null, null, null, null);
+        given(houseBlRepository.findById(777L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> adapter.saveHouseBl(sea))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // ── countHouseBlsByMasterBlId 위임 ─────────────────────────────────
+
+    @Test
+    @DisplayName("countHouseBlsByMasterBlId: repository.countByMasterBlId에 위임하고 결과를 그대로 반환")
+    void countHouseBlsByMasterBlId_delegatesToRepository() {
+        given(houseBlRepository.countByMasterBlId(42L)).willReturn(3L);
+
+        long result = adapter.countHouseBlsByMasterBlId(42L);
+
+        assertThat(result).isEqualTo(3L);
+        then(houseBlRepository).should().countByMasterBlId(42L);
     }
 }
