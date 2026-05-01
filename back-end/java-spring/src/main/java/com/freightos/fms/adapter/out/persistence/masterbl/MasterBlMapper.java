@@ -80,6 +80,8 @@ public class MasterBlMapper {
                 TeamCode.of(jpa.getTeamCode()));
         domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), WeightUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
+        domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
+        domain.updateTradeInfo(jpa.getMainItemName(), jpa.getHsCode());
     }
 
     private void copySeaFields(MasterBlSeaJpaEntity jpa, MasterBlSea domain) {
@@ -87,6 +89,8 @@ public class MasterBlMapper {
                 VesselVoyage.of(null, jpa.getVesselName(), jpa.getVoyageNo()),
                 BlDate.of(jpa.getOnboardDate()), BlNumber.of(jpa.getLineBkgNo()),
                 BlDate.of(jpa.getIssueDate()));
+        domain.updateVesselNationality(jpa.getVesselNationality());
+        domain.updateWeightUnit(jpa.getWeightUnit());
     }
 
     private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
@@ -126,6 +130,9 @@ public class MasterBlMapper {
         jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), WeightUnit::name));
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
+        jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
+        jpa.setMainItemName(domain.getMainItemName());
+        jpa.setHsCode(domain.getHsCode());
     }
 
     public void applySeaFields(MasterBlSea domain, MasterBlSeaJpaEntity jpa) {
@@ -138,6 +145,8 @@ public class MasterBlMapper {
         jpa.setOnboardDate(mapOrNull(domain.getOnboardDate(), BlDate::asString));
         jpa.setLineBkgNo(mapOrNull(domain.getLineBkgNo(), BlNumber::value));
         jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
+        jpa.setVesselNationality(domain.getVesselNationality());
+        jpa.setWeightUnit(domain.getWeightUnit());
     }
 
     public void applyAirFields(MasterBlAir domain, MasterBlAirJpaEntity jpa) {
