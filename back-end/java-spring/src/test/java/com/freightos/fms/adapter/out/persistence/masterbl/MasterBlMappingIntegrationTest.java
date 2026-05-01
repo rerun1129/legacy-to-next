@@ -1,0 +1,256 @@
+package com.freightos.fms.adapter.out.persistence.masterbl;
+
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
+import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.freightos.fms.application.config.QueryDslConfig;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Master B/L 단방향 @OneToMany 매핑의 CRUD·라운드트립·orphanRemoval·cascade 동작을 검증한다.
+ * @DataJpaTest 슬라이스 + H2 in-memory(application-test.yml).
+ */
+@DataJpaTest
+@ActiveProfiles("test")
+@Import(QueryDslConfig.class)
+class MasterBlMappingIntegrationTest {
+
+    @Autowired
+    private EntityManager em;
+
+    // ── 픽스처 헬퍼 ──────────────────────────────────────────────────────
+
+    private MasterBlJpaEntity newParent(MasterBlJobDiv jobDiv) {
+        MasterBlJpaEntity p = new MasterBlJpaEntity();
+        p.setJobDiv(jobDiv);
+        p.setBound(Bound.EXP);
+        return p;
+    }
+
+    private MasterBlDimJpaEntity dim() {
+        MasterBlDimJpaEntity d = new MasterBlDimJpaEntity();
+        d.setQuantity(1);
+        return d;
+    }
+
+    private MasterBlScheduleLegJpaEntity scheduleLeg(String toCode) {
+        MasterBlScheduleLegJpaEntity leg = new MasterBlScheduleLegJpaEntity();
+        leg.setToCode(toCode);
+        leg.setOnBoardDt("20260101");
+        leg.setArrivalDt("20260102");
+        return leg;
+    }
+
+    private MasterBlAirChargeJpaEntity airCharge(String freightCode) {
+        MasterBlAirChargeJpaEntity a = new MasterBlAirChargeJpaEntity();
+        a.setFreightCode(freightCode);
+        return a;
+    }
+
+    private long countChildren(String table, Long parentId) {
+        return em.createQuery(
+                        "SELECT COUNT(c) FROM " + table + " c WHERE c.masterBlId = :pid", Long.class)
+                .setParameter("pid", parentId)
+                .getSingleResult();
+    }
+
+    // ── 테스트 ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Sea 모드 save→load: dims/scheduleLegs 채움 라운드트립")
+    void seaMode_fullRoundTrip_dimsAndScheduleLegsRestored() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
+        parent.syncDims(List.of(dim()));
+        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+
+        assertThat(loaded).isNotNull();
+        assertThat(loaded.getDims()).hasSize(1);
+        assertThat(loaded.getScheduleLegs()).hasSize(1);
+        assertThat(loaded.getAirCharges()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Air 모드 save→load: dims/scheduleLegs/airCharges 채움 라운드트립")
+    void airMode_fullRoundTrip_allCollectionsRestored() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        parent.syncDims(List.of(dim()));
+        parent.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
+        parent.syncAirCharges(List.of(airCharge("FUEL")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+
+        assertThat(loaded.getDims()).hasSize(1);
+        assertThat(loaded.getScheduleLegs()).hasSize(1);
+        assertThat(loaded.getAirCharges()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, 모든 컬렉션이 빈 List 반환")
+    void emptyCollections_noPeNpeAndEmptyListReturned() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+
+        assertThat(loaded.getDims()).isNotNull().isEmpty();
+        assertThat(loaded.getScheduleLegs()).isNotNull().isEmpty();
+        assertThat(loaded.getAirCharges()).isNotNull().isEmpty();
+    }
+
+    @Test
+    @DisplayName("자식 일부 필드 수정: dims[0].setQuantity → flush → 재조회 시 변경 반영")
+    void partialChildUpdate_dimQuantity_persisted() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        MasterBlDimJpaEntity firstDim = dim();
+        MasterBlDimJpaEntity secondDim = dim();
+        parent.syncDims(List.of(firstDim, secondDim));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        // 첫 번째 dim을 업데이트 — ID로 구분
+        Long firstDimId = loaded.getDims().get(0).getMasterBlDimId();
+        loaded.getDims().get(0).setQuantity(99);
+
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        MasterBlDimJpaEntity updatedDim = reloaded.getDims().stream()
+                .filter(d -> d.getMasterBlDimId().equals(firstDimId))
+                .findFirst().orElseThrow();
+        MasterBlDimJpaEntity otherDim = reloaded.getDims().stream()
+                .filter(d -> !d.getMasterBlDimId().equals(firstDimId))
+                .findFirst().orElseThrow();
+
+        assertThat(updatedDim.getQuantity()).isEqualTo(99);
+        assertThat(otherDim.getQuantity()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("syncDims: 기존 2건 → 신규 3건 교체. flush 후 자식 row count == 3, 기존 ID 모두 사라짐")
+    void syncDims_replaceTwoWithThree_orphanRemovedAndNewRowsInserted() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        parent.syncDims(List.of(dim(), dim()));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        List<Long> oldIds = loaded.getDims().stream()
+                .map(MasterBlDimJpaEntity::getMasterBlDimId)
+                .toList();
+
+        loaded.syncDims(List.of(dim(), dim(), dim()));
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        List<Long> newIds = reloaded.getDims().stream()
+                .map(MasterBlDimJpaEntity::getMasterBlDimId)
+                .toList();
+
+        assertThat(reloaded.getDims()).hasSize(3);
+        assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
+    }
+
+    @Test
+    @DisplayName("syncScheduleLegs: 기존 1건 → 신규 2건 교체. orphanRemoval 동작 확인")
+    void syncScheduleLegs_replaceOneWithTwo_orphanRemovedAndNewRowsInserted() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        List<Long> oldIds = loaded.getScheduleLegs().stream()
+                .map(MasterBlScheduleLegJpaEntity::getMasterBlScheduleLegId)
+                .toList();
+
+        loaded.syncScheduleLegs(List.of(scheduleLeg("KRPUS"), scheduleLeg("JPOSA")));
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        List<Long> newIds = reloaded.getScheduleLegs().stream()
+                .map(MasterBlScheduleLegJpaEntity::getMasterBlScheduleLegId)
+                .toList();
+
+        assertThat(reloaded.getScheduleLegs()).hasSize(2);
+        assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
+    }
+
+    @Test
+    @DisplayName("syncAirCharges: 기존 2건 → 빈 리스트로 전체 삭제")
+    void syncAirCharges_emptyList_allChildrenDeleted() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        parent.syncAirCharges(List.of(airCharge("FUEL"), airCharge("AWC")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        loaded.syncAirCharges(List.of());
+        em.flush();
+        em.clear();
+
+        long rowCount = countChildren("MasterBlAirChargeJpaEntity", parent.getMasterBlId());
+        assertThat(rowCount).isZero();
+    }
+
+    @Test
+    @DisplayName("부모 delete → dims/scheduleLegs/airCharges 자식 row count 모두 0 (cascade)")
+    void parentDelete_cascadeDeleteAllChildren() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        parent.syncDims(List.of(dim()));
+        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        parent.syncAirCharges(List.of(airCharge("FUEL")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        Long parentId = parent.getMasterBlId();
+        MasterBlJpaEntity toDelete = em.find(MasterBlJpaEntity.class, parentId);
+        em.remove(toDelete);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlJpaEntity.class, parentId)).isNull();
+        assertThat(countChildren("MasterBlDimJpaEntity", parentId)).isZero();
+        assertThat(countChildren("MasterBlScheduleLegJpaEntity", parentId)).isZero();
+        assertThat(countChildren("MasterBlAirChargeJpaEntity", parentId)).isZero();
+    }
+}
