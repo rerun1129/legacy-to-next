@@ -53,8 +53,9 @@ public abstract class MasterBl extends BaseEntity {
     private WeightUnit pkgUnit;
     private Weight grossWeightKg;
     private Volume cbm;
-    //TODO : HSCode를 추가하는 필드가 없음
-    //TODO : Main Item Code를 추가하는 필드가 없음
+    private String mainItemName;
+    private String hsCode;
+    private CustomerCode settlePartnerCode;
 
     protected MasterBl(Bound bound) {
         this.bound = bound;
@@ -98,6 +99,15 @@ public abstract class MasterBl extends BaseEntity {
         this.pkgUnit       = cargo.packageUnit();
         this.grossWeightKg = cargo.grossWeight();
         this.cbm           = cargo.volume();
+    }
+
+    public void updateTradeInfo(String mainItemName, String hsCode) {
+        this.mainItemName = mainItemName;
+        this.hsCode       = hsCode;
+    }
+
+    public void assignSettlePartner(CustomerCode settlePartnerCode) {
+        this.settlePartnerCode = settlePartnerCode;
     }
 
     // ── AirCharge (AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상.

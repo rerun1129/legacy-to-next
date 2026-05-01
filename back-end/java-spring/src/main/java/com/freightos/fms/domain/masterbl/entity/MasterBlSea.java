@@ -2,6 +2,7 @@ package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import lombok.AccessLevel;
@@ -25,6 +26,8 @@ public class MasterBlSea extends MasterBl {
 
     // 수출 전용
     private BlDate issueDate;
+    private WeightUnit weightUnit;
+    private String vesselNationality;
 
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
@@ -44,5 +47,13 @@ public class MasterBlSea extends MasterBl {
         this.onboardDate  = onboardDate;
         this.lineBkgNo    = lineBkgNo;
         this.issueDate    = issueDate;
+    }
+
+    public void updateVesselNationality(String vesselNationality) {
+        this.vesselNationality = vesselNationality;
+    }
+
+    public void updateWeightUnit(WeightUnit weightUnit) {
+        this.weightUnit = weightUnit;
     }
 }
