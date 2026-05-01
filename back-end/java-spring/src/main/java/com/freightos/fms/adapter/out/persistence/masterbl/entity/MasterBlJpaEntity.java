@@ -93,6 +93,15 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "cbm", columnDefinition = "NUMERIC(10,3)")
     private BigDecimal cbm;
 
+    @Column(name = "hs_code", length = 12)
+    private String hsCode;
+
+    @Column(name = "main_item_name", length = 100)
+    private String mainItemName;
+
+    @Column(name = "settle_partner_code", length = 20)
+    private String settlePartnerCode;
+
     public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setMblNo(String v) { this.mblNo = v; }
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
@@ -115,6 +124,9 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setPkgUnit(String v) { this.pkgUnit = v; }
     public void setGrossWeightKg(BigDecimal v) { this.grossWeightKg = v; }
     public void setCbm(BigDecimal v) { this.cbm = v; }
+    public void setHsCode(String v) { this.hsCode = v; }
+    public void setMainItemName(String v) { this.mainItemName = v; }
+    public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }
 
     // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
     @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)

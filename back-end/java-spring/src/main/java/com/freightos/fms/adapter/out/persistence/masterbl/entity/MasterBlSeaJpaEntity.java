@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,13 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "issue_date", length = 8)
     private String issueDate;
 
+    @Column(name = "vessel_nationality", length = 50)
+    private String vesselNationality;
+
+    @Column(name = "weight_unit", length = 5)
+    @Enumerated(EnumType.STRING)
+    private WeightUnit weightUnit;
+
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -55,4 +63,6 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     public void setOnboardDate(String v) { this.onboardDate = v; }
     public void setLineBkgNo(String v) { this.lineBkgNo = v; }
     public void setIssueDate(String v) { this.issueDate = v; }
+    public void setVesselNationality(String v) { this.vesselNationality = v; }
+    public void setWeightUnit(WeightUnit v) { this.weightUnit = v; }
 }
