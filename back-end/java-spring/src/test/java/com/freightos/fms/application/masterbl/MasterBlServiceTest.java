@@ -228,4 +228,46 @@ class MasterBlServiceTest {
         assertThat(annotation).isNotNull();
         assertThat(annotation.readOnly()).isTrue();
     }
+
+    @Test
+    @DisplayName("deleteMasterBlById - 없는 ID 조회 시 ResourceNotFoundException throw, port.delete 미호출")
+    void deleteMasterBlById_whenNotFound_throwsAndDoesNotDelete() {
+        Long id = 999L;
+        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> masterBlService.deleteMasterBlById(id))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        then(masterBlPort).should(never()).deleteMasterBl(any());
+    }
+
+    @Test
+    @DisplayName("getMasterBlsByBound - port PagedResult 메타(totalElements/totalPages/page/size) 그대로 반영")
+    void getMasterBlsByBound_returnsPagedResultWithCorrectMeta() {
+        PageRequest pageRequest = PageRequest.of(1, 15);
+        PageRequest sortedRequest = PageRequest.of(1, 15, "createdAt", SortDirection.DESC);
+        MasterBl mockEntity = mock(MasterBl.class);
+        PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 42L, 3, 1, 15);
+        given(masterBlPort.getMasterBlsByBound(Bound.EXP, sortedRequest)).willReturn(portResult);
+
+        PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.EXP, pageRequest);
+
+        assertThat(result.getTotalElements()).isEqualTo(42L);
+        assertThat(result.getTotalPages()).isEqualTo(3);
+        assertThat(result.getPage()).isEqualTo(1);
+        assertThat(result.getSize()).isEqualTo(15);
+    }
+
+    @Test
+    @DisplayName("findMasterBlDetailById - 반환 MasterBlDetail.master()가 port에서 반환된 MasterBl과 동일")
+    void findMasterBlDetailById_returnsMasterBlDetailWithCorrectMasterField() {
+        Long id = 10L;
+        MasterBlSea master = MasterBlSea.create(Bound.EXP);
+        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
+        given(houseBlPort.findConsoledSeaSummariesByMasterBlId(id)).willReturn(List.of());
+
+        MasterBlDetail result = masterBlService.findMasterBlDetailById(id);
+
+        assertThat(result.master()).isEqualTo(master);
+    }
 }
