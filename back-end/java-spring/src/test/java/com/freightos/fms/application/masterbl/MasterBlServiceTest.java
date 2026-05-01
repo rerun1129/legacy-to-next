@@ -268,6 +268,6 @@ class MasterBlServiceTest {
 
         MasterBlDetail result = masterBlService.findMasterBlDetailById(id);
 
-        assertThat(result.master()).isEqualTo(master);
+        assertThat(result.masterBl()).isEqualTo(master);
     }
 }
