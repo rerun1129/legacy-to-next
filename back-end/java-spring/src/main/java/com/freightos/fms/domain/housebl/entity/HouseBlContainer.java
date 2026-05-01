@@ -27,6 +27,10 @@ public class HouseBlContainer extends BaseEntity {
     private Integer lengthFeet;
     private SealNumber sealNo1;
     private SealNumber sealNo2;
+    private SealNumber sealNo3;
+    private SealNumber sealNo4;
+    private SealNumber sealNo5;
+    private SealNumber sealNo6;
     private Quantity pkgQty;
     private WeightUnit pkgUnit;
     private Weight grossWeightKg;
@@ -49,13 +53,18 @@ public class HouseBlContainer extends BaseEntity {
     }
 
     public static record Details(
-            SealNumber sealNo1, SealNumber sealNo2, Quantity pkgQty, WeightUnit pkgUnit,
+            SealNumber sealNo1, SealNumber sealNo2, SealNumber sealNo3, SealNumber sealNo4,
+            SealNumber sealNo5, SealNumber sealNo6, Quantity pkgQty, WeightUnit pkgUnit,
             Weight grossWeightKg, Weight netWeightKg, Volume cbm,
             Weight vgmKg, boolean isSoc, int seq) {}
 
     public void updateDetails(Details d) {
         this.sealNo1       = d.sealNo1();
         this.sealNo2       = d.sealNo2();
+        this.sealNo3       = d.sealNo3();
+        this.sealNo4       = d.sealNo4();
+        this.sealNo5       = d.sealNo5();
+        this.sealNo6       = d.sealNo6();
         this.pkgQty        = d.pkgQty();
         this.pkgUnit       = d.pkgUnit();
         this.grossWeightKg = d.grossWeightKg();

@@ -44,6 +44,18 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     @Column(name = "seal_no_2", length = 30)
     private String sealNo2;
 
+    @Column(name = "seal_no_3", length = 30)
+    private String sealNo3;
+
+    @Column(name = "seal_no_4", length = 30)
+    private String sealNo4;
+
+    @Column(name = "seal_no_5", length = 30)
+    private String sealNo5;
+
+    @Column(name = "seal_no_6", length = 30)
+    private String sealNo6;
+
     @Column(name = "pkg_qty")
     private Integer pkgQty;
 
@@ -85,6 +97,10 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     public void setLengthFeet(Integer v) { this.lengthFeet = v; }
     public void setSealNo1(String v) { this.sealNo1 = v; }
     public void setSealNo2(String v) { this.sealNo2 = v; }
+    public void setSealNo3(String v) { this.sealNo3 = v; }
+    public void setSealNo4(String v) { this.sealNo4 = v; }
+    public void setSealNo5(String v) { this.sealNo5 = v; }
+    public void setSealNo6(String v) { this.sealNo6 = v; }
     public void setPkgQty(Integer v) { this.pkgQty = v; }
     public void setPkgUnit(String v) { this.pkgUnit = v; }
     public void setGrossWeightKg(BigDecimal v) { this.grossWeightKg = v; }

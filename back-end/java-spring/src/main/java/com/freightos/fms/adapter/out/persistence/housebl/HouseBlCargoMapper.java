@@ -25,6 +25,10 @@ public class HouseBlCargoMapper {
         if (c.getId() != null) jpa.setHouseBlContainerId(c.getId());
         jpa.setSealNo1(mapOrNull(c.getSealNo1(), SealNumber::value));
         jpa.setSealNo2(mapOrNull(c.getSealNo2(), SealNumber::value));
+        jpa.setSealNo3(mapOrNull(c.getSealNo3(), SealNumber::value));
+        jpa.setSealNo4(mapOrNull(c.getSealNo4(), SealNumber::value));
+        jpa.setSealNo5(mapOrNull(c.getSealNo5(), SealNumber::value));
+        jpa.setSealNo6(mapOrNull(c.getSealNo6(), SealNumber::value));
         jpa.setPkgQty(mapOrNull(c.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(mapOrNull(c.getPkgUnit(), WeightUnit::name));
         jpa.setGrossWeightKg(mapOrNull(c.getGrossWeightKg(), Weight::kg));

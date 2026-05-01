@@ -193,6 +193,8 @@ public class HouseBlMapper {
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new HouseBlContainer.Details(
                 SealNumber.of(jpa.getSealNo1()), SealNumber.of(jpa.getSealNo2()),
+                SealNumber.of(jpa.getSealNo3()), SealNumber.of(jpa.getSealNo4()),
+                SealNumber.of(jpa.getSealNo5()), SealNumber.of(jpa.getSealNo6()),
                 Quantity.of(jpa.getPkgQty()), WeightUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Weight.of(jpa.getNetWeightKg()),
                 Volume.of(jpa.getCbm()), Weight.of(jpa.getVgmKg()), jpa.isSoc(), jpa.getSeq()));
