@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -88,7 +89,8 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     private String handlingInfoText;
 
     @Column(name = "volume_divisor", length = 10)
-    private String volumeDivisor;
+    @Enumerated(EnumType.STRING)
+    private VolumeDivisor volumeDivisor;
 
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
@@ -108,5 +110,5 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setOtherTerm(FreightTerm v) { this.otherTerm = v; }
     public void setHandlingInfoCode(HandlingInfoCode v) { this.handlingInfoCode = v; }
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
-    public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
+    public void setVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
 }

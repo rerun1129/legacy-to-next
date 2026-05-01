@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.housebl.enums.CargoType;
 import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
@@ -77,7 +78,8 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     private Fhd fhd;
 
     @Column(name = "volume_divisor", length = 10)
-    private String volumeDivisor;
+    @Enumerated(EnumType.STRING)
+    private VolumeDivisor volumeDivisor;
 
     @Column(name = "handling_info_code", length = 30)
     @Enumerated(EnumType.STRING)
@@ -108,7 +110,7 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setSignature(String v) { this.signature = v; }
     public void setFhd(Fhd v) { this.fhd = v; }
-    public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
+    public void setVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
     public void setHandlingInfoCode(HandlingInfoCode v) { this.handlingInfoCode = v; }
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setOriginOfGoods(String v) { this.originOfGoods = v; }
