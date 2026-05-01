@@ -2,8 +2,10 @@ package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.FlightType;
+import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
+import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,9 +33,6 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
 
     @Column(name = "airline_code", length = 10)
     private String airlineCode;
-
-    @Column(name = "mawb_no", length = 50)
-    private String mawbNo;
 
     @Column(name = "charge_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal chargeWeightKg;
@@ -77,12 +76,22 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @Column(name = "signature", length = 100)
     private String signature;
 
+    @Column(name = "other_term", length = 100)
+    @Enumerated(EnumType.STRING)
+    private FreightTerm otherTerm;
+
+    @Column(name = "handling_info_code", length = 30)
+    @Enumerated(EnumType.STRING)
+    private HandlingInfoCode handlingInfoCode;
+
+    @Column(name = "handling_info_text", length = 500)
+    private String handlingInfoText;
+
     @Column(name = "volume_divisor", length = 10)
     private String volumeDivisor;
 
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
-    public void setMawbNo(String v) { this.mawbNo = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setVolumeWeightKg(BigDecimal v) { this.volumeWeightKg = v; }
     public void setRateClass(RateClass v) { this.rateClass = v; }
@@ -96,5 +105,8 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setIssueDate(String v) { this.issueDate = v; }
     public void setIssuePlace(String v) { this.issuePlace = v; }
     public void setSignature(String v) { this.signature = v; }
+    public void setOtherTerm(FreightTerm v) { this.otherTerm = v; }
+    public void setHandlingInfoCode(HandlingInfoCode v) { this.handlingInfoCode = v; }
+    public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setVolumeDivisor(String v) { this.volumeDivisor = v; }
 }

@@ -2,6 +2,7 @@ package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FlightType;
+import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.SecurityStatus;
@@ -19,7 +20,6 @@ import lombok.NoArgsConstructor;
 public class MasterBlAir extends MasterBl {
 
     private AirlineCode airlineCode;
-    private BlNumber mawbNo; //TODO : MasterBl의 mblNo와 중복 필드. 만약 인덱싱을 위한 후보키라면 필드명을 맞출것
 
     private Weight chargeWeightKg;
     private Weight volumeWeightKg;
@@ -33,6 +33,9 @@ public class MasterBlAir extends MasterBl {
 
     private SecurityStatus securityStatus;
     private FlightType flightType;
+
+    private FreightTerm otherTerm;
+    private HandlingInformation handlingInformation;
 
     // 수출 전용 Issue
     private BlDate issueDate;
@@ -51,17 +54,18 @@ public class MasterBlAir extends MasterBl {
     }
 
     public static record AirFields(
-            AirlineCode airlineCode, BlNumber mawbNo,
+            AirlineCode airlineCode,
             Weight chargeWeightKg, Weight volumeWeightKg,
             RateClass rateClass, CurrencyCode currencyCode,
             String declaredValueCarriage, String declaredValueCustoms,
             String insurance, String accountInformation,
             SecurityStatus securityStatus, FlightType flightType,
-            BlDate issueDate, PortCode issuePlace, String signature) {}
+            BlDate issueDate, PortCode issuePlace, String signature,
+            FreightTerm otherTerm,
+            HandlingInformation handlingInformation) {}
 
     public void updateAirFields(AirFields f) {
         this.airlineCode           = f.airlineCode();
-        this.mawbNo                = f.mawbNo();
         this.chargeWeightKg        = f.chargeWeightKg();
         this.volumeWeightKg        = f.volumeWeightKg();
         this.rateClass             = f.rateClass();
@@ -75,5 +79,7 @@ public class MasterBlAir extends MasterBl {
         this.issueDate             = f.issueDate();
         this.issuePlace            = f.issuePlace();
         this.signature             = f.signature();
+        this.otherTerm             = f.otherTerm();
+        this.handlingInformation   = f.handlingInformation();
     }
 }

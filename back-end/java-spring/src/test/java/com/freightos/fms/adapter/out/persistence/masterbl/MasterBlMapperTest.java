@@ -11,6 +11,7 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
@@ -83,19 +84,43 @@ class MasterBlMapperTest {
     void applyAirFields_copiesAirFieldsToJpa() {
         MasterBlAir domain = MasterBlAir.create(Bound.EXP);
         domain.updateAirFields(new MasterBlAir.AirFields(
-                AirlineCode.of("KE"), BlNumber.of("180-12345678"),
+                AirlineCode.of("KE"),
                 Weight.of(BigDecimal.valueOf(100.5)), Weight.of(BigDecimal.valueOf(90.0)),
                 RateClass.Q, CurrencyCode.of("KRW"), "N.V.D.", null, "NIL", null, null, null,
-                BlDate.of("20240301"), PortCode.of("Seoul"), "Signature"));
+                BlDate.of("20240301"), PortCode.of("Seoul"), "Signature",
+                FreightTerm.COLLECT,
+                HandlingInformation.of(HandlingInfoCode.A, "TEST HANDLING")));
         MasterBlAirJpaEntity jpa = new MasterBlAirJpaEntity();
 
         mapper.applyAirFields(domain, jpa);
 
         assertThat(jpa.getAirlineCode()).isEqualTo("KE");
-        assertThat(jpa.getMawbNo()).isEqualTo("180-12345678");
         assertThat(jpa.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
         assertThat(jpa.getInsurance()).isEqualTo("NIL");
         assertThat(jpa.getIssueDate()).isEqualTo("20240301");
+        assertThat(jpa.getOtherTerm()).isEqualTo(FreightTerm.COLLECT);
+        assertThat(jpa.getHandlingInfoCode()).isEqualTo(HandlingInfoCode.A);
+        assertThat(jpa.getHandlingInfoText()).isEqualTo("TEST HANDLING");
+    }
+
+    @Test
+    @DisplayName("toAirDomain: handlingInformation과 otherTerm이 도메인으로 복사된다")
+    void toAirDomain_withAirJpa_copiesHandlingInfoAndOtherTerm() {
+        MasterBlJpaEntity parentJpa = new MasterBlJpaEntity();
+        parentJpa.setJobDiv(MasterBlJobDiv.AIR);
+        parentJpa.setBound(Bound.EXP);
+
+        MasterBlAirJpaEntity airJpa = new MasterBlAirJpaEntity();
+        airJpa.setHandlingInfoCode(HandlingInfoCode.A);
+        airJpa.setHandlingInfoText("ATTACHED : COMM INV & P/LIST");
+        airJpa.setOtherTerm(FreightTerm.COLLECT);
+
+        MasterBlAir domain = mapper.toAirDomain(parentJpa, airJpa);
+
+        assertThat(domain.getOtherTerm()).isEqualTo(FreightTerm.COLLECT);
+        assertThat(domain.getHandlingInformation()).isNotNull();
+        assertThat(domain.getHandlingInformation().code()).isEqualTo(HandlingInfoCode.A);
+        assertThat(domain.getHandlingInformation().description()).isEqualTo("ATTACHED : COMM INV & P/LIST");
     }
 
     // ── JPA → Domain ────────────────────────────────────────────────
