@@ -138,33 +138,39 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     private String masterRefNo;
 
     // SEA/NON_BL에서 채워짐, AIR/TRUCK은 LAZY이므로 미사용 모드 영향 없음
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
 
     // AIR/NON_BL/TRUCK에서 채워짐, SEA는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
 
     // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
 
     // AIR/SEA에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlLicenseJpaEntity> licenses = new ArrayList<>();
 
     // TRUCK에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlTruckOrderJpaEntity> truckOrders = new ArrayList<>();
 
     // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
 
     // AIR/SEA/NON_BL에서 채워짐, TRUCK은 null이 정상

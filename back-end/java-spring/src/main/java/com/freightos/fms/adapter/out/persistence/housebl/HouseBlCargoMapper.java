@@ -18,7 +18,7 @@ import static com.freightos.fms.common.util.VoMapper.mapOrNull;
 public class HouseBlCargoMapper {
 
     HouseBlContainerJpaEntity toContainerJpa(HouseBlContainer c, HouseBlJpaEntity jpaParent) {
-        HouseBlContainerJpaEntity jpa = HouseBlContainerJpaEntity.of(jpaParent,
+        HouseBlContainerJpaEntity jpa = HouseBlContainerJpaEntity.of(
                 mapOrNull(c.getContainerNo(), ContainerNumber::value),
                 c.getContainerType(),
                 c.getLengthFeet());
@@ -44,7 +44,7 @@ public class HouseBlCargoMapper {
 
     public HouseBlDim toDimDomain(HouseBlDimJpaEntity jpa) {
         HouseBlDim domain = HouseBlDim.create(
-                jpa.getHouseBl().getHouseBlId(),
+                jpa.getHouseBlId(),
                 jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
                 jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
         domain.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
@@ -57,7 +57,6 @@ public class HouseBlCargoMapper {
     }
 
     public void applyDimFields(HouseBlDim domain, HouseBlDimJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
         jpa.setLengthCm(domain.getLengthCm());
         jpa.setWidthCm(domain.getWidthCm());
         jpa.setHeightCm(domain.getHeightCm());
@@ -76,7 +75,7 @@ public class HouseBlCargoMapper {
 
     public HouseBlLicense toLicenseDomain(HouseBlLicenseJpaEntity jpa) {
         HouseBlLicense domain = HouseBlLicense.create(
-                jpa.getHouseBl().getHouseBlId());
+                jpa.getHouseBlId());
         domain.assignIdentity(jpa.getHouseBlLicenseId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateDetails(jpa.getLicenseNo(), jpa.getPkgQty(), jpa.getPkgUnit(),
@@ -91,7 +90,6 @@ public class HouseBlCargoMapper {
     }
 
     public void applyLicenseFields(HouseBlLicense domain, HouseBlLicenseJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
         jpa.setLicenseNo(domain.getLicenseNo());
         jpa.setPkgQty(domain.getPkgQty());
         jpa.setPkgUnit(domain.getPkgUnit());

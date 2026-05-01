@@ -197,13 +197,13 @@ class HouseBlMapperModeTest {
 
     private HouseBlDimJpaEntity dimJpa(HouseBlJpaEntity parent) {
         HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
-        jpa.setHouseBl(parent);
+        jpa.setHouseBlId(parent.getHouseBlId());
         return jpa;
     }
 
     private HouseBlScheduleLegJpaEntity legJpa(HouseBlJpaEntity parent) {
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
-        jpa.setHouseBl(parent);
+        jpa.setHouseBlId(parent.getHouseBlId());
         jpa.setToCode("NRT");
         jpa.setOnBoardDt("20260501");
         jpa.setArrivalDt("20260502");
@@ -212,7 +212,7 @@ class HouseBlMapperModeTest {
 
     private HouseBlLicenseJpaEntity licenseJpa(HouseBlJpaEntity parent) {
         HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
-        jpa.setHouseBl(parent);
+        jpa.setHouseBlId(parent.getHouseBlId());
         return jpa;
     }
 
@@ -224,6 +224,6 @@ class HouseBlMapperModeTest {
 
     private HouseBlContainerJpaEntity containerJpa(HouseBlJpaEntity parent) {
         // ContainerNumber는 AAAA1234567 형식(ISO 6346) 요구
-        return HouseBlContainerJpaEntity.of(parent, "ABCD1234567", null, 20);
+        return HouseBlContainerJpaEntity.of("ABCD1234567", null, 20);
     }
 }

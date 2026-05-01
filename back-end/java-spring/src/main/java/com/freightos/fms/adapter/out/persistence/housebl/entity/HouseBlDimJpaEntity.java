@@ -22,9 +22,8 @@ public class HouseBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_dim_id", updatable = false, nullable = false)
     private Long houseBlDimId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false)
-    private HouseBlJpaEntity houseBl;
+    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlId;
 
     @Column(name = "length_cm", columnDefinition = "NUMERIC(10,2)")
     private BigDecimal lengthCm;
@@ -45,7 +44,7 @@ public class HouseBlDimJpaEntity extends BaseJpaEntity {
     private BigDecimal volumeWeightKg;
 
     public void setHouseBlDimId(Long v) { this.houseBlDimId = v; }
-    public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
+    public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setLengthCm(BigDecimal v) { this.lengthCm = v; }
     public void setWidthCm(BigDecimal v) { this.widthCm = v; }
     public void setHeightCm(BigDecimal v) { this.heightCm = v; }

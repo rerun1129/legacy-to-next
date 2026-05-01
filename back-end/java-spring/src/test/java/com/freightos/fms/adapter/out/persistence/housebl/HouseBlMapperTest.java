@@ -200,11 +200,8 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("toDimDomain: 모든 치수 필드가 도메인으로 복사된다")
     void toDimDomain_mapsAllFields() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
         HouseBlDimJpaEntity dimJpa = new HouseBlDimJpaEntity();
-        dimJpa.setHouseBl(houseBlJpa);
+        dimJpa.setHouseBlId(1L);
         dimJpa.setLengthCm(BigDecimal.valueOf(50.0));
         dimJpa.setWidthCm(BigDecimal.valueOf(40.0));
         dimJpa.setHeightCm(BigDecimal.valueOf(30.0));
@@ -242,19 +239,15 @@ class HouseBlMapperTest {
         assertThat(jpa.getQuantity()).isEqualTo(2);
         assertThat(jpa.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.06));
         assertThat(jpa.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(10.0));
-        assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }
 
     @Test
     @DisplayName("toDimDomainList: 2개 JPA 엔티티 → 크기 2인 도메인 리스트 반환")
     void toDimDomainList_returnsCorrectSize() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
         HouseBlDimJpaEntity dim1 = new HouseBlDimJpaEntity();
-        dim1.setHouseBl(houseBlJpa);
+        dim1.setHouseBlId(1L);
         HouseBlDimJpaEntity dim2 = new HouseBlDimJpaEntity();
-        dim2.setHouseBl(houseBlJpa);
+        dim2.setHouseBlId(1L);
 
         List<HouseBlDim> result = cargoMapper.toDimDomainList(List.of(dim1, dim2));
 
@@ -318,11 +311,8 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("toLicenseDomain: 수출면장 모든 필드가 도메인으로 복사된다")
     void toLicenseDomain_mapsAllFields() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
         HouseBlLicenseJpaEntity licJpa = new HouseBlLicenseJpaEntity();
-        licJpa.setHouseBl(houseBlJpa);
+        licJpa.setHouseBlId(1L);
         licJpa.setLicenseNo("LC-001");
         licJpa.setPkgQty(10);
         licJpa.setPkgUnit("CTN");
@@ -359,21 +349,17 @@ class HouseBlMapperTest {
         assertThat(jpa.isPartialShipment()).isTrue();
         assertThat(jpa.getPartialShipmentSeq()).isEqualTo(2);
         assertThat(jpa.getHsnNo()).isEqualTo("1234.56");
-        assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }
 
     @Test
     @DisplayName("toLicenseDomainList: 3개 JPA 엔티티 → 크기 3인 도메인 리스트 반환")
     void toLicenseDomainList_returnsCorrectSize() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
         HouseBlLicenseJpaEntity lic1 = new HouseBlLicenseJpaEntity();
-        lic1.setHouseBl(houseBlJpa);
+        lic1.setHouseBlId(1L);
         HouseBlLicenseJpaEntity lic2 = new HouseBlLicenseJpaEntity();
-        lic2.setHouseBl(houseBlJpa);
+        lic2.setHouseBlId(1L);
         HouseBlLicenseJpaEntity lic3 = new HouseBlLicenseJpaEntity();
-        lic3.setHouseBl(houseBlJpa);
+        lic3.setHouseBlId(1L);
 
         List<HouseBlLicense> result = cargoMapper.toLicenseDomainList(List.of(lic1, lic2, lic3));
 
@@ -385,11 +371,8 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("toScheduleLegDomain: 항공 스케줄 레그 모든 필드가 도메인으로 복사된다")
     void toScheduleLegDomain_mapsAllFields() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
         HouseBlScheduleLegJpaEntity legJpa = new HouseBlScheduleLegJpaEntity();
-        legJpa.setHouseBl(houseBlJpa);
+        legJpa.setHouseBlId(1L);
         legJpa.setToCode("NRT");
         legJpa.setByCarrier("OZ");
         legJpa.setFlightNo("OZ102");
@@ -428,19 +411,21 @@ class HouseBlMapperTest {
         assertThat(jpa.getOnBoardTm()).isEqualTo("1800");
         assertThat(jpa.getArrivalDt()).isEqualTo("20240316");
         assertThat(jpa.getArrivalTm()).isEqualTo("0700");
-        assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }
 
     @Test
     @DisplayName("toScheduleLegDomainList: 2개 JPA 엔티티 → 크기 2인 도메인 리스트 반환")
     void toScheduleLegDomainList_returnsCorrectSize() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
         HouseBlScheduleLegJpaEntity leg1 = new HouseBlScheduleLegJpaEntity();
-        leg1.setHouseBl(houseBlJpa);
+        leg1.setHouseBlId(1L);
+        leg1.setToCode("NRT");
+        leg1.setOnBoardDt("20240315");
+        leg1.setArrivalDt("20240316");
         HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
-        leg2.setHouseBl(houseBlJpa);
+        leg2.setHouseBlId(1L);
+        leg2.setToCode("LAX");
+        leg2.setOnBoardDt("20240317");
+        leg2.setArrivalDt("20240318");
 
         List<HouseBlScheduleLeg> result = docMapper.toScheduleLegDomainList(List.of(leg1, leg2));
 

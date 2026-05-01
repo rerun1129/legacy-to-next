@@ -24,9 +24,8 @@ public class HouseBlTruckOrderJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_truck_order_id", updatable = false, nullable = false)
     private Long houseBlTruckOrderId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false)
-    private HouseBlJpaEntity houseBl;
+    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlId;
 
     @Column(name = "truck_order_no", length = 30)
     private String truckOrderNo;
@@ -72,7 +71,7 @@ public class HouseBlTruckOrderJpaEntity extends BaseJpaEntity {
     @Column(name = "seal_no_3", length = 30)
     private String sealNo3;
 
-    public void setHouseBl(HouseBlJpaEntity v)    { this.houseBl      = v; }
+    public void setHouseBlId(Long v)               { this.houseBlId    = v; }
     public void setTruckOrderNo(String v)          { this.truckOrderNo = v; }
     public void setPkgQty(Integer v)               { this.pkgQty       = v; }
     public void setPkgUnit(String v)               { this.pkgUnit      = v; }

@@ -19,9 +19,8 @@ public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_schedule_leg_id", updatable = false, nullable = false)
     private Long houseBlScheduleLegId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false)
-    private HouseBlJpaEntity houseBl;
+    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlId;
 
     @Column(name = "to_code", nullable = false, length = 10)
     private String toCode;
@@ -45,7 +44,7 @@ public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {
     private String arrivalTm;
 
     public void setHouseBlScheduleLegId(Long v) { this.houseBlScheduleLegId = v; }
-    public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
+    public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setToCode(String v) { this.toCode = v; }
     public void setByCarrier(String v) { this.byCarrier = v; }
     public void setFlightNo(String v) { this.flightNo = v; }

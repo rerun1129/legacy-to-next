@@ -51,7 +51,7 @@ public class HouseBlDocMapper {
 
     public HouseBlScheduleLeg toScheduleLegDomain(HouseBlScheduleLegJpaEntity jpa) {
         HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(
-                jpa.getHouseBl().getHouseBlId(),
+                jpa.getHouseBlId(),
                 jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt());
         domain.assignIdentity(jpa.getHouseBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
@@ -65,7 +65,6 @@ public class HouseBlDocMapper {
     }
 
     public void applyScheduleLegFields(HouseBlScheduleLeg domain, HouseBlScheduleLegJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
         jpa.setToCode(domain.getToCode());
         jpa.setByCarrier(domain.getByCarrier());
         jpa.setFlightNo(domain.getFlightNo());
@@ -84,7 +83,7 @@ public class HouseBlDocMapper {
     // ── E-20 TRUCK ORDER ──────────────────────────────────────────────
 
     public HouseBlTruckOrder toTruckOrderDomain(HouseBlTruckOrderJpaEntity jpa) {
-        HouseBlTruckOrder o = HouseBlTruckOrder.create(jpa.getHouseBl().getHouseBlId());
+        HouseBlTruckOrder o = HouseBlTruckOrder.create(jpa.getHouseBlId());
         o.assignIdentity(jpa.getHouseBlTruckOrderId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         o.updateDetails(new HouseBlTruckOrder.Details(
@@ -102,7 +101,6 @@ public class HouseBlDocMapper {
     }
 
     public void applyTruckOrderFields(HouseBlTruckOrder domain, HouseBlTruckOrderJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
         jpa.setTruckOrderNo(domain.getTruckOrderNo());
         jpa.setPkgQty(domain.getPkgQty());
         jpa.setPkgUnit(domain.getPkgUnit());
@@ -128,7 +126,7 @@ public class HouseBlDocMapper {
     // ── E-21 AIR CHARGE ──────────────────────────────────────────────
 
     public HouseBlAirCharge toAirChargeDomain(HouseBlAirChargeJpaEntity jpa) {
-        HouseBlAirCharge c = HouseBlAirCharge.create(jpa.getHouseBl().getHouseBlId());
+        HouseBlAirCharge c = HouseBlAirCharge.create(jpa.getHouseBlId());
         c.assignIdentity(jpa.getHouseBlAirChargeId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new HouseBlAirCharge.Details(
@@ -144,7 +142,6 @@ public class HouseBlDocMapper {
     }
 
     public void applyAirChargeFields(HouseBlAirCharge domain, HouseBlAirChargeJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
         jpa.setFreightCode(domain.getFreightCode());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
         jpa.setPer(domain.getPer());

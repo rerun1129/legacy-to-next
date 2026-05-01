@@ -180,7 +180,7 @@ public class MasterBlMapper {
 
     public MasterBlDim toDimDomain(MasterBlDimJpaEntity jpa) {
         MasterBlDim domain = MasterBlDim.create(
-                jpa.getMasterBl().getMasterBlId(),
+                jpa.getMasterBlId(),
                 jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
                 jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
         domain.assignIdentity(jpa.getMasterBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
@@ -193,7 +193,6 @@ public class MasterBlMapper {
     }
 
     public void applyDimFields(MasterBlDim domain, MasterBlDimJpaEntity jpa, MasterBlJpaEntity masterBlJpa) {
-        jpa.setMasterBl(masterBlJpa);
         jpa.setLengthCm(domain.getLengthCm());
         jpa.setWidthCm(domain.getWidthCm());
         jpa.setHeightCm(domain.getHeightCm());
@@ -230,7 +229,7 @@ public class MasterBlMapper {
 
     public MasterBlScheduleLeg toScheduleLegDomain(MasterBlScheduleLegJpaEntity jpa) {
         MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(
-                jpa.getMasterBl().getMasterBlId(),
+                jpa.getMasterBlId(),
                 jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt());
         domain.assignIdentity(jpa.getMasterBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
@@ -246,7 +245,6 @@ public class MasterBlMapper {
 
     public void applyScheduleLegFields(MasterBlScheduleLeg domain, MasterBlScheduleLegJpaEntity jpa,
                                        MasterBlJpaEntity masterBlJpa) {
-        jpa.setMasterBl(masterBlJpa);
         jpa.setToCode(domain.getToCode());
         jpa.setByCarrier(domain.getByCarrier());
         jpa.setFlightNo(domain.getFlightNo());
@@ -271,7 +269,7 @@ public class MasterBlMapper {
     // ── AIR CHARGE ───────────────────────────────────────────────────
 
     public MasterBlAirCharge toAirChargeDomain(MasterBlAirChargeJpaEntity jpa) {
-        MasterBlAirCharge c = MasterBlAirCharge.create(jpa.getMasterBl().getMasterBlId());
+        MasterBlAirCharge c = MasterBlAirCharge.create(jpa.getMasterBlId());
         c.assignIdentity(jpa.getMasterBlAirChargeId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new MasterBlAirCharge.Details(
@@ -288,7 +286,6 @@ public class MasterBlMapper {
 
     public void applyAirChargeFields(MasterBlAirCharge domain, MasterBlAirChargeJpaEntity jpa,
                                      MasterBlJpaEntity masterBlJpa) {
-        jpa.setMasterBl(masterBlJpa);
         jpa.setFreightCode(domain.getFreightCode());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
         jpa.setPer(domain.getPer());

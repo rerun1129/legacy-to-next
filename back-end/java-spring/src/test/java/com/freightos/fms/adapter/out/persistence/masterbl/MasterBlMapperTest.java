@@ -187,11 +187,8 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("toDimDomain: JPA → 도메인 전체 필드가 복사된다")
     void toDimDomain_mapsAllFields() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(1L);
-
         MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
-        dimJpa.setMasterBl(masterBlJpa);
+        dimJpa.setMasterBlId(1L);
         dimJpa.setLengthCm(BigDecimal.valueOf(100.5));
         dimJpa.setWidthCm(BigDecimal.valueOf(80.0));
         dimJpa.setHeightCm(BigDecimal.valueOf(60.0));
@@ -228,20 +225,16 @@ class MasterBlMapperTest {
         assertThat(dimJpa.getQuantity()).isEqualTo(3);
         assertThat(dimJpa.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.485));
         assertThat(dimJpa.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(80.8));
-        assertThat(dimJpa.getMasterBl()).isSameAs(masterBlJpa);
     }
 
     @Test
     @DisplayName("toDimDomainList: JPA 엔티티 리스트 → 도메인 리스트로 변환된다")
     void toDimDomainList_convertsMultipleEntities() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(1L);
-
         MasterBlDimJpaEntity dim1 = new MasterBlDimJpaEntity();
-        dim1.setMasterBl(masterBlJpa);
+        dim1.setMasterBlId(1L);
 
         MasterBlDimJpaEntity dim2 = new MasterBlDimJpaEntity();
-        dim2.setMasterBl(masterBlJpa);
+        dim2.setMasterBlId(1L);
 
         List<MasterBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
 
@@ -318,11 +311,8 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("toScheduleLegDomain: JPA → 도메인 전체 필드가 복사된다")
     void toScheduleLegDomain_mapsAllFields() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(3L);
-
         MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
-        legJpa.setMasterBl(masterBlJpa);
+        legJpa.setMasterBlId(3L);
         legJpa.setToCode("NRT");
         legJpa.setByCarrier("KE");
         legJpa.setFlightNo("KE101");
@@ -366,23 +356,20 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("toScheduleLegDomainList: JPA 엔티티 3개 리스트 → 도메인 리스트로 변환된다")
     void toScheduleLegDomainList_convertsMultipleLegs() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(3L);
-
         MasterBlScheduleLegJpaEntity leg1 = new MasterBlScheduleLegJpaEntity();
-        leg1.setMasterBl(masterBlJpa);
+        leg1.setMasterBlId(3L);
         leg1.setToCode("HKG");
         leg1.setOnBoardDt("20240310");
         leg1.setArrivalDt("20240310");
 
         MasterBlScheduleLegJpaEntity leg2 = new MasterBlScheduleLegJpaEntity();
-        leg2.setMasterBl(masterBlJpa);
+        leg2.setMasterBlId(3L);
         leg2.setToCode("NRT");
         leg2.setOnBoardDt("20240311");
         leg2.setArrivalDt("20240311");
 
         MasterBlScheduleLegJpaEntity leg3 = new MasterBlScheduleLegJpaEntity();
-        leg3.setMasterBl(masterBlJpa);
+        leg3.setMasterBlId(3L);
         leg3.setToCode("LAX");
         leg3.setOnBoardDt("20240312");
         leg3.setArrivalDt("20240312");

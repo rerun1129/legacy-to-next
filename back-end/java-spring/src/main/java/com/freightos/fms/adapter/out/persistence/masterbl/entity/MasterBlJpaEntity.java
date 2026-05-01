@@ -109,18 +109,21 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     private MasterBlDescJpaEntity desc;
 
     // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
     private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
 
     // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
     private List<MasterBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
 
     // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
+    @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
     private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
 
     public void setMasterBlId(Long v) { this.masterBlId = v; }

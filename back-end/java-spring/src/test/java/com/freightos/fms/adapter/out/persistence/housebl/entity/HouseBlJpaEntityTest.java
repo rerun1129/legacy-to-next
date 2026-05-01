@@ -17,7 +17,7 @@ class HouseBlJpaEntityTest {
     void syncContainers_preservesListIdentity() {
         HouseBlJpaEntity entity = new HouseBlJpaEntity();
         List<HouseBlContainerJpaEntity> originalRef = entity.getContainers();
-        HouseBlContainerJpaEntity c = HouseBlContainerJpaEntity.of(entity, "CONT001", null, 20);
+        HouseBlContainerJpaEntity c = HouseBlContainerJpaEntity.of("CONT001", null, 20);
 
         entity.syncContainers(List.of(c));
 
@@ -29,7 +29,7 @@ class HouseBlJpaEntityTest {
     @DisplayName("syncContainers: 빈 리스트로 sync하면 기존 컨테이너가 모두 제거된다")
     void syncContainers_emptyInput_clearsExistingItems() {
         HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        entity.syncContainers(List.of(HouseBlContainerJpaEntity.of(entity, "CONT001", null, 20)));
+        entity.syncContainers(List.of(HouseBlContainerJpaEntity.of("CONT001", null, 20)));
 
         entity.syncContainers(List.of());
 
@@ -44,7 +44,6 @@ class HouseBlJpaEntityTest {
         HouseBlJpaEntity entity = new HouseBlJpaEntity();
         List<HouseBlDimJpaEntity> originalRef = entity.getDims();
         HouseBlDimJpaEntity dim = new HouseBlDimJpaEntity();
-        dim.setHouseBl(entity);
 
         entity.syncDims(List.of(dim));
 
@@ -57,7 +56,6 @@ class HouseBlJpaEntityTest {
     void syncDims_emptyInput_clearsExistingCollection() {
         HouseBlJpaEntity entity = new HouseBlJpaEntity();
         HouseBlDimJpaEntity dim = new HouseBlDimJpaEntity();
-        dim.setHouseBl(entity);
         entity.syncDims(List.of(dim));
 
         entity.syncDims(List.of());
@@ -73,9 +71,7 @@ class HouseBlJpaEntityTest {
         HouseBlJpaEntity entity = new HouseBlJpaEntity();
         List<HouseBlScheduleLegJpaEntity> originalRef = entity.getScheduleLegs();
         HouseBlScheduleLegJpaEntity leg1 = new HouseBlScheduleLegJpaEntity();
-        leg1.setHouseBl(entity);
         HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
-        leg2.setHouseBl(entity);
 
         entity.syncScheduleLegs(List.of(leg1, leg2));
 
@@ -90,11 +86,9 @@ class HouseBlJpaEntityTest {
     void syncLicenses_replacesAllExistingItems() {
         HouseBlJpaEntity entity = new HouseBlJpaEntity();
         HouseBlLicenseJpaEntity oldLic = new HouseBlLicenseJpaEntity();
-        oldLic.setHouseBl(entity);
         entity.syncLicenses(List.of(oldLic));
 
         HouseBlLicenseJpaEntity newLic = new HouseBlLicenseJpaEntity();
-        newLic.setHouseBl(entity);
         entity.syncLicenses(List.of(newLic));
 
         assertThat(entity.getLicenses()).containsExactly(newLic);

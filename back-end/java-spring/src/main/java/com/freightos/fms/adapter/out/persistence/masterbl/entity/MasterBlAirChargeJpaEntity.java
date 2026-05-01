@@ -25,9 +25,8 @@ public class MasterBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_air_charge_id", updatable = false, nullable = false)
     private Long masterBlAirChargeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_id", nullable = false)
-    private MasterBlJpaEntity masterBl;
+    @Column(name = "master_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long masterBlId;
 
     @Column(name = "freight_code", length = 20)
     private String freightCode;
@@ -56,7 +55,7 @@ public class MasterBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "rate", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal rate;
 
-    public void setMasterBl(MasterBlJpaEntity v)       { this.masterBl      = v; }
+    public void setMasterBlId(Long v)                  { this.masterBlId    = v; }
     public void setFreightCode(String v)               { this.freightCode   = v; }
     public void setCurrencyCode(String v)              { this.currencyCode  = v; }
     public void setPer(Per v)                          { this.per           = v; }

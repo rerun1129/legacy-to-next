@@ -22,9 +22,8 @@ public class HouseBlLicenseJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_license_id", updatable = false, nullable = false)
     private Long houseBlLicenseId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false)
-    private HouseBlJpaEntity houseBl;
+    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlId;
 
     @Column(name = "license_no", length = 50)
     private String licenseNo;
@@ -57,7 +56,7 @@ public class HouseBlLicenseJpaEntity extends BaseJpaEntity {
     private String hsnNo;
 
     public void setHouseBlLicenseId(Long v) { this.houseBlLicenseId = v; }
-    public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
+    public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setLicenseNo(String v) { this.licenseNo = v; }
     public void setPkgQty(Integer v) { this.pkgQty = v; }
     public void setPkgUnit(String v) { this.pkgUnit = v; }

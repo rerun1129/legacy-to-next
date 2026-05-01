@@ -24,9 +24,8 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_container_id", updatable = false, nullable = false)
     private Long houseBlContainerId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false)
-    private HouseBlJpaEntity houseBl;
+    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlId;
 
     @Column(name = "container_no", nullable = false, length = 20)
     private String containerNo;
@@ -80,10 +79,9 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     @Column(name = "seq", nullable = false)
     private int seq = 1;
 
-    public static HouseBlContainerJpaEntity of(HouseBlJpaEntity houseBl, String containerNo,
+    public static HouseBlContainerJpaEntity of(String containerNo,
                                                ContainerType containerType, int lengthFeet) {
         HouseBlContainerJpaEntity c = new HouseBlContainerJpaEntity();
-        c.houseBl       = houseBl;
         c.containerNo   = containerNo;
         c.containerType = containerType;
         c.lengthFeet    = lengthFeet;
@@ -91,7 +89,6 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     }
 
     public void setHouseBlContainerId(Long v) { this.houseBlContainerId = v; }
-    public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setContainerNo(String v) { this.containerNo = v; }
     public void setContainerType(ContainerType v) { this.containerType = v; }
     public void setLengthFeet(Integer v) { this.lengthFeet = v; }

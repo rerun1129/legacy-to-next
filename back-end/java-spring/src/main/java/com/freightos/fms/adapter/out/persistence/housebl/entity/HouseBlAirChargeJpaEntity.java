@@ -25,9 +25,8 @@ public class HouseBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_air_charge_id", updatable = false, nullable = false)
     private Long houseBlAirChargeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false)
-    private HouseBlJpaEntity houseBl;
+    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlId;
 
     @Column(name = "freight_code", length = 20)
     private String freightCode;
@@ -56,7 +55,7 @@ public class HouseBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "rate", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal rate;
 
-    public void setHouseBl(HouseBlJpaEntity v)        { this.houseBl       = v; }
+    public void setHouseBlId(Long v)                  { this.houseBlId     = v; }
     public void setFreightCode(String v)              { this.freightCode   = v; }
     public void setCurrencyCode(String v)             { this.currencyCode  = v; }
     public void setPer(Per v)                         { this.per           = v; }

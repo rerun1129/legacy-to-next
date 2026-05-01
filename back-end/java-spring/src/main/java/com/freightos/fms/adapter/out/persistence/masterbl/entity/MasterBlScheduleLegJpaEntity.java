@@ -20,9 +20,8 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_schedule_leg_id", updatable = false, nullable = false)
     private Long masterBlScheduleLegId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_id", nullable = false)
-    private MasterBlJpaEntity masterBl;
+    @Column(name = "master_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long masterBlId;
 
     @Column(name = "to_code", nullable = false, length = 10)
     private String toCode;
@@ -45,7 +44,7 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "arrival_tm", length = 4)
     private String arrivalTm;
 
-    public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
+    public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setToCode(String v) { this.toCode = v; }
     public void setByCarrier(String v) { this.byCarrier = v; }
     public void setFlightNo(String v) { this.flightNo = v; }

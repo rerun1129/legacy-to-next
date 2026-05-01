@@ -22,9 +22,8 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_dim_id", updatable = false, nullable = false)
     private Long masterBlDimId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_id", nullable = false)
-    private MasterBlJpaEntity masterBl;
+    @Column(name = "master_bl_id", nullable = false, insertable = false, updatable = false)
+    private Long masterBlId;
 
     @Column(name = "length_cm", columnDefinition = "NUMERIC(10,2)")
     private BigDecimal lengthCm;
@@ -44,7 +43,7 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal volumeWeightKg;
 
-    public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
+    public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setLengthCm(BigDecimal v) { this.lengthCm = v; }
     public void setWidthCm(BigDecimal v) { this.widthCm = v; }
     public void setHeightCm(BigDecimal v) { this.heightCm = v; }
