@@ -3,7 +3,7 @@ package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
-import com.freightos.fms.domain.housebl.enums.Per;
+import com.freightos.fms.domain.common.enums.Per;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -6,8 +6,8 @@ import com.freightos.fms.domain.common.vo.Rton;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.enums.LoadType;
-import com.freightos.fms.domain.housebl.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.LoadType;
+import com.freightos.fms.domain.common.enums.ServiceTerm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

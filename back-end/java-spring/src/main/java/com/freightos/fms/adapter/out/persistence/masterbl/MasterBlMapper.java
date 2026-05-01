@@ -9,8 +9,8 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSchedul
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
-import com.freightos.fms.domain.housebl.enums.BlType;
-import com.freightos.fms.domain.housebl.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.BlType;
+import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAirCharge;

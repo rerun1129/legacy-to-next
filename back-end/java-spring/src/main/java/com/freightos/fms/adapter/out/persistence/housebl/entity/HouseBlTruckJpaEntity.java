@@ -1,8 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
-import com.freightos.fms.domain.housebl.enums.LoadType;
-import com.freightos.fms.domain.housebl.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.LoadType;
+import com.freightos.fms.domain.common.enums.ServiceTerm;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

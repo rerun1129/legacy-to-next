@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.housebl.enums;
+package com.freightos.fms.domain.common.enums;
 
 public enum Per {
 

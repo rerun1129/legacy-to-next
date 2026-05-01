@@ -2,10 +2,10 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
-import com.freightos.fms.domain.housebl.enums.BlType;
-import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.common.enums.BlType;
+import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
-import com.freightos.fms.domain.housebl.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.ServiceTerm;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import lombok.Getter;

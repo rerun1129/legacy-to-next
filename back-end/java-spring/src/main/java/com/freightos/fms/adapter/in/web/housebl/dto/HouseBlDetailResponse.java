@@ -6,7 +6,7 @@ import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlSea;
-import com.freightos.fms.domain.housebl.enums.BlType;
+import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
 
