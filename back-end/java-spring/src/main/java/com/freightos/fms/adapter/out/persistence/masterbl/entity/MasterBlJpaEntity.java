@@ -105,7 +105,7 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     private String settlePartnerCode;
 
     // SEA/AIR 모두 채워질 수 있음, null 허용
-    @OneToOne(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
     private MasterBlDescJpaEntity desc;
 
     // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상

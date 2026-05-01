@@ -174,8 +174,7 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
 
     // AIR/SEA/NON_BL에서 채워짐, TRUCK은 null이 정상
-    @OneToOne(mappedBy = "houseBl", cascade = CascadeType.ALL,
-              orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
     private HouseBlDescJpaEntity desc;
 
     public void setHouseBlId(Long v) { this.houseBlId = v; }
