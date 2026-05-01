@@ -162,6 +162,11 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @BatchSize(size = 50)
     private List<HouseBlTruckOrderJpaEntity> truckOrders = new ArrayList<>();
 
+    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
+
     // AIR/SEA/NON_BL에서 채워짐, TRUCK은 null이 정상
     @OneToOne(mappedBy = "houseBl", cascade = CascadeType.ALL,
               orphanRemoval = true, fetch = FetchType.LAZY)
@@ -227,11 +232,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
         this.truckOrders.clear();
         this.truckOrders.addAll(newOrders);
     }
-
-    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
 
     public void syncAirCharges(List<HouseBlAirChargeJpaEntity> newCharges) {
         this.airCharges.clear();

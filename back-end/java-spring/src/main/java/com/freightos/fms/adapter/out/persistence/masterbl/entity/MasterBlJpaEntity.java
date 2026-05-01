@@ -104,6 +104,25 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "settle_partner_code", length = 20)
     private String settlePartnerCode;
 
+    // SEA/AIR 모두 채워질 수 있음, null 허용
+    @OneToOne(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private MasterBlDescJpaEntity desc;
+
+    // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
+
+    // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<MasterBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
+
+    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
+    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
+
     public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setMblNo(String v) { this.mblNo = v; }
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
@@ -130,25 +149,10 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setMainItemName(String v) { this.mainItemName = v; }
     public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }
 
-    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
-
     public void syncAirCharges(List<MasterBlAirChargeJpaEntity> v) {
         this.airCharges.clear();
         if (v != null) this.airCharges.addAll(v);
     }
-
-    // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
-
-    // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    private List<MasterBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
 
     public void syncDims(List<MasterBlDimJpaEntity> v) {
         this.dims.clear();
@@ -159,10 +163,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
         this.scheduleLegs.clear();
         if (v != null) this.scheduleLegs.addAll(v);
     }
-
-    // SEA/AIR 모두 채워질 수 있음, null 허용
-    @OneToOne(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private MasterBlDescJpaEntity desc;
 
     public void replaceDesc(MasterBlDescJpaEntity newDesc) {
         if (this.desc != null) this.desc.setMasterBl(null);
