@@ -84,9 +84,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "pod_code", length = 10)
     private String podCode;
 
-    @Column(name = "delivery_code", length = 10)
-    private String deliveryCode;
-
     @Column(name = "etd", length = 8)
     private String etd;
 
@@ -194,7 +191,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setDocPartnerCode(String docPartnerCode) { this.docPartnerCode = docPartnerCode; }
     public void setDocPartnerAddress(String docPartnerAddress) { this.docPartnerAddress = docPartnerAddress; }
     public void setSettlePartnerCode(String settlePartnerCode) { this.settlePartnerCode = settlePartnerCode; }
-    public void setDeliveryCode(String deliveryCode) { this.deliveryCode = deliveryCode; }
     public void setPkgQty(Integer pkgQty) { this.pkgQty = pkgQty; }
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }
     public void setGrossWeightKg(BigDecimal grossWeightKg) { this.grossWeightKg = grossWeightKg; }

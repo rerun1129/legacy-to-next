@@ -122,7 +122,7 @@ public class HouseBlMapper {
                 CustomerCode.of(jpa.getConsigneeCode(), jpa.getConsigneeAddress()),
                 CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()),
                 CustomerCode.of(jpa.getDocPartnerCode(), jpa.getDocPartnerAddress()),
-                PortCode.of(jpa.getDeliveryCode()));
+                null);
         domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), WeightUnit.fromCode(jpa.getPkgUnit()),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
@@ -145,6 +145,7 @@ public class HouseBlMapper {
                 BlDate.of(jpa.getDoDate()), PortCode.of(jpa.getPayableAt()),
                 jpa.isTriangle(),
                 jpa.getLoadType()));
+        domain.assignDeliveryCode(PortCode.of(jpa.getDeliveryCode()));
         domain.updateVesselNationality(jpa.getVesselNationality());
         domain.updateSeaCargoTerms(
                 jpa.getServiceTerm(),
@@ -230,7 +231,6 @@ public class HouseBlMapper {
         jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
         jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
         jpa.setDocPartnerAddress(mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
-        jpa.setDeliveryCode(mapOrNull(domain.getDeliveryCode(), PortCode::value));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), WeightUnit::name));
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
@@ -271,6 +271,7 @@ public class HouseBlMapper {
         jpa.setSayInformation(domain.getSayInformation());
         jpa.setNoOfContainerOrPackages(domain.getNoOfContainerOrPackages());
         jpa.setBlType(domain.getBlType());
+        jpa.setDeliveryCode(mapOrNull(domain.getDeliveryCode(), PortCode::value));
     }
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {

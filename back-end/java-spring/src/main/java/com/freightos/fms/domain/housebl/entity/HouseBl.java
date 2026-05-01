@@ -156,6 +156,10 @@ public abstract class HouseBl extends BaseEntity {
         this.deliveryCode   = deliveryCode;
     }
 
+    public void assignDeliveryCode(PortCode deliveryCode) {
+        this.deliveryCode = deliveryCode;
+    }
+
     public void assignSettlePartner(CustomerCode settlePartnerCode) {
         this.settlePartnerCode = settlePartnerCode;
     }

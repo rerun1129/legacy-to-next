@@ -98,6 +98,9 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private BlType blType;
 
+    @Column(name = "delivery_code", length = 10)
+    private String deliveryCode;
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -120,4 +123,5 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setSayInformation(String v) { this.sayInformation = v; }
     public void setNoOfContainerOrPackages(String v) { this.noOfContainerOrPackages = v; }
     public void setBlType(BlType v) { this.blType = v; }
+    public void setDeliveryCode(String v) { this.deliveryCode = v; }
 }
