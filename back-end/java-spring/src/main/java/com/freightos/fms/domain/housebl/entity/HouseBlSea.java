@@ -2,6 +2,7 @@ package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.WeightUnit;
+import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -39,6 +40,7 @@ public class HouseBlSea extends HouseBl {
     private boolean isTriangle = false;
 
     private ServiceTerm serviceTerm;
+    private BlType blType;              // SEA 수출만 적용
     private String vesselNationality;
     private WeightUnit weightUnit;
     private Rton rton;
@@ -74,6 +76,8 @@ public class HouseBlSea extends HouseBl {
         this.sayInformation = sayInformation;
         this.noOfContainerOrPackages = noOfContainerOrPackages;
     }
+
+    public void updateBlType(BlType blType) { this.blType = blType; }
 
     public void updateVesselNationality(String vesselNationality) {
         this.vesselNationality = vesselNationality;

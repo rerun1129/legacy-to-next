@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.domain.housebl.entity.HouseBlSea;
 import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
@@ -51,7 +52,7 @@ public record HouseBlDetailResponse(
                 entity.getJobDiv(),
                 entity.getBound(),
                 entity.getShipmentType(),
-                entity.getBlType(),
+                entity instanceof HouseBlSea sea ? sea.getBlType() : null,
                 entity.getFreightTerm(),
                 mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 mapOrNull(entity.getConsigneeCode(), CustomerCode::value),

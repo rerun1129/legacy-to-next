@@ -6,7 +6,6 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
-import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
@@ -33,7 +32,6 @@ public abstract class HouseBl extends BaseEntity {
 
     // ── 상태 ──────────────────────────────────────────────────────
     private ShipmentType shipmentType;  // HOUSE / DIRECT
-    private BlType blType;              // SEA 수출만 적용
     private FreightTerm freightTerm;
 
     // ── 당사자 (코드 참조) ─────────────────────────────────────────
@@ -144,9 +142,8 @@ public abstract class HouseBl extends BaseEntity {
         this.hsCode       = hsCode;
     }
 
-    public void updateBlStatus(ShipmentType shipmentType, BlType blType, FreightTerm freightTerm) {
+    public void updateBlStatus(ShipmentType shipmentType, FreightTerm freightTerm) {
         this.shipmentType = shipmentType;
-        this.blType       = blType;
         this.freightTerm  = freightTerm;
     }
 

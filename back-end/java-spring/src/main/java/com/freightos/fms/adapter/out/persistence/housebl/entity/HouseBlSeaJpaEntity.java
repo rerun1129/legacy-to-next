@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
+import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.LoadType;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.ServiceTerm;
@@ -93,6 +94,10 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "no_of_container_or_packages", length = 100)
     private String noOfContainerOrPackages;
 
+    @Column(name = "bl_type", length = 15)
+    @Enumerated(EnumType.STRING)
+    private BlType blType;
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -114,4 +119,5 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setRton(BigDecimal v) { this.rton = v; }
     public void setSayInformation(String v) { this.sayInformation = v; }
     public void setNoOfContainerOrPackages(String v) { this.noOfContainerOrPackages = v; }
+    public void setBlType(BlType v) { this.blType = v; }
 }

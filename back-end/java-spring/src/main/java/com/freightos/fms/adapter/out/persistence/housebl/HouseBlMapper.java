@@ -116,7 +116,7 @@ public class HouseBlMapper {
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.assignOperator(CustomerCode.of(jpa.getActualCustomerCode()), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()), EmployeeCode.of(jpa.getSalesManCode()));
-        domain.updateBlStatus(jpa.getShipmentType(), jpa.getBlType(), jpa.getFreightTerm());
+        domain.updateBlStatus(jpa.getShipmentType(), jpa.getFreightTerm());
         domain.assignParties(
                 CustomerCode.of(jpa.getShipperCode(), jpa.getShipperAddress()),
                 CustomerCode.of(jpa.getConsigneeCode(), jpa.getConsigneeAddress()),
@@ -152,6 +152,7 @@ public class HouseBlMapper {
                 Rton.of(jpa.getRton()),
                 jpa.getSayInformation(),
                 jpa.getNoOfContainerOrPackages());
+        domain.updateBlType(jpa.getBlType());
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
@@ -220,7 +221,6 @@ public class HouseBlMapper {
         jpa.setSalesManCode(mapOrNull(domain.getSalesManCode(), EmployeeCode::value));
         jpa.setMasterBlId(domain.getMasterBlId());
         jpa.setShipmentType(domain.getShipmentType());
-        jpa.setBlType(domain.getBlType());
         jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
         jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
@@ -270,6 +270,7 @@ public class HouseBlMapper {
         jpa.setRton(mapOrNull(domain.getRton(), Rton::ton));
         jpa.setSayInformation(domain.getSayInformation());
         jpa.setNoOfContainerOrPackages(domain.getNoOfContainerOrPackages());
+        jpa.setBlType(domain.getBlType());
     }
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {

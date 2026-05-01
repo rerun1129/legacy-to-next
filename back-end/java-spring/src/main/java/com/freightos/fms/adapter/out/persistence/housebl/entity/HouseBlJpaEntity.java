@@ -4,7 +4,6 @@ import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
-import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.housebl.enums.ShipmentType;
@@ -47,10 +46,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "shipment_type", length = 10)
     @Enumerated(EnumType.STRING)
     private ShipmentType shipmentType;
-
-    @Column(name = "bl_type", length = 15)
-    @Enumerated(EnumType.STRING)
-    private BlType blType;
 
     @Column(name = "freight_term", length = 10)
     @Enumerated(EnumType.STRING)
@@ -189,7 +184,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setSalesManCode(String code) { this.salesManCode = code; }
     public void setMasterBlId(Long masterBlId) { this.masterBlId = masterBlId; }
     public void setShipmentType(ShipmentType shipmentType) { this.shipmentType = shipmentType; }
-    public void setBlType(BlType blType) { this.blType = blType; }
     public void setFreightTerm(FreightTerm freightTerm) { this.freightTerm = freightTerm; }
     public void setShipperCode(String shipperCode) { this.shipperCode = shipperCode; }
     public void setShipperAddress(String shipperAddress) { this.shipperAddress = shipperAddress; }
