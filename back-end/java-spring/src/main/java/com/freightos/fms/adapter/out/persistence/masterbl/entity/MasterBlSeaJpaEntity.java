@@ -1,11 +1,15 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 /**
  * JPA ORM 엔티티 — Master B/L 해상 확장.
@@ -55,6 +59,26 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private WeightUnit weightUnit;
 
+    @Column(name = "service_term", length = 20)
+    @Enumerated(EnumType.STRING)
+    private ServiceTerm serviceTerm;
+
+    @Column(name = "bl_type", length = 15)
+    @Enumerated(EnumType.STRING)
+    private BlType blType;
+
+    @Column(name = "vessel_code", length = 20)
+    private String vesselCode;
+
+    @Column(name = "por_code", length = 10)
+    private String porCode;
+
+    @Column(name = "final_dest_code", length = 10)
+    private String finalDestCode;
+
+    @Column(name = "rton", columnDefinition = "NUMERIC(10,3)")
+    private BigDecimal rton;
+
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -65,4 +89,10 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     public void setIssueDate(String v) { this.issueDate = v; }
     public void setVesselNationality(String v) { this.vesselNationality = v; }
     public void setWeightUnit(WeightUnit v) { this.weightUnit = v; }
+    public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
+    public void setBlType(BlType v) { this.blType = v; }
+    public void setVesselCode(String v) { this.vesselCode = v; }
+    public void setPorCode(String v) { this.porCode = v; }
+    public void setFinalDestCode(String v) { this.finalDestCode = v; }
+    public void setRton(BigDecimal v) { this.rton = v; }
 }

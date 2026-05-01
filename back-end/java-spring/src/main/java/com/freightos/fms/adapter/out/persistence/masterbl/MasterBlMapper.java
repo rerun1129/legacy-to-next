@@ -9,6 +9,8 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSchedul
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.housebl.enums.BlType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAirCharge;
@@ -80,11 +82,15 @@ public class MasterBlMapper {
 
     private void copySeaFields(MasterBlSeaJpaEntity jpa, MasterBlSea domain) {
         domain.updateSeaFields(jpa.getLoadType(), LinerCode.of(jpa.getLinerCode()),
-                VesselVoyage.of(null, jpa.getVesselName(), jpa.getVoyageNo()),
+                VesselVoyage.of(jpa.getVesselCode(), jpa.getVesselName(), jpa.getVoyageNo()),
                 BlDate.of(jpa.getOnboardDate()), BlNumber.of(jpa.getLineBkgNo()),
                 BlDate.of(jpa.getIssueDate()));
         domain.updateVesselNationality(jpa.getVesselNationality());
         domain.updateWeightUnit(jpa.getWeightUnit());
+        domain.updateServiceTerm(jpa.getServiceTerm());
+        domain.updateBlType(jpa.getBlType());
+        domain.updateRoute(PortCode.of(jpa.getPorCode()), PortCode.of(jpa.getFinalDestCode()));
+        domain.updateRton(Rton.of(jpa.getRton()));
     }
 
     private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
@@ -135,12 +141,18 @@ public class MasterBlMapper {
         if (domain.getVesselVoyage() != null) {
             jpa.setVesselName(domain.getVesselVoyage().vesselName());
             jpa.setVoyageNo(domain.getVesselVoyage().voyageNo());
+            jpa.setVesselCode(domain.getVesselVoyage().vesselCode());
         }
         jpa.setOnboardDate(mapOrNull(domain.getOnboardDate(), BlDate::asString));
         jpa.setLineBkgNo(mapOrNull(domain.getLineBkgNo(), BlNumber::value));
         jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
         jpa.setVesselNationality(domain.getVesselNationality());
         jpa.setWeightUnit(domain.getWeightUnit());
+        jpa.setServiceTerm(domain.getServiceTerm());
+        jpa.setBlType(domain.getBlType());
+        jpa.setPorCode(mapOrNull(domain.getPorCode(), PortCode::value));
+        jpa.setFinalDestCode(mapOrNull(domain.getFinalDestCode(), PortCode::value));
+        jpa.setRton(mapOrNull(domain.getRton(), Rton::ton));
     }
 
     public void applyAirFields(MasterBlAir domain, MasterBlAirJpaEntity jpa) {

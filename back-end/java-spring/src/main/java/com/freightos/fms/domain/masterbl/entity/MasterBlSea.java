@@ -4,7 +4,9 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
+import com.freightos.fms.domain.housebl.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.LoadType;
+import com.freightos.fms.domain.housebl.enums.ServiceTerm;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +30,12 @@ public class MasterBlSea extends MasterBl {
     private BlDate issueDate;
     private WeightUnit weightUnit;
     private String vesselNationality;
+
+    private ServiceTerm serviceTerm;
+    private BlType blType;
+    private PortCode porCode;
+    private PortCode finalDestCode;
+    private Rton rton;
 
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
@@ -56,4 +64,15 @@ public class MasterBlSea extends MasterBl {
     public void updateWeightUnit(WeightUnit weightUnit) {
         this.weightUnit = weightUnit;
     }
+
+    public void updateServiceTerm(ServiceTerm serviceTerm) { this.serviceTerm = serviceTerm; }
+
+    public void updateBlType(BlType blType) { this.blType = blType; }
+
+    public void updateRoute(PortCode porCode, PortCode finalDestCode) {
+        this.porCode = porCode;
+        this.finalDestCode = finalDestCode;
+    }
+
+    public void updateRton(Rton rton) { this.rton = rton; }
 }
