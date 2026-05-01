@@ -2,6 +2,8 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.DescClause1;
+import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
@@ -271,8 +273,8 @@ class HouseBlMapperTest {
         descJpa.setHouseBl(houseBlJpa);
         descJpa.setMarks("MARKS");
         descJpa.setDescription("DESCRIPTION");
-        descJpa.setDescClause1("CLAUSE1");
-        descJpa.setDescClause2("CLAUSE2");
+        descJpa.setDescClause1(DescClause1.A);
+        descJpa.setDescClause2(DescClause2.A);
         descJpa.setRemark("REMARK TEXT");
 
         HouseBlDesc domain = docMapper.toDescDomain(descJpa);
@@ -280,7 +282,7 @@ class HouseBlMapperTest {
         assertThat(domain.getHouseBlId()).isEqualTo(1L);
         assertThat(domain.getMarks()).isEqualTo("MARKS");
         assertThat(domain.getDescription()).isEqualTo("DESCRIPTION");
-        assertThat(domain.getDescClause1()).isEqualTo("CLAUSE1");
+        assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(domain.getRemark()).isEqualTo("REMARK TEXT");
     }
 
@@ -291,14 +293,14 @@ class HouseBlMapperTest {
         houseBlJpa.setHouseBlId(1L);
 
         HouseBlDesc domain = HouseBlDesc.create(1L);
-        domain.updateContent("MARKS", "DESCRIPTION", "CLAUSE1", "CLAUSE2", "REMARK TEXT");
+        domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A, "REMARK TEXT");
         HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
 
         docMapper.applyDescFields(domain, jpa, houseBlJpa);
 
         assertThat(jpa.getMarks()).isEqualTo("MARKS");
         assertThat(jpa.getDescription()).isEqualTo("DESCRIPTION");
-        assertThat(jpa.getDescClause1()).isEqualTo("CLAUSE1");
+        assertThat(jpa.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(jpa.getRemark()).isEqualTo("REMARK TEXT");
         assertThat(jpa.getHouseBl()).isEqualTo(houseBlJpa);
     }

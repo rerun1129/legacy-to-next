@@ -1,6 +1,8 @@
 package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.fms.domain.common.enums.DescClause1;
+import com.freightos.fms.domain.common.enums.DescClause2;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +19,8 @@ public class MasterBlDesc extends BaseEntity {
     private Long masterBlId;
     private String marks;
     private String description;
-    private String descClause1;
-    private String descClause2;
+    private DescClause1 descClause1;
+    private DescClause2 descClause2;
     private String remark;
 
     public static MasterBlDesc create(Long masterBlId) {
@@ -28,7 +30,7 @@ public class MasterBlDesc extends BaseEntity {
     }
 
     public void updateContent(String marks, String description,
-                              String descClause1, String descClause2, String remark) {
+                              DescClause1 descClause1, DescClause2 descClause2, String remark) {
         this.marks       = marks;
         this.description = description;
         this.descClause1 = descClause1;

@@ -7,6 +7,8 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEnti
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.DescClause1;
+import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.enums.RateClass;
@@ -271,16 +273,16 @@ class MasterBlMapperTest {
         descJpa.setMasterBl(masterBlJpa);
         descJpa.setMarks("MARKS");
         descJpa.setDescription("DESCRIPTION");
-        descJpa.setDescClause1("CLAUSE1");
-        descJpa.setDescClause2("CLAUSE2");
+        descJpa.setDescClause1(DescClause1.A);
+        descJpa.setDescClause2(DescClause2.A);
         descJpa.setRemark("REMARK");
 
         MasterBlDesc domain = mapper.toDescDomain(descJpa);
 
         assertThat(domain.getMarks()).isEqualTo("MARKS");
         assertThat(domain.getDescription()).isEqualTo("DESCRIPTION");
-        assertThat(domain.getDescClause1()).isEqualTo("CLAUSE1");
-        assertThat(domain.getDescClause2()).isEqualTo("CLAUSE2");
+        assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(domain.getDescClause2()).isEqualTo(DescClause2.A);
         assertThat(domain.getRemark()).isEqualTo("REMARK");
     }
 
@@ -291,14 +293,14 @@ class MasterBlMapperTest {
         masterBlJpa.setMasterBlId(2L);
 
         MasterBlDesc domain = MasterBlDesc.create(2L);
-        domain.updateContent("MARKS", "DESCRIPTION", "CLAUSE1", "CLAUSE2", "REMARK");
+        domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A, "REMARK");
         MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
 
         mapper.applyDescFields(domain, descJpa, masterBlJpa);
 
         assertThat(descJpa.getMarks()).isEqualTo("MARKS");
         assertThat(descJpa.getDescription()).isEqualTo("DESCRIPTION");
-        assertThat(descJpa.getDescClause1()).isEqualTo("CLAUSE1");
+        assertThat(descJpa.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(descJpa.getRemark()).isEqualTo("REMARK");
         assertThat(descJpa.getMasterBl()).isSameAs(masterBlJpa);
     }
@@ -413,15 +415,15 @@ class MasterBlMapperTest {
         masterBlJpa.setMasterBlId(1L);
 
         MasterBlDesc domain = MasterBlDesc.create(1L);
-        domain.updateContent("MARKS", "DESC", "CLAUSE1", "CLAUSE2", "REMARK");
+        domain.updateContent("MARKS", "DESC", DescClause1.A, DescClause2.A, "REMARK");
 
         MasterBlDescJpaEntity result = mapper.toDescJpa(domain, masterBlJpa);
 
         assertThat(result.getMasterBl()).isSameAs(masterBlJpa);
         assertThat(result.getMarks()).isEqualTo("MARKS");
         assertThat(result.getDescription()).isEqualTo("DESC");
-        assertThat(result.getDescClause1()).isEqualTo("CLAUSE1");
-        assertThat(result.getDescClause2()).isEqualTo("CLAUSE2");
+        assertThat(result.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
         assertThat(result.getRemark()).isEqualTo("REMARK");
     }
 }

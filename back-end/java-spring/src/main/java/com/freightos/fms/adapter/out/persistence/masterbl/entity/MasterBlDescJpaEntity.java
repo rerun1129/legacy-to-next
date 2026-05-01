@@ -1,6 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
 import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.fms.domain.common.enums.DescClause1;
+import com.freightos.fms.domain.common.enums.DescClause2;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,11 +32,13 @@ public class MasterBlDescJpaEntity extends BaseJpaEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "desc_clause_1", length = 50)
-    private String descClause1;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "desc_clause_1")
+    private DescClause1 descClause1;
 
-    @Column(name = "desc_clause_2", length = 50)
-    private String descClause2;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "desc_clause_2")
+    private DescClause2 descClause2;
 
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
@@ -42,7 +46,7 @@ public class MasterBlDescJpaEntity extends BaseJpaEntity {
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setMarks(String v) { this.marks = v; }
     public void setDescription(String v) { this.description = v; }
-    public void setDescClause1(String v) { this.descClause1 = v; }
-    public void setDescClause2(String v) { this.descClause2 = v; }
+    public void setDescClause1(DescClause1 v) { this.descClause1 = v; }
+    public void setDescClause2(DescClause2 v) { this.descClause2 = v; }
     public void setRemark(String v) { this.remark = v; }
 }
