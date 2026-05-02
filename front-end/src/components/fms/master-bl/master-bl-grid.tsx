@@ -72,18 +72,18 @@ export function MasterBlGrid({ variantKey, variant }: Props) {
       render: (_v, row) => <span className="cell-mono">{row.consigneeCode}</span>,
     },
     {
-      key: "pol",
+      key: "polCode",
       label: "POL",
       minWidth: 70,
       align: "center" as const,
-      render: (_v, row) => <span className="port__code">{row.pol}</span>,
+      render: (_v, row) => <span className="port__code">{row.polCode}</span>,
     },
     {
-      key: "pod",
+      key: "podCode",
       label: "POD",
       minWidth: 70,
       align: "center" as const,
-      render: (_v, row) => <span className="port__code">{row.pod}</span>,
+      render: (_v, row) => <span className="port__code">{row.podCode}</span>,
     },
     {
       key: "etd",

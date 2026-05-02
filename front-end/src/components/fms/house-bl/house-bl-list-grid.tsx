@@ -9,17 +9,6 @@ import type { HouseBlRow } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
-const STATUS_CLASS: Record<string, string> = {
-  ok:     "pill--ok",
-  inprog: "pill--draft",
-  draft:  "pill--hold",
-};
-const STATUS_LABEL: Record<string, string> = {
-  ok:     "Confirmed",
-  inprog: "In Progress",
-  draft:  "Draft",
-};
-
 interface Props { variantKey: string }
 
 export function HouseBLListGrid({ variantKey }: Props) {
@@ -76,26 +65,19 @@ export function HouseBLListGrid({ variantKey }: Props) {
       ),
     },
     {
+      // TODO: BE 미반영 — docStatus 필드가 HouseBlRow에 없음, 후속 사이클 처리
       key: "docStatus",
       label: "Doc Status",
       minWidth: 96,
       align: "center",
-      render: (_v, row) => {
-        const status = row.docStatus ?? "";
-        return (
-          <span className={`pill ${STATUS_CLASS[status] ?? ""}`}>
-            {STATUS_LABEL[status] ?? "-"}
-          </span>
-        );
-      },
+      render: () => <span className="pill">-</span>,
     },
     {
+      // TODO: BE 미반영 — masterBlId 필드가 HouseBlRow에 없음 (HouseBlDetail에만 존재)
       key: "masterBlId",
       label: "MBL No",
       minWidth: 140,
-      render: (_v, row) => (
-        <span className="cell-mono">{row.masterBlId ?? "-"}</span>
-      ),
+      render: () => <span className="cell-mono">-</span>,
     },
     // BE 미반영 — 헤더 유지, 값은 '-' 표시 (key는 컬럼 식별자로만 사용)
     { key: "_sType", label: "Type",  align: "center", minWidth: 56, render: () => <span>-</span> },

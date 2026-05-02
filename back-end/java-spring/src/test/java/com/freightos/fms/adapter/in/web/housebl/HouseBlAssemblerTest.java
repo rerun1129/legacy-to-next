@@ -2,6 +2,8 @@ package com.freightos.fms.adapter.in.web.housebl;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
 import com.freightos.fms.domain.housebl.entity.HouseBlSea;
@@ -21,7 +23,14 @@ class HouseBlAssemblerTest {
     @Test
     @DisplayName("toEntity: jobDiv=SEA, bound=EXP → HouseBlSea 인스턴스 생성, jobDiv·bound 일치")
     void toEntity_seaExp_returnsHouseBlSeaWithCorrectJobDivAndBound() {
-        CreateHouseBlRequest request = new CreateHouseBlRequest(JobDiv.SEA, Bound.EXP);
+        CreateHouseBlRequest request = new CreateHouseBlRequest(
+                JobDiv.SEA, Bound.EXP, null,
+                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                null, null, null,
+                null, null, null, null,
+                null, null, null, null,
+                null, null, null, null
+        );
 
         HouseBl result = assembler.toEntity(request);
 
@@ -33,7 +42,14 @@ class HouseBlAssemblerTest {
     @Test
     @DisplayName("toEntity: jobDiv=AIR, bound=IMP → HouseBlAir 인스턴스 생성, bound 일치")
     void toEntity_airImp_returnsHouseBlAirWithCorrectBound() {
-        CreateHouseBlRequest request = new CreateHouseBlRequest(JobDiv.AIR, Bound.IMP);
+        CreateHouseBlRequest request = new CreateHouseBlRequest(
+                JobDiv.AIR, Bound.IMP, null,
+                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                null, null, null,
+                null, null, null, null,
+                null, null, null, null,
+                null, null, null, null
+        );
 
         HouseBl result = assembler.toEntity(request);
 
@@ -45,7 +61,14 @@ class HouseBlAssemblerTest {
     @Test
     @DisplayName("toEntity: jobDiv=TRUCK → UnsupportedOperationException")
     void toEntity_truckJobDiv_throwsUnsupportedOperationException() {
-        CreateHouseBlRequest request = new CreateHouseBlRequest(JobDiv.TRUCK, Bound.EXP);
+        CreateHouseBlRequest request = new CreateHouseBlRequest(
+                JobDiv.TRUCK, Bound.EXP, null,
+                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                null, null, null,
+                null, null, null, null,
+                null, null, null, null,
+                null, null, null, null
+        );
 
         assertThatThrownBy(() -> assembler.toEntity(request))
                 .isInstanceOf(UnsupportedOperationException.class)
@@ -55,7 +78,14 @@ class HouseBlAssemblerTest {
     @Test
     @DisplayName("toEntity: jobDiv=NON_BL → UnsupportedOperationException")
     void toEntity_nonBlJobDiv_throwsUnsupportedOperationException() {
-        CreateHouseBlRequest request = new CreateHouseBlRequest(JobDiv.NON_BL, Bound.EXP);
+        CreateHouseBlRequest request = new CreateHouseBlRequest(
+                JobDiv.NON_BL, Bound.EXP, null,
+                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                null, null, null,
+                null, null, null, null,
+                null, null, null, null,
+                null, null, null, null
+        );
 
         assertThatThrownBy(() -> assembler.toEntity(request))
                 .isInstanceOf(UnsupportedOperationException.class);
@@ -64,7 +94,14 @@ class HouseBlAssemblerTest {
     @Test
     @DisplayName("toEntity: jobDiv=SEA, bound=IMP → HouseBlSea, bound IMP 확인")
     void toEntity_seaImp_returnsHouseBlSeaWithImpBound() {
-        CreateHouseBlRequest request = new CreateHouseBlRequest(JobDiv.SEA, Bound.IMP);
+        CreateHouseBlRequest request = new CreateHouseBlRequest(
+                JobDiv.SEA, Bound.IMP, null,
+                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                null, null, null,
+                null, null, null, null,
+                null, null, null, null,
+                null, null, null, null
+        );
 
         HouseBl result = assembler.toEntity(request);
 
