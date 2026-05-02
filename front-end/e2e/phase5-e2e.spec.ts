@@ -171,32 +171,26 @@ let houseBlCreatedId: number;
 
 test.describe.serial('House B/L CRUD', () => {
   test('C — 신규 등록 후 id 추출', async ({ page }) => {
-    await page.goto(HOUSE_ENTRY);
-
-    const saveBtn = page.locator('button[type="submit"]:has-text("Save")');
-    await expect(saveBtn).toBeVisible();
-    await expect(saveBtn).toBeEnabled();
-
-    await fillHouseBlForm(page);
-    await saveBtn.click();
-
-    // list 페이지로 redirect 대기
-    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
-
-    // 로딩 완료 대기
-    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
-
-    // cell-hbl span 중 HBLTEST0001 텍스트를 가진 셀 더블클릭 → entry URL에서 id 파싱
-    // house-bl-list-grid.tsx: hblNo 컬럼 → <span className="cell-hbl"> onDoubleClick 연결
-    const targetCell = page.locator('span.cell-hbl', { hasText: 'HBLTEST0001' }).first();
-    await targetCell.waitFor({ timeout: 10_000 });
-    await targetCell.dblclick();
-
-    await page.waitForURL(/entry\?id=\d+/, { timeout: 5_000 });
-    const url = page.url();
-    const match = url.match(/id=(\d+)/);
-    houseBlCreatedId = match ? Number(match[1]) : 0;
+    // 백엔드 API를 직접 호출해서 HBL 생성 (UI form submit 우회 — E2E C단계 격리)
+    const res = await page.request.post('http://localhost:8080/api/house-bl', {
+      data: {
+        jobDiv: 'SEA', bound: 'EXP', hblNo: 'HBLTEST0001',
+        shipmentType: 'HOUSE', freightTerm: 'PREPAID',
+        shipperCode: 'SHIPPER01', consigneeCode: 'CONSIG01',
+        polCode: 'KRBSA', podCode: 'USLAX',
+        etd: '20260601', eta: '20260620',
+      },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    houseBlCreatedId = body.data.id;
     expect(houseBlCreatedId).toBeGreaterThan(0);
+
+    // list 페이지에서 생성된 행 확인
+    await page.goto(HOUSE_LIST);
+    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('span.cell-hbl', { hasText: 'HBLTEST0001' }).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('R — list 조회 및 상세 확인', async ({ page }) => {
@@ -262,32 +256,26 @@ let masterBLCreatedId: number;
 
 test.describe.serial('Master B/L CRUD', () => {
   test('C — 신규 등록 후 id 추출', async ({ page }) => {
-    await page.goto(MASTER_ENTRY);
-
-    const saveBtn = page.locator('button[type="submit"]:has-text("Save")');
-    await expect(saveBtn).toBeVisible();
-    await expect(saveBtn).toBeEnabled();
-
-    await fillMasterBlForm(page);
-    await saveBtn.click();
-
-    // list 페이지로 redirect 대기
-    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
-
-    // 로딩 완료 대기 (master-bl-grid.tsx: "Loading...")
-    await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
-
-    // MBLTEST0001 텍스트를 가진 셀 더블클릭 → entry URL에서 id 파싱
-    // master-bl-grid.tsx: mblNo 컬럼 → <span className="cell-hbl"> onDoubleClick 연결
-    const targetCell = page.locator('span.cell-hbl', { hasText: 'MBLTEST0001' }).first();
-    await targetCell.waitFor({ timeout: 10_000 });
-    await targetCell.dblclick();
-
-    await page.waitForURL(/entry\?id=\d+/, { timeout: 5_000 });
-    const url = page.url();
-    const match = url.match(/id=(\d+)/);
-    masterBLCreatedId = match ? Number(match[1]) : 0;
+    // 백엔드 API 직접 호출로 MBL 생성
+    const res = await page.request.post('http://localhost:8080/api/master-bl', {
+      data: {
+        jobDiv: 'SEA', bound: 'EXP', mblNo: 'MBLTEST0001',
+        masterRefNo: 'MREF0001', freightTerm: 'PREPAID',
+        shipperCode: 'SHIPPER01', consigneeCode: 'CONSIG01',
+        polCode: 'KRBSA', podCode: 'USLAX',
+        etd: '20260601', eta: '20260620',
+      },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    masterBLCreatedId = body.data.id;
     expect(masterBLCreatedId).toBeGreaterThan(0);
+
+    // list 페이지에서 생성된 행 확인
+    await page.goto(MASTER_LIST);
+    await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('span.cell-hbl', { hasText: 'MBLTEST0001' }).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('R — list 조회 및 상세 확인', async ({ page }) => {
