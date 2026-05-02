@@ -74,7 +74,7 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()));
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), jpa.getWeightUnit(),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), null, // weightUnit: sea 확장 테이블에서 별도 로드
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         domain.updateTradeInfo(jpa.getMainItemName(), jpa.getHsCode());

@@ -123,7 +123,7 @@ public class HouseBlMapper {
                 CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()),
                 CustomerCode.of(jpa.getDocPartnerCode(), jpa.getDocPartnerAddress()),
                 null);
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), jpa.getWeightUnit(),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), null, // weightUnit: sea/air 확장 테이블에서 별도 로드
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());
