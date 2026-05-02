@@ -270,4 +270,16 @@ class MasterBlServiceTest {
 
         assertThat(result.masterBl()).isEqualTo(master);
     }
+
+    @Test
+    @DisplayName("save - port.saveMasterBl 위임 호출 후 port 반환값을 그대로 반환")
+    void save_delegatesToPort_returnsResult() {
+        MasterBl mockMasterBl = mock(MasterBl.class);
+        given(masterBlPort.saveMasterBl(mockMasterBl)).willReturn(mockMasterBl);
+
+        MasterBl result = masterBlService.save(mockMasterBl);
+
+        assertThat(result).isEqualTo(mockMasterBl);
+        then(masterBlPort).should().saveMasterBl(mockMasterBl);
+    }
 }

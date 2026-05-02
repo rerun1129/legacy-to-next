@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
@@ -46,21 +47,21 @@ public class HouseBlController {
                 houseBlUseCase.getHouseBlsByJobDivAndBound(jobDiv, bound, PageRequest.of(page, size)))));
     }
 
+    @Operation(summary = "House B/L 생성")
+    @PostMapping
+    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> createHouseBl(
+            @Valid @RequestBody CreateHouseBlRequest request,
+            UriComponentsBuilder uriBuilder) {
+        HouseBl saved = houseBlUseCase.save(houseBlAssembler.toEntity(request));
+        URI location = uriBuilder.path("/api/house-bl/{id}").buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location)
+                .body(ApiResponse.of(houseBlAssembler.toDetail(saved), MessageCode.HOUSE_BL_CREATED.message()));
+    }
+
     @Operation(summary = "House B/L 단건 조회")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<HouseBlDetailResponse>> getHouseBlById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.findHouseBlById(id))));
-    }
-
-    @Operation(summary = "House B/L 생성")
-    @PostMapping
-    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> create(
-            @Valid @RequestBody CreateHouseBlRequest req) {
-        HouseBl entity = houseBlAssembler.toEntity(req);
-        HouseBl saved  = houseBlUseCase.save(entity);
-        URI location   = URI.create("/api/house-bl/" + saved.getId());
-        return ResponseEntity.created(location)
-                .body(ApiResponse.of(houseBlAssembler.toDetail(saved)));
     }
 
     @Operation(summary = "House B/L 수정")

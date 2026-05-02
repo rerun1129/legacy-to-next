@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
@@ -43,25 +43,22 @@ public class MasterBlController {
                 masterBlAssembler.toSummaryPage(masterBlUseCase.getMasterBlsByBound(bound, PageRequest.of(page, size)))));
     }
 
+    @Operation(summary = "Master B/L 생성")
+    @PostMapping
+    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> createMasterBl(
+            @Valid @RequestBody CreateMasterBlRequest request,
+            UriComponentsBuilder uriBuilder) {
+        MasterBl saved = masterBlUseCase.save(masterBlAssembler.toEntity(request));
+        URI location = uriBuilder.path("/api/master-bl/{id}").buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location)
+                .body(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(saved.getId())),
+                        MessageCode.MASTER_BL_CREATED.message()));
+    }
+
     @Operation(summary = "Master B/L 단건 조회")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> findMasterBlById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(id))));
-    }
-
-    @Operation(summary = "Master B/L 신규 등록")
-    @PostMapping
-    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> createMasterBl(
-            @Valid @RequestBody CreateMasterBlRequest req) {
-        MasterBl saved = masterBlUseCase.save(masterBlAssembler.toEntity(req));
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.getId())
-                .toUri();
-        return ResponseEntity.created(location)
-                .body(ApiResponse.of(
-                        masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(saved.getId())),
-                        MessageCode.MASTER_BL_CREATED.message()));
     }
 
     @Operation(summary = "Master B/L 수정")

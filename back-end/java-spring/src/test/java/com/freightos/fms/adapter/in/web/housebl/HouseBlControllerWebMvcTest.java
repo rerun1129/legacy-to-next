@@ -6,6 +6,7 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +30,9 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -146,6 +151,72 @@ class HouseBlControllerWebMvcTest {
                 .given(houseBlUseCase).deleteHouseBlById(id);
 
         mockMvc.perform(delete("/api/house-bl/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value(MessageCode.HOUSE_BL_NOT_FOUND.message()));
+    }
+
+    // ── POST /api/house-bl ────────────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /api/house-bl: jobDiv=SEA, bound=EXP happy path → 201 + Location 헤더")
+    void createHouseBl_happyPath_returns201WithLocation() throws Exception {
+        HouseBl mockEntity = mock(HouseBl.class);
+        HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
+        given(mockEntity.getId()).willReturn(1L);
+        given(houseBlAssembler.toEntity(any())).willReturn(mockEntity);
+        given(houseBlUseCase.save(mockEntity)).willReturn(mockEntity);
+        given(houseBlAssembler.toDetail(mockEntity)).willReturn(mockResponse);
+
+        mockMvc.perform(post("/api/house-bl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/house-bl/1")));
+
+        then(houseBlUseCase).should().save(mockEntity);
+    }
+
+    @Test
+    @DisplayName("POST /api/house-bl: jobDiv 누락 → 400 validation 오류")
+    void createHouseBl_missingJobDiv_returns400() throws Exception {
+        mockMvc.perform(post("/api/house-bl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"bound\":\"EXP\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    // ── PUT /api/house-bl/{id} ────────────────────────────────────────
+
+    @Test
+    @DisplayName("PUT /api/house-bl/1: happy path → 200")
+    void updateHouseBl_happyPath_returns200() throws Exception {
+        Long id = 1L;
+        HouseBl mockEntity = mock(HouseBl.class);
+        HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
+        given(houseBlUseCase.findHouseBlById(id)).willReturn(mockEntity);
+        given(houseBlUseCase.save(mockEntity)).willReturn(mockEntity);
+        given(houseBlAssembler.toDetail(mockEntity)).willReturn(mockResponse);
+
+        mockMvc.perform(put("/api/house-bl/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+
+        then(houseBlUseCase).should().findHouseBlById(id);
+        then(houseBlUseCase).should().save(mockEntity);
+    }
+
+    @Test
+    @DisplayName("PUT /api/house-bl/999: 존재하지 않는 id → 404")
+    void updateHouseBl_whenNotFound_returns404() throws Exception {
+        Long id = 999L;
+        given(houseBlUseCase.findHouseBlById(id))
+                .willThrow(new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
+
+        mockMvc.perform(put("/api/house-bl/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.detail").value(MessageCode.HOUSE_BL_NOT_FOUND.message()));

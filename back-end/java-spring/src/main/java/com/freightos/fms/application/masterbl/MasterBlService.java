@@ -44,6 +44,13 @@ public class MasterBlService implements MasterBlUseCase {
 
     @Override
     @Transactional
+    public MasterBl save(MasterBl masterBl) {
+        log.debug("Saving MasterBl: {}", masterBl.getMblNo());
+        return masterBlPort.saveMasterBl(masterBl);
+    }
+
+    @Override
+    @Transactional
     public void deleteMasterBlById(Long id) {
         masterBlPort.deleteMasterBl(findMasterBlById(id));
         log.info("Deleted MasterBl id={}", id);
