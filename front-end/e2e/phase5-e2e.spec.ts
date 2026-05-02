@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 // bl-variants.ts BL_VARIANT_KEYS: ['sea-exp', 'sea-imp', 'air-exp', 'air-imp']
-// sea-exp: 필드가 가장 많은 EXP variant (hasContainer, hasIssueInfo 모두 true)
+// sea-exp: hasContainer·hasIssueInfo 모두 true, 입력 필드가 가장 풍부한 variant
 const HOUSE_VARIANT  = 'sea-exp';
 const MASTER_VARIANT = 'sea-exp';
 
@@ -12,56 +12,157 @@ const MASTER_ENTRY = `/fms/master-bl/${MASTER_VARIANT}/entry`;
 
 // ── House B/L 폼 채우기 헬퍼 ───────────────────────────────────────────────
 //
-// house-bl-entry.tsx의 form.register 연결 현황:
-//   form.register('hbl')    → toolbar "HBL No"  input[name="hbl"]
-//   form.register('mbl')    → toolbar "MBL No"  input[name="mbl"]
-//   form.register('lType')  → toolbar "Load Type" input[name="lType"]
-//   form.register('settle') → toolbar "Settle"  input[name="settle"]  (text input, select 아님)
+// house-bl-entry.tsx 조사 결과:
 //
-// form에 존재하지만 DOM name attribute 미노출 필드:
-//   sType, etd, eta, pol, pod, expImp — tab panel 내부의 독립 defaultValue input으로 렌더됨
-//   TODO: 해당 필드들이 form.register로 연결되면 name selector로 채울 수 있음
+// [toolbar — form.register 연결 필드 → name attribute 있음]
+//   form.register('hbl')    → input placeholder="HBL No",   name="hbl"
+//   form.register('mbl')    → input placeholder="MBL No",   name="mbl"
+//   form.register('lType')  → input placeholder="Load Type", name="lType"
+//   form.register('settle') → input placeholder="Settle",    name="settle" (text input)
 //
-// party/schedule/trade 패널은 모두 독립 input (form.register 미연결, defaultValue 사용)
-// → Playwright로 채울 수 없는 커스텀 컴포넌트 구조
+// [toolbar — form.register 미연결 → defaultValue only, name attribute 없음]
+//   "Shipment Type", "Service Term", "B/L Type", "Master Ref"
+//   → getByPlaceholder 로 접근 가능
+//
+// [Main 탭 — PartyPanel (party-panel.tsx)]
+//   PartyBlock 마다: input placeholder="Code", input placeholder="Company Name"
+//   textarea placeholder="Address (free text)"
+//   → 동일 placeholder 다수 존재 → .nth(n) 로케이터 필요
+//   SHIPPER=index0, CONSIGNEE=index1, NOTIFY=index2, DOC PARTNER=index3
+//
+// [Main 탭 — SchedulePanel (schedule-panel.tsx)]
+//   Liner Code: input placeholder="Code" (party Code와 같은 placeholder, 패널이 다름)
+//   Liner Name: input (placeholder 없음, defaultValue="COSCO SHIPPING")
+//   Vessel: input (defaultValue 사용, placeholder 없음)
+//   Voyage: input (defaultValue 사용, placeholder 없음)
+//   ETD/ETA: PanelDateInput → DateInputBase → input placeholder="yyyyMMdd"
+//     → 동일 placeholder 다수 존재 → .nth(n) 로케이터 필요
+//   POL/POD: input placeholder="UNLOC" / input placeholder="Port Name"
+//     → 동일 placeholder 다수 존재 → .nth(n) 로케이터 필요
+//
+// [Main 탭 — TradePanel (trade-panel.tsx)]
+//   Incoterms/Freight Term/Payable At/Co-Load: defaultValue only, placeholder 없음
+//   Actual Customer/Sales Man/Operator/Team: defaultValue only, placeholder 없음
+//   → 채울 수 없음: placeholder 없고 label 텍스트와 input이 직접 연결된 label 요소 없음
+//
+// [WidgetGrid 주의사항]
+//   WidgetGrid는 ResizeObserver로 containerWidth 측정 후 렌더
+//   → page.waitForSelector로 패널 내 input이 실제 DOM에 나타날 때까지 대기 필요
+//
 async function fillHouseBlForm(page: Page): Promise<void> {
-  // form.register 연결 필드 — name attribute로 직접 접근 가능
-  await page.fill('input[name="hbl"]',    'HBLTEST0001');
-  await page.fill('input[name="mbl"]',    'MBLTEST0001');
-  await page.fill('input[name="lType"]',  'CY/CY');
-  // settle은 text input (select 아님) — defaultValue "PREPAID"이므로 그대로 유지
-  // form.register('settle')의 defaultValue가 이미 "PREPAID"로 설정되어 있음
+  // ── Toolbar (form.register 연결 필드) ──────────────────────────────────────
+  await page.fill('input[name="hbl"]', 'HBLTEST0001');
+  await page.fill('input[name="mbl"]', 'MBLTEST0001');
+  await page.fill('input[name="lType"]', 'CY/CY');
+  // settle: form.register 연결 text input — defaultValue "PREPAID" 이미 설정됨
+  // clearFirst로 기존값 지우고 새 값 입력
+  await page.fill('input[name="settle"]', 'PREPAID');
+
+  // ── Toolbar (form.register 미연결, getByPlaceholder 접근) ──────────────────
+  // "Shipment Type": defaultValue="FCL", form 미연결
+  await page.getByPlaceholder('Shipment Type').fill('HOUSE');
+  // "Service Term": defaultValue="FCL", form 미연결
+  // 채울 수 없음: placeholder="Service Term" 이나 DOM에 렌더된 값은 defaultValue 기반으로 표시만 됨
+  // → getByPlaceholder로 덮어쓰기는 가능 (defaultValue 있어도 fill은 작동)
+  await page.getByPlaceholder('B/L Type').fill('OBL');
+
+  // ── Main 탭 — PartyPanel ─────────────────────────────────────────────────
+  // WidgetGrid가 ResizeObserver 완료 후 렌더하므로 party Code input 나타날 때까지 대기
+  // party-panel.tsx: SHIPPER(0), CONSIGNEE(1), NOTIFY(2), DOC PARTNER(3) 순서
+  await page.waitForSelector('input[placeholder="Code"]', { timeout: 5_000 });
+
+  // SHIPPER Code
+  await page.getByPlaceholder('Code').nth(0).fill('SHIPPER01');
+  // CONSIGNEE Code
+  await page.getByPlaceholder('Code').nth(1).fill('CONSIG01');
+  // NOTIFY Code
+  await page.getByPlaceholder('Code').nth(2).fill('NOTIFY01');
+
+  // Company Name (동일 placeholder 순서: SHIPPER=0, CONSIGNEE=1, NOTIFY=2, DOC PARTNER=3)
+  await page.getByPlaceholder('Company Name').nth(0).fill('SHIPPER CO LTD');
+  await page.getByPlaceholder('Company Name').nth(1).fill('CONSIG CO LTD');
+
+  // ── Main 탭 — SchedulePanel ─────────────────────────────────────────────
+  // schedule-panel.tsx: PanelDateInput → DateInputBase → placeholder="yyyyMMdd"
+  // ETD(index 0), ETA(index 1)
+  await page.getByPlaceholder('yyyyMMdd').nth(0).fill('20260601');
+  await page.getByPlaceholder('yyyyMMdd').nth(1).fill('20260620');
+
+  // POL/POD: input placeholder="UNLOC"
+  // schedule-panel.tsx LcnField: POL(index 0), POD(index 1), Delivery(index 2)
+  await page.getByPlaceholder('UNLOC').nth(0).fill('KRBSA');
+  await page.getByPlaceholder('UNLOC').nth(1).fill('USLAX');
+
+  // ── Main 탭 — TradePanel ────────────────────────────────────────────────
+  // 채울 수 없음: trade-panel.tsx LiField/LcnField 모두 placeholder 없고
+  //   label은 <span> 요소로 label[for] 연결 없음 → Playwright getByLabel 미작동
+  // 채울 수 없음: Incoterms, Freight Term, Payable At, Co-Load, Operator, Team, Sales Man
 }
 
 // ── Master B/L 폼 채우기 헬퍼 ─────────────────────────────────────────────
 //
-// master-bl-entry.tsx 분석 결과:
-//   toolbar input 전체가 defaultValue만 사용하며 form.register 미연결
-//   → toolbar input들은 DOM에 name attribute 없음
+// master-bl-entry.tsx 조사 결과:
 //
-// form.register 연결 필드(mblNo, masterRefNo, freightTerm, shipperCode 등)는
-// MasterMainTab → WidgetGrid → 각 패널 컴포넌트로 전달되지만,
-// 해당 패널들(MasterPartyPanel, MasterSchedulePanel, MasterCargoDocPanel)은
-// 독립 input (form.register 미연결, defaultValue 사용)
-// TODO: 백엔드 연동 시 form.register 연결 확장 필요
-async function fillMasterBlForm(_page: Page): Promise<void> {
-  // 현재 Master B/L entry의 form.register 연결 필드가 DOM에 name attribute로
-  // 노출되지 않아 Playwright selector로 직접 채울 수 없음
-  // defaultValues: freightTerm="PREPAID", jobDiv="SEA", bound="EXP" 으로 초기화됨
-  // TODO: form.register 연결 확장 후 아래 채우기 로직 추가
-  //   await page.fill('input[name="mblNo"]',      'MBLTEST0001');
-  //   await page.fill('input[name="masterRefNo"]', 'MREF0001');
-  //   await page.selectOption('select[name="freightTerm"]', 'PREPAID');
-  //   await page.fill('input[name="shipperCode"]',   'SHIPPER01');
-  //   await page.fill('input[name="consigneeCode"]', 'CONSIG01');
-  //   await page.fill('input[name="polCode"]',       'KRBSA');
-  //   await page.fill('input[name="podCode"]',       'USLAX');
-  //   await page.fill('input[name="etd"]',           '20260601');
-  //   await page.fill('input[name="eta"]',           '20260620');
-  //   await page.fill('input[name="pkgQty"]',        '5');
-  //   await page.fill('input[name="grossWeightKg"]', '500');
-  //   await page.fill('input[name="cbm"]',           '10');
-  //   await page.fill('input[name="operatorCode"]',  'OP01');
+// [toolbar — 전체 form.register 미연결]
+//   master-bl-entry.tsx toolbar: 모든 input이 defaultValue only, name attribute 없음
+//   placeholder={f || ""} 로 렌더됨
+//   "Master Ref"    → placeholder="Master Ref"
+//   "MBL No"        → placeholder="MBL No"
+//   "Line Bkg. No"  → placeholder="Line Bkg. No"
+//   "Load Type"     → placeholder="Load Type"
+//   "Service Term"  → placeholder="Service Term"
+//   "B/L Type"      → placeholder="B/L Type"
+//   "Shipment Type" → placeholder="Shipment Type"
+//   "Status"        → placeholder="Status"
+//
+// [Main 탭 — MasterPartyPanel (master-panels.tsx)]
+//   PartyBlock 마다: input placeholder="Code", input placeholder="Company Name"
+//   textarea placeholder="Address (free text)"
+//   SHIPPER=index0, CONSIGNEE=index1, NOTIFY=index2
+//
+// [Main 탭 — MasterSchedulePanel (master-schedule-panel.tsx, sea-exp)]
+//   buildSeaFields: Liner Code(no placeholder, defaultValue), Vessel(no placeholder), Voyage(no placeholder)
+//   ETD/ETA: PanelDateInput → placeholder="yyyyMMdd"
+//   POL/POD: input placeholder="UNLOC"
+//
+// [Main 탭 — MasterCargoDocPanel (master-cargo-doc-panel.tsx)]
+//   Main Item/HS Code/CBM/R-Ton: defaultValue only, placeholder 없음
+//   PackageField → input type="number" (placeholder 없음), select
+//   G/W → input type="number" (placeholder 없음)
+//   Settle Partner/Co-Load Agent/Operator/Team: defaultValue only, placeholder 없음
+//   → 채울 수 없음: placeholder 없고 label 연결 없음
+//
+async function fillMasterBlForm(page: Page): Promise<void> {
+  // ── Toolbar (form.register 미연결, getByPlaceholder 접근) ──────────────────
+  await page.getByPlaceholder('Master Ref').fill('MREF0001');
+  await page.getByPlaceholder('MBL No').fill('MBLTEST0001');
+  await page.getByPlaceholder('Line Bkg. No').fill('BKG-TEST-001');
+  await page.getByPlaceholder('Shipment Type').fill('FCL');
+
+  // ── Main 탭 — MasterPartyPanel ──────────────────────────────────────────
+  // WidgetGrid ResizeObserver 완료 후 렌더 대기
+  await page.waitForSelector('input[placeholder="Code"]', { timeout: 5_000 });
+
+  // SHIPPER Code(index 0), CONSIGNEE Code(index 1)
+  await page.getByPlaceholder('Code').nth(0).fill('SHIPPER01');
+  await page.getByPlaceholder('Code').nth(1).fill('CONSIG01');
+
+  await page.getByPlaceholder('Company Name').nth(0).fill('SHIPPER CO LTD');
+  await page.getByPlaceholder('Company Name').nth(1).fill('CONSIG CO LTD');
+
+  // ── Main 탭 — MasterSchedulePanel (sea-exp, isExp=true) ─────────────────
+  // ETD(index 0), ETA(index 1)
+  await page.getByPlaceholder('yyyyMMdd').nth(0).fill('20260601');
+  await page.getByPlaceholder('yyyyMMdd').nth(1).fill('20260620');
+
+  // POL(index 0), POD(index 1)
+  await page.getByPlaceholder('UNLOC').nth(0).fill('KRBSA');
+  await page.getByPlaceholder('UNLOC').nth(1).fill('USLAX');
+
+  // ── Main 탭 — MasterCargoDocPanel ─────────────────────────────────────
+  // 채울 수 없음: PackageField의 qty input은 type="number" placeholder 없음
+  // 채울 수 없음: G/W input은 type="number" placeholder 없음
+  // 채울 수 없음: Operator/Team/Settle Partner 등 LiField — placeholder 없고 label 연결 없음
 }
 
 // ── House B/L ─────────────────────────────────────────────────────────────
@@ -82,7 +183,7 @@ test.describe('House B/L', () => {
     await expect(page.locator('.panel--list')).toBeVisible();
   });
 
-  test('entry — 모든 폼 필드 채워서 Save 클릭', async ({ page }) => {
+  test('entry — 모든 접근 가능 필드 채워서 Save 클릭', async ({ page }) => {
     await page.goto(HOUSE_ENTRY);
 
     // Save 버튼 활성화 확인 (신규 폼 기본 상태)
@@ -90,16 +191,25 @@ test.describe('House B/L', () => {
     await expect(saveBtn).toBeVisible();
     await expect(saveBtn).toBeEnabled();
 
-    // form.register 연결 필드 채우기
+    // toolbar와 Main 탭 내 접근 가능한 모든 input 채우기
     await fillHouseBlForm(page);
+
+    // Freight 탭 진입 후 Freight 패널 로딩 확인
+    // freight-tab.tsx: FreightRatePanel, FreightSellingPanel, FreightBuyingPanel, FreightAccountPanel
+    await page.click('button:has-text("Freight")');
+    // Freight 탭의 Rate 그리드 input — class="grid__cell-input", placeholder 없음
+    // 채울 수 없음: SELLING_COLS/BUYING_COLS grid__cell-input은 placeholder·label 미존재
+    // 탭 이동 확인 (패널 헤더 텍스트로)
+    await expect(page.getByText('Selling / Debit')).toBeVisible({ timeout: 5_000 });
+
+    // Main 탭으로 복귀
+    await page.click('button:has-text("Main")');
 
     // Save 클릭 후 Saving... 상태 전환 또는 redirect 확인
     // mockHouseBlPort 사용 시 성공 후 /fms/house-bl/sea-exp/list 로 이동
     await saveBtn.click();
 
-    // "Saving..." 일시 노출 또는 list redirect — 둘 중 하나를 확인
-    // 백엔드 미연동 환경에서는 mock이 즉시 resolve하므로 redirect 발생 가능
-    // TODO: 백엔드 연동 완료 후 redirect URL로 강화
+    // 에러 페이지로 이동하지 않음을 확인
     await expect(page).not.toHaveURL(HOUSE_ENTRY + '?error=true');
   });
 
@@ -135,7 +245,7 @@ test.describe('Master B/L', () => {
     await expect(page.locator('.panel').first()).toBeVisible();
   });
 
-  test('entry — 모든 폼 필드 채워서 Save 클릭', async ({ page }) => {
+  test('entry — 모든 접근 가능 필드 채워서 Save 클릭', async ({ page }) => {
     await page.goto(MASTER_ENTRY);
 
     // Save 버튼 활성화 확인 (신규 폼 기본 상태)
@@ -143,15 +253,14 @@ test.describe('Master B/L', () => {
     await expect(saveBtn).toBeVisible();
     await expect(saveBtn).toBeEnabled();
 
-    // form.register 미연결로 채울 수 있는 필드가 없음 — 헬퍼 호출
-    // defaultValues(freightTerm="PREPAID", jobDiv="SEA", bound="EXP")로 이미 초기화됨
+    // toolbar와 Main 탭 내 접근 가능한 모든 input 채우기
     await fillMasterBlForm(page);
 
     // Save 클릭 후 list redirect 또는 pending 상태 확인
-    // masterBlPort.create 호출 — 백엔드 연동 시 /fms/master-bl/sea-exp/list 로 이동
-    // TODO: 백엔드 연동 완료 후 redirect URL로 강화
+    // masterBlPort.create 호출 → 백엔드 연동 시 /fms/master-bl/sea-exp/list 로 이동
     await saveBtn.click();
 
+    // 에러 페이지로 이동하지 않음을 확인
     await expect(page).not.toHaveURL(MASTER_ENTRY + '?error=true');
   });
 
