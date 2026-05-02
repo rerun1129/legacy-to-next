@@ -117,16 +117,16 @@ export function HouseBLEntry({ variant, id }: Props) {
   useEffect(() => {
     if (detail) {
       form.reset({
-        hbl:    detail.hbl ?? "",
-        mbl:    detail.mbl ?? "",
-        sType:  detail.sType ?? "",
-        lType:  detail.lType ?? "",
+        hbl:    detail.hblNo ?? "",
+        mbl:    detail.masterBlId != null ? String(detail.masterBlId) : "",
+        sType:  detail.shipmentType ?? "",
+        lType:  detail.blType ?? "",
         etd:    detail.etd ?? "",
         eta:    detail.eta ?? "",
-        pol:    detail.pol ?? "",
-        pod:    detail.pod ?? "",
+        pol:    detail.polCode ?? "",
+        pod:    detail.podCode ?? "",
         settle: "PREPAID",
-        expImp: detail.expImp,
+        expImp: detail.bound,
       });
     }
   }, [detail, form]);

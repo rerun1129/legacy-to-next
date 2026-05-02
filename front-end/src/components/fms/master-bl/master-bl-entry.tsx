@@ -10,7 +10,7 @@ import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
-import type { CreateMasterBlRequest, UpdateMasterBlRequest } from "@/domain/master-bl";
+import type { CreateMasterBlRequest, UpdateMasterBlRequest, ConsolidatedHouseBlSummary } from "@/domain/master-bl";
 import { MasterMainTab } from "./tabs/main-tab";
 import { MasterEdiTab }  from "./tabs/edi-tab";
 import { OtherTab }      from "@/components/fms/house-bl/tabs/other-tab";
@@ -204,7 +204,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       {/* consolidatedHouseBls: detail fetch 시 읽기 전용 표시 전용, submit body에 미포함 */}
       {isEdit && detail?.consolidatedHouseBls && detail.consolidatedHouseBls.length > 0 && (
         <div className="consolidated-hbl-list" aria-label="Consolidated House B/L list (read-only)">
-          {detail.consolidatedHouseBls.map((hbl) => (
+          {detail.consolidatedHouseBls.map((hbl: ConsolidatedHouseBlSummary) => (
             <span key={hbl.id} className="badge">{hbl.hblNo ?? `HBL#${hbl.id}`}</span>
           ))}
         </div>

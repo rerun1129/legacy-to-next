@@ -9,10 +9,10 @@ export const mockMasterBlPort: MasterBlPort = {
   async list(_filter: MasterBlFilter): Promise<MasterBlRow[]> {
     return masterBlRows;
   },
-  async getById(id: number): Promise<MasterBlRow> {
+  async getById(id: number): Promise<MasterBlDetail> {
     const row = masterBlRows.find((r) => r.id === id);
     if (!row) throw new NotFoundError('MasterBl', String(id));
-    return row;
+    return row as unknown as MasterBlDetail;
   },
   async create(req: CreateMasterBlRequest): Promise<MasterBlDetail> {
     return {
