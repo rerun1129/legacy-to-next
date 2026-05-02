@@ -23,7 +23,16 @@ color: blue
      - `application/` — 유스케이스, 훅
      - `adapter/` — 아웃바운드: API 클라이언트 / 인바운드: React 컴포넌트
      - Next.js App Router 규칙 준수
-3. 작업 완료 후 변경 파일을 worktree 브랜치에 커밋:
+3. **작업 시작 전** 불필요한 worktree가 남아 있으면 정리:
+   ```bash
+   git worktree list
+   # 본인 worktree 이외에 locked 상태가 아닌 불필요한 worktree 발견 시:
+   git worktree remove -f -f <path>
+   git branch -D <branch>
+   ```
+   단, 현재 사용 중(locked)이거나 master/main 브랜치 worktree는 건드리지 않음.
+
+4. 작업 완료 후 변경 파일을 worktree 브랜치에 커밋:
    ```bash
    git add <변경된 파일들>
    git commit -m "작업단위를 설명하는 메시지"

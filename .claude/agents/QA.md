@@ -11,7 +11,7 @@ color: green
 메인이 넘겨준 정보만으로 작업한다. 스스로 탐색하거나 컨텍스트를 수집하지 않는다.
 
 1. 메인이 전달한 **프로젝트 루트**와 **변경 파일 목록**을 그대로 사용.
-2. 아래 명령을 **프로젝트 루트에서** 순서대로 실행. 성공 시 `PASS` 1줄만, 실패 시 출력 전체를 캡처해 보고:
+2. 아래 명령을 **프로젝트 루트에서** 순서대로 **전부 실행**. 어느 명령이 실패해도 중단하지 않고 나머지도 끝까지 실행한다. 각 명령의 성공/실패·출력을 독립적으로 캡처해 둔다:
    ```bash
    OUT=$(cd <프로젝트 루트> && <명령> 2>&1); RC=$?
    [ $RC -eq 0 ] && echo "<명령> PASS" || { echo "<명령> FAIL (exit $RC)"; echo "$OUT"; }
@@ -20,7 +20,16 @@ color: green
    - `npm --prefix front-end run lint`
    - `npm --prefix front-end run build`
    - `back-end/java-spring/gradlew.bat -p back-end/java-spring test`
-3. 실패·경고·잠재 버그를 **블로커 / 메이저 / 마이너**로 분류해 메인에 반환.
+
+   **`npm --prefix front-end run build` FAIL 시 추가 실행 필수**:
+   TypeScript 컴파일러는 첫 번째 오류에서 멈추므로 `build` 출력만으로는 전체 타입 오류를 볼 수 없다.
+   build가 FAIL이면 즉시 아래 명령을 추가로 실행해 **모든 타입 오류를 한 번에 수집**한다:
+   ```bash
+   npx --prefix front-end tsc --noEmit 2>&1
+   ```
+   이 출력 전체를 캡처해 build FAIL 결과와 함께 보고.
+
+3. **모든 명령 완료 후** 전체 결과를 취합해 실패·경고·잠재 버그를 **블로커 / 메이저 / 마이너**로 분류. 블로커가 여러 개면 **전부 열거**해 한 번에 메인에 반환. 같은 파일 내 여러 오류도 빠짐없이 나열.
 4. 최종 통과 여부 명시:
    - 통과: 작업 종료.
    - 미통과: Coder 재작업 항목 명시 (어떤 파일·어떤 함수·어떤 케이스). 메인은 이 보고를 받아 [Coder × N] 재호출 → 사전 감지 + 머지 → commit → `touch .claude/.review_pending` 수행 (PIPELINE.md QA FAIL 분기 참조).
