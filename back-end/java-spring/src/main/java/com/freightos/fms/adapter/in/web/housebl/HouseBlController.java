@@ -1,22 +1,28 @@
 package com.freightos.fms.adapter.in.web.housebl;
 
+import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
+import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @Tag(name = "House B/L", description = "House B/L CRUD — S-02/S-03")
 @RestController
@@ -44,6 +50,28 @@ public class HouseBlController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<HouseBlDetailResponse>> getHouseBlById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.findHouseBlById(id))));
+    }
+
+    @Operation(summary = "House B/L 생성")
+    @PostMapping
+    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> create(
+            @Valid @RequestBody CreateHouseBlRequest req) {
+        HouseBl entity = houseBlAssembler.toEntity(req);
+        HouseBl saved  = houseBlUseCase.save(entity);
+        URI location   = URI.create("/api/house-bl/" + saved.getId());
+        return ResponseEntity.created(location)
+                .body(ApiResponse.of(houseBlAssembler.toDetail(saved)));
+    }
+
+    @Operation(summary = "House B/L 수정")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> update(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateHouseBlRequest req) {
+        HouseBl existing = houseBlUseCase.findHouseBlById(id);
+        houseBlAssembler.applyToEntity(req, existing);
+        HouseBl saved = houseBlUseCase.save(existing);
+        return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(saved)));
     }
 
     @Operation(summary = "House B/L 삭제")
