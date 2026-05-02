@@ -34,7 +34,7 @@ const applyDateDisplay = (raw: z.infer<typeof HOUSE_BL_ROW_SCHEMA>) => ({
 
 export const API_HOUSE_BL_PORT: HouseBlPort = {
   async list(filter: HouseBlFilter) {
-    const json = await fetchJson(`/api/v1/house-bl?${toSearchParams(filter as Record<string, unknown>)}`);
+    const json = await fetchJson(`/api/v1/house-bl?${toSearchParams(filter as unknown as Record<string, unknown>)}`);
     const content = (json as { data?: { content?: unknown } })?.data?.content;
     const parsed = z.array(HOUSE_BL_ROW_SCHEMA).safeParse(content);
     if (!parsed.success) throw new ResponseParseError(`Invalid house B/L list response: ${parsed.error.message}`);
