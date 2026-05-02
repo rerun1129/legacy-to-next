@@ -1,21 +1,17 @@
 export interface HouseBlRow {
-  id?: number;
-  no?: number;
-  hbl: string;
-  expImp: 'EXP' | 'IMP';
-  docStatus: 'ok' | 'inprog' | 'draft';
-  mbl: string;
-  sType: string;
-  lType: string;
-  etd: string;
-  eta: string;
-  regDate: string;
-  pol: string;
-  pod: string;
-  vessel: string;
-  voyage: string;
-  shipper: string;
-  consignee: string;
+  id: number;
+  hblNo: string;
+  bound: 'EXP' | 'IMP';
+  // BE 미반영 필드 — 현재 null 가능
+  docStatus?: string;
+  masterBlId?: number | null;
+  polCode?: string;
+  podCode?: string;
+  shipperCode?: string;
+  consigneeCode?: string;
+  createdAt?: string;
+  etd?: string;
+  eta?: string;
 }
 
 export interface HouseBlFilter {
