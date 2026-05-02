@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
+import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
@@ -430,5 +431,120 @@ class HouseBlMapperTest {
         List<HouseBlScheduleLeg> result = docMapper.toScheduleLegDomainList(List.of(leg1, leg2));
 
         assertThat(result).hasSize(2);
+    }
+
+    // ── applySeaFields vesselVoyage 분기 ────────────────────────────
+
+    @Test
+    @DisplayName("applySeaFields: vesselVoyage==null 이면 JPA vesselName/voyageNo를 세팅하지 않는다")
+    void applySeaFields_vesselVoyageNull_doesNotSetVesselFields() {
+        // HouseBlSea.create() 후 vesselVoyage를 null 상태로 둔다
+        HouseBlSea domain = HouseBlSea.create(Bound.EXP);
+        HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
+
+        mapper.applySeaFields(domain, jpa);
+
+        // vesselVoyage == null 이므로 if 블록 미진입 → JPA 필드는 초기값(null) 유지
+        assertThat(jpa.getVesselName()).isNull();
+        assertThat(jpa.getVoyageNo()).isNull();
+    }
+
+    @Test
+    @DisplayName("applySeaFields: vesselVoyage != null 이면 JPA vesselName/voyageNo가 세팅된다")
+    void applySeaFields_vesselVoyageNonNull_setsVesselFields() {
+        HouseBlSea domain = HouseBlSea.create(Bound.EXP);
+        domain.updateSeaSchedule(null,
+                VesselVoyage.of(null, "MSC OSCAR", "V001W"),
+                null);
+        HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
+
+        mapper.applySeaFields(domain, jpa);
+
+        assertThat(jpa.getVesselName()).isEqualTo("MSC OSCAR");
+        assertThat(jpa.getVoyageNo()).isEqualTo("V001W");
+    }
+
+    // ── applyAirFields handlingInformation 분기 ──────────────────────
+
+    @Test
+    @DisplayName("applyAirFields: handlingInformation==null 이면 JPA handlingInfoCode/Text를 null로 세팅한다")
+    void applyAirFields_handlingInformationNull_setsNullOnJpa() {
+        // HouseBlAir.create() 기본값: handlingInformation == null
+        HouseBlAir domain = HouseBlAir.create(Bound.EXP);
+        HouseBlAirJpaEntity jpa = new HouseBlAirJpaEntity();
+
+        mapper.applyAirFields(domain, jpa);
+
+        assertThat(jpa.getHandlingInfoCode()).isNull();
+        assertThat(jpa.getHandlingInfoText()).isNull();
+    }
+
+    // ── applyTruckFields vesselVoyage 분기 ───────────────────────────
+
+    @Test
+    @DisplayName("applyTruckFields: create() 기본 상태(vesselVoyage.vesselName=TRUCK)에서 JPA vesselName은 TRUCK으로 세팅된다")
+    void applyTruckFields_vesselVoyageNull_setsTruckAsVesselName() {
+        HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
+        // create() 시 vesselVoyage = VesselVoyage.of(null, "TRUCK", null) 이므로
+        // mapper의 vv != null 분기를 통해 vesselName = "TRUCK" 이 세팅된다
+        HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
+
+        mapper.applyTruckFields(domain, jpa);
+
+        assertThat(jpa.getVesselName()).isEqualTo("TRUCK");
+        assertThat(jpa.getVoyageNo()).isNull();
+    }
+
+    @Test
+    @DisplayName("applyTruckFields: updateTruckFields 호출 시 vesselName은 도메인 정책에 따라 항상 TRUCK으로 강제된다")
+    void applyTruckFields_vesselVoyageNonNull_overridesVesselNameToTruck() {
+        HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
+        // updateTruckFields는 내부적으로 VesselVoyage.of(null, "TRUCK", voyageNo) 로 고정 세팅
+        domain.updateTruckFields(new HouseBlTruck.TruckFields(
+                VesselVoyage.of(null, "IGNORED", "T-001"),
+                null, null, null, null, null, null, null, null, null));
+        HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
+
+        mapper.applyTruckFields(domain, jpa);
+
+        // updateTruckFields가 vesselName을 "TRUCK"으로 강제하므로 JPA도 "TRUCK"
+        assertThat(jpa.getVesselName()).isEqualTo("TRUCK");
+        assertThat(jpa.getVoyageNo()).isEqualTo("T-001");
+    }
+
+    // ── applyCommonFields masterBlId 분기 ────────────────────────────
+
+    @Test
+    @DisplayName("copyBaseFields: masterBlId==null 이면 JPA masterBlId를 세팅하지 않는다")
+    void copyBaseFields_masterBlIdNull_doesNotSetMasterBlId() {
+        HouseBlAir domain = HouseBlAir.create(Bound.EXP);
+        // domain.getMasterBlId() == null (linkToMaster 미호출)
+        HouseBlJpaEntity jpa = new HouseBlJpaEntity();
+
+        mapper.applyCommonFields(domain, jpa);
+
+        assertThat(jpa.getMasterBlId()).isNull();
+    }
+
+    // ── toNonBlDomain round-trip NON_BL 특화 필드 ───────────────────
+
+    @Test
+    @DisplayName("toNonBlDomain: originalBlRef/rton/volumeWtKg 필드가 round-trip으로 복원된다")
+    void toNonBlDomain_roundTrip_preservesOriginalBlRefRtonVolumeWtKg() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.NON_BL);
+        parentJpa.setBound(Bound.EXP);
+
+        HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
+        nonBlJpa.setWorkDivision(HouseBlNonBl.WorkDivision.SEA);
+        nonBlJpa.setOriginalBlRef("REF-001");
+        nonBlJpa.setRton(BigDecimal.valueOf(12.5));
+        nonBlJpa.setVolumeWtKg(BigDecimal.valueOf(100.0));
+
+        HouseBlNonBl domain = mapper.toNonBlDomain(parentJpa, nonBlJpa);
+
+        assertThat(domain.getOriginalBlRef().value()).isEqualTo("REF-001");
+        assertThat(domain.getRton().ton()).isEqualByComparingTo(BigDecimal.valueOf(12.5));
+        assertThat(domain.getVolumeWtKg().kg()).isEqualByComparingTo(BigDecimal.valueOf(100.0));
     }
 }

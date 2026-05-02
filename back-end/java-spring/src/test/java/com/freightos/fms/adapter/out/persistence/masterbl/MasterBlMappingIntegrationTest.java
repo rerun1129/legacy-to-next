@@ -1,9 +1,12 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
+import com.freightos.fms.domain.common.enums.DescClause1;
+import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import jakarta.persistence.EntityManager;
@@ -58,6 +61,13 @@ class MasterBlMappingIntegrationTest {
         MasterBlAirChargeJpaEntity a = new MasterBlAirChargeJpaEntity();
         a.setFreightCode(freightCode);
         return a;
+    }
+
+    private MasterBlDescJpaEntity desc(MasterBlJpaEntity parent, String marks) {
+        MasterBlDescJpaEntity d = new MasterBlDescJpaEntity();
+        d.setMasterBl(parent);
+        d.setMarks(marks);
+        return d;
     }
 
     private long countChildren(String table, Long parentId) {
@@ -252,5 +262,59 @@ class MasterBlMappingIntegrationTest {
         assertThat(countChildren("MasterBlDimJpaEntity", parentId)).isZero();
         assertThat(countChildren("MasterBlScheduleLegJpaEntity", parentId)).isZero();
         assertThat(countChildren("MasterBlAirChargeJpaEntity", parentId)).isZero();
+    }
+
+    @Test
+    @DisplayName("replaceDesc: 기존 desc 교체 후 flush → 기존 descId로 조회 시 null (orphanRemoval)")
+    void replaceDesc_orphanDescIsDeletedFromDb() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
+        em.persist(parent);
+        em.flush();
+
+        MasterBlDescJpaEntity oldDesc = desc(parent, "OLD MARKS");
+        em.persist(oldDesc);
+        parent.replaceDesc(oldDesc);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        Long oldDescId = loaded.getDesc().getMasterBlDescId();
+
+        MasterBlDescJpaEntity newDesc = desc(loaded, "NEW MARKS");
+        em.persist(newDesc);
+        loaded.replaceDesc(newDesc);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlDescJpaEntity.class, oldDescId)).isNull();
+        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        assertThat(reloaded.getDesc().getMarks()).isEqualTo("NEW MARKS");
+    }
+
+    @Test
+    @DisplayName("desc round-trip: marks/description/descClause1/descClause2/remark 저장 후 재조회 시 모든 필드 유지")
+    void desc_roundTrip_allFieldsPreserved() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        em.persist(parent);
+        em.flush();
+
+        MasterBlDescJpaEntity descEntity = desc(parent, "ROUND-TRIP MARKS");
+        descEntity.setDescription("ROUND-TRIP DESCRIPTION");
+        descEntity.setDescClause1(DescClause1.A);
+        descEntity.setDescClause2(DescClause2.A);
+        descEntity.setRemark("ROUND-TRIP REMARK");
+        em.persist(descEntity);
+        parent.replaceDesc(descEntity);
+        em.flush();
+        em.clear();
+
+        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        MasterBlDescJpaEntity loadedDesc = loaded.getDesc();
+
+        assertThat(loadedDesc.getMarks()).isEqualTo("ROUND-TRIP MARKS");
+        assertThat(loadedDesc.getDescription()).isEqualTo("ROUND-TRIP DESCRIPTION");
+        assertThat(loadedDesc.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(loadedDesc.getDescClause2()).isEqualTo(DescClause2.A);
+        assertThat(loadedDesc.getRemark()).isEqualTo("ROUND-TRIP REMARK");
     }
 }

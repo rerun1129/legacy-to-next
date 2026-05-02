@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirChargeJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlContainerJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlLicenseJpaEntity;
@@ -79,6 +80,13 @@ class HouseBlMappingIntegrationTest {
         HouseBlAirChargeJpaEntity a = new HouseBlAirChargeJpaEntity();
         a.setFreightCode(freightCode);
         return a;
+    }
+
+    private HouseBlDescJpaEntity desc(HouseBlJpaEntity parent, String marks) {
+        HouseBlDescJpaEntity d = new HouseBlDescJpaEntity();
+        d.setHouseBl(parent);
+        d.setMarks(marks);
+        return d;
     }
 
     private long countChildren(String table, Long parentId) {
@@ -309,5 +317,157 @@ class HouseBlMappingIntegrationTest {
         assertThat(countChildren("HouseBlScheduleLegJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlTruckOrderJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlAirChargeJpaEntity", parentId)).isZero();
+    }
+
+    @Test
+    @DisplayName("replaceDesc: 기존 desc 교체 후 flush → 기존 descId로 조회 시 null (orphanRemoval)")
+    void replaceDesc_orphanDescIsDeletedFromDb() {
+        HouseBlJpaEntity parent = newParent(JobDiv.SEA);
+        em.persist(parent);
+        em.flush();
+
+        HouseBlDescJpaEntity oldDesc = desc(parent, "OLD MARKS");
+        em.persist(oldDesc);
+        parent.replaceDesc(oldDesc);
+        em.flush();
+        em.clear();
+
+        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        Long oldDescId = loaded.getDesc().getHouseBlDescId();
+
+        HouseBlDescJpaEntity newDesc = desc(loaded, "NEW MARKS");
+        em.persist(newDesc);
+        loaded.replaceDesc(newDesc);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(HouseBlDescJpaEntity.class, oldDescId)).isNull();
+        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        assertThat(reloaded.getDesc().getMarks()).isEqualTo("NEW MARKS");
+    }
+
+    @Test
+    @DisplayName("syncDims: 2건 저장 후 3건으로 교체 → flush → DB count==3, 기존 ID 없음")
+    void syncDims_replace_orphanRemovedAndNewRowsInserted() {
+        HouseBlJpaEntity parent = newParent(JobDiv.AIR);
+        parent.syncDims(List.of(dim(), dim()));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        List<Long> oldIds = loaded.getDims().stream()
+                .map(HouseBlDimJpaEntity::getHouseBlDimId)
+                .toList();
+
+        loaded.syncDims(List.of(dim(), dim(), dim()));
+        em.flush();
+        em.clear();
+
+        long count = countChildren("HouseBlDimJpaEntity", parent.getHouseBlId());
+        assertThat(count).isEqualTo(3);
+
+        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        List<Long> newIds = reloaded.getDims().stream()
+                .map(HouseBlDimJpaEntity::getHouseBlDimId)
+                .toList();
+        assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
+    }
+
+    @Test
+    @DisplayName("syncScheduleLegs: 1건 저장 후 empty 전달 → flush → DB count==0")
+    void syncScheduleLegs_emptyList_allDeletedFromDb() {
+        HouseBlJpaEntity parent = newParent(JobDiv.AIR);
+        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        loaded.syncScheduleLegs(List.of());
+        em.flush();
+        em.clear();
+
+        long count = countChildren("HouseBlScheduleLegJpaEntity", parent.getHouseBlId());
+        assertThat(count).isZero();
+    }
+
+    @Test
+    @DisplayName("syncLicenses: 2건 저장 후 다른 2건으로 교체 → DB count==2, 기존 ID 없음")
+    void syncLicenses_replaceTwo_orphanRemovedAndNewInserted() {
+        HouseBlJpaEntity parent = newParent(JobDiv.SEA);
+        parent.syncLicenses(List.of(license("LIC-OLD-1"), license("LIC-OLD-2")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        List<Long> oldIds = loaded.getLicenses().stream()
+                .map(HouseBlLicenseJpaEntity::getHouseBlLicenseId)
+                .toList();
+
+        loaded.syncLicenses(List.of(license("LIC-NEW-1"), license("LIC-NEW-2")));
+        em.flush();
+        em.clear();
+
+        long count = countChildren("HouseBlLicenseJpaEntity", parent.getHouseBlId());
+        assertThat(count).isEqualTo(2);
+
+        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        List<Long> newIds = reloaded.getLicenses().stream()
+                .map(HouseBlLicenseJpaEntity::getHouseBlLicenseId)
+                .toList();
+        assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
+    }
+
+    @Test
+    @DisplayName("syncTruckOrders: 1건 저장 후 empty 전달 → flush → DB count==0")
+    void syncTruckOrders_emptyList_allDeletedFromDb() {
+        HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+        parent.syncTruckOrders(List.of(truckOrder("TRUCK-01")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        loaded.syncTruckOrders(List.of());
+        em.flush();
+        em.clear();
+
+        long count = countChildren("HouseBlTruckOrderJpaEntity", parent.getHouseBlId());
+        assertThat(count).isZero();
+    }
+
+    @Test
+    @DisplayName("syncAirCharges: 1건 저장 후 다른 1건으로 교체 → DB count==1, 기존 ID 없음")
+    void syncAirCharges_replaceOne_orphanRemovedAndNewInserted() {
+        HouseBlJpaEntity parent = newParent(JobDiv.AIR);
+        parent.syncAirCharges(List.of(airCharge("FUEL")));
+
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        List<Long> oldIds = loaded.getAirCharges().stream()
+                .map(HouseBlAirChargeJpaEntity::getHouseBlAirChargeId)
+                .toList();
+
+        loaded.syncAirCharges(List.of(airCharge("AWC")));
+        em.flush();
+        em.clear();
+
+        long count = countChildren("HouseBlAirChargeJpaEntity", parent.getHouseBlId());
+        assertThat(count).isEqualTo(1);
+
+        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        List<Long> newIds = reloaded.getAirCharges().stream()
+                .map(HouseBlAirChargeJpaEntity::getHouseBlAirChargeId)
+                .toList();
+        assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
     }
 }

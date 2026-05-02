@@ -413,4 +413,20 @@ class MasterBlMapperTest {
         assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
         assertThat(result.getRemark()).isEqualTo("REMARK");
     }
+
+    // ── applyAirFields handlingInformation null 분기 ─────────────────
+
+    @Test
+    @DisplayName("applyAirFields: handlingInformation==null 이면 JPA handlingInfoCode/Text를 null로 세팅한다")
+    void applyAirFields_handlingInformationNull_setsNullOnJpa() {
+        // MasterBlAir.create() 기본값: handlingInformation == null
+        MasterBlAir domain = MasterBlAir.create(Bound.EXP);
+        MasterBlAirJpaEntity jpa = new MasterBlAirJpaEntity();
+
+        mapper.applyAirFields(domain, jpa);
+
+        // mapOrNull(null, ...) → null 이므로 두 필드 모두 null
+        assertThat(jpa.getHandlingInfoCode()).isNull();
+        assertThat(jpa.getHandlingInfoText()).isNull();
+    }
 }
