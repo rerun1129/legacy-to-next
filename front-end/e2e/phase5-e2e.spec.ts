@@ -229,10 +229,10 @@ test.describe.serial('House B/L CRUD', () => {
   });
 
   test('D — 삭제 후 빈 entry 폼으로 리셋', async ({ page }) => {
+    // window.confirm을 항상 true로 override (dialog 이벤트 타이밍 문제 우회)
+    await page.addInitScript(() => { window.confirm = () => true; });
     await page.goto(`${HOUSE_ENTRY}?id=${houseBlCreatedId}`);
-
-    // Delete 버튼 클릭 전 confirm dialog 수락 처리
-    page.on('dialog', (dialog) => dialog.accept());
+    await page.waitForSelector('button.btn--danger:not([disabled])');
     await page.click('button.btn--danger');
 
     // 삭제 후 ?id 없는 신규 entry로 replace (빈 폼)
@@ -256,10 +256,12 @@ let masterBLCreatedId: number;
 
 test.describe.serial('Master B/L CRUD', () => {
   test('C — 신규 등록 후 id 추출', async ({ page }) => {
+    // 매 실행마다 고유한 mblNo 생성 (중복 방지)
+    const uniqueMbl = `MBL${Date.now()}`;
     // 백엔드 API 직접 호출로 MBL 생성
     const res = await page.request.post('http://localhost:8080/api/master-bl', {
       data: {
-        jobDiv: 'SEA', bound: 'EXP', mblNo: 'MBLTEST0001',
+        jobDiv: 'SEA', bound: 'EXP', mblNo: uniqueMbl,
         masterRefNo: 'MREF0001', freightTerm: 'PREPAID',
         shipperCode: 'SHIPPER01', consigneeCode: 'CONSIG01',
         polCode: 'KRBSA', podCode: 'USLAX',
@@ -322,10 +324,9 @@ test.describe.serial('Master B/L CRUD', () => {
   });
 
   test('D — 삭제 후 빈 entry 폼으로 리셋', async ({ page }) => {
+    await page.addInitScript(() => { window.confirm = () => true; });
     await page.goto(`${MASTER_ENTRY}?id=${masterBLCreatedId}`);
-
-    // Delete 버튼 클릭 전 confirm dialog 수락 처리
-    page.on('dialog', (dialog) => dialog.accept());
+    await page.waitForSelector('button.btn--danger:not([disabled])');
     await page.click('button.btn--danger');
 
     // 삭제 후 ?id 없는 신규 entry로 replace (빈 폼)
