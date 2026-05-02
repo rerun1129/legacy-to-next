@@ -23,7 +23,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        default_schema: public
+        default_schema: legacy_to_next
         jdbc:
           batch_size: 50
         order_inserts: true
