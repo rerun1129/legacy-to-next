@@ -1,5 +1,5 @@
 import type { HouseBlPort } from '@/application/house-bl/ports';
-import type { HouseBlRow, HouseBlFilter, HouseBlDetail } from '@/domain/house-bl';
+import type { HouseBlRow, HouseBlDetail, HouseBlFilter, CreateHouseBlRequest, UpdateHouseBlRequest } from '@/domain/house-bl';
 import { NotFoundError } from '@/adapter/out/api/errors';
 import { HOUSE_BL_ROWS } from '@/lib/mock-data';
 
@@ -14,6 +14,13 @@ export const mockHouseBlPort: HouseBlPort = {
   },
   async save(data: unknown): Promise<HouseBlDetail> {
     return { ...HOUSE_BL_ROWS[0], ...(data as Record<string, unknown>) } as unknown as HouseBlDetail;
+  },
+  async create(req: CreateHouseBlRequest): Promise<HouseBlDetail> {
+    return { ...HOUSE_BL_ROWS[0], ...(req as Record<string, unknown>) } as unknown as HouseBlDetail;
+  },
+  async update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail> {
+    const row = HOUSE_BL_ROWS.find(r => r.id === id) ?? HOUSE_BL_ROWS[0];
+    return { ...row, ...(req as Record<string, unknown>) } as unknown as HouseBlDetail;
   },
   async delete(_id: number): Promise<void> {
     // mock: no-op
