@@ -33,7 +33,7 @@ export function MasterBlGrid({ variantKey, variant }: Props) {
       render: (_v, row) => (
         <span
           className="cell-hbl"
-          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/entry/${row.id ?? ""}`)}
+          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/entry?id=${row.id}`)}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"
         >

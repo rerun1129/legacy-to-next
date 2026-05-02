@@ -121,6 +121,14 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => masterBlPort.delete(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
+      router.push(`/fms/master-bl/${variantKey}/list`);
+    },
+  });
+
   function handleSave(raw: FormValues) {
     const result = MASTER_BL_SCHEMA.safeParse(raw);
     if (!result.success) {
@@ -154,7 +162,17 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
-          <button type="button" className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
+          <button
+            type="button"
+            className="btn btn--sm btn--danger"
+            onClick={() => {
+              if (!isEdit) return;
+              if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
+            }}
+            disabled={!isEdit || deleteMutation.isPending}
+          >
+            <Trash2 size={12} />Delete
+          </button>
           <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
           <button type="button" className="btn btn--sm">
             <RefreshCw size={12} />{modeLabels.changeBLNo}

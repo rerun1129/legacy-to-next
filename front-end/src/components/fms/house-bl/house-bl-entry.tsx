@@ -149,6 +149,14 @@ export function HouseBLEntry({ variant, id }: Props) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => mockHouseBlPort.delete(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
+      router.push(`/fms/house-bl/${variant.key}/list`);
+    },
+  });
+
   function handleTabChange(key: string) {
     setCanEdit(key === "main" || key === "freight");
     setTab(key);
@@ -182,7 +190,17 @@ export function HouseBLEntry({ variant, id }: Props) {
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
-          <button type="button" className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
+          <button
+            type="button"
+            className="btn btn--sm btn--danger"
+            onClick={() => {
+              if (!isEdit) return;
+              if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
+            }}
+            disabled={!isEdit || deleteMutation.isPending}
+          >
+            <Trash2 size={12} />Delete
+          </button>
           <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
           <button type="button" className="btn btn--sm"><Download size={12} />Export</button>
           {variant.printDocs.length > 0 && (
