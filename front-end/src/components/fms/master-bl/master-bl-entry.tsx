@@ -125,7 +125,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
-      router.push(`/fms/master-bl/${variantKey}/list`);
+      form.reset();
+      router.replace(`/fms/master-bl/${variantKey}/entry`);
     },
   });
 

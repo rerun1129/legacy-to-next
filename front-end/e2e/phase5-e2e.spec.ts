@@ -234,17 +234,24 @@ test.describe.serial('House B/L CRUD', () => {
     await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
   });
 
-  test('D — 삭제 후 list 복귀', async ({ page }) => {
+  test('D — 삭제 후 빈 entry 폼으로 리셋', async ({ page }) => {
     await page.goto(`${HOUSE_ENTRY}?id=${houseBlCreatedId}`);
 
     // Delete 버튼 클릭 전 confirm dialog 수락 처리
     page.on('dialog', (dialog) => dialog.accept());
     await page.click('button.btn--danger');
 
-    // list로 redirect 확인
-    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
+    // 삭제 후 ?id 없는 신규 entry로 replace (빈 폼)
+    await page.waitForURL(`**${HOUSE_ENTRY}`, { timeout: 15_000 });
+    await expect(page.url()).not.toContain('?id=');
+    await expect(page.locator('input[name="hbl"]')).toHaveValue('');
+  });
 
-    // 삭제 후 로딩 완료 대기
+  test('C(마지막) — 삭제 후 빈 폼에서 재등록 (DB에 레코드 유지)', async ({ page }) => {
+    await page.goto(HOUSE_ENTRY);
+    await fillHouseBlForm(page);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
     await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
   });
 });
@@ -325,17 +332,23 @@ test.describe.serial('Master B/L CRUD', () => {
     await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
   });
 
-  test('D — 삭제 후 list 복귀', async ({ page }) => {
+  test('D — 삭제 후 빈 entry 폼으로 리셋', async ({ page }) => {
     await page.goto(`${MASTER_ENTRY}?id=${masterBLCreatedId}`);
 
     // Delete 버튼 클릭 전 confirm dialog 수락 처리
     page.on('dialog', (dialog) => dialog.accept());
     await page.click('button.btn--danger');
 
-    // list로 redirect 확인
-    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
+    // 삭제 후 ?id 없는 신규 entry로 replace (빈 폼)
+    await page.waitForURL(`**${MASTER_ENTRY}`, { timeout: 15_000 });
+    await expect(page.url()).not.toContain('?id=');
+  });
 
-    // 삭제 후 로딩 완료 대기
+  test('C(마지막) — 삭제 후 빈 폼에서 재등록 (DB에 레코드 유지)', async ({ page }) => {
+    await page.goto(MASTER_ENTRY);
+    await fillMasterBlForm(page);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
     await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
   });
 });

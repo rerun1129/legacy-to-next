@@ -153,7 +153,8 @@ export function HouseBLEntry({ variant, id }: Props) {
     mutationFn: () => mockHouseBlPort.delete(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
-      router.push(`/fms/house-bl/${variant.key}/list`);
+      form.reset();
+      router.replace(`/fms/house-bl/${variantKey}/entry`);
     },
   });
 
