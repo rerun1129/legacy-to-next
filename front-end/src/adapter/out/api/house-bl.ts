@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { HouseBlPort } from '@/application/house-bl/ports';
-import type { HouseBlFilter } from '@/domain/house-bl';
+import type { HouseBlFilter, CreateHouseBlRequest, UpdateHouseBlRequest } from '@/domain/house-bl';
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
 import { formatDateDisplay } from '@/lib/date';
@@ -55,6 +55,28 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
     if (json === null) throw new ResponseParseError('Expected response body from POST /house-bl');
     const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid save response: ${parsed.error.message}`);
+    return applyDateDisplay(parsed.data);
+  },
+  async create(req: CreateHouseBlRequest) {
+    const json = await fetchJson('/api/v1/house-bl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    });
+    if (json === null) throw new ResponseParseError('Expected response body from POST /house-bl');
+    const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
+    if (!parsed.success) throw new ResponseParseError(`Invalid create response: ${parsed.error.message}`);
+    return applyDateDisplay(parsed.data);
+  },
+  async update(id: number, req: UpdateHouseBlRequest) {
+    const json = await fetchJson(`/api/v1/house-bl/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    });
+    if (json === null) throw new ResponseParseError(`Expected response body from PUT /house-bl/${id}`);
+    const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
+    if (!parsed.success) throw new ResponseParseError(`Invalid update response: ${parsed.error.message}`);
     return applyDateDisplay(parsed.data);
   },
   async delete(id: number) {
