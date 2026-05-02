@@ -64,7 +64,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         pd.setType(URI.create(TYPE_BASE + "INTERNAL_ERROR"));
         pd.setTitle("Internal Server Error");
-        pd.setDetail("An unexpected error occurred. Please contact support.");
+        pd.setDetail("[DEBUG] " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(pd);
