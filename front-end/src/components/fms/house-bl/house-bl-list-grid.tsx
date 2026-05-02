@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { houseBlPort } from "@/application/house-bl/bindings";
+import { houseBlPort } from "@/lib/ports";
 import { getBLVariant } from "@/lib/bl-variants";
 import type { HouseBlRow } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";

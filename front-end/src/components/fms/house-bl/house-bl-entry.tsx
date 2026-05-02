@@ -14,7 +14,7 @@ import { MainTabAir }  from "./tabs/main-air";
 import { EdiTab }      from "./tabs/edi-tab";
 import { OtherTab }    from "./tabs/other-tab";
 import { FreightTab }  from "./tabs/freight-tab";
-import { mockHouseBlPort } from "@/adapter/out/mock/house-bl";
+import { houseBlPort } from "@/lib/ports";
 
 // @hookform/resolvers 미설치로 zodResolver 없이 useForm 단독 사용. 검증은 submit 시 수동 호출.
 const HOUSE_BL_SCHEMA = z.object({
@@ -109,7 +109,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   // 수정 모드: 기존 데이터 fetch
   const { data: detail } = useQuery({
     queryKey: ["house-bl", "detail", id],
-    queryFn: () => mockHouseBlPort.getById(id!),
+    queryFn: () => houseBlPort.getById(id!),
     enabled: isEdit,
   });
 
@@ -133,7 +133,7 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   const mutation = useMutation({
     mutationFn: (data: FormValues) =>
-      mockHouseBlPort.save({
+      houseBlPort.save({
         ...data,
         ...(isEdit ? { id } : {}),
         docStatus: "draft",
@@ -150,7 +150,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => mockHouseBlPort.delete(id!),
+    mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
       form.reset();
