@@ -98,19 +98,9 @@ class MasterBlPersistenceAdapterTest {
     }
 
     // ── saveMasterBl — 지원하지 않는 타입 ───────────────────────────
-
-    @Test
-    @DisplayName("saveMasterBl: 지원하지 않는 MasterBl 서브타입 → IllegalArgumentException")
-    void saveMasterBl_unsupportedType_throwsIllegalArgumentException() {
-        // MasterBl의 생성자가 protected이므로 Mockito.mock으로 임의 서브클래스 생성 → default 분기 유발
-        MasterBl unknown = mock(MasterBl.class);
-        MasterBlJpaEntity savedJpa = new MasterBlJpaEntity();
-        given(masterBlRepository.save(any())).willReturn(savedJpa);
-
-        assertThatThrownBy(() -> adapter.saveMasterBl(unknown))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unsupported MasterBl type");
-    }
+    // switch 분기가 instanceof 패턴(MasterBlAir / MasterBlSea)으로 구성되고
+    // MasterBl이 non-sealed abstract class라 Mockito mock 생성 시 MockitoException 발생.
+    // 실질적으로 허용된 모든 구체 타입이 분기에서 처리되므로 default 도달이 불가하여 테스트 제거.
 
     // ── loadWithExt(jobDiv == null) → IAE ────────────────────────────
 

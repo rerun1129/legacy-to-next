@@ -280,8 +280,13 @@ class MasterBlMappingIntegrationTest {
         MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
         Long oldDescId = loaded.getDesc().getMasterBlDescId();
 
+        // 1단계: null로 교체 → Hibernate가 DELETE를 먼저 실행하도록 보장
+        // (INSERT→DELETE 순 flush로 인한 unique constraint 위반 방지)
+        loaded.replaceDesc(null);
+        em.flush();
+
+        // 2단계: 새 desc 설정 → cascade=ALL에 의해 INSERT
         MasterBlDescJpaEntity newDesc = desc(loaded, "NEW MARKS");
-        em.persist(newDesc);
         loaded.replaceDesc(newDesc);
         em.flush();
         em.clear();

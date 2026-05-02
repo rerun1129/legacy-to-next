@@ -335,8 +335,13 @@ class HouseBlMappingIntegrationTest {
         HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
         Long oldDescId = loaded.getDesc().getHouseBlDescId();
 
+        // 1단계: null로 교체 → Hibernate가 DELETE를 먼저 실행하도록 보장
+        // (INSERT→DELETE 순 flush로 인한 unique constraint 위반 방지)
+        loaded.replaceDesc(null);
+        em.flush();
+
+        // 2단계: 새 desc 설정 → cascade=ALL에 의해 INSERT
         HouseBlDescJpaEntity newDesc = desc(loaded, "NEW MARKS");
-        em.persist(newDesc);
         loaded.replaceDesc(newDesc);
         em.flush();
         em.clear();
