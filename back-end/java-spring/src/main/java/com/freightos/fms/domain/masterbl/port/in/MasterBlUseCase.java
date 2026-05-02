@@ -9,6 +9,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBl;
 public interface MasterBlUseCase {
     PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest);
     MasterBl findMasterBlById(Long id);
+    MasterBl save(MasterBl masterBl);
     void deleteMasterBlById(Long id);
     MasterBlDetail findMasterBlDetailById(Long id);
 }
