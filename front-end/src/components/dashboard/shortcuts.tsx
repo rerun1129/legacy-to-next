@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, Layers, Search, Printer, Receipt, FolderOpen } from "lucide-react";
 import { SHORTCUT_DATA } from "@/lib/mock-data";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 const icons = [FileText, Layers, Search, Printer, Receipt, FolderOpen];
 

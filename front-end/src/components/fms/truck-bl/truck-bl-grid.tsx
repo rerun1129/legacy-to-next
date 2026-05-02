@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 const ROWS = [
   { id: 1, tbl: "TRUCK-2026-04-001", status: "배차완료", cust: "한진무역(주)", shipper: "한진무역(주)", cons: "서울물류센터", etd: "04/24", eta: "04/25", pol: "KRBSAN", pod: "KRSEL", pickup: "04/23", trucker: "(주)부산트럭", op: "KYS" },

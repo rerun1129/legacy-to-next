@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 const ROWS = [
   { id: 1, nbl: "NBL-2026-04-001", div: "Sea",       status: "처리중", cust: "한진무역(주)", sh: "한진무역(주)", cn: "SHANGHAI CO.",    etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", ref: "HBLKR24041956",  op: "KYS" },
