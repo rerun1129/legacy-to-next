@@ -131,9 +131,10 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   });
 
   function handleSave(raw: FormValues) {
-    const result = MASTER_BL_SCHEMA.safeParse(raw);
+    // form.register 미연결 필드는 submit 시 undefined — defaultValues로 병합
+    const merged = { ...form.getValues(), ...raw };
+    const result = MASTER_BL_SCHEMA.safeParse(merged);
     if (!result.success) {
-      // 유효성 오류는 폼 필드 수준에서 이미 제어되지 않으므로 콘솔 경고로만 노출
       console.warn("MasterBLEntry validation failed", result.error.issues);
       return;
     }

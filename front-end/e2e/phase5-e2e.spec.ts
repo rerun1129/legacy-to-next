@@ -186,11 +186,11 @@ test.describe.serial('House B/L CRUD', () => {
     // 로딩 완료 대기
     await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
 
-    // 첫 번째 행의 cell-hbl span 더블클릭 → entry URL에서 id 파싱
-    // grid-list.tsx: table.grid--list > tbody > tr — 행에 별도 클래스 없음
-    // house-bl-list-grid.tsx: hblNo 컬럼 render → <span className="cell-hbl"> onDoubleClick
-    const firstCellHbl = page.locator('table.grid--list tbody tr').first().locator('span.cell-hbl');
-    await firstCellHbl.dblclick();
+    // cell-hbl span 중 HBLTEST0001 텍스트를 가진 셀 더블클릭 → entry URL에서 id 파싱
+    // house-bl-list-grid.tsx: hblNo 컬럼 → <span className="cell-hbl"> onDoubleClick 연결
+    const targetCell = page.locator('span.cell-hbl', { hasText: 'HBLTEST0001' }).first();
+    await targetCell.waitFor({ timeout: 10_000 });
+    await targetCell.dblclick();
 
     await page.waitForURL(/entry\?id=\d+/, { timeout: 5_000 });
     const url = page.url();
@@ -277,10 +277,11 @@ test.describe.serial('Master B/L CRUD', () => {
     // 로딩 완료 대기 (master-bl-grid.tsx: "Loading...")
     await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
 
-    // 첫 번째 행의 cell-hbl span 더블클릭 → entry URL에서 id 파싱
-    // master-bl-grid.tsx: mblNo 컬럼 render → <span className="cell-hbl"> onDoubleClick
-    const firstCellHbl = page.locator('table.grid--list tbody tr').first().locator('span.cell-hbl');
-    await firstCellHbl.dblclick();
+    // MBLTEST0001 텍스트를 가진 셀 더블클릭 → entry URL에서 id 파싱
+    // master-bl-grid.tsx: mblNo 컬럼 → <span className="cell-hbl"> onDoubleClick 연결
+    const targetCell = page.locator('span.cell-hbl', { hasText: 'MBLTEST0001' }).first();
+    await targetCell.waitFor({ timeout: 10_000 });
+    await targetCell.dblclick();
 
     await page.waitForURL(/entry\?id=\d+/, { timeout: 5_000 });
     const url = page.url();
