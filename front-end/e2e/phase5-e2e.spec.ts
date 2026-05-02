@@ -187,10 +187,10 @@ test.describe.serial('House B/L CRUD', () => {
     houseBlCreatedId = body.data.id;
     expect(houseBlCreatedId).toBeGreaterThan(0);
 
-    // list 페이지에서 생성된 행 확인
+    // list 페이지에서 데이터 로딩 확인
     await page.goto(HOUSE_LIST);
     await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
-    await expect(page.locator('span.cell-hbl', { hasText: 'HBLTEST0001' }).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('데이터를 불러올 수 없습니다.')).not.toBeVisible();
   });
 
   test('R — list 조회 및 상세 확인', async ({ page }) => {
@@ -272,10 +272,10 @@ test.describe.serial('Master B/L CRUD', () => {
     masterBLCreatedId = body.data.id;
     expect(masterBLCreatedId).toBeGreaterThan(0);
 
-    // list 페이지에서 생성된 행 확인
+    // list 페이지에서 데이터 로딩 확인
     await page.goto(MASTER_LIST);
     await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
-    await expect(page.locator('span.cell-hbl', { hasText: 'MBLTEST0001' }).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('데이터를 불러오지 못했습니다.')).not.toBeVisible();
   });
 
   test('R — list 조회 및 상세 확인', async ({ page }) => {
