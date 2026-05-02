@@ -170,7 +170,7 @@ class HouseBlControllerWebMvcTest {
 
         mockMvc.perform(post("/api/house-bl")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\"}"))
+                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\",\"shipmentType\":\"HOUSE\",\"freightTerm\":\"PREPAID\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/house-bl/1")));
 

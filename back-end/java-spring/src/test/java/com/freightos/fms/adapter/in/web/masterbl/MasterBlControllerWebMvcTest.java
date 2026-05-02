@@ -156,7 +156,7 @@ class MasterBlControllerWebMvcTest {
 
         mockMvc.perform(post("/api/master-bl")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\"}"))
+                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\",\"freightTerm\":\"PREPAID\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/master-bl/1")));
 
