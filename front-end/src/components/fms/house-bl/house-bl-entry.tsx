@@ -132,17 +132,20 @@ export function HouseBLEntry({ variant, id }: Props) {
   }, [detail, form]);
 
   const mutation = useMutation({
-    mutationFn: (data: FormValues) =>
-      houseBlPort.save({
-        ...data,
-        ...(isEdit ? { id } : {}),
-        docStatus: "draft",
-        regDate: "",
-        vessel: "",
-        voyage: "",
-        shipper: "",
-        consignee: "",
-      }),
+    mutationFn: (data: FormValues) => {
+      const req = {
+        jobDiv: variant.mode as 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL',
+        bound: variant.direction as 'EXP' | 'IMP',
+        hblNo: data.hbl || undefined,
+        shipmentType: (data.sType as 'HOUSE' | 'DIRECT') || 'HOUSE',
+        freightTerm: (data.settle as 'PREPAID' | 'COLLECT') || 'PREPAID',
+        polCode: data.pol || undefined,
+        podCode: data.pod || undefined,
+        etd: data.etd || undefined,
+        eta: data.eta || undefined,
+      };
+      return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       router.push(`/fms/house-bl/${variant.key}/list`);

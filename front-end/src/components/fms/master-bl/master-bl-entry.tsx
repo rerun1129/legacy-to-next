@@ -131,14 +131,13 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   });
 
   function handleSave(raw: FormValues) {
-    // form.register 미연결 필드는 submit 시 undefined — defaultValues로 병합
-    const merged = { ...form.getValues(), ...raw };
-    const result = MASTER_BL_SCHEMA.safeParse(merged);
-    if (!result.success) {
-      console.warn("MasterBLEntry validation failed", result.error.issues);
-      return;
-    }
-    mutation.mutate(result.data);
+    const req: CreateMasterBlRequest = {
+      jobDiv: variant.mode as 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL',
+      bound: variant.direction as 'EXP' | 'IMP',
+      freightTerm: 'PREPAID',
+      ...raw,
+    };
+    mutation.mutate(req as FormValues);
   }
 
   const tabs = [
