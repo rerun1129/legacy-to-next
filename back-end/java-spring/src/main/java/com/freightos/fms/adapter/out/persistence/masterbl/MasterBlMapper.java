@@ -74,7 +74,7 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()));
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), WeightUnit.fromCode(jpa.getPkgUnit()),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), jpa.getWeightUnit(),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         domain.updateTradeInfo(jpa.getMainItemName(), jpa.getHsCode());
