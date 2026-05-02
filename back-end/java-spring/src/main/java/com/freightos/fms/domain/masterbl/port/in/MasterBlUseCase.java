@@ -12,5 +12,4 @@ public interface MasterBlUseCase {
     MasterBl save(MasterBl masterBl);
     void deleteMasterBlById(Long id);
     MasterBlDetail findMasterBlDetailById(Long id);
-    MasterBl save(MasterBl masterBl);
 }
