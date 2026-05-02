@@ -24,3 +24,17 @@ export interface HouseBlFilter {
   page?: number;
   size?: number;
 }
+
+/** Entry 폼에서 신규/수정 저장 시 사용하는 요청 타입 */
+export interface HouseBlSaveRequest {
+  hbl: string;
+  expImp: 'EXP' | 'IMP';
+  mbl: string;
+  sType: string;
+  lType: string;
+  etd: string;
+  eta: string;
+  pol: string;
+  pod: string;
+  settle: string;
+}

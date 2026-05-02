@@ -5,10 +5,15 @@ export function generateStaticParams() {
   return BL_VARIANT_KEYS.map((v) => ({ variant: v }));
 }
 
-interface Props { params: Promise<{ variant: string }> }
+interface Props {
+  params: Promise<{ variant: string }>;
+  searchParams: Promise<{ id?: string }>;
+}
 
-export default async function HouseBLEntryPage({ params }: Props) {
+export default async function HouseBLEntryPage({ params, searchParams }: Props) {
   const { variant: variantKey } = await params;
+  const { id: idStr } = await searchParams;
   const variant = getBLVariant(variantKey);
-  return <HouseBLEntry variant={variant} />;
+  const id = idStr ? Number(idStr) : undefined;
+  return <HouseBLEntry variant={variant} id={id} />;
 }
