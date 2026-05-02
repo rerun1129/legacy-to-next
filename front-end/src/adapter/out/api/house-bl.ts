@@ -4,6 +4,7 @@ import type { HouseBlRow, HouseBlDetail, HouseBlFilter, CreateHouseBlRequest, Up
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
 
+
 const HOUSE_BL_BASE = '/api/house-bl';
 
 const HOUSE_BL_ROW_SCHEMA = z.object({
