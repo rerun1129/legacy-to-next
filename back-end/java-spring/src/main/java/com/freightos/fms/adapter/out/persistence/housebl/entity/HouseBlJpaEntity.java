@@ -22,7 +22,7 @@ import java.util.List;
  * 해상/항공/트럭/Non-BL 확장은 별도 독립 테이블(@OneToOne FK).
  */
 @Entity
-@Table(name = "house_bl")
+@Table(schema = "fms", name = "house_bl")
 @Getter
 @NoArgsConstructor
 public class HouseBlJpaEntity extends BaseJpaEntity {

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  * JPA ORM 엔티티 — House B/L 구간별 운항 스케줄 (E-19).
  */
 @Entity
-@Table(name = "house_bl_schedule_leg")
+@Table(schema = "fms", name = "house_bl_schedule_leg")
 @Getter
 @NoArgsConstructor
 public class HouseBlScheduleLegJpaEntity extends BaseJpaEntity {

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  * MasterBlJpaEntity 와 @OneToOne(FK: master_bl_id, unique) 관계.
  */
 @Entity
-@Table(name = "master_bl_desc")
+@Table(schema = "fms", name = "master_bl_desc")
 @Getter
 @NoArgsConstructor
 public class MasterBlDescJpaEntity extends BaseJpaEntity {

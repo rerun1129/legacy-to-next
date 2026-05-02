@@ -15,7 +15,7 @@ import java.math.BigDecimal;
  * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
-@Table(name = "house_bl_truck")
+@Table(schema = "fms", name = "house_bl_truck")
 @Getter
 @NoArgsConstructor
 public class HouseBlTruckJpaEntity extends BaseJpaEntity {

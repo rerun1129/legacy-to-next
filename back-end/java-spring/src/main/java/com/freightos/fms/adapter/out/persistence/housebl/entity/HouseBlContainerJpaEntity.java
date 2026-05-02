@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  * PRD §2.2: TEU = length_feet / 20
  */
 @Entity
-@Table(name = "house_bl_container")
+@Table(schema = "fms", name = "house_bl_container")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseBlContainerJpaEntity extends BaseJpaEntity {

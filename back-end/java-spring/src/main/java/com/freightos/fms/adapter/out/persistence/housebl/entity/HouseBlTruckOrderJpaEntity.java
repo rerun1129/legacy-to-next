@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  * TRUCK 모드 전용 1:N 자식. truck_type은 TruckType.code 문자열로 저장.
  */
 @Entity
-@Table(name = "house_bl_truck_order")
+@Table(schema = "fms", name = "house_bl_truck_order")
 @Getter
 @NoArgsConstructor
 public class HouseBlTruckOrderJpaEntity extends BaseJpaEntity {

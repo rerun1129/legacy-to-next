@@ -19,7 +19,7 @@ import java.util.List;
  * 해상/항공 확장은 별도 독립 테이블(@OneToOne FK).
  */
 @Entity
-@Table(name = "master_bl")
+@Table(schema = "fms", name = "master_bl")
 @Getter
 @NoArgsConstructor
 public class MasterBlJpaEntity extends BaseJpaEntity {

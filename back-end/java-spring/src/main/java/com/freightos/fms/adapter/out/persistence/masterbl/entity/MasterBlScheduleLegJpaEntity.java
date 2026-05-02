@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * MasterBlJpaEntity 와 @ManyToOne(FK: master_bl_id) 관계.
  */
 @Entity
-@Table(name = "master_bl_schedule_leg")
+@Table(schema = "fms", name = "master_bl_schedule_leg")
 @Getter
 @NoArgsConstructor
 public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {

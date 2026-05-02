@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * MasterBlJpaEntity 와 @ManyToOne(FK: master_bl_id) 관계.
  */
 @Entity
-@Table(name = "master_bl_dim")
+@Table(schema = "fms", name = "master_bl_dim")
 @Getter
 @NoArgsConstructor
 public class MasterBlDimJpaEntity extends BaseJpaEntity {

@@ -16,7 +16,7 @@ import java.math.BigDecimal;
  * MasterBlJpaEntity 와 @OneToOne(FK: master_bl_id) 관계.
  */
 @Entity
-@Table(name = "master_bl_sea")
+@Table(schema = "fms", name = "master_bl_sea")
 @Getter
 @NoArgsConstructor
 public class MasterBlSeaJpaEntity extends BaseJpaEntity {

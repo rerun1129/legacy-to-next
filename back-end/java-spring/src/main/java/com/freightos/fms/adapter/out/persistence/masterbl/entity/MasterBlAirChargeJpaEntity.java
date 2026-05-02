@@ -15,7 +15,7 @@ import java.math.BigDecimal;
  * AIR 모드 전용 1:N 자식.
  */
 @Entity
-@Table(name = "master_bl_air_charge")
+@Table(schema = "fms", name = "master_bl_air_charge")
 @Getter
 @NoArgsConstructor
 public class MasterBlAirChargeJpaEntity extends BaseJpaEntity {

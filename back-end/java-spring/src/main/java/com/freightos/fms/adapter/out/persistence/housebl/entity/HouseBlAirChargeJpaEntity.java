@@ -15,7 +15,7 @@ import java.math.BigDecimal;
  * AIR 모드 전용 1:N 자식. per는 Per.getCode() 문자열로 저장.
  */
 @Entity
-@Table(name = "house_bl_air_charge")
+@Table(schema = "fms", name = "house_bl_air_charge")
 @Getter
 @NoArgsConstructor
 public class HouseBlAirChargeJpaEntity extends BaseJpaEntity {

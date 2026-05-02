@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
-@Table(name = "switch_bl")
+@Table(schema = "fms", name = "switch_bl")
 @Getter
 @NoArgsConstructor
 public class SwitchBlJpaEntity extends BaseJpaEntity {

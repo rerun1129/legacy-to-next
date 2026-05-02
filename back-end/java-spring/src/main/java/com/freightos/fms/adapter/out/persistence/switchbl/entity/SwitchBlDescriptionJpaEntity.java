@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * SwitchBlJpaEntity 와 @OneToOne(FK: switch_bl_id) 관계.
  */
 @Entity
-@Table(name = "switch_bl_description")
+@Table(schema = "fms", name = "switch_bl_description")
 @Getter
 @NoArgsConstructor
 public class SwitchBlDescriptionJpaEntity extends BaseJpaEntity {

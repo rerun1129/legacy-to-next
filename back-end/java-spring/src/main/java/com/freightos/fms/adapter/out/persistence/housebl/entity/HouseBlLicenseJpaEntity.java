@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * HouseBlJpaEntity 와 @ManyToOne(FK: house_bl_id) 관계.
  */
 @Entity
-@Table(name = "house_bl_license")
+@Table(schema = "fms", name = "house_bl_license")
 @Getter
 @NoArgsConstructor
 public class HouseBlLicenseJpaEntity extends BaseJpaEntity {

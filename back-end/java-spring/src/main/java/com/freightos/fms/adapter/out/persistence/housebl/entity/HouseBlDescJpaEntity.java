@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
  */
 @Entity
-@Table(name = "house_bl_desc")
+@Table(schema = "fms", name = "house_bl_desc")
 @Getter
 @NoArgsConstructor
 public class HouseBlDescJpaEntity extends BaseJpaEntity {
