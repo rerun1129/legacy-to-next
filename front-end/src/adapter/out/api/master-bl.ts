@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { MasterBlPort } from '@/application/master-bl/ports';
-import type { MasterBlRow, MasterBlFilter } from '@/domain/master-bl';
+import type { MasterBlRow, MasterBlFilter, CreateMasterBlRequest, UpdateMasterBlRequest } from '@/domain/master-bl';
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
 
@@ -62,6 +62,20 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
     const parsed = apiResponse(MASTER_BL_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid detail response: ${parsed.error.message}`);
     return parsed.data.data as unknown as MasterBlRow;
+  },
+  async create(req: CreateMasterBlRequest) {
+    const json = await fetchJson(MASTER_BL_BASE, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+    return apiResponse(MASTER_BL_DETAIL_SCHEMA).parse(json).data;
+  },
+  async update(id: number, req: UpdateMasterBlRequest) {
+    const json = await fetchJson(`${MASTER_BL_BASE}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(req),
+    });
+    return apiResponse(MASTER_BL_DETAIL_SCHEMA).parse(json).data;
   },
   async delete(id: number): Promise<void> {
     await fetchJson(`${MASTER_BL_BASE}/${id}`, { method: 'DELETE' });
