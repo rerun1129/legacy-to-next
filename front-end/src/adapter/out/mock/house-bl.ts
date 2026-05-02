@@ -12,8 +12,8 @@ export const mockHouseBlPort: HouseBlPort = {
     if (!row) throw new NotFoundError('HouseBl', String(id));
     return row as unknown as HouseBlDetail;
   },
-  async save(data): Promise<HouseBlRow> {
-    return { ...HOUSE_BL_ROWS[0], ...data } as unknown as HouseBlRow;
+  async save(data): Promise<HouseBlDetail> {
+    return { ...HOUSE_BL_ROWS[0], ...data } as unknown as HouseBlDetail;
   },
   async delete(_id: number): Promise<void> {
     // mock: no-op
