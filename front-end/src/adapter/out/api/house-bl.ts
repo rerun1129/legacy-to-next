@@ -1,63 +1,84 @@
 import { z } from 'zod';
 import type { HouseBlPort } from '@/application/house-bl/ports';
-import type { HouseBlFilter } from '@/domain/house-bl';
+import type { HouseBlRow, HouseBlDetail, HouseBlFilter } from '@/domain/house-bl';
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
-import { formatDateDisplay } from '@/lib/date';
+
+const HOUSE_BL_BASE = '/api/v1/house-bl';
 
 const HOUSE_BL_ROW_SCHEMA = z.object({
-  id: z.number().optional(),
-  no: z.number().optional(),
-  hbl: z.string(),
-  expImp: z.enum(['EXP', 'IMP']),
-  docStatus: z.enum(['ok', 'inprog', 'draft']),
-  mbl: z.string(),
-  sType: z.string(),
-  lType: z.string(),
-  etd: z.string(),
-  eta: z.string(),
-  regDate: z.string(),
-  pol: z.string(),
-  pod: z.string(),
-  vessel: z.string(),
-  voyage: z.string(),
-  shipper: z.string(),
-  consignee: z.string(),
+  id: z.number(),
+  hblNo: z.string().nullable(),
+  jobDiv: z.enum(['SEA', 'AIR', 'TRUCK', 'NON_BL']),
+  bound: z.enum(['EXP', 'IMP']),
+  polCode: z.string().nullable(),
+  podCode: z.string().nullable(),
+  etd: z.string().nullable(),
+  eta: z.string().nullable(),
+  shipperCode: z.string().nullable(),
+  consigneeCode: z.string().nullable(),
+  pkgQty: z.number().nullable(),
+  pkgUnit: z.string().nullable(),
+  createdAt: z.string(),
 });
 
-const applyDateDisplay = (raw: z.infer<typeof HOUSE_BL_ROW_SCHEMA>) => ({
-  ...raw,
-  etd: formatDateDisplay(raw.etd),
-  eta: formatDateDisplay(raw.eta),
-  regDate: formatDateDisplay(raw.regDate),
+const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
+  shipmentType: z.enum(['HOUSE', 'DIRECT']).nullable(),
+  blType: z.enum(['OBL', 'SWB', 'SURRENDER']).nullable(),
+  freightTerm: z.enum(['PREPAID', 'COLLECT']).nullable(),
+  notifyCode: z.string().nullable(),
+  deliveryCode: z.string().nullable(),
+  grossWeightKg: z.number().nullable(),
+  cbm: z.number().nullable(),
+  operatorCode: z.string().nullable(),
+  teamCode: z.string().nullable(),
+  salesManCode: z.string().nullable(),
+  masterBlId: z.number().nullable(),
+  updatedAt: z.string().nullable(),
 });
+
+const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
+  z.object({
+    content: z.array(schema),
+    totalElements: z.number(),
+    totalPages: z.number(),
+    page: z.number(),
+    size: z.number(),
+  });
+
+const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
+  z.object({
+    data: schema,
+    message: z.string().optional(),
+  });
 
 export const API_HOUSE_BL_PORT: HouseBlPort = {
-  async list(filter: HouseBlFilter) {
-    const json = await fetchJson(`/api/v1/house-bl?${toSearchParams(filter as Record<string, unknown>)}`);
-    const content = (json as { data?: { content?: unknown } })?.data?.content;
-    const parsed = z.array(HOUSE_BL_ROW_SCHEMA).safeParse(content);
-    if (!parsed.success) throw new ResponseParseError(`Invalid house B/L list response: ${parsed.error.message}`);
-    return parsed.data.map(applyDateDisplay);
+  async list(filter: HouseBlFilter): Promise<HouseBlRow[]> {
+    const json = await fetchJson(`${HOUSE_BL_BASE}?${toSearchParams(filter as Record<string, unknown>)}`);
+    const parsed = apiResponse(pagedResult(HOUSE_BL_ROW_SCHEMA)).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid list response: ${parsed.error.message}`);
+    return parsed.data.data.content;
   },
-  async getById(id: number) {
-    const json = await fetchJson(`/api/v1/house-bl/${id}`);
-    const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
-    if (!parsed.success) throw new ResponseParseError(`Invalid house B/L response: ${parsed.error.message}`);
-    return applyDateDisplay(parsed.data);
+
+  async getById(id: number): Promise<HouseBlDetail> {
+    const json = await fetchJson(`${HOUSE_BL_BASE}/${id}`);
+    const parsed = apiResponse(HOUSE_BL_DETAIL_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid detail response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
-  async save(data) {
-    const json = await fetchJson('/api/v1/house-bl', {
+
+  async save(req: unknown): Promise<HouseBlDetail> {
+    const json = await fetchJson(HOUSE_BL_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(req),
     });
-    if (json === null) throw new ResponseParseError('Expected response body from POST /house-bl');
-    const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
+    const parsed = apiResponse(HOUSE_BL_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid save response: ${parsed.error.message}`);
-    return applyDateDisplay(parsed.data);
+    return parsed.data.data;
   },
-  async delete(id: number) {
-    await fetchJson(`/api/v1/house-bl/${id}`, { method: 'DELETE' });
+
+  async delete(id: number): Promise<void> {
+    await fetchJson(`${HOUSE_BL_BASE}/${id}`, { method: 'DELETE' });
   },
 };
