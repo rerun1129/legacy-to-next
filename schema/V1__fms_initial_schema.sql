@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS master_bl (
     master_ref_no         VARCHAR(50),
     job_div               VARCHAR(10)  NOT NULL,
     bound                 VARCHAR(3)   NOT NULL,
+    shipment_type         VARCHAR(10),
     shipper_code          VARCHAR(20),
     shipper_address       VARCHAR(500),
     consignee_code        VARCHAR(20),
@@ -44,6 +45,7 @@ CREATE TABLE IF NOT EXISTS master_bl (
 
 COMMENT ON COLUMN master_bl.job_div           IS '운송구분: SEA(해상) | AIR(항공)';
 COMMENT ON COLUMN master_bl.bound             IS '수출입구분: EXP(수출) | IMP(수입)';
+COMMENT ON COLUMN master_bl.shipment_type     IS '선적구분: HOUSE(혼재) | DIRECT(직접)';
 COMMENT ON COLUMN master_bl.mbl_no            IS 'Master B/L 번호';
 COMMENT ON COLUMN master_bl.master_ref_no     IS '사내 Master 참조번호';
 COMMENT ON COLUMN master_bl.shipper_code      IS '화주 거래처 코드';

@@ -21,9 +21,9 @@ class MasterBlDetailResponseTest {
     void recordComponents_haveExactlyTwentyTwoFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(22);
-        assertThat(components[21].getName()).isEqualTo("consolidatedHouseBls");
-        assertThat(components[21].getType()).isEqualTo(List.class);
+        assertThat(components).hasSize(23);
+        assertThat(components[22].getName()).isEqualTo("consolidatedHouseBls");
+        assertThat(components[22].getType()).isEqualTo(List.class);
     }
 
     // ── from(MasterBlDetail) 매핑 검증 ───────────────────────────────
