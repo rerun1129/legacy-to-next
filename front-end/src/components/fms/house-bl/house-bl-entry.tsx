@@ -176,10 +176,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   ];
 
   function handleSubmit(raw: FormValues) {
-    // zodResolver 없이 수동 parse로 입력 경계 검증 수행
-    const result = HOUSE_BL_SCHEMA.safeParse(raw);
-    if (!result.success) return;
-    mutation.mutate(result.data);
+    mutation.mutate(raw);
   }
 
   return (
