@@ -4,8 +4,8 @@
 -- 컨벤션: rules/DDL_RULES.md
 -- =============================================================================
 
-CREATE SCHEMA IF NOT EXISTS legacy_to_next;
-SET search_path TO legacy_to_next;
+CREATE SCHEMA IF NOT EXISTS fms;
+SET search_path TO fms;
 
 -- =============================================================================
 -- E-01 Master B/L 공통 본체
