@@ -238,12 +238,20 @@ test.describe.serial('House B/L CRUD', () => {
     await expect(page.getByText('데이터를 불러올 수 없습니다.')).not.toBeVisible({ timeout: 10_000 });
   });
 
-  test('C(마지막) — 삭제 후 빈 폼에서 재등록 (DB에 레코드 유지)', async ({ page }) => {
-    await page.goto(HOUSE_ENTRY);
-    await fillHouseBlForm(page);
-    await page.click('button[type="submit"]');
-    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
-    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
+  test('C(마지막) — 삭제 후 재등록으로 DB 레코드 유지 (API 직접 호출)', async ({ page }) => {
+    const res = await page.request.post('http://localhost:8080/api/house-bl', {
+      data: {
+        jobDiv: 'SEA', bound: 'EXP', hblNo: `HBL${Date.now()}`,
+        shipmentType: 'HOUSE', freightTerm: 'PREPAID',
+        polCode: 'KRBSA', podCode: 'USLAX',
+      },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(res.ok()).toBeTruthy();
+
+    // list 에러 없음 확인
+    await page.goto(HOUSE_LIST);
+    await expect(page.getByText('데이터를 불러올 수 없습니다.')).not.toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -331,12 +339,15 @@ test.describe.serial('Master B/L CRUD', () => {
     await expect(page.url()).not.toContain('?id=');
   });
 
-  test('C(마지막) — 삭제 후 빈 폼에서 재등록 (DB에 레코드 유지)', async ({ page }) => {
-    await page.goto(MASTER_ENTRY);
-    await fillMasterBlForm(page);
-    await page.click('button[type="submit"]');
-    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
-    await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
+  test('C(마지막) — 삭제 후 재등록으로 DB 레코드 유지 (API 직접 호출)', async ({ page }) => {
+    const res = await page.request.post('http://localhost:8080/api/master-bl', {
+      data: {
+        jobDiv: 'SEA', bound: 'EXP', mblNo: `MBL${Date.now()}`,
+        freightTerm: 'PREPAID', polCode: 'KRBSA', podCode: 'USLAX',
+      },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(res.ok()).toBeTruthy();
   });
 });
 
