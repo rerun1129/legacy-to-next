@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Topbar } from "./topbar";
 import { Sidebar } from "./sidebar";
+import { ToastViewport } from "@/components/shared/toast";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -15,6 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       />
       <Sidebar />
       <main className="app__main">{children}</main>
+      <ToastViewport />
     </div>
   );
 }
