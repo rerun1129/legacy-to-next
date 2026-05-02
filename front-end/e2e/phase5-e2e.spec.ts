@@ -165,113 +165,178 @@ async function fillMasterBlForm(page: Page): Promise<void> {
   // 채울 수 없음: Operator/Team/Settle Partner 등 LiField — placeholder 없고 label 연결 없음
 }
 
-// ── House B/L ─────────────────────────────────────────────────────────────
-test.describe('House B/L', () => {
-  test('list — 페이지 로딩 성공 (에러 없음)', async ({ page }) => {
-    await page.goto(HOUSE_LIST);
+// ── House B/L CRUD (serial) ───────────────────────────────────────────────
+// createdId: CREATE 결과 id를 UPDATE/DELETE에서 공유
+let houseBlCreatedId: number;
 
-    // 로딩 텍스트가 사라질 때까지 대기
-    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
-
-    // 에러 메시지 미노출 확인 — 빈 리스트도 정상 상태
-    await expect(page.getByText('데이터를 불러올 수 없습니다.')).not.toBeVisible();
-
-    // URL 유지 확인
-    await expect(page).toHaveURL(HOUSE_LIST);
-
-    // 그리드 패널 컨테이너 존재 확인
-    await expect(page.locator('.panel--list')).toBeVisible();
-  });
-
-  test('entry — 모든 접근 가능 필드 채워서 Save 클릭', async ({ page }) => {
+test.describe.serial('House B/L CRUD', () => {
+  test('C — 신규 등록 후 id 추출', async ({ page }) => {
     await page.goto(HOUSE_ENTRY);
 
-    // Save 버튼 활성화 확인 (신규 폼 기본 상태)
     const saveBtn = page.locator('button[type="submit"]:has-text("Save")');
     await expect(saveBtn).toBeVisible();
     await expect(saveBtn).toBeEnabled();
 
-    // toolbar와 Main 탭 내 접근 가능한 모든 input 채우기
     await fillHouseBlForm(page);
-
-    // Freight 탭 진입 후 Freight 패널 로딩 확인
-    // freight-tab.tsx: FreightRatePanel, FreightSellingPanel, FreightBuyingPanel, FreightAccountPanel
-    await page.click('button:has-text("Freight")');
-    // Freight 탭의 Rate 그리드 input — class="grid__cell-input", placeholder 없음
-    // 채울 수 없음: SELLING_COLS/BUYING_COLS grid__cell-input은 placeholder·label 미존재
-    // 탭 이동 확인 (패널 헤더 텍스트로)
-    await expect(page.getByText('Selling / Debit')).toBeVisible({ timeout: 5_000 });
-
-    // Main 탭으로 복귀
-    await page.click('button:has-text("Main")');
-
-    // Save 클릭 후 Saving... 상태 전환 또는 redirect 확인
-    // mockHouseBlPort 사용 시 성공 후 /fms/house-bl/sea-exp/list 로 이동
     await saveBtn.click();
 
-    // 에러 페이지로 이동하지 않음을 확인
-    await expect(page).not.toHaveURL(HOUSE_ENTRY + '?error=true');
+    // list 페이지로 redirect 대기
+    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
+
+    // 로딩 완료 대기
+    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
+
+    // 첫 번째 행의 cell-hbl span 더블클릭 → entry URL에서 id 파싱
+    // grid-list.tsx: table.grid--list > tbody > tr — 행에 별도 클래스 없음
+    // house-bl-list-grid.tsx: hblNo 컬럼 render → <span className="cell-hbl"> onDoubleClick
+    const firstCellHbl = page.locator('table.grid--list tbody tr').first().locator('span.cell-hbl');
+    await firstCellHbl.dblclick();
+
+    await page.waitForURL(/entry\?id=\d+/, { timeout: 5_000 });
+    const url = page.url();
+    const match = url.match(/id=(\d+)/);
+    houseBlCreatedId = match ? Number(match[1]) : 0;
+    expect(houseBlCreatedId).toBeGreaterThan(0);
   });
 
-  test.skip('entry — 수정 모드 (list에 데이터 있어야 확인 가능)', () => {
-    // list에 저장된 행이 있어야 id가 생성됨
-    // /fms/house-bl/sea-exp/entry?id=1 진입 후 기존 데이터 로드 확인
-    // TODO: 신규 저장 성공 후 연계 테스트로 구현
+  test('R — list 조회 및 상세 확인', async ({ page }) => {
+    await page.goto(HOUSE_LIST);
+
+    // 로딩 완료 대기
+    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
+
+    // 에러 없음 확인
+    await expect(page.getByText('데이터를 불러올 수 없습니다.')).not.toBeVisible();
+
+    // list에 행이 있음 (CREATE 이후)
+    const firstRow = page.locator('table.grid--list tbody tr').first();
+    await expect(firstRow).toBeVisible();
+
+    // 상세 페이지 직접 진입 후 Save 버튼 존재 확인
+    await page.goto(`${HOUSE_ENTRY}?id=${houseBlCreatedId}`);
+    await expect(page.locator('button[type="submit"]:has-text("Save")')).toBeVisible({ timeout: 10_000 });
   });
 
-  test.skip('list — 행 더블클릭 → 수정 entry 이동 (데이터 필요)', () => {
-    // list에 데이터가 있어야 row click 이벤트 발생 가능
-    // TODO: 신규 저장 성공 후 연계 테스트로 구현
+  test('U — 수정', async ({ page }) => {
+    await page.goto(`${HOUSE_ENTRY}?id=${houseBlCreatedId}`);
+
+    // hbl 필드에 기존 데이터가 로드될 때까지 대기
+    await page.waitForFunction(
+      () => (document.querySelector('input[name="hbl"]') as HTMLInputElement | null)?.value?.length ?? 0 > 0,
+      { timeout: 10_000 },
+    );
+
+    // HBL No 수정
+    await page.fill('input[name="hbl"]', 'HBLTEST0002');
+    await page.click('button[type="submit"]');
+
+    // list로 redirect 확인
+    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
   });
 
-  test.skip('DELETE 버튼 — TODO: onClick 핸들러 미구현', () => {
-    // house-bl-entry.tsx: <button type="button" className="btn btn--danger">Delete</button>
-    // onClick 핸들러 미연결 상태 — 구현 완료 후 테스트 추가
+  test('D — 삭제 후 list 복귀', async ({ page }) => {
+    await page.goto(`${HOUSE_ENTRY}?id=${houseBlCreatedId}`);
+
+    // Delete 버튼 클릭 전 confirm dialog 수락 처리
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.click('button.btn--danger');
+
+    // list로 redirect 확인
+    await page.waitForURL(`**${HOUSE_LIST}`, { timeout: 15_000 });
+
+    // 삭제 후 로딩 완료 대기
+    await expect(page.getByText('로딩 중...')).not.toBeVisible({ timeout: 10_000 });
   });
 });
 
-// ── Master B/L ────────────────────────────────────────────────────────────
-test.describe('Master B/L', () => {
-  test('list — 페이지 로딩 성공', async ({ page }) => {
-    await page.goto(MASTER_LIST);
+// ── Master B/L CRUD (serial) ─────────────────────────────────────────────
+// masterBLCreatedId: CREATE 결과 id를 UPDATE/DELETE에서 공유
+let masterBLCreatedId: number;
 
-    // 에러 메시지 미노출 확인
-    await expect(page.getByText('데이터를 불러오지 못했습니다.')).not.toBeVisible({ timeout: 10_000 });
-
-    // URL 유지 확인
-    await expect(page).toHaveURL(MASTER_LIST);
-
-    // 패널 컨테이너 존재 확인
-    await expect(page.locator('.panel').first()).toBeVisible();
-  });
-
-  test('entry — 모든 접근 가능 필드 채워서 Save 클릭', async ({ page }) => {
+test.describe.serial('Master B/L CRUD', () => {
+  test('C — 신규 등록 후 id 추출', async ({ page }) => {
     await page.goto(MASTER_ENTRY);
 
-    // Save 버튼 활성화 확인 (신규 폼 기본 상태)
     const saveBtn = page.locator('button[type="submit"]:has-text("Save")');
     await expect(saveBtn).toBeVisible();
     await expect(saveBtn).toBeEnabled();
 
-    // toolbar와 Main 탭 내 접근 가능한 모든 input 채우기
     await fillMasterBlForm(page);
-
-    // Save 클릭 후 list redirect 또는 pending 상태 확인
-    // masterBlPort.create 호출 → 백엔드 연동 시 /fms/master-bl/sea-exp/list 로 이동
     await saveBtn.click();
 
-    // 에러 페이지로 이동하지 않음을 확인
-    await expect(page).not.toHaveURL(MASTER_ENTRY + '?error=true');
+    // list 페이지로 redirect 대기
+    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
+
+    // 로딩 완료 대기 (master-bl-grid.tsx: "Loading...")
+    await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
+
+    // 첫 번째 행의 cell-hbl span 더블클릭 → entry URL에서 id 파싱
+    // master-bl-grid.tsx: mblNo 컬럼 render → <span className="cell-hbl"> onDoubleClick
+    const firstCellHbl = page.locator('table.grid--list tbody tr').first().locator('span.cell-hbl');
+    await firstCellHbl.dblclick();
+
+    await page.waitForURL(/entry\?id=\d+/, { timeout: 5_000 });
+    const url = page.url();
+    const match = url.match(/id=(\d+)/);
+    masterBLCreatedId = match ? Number(match[1]) : 0;
+    expect(masterBLCreatedId).toBeGreaterThan(0);
   });
 
-  test.skip('entry — 수정 모드 (list에 데이터 있어야 확인 가능)', () => {
-    // /fms/master-bl/sea-exp/entry?id=1 진입 후 기존 데이터 로드 확인
-    // TODO: 신규 저장 성공 후 연계 테스트로 구현
+  test('R — list 조회 및 상세 확인', async ({ page }) => {
+    await page.goto(MASTER_LIST);
+
+    // 로딩 완료 대기
+    await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
+
+    // 에러 없음 확인
+    await expect(page.getByText('데이터를 불러오지 못했습니다.')).not.toBeVisible();
+
+    // list에 행이 있음 (CREATE 이후)
+    const firstRow = page.locator('table.grid--list tbody tr').first();
+    await expect(firstRow).toBeVisible();
+
+    // 상세 페이지 직접 진입 후 Save 버튼 존재 확인
+    await page.goto(`${MASTER_ENTRY}?id=${masterBLCreatedId}`);
+    await expect(page.locator('button[type="submit"]:has-text("Save")')).toBeVisible({ timeout: 10_000 });
   });
 
-  test.skip('DELETE 버튼 — TODO: onClick 핸들러 미구현', () => {
-    // master-bl-entry.tsx: <button type="button" className="btn btn--danger">Delete</button>
-    // onClick 핸들러 미연결 상태 — 구현 완료 후 테스트 추가
+  test('U — 수정', async ({ page }) => {
+    await page.goto(`${MASTER_ENTRY}?id=${masterBLCreatedId}`);
+
+    // MBL No 필드에 기존 데이터가 로드될 때까지 대기
+    // master-bl-entry.tsx toolbar: getByPlaceholder('MBL No') — form.register 미연결이므로
+    // defaultValue 로드 완료를 value 존재로 확인
+    await page.waitForFunction(
+      () => {
+        const inputs = Array.from(document.querySelectorAll('input'));
+        const mblInput = inputs.find(
+          (el) => (el as HTMLInputElement).placeholder === 'MBL No',
+        ) as HTMLInputElement | undefined;
+        return (mblInput?.value?.length ?? 0) > 0;
+      },
+      { timeout: 10_000 },
+    );
+
+    // MBL No 수정
+    await page.getByPlaceholder('MBL No').fill('MBLTEST0002');
+    await page.click('button[type="submit"]');
+
+    // list로 redirect 확인
+    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
+  });
+
+  test('D — 삭제 후 list 복귀', async ({ page }) => {
+    await page.goto(`${MASTER_ENTRY}?id=${masterBLCreatedId}`);
+
+    // Delete 버튼 클릭 전 confirm dialog 수락 처리
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.click('button.btn--danger');
+
+    // list로 redirect 확인
+    await page.waitForURL(`**${MASTER_LIST}`, { timeout: 15_000 });
+
+    // 삭제 후 로딩 완료 대기
+    await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10_000 });
   });
 });
 
