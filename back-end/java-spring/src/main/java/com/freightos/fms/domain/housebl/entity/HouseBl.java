@@ -8,7 +8,7 @@ import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
-import com.freightos.fms.domain.housebl.enums.ShipmentType;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

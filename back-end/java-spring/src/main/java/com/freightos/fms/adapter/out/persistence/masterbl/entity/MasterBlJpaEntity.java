@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -42,6 +43,10 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "bound", nullable = false, length = 3)
     @Enumerated(EnumType.STRING)
     private Bound bound;
+
+    @Column(name = "shipment_type", length = 10)
+    @Enumerated(EnumType.STRING)
+    private ShipmentType shipmentType;
 
     @Column(name = "shipper_code", length = 20)
     private String shipperCode;
@@ -131,6 +136,7 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
     public void setJobDiv(MasterBlJobDiv v) { this.jobDiv = v; }
     public void setBound(Bound v) { this.bound = v; }
+    public void setShipmentType(ShipmentType v) { this.shipmentType = v; }
     public void setShipperCode(String v) { this.shipperCode = v; }
     public void setShipperAddress(String v) { this.shipperAddress = v; }
     public void setConsigneeCode(String v) { this.consigneeCode = v; }

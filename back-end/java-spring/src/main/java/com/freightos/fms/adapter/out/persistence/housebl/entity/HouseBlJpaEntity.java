@@ -6,7 +6,7 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
-import com.freightos.fms.domain.housebl.enums.ShipmentType;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

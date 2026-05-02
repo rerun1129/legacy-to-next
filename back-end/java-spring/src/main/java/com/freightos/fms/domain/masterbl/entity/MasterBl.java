@@ -3,6 +3,7 @@ package com.freightos.fms.domain.masterbl.entity;
 import com.freightos.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.vo.*;
@@ -27,6 +28,7 @@ public abstract class MasterBl extends BaseEntity {
     private BlNumber masterRefNo;       // 해상 수출 자동 채번
     private MasterBlJobDiv jobDiv;
     private Bound bound;
+    private ShipmentType shipmentType;
 
     // ── 당사자 (3슬롯) ──────────────────────────────────────────
     private CustomerCode shipperCode;
@@ -104,6 +106,10 @@ public abstract class MasterBl extends BaseEntity {
     public void updateTradeInfo(String mainItemName, String hsCode) {
         this.mainItemName = mainItemName;
         this.hsCode       = hsCode;
+    }
+
+    public void updateShipmentType(ShipmentType shipmentType) {
+        this.shipmentType = shipmentType;
     }
 
     public void assignSettlePartner(CustomerCode settlePartnerCode) {

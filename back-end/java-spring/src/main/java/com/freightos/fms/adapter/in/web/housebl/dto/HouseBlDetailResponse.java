@@ -8,7 +8,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlSea;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.enums.ShipmentType;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

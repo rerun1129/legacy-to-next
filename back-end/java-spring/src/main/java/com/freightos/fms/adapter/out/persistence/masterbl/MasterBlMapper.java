@@ -78,6 +78,7 @@ public class MasterBlMapper {
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         domain.updateTradeInfo(jpa.getMainItemName(), jpa.getHsCode());
+        domain.updateShipmentType(jpa.getShipmentType());
     }
 
     private void copySeaFields(MasterBlSeaJpaEntity jpa, MasterBlSea domain) {
@@ -134,6 +135,7 @@ public class MasterBlMapper {
         jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
+        jpa.setShipmentType(domain.getShipmentType());
     }
 
     public void applySeaFields(MasterBlSea domain, MasterBlSeaJpaEntity jpa) {

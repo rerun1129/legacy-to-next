@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
@@ -22,6 +23,7 @@ public record MasterBlDetailResponse(
         String masterRefNo,
         String jobDiv,
         Bound bound,
+        ShipmentType shipmentType,
         String shipperCode,
         String consigneeCode,
         String notifyCode,
@@ -48,6 +50,7 @@ public record MasterBlDetailResponse(
                 mapOrNull(entity.getMasterRefNo(), BlNumber::value),
                 mapOrNull(entity.getJobDiv(), MasterBlJobDiv::name),
                 entity.getBound(),
+                entity.getShipmentType(),
                 mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 mapOrNull(entity.getNotifyCode(), CustomerCode::value),
