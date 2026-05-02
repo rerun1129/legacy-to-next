@@ -1,7 +1,9 @@
 package com.freightos.fms.application.masterbl;
 
+import com.freightos.common.exception.FmsException;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
+import org.springframework.http.HttpStatus;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
@@ -45,6 +47,19 @@ public class MasterBlService implements MasterBlUseCase {
     public void deleteMasterBlById(Long id) {
         masterBlPort.deleteMasterBl(findMasterBlById(id));
         log.info("Deleted MasterBl id={}", id);
+    }
+
+    @Override
+    @Transactional
+    public MasterBl save(MasterBl masterBl) {
+        if (masterBl.getId() == null && masterBl.getMblNo() != null) {
+            String mblNo = masterBl.getMblNo().value();
+            if (masterBlPort.existsByMblNo(mblNo)) {
+                throw new FmsException(HttpStatus.CONFLICT, "DUPLICATE_MBL_NO",
+                        "MBL No already exists: " + mblNo);
+            }
+        }
+        return masterBlPort.saveMasterBl(masterBl);
     }
 
     @Override
