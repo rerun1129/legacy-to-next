@@ -5,6 +5,8 @@ import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
 import { formatDateDisplay } from '@/lib/date';
 
+const HOUSE_BL_BASE = '/api/house-bl';
+
 const HOUSE_BL_ROW_SCHEMA = z.object({
   id: z.number().optional(),
   no: z.number().optional(),
@@ -34,20 +36,20 @@ const applyDateDisplay = (raw: z.infer<typeof HOUSE_BL_ROW_SCHEMA>) => ({
 
 export const API_HOUSE_BL_PORT: HouseBlPort = {
   async list(filter: HouseBlFilter) {
-    const json = await fetchJson(`/api/v1/house-bl?${toSearchParams(filter as Record<string, unknown>)}`);
+    const json = await fetchJson(`${HOUSE_BL_BASE}?${toSearchParams(filter as Record<string, unknown>)}`);
     const content = (json as { data?: { content?: unknown } })?.data?.content;
     const parsed = z.array(HOUSE_BL_ROW_SCHEMA).safeParse(content);
     if (!parsed.success) throw new ResponseParseError(`Invalid house B/L list response: ${parsed.error.message}`);
     return parsed.data.map(applyDateDisplay);
   },
   async getById(id: number) {
-    const json = await fetchJson(`/api/v1/house-bl/${id}`);
+    const json = await fetchJson(`${HOUSE_BL_BASE}/${id}`);
     const parsed = HOUSE_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid house B/L response: ${parsed.error.message}`);
     return applyDateDisplay(parsed.data);
   },
   async save(data) {
-    const json = await fetchJson('/api/v1/house-bl', {
+    const json = await fetchJson(HOUSE_BL_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -58,6 +60,6 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
     return applyDateDisplay(parsed.data);
   },
   async delete(id: number) {
-    await fetchJson(`/api/v1/house-bl/${id}`, { method: 'DELETE' });
+    await fetchJson(`${HOUSE_BL_BASE}/${id}`, { method: 'DELETE' });
   },
 };

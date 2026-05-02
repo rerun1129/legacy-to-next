@@ -5,6 +5,8 @@ import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
 import { formatDateDisplay } from '@/lib/date';
 
+const MASTER_BL_BASE = '/api/master-bl';
+
 const MASTER_BL_ROW_SCHEMA = z.object({
   id: z.number().optional(),
   mblNo: z.string(),
@@ -19,7 +21,7 @@ const MASTER_BL_ROW_SCHEMA = z.object({
 
 export const API_MASTER_BL_PORT: MasterBlPort = {
   async list(filter: MasterBlFilter) {
-    const json = await fetchJson(`/api/v1/master-bl?${toSearchParams(filter as Record<string, unknown>)}`);
+    const json = await fetchJson(`${MASTER_BL_BASE}?${toSearchParams(filter as Record<string, unknown>)}`);
     const content = (json as { data?: { content?: unknown } })?.data?.content;
     const parsed = z.array(MASTER_BL_ROW_SCHEMA).safeParse(content);
     if (!parsed.success) throw new ResponseParseError(`Invalid master B/L list response: ${parsed.error.message}`);
@@ -30,7 +32,7 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
     }));
   },
   async getById(id: number) {
-    const json = await fetchJson(`/api/v1/master-bl/${id}`);
+    const json = await fetchJson(`${MASTER_BL_BASE}/${id}`);
     const parsed = MASTER_BL_ROW_SCHEMA.safeParse((json as { data?: unknown })?.data);
     if (!parsed.success) throw new ResponseParseError(`Invalid master B/L response: ${parsed.error.message}`);
     const raw = parsed.data;
@@ -41,6 +43,6 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
     };
   },
   async delete(id: number) {
-    await fetchJson(`/api/v1/master-bl/${id}`, { method: 'DELETE' });
+    await fetchJson(`${MASTER_BL_BASE}/${id}`, { method: 'DELETE' });
   },
 };
