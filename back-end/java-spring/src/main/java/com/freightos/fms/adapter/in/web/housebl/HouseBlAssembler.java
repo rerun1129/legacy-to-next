@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.in.web.housebl;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import org.springframework.stereotype.Component;

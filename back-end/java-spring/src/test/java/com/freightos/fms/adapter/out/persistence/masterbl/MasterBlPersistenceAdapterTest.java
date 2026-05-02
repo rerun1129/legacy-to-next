@@ -1,10 +1,10 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
-import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.SortDirection;
-import com.freightos.fms.domain.common.model.PageRequest;
+import com.freightos.common.model.PageRequest;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;

@@ -7,7 +7,7 @@ import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
 import java.time.LocalDateTime;
 
-import static com.freightos.fms.common.util.VoMapper.mapOrNull;
+import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /** Master B/L 리스트 화면용 요약 DTO. */
 public record MasterBlSummaryResponse(

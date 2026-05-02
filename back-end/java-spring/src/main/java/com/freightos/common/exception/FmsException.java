@@ -1,4 +1,4 @@
-package com.freightos.fms.common.exception;
+package com.freightos.common.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

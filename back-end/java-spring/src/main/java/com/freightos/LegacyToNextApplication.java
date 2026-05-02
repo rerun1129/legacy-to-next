@@ -1,4 +1,4 @@
-package com.freightos.fms;
+package com.freightos;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class FmsApplication {
+public class LegacyToNextApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FmsApplication.class, args);
+        SpringApplication.run(LegacyToNextApplication.class, args);
     }
 }

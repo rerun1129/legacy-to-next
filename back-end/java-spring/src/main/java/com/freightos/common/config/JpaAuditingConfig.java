@@ -1,4 +1,4 @@
-package com.freightos.fms.config;
+package com.freightos.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.common.model;
+package com.freightos.common.model;
 
 import com.freightos.fms.domain.common.enums.SortDirection;
 

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.freightos.fms.common.util.VoMapper.mapOrNull;
+import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /** Master B/L 상세 응답 DTO. 도메인 엔티티를 직접 노출하지 않는다. */
 public record MasterBlDetailResponse(

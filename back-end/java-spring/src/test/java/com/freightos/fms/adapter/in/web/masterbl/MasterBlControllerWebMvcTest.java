@@ -2,10 +2,10 @@ package com.freightos.fms.adapter.in.web.masterbl;
 
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
-import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.MasterBlDetail;
 import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
 import org.junit.jupiter.api.DisplayName;

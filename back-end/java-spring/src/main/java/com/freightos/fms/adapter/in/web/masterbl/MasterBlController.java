@@ -2,11 +2,11 @@ package com.freightos.fms.adapter.in.web.masterbl;
 
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
-import com.freightos.fms.common.response.ApiResponse;
+import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.model.PageRequest;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PageRequest;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

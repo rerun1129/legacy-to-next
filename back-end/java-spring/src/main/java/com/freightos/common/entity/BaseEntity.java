@@ -1,4 +1,4 @@
-package com.freightos.fms.common.entity;
+package com.freightos.common.entity;
 
 import lombok.Getter;
 

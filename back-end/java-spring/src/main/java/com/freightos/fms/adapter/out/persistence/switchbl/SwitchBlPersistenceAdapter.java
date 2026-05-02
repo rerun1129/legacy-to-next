@@ -3,7 +3,7 @@ package com.freightos.fms.adapter.out.persistence.switchbl;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlRepository;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlDescriptionJpaEntity;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlJpaEntity;
-import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
 import com.freightos.fms.domain.switchbl.port.out.SwitchBlPort;

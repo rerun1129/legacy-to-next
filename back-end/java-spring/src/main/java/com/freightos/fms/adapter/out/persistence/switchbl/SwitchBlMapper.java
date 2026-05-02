@@ -7,7 +7,7 @@ import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
 import org.springframework.stereotype.Component;
 
-import static com.freightos.fms.common.util.VoMapper.mapOrNull;
+import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /**
  * JPA ↔ Domain 변환 매퍼 — Switch B/L.

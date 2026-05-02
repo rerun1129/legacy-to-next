@@ -1,4 +1,4 @@
-package com.freightos.fms.adapter.out.persistence.common;
+package com.freightos.common.persistence;
 
 import jakarta.persistence.*;
 import lombok.Getter;

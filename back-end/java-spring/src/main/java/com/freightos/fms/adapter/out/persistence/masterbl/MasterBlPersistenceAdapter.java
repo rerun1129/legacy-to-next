@@ -7,10 +7,10 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
-import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.model.PageRequest;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PageRequest;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;

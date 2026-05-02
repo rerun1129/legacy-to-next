@@ -1,4 +1,4 @@
-package com.freightos.fms.common.util;
+package com.freightos.common.util;
 
 import java.util.function.Function;
 

@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.common.model;
+package com.freightos.common.model;
 
 import java.util.List;
 import java.util.function.Function;

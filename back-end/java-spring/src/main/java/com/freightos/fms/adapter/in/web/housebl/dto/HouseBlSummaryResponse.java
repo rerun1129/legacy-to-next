@@ -9,7 +9,7 @@ import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 
 import java.time.LocalDateTime;
 
-import static com.freightos.fms.common.util.VoMapper.mapOrNull;
+import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /** 리스트 화면용 요약 DTO */
 public record HouseBlSummaryResponse(

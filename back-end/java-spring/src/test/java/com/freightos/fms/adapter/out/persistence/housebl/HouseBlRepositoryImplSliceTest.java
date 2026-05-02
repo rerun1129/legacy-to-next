@@ -4,10 +4,10 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirJpaEnt
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
-import com.freightos.fms.application.config.QueryDslConfig;
+import com.freightos.common.config.QueryDslConfig;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.model.PageRequest;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PageRequest;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;

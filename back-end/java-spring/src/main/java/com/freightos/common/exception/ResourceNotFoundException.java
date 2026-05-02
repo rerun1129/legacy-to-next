@@ -1,4 +1,4 @@
-package com.freightos.fms.common.exception;
+package com.freightos.common.exception;
 
 import com.freightos.fms.common.response.MessageCode;
 import org.springframework.http.HttpStatus;

@@ -3,7 +3,7 @@ package com.freightos.fms.adapter.out.persistence.switchbl;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlDescriptionJpaEntity;
 import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlJpaEntity;
-import com.freightos.fms.application.config.QueryDslConfig;
+import com.freightos.common.config.QueryDslConfig;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import jakarta.persistence.EntityManager;

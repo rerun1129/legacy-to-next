@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.freightos.fms.common.util.VoMapper.mapOrNull;
+import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /**
  * House B/L 화물(컨테이너·DIM·라이선스) JPA ↔ Domain 변환 매퍼.

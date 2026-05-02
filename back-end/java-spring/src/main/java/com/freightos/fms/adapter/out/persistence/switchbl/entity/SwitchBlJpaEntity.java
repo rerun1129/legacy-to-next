@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.switchbl.entity;
 
-import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

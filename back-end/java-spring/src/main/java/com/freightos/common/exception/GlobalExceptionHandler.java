@@ -1,4 +1,4 @@
-package com.freightos.fms.common.exception;
+package com.freightos.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;

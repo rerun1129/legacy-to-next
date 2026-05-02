@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.masterbl.entity;
 
-import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.vo.CurrencyCode;

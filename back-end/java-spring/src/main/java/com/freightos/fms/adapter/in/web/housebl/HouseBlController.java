@@ -2,11 +2,11 @@ package com.freightos.fms.adapter.in.web.housebl;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
-import com.freightos.fms.common.response.ApiResponse;
+import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.model.PageRequest;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PageRequest;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;

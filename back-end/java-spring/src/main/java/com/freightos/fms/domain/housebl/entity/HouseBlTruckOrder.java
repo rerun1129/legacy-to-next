@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
-import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.vo.ContainerNumber;
 import com.freightos.fms.domain.common.vo.SealNumber;
 import com.freightos.fms.domain.common.vo.Volume;

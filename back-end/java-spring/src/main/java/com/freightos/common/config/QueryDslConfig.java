@@ -1,4 +1,4 @@
-package com.freightos.fms.application.config;
+package com.freightos.common.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

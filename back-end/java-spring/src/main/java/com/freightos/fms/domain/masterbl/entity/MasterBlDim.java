@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.masterbl.entity;
 
-import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.common.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

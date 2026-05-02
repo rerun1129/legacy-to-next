@@ -1,6 +1,7 @@
-package com.freightos.fms.common.response;
+package com.freightos.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.freightos.fms.common.response.MessageCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

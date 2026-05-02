@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
-import com.freightos.fms.adapter.out.persistence.common.BaseJpaEntity;
+import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;

@@ -2,14 +2,14 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.model.PageRequest;
-import com.freightos.fms.domain.common.model.PagedResult;
+import com.freightos.common.model.PageRequest;
+import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
-import com.freightos.fms.common.exception.ResourceNotFoundException;
+import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlCargoMapper;

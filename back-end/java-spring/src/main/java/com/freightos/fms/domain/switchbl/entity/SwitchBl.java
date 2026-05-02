@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.switchbl.entity;
 
-import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.freightos.fms.config;
+package com.freightos.common.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;

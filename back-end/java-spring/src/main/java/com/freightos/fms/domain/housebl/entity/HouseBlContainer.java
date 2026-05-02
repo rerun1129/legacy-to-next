@@ -1,6 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
-import com.freightos.fms.common.entity.BaseEntity;
+import com.freightos.common.entity.BaseEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
