@@ -54,7 +54,7 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
 
 export const API_HOUSE_BL_PORT: HouseBlPort = {
   async list(filter: HouseBlFilter): Promise<HouseBlRow[]> {
-    const json = await fetchJson(`${HOUSE_BL_BASE}?${toSearchParams(filter as Record<string, unknown>)}`);
+    const json = await fetchJson(`${HOUSE_BL_BASE}?${toSearchParams(filter as unknown as Record<string, unknown>)}`);
     const parsed = apiResponse(pagedResult(HOUSE_BL_ROW_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid list response: ${parsed.error.message}`);
     return parsed.data.data.content;
