@@ -6,9 +6,9 @@ export default defineConfig({
   retries: 0,
   use: {
     baseURL: 'http://localhost:3000',
-    headless: true,
+    headless: false,
     screenshot: 'only-on-failure',
-    video: 'off',
+    video: 'retain-on-failure',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
