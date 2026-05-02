@@ -1,4 +1,5 @@
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function DescriptionPanel() {
   return (

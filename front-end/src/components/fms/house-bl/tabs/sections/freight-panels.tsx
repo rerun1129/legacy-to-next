@@ -5,6 +5,7 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 // ── Types ──────────────────────────────────────────────────
 interface RateRow {

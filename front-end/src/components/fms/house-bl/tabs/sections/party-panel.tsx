@@ -2,6 +2,7 @@ import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig; isExp?: boolean }
 

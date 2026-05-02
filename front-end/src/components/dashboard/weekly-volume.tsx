@@ -1,6 +1,7 @@
 "use client";
 
 import { WEEKLY_VOLUME_DATA } from "@/lib/mock-data";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function WeeklyVolume() {
   const maxTotal = Math.max(...WEEKLY_VOLUME_DATA.map((d) => d.total));
