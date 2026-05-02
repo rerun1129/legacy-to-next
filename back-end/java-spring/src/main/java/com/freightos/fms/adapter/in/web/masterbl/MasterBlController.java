@@ -46,6 +46,6 @@ public class MasterBlController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteMasterBlById(@PathVariable Long id) {
         masterBlUseCase.deleteMasterBlById(id);
-        return ResponseEntity.ok(ApiResponse.ok(MessageCode.MASTER_BL_DELETED));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.MASTER_BL_DELETED.message()));
     }
 }

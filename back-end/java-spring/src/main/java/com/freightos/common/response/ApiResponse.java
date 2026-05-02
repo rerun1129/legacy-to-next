@@ -1,7 +1,6 @@
 package com.freightos.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.freightos.fms.common.response.MessageCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,7 +39,4 @@ public class ApiResponse<T> {
         return of(null, message);
     }
 
-    public static ApiResponse<Void> ok(MessageCode code) {
-        return of(null, code.message());
-    }
 }

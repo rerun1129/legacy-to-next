@@ -50,6 +50,6 @@ public class HouseBlController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteHouseBlById(@PathVariable Long id) {
         houseBlUseCase.deleteHouseBlById(id);
-        return ResponseEntity.ok(ApiResponse.ok(MessageCode.HOUSE_BL_DELETED));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.HOUSE_BL_DELETED.message()));
     }
 }
