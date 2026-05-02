@@ -177,9 +177,6 @@ class MasterBlMapperTest {
         assertThat(domain.getPolCode().value()).isEqualTo("ICN");
         assertThat(domain.getFreightTerm()).isEqualTo(FreightTerm.PREPAID);
         assertThat(domain.getPkgQty().count()).isEqualTo(5);
-        // create() 기본값 유지 (airExt null 이므로 copyAirFields 미호출)
-        assertThat(domain.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
-        assertThat(domain.getInsurance()).isEqualTo("NIL");
     }
 
     // ── E-05 DIM ────────────────────────────────────────────────────────

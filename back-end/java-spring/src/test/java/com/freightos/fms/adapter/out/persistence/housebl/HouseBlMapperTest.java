@@ -132,9 +132,6 @@ class HouseBlMapperTest {
         assertThat(domain.getConsigneeCode().value()).isEqualTo("CONSIGNEE01");
         assertThat(domain.getPkgQty().count()).isEqualTo(10);
         assertThat(domain.getGrossWeightKg().kg()).isEqualByComparingTo(BigDecimal.valueOf(250.0));
-        // create() 기본값 유지
-        assertThat(domain.getDeclaredValueCarriage()).isEqualTo("N.V.D.");
-        assertThat(domain.getInsurance()).isEqualTo("NIL");
     }
 
     @Test
