@@ -2,63 +2,147 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Mode } from "@/lib/bl-variants";
+import { useQuery } from "@tanstack/react-query";
+import type { MasterVariantConfig } from "@/lib/bl-variants";
+import { masterBlPort } from "@/lib/ports";
+import type { MasterBlRow } from "@/domain/master-bl";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 
-function selectActiveColumns<T>(mode: Mode, seaColumns: T[], airColumns: T[]): T[] {
-  return mode === "SEA" ? seaColumns : airColumns;
+interface Props {
+  variantKey: string;
+  variant: MasterVariantConfig;
 }
 
-const ROWS = [
-  { id: 1, mbl: "COSCO2404195",  isSea: true,  ref: "MR-2026-04195", bkg: "BKG-COSCO-0412", vessel: "COSCO EXCELLENCE", etd: "04/24", eta: "05/08", pol: "KRBSAN", pod: "CNSHA", houses: 2 },
-  { id: 2, mbl: "HAPAG0418011",  isSea: true,  ref: "MR-2026-04180", bkg: "BKG-HAPAG-0419", vessel: "HAPAG EXPRESS",    etd: "04/23", eta: "05/12", pol: "KRICN",  pod: "DEHAM",  houses: 1 },
-  { id: 3, mbl: "180-12345678",  isSea: false, ref: "MR-2026-04195", bkg: "",                vessel: "KE851",            etd: "04/24", eta: "04/24", pol: "ICN",    pod: "PVG",    houses: 2 },
-  { id: 4, mbl: "176-87654321",  isSea: false, ref: "MR-2026-04180", bkg: "",                vessel: "OZ741",            etd: "04/23", eta: "04/23", pol: "GMP",    pod: "NRT",    houses: 1 },
-];
-
-type MblRow = typeof ROWS[number];
-
-interface Props { variantKey: string; mode: Mode }
-
-export function MasterBlGrid({ variantKey, mode }: Props) {
+export function MasterBlGrid({ variantKey, variant }: Props) {
   const router = useRouter();
-  const [selected, setSelected] = useState<string | null>(null);
-  const isSea = mode === "SEA";
-  const modeLabels = getModeLabels(mode);
-  const rows = ROWS.filter((r) => r.isSea === isSea);
+  const [selected, setSelected] = useState<number | null>(null);
+  const modeLabels = getModeLabels(variant.mode);
 
-  const seaColumns: GridColumn<MblRow>[] = [
+  const { data: rows = [], isLoading, error } = useQuery({
+    queryKey: ["master-bl", "list", variantKey],
+    queryFn: () => masterBlPort.list({ bound: variant.direction }),
+  });
+
+  const columns: GridColumn<MasterBlRow>[] = [
     {
-      key: "mbl",
+      key: "mblNo",
       label: modeLabels.blNo,
       minWidth: 140,
-      render: (value) => (
+      render: (_v, row) => (
         <span
           className="cell-hbl"
-          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/entry`)}
+          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/entry/${row.id ?? ""}`)}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"
         >
-          {String(value ?? "")}
+          {row.mblNo}
         </span>
       ),
     },
-    { key: "ref",    label: "Master Ref",   minWidth: 130, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "bkg",    label: "Line Bkg. No", minWidth: 130, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "vessel", label: "Vessel / Flight", minWidth: 160 },
-    { key: "etd",    label: "ETD", minWidth: 60, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "eta",    label: "ETA", minWidth: 60, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "pol",    label: "POL", minWidth: 70, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "pod",    label: "POD", minWidth: 70, render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "houses", label: "Houses", minWidth: 70, align: "right", render: (v) => <span className="cell-mono">{String(v ?? "")}</span> },
-    { key: "status", label: "Status", minWidth: 90, render: () => <span className="pill pill--ok">Confirmed</span> },
+    {
+      // TODO: BE 미반영 — masterRefNo 필드가 MasterBlRow에 없음
+      key: "masterRefNo",
+      label: "Master Ref",
+      minWidth: 130,
+      render: () => <span className="cell-mono">-</span>,
+    },
+    {
+      key: "bound",
+      label: "Bound",
+      minWidth: 66,
+      align: "center" as const,
+      render: (_v, row) => (
+        <span className={`chip${row.bound === "EXP" ? " chip--accent" : ""}`}>
+          {row.bound}
+        </span>
+      ),
+    },
+    {
+      key: "shipperCode",
+      label: "Shipper",
+      minWidth: 130,
+      render: (_v, row) => <span className="cell-mono">{row.shipperCode}</span>,
+    },
+    {
+      key: "consigneeCode",
+      label: "Consignee",
+      minWidth: 130,
+      render: (_v, row) => <span className="cell-mono">{row.consigneeCode}</span>,
+    },
+    {
+      key: "pol",
+      label: "POL",
+      minWidth: 70,
+      align: "center" as const,
+      render: (_v, row) => <span className="port__code">{row.pol}</span>,
+    },
+    {
+      key: "pod",
+      label: "POD",
+      minWidth: 70,
+      align: "center" as const,
+      render: (_v, row) => <span className="port__code">{row.pod}</span>,
+    },
+    {
+      key: "etd",
+      label: "ETD",
+      minWidth: 88,
+      align: "center" as const,
+      render: (_v, row) => <span className="cell-mono">{row.etd}</span>,
+    },
+    {
+      key: "eta",
+      label: "ETA",
+      minWidth: 88,
+      align: "center" as const,
+      render: (_v, row) => <span className="cell-mono">{row.eta}</span>,
+    },
+    {
+      // TODO: BE 미반영 — operatorCode 필드가 MasterBlRow에 없음
+      key: "operatorCode",
+      label: "Operator",
+      minWidth: 100,
+      render: () => <span className="cell-mono">-</span>,
+    },
+    {
+      // TODO: BE 미반영 — createdAt 필드가 MasterBlRow에 없음
+      key: "createdAt",
+      label: "Reg. Date",
+      minWidth: 88,
+      align: "center" as const,
+      render: () => <span className="cell-mono">-</span>,
+    },
   ];
 
-  const airColumns: GridColumn<MblRow>[] = seaColumns.filter((c) => c.key !== "bkg");
+  if (isLoading) {
+    return (
+      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div className="panel__head">
+          <div className="panel__title-accent" />
+          <span className="panel__title">Master B/L</span>
+        </div>
+        <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
+          <span className="text-muted">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
-  const activeColumns = selectActiveColumns(mode, seaColumns, airColumns);
+  if (error) {
+    return (
+      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div className="panel__head">
+          <div className="panel__title-accent" />
+          <span className="panel__title">Master B/L</span>
+        </div>
+        <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
+          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -66,15 +150,15 @@ export function MasterBlGrid({ variantKey, mode }: Props) {
         <div className="panel__title-accent" />
         <span className="panel__title">Master B/L</span>
         <span className="panel__rowcount">{rows.length}</span>
-        <ColumnVisibilityMenu<MblRow> gridId="master-bl" defaultColumns={activeColumns} />
+        <ColumnVisibilityMenu<MasterBlRow> gridId="master-bl" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
-        <GridList<MblRow>
-          columns={activeColumns}
+        <GridList<MasterBlRow>
+          columns={columns}
           data={rows}
-          onRowClick={(row) => setSelected(row.mbl)}
-          rowKey={(row) => row.id}
-          rowClassName={(row) => (selected === row.mbl ? "is-selected" : undefined)}
+          onRowClick={(row) => setSelected(row.id ?? null)}
+          rowKey={(row) => row.id ?? row.mblNo}
+          rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="master-bl"
         />
       </div>

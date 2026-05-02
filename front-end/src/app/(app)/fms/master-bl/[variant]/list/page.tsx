@@ -37,7 +37,7 @@ export default async function MasterBLListPage({ params }: Props) {
       <ListFilter />
 
       <div style={{ flex: 1, overflow: "auto", margin: "10px 14px 0", display: "flex", flexDirection: "column" }}>
-        <MasterBlGrid variantKey={variantKey} mode={variant.mode} />
+        <MasterBlGrid variantKey={variantKey} variant={variant} />
       </div>
     </div>
   );
