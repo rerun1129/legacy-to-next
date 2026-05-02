@@ -1,20 +1,27 @@
 package com.freightos.fms.adapter.in.web.masterbl;
 
+import com.freightos.fms.adapter.in.web.masterbl.dto.CreateMasterBlRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
+import com.freightos.fms.adapter.in.web.masterbl.dto.UpdateMasterBlRequest;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @Tag(name = "Master B/L", description = "Master B/L CRUD — S-04/S-05")
 @RestController
@@ -40,6 +47,34 @@ public class MasterBlController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> findMasterBlById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(id))));
+    }
+
+    @Operation(summary = "Master B/L 신규 등록")
+    @PostMapping
+    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> createMasterBl(
+            @Valid @RequestBody CreateMasterBlRequest req) {
+        MasterBl saved = masterBlUseCase.save(masterBlAssembler.toEntity(req));
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
+        return ResponseEntity.created(location)
+                .body(ApiResponse.of(
+                        masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(saved.getId())),
+                        MessageCode.MASTER_BL_CREATED.message()));
+    }
+
+    @Operation(summary = "Master B/L 수정")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> updateMasterBl(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateMasterBlRequest req) {
+        MasterBl entity = masterBlUseCase.findMasterBlById(id);
+        masterBlAssembler.applyToEntity(req, entity);
+        masterBlUseCase.save(entity);
+        return ResponseEntity.ok(ApiResponse.of(
+                masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(id)),
+                MessageCode.MASTER_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Master B/L 삭제")

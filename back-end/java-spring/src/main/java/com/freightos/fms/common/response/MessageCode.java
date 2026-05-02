@@ -7,6 +7,8 @@ public enum MessageCode {
 
     HOUSE_BL_DELETED("삭제되었습니다."),
     HOUSE_BL_NOT_FOUND("House B/L을 찾을 수 없습니다."),
+    MASTER_BL_CREATED("등록되었습니다."),
+    MASTER_BL_UPDATED("수정되었습니다."),
     MASTER_BL_DELETED("삭제되었습니다."),
     MASTER_BL_NOT_FOUND("Master B/L을 찾을 수 없습니다.");
 
