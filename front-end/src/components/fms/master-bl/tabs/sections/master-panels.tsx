@@ -108,7 +108,7 @@ export function MasterMarksPanel({ form }: Props) {
                 />
               )}
             />
-          : <LineNumberTextarea defaultValue="MADE IN KOREA" style={{ flex: 1, minHeight: 0 }} />
+          : <LineNumberTextarea defaultValue="" style={{ flex: 1, minHeight: 0 }} />
         }
       </div>
     </div>
@@ -155,7 +155,7 @@ export function MasterGoodsDescPanel({ variant, form }: Props) {
               )}
             />
           : <LineNumberTextarea
-              defaultValue={isSea ? "SAID TO CONTAIN\nELECTRONIC GOODS" : "CONSOLIDATION SHIPMENT\nAS PER ATTACHED MANIFEST"}
+              defaultValue=""
               style={{ flex: 1, minHeight: 0 }}
             />
         }

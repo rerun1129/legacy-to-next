@@ -13,10 +13,10 @@ export function MasterEdiTab({ variant }: Props) {
         <div className="panel__body">
           <div className="form-grid form-grid--4">
             {[
-              { label: modeLabels.masterBlNo, value: isSea ? "COSCO2404195" : "180-12345678", req: true },
-              { label: "EDI Item",           value: "",     req: false },
-              { label: "MRN",                value: "",     req: false },
-              { label: "Cargo Type",         value: "GEN",  req: false },
+              { label: modeLabels.masterBlNo, value: "", req: true },
+              { label: "EDI Item",           value: "", req: false },
+              { label: "MRN",                value: "", req: false },
+              { label: "Cargo Type",         value: "", req: false },
             ].map((f) => (
               <div key={f.label} className={`field${f.req ? " is-required" : ""}`}>
                 <div className={`field__label${f.req ? " is-required" : ""}`}>{f.label}</div>

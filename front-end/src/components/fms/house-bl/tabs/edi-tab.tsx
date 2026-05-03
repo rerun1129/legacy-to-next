@@ -8,14 +8,7 @@ interface LicenseRow {
   splitYn: string; seq: string; progress: string;
 }
 
-const LICENSE_ROWS: LicenseRow[] = [
-  { id: 1, exportNo: "22231-26-123456X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
-  { id: 2, exportNo: "22231-26-123457X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"     },
-  { id: 3, exportNo: "22231-26-123458X", qty: "200", unit: "CTN", weight: "2,480", symCode: "A1", symQty: "50", symUnit: "CTN", splitYn: "Y", seq: "1", progress: "검사지정" },
-  { id: 4, exportNo: "22231-26-123459X", qty: "300", unit: "CTN", weight: "3,720", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "2", progress: "수리"     },
-  { id: 5, exportNo: "22231-26-123460X", qty: "250", unit: "CTN", weight: "3,100", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "신고수리"  },
-  { id: 6, exportNo: "22231-26-123461X", qty: "200", unit: "CTN", weight: "2,480", symCode: "",   symQty: "",   symUnit: "",    splitYn: "N", seq: "1", progress: "수리"      },
-];
+const LICENSE_ROWS: LicenseRow[] = [];
 
 const LICENSE_COLS: GridColumn<LicenseRow>[] = [
   { key: "_no",       label: "#",                    className: "row-num",   render: (_, __, i) => i + 1 },
@@ -48,14 +41,14 @@ export function EdiTab({ variant }: Props) {
           <div className="panel__body">
             <div className="form-grid form-grid--4">
               {[
-                { label: "EDI B/L No",      value: variant?.mode === "AIR" ? "HAWBKR24041001" : "HBLKR24041956", req: true  },
-                { label: "EDI Item",         value: "",         req: false },
-                { label: "Cargo Class",      value: "GEN",      req: false },
-                { label: "T/S",              value: "N",        req: false },
-                { label: "Customs Entry No", value: "",         req: false },
-                { label: "MRN No",           value: "",         req: false },
-                { label: "Co-load HBL No",   value: "",         req: false },
-                { label: "Filing Type",      value: "AMS",      req: false },
+                { label: "EDI B/L No",      value: "",  req: true  },
+                { label: "EDI Item",         value: "",  req: false },
+                { label: "Cargo Class",      value: "",  req: false },
+                { label: "T/S",              value: "",  req: false },
+                { label: "Customs Entry No", value: "",  req: false },
+                { label: "MRN No",           value: "",  req: false },
+                { label: "Co-load HBL No",   value: "",  req: false },
+                { label: "Filing Type",      value: "",  req: false },
               ].map((f) => (
                 <div key={f.label} className={`field${f.req ? " is-required" : ""}`}>
                   <div className={`field__label${f.req ? " is-required" : ""}`}>{f.label}</div>

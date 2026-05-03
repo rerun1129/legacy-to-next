@@ -112,14 +112,14 @@ export function MasterCargoDocPanel({ variant, form }: Props) {
       ),
     },
   ] : [
-    { key: "main-item", render: () => <LiFieldStatic label="Main Item" value="ELECTRONIC GOODS" /> },
-    { key: "hs-code",   render: () => <LiFieldStatic label="HS Code"   value="8517.13" /> },
+    { key: "main-item", render: () => <LiFieldStatic label="Main Item" value="" /> },
+    { key: "hs-code",   render: () => <LiFieldStatic label="HS Code"   value="" /> },
     { key: "package",   render: () => (
       <div className="li">
         <span className="li__label">Package</span>
         <div className="li__input" style={{ display: "flex", gap: 4 }}>
-          <input type="number" step="1" defaultValue="1300" style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }} />
-          <select defaultValue="CTN" style={UNIT_SEL}><option>CTN</option><option>PKG</option></select>
+          <input type="number" step="1" defaultValue="" style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }} />
+          <select style={UNIT_SEL}><option>CTN</option><option>PKG</option></select>
         </div>
       </div>
     )},
@@ -127,12 +127,12 @@ export function MasterCargoDocPanel({ variant, form }: Props) {
       <div className="li">
         <span className="li__label">G/W</span>
         <div className="li__input" style={{ display: "flex", gap: 4 }}>
-          <input type="number" step="any" defaultValue="30600" style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }} />
+          <input type="number" step="any" defaultValue="" style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }} />
           <select style={UNIT_SEL}><option>KGS</option><option>LBS</option></select>
         </div>
       </div>
     )},
-    { key: "cbm", render: () => <LiFieldStatic label="CBM" value="87.5"  numeric /> },
+    { key: "cbm", render: () => <LiFieldStatic label="CBM" value=""  numeric /> },
   ];
 
   const cargoExtras: FieldItemDef[] = isSea
@@ -148,8 +148,8 @@ export function MasterCargoDocPanel({ variant, form }: Props) {
         : <LiFieldStatic label="R/Ton" value="" numeric />
     }]
     : [
-        { key: "vol-wt",     render: () => <LiFieldStatic label="Volume W/T" value="14583" numeric /> },
-        { key: "charge-wt",  render: () => <LiFieldStatic label="Charge W/T" value="30600" numeric /> },
+        { key: "vol-wt",     render: () => <LiFieldStatic label="Volume W/T" value="" numeric /> },
+        { key: "charge-wt",  render: () => <LiFieldStatic label="Charge W/T" value="" numeric /> },
         { key: "rate-class", render: () => <LiFieldStatic label="Rate Class" value="GCR" /> },
       ];
 
@@ -175,12 +175,12 @@ export function MasterCargoDocPanel({ variant, form }: Props) {
       </div>
     )},
     { key: "co-load",  render: () => <LiFieldStatic label="Co-Load Agent" value="" /> },
-    { key: "team",     render: () => <LiFieldStatic label="Team"          value="SEA-EXP" /> },
+    { key: "team",     render: () => <LiFieldStatic label="Team"          value="" /> },
   ] : [
     { key: "settle",   render: () => <LiFieldStatic label="Settle Partner" value="" /> },
     { key: "co-load",  render: () => <LiFieldStatic label="Co-Load Agent"  value="" /> },
-    { key: "operator", render: () => <LiFieldStatic label="Operator"       value="KYS" /> },
-    { key: "team",     render: () => <LiFieldStatic label="Team"           value="SEA-EXP" /> },
+    { key: "operator", render: () => <LiFieldStatic label="Operator"       value="" /> },
+    { key: "team",     render: () => <LiFieldStatic label="Team"           value="" /> },
   ];
 
   const airDocBase: FieldItemDef[] = [
@@ -210,11 +210,11 @@ export function MasterCargoDocPanel({ variant, form }: Props) {
         </div>
       </div>
     )},
-    { key: "team", render: () => <LiFieldStatic label="Team" value="AIR-EXP" /> },
+    { key: "team", render: () => <LiFieldStatic label="Team" value="" /> },
   ] : [
     { key: "settle",   render: () => <LiFieldStatic label="Settle Partner" value="" /> },
-    { key: "operator", render: () => <LiFieldStatic label="Operator"       value="KYS" /> },
-    { key: "team",     render: () => <LiFieldStatic label="Team"           value="AIR-EXP" /> },
+    { key: "operator", render: () => <LiFieldStatic label="Operator"       value="" /> },
+    { key: "team",     render: () => <LiFieldStatic label="Team"           value="" /> },
   ];
 
   const docItems = isSea ? seaDoc : [...airDocBase, ...airDocSec, ...airDocTail];
