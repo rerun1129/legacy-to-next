@@ -31,16 +31,15 @@ const EMPTY_CONTAINER_ROW = {
 
 export function ContainerGridPanel() {
   const { control } = useFormContext<HouseBlFormValues>();
-  const { fields, append, remove } = useFieldArray({ control, name: "containers", keyName: "rhfKey" });
-  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+  const { fields, append, remove } = useFieldArray({ control, name: "containers" });
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
     : -1;
 
   function handleAdd() {
-    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id as number)) + 1 : 1;
-    append({ ...EMPTY_CONTAINER_ROW, id: nextId } as never);
+    append({ ...EMPTY_CONTAINER_ROW, id: fields.length + 1 });
     setSelectedKey(null);
   }
 
@@ -66,9 +65,9 @@ export function ContainerGridPanel() {
       <GridList
         columns={CONTAINER_COLS}
         data={fields as unknown as ContainerRow[]}
-        rowKey={(r) => r.id}
-        onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
-        rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
+        rowKey={(_, i) => fields[i].id}
+        onRowClick={(_, i) => setSelectedKey(fields[i].id === selectedKey ? null : fields[i].id)}
+        rowClassName={(_, i) => fields[i]?.id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1, minHeight: 0 }}
       />
     </div>
