@@ -8,12 +8,44 @@ import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
 import type { NonBlFormValues }            from "./non-bl-schema";
 
-type WorkDiv = "Sea" | "Air" | "Warehouse" | "Trucking";
-
 export function NonBLEntry() {
-  const [tab,     setTab]     = useState("main");
-  const [workDiv, setWorkDiv] = useState<WorkDiv>("Sea");
-  const methods = useForm<NonBlFormValues>({ defaultValues: { containers: [], dimensions: [] } });
+  const [tab, setTab] = useState("main");
+
+  const methods = useForm<NonBlFormValues>({
+    defaultValues: {
+      nonBlNo:  "",
+      workDiv:  "Sea",
+      status:   "",
+      refNo:    "",
+      actualCustomerCode: "", actualCustomerName: "",
+      shipperCode:        "", shipperName:        "",
+      consigneeCode:      "", consigneeName:      "",
+      notifyCode:         "", notifyName:         "",
+      settlePartnerCode:  "", settlePartnerName:  "",
+      linerCode:    "", linerName:    "",
+      vesselName:   "", voyNo:        "",
+      etd:          "", eta:          "",
+      polCode:      "", polName:      "",
+      podCode:      "", podName:      "",
+      finalDestCode: "", finalDestName: "",
+      finalEta:     "",
+      mainItem:  "", hsCode:    "",
+      cargoQty:  undefined, cargoUnit: "",
+      grossWt:   undefined, volWt:     undefined,
+      totalCbm:  undefined, rton:      undefined,
+      salesClass:   "",
+      salesManCode: "", salesManName: "",
+      operatorCode: "", operatorName: "",
+      teamCode:     "", teamName:     "",
+      remark:        "",
+      freightSelling: [],
+      freightBuying:  [],
+      containers: [],
+      dimensions: [],
+    },
+  });
+
+  const { register } = methods;
   const { clearDraft: _clearDraft } = useDraftPersist(methods, "draft:non-bl:new");
 
   return (
@@ -32,26 +64,51 @@ export function NonBLEntry() {
         </div>
       </div>
 
-      <div className="toolbar" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-        {[
-          { l: "Non B/L No",    v: "",      req: true  },
-          { l: "Work Division", v: workDiv, req: true  },
-          { l: "Status",        v: "",      req: false },
-          { l: "Ref. No.",      v: "",      req: false },
-        ].map(f => (
-          <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
-            <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>
-            <div className="field__input">
-              {f.l === "Work Division" ? (
-                <select value={workDiv} onChange={e => setWorkDiv(e.target.value as WorkDiv)} style={{ all: "unset", flex: 1, minWidth: 0, fontSize: "var(--fs-base)", color: "var(--ink)", cursor: "pointer" }}>
-                  <option>Sea</option><option>Air</option><option>Warehouse</option><option>Trucking</option>
-                </select>
-              ) : (
-                <input defaultValue={f.v} placeholder={f.l === "Non B/L No" ? "Auto on save" : f.v || f.l} />
-              )}
-            </div>
+      <div className="toolbar" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
+        <div className="field is-required">
+          <div className="field__label is-required">Non B/L No</div>
+          <div className="field__input">
+            <input {...register("nonBlNo")} placeholder="Auto on save" />
           </div>
-        ))}
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Work Division</div>
+          <div className="field__input">
+            <select
+              {...register("workDiv")}
+              style={{ all: "unset", flex: 1, minWidth: 0, fontSize: "var(--fs-base)", color: "var(--ink)", cursor: "pointer" }}
+            >
+              <option>Sea</option>
+              <option>Air</option>
+              <option>Warehouse</option>
+              <option>Trucking</option>
+            </select>
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">Status</div>
+          <div className="field__input">
+            <input {...register("status")} placeholder="Status" />
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">Ref. No.</div>
+          <div className="field__input">
+            <input {...register("refNo")} placeholder="Ref. No." />
+          </div>
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Operator</div>
+          <div className="field__input">
+            <input defaultValue="KYS" placeholder="Operator" />
+          </div>
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Team</div>
+          <div className="field__input">
+            <input defaultValue="OPS" placeholder="Team" />
+          </div>
+        </div>
       </div>
 
       <div className="tabbar">
