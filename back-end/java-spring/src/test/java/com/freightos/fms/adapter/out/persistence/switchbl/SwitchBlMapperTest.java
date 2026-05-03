@@ -141,16 +141,14 @@ class SwitchBlMapperTest {
     @DisplayName("toDescriptionJpa: SwitchBlDescription 텍스트 필드가 모두 JPA 엔티티에 복사된다")
     void toDescriptionJpa_setsAllTextFields() {
         SwitchBlDescription desc = SwitchBlDescription.create(100L);
-        desc.updateContent("MARKS-L", "MARKS-R", "NATURE-L", "NATURE-R");
+        desc.updateContent("MARKS-VALUE", "NATURE-VALUE");
 
         SwitchBlJpaEntity switchBlJpa = new SwitchBlJpaEntity();
 
         SwitchBlDescriptionJpaEntity jpa = mapper.toDescriptionJpa(desc, switchBlJpa);
 
-        assertThat(jpa.getMarksLeft()).isEqualTo("MARKS-L");
-        assertThat(jpa.getMarksRight()).isEqualTo("MARKS-R");
-        assertThat(jpa.getNatureQuantityLeft()).isEqualTo("NATURE-L");
-        assertThat(jpa.getNatureQuantityRight()).isEqualTo("NATURE-R");
+        assertThat(jpa.getMarks()).isEqualTo("MARKS-VALUE");
+        assertThat(jpa.getNatureQuantity()).isEqualTo("NATURE-VALUE");
         assertThat(jpa.getSwitchBl()).isEqualTo(switchBlJpa);
     }
 
@@ -158,23 +156,21 @@ class SwitchBlMapperTest {
     @DisplayName("toDescriptionJpa: 텍스트 필드 null 이어도 NPE 없이 동작한다")
     void toDescriptionJpa_nullTextFields_doesNotThrow() {
         SwitchBlDescription desc = SwitchBlDescription.create(101L);
-        desc.updateContent(null, null, null, null);
+        desc.updateContent(null, null);
 
         SwitchBlJpaEntity switchBlJpa = new SwitchBlJpaEntity();
 
         SwitchBlDescriptionJpaEntity jpa = mapper.toDescriptionJpa(desc, switchBlJpa);
 
-        assertThat(jpa.getMarksLeft()).isNull();
-        assertThat(jpa.getMarksRight()).isNull();
-        assertThat(jpa.getNatureQuantityLeft()).isNull();
-        assertThat(jpa.getNatureQuantityRight()).isNull();
+        assertThat(jpa.getMarks()).isNull();
+        assertThat(jpa.getNatureQuantity()).isNull();
     }
 
     @Test
     @DisplayName("toDescriptionJpa: 도메인 description 으로 생성한 JPA 엔티티를 다시 도메인으로 역매핑하면 동일 값이 유지된다")
     void toDescriptionJpa_roundTrip_preservesAllTextFields() {
         SwitchBlDescription desc = SwitchBlDescription.create(50L);
-        desc.updateContent("ML", "MR", "NQL", "NQR");
+        desc.updateContent("MARKS-TEXT", "NATURE-TEXT");
 
         SwitchBlJpaEntity switchBlJpa = new SwitchBlJpaEntity();
         HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
@@ -184,10 +180,8 @@ class SwitchBlMapperTest {
 
         SwitchBlDescriptionJpaEntity descJpa = mapper.toDescriptionJpa(desc, switchBlJpa);
 
-        assertThat(descJpa.getMarksLeft()).isEqualTo("ML");
-        assertThat(descJpa.getMarksRight()).isEqualTo("MR");
-        assertThat(descJpa.getNatureQuantityLeft()).isEqualTo("NQL");
-        assertThat(descJpa.getNatureQuantityRight()).isEqualTo("NQR");
+        assertThat(descJpa.getMarks()).isEqualTo("MARKS-TEXT");
+        assertThat(descJpa.getNatureQuantity()).isEqualTo("NATURE-TEXT");
         assertThat(descJpa.getSwitchBl()).isEqualTo(switchBlJpa);
     }
 

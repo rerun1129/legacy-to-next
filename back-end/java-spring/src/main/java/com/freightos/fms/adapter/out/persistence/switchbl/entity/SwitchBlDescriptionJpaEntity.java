@@ -24,21 +24,13 @@ public class SwitchBlDescriptionJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "switch_bl_id", nullable = false, unique = true)
     private SwitchBlJpaEntity switchBl;
 
-    @Column(name = "marks_left", columnDefinition = "TEXT")
-    private String marksLeft;
+    @Column(name = "marks", columnDefinition = "TEXT")
+    private String marks;
 
-    @Column(name = "marks_right", columnDefinition = "TEXT")
-    private String marksRight;
+    @Column(name = "nature_quantity", columnDefinition = "TEXT")
+    private String natureQuantity;
 
-    @Column(name = "nature_quantity_left", columnDefinition = "TEXT")
-    private String natureQuantityLeft;
-
-    @Column(name = "nature_quantity_right", columnDefinition = "TEXT")
-    private String natureQuantityRight;
-
-    public void setSwitchBl(SwitchBlJpaEntity v)          { this.switchBl           = v; }
-    public void setMarksLeft(String v)                    { this.marksLeft           = v; }
-    public void setMarksRight(String v)                   { this.marksRight          = v; }
-    public void setNatureQuantityLeft(String v)           { this.natureQuantityLeft  = v; }
-    public void setNatureQuantityRight(String v)          { this.natureQuantityRight = v; }
+    public void setSwitchBl(SwitchBlJpaEntity v)    { this.switchBl      = v; }
+    public void setMarks(String v)                  { this.marks         = v; }
+    public void setNatureQuantity(String v)         { this.natureQuantity = v; }
 }

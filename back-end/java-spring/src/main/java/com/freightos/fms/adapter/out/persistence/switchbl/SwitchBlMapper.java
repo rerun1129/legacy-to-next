@@ -41,8 +41,7 @@ public class SwitchBlMapper {
         desc.assignIdentity(jpa.getSwitchBlDescriptionId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         desc.assignSwitchBlDescriptionId(jpa.getSwitchBlDescriptionId());
-        desc.updateContent(jpa.getMarksLeft(), jpa.getMarksRight(),
-                jpa.getNatureQuantityLeft(), jpa.getNatureQuantityRight());
+        desc.updateContent(jpa.getMarks(), jpa.getNatureQuantity());
         return desc;
     }
 
@@ -61,10 +60,8 @@ public class SwitchBlMapper {
     public SwitchBlDescriptionJpaEntity toDescriptionJpa(SwitchBlDescription desc, SwitchBlJpaEntity switchBlJpa) {
         SwitchBlDescriptionJpaEntity jpa = new SwitchBlDescriptionJpaEntity();
         jpa.setSwitchBl(switchBlJpa);
-        jpa.setMarksLeft(desc.getMarksLeft());
-        jpa.setMarksRight(desc.getMarksRight());
-        jpa.setNatureQuantityLeft(desc.getNatureQuantityLeft());
-        jpa.setNatureQuantityRight(desc.getNatureQuantityRight());
+        jpa.setMarks(desc.getMarks());
+        jpa.setNatureQuantity(desc.getNatureQuantity());
         return jpa;
     }
 }

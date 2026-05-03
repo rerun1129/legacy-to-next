@@ -714,18 +714,14 @@ COMMENT ON COLUMN switch_bl.notify_code     IS '교체 적용 통보처 코드';
 CREATE TABLE IF NOT EXISTS switch_bl_description (
     switch_bl_description_id  BIGINT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     switch_bl_id              BIGINT  NOT NULL UNIQUE REFERENCES switch_bl(switch_bl_id),
-    marks_left                TEXT,
-    marks_right               TEXT,
-    nature_quantity_left      TEXT,
-    nature_quantity_right     TEXT,
+    marks                     TEXT,
+    nature_quantity           TEXT,
     created_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by                VARCHAR(50),
     updated_by                VARCHAR(50)
 );
 
-COMMENT ON COLUMN switch_bl_description.switch_bl_id           IS 'Switch B/L 참조 FK (1:1 UNIQUE)';
-COMMENT ON COLUMN switch_bl_description.marks_left             IS 'Marks and Numbers 좌측';
-COMMENT ON COLUMN switch_bl_description.marks_right            IS 'Marks and Numbers 우측';
-COMMENT ON COLUMN switch_bl_description.nature_quantity_left   IS 'Nature & Quantity of Goods 좌측';
-COMMENT ON COLUMN switch_bl_description.nature_quantity_right  IS 'Nature & Quantity of Goods 우측';
+COMMENT ON COLUMN switch_bl_description.switch_bl_id     IS 'Switch B/L 참조 FK (1:1 UNIQUE)';
+COMMENT ON COLUMN switch_bl_description.marks            IS 'Marks and Numbers';
+COMMENT ON COLUMN switch_bl_description.nature_quantity  IS 'Nature & Quantity of Goods';

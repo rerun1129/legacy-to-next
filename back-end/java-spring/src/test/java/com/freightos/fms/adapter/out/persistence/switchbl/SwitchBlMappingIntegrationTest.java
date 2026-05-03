@@ -46,11 +46,11 @@ class SwitchBlMappingIntegrationTest {
     }
 
     private SwitchBlDescriptionJpaEntity newDescription(SwitchBlJpaEntity switchBl,
-                                                         String marksLeft, String marksRight) {
+                                                         String marks, String natureQuantity) {
         SwitchBlDescriptionJpaEntity d = new SwitchBlDescriptionJpaEntity();
         d.setSwitchBl(switchBl);
-        d.setMarksLeft(marksLeft);
-        d.setMarksRight(marksRight);
+        d.setMarks(marks);
+        d.setNatureQuantity(natureQuantity);
         return d;
     }
 
@@ -85,9 +85,7 @@ class SwitchBlMappingIntegrationTest {
         em.persist(switchBl);
         em.flush();
 
-        SwitchBlDescriptionJpaEntity desc = newDescription(switchBl, "MARKS-LEFT", "MARKS-RIGHT");
-        desc.setNatureQuantityLeft("NATURE-LEFT");
-        desc.setNatureQuantityRight("NATURE-RIGHT");
+        SwitchBlDescriptionJpaEntity desc = newDescription(switchBl, "MARKS-VALUE", "NATURE-VALUE");
         em.persist(desc);
         em.flush();
         em.clear();
@@ -96,10 +94,8 @@ class SwitchBlMappingIntegrationTest {
                 SwitchBlDescriptionJpaEntity.class, desc.getSwitchBlDescriptionId());
 
         assertThat(loaded).isNotNull();
-        assertThat(loaded.getMarksLeft()).isEqualTo("MARKS-LEFT");
-        assertThat(loaded.getMarksRight()).isEqualTo("MARKS-RIGHT");
-        assertThat(loaded.getNatureQuantityLeft()).isEqualTo("NATURE-LEFT");
-        assertThat(loaded.getNatureQuantityRight()).isEqualTo("NATURE-RIGHT");
+        assertThat(loaded.getMarks()).isEqualTo("MARKS-VALUE");
+        assertThat(loaded.getNatureQuantity()).isEqualTo("NATURE-VALUE");
         assertThat(loaded.getSwitchBl().getSwitchBlId()).isEqualTo(switchBl.getSwitchBlId());
     }
 

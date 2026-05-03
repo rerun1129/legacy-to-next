@@ -15,10 +15,8 @@ public class SwitchBlDescription extends BaseEntity {
 
     private Long switchBlDescriptionId;
     private Long switchBlId;
-    private String marksLeft;
-    private String marksRight;
-    private String natureQuantityLeft;
-    private String natureQuantityRight;
+    private String marks;
+    private String natureQuantity;
 
     protected SwitchBlDescription(Long switchBlId) {
         this.switchBlId = switchBlId;
@@ -36,11 +34,8 @@ public class SwitchBlDescription extends BaseEntity {
         this.switchBlDescriptionId = switchBlDescriptionId;
     }
 
-    public void updateContent(String marksLeft, String marksRight,
-                              String natureQuantityLeft, String natureQuantityRight) {
-        this.marksLeft           = marksLeft;
-        this.marksRight          = marksRight;
-        this.natureQuantityLeft  = natureQuantityLeft;
-        this.natureQuantityRight = natureQuantityRight;
+    public void updateContent(String marks, String natureQuantity) {
+        this.marks         = marks;
+        this.natureQuantity = natureQuantity;
     }
 }

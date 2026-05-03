@@ -58,10 +58,8 @@ public class SwitchBlPersistenceAdapter implements SwitchBlPort {
             if (descJpa.getSwitchBl() == null) {
                 descJpa.setSwitchBl(savedJpa);
             }
-            descJpa.setMarksLeft(descDomain.getMarksLeft());
-            descJpa.setMarksRight(descDomain.getMarksRight());
-            descJpa.setNatureQuantityLeft(descDomain.getNatureQuantityLeft());
-            descJpa.setNatureQuantityRight(descDomain.getNatureQuantityRight());
+            descJpa.setMarks(descDomain.getMarks());
+            descJpa.setNatureQuantity(descDomain.getNatureQuantity());
             switchBlDescriptionJpaRepository.save(descJpa);
         }
 
