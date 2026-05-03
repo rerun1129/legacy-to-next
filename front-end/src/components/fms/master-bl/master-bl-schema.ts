@@ -58,6 +58,17 @@ const AIR_CHARGE_SCHEMA = z.object({
   rate:           z.number().min(0).optional(),
 });
 
+const HOUSE_BL_REF_SCHEMA = z.object({
+  id:         z.number(),
+  hblNo:      z.string().optional(),
+  shipper:    z.string().optional(),
+  consignee:  z.string().optional(),
+  pkg:        z.string().optional(),
+  gw:         z.string().optional(),
+  cbm:        z.string().optional(),
+  status:     z.string().optional(),
+});
+
 export const MASTER_BL_SCHEMA = z.object({
   jobDiv:       z.enum(["SEA", "AIR", "TRUCK", "NON_BL"]),
   bound:        z.enum(["EXP", "IMP"]),
@@ -91,6 +102,7 @@ export const MASTER_BL_SCHEMA = z.object({
   dims:         z.array(DIM_SCHEMA).optional(),
   scheduleLegs: z.array(SCHEDULE_LEG_SCHEMA).optional(),
   airCharges:   z.array(AIR_CHARGE_SCHEMA).optional(),
+  houseBls:     z.array(HOUSE_BL_REF_SCHEMA).optional(),
 });
 
 export type MasterBlFormValues = z.infer<typeof MASTER_BL_SCHEMA>;

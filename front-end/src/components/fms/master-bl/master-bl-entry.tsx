@@ -98,6 +98,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       dims: [],
       scheduleLegs: [],
       airCharges: [],
+      houseBls: [],
     },
   });
 
