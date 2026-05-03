@@ -41,9 +41,10 @@ export function EdiTab({ variant }: Props) {
   }
 
   function handleLicenseRemove() {
-    if (selectedKey === null || selectedIdx === -1) return;
+    if (fields.length === 0) return;
+    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
     if (window.confirm("삭제하시겠습니까?")) {
-      remove(selectedIdx);
+      remove(targetIdx);
       setSelectedKey(null);
     }
   }
@@ -117,7 +118,7 @@ export function EdiTab({ variant }: Props) {
                   <div className="subhead__bar" />License (수출신고필증) — Korea Only
                   <div className="panel__actions" style={{ marginLeft: "auto" }}>
                     <button type="button" className="btn btn--sm" onClick={handleLicenseAdd}><Plus size={12} /></button>
-                    <button type="button" className="btn btn--sm" onClick={handleLicenseRemove} disabled={selectedKey === null}><Minus size={12} /></button>
+                    <button type="button" className="btn btn--sm" onClick={handleLicenseRemove} disabled={fields.length === 0}><Minus size={12} /></button>
                   </div>
                 </div>
                 <div style={{ overflow: "auto" }}>

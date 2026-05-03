@@ -43,9 +43,10 @@ export function ContainerGridPanel() {
   }
 
   function handleRemove() {
-    if (selectedKey === null || selectedIdx === -1) return;
+    if (fields.length === 0) return;
+    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
     if (window.confirm("삭제하시겠습니까?")) {
-      remove(selectedIdx);
+      remove(targetIdx);
       setSelectedKey(null);
     }
   }
@@ -58,7 +59,7 @@ export function ContainerGridPanel() {
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={selectedKey === null}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList

@@ -47,9 +47,10 @@ export function NonBLContainerInfoPanel() {
   }
 
   function handleRemove() {
-    if (selectedKey === null || selectedIdx === -1) return;
+    if (fields.length === 0) return;
+    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
     if (window.confirm("삭제하시겠습니까?")) {
-      remove(selectedIdx);
+      remove(targetIdx);
       setSelectedKey(null);
     }
   }
@@ -62,7 +63,7 @@ export function NonBLContainerInfoPanel() {
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
