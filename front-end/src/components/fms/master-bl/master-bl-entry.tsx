@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { MASTER_BL_DEFAULT_VALUES, TOOLBAR_TO_FIELD } from "./master-bl-schema";
+import type { MasterBlFormValues } from "./master-bl-schema";
 import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
@@ -23,27 +24,6 @@ interface Props {
 
 const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type", "Status"] as const;
 const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "Status", "", "", "", ""] as const;
-
-// freightTerm 값이 null일 수 있으므로 detail reset 시 기본값 fallback 처리
-const MASTER_BL_SCHEMA = z.object({
-  jobDiv: z.enum(["SEA", "AIR", "TRUCK", "NON_BL"]),
-  bound: z.enum(["EXP", "IMP"]),
-  mblNo: z.string().max(35).optional(),
-  masterRefNo: z.string().max(35).optional(),
-  freightTerm: z.enum(["PREPAID", "COLLECT"]),
-  shipperCode: z.string().max(20).optional(),
-  consigneeCode: z.string().max(20).optional(),
-  polCode: z.string().max(5).optional(),
-  podCode: z.string().max(5).optional(),
-  etd: z.string().regex(/^\d{8}$/).optional().or(z.literal("")),
-  eta: z.string().regex(/^\d{8}$/).optional().or(z.literal("")),
-  pkgQty: z.number().min(0).optional(),
-  grossWeightKg: z.number().min(0).optional(),
-  cbm: z.number().min(0).optional(),
-  operatorCode: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof MASTER_BL_SCHEMA>;
 
 function getToolbarFields(mode: string) {
   return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
@@ -71,21 +51,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     enabled: isEdit,
   });
 
-  const form = useForm<FormValues>({
-    defaultValues: {
-      jobDiv: "SEA",
-      bound: "EXP",
-      freightTerm: "PREPAID",
-      mblNo: "",
-      masterRefNo: "",
-      shipperCode: "",
-      consigneeCode: "",
-      polCode: "",
-      podCode: "",
-      etd: "",
-      eta: "",
-      operatorCode: "",
-    },
+  const form = useForm<MasterBlFormValues>({
+    defaultValues: MASTER_BL_DEFAULT_VALUES,
   });
 
   useEffect(() => {
@@ -111,7 +78,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   }, [detail, form]);
 
   const mutation = useMutation({
-    mutationFn: (data: FormValues) =>
+    mutationFn: (data: MasterBlFormValues) =>
       isEdit
         ? masterBlPort.update(id!, data as UpdateMasterBlRequest)
         : masterBlPort.create(data as CreateMasterBlRequest),
@@ -130,14 +97,14 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
-  function handleSave(raw: FormValues) {
+  function handleSave(raw: MasterBlFormValues) {
     const req: CreateMasterBlRequest = {
       jobDiv: variant.mode as 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL',
       bound: variant.direction as 'EXP' | 'IMP',
       freightTerm: 'PREPAID',
       ...raw,
     };
-    mutation.mutate(req as FormValues);
+    mutation.mutate(req as MasterBlFormValues);
   }
 
   const tabs = [
@@ -147,11 +114,13 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     { key: "freight", label: "Freight" },
   ];
 
+  const { register } = form;
   const isExp = variant.direction === "EXP";
   const bottomActionsLeft  = variant.bottomActions.filter(a => ["Profit/Loss", "House B/L Load"].includes(a));
   const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
 
   return (
+    <FormProvider {...form}>
     <form onSubmit={form.handleSubmit(handleSave)}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">
@@ -187,24 +156,20 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
       {/* Toolbar */}
       <div className="toolbar" style={{ gridTemplateColumns: `repeat(${variant.toolbarColumnCount}, 1fr)` }}>
-        {toolbarFields.map((f) => (
-          <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
-            <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
-            <div className="field__input">
-              <input defaultValue={
-                f === "MBL No" ? "COSCO2404195" :
-                f === "MAWB No" ? "180-12345678" :
-                f === "Master Ref" ? "MR-2026-04195" :
-                f === "Load Type" ? "FCL" :
-                f === "Service Term" ? "CY/CY" :
-                f === "B/L Type" ? "OBL" :
-                f === "Line Bkg. No" ? "BKG-COSCO-0412" :
-                f === "Shipment Type" ? "FCL" :
-                ""
-              } placeholder={f || ""} />
+        {toolbarFields.map((f) => {
+          const fieldPath = TOOLBAR_TO_FIELD[f];
+          return (
+            <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
+              <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
+              <div className="field__input">
+                {fieldPath
+                  ? <input placeholder={f || ""} {...(register as (name: string) => object)(fieldPath)} />
+                  : <input placeholder={f || ""} />
+                }
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Tabbar */}
@@ -235,5 +200,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       {tab === "other"   && <OtherTab />}
       {tab === "freight" && <FreightTab />}
     </form>
+    </FormProvider>
   );
 }
