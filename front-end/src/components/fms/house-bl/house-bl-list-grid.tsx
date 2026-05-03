@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { houseBlPort } from "@/lib/ports";
 import { getBLVariant } from "@/lib/bl-variants";
-import type { HouseBlRow, HouseBlFilter } from "@/domain/house-bl";
+import type { HouseBlRow, HouseBlFilter, Bound } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
@@ -24,7 +24,7 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
   const { data: rows = [], isLoading, error } = useQuery({
     queryKey: ["house-bl", "list", variantKey, extraFilter],
     queryFn: () =>
-      houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction, ...extraFilter }),
+      houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction as Bound, ...extraFilter }),
     enabled: variant.direction !== null,
   });
 
