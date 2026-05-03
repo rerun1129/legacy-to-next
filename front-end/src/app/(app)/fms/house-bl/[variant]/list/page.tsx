@@ -1,7 +1,6 @@
-import {FileText, RotateCcw, Search} from "lucide-react";
-import { ListFilter } from "@/components/fms/house-bl/list-filter";
-import { HouseBLListGrid } from "@/components/fms/house-bl/house-bl-list-grid";
+import { FileText, RotateCcw, Search } from "lucide-react";
 import { getBLVariant, getPageTitle, BL_VARIANT_KEYS } from "@/lib/bl-variants";
+import { HouseBLListClient } from "@/components/fms/house-bl/house-bl-list-client";
 
 export function generateStaticParams() {
   return BL_VARIANT_KEYS.map((v) => ({ variant: v }));
@@ -20,21 +19,8 @@ export default async function HouseBLListPage({ params }: Props) {
           <div className="page-head__title-icon"><FileText size={14} /></div>
           {getPageTitle(variant, 'House', 'List')}
         </div>
-        <div className="page-head__actions">
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-                <button className="btn btn--sm btn--ghost">
-                    <RotateCcw size={12} />
-                    Reset
-                </button>
-                <button className="btn btn--sm btn--primary">
-                    <Search size={12} />
-                    Search
-                </button>
-            </div>
-        </div>
       </div>
-      <ListFilter />
-      <HouseBLListGrid variantKey={variantKey} />
+      <HouseBLListClient variantKey={variantKey} />
     </div>
   );
 }

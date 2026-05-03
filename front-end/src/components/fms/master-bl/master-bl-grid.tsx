@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import { masterBlPort } from "@/lib/ports";
-import type { MasterBlRow } from "@/domain/master-bl";
-import type { Bound } from "@/domain/house-bl";
+import type { MasterBlRow, MasterBlFilter } from "@/domain/master-bl";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { getModeLabels } from "@/lib/bl-mode-labels";
@@ -14,17 +13,18 @@ import { getModeLabels } from "@/lib/bl-mode-labels";
 interface Props {
   variantKey: string;
   variant: MasterVariantConfig;
+  extraFilter?: Partial<MasterBlFilter>;
 }
 
-export function MasterBlGrid({ variantKey, variant }: Props) {
+export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
   const modeLabels = getModeLabels(variant.mode);
 
   // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
   const { data: rows = [], isLoading, error } = useQuery({
-    queryKey: ["master-bl", "list", variantKey],
-    queryFn: () => masterBlPort.list({ bound: variant.direction as Bound }),
+    queryKey: ["master-bl", "list", variantKey, extraFilter],
+    queryFn: () => masterBlPort.list({ bound: variant.direction, ...extraFilter }),
     enabled: variant.direction !== null,
   });
 
