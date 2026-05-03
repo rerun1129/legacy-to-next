@@ -1,144 +1,198 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { Search, Plus, Trash2 } from "lucide-react";
+import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
-import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
-import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { MasterBlFormValues } from "../../master-bl-schema";
+import { SeaScheduleStub, AirScheduleStub } from "./master-schedule-stub";
 
-interface Props { variant?: AnyVariantConfig }
-interface LegRow { id: number; to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
+interface Props {
+  variant?: AnyVariantConfig;
+  form?:    UseFormReturn<MasterBlFormValues>;
+}
 
-const LEG_COLS: GridColumn<LegRow>[] = [
-  { key: "_no",       width: 32, align: "center", label: "#",        className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "to",        width: 40, align: "center", label: "To",       render: v => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
-  { key: "by",        width: 32, align: "center", label: "By",       render: v => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "flight",    width: 50, align: "center", label: "Flight",   render: v => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "onBoard",   width: 96, align: "center", label: "On Board", render: v => <DateCell defaultValue={String(v)} /> },
-  { key: "boardTime", width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
-  { key: "arrival",   width: 96, align: "center", label: "Arrival",  render: v => <DateCell defaultValue={String(v)} /> },
-  { key: "arrTime",   width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
-];
-const LEG_DATA: LegRow[] = [
-  { id: 1, to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
-  { id: 2, to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
-];
-
-// ── 공통 헬퍼 ──────────────────────────────────────────────
-function SchedField({ label, value, req, type = "text" }: { label: string; value?: string; req?: boolean; type?: string }) {
+// ── SEA schedule (form 연결) ────────────────────────────────
+function SeaScheduleSection({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
   return (
-    <div className="li">
-      <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
-      <div className="li__input">
-        {type === "date"
-          ? <PanelDateInput defaultValue={value} required={req} />
-          : <input defaultValue={value} style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} />}
+    <>
+      {/* Liner & Vessel */}
+      <div className="subhead"><div className="subhead__bar" />Liner &amp; Vessel</div>
+      <div className="li">
+        <span className="li__label is-required">Liner</span>
+        <div className="li__input" style={{ gap: 4 }}>
+          <input style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+            {...form.register("seaDetail.linerCode")} />
+          <input style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }}
+            placeholder="Liner Name" />
+        </div>
       </div>
-    </div>
-  );
-}
-
-function CodeNameField({ label, code, name, req }: { label: string; code: string; name: string; req?: boolean }) {
-  return (
-    <div className="li">
-      <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
-      <div className="li__input" style={{ gap: 4 }}>
-        <input defaultValue={code} style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-        <input defaultValue={name} style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }} />
+      <div className="li">
+        <span className="li__label is-required">Vessel</span>
+        <div className="li__input" style={{ gap: 4 }}>
+          <input style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+            {...form.register("seaDetail.vesselCode")} />
+          <input style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }}
+            {...form.register("seaDetail.vesselName")} />
+        </div>
       </div>
-    </div>
-  );
-}
-
-function LcnField({ label, req, code, name }: { label: string; req?: boolean; code: string; name: string }) {
-  return (
-    <div className="lcn" style={{ marginBottom: 4 }}>
-      <span className={`lcn__label${req ? " is-required" : ""}`}>{label}</span>
-      <div className="lcn__code" style={{ position: "relative" }}>
-        <input defaultValue={code} placeholder="UNLOC" style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-        <Search size={10} className="lcn__icon" />
+      <div className="li">
+        <span className="li__label is-required">Voyage</span>
+        <div className="li__input">
+          <input style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }}
+            {...form.register("seaDetail.voyageNo")} />
+        </div>
       </div>
-      <input className="lcn__name" defaultValue={name} placeholder="Port" style={{ fontSize: 10 }} />
-    </div>
-  );
-}
 
-// ── Sea schedule ────────────────────────────────────────────
-function buildSeaFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
-  const linerItems: FieldItemDef[] = [
-    { key: "liner",  render: () => <CodeNameField label="Liner"  code="COSCO" name="COSCO SHIPPING" req /> },
-    { key: "vessel", render: () => <SchedField    label="Vessel" value="COSCO EXCELLENCE" req /> },
-    { key: "voyage", render: () => <SchedField    label="Voyage" value="0412E" req /> },
-    { key: "etd",    render: () => <SchedField    label="ETD"    value="2026-04-24" req type="date" /> },
-    { key: "eta",    render: () => <SchedField    label="ETA"    value="2026-05-08" req type="date" /> },
-  ];
-  const portItems: FieldItemDef[] = [
-    { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
-    { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
-    { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
-  ];
-  const issueItems: FieldItemDef[] = [
-    { key: "issue-date",   render: () => <SchedField label="Issue Date"   value="2026-04-20" type="date" /> },
-    { key: "freight-term", render: () => <SchedField label="Freight Term" value="Prepaid" /> },
-  ];
-
-  return [
-    { key: "liner-vessel", label: "Liner & Vessel", render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={linerItems} /> },
-    { key: "ports",        label: "Ports",          render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} shouldShowRowControls={false} /> },
-    ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
-  ];
-}
-
-// ── Air schedule ────────────────────────────────────────────
-function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
-  const carrierItems: FieldItemDef[] = [
-    { key: "carrier",   render: () => <CodeNameField label={isExp ? "Airline" : "Carrier"} code={isExp ? "KE" : "OZ"} name={isExp ? "Korean Air" : "Asiana Airlines"} req /> },
-    { key: "departure", render: () => <CodeNameField label="Departure" code="ICN" name="Incheon Int'l" req /> },
-  ];
-  const issueItems: FieldItemDef[] = [
-    { key: "issue-date",  render: () => <SchedField label="Issue Date"  value="2026-04-20" type="date" /> },
-    { key: "signature",   render: () => <SchedField label="Signature"   value="" /> },
-    { key: "issue-place", render: () => <SchedField label="Issue Place" value="INCHEON" /> },
-  ];
-
-  return [
-    {
-      key: "carrier", label: "Carrier",
-      render: () => <FieldItemGrid itemScope={`${panelScope}.carrier`} items={carrierItems} />,
-    },
-    {
-      key: "legs", label: "Schedule Legs",
-      render: () => (
-        <>
-          <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
-          <div style={{ overflow: "auto" }}>
-            <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(row) => row.id} />
+      {/* Ports */}
+      <div className="subhead" style={{ marginTop: 8 }}><div className="subhead__bar" />Ports</div>
+      {(["polCode", "podCode"] as const).map(field => (
+        <div key={field} className="lcn" style={{ marginBottom: 4 }}>
+          <span className="lcn__label is-required">{field === "polCode" ? "POL" : "POD"}</span>
+          <div className="lcn__code" style={{ position: "relative" }}>
+            <input style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+              {...form.register(field)} />
+            <Search size={10} className="lcn__icon" />
           </div>
-        </>
-      ),
-    },
-    ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
-  ];
+          <input className="lcn__name" placeholder="Port" style={{ fontSize: 10 }} />
+        </div>
+      ))}
+      <div className="lcn" style={{ marginBottom: 4 }}>
+        <span className="lcn__label">POR</span>
+        <div className="lcn__code" style={{ position: "relative" }}>
+          <input style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+            {...form.register("seaDetail.porCode")} />
+          <Search size={10} className="lcn__icon" />
+        </div>
+        <input className="lcn__name" placeholder="Port" style={{ fontSize: 10 }} />
+      </div>
+      <div className="lcn" style={{ marginBottom: 4 }}>
+        <span className="lcn__label">Dest</span>
+        <div className="lcn__code" style={{ position: "relative" }}>
+          <input style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+            {...form.register("seaDetail.finalDestCode")} />
+          <Search size={10} className="lcn__icon" />
+        </div>
+        <input className="lcn__name" placeholder="Port" style={{ fontSize: 10 }} />
+      </div>
+
+      {/* Issue */}
+      <div className="subhead" style={{ marginTop: 8 }}><div className="subhead__bar" />Issue</div>
+      <div className="li">
+        <span className="li__label">Issue Date</span>
+        <div className="li__input">
+          {/* PanelDateInput은 uncontrolled이므로 일반 input으로 8자리 날짜 입력 */}
+          <input style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }}
+            placeholder="yyyyMMdd"
+            {...form.register("seaDetail.issueDate")} />
+        </div>
+      </div>
+      <div className="li">
+        <span className="li__label">Freight Term</span>
+        <div className="li__input">
+          <select style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }}
+            {...form.register("freightTerm")}>
+            <option value="PREPAID">Prepaid</option>
+            <option value="COLLECT">Collect</option>
+          </select>
+        </div>
+      </div>
+      <div className="li">
+        <span className="li__label">Vessel Nat.</span>
+        <div className="li__input">
+          <input style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }}
+            {...form.register("seaDetail.vesselNationality")} />
+        </div>
+      </div>
+    </>
+  );
 }
 
-export function MasterSchedulePanel({ variant }: Props) {
+// ── AIR scheduleLegs useFieldArray ─────────────────────────
+function AirLegsSection({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name:    "scheduleLegs",
+  });
+
+  return (
+    <>
+      <div className="subhead" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="subhead__bar" />Schedule Legs
+        <button
+          type="button"
+          className="btn btn--sm"
+          style={{ marginLeft: "auto" }}
+          onClick={() => append({ toCode: "", onBoardDt: "20000101", arrivalDt: "20000101" })}
+        >
+          <Plus size={10} />Add
+        </button>
+      </div>
+      <div style={{ overflow: "auto" }}>
+        <table className="grid--list">
+          <thead>
+            <tr>
+              <th className="row-num">#</th>
+              <th>To</th><th>By</th><th>Flight</th>
+              <th>On Board</th><th>Time</th>
+              <th>Arrival</th><th>Time</th>
+              <th style={{ width: 24 }} />
+            </tr>
+          </thead>
+          <tbody>
+            {fields.map((field, i) => (
+              <tr key={field.id}>
+                <td className="row-num">{i + 1}</td>
+                <td><input className="grid__cell-input" style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}
+                  {...form.register(`scheduleLegs.${i}.toCode`)} /></td>
+                <td><input className="grid__cell-input"
+                  {...form.register(`scheduleLegs.${i}.byCarrier`)} /></td>
+                <td><input className="grid__cell-input" style={{ fontFamily: "var(--font-mono)" }}
+                  {...form.register(`scheduleLegs.${i}.flightNo`)} /></td>
+                <td><input className="grid__cell-input"
+                  {...form.register(`scheduleLegs.${i}.onBoardDt`)} /></td>
+                <td><input className="grid__cell-input"
+                  {...form.register(`scheduleLegs.${i}.onBoardTm`)} /></td>
+                <td><input className="grid__cell-input"
+                  {...form.register(`scheduleLegs.${i}.arrivalDt`)} /></td>
+                <td><input className="grid__cell-input"
+                  {...form.register(`scheduleLegs.${i}.arrivalTm`)} /></td>
+                <td>
+                  <button type="button" onClick={() => remove(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                    <Trash2 size={10} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+export function MasterSchedulePanel({ variant, form }: Props) {
   if (!variant) return null;
   const panelScope = `master-schedule-panel.${variant.key}`;
   const isExp      = variant.direction === "EXP";
-  const fields     = variant.mode === "SEA"
-    ? buildSeaFields(panelScope, isExp)
-    : buildAirFields(panelScope, isExp);
+  const isSea      = variant.mode === "SEA";
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Schedule</span>
-        <div className="panel__actions"><button className="btn btn--sm">Reset</button></div>
+        <div className="panel__actions"><button type="button" className="btn btn--sm">Reset</button></div>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <FieldWidgetList panelScope={panelScope} fields={fields} />
+        {form ? (
+          isSea
+            ? <SeaScheduleSection form={form} />
+            : <AirLegsSection form={form} />
+        ) : (
+          isSea
+            ? <SeaScheduleStub panelScope={panelScope} isExp={isExp} />
+            : <AirScheduleStub panelScope={panelScope} isExp={isExp} />
+        )}
       </div>
     </div>
   );

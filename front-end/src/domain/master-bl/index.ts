@@ -39,6 +39,62 @@ export interface MasterBlFilter {
   size?: number;
 }
 
+export interface SeaDetailRequest {
+  loadType?: string;
+  linerCode?: string;
+  vesselCode?: string;
+  vesselName?: string;
+  voyageNo?: string;
+  onboardDate?: string;
+  vesselNationality?: string;
+  weightUnit?: string;
+  serviceTerm?: string;
+  blType?: string;
+  porCode?: string;
+  finalDestCode?: string;
+  rton?: number;
+  lineBkgNo?: string;
+  issueDate?: string;
+}
+
+export interface DescRequest {
+  marks?: string;
+  description?: string;
+  descClause1?: string;
+  descClause2?: string;
+  remark?: string;
+}
+
+export interface DimRequest {
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  quantity?: number;
+  cbm?: number;
+  volumeWeightKg?: number;
+}
+
+export interface ScheduleLegRequest {
+  toCode: string;
+  byCarrier?: string;
+  flightNo?: string;
+  onBoardDt: string;
+  onBoardTm?: string;
+  arrivalDt: string;
+  arrivalTm?: string;
+}
+
+export interface AirChargeRequest {
+  freightCode?: string;
+  currencyCode?: string;
+  per?: string;
+  freightTerm?: string;
+  grossWeightKg?: number;
+  rateClass?: string;
+  chargeWeightKg?: number;
+  rate?: number;
+}
+
 export interface CreateMasterBlRequest {
   jobDiv: JobDiv;
   bound: Bound;
@@ -46,15 +102,28 @@ export interface CreateMasterBlRequest {
   masterRefNo?: string;
   freightTerm: 'PREPAID' | 'COLLECT';
   shipperCode?: string;
+  shipperAddress?: string;
   consigneeCode?: string;
+  consigneeAddress?: string;
+  notifyCode?: string;
+  notifyAddress?: string;
   polCode?: string;
   podCode?: string;
   etd?: string;
   eta?: string;
   pkgQty?: number;
+  pkgUnit?: string;
   grossWeightKg?: number;
   cbm?: number;
+  hsCode?: string;
+  mainItemName?: string;
+  settlePartnerCode?: string;
   operatorCode?: string;
+  seaDetail?: SeaDetailRequest;
+  desc?: DescRequest;
+  dims?: DimRequest[];
+  scheduleLegs?: ScheduleLegRequest[];
+  airCharges?: AirChargeRequest[];
 }
 
 export type UpdateMasterBlRequest = Partial<CreateMasterBlRequest>;
