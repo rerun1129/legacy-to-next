@@ -6,12 +6,13 @@ import { useDraftPersist } from "@/lib/use-draft-persist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { MASTER_BL_DEFAULT_VALUES, TOOLBAR_TO_FIELD } from "./master-bl-schema";
+import type { MasterBlFormValues } from "./master-bl-schema";
 import { Save, Copy, Trash2, Layers, Send, RefreshCw, Search } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
 import type { CreateMasterBlRequest, UpdateMasterBlRequest, ConsolidatedHouseBlSummary } from "@/domain/master-bl";
-import type { MasterBlFormValues } from "./master-bl-schema";
 import { MasterMainTab } from "./tabs/main-tab";
 import { MasterEdiTab }  from "./tabs/edi-tab";
 import { OtherTab }      from "@/components/fms/house-bl/tabs/other-tab";
@@ -52,55 +53,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   });
 
   const form = useForm<MasterBlFormValues>({
-    defaultValues: {
-      jobDiv: "SEA",
-      bound: "EXP",
-      freightTerm: "PREPAID",
-      mblNo: "",
-      masterRefNo: "",
-      shipperCode: "",
-      shipperAddress: "",
-      consigneeCode: "",
-      consigneeAddress: "",
-      notifyCode: "",
-      notifyAddress: "",
-      polCode: "",
-      podCode: "",
-      etd: "",
-      eta: "",
-      pkgUnit: "",
-      hsCode: "",
-      mainItemName: "",
-      settlePartnerCode: "",
-      operatorCode: "",
-      seaDetail: {
-        loadType: "",
-        linerCode: "",
-        vesselCode: "",
-        vesselName: "",
-        voyageNo: "",
-        onboardDate: "",
-        vesselNationality: "",
-        weightUnit: "",
-        serviceTerm: "",
-        blType: "",
-        porCode: "",
-        finalDestCode: "",
-        lineBkgNo: "",
-        issueDate: "",
-      },
-      desc: {
-        marks: "",
-        description: "",
-        descClause1: "",
-        descClause2: "",
-        remark: "",
-      },
-      dims: [],
-      scheduleLegs: [],
-      airCharges: [],
-      houseBls: [],
-    },
+    defaultValues: MASTER_BL_DEFAULT_VALUES,
   });
 
   const { clearDraft, hasDraft } = useDraftPersist(form, `draft:master-bl:${variantKey}:${id ?? "new"}`);
@@ -232,6 +185,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     { key: "freight", label: "Freight" },
   ];
 
+  const { register } = form;
   const isExp = variant.direction === "EXP";
   const bottomActionsLeft  = variant.bottomActions.filter(a => ["Profit/Loss", "House B/L Load"].includes(a));
   const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
@@ -276,18 +230,20 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
       {/* Toolbar */}
       <div className="toolbar" style={{ gridTemplateColumns: `repeat(${variant.toolbarColumnCount}, 1fr)` }}>
-        {toolbarFields.map((f) => (
-          <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
-            <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
-            <div className="field__input">
-              {(f === "MBL No" || f === "MAWB No") ? (
-                <input {...form.register('mblNo')} placeholder={f} />
-              ) : (
-                <input defaultValue="" placeholder={f || ""} />
-              )}
+        {toolbarFields.map((f) => {
+          const fieldPath = TOOLBAR_TO_FIELD[f];
+          return (
+            <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
+              <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
+              <div className="field__input">
+                {fieldPath
+                  ? <input placeholder={f || ""} {...(register as (name: string) => object)(fieldPath)} />
+                  : <input placeholder={f || ""} />
+                }
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Tabbar */}
