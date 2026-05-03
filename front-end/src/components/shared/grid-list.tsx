@@ -37,6 +37,8 @@ export interface GridListProps<T> {
   style?: React.CSSProperties;
   emptyMessage?: string;
   gridId?: string;
+  selectedRowKey?: string | number | null;
+  onSelectRow?: (row: T | null, index: number | null) => void;
 }
 
 function renderRows<T>(
@@ -46,6 +48,8 @@ function renderRows<T>(
   rowClassName: GridListProps<T>["rowClassName"],
   onRowClick: GridListProps<T>["onRowClick"],
   emptyMessage: string | undefined,
+  selectedRowKey?: string | number | null,
+  onSelectRow?: (row: T | null, index: number | null) => void,
 ): React.ReactNode {
   if (data.length === 0) {
     return (
@@ -63,12 +67,24 @@ function renderRows<T>(
       ? rowKey(row, rowIndex)
       : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
     const extraClass = rowClassName ? rowClassName(row, rowIndex) : undefined;
+    const isSelected = selectedRowKey != null && key === selectedRowKey;
+    const finalClassName =
+      [extraClass, isSelected ? "is-selected" : undefined].filter(Boolean).join(" ") || undefined;
+
+    function handleClick() {
+      if (onRowClick) onRowClick(row, rowIndex);
+      if (onSelectRow) {
+        // 같은 행 재클릭 시 선택 해제(null 전달), 그 외엔 해당 행 전달
+        onSelectRow(isSelected ? null : row, isSelected ? null : rowIndex);
+      }
+    }
+
     return (
       <tr
         key={key}
-        className={extraClass}
-        onClick={onRowClick ? () => onRowClick(row, rowIndex) : undefined}
-        style={onRowClick ? { cursor: "pointer" } : undefined}
+        className={finalClassName}
+        onClick={onRowClick || onSelectRow ? handleClick : undefined}
+        style={onRowClick || onSelectRow ? { cursor: "pointer" } : undefined}
       >
         {columns.map((col) => {
           const rawValue =
@@ -100,6 +116,8 @@ function ManagedGridList<T>({
   className,
   style,
   emptyMessage,
+  selectedRowKey,
+  onSelectRow,
 }: GridListProps<T> & { gridId: string }) {
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
@@ -186,7 +204,7 @@ function ManagedGridList<T>({
             </SortableContext>
           </thead>
           <tbody>
-            {renderRows(visibleColumns, data, rowKey, rowClassName, onRowClick, emptyMessage)}
+            {renderRows(visibleColumns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow)}
           </tbody>
         </table>
         <DragOverlay>
@@ -218,6 +236,8 @@ function PlainGridList<T>({
   className,
   style,
   emptyMessage,
+  selectedRowKey,
+  onSelectRow,
 }: Omit<GridListProps<T>, "gridId">) {
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`} style={style}>
@@ -241,7 +261,7 @@ function PlainGridList<T>({
           </tr>
         </thead>
         <tbody>
-          {renderRows(columns, data, rowKey, rowClassName, onRowClick, emptyMessage)}
+          {renderRows(columns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow)}
         </tbody>
       </table>
     </div>
