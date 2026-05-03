@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
+import { Save, Copy, Trash2, Layers, Send, RefreshCw, Search } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
@@ -174,6 +174,46 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
+  function handleSearchBl() {
+    const mblValue = form.getValues('mblNo');
+    if (!mblValue?.trim()) return;
+
+    masterBlPort
+      .list({
+        bound: variant.direction as 'EXP' | 'IMP',
+        mblNo: mblValue.trim(),
+      })
+      .then((rows) => {
+        if (rows.length === 0) {
+          alert('해당 B/L을 찾을 수 없습니다.');
+          return;
+        }
+        return masterBlPort.getById(rows[0].id).then((detail) => {
+          form.reset({
+            jobDiv: detail.jobDiv,
+            bound: detail.bound,
+            freightTerm: detail.freightTerm ?? 'PREPAID',
+            mblNo: detail.mblNo ?? '',
+            masterRefNo: detail.masterRefNo ?? '',
+            shipperCode: detail.shipperCode ?? '',
+            consigneeCode: detail.consigneeCode ?? '',
+            polCode: detail.polCode ?? '',
+            podCode: detail.podCode ?? '',
+            etd: detail.etd ?? '',
+            eta: detail.eta ?? '',
+            pkgQty: detail.pkgQty ?? undefined,
+            grossWeightKg: detail.grossWeightKg ?? undefined,
+            cbm: detail.cbm ?? undefined,
+            operatorCode: detail.operatorCode ?? '',
+          });
+        });
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        alert(`B/L 조회 중 오류가 발생했습니다: ${message}`);
+      });
+  }
+
   function handleSave(raw: MasterBlFormValues) {
     mutation.mutate(raw);
   }
@@ -201,6 +241,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
+          <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
+            <Search size={12} />Search B/L
+          </button>
           <button
             type="button"
             className="btn btn--sm btn--danger"
@@ -229,7 +272,11 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
             <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
             <div className="field__input">
-              <input defaultValue="" placeholder={f || ""} />
+              {(f === "MBL No" || f === "MAWB No") ? (
+                <input {...form.register('mblNo')} placeholder={f} />
+              ) : (
+                <input defaultValue="" placeholder={f || ""} />
+              )}
             </div>
           </div>
         ))}

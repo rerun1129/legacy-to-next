@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw } from "lucide-react";
+import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
@@ -17,6 +17,7 @@ import { houseBlPort } from "@/lib/ports";
 import type { HouseBlFormValues } from "./house-bl-schema";
 import { buildHouseBlRequest } from "./house-bl-submit";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
+import { useSearchBl } from "./use-search-bl";
 
 // @hookform/resolvers 미설치로 zodResolver 없이 useForm 단독 사용. 검증은 submit 시 수동 호출.
 
@@ -174,6 +175,8 @@ export function HouseBLEntry({ variant, id }: Props) {
     { key: "freight", label: "Freight" },
   ];
 
+  const { handleSearchBl } = useSearchBl(form, variant);
+
   function handleSubmit(raw: HouseBlFormValues) {
     mutation.mutate(raw);
   }
@@ -194,6 +197,9 @@ export function HouseBLEntry({ variant, id }: Props) {
             <span className="badge badge--draft">DRAFT</span>
           </div>
           <div className="page-head__actions">
+            <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
+              <Search size={12} />Search B/L
+            </button>
             <button
               type="button"
               className="btn btn--sm btn--danger"
