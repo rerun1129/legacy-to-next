@@ -1,11 +1,12 @@
 "use client";
 
-import { useState }        from "react";
-import { Search }          from "lucide-react";
+import { useState }              from "react";
+import { useFormContext }        from "react-hook-form";
+import { Search }                from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { PanelDateInput }  from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { NonBlFormValues }  from "@/components/fms/non-bl/non-bl-schema";
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function LiField({ label, value, req }: { label: string; value?: string; req?: boolean }) {
@@ -28,7 +29,26 @@ const NON_PARTIES = [
   { key: "settle-partner",  role: "SETTLE PARTNER",  req: false, btn: null           },
 ] as const;
 
+type PartyKey = typeof NON_PARTIES[number]["key"];
+
+// 파티 키 → RHF 필드명 매핑
+const PARTY_CODE_FIELD: Record<PartyKey, keyof NonBlFormValues> = {
+  "actual-customer": "actualCustomerCode",
+  "shipper":         "shipperCode",
+  "consignee":       "consigneeCode",
+  "notify":          "notifyCode",
+  "settle-partner":  "settlePartnerCode",
+};
+const PARTY_NAME_FIELD: Record<PartyKey, keyof NonBlFormValues> = {
+  "actual-customer": "actualCustomerName",
+  "shipper":         "shipperName",
+  "consignee":       "consigneeName",
+  "notify":          "notifyName",
+  "settle-partner":  "settlePartnerName",
+};
+
 function PartyBlock({ party }: { party: typeof NON_PARTIES[number] }) {
+  const { register } = useFormContext<NonBlFormValues>();
   return (
     <div className="party-block" style={{ paddingBottom: 8 }}>
       <div className="party-block__head">
@@ -37,10 +57,10 @@ function PartyBlock({ party }: { party: typeof NON_PARTIES[number] }) {
         </span>
         <div className="party-cn">
           <div className="party-cn__code">
-            <input placeholder="Code" />
+            <input {...register(PARTY_CODE_FIELD[party.key])} placeholder="Code" />
             <Search size={12} className="party-cn__icon" />
           </div>
-          <input className="party-cn__name" placeholder="Company Name" />
+          <input className="party-cn__name" {...register(PARTY_NAME_FIELD[party.key])} placeholder="Company Name" />
         </div>
         {party.btn && <div className="party-block__head-actions"><button className="party-block__head-btn">{party.btn}</button></div>}
       </div>
@@ -65,37 +85,66 @@ export function NonBLPartyPanel() {
   );
 }
 
-// ── Schedule ───────────────────────────────────────────────
-const DATE_ITEMS: FieldItemDef[] = [
-  { key: "etd", render: () => (
-    <div className="li"><span className="li__label is-required">ETD</span><div className="li__input"><PanelDateInput defaultValue="2026-04-24" required /></div></div>
-  )},
-  { key: "eta", render: () => (
-    <div className="li"><span className="li__label is-required">ETA</span><div className="li__input"><PanelDateInput defaultValue="2026-05-08" required /></div></div>
-  )},
-];
+// ── Schedule 개별 필드 컴포넌트 ────────────────────────────
+function SchedEtd()    { const { register } = useFormContext<NonBlFormValues>(); return <div className="li"><span className="li__label is-required">ETD</span><div className="li__input"><input type="date" {...register("etd")} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>; }
+function SchedEta()    { const { register } = useFormContext<NonBlFormValues>(); return <div className="li"><span className="li__label is-required">ETA</span><div className="li__input"><input type="date" {...register("eta")} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>; }
+function SchedLiner()  { const { register } = useFormContext<NonBlFormValues>(); return <div className="li"><span className="li__label is-required">Liner</span><div className="li__input" style={{ gap: 4 }}><input {...register("linerCode")} placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /><input {...register("linerName")} placeholder="Liner Name" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>; }
+function SchedVessel() { const { register } = useFormContext<NonBlFormValues>(); return <div className="li"><span className="li__label is-required">Vessel</span><div className="li__input"><input {...register("vesselName")} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>; }
+function SchedVoy()    { const { register } = useFormContext<NonBlFormValues>(); return <div className="li"><span className="li__label is-required">Voy</span><div className="li__input"><input {...register("voyNo")} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>; }
 
-const PORT_ITEMS: FieldItemDef[] = [
-  { key: "pol", render: () => (
+function SchedPol() {
+  const { register } = useFormContext<NonBlFormValues>();
+  return (
     <div className="lcn" style={{ marginBottom: 4 }}>
       <span className="lcn__label is-required">POL</span>
-      <div className="lcn__code"><input defaultValue="KRBSAN" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-      <input className="lcn__name" defaultValue="Busan" />
+      <div className="lcn__code"><input {...register("polCode")} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" {...register("polName")} placeholder="Port Name" />
     </div>
-  )},
-  { key: "pod", render: () => (
+  );
+}
+function SchedPod() {
+  const { register } = useFormContext<NonBlFormValues>();
+  return (
     <div className="lcn" style={{ marginBottom: 4 }}>
       <span className="lcn__label is-required">POD</span>
-      <div className="lcn__code"><input defaultValue="CNSHA" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-      <input className="lcn__name" defaultValue="Shanghai" />
+      <div className="lcn__code"><input {...register("podCode")} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" {...register("podName")} placeholder="Port Name" />
     </div>
-  )},
+  );
+}
+function SchedFinalDest() {
+  const { register } = useFormContext<NonBlFormValues>();
+  return (
+    <div className="lcn" style={{ marginBottom: 4 }}>
+      <span className="lcn__label">Final Dest</span>
+      <div className="lcn__code"><input {...register("finalDestCode")} placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" {...register("finalDestName")} placeholder="Port Name" />
+    </div>
+  );
+}
+function SchedFinalEta() { const { register } = useFormContext<NonBlFormValues>(); return <div className="li"><span className="li__label">Final ETA</span><div className="li__input"><input type="date" {...register("finalEta")} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} /></div></div>; }
+
+const SCHED_LINER_ITEMS: FieldItemDef[] = [
+  { key: "liner",  render: () => <SchedLiner /> },
+  { key: "vessel", render: () => <SchedVessel /> },
+  { key: "voy",    render: () => <SchedVoy /> },
+];
+const SCHED_DATE_ITEMS: FieldItemDef[] = [
+  { key: "etd", render: () => <SchedEtd /> },
+  { key: "eta", render: () => <SchedEta /> },
+];
+const SCHED_PORT_ITEMS: FieldItemDef[] = [
+  { key: "pol",        render: () => <SchedPol /> },
+  { key: "pod",        render: () => <SchedPod /> },
+  { key: "final-dest", render: () => <SchedFinalDest /> },
+  { key: "final-eta",  render: () => <SchedFinalEta /> },
 ];
 
 export function NonBLSchedulePanel() {
   const fields: FieldWidgetDef[] = [
-    { key: "dates", label: "Dates", render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.dates" items={DATE_ITEMS} /> },
-    { key: "ports", label: "Ports", render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={PORT_ITEMS} shouldShowRowControls={false} /> },
+    { key: "liner", label: "Liner & Vessel", render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.liner" items={SCHED_LINER_ITEMS} shouldShowRowControls={false} /> },
+    { key: "dates", label: "Dates",          render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.dates" items={SCHED_DATE_ITEMS}  shouldShowRowControls={false} /> },
+    { key: "ports", label: "Ports",          render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={SCHED_PORT_ITEMS}  shouldShowRowControls={false} /> },
   ];
 
   return (

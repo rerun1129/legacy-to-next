@@ -1,18 +1,51 @@
 "use client";
 
-import { useState }       from "react";
+import { useState }                  from "react";
+import { useForm, FormProvider }      from "react-hook-form";
 import { Save, Trash2, Package, Printer } from "lucide-react";
-import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
-import { MainNonBL }      from "./tabs/main-non-bl";
-
-type WorkDiv = "Sea" | "Air" | "Warehouse" | "Trucking";
+import { FreightTab }                 from "@/components/fms/house-bl/tabs/freight-tab";
+import { MainNonBL }                  from "./tabs/main-non-bl";
+import type { NonBlFormValues }       from "./non-bl-schema";
 
 export function NonBLEntry() {
-  const [tab,     setTab]     = useState("main");
-  const [workDiv, setWorkDiv] = useState<WorkDiv>("Sea");
+  const [tab, setTab] = useState("main");
+
+  const methods = useForm<NonBlFormValues>({
+    defaultValues: {
+      nonBlNo:  "",
+      workDiv:  "Sea",
+      status:   "",
+      refNo:    "",
+      actualCustomerCode: "", actualCustomerName: "",
+      shipperCode:        "", shipperName:        "",
+      consigneeCode:      "", consigneeName:      "",
+      notifyCode:         "", notifyName:         "",
+      settlePartnerCode:  "", settlePartnerName:  "",
+      linerCode:    "", linerName:    "",
+      vesselName:   "", voyNo:        "",
+      etd:          "", eta:          "",
+      polCode:      "", polName:      "",
+      podCode:      "", podName:      "",
+      finalDestCode: "", finalDestName: "",
+      finalEta:     "",
+      mainItem:  "", hsCode:    "",
+      cargoQty:  undefined, cargoUnit: "",
+      grossWt:   undefined, volWt:     undefined,
+      totalCbm:  undefined, rton:      undefined,
+      salesClass:   "",
+      salesManCode: "", salesManName: "",
+      operatorCode: "", operatorName: "",
+      teamCode:     "", teamName:     "",
+      remark:        "",
+      freightSelling: [],
+      freightBuying:  [],
+    },
+  });
+
+  const { register } = methods;
 
   return (
-    <>
+    <FormProvider {...methods}>
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><Package size={14} /></div>
@@ -27,27 +60,50 @@ export function NonBLEntry() {
       </div>
 
       <div className="toolbar" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
-        {[
-          { l: "Non B/L No",    v: "",      req: true  },
-          { l: "Work Division", v: workDiv, req: true  },
-          { l: "Status",        v: "접수",  req: false },
-          { l: "Ref. No.",      v: "",      req: false },
-          { l: "Operator",      v: "KYS",   req: true  },
-          { l: "Team",          v: "OPS",   req: true  },
-        ].map(f => (
-          <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
-            <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>
-            <div className="field__input">
-              {f.l === "Work Division" ? (
-                <select value={workDiv} onChange={e => setWorkDiv(e.target.value as WorkDiv)} style={{ all: "unset", flex: 1, minWidth: 0, fontSize: "var(--fs-base)", color: "var(--ink)", cursor: "pointer" }}>
-                  <option>Sea</option><option>Air</option><option>Warehouse</option><option>Trucking</option>
-                </select>
-              ) : (
-                <input defaultValue={f.v} placeholder={f.l === "Non B/L No" ? "Auto on save" : f.v || f.l} />
-              )}
-            </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Non B/L No</div>
+          <div className="field__input">
+            <input {...register("nonBlNo")} placeholder="Auto on save" />
           </div>
-        ))}
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Work Division</div>
+          <div className="field__input">
+            <select
+              {...register("workDiv")}
+              style={{ all: "unset", flex: 1, minWidth: 0, fontSize: "var(--fs-base)", color: "var(--ink)", cursor: "pointer" }}
+            >
+              <option>Sea</option>
+              <option>Air</option>
+              <option>Warehouse</option>
+              <option>Trucking</option>
+            </select>
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">Status</div>
+          <div className="field__input">
+            <input {...register("status")} placeholder="Status" />
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">Ref. No.</div>
+          <div className="field__input">
+            <input {...register("refNo")} placeholder="Ref. No." />
+          </div>
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Operator</div>
+          <div className="field__input">
+            <input defaultValue="KYS" placeholder="Operator" />
+          </div>
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Team</div>
+          <div className="field__input">
+            <input defaultValue="OPS" placeholder="Team" />
+          </div>
+        </div>
       </div>
 
       <div className="tabbar">
@@ -61,6 +117,6 @@ export function NonBLEntry() {
 
       {tab === "main"    && <MainNonBL />}
       {tab === "freight" && <FreightTab />}
-    </>
+    </FormProvider>
   );
 }
