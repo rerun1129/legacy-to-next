@@ -17,7 +17,13 @@ allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
 
 ## 수행 절차
 
-1. **Coder × N 호출**: 작업 단위가 단일이면 Coder 1개, 명확히 독립 분할 가능하면 `subagent_type=Coder`, `isolation: "worktree"`로 병렬 호출. **Planner 호출하지 않음**. 작업 지시(`$ARGUMENTS`) + 관련 파일 경로를 직접 전달.
+0. **Coder 호출 전 main HEAD 확인** (worktree base 기준점 보장):
+   ```bash
+   git status --short && git log -1 --oneline
+   ```
+   uncommitted 변경이 있거나 예상과 다른 HEAD면 사용자에게 보고 후 중단. 이 시점의 HEAD가 worktree base가 된다.
+
+1. **Coder × N 호출**: 작업 단위가 단일이면 Coder 1개, **변경 파일 집합이 겹치지 않는 경우에만** `subagent_type=Coder`, `isolation: "worktree"`로 병렬 호출. domain 모델·entry 컴포넌트 등 공유 파일이 여러 Coder에 걸치면 단일 Coder 직렬 처리. **Planner 호출하지 않음**. 작업 지시(`$ARGUMENTS`) + 관련 파일 경로를 직접 전달.
 
 2. **트렁크 머지 (사전 충돌 감지 적용)**:
 
