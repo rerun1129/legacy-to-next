@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { Save, Trash2, Truck } from "lucide-react";
+import { Save, Trash2, Truck, RotateCcw } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }  from "./tabs/main-truck";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { useDraftPersist } from "@/lib/use-draft-persist";
+import { createEmptyTruckBlFormValues } from "./truck-bl-defaults";
 
 // label → RHF 필드 경로 매핑 (toolbar 5개)
 const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
@@ -20,18 +21,14 @@ const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
 export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
   const form = useForm<HouseBlFormValues>({
-    defaultValues: {
-      freightSelling: [],
-      freightBuying: [],
-      truckOrders: [],
-      truckBlNo:        "",
-      truckSettle:      "",
-      incoterms:        "",
-      truckFreightTerm: "",
-      truckStatus:      "",
-    },
+    defaultValues: createEmptyTruckBlFormValues(),
   });
-  const { clearDraft: _clearDraft } = useDraftPersist(form, "draft:truck-bl:new");
+  const { clearDraft } = useDraftPersist(form, "draft:truck-bl:single:new");
+
+  function handleResetEntry() {
+    form.reset(createEmptyTruckBlFormValues());
+    clearDraft();
+  }
 
   return (
     <FormProvider {...form}>
@@ -46,6 +43,9 @@ export function TruckBLEntry() {
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
+          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+            <RotateCcw size={12} />Reset
+          </button>
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm btn--primary">
             <Save size={12} />Save

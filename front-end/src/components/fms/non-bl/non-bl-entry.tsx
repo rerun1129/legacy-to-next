@@ -1,52 +1,28 @@
 "use client";
 
-import { useState }                       from "react";
-import { useForm, FormProvider }           from "react-hook-form";
-import { useDraftPersist }                 from "@/lib/use-draft-persist";
-import { Save, Trash2, Package, Printer } from "lucide-react";
+import { useState }                                from "react";
+import { useForm, FormProvider }                  from "react-hook-form";
+import { useDraftPersist }                        from "@/lib/use-draft-persist";
+import { Save, Trash2, Package, Printer, RotateCcw } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
-import type { NonBlFormValues }            from "./non-bl-schema";
+import type { NonBlFormValues }                   from "./non-bl-schema";
+import { createEmptyNonBlFormValues }             from "./non-bl-defaults";
 
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
 
   const methods = useForm<NonBlFormValues>({
-    defaultValues: {
-      nonBlNo:  "",
-      workDiv:  "Sea",
-      status:   "",
-      refNo:    "",
-      actualCustomerCode: "", actualCustomerName: "",
-      shipperCode:        "", shipperName:        "",
-      consigneeCode:      "", consigneeName:      "",
-      notifyCode:         "", notifyName:         "",
-      settlePartnerCode:  "", settlePartnerName:  "",
-      linerCode:    "", linerName:    "",
-      vesselName:   "", voyNo:        "",
-      etd:          "", eta:          "",
-      polCode:      "", polName:      "",
-      podCode:      "", podName:      "",
-      finalDestCode: "", finalDestName: "",
-      finalEta:     "",
-      mainItem:  "", hsCode:    "",
-      cargoQty:  undefined, cargoUnit: "",
-      grossWt:   undefined, volWt:     undefined,
-      totalCbm:  undefined, rton:      undefined,
-      salesClass:   "",
-      salesManCode: "", salesManName: "",
-      operatorCode: "", operatorName: "",
-      teamCode:     "", teamName:     "",
-      remark:        "",
-      freightSelling: [],
-      freightBuying:  [],
-      containers: [],
-      dimensions: [],
-    },
+    defaultValues: createEmptyNonBlFormValues(),
   });
 
   const { register } = methods;
-  const { clearDraft: _clearDraft } = useDraftPersist(methods, "draft:non-bl:new");
+  const { clearDraft } = useDraftPersist(methods, "draft:non-bl:single:new");
+
+  function handleResetEntry() {
+    methods.reset(createEmptyNonBlFormValues());
+    clearDraft();
+  }
 
   return (
     <FormProvider {...methods}>
@@ -58,6 +34,9 @@ export function NonBLEntry() {
         </div>
         <div className="page-head__meta"><span className="badge badge--draft">DRAFT</span></div>
         <div className="page-head__actions">
+          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+            <RotateCcw size={12} />Reset
+          </button>
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm btn--success"><Printer size={12} />Print</button>
           <button className="btn btn--sm btn--primary"><Save size={12} />Save</button>
