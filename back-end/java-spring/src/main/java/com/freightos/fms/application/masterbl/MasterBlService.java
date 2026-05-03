@@ -11,6 +11,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
 import com.freightos.fms.domain.masterbl.MasterBlDetail;
+import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
@@ -35,6 +36,11 @@ public class MasterBlService implements MasterBlUseCase {
     @Override
     public PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest) {
         return masterBlPort.getMasterBlsByBound(bound,PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
+    }
+
+    @Override
+    public PagedResult<MasterBl> searchMasterBls(MasterBlFilter filter, PageRequest pageRequest) {
+        return masterBlPort.searchMasterBls(filter, pageRequest);
     }
 
     @Override

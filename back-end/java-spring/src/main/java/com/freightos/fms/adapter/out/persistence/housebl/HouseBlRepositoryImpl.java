@@ -6,14 +6,17 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaJpaEn
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -56,6 +59,73 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .select(h.count())
             .from(h)
             .where(h.jobDiv.eq(jobDiv).and(h.bound.eq(bound)))
+            .fetchOne();
+
+        int totalPages = (int) Math.ceil((double) total / pageRequest.getSize());
+
+        return PagedResult.of(content, total, totalPages, pageRequest.getPage(), pageRequest.getSize());
+    }
+
+    @Override
+    public PagedResult<HouseBlSummary> searchSummaries(HouseBlFilter filter, PageRequest pageRequest) {
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+
+        BooleanBuilder where = new BooleanBuilder();
+        where.and(h.jobDiv.eq(filter.jobDiv()));
+        where.and(h.bound.eq(filter.bound()));
+
+        if (StringUtils.hasText(filter.hblNo())) {
+            where.and(h.hblNo.containsIgnoreCase(filter.hblNo()));
+        }
+        if (StringUtils.hasText(filter.mblNo())) {
+            where.and(h.mblNo.containsIgnoreCase(filter.mblNo()));
+        }
+        if (StringUtils.hasText(filter.shipperCode())) {
+            where.and(h.shipperCode.containsIgnoreCase(filter.shipperCode()));
+        }
+        if (StringUtils.hasText(filter.consigneeCode())) {
+            where.and(h.consigneeCode.containsIgnoreCase(filter.consigneeCode()));
+        }
+        if (StringUtils.hasText(filter.polCode())) {
+            where.and(h.polCode.eq(filter.polCode()));
+        }
+        if (StringUtils.hasText(filter.podCode())) {
+            where.and(h.podCode.eq(filter.podCode()));
+        }
+        if (StringUtils.hasText(filter.etdFrom())) {
+            where.and(h.etd.goe(filter.etdFrom()));
+        }
+        if (StringUtils.hasText(filter.etdTo())) {
+            where.and(h.etd.loe(filter.etdTo()));
+        }
+
+        List<HouseBlSummary> content = queryFactory
+            .select(Projections.constructor(HouseBlSummary.class,
+                h.houseBlId,
+                h.hblNo,
+                h.jobDiv,
+                h.bound,
+                h.polCode,
+                h.podCode,
+                h.etd,
+                h.eta,
+                h.shipperCode,
+                h.consigneeCode,
+                h.pkgQty,
+                h.pkgUnit,
+                h.createdAt
+            ))
+            .from(h)
+            .where(where)
+            .orderBy(h.createdAt.desc())
+            .offset((long) pageRequest.getPage() * pageRequest.getSize())
+            .limit(pageRequest.getSize())
+            .fetch();
+
+        long total = queryFactory
+            .select(h.count())
+            .from(h)
+            .where(where)
             .fetchOne();
 
         int totalPages = (int) Math.ceil((double) total / pageRequest.getSize());

@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
@@ -43,6 +44,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     @Override
     public PagedResult<HouseBlSummary> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
         return houseBlRepository.findSummariesByJobDivAndBound(jobDiv, bound, pageRequest);
+    }
+
+    @Override
+    public PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest) {
+        return houseBlRepository.searchSummaries(filter, pageRequest);
     }
 
     @Override

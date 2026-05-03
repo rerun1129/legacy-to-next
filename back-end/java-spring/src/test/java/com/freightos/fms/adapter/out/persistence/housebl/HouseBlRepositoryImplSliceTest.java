@@ -8,6 +8,7 @@ import com.freightos.common.config.QueryDslConfig;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
@@ -462,5 +463,95 @@ class HouseBlRepositoryImplSliceTest {
                 houseBlRepository.findConsoledAirSummariesByMasterBlId(9999L);
 
         assertThat(result).isNotNull().isEmpty();
+    }
+
+    // ── searchSummaries ───────────────────────────────────────
+
+    @Test
+    @DisplayName("searchSummaries: jobDiv+bound 필수 필터만으로 해당 데이터 반환")
+    void searchSummaries_withOnlyRequiredFilters_returnsMatchingResults() {
+        persist(JobDiv.SEA, Bound.EXP, 3);
+        persist(JobDiv.AIR, Bound.EXP, 2);
+        em.flush();
+
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, null, null, null, null);
+        PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        result.getContent().forEach(s -> {
+            assertThat(s.jobDiv()).isEqualTo(JobDiv.SEA);
+            assertThat(s.bound()).isEqualTo(Bound.EXP);
+        });
+    }
+
+    @Test
+    @DisplayName("searchSummaries: hblNo 부분 일치 필터 적용")
+    void searchSummaries_withHblNoFilter_returnsMatchingResults() {
+        HouseBlJpaEntity match1 = newJpa(JobDiv.SEA, Bound.EXP);
+        match1.setHblNo("HBL-MATCH-001");
+        HouseBlJpaEntity match2 = newJpa(JobDiv.SEA, Bound.EXP);
+        match2.setHblNo("HBL-MATCH-002");
+        HouseBlJpaEntity noMatch = newJpa(JobDiv.SEA, Bound.EXP);
+        noMatch.setHblNo("HBL-OTHER-001");
+        em.persist(match1);
+        em.persist(match2);
+        em.persist(noMatch);
+        em.flush();
+
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "MATCH", null, null, null, null, null, null, null);
+        PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(2);
+        result.getContent().forEach(s -> assertThat(s.hblNo()).containsIgnoringCase("MATCH"));
+    }
+
+    @Test
+    @DisplayName("searchSummaries: polCode 동등 필터 적용")
+    void searchSummaries_withPolCodeFilter_returnsMatchingResults() {
+        HouseBlJpaEntity match = newJpa(JobDiv.SEA, Bound.EXP);
+        match.setPolCode("KRPUS");
+        HouseBlJpaEntity noMatch = newJpa(JobDiv.SEA, Bound.EXP);
+        noMatch.setPolCode("USNYC");
+        em.persist(match);
+        em.persist(noMatch);
+        em.flush();
+
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, "KRPUS", null, null, null);
+        PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).polCode()).isEqualTo("KRPUS");
+    }
+
+    @Test
+    @DisplayName("searchSummaries: etdFrom/etdTo 범위 필터 적용")
+    void searchSummaries_withEtdRangeFilter_returnsMatchingResults() {
+        HouseBlJpaEntity inRange = newJpa(JobDiv.SEA, Bound.EXP);
+        inRange.setEtd("20251201");
+        HouseBlJpaEntity beforeRange = newJpa(JobDiv.SEA, Bound.EXP);
+        beforeRange.setEtd("20251101");
+        HouseBlJpaEntity afterRange = newJpa(JobDiv.SEA, Bound.EXP);
+        afterRange.setEtd("20260101");
+        em.persist(inRange);
+        em.persist(beforeRange);
+        em.persist(afterRange);
+        em.flush();
+
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, null, null, "20251130", "20251231");
+        PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).etd()).isEqualTo("20251201");
+    }
+
+    @Test
+    @DisplayName("searchSummaries: 매칭 0건 → 빈 리스트(null 아님)")
+    void searchSummaries_zeroMatches_returnsEmptyPagedResult() {
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "NONEXISTENT", null, null, null, null, null, null, null);
+        PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).isNotNull().isEmpty();
+        assertThat(result.getTotalElements()).isZero();
     }
 }

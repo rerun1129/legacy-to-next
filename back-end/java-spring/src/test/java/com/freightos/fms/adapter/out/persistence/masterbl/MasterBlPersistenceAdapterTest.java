@@ -5,6 +5,8 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
+import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
@@ -200,5 +202,30 @@ class MasterBlPersistenceAdapterTest {
         order.verify(masterBlSeaRepository).findByMasterBlMasterBlId(10L);
         order.verify(masterBlAirRepository).findByMasterBlMasterBlId(10L);
         order.verify(masterBlRepository).deleteById(10L);
+    }
+
+    // ── searchMasterBls ───────────────────────────────────────
+
+    @Test
+    @DisplayName("searchMasterBls: repository.searchByFilter 결과를 도메인으로 변환하여 반환")
+    void searchMasterBls_delegatesToCustomRepositoryAndMapsResult() {
+        MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        MasterBlJpaEntity jpa = new MasterBlJpaEntity();
+        jpa.setJobDiv(MasterBlJobDiv.SEA);
+        MasterBlSea expected = MasterBlSea.create(Bound.EXP);
+        PagedResult<MasterBlJpaEntity> repoResult = PagedResult.of(List.of(jpa), 1L, 1, 0, 10);
+
+        given(masterBlRepository.searchByFilter(filter, pageRequest)).willReturn(repoResult);
+        given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
+        given(masterBlMapper.toSeaDomain(eq(jpa), any())).willReturn(expected);
+
+        PagedResult<MasterBl> result = adapter.searchMasterBls(filter, pageRequest);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(expected);
+        assertThat(result.getTotalElements()).isEqualTo(1L);
+        then(masterBlRepository).should().searchByFilter(filter, pageRequest);
     }
 }

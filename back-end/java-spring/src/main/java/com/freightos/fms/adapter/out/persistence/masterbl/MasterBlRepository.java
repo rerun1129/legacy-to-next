@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface MasterBlRepository extends JpaRepository<MasterBlJpaEntity, Long> {
+public interface MasterBlRepository extends JpaRepository<MasterBlJpaEntity, Long>, MasterBlRepositoryCustom {
 
     Optional<MasterBlJpaEntity> findByMblNo(String mblNo);
 
