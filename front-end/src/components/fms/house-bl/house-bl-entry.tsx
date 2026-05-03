@@ -188,7 +188,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   return (
     <>
       <FormProvider {...form}>
-      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div className="page-head">
           <div className="page-head__title">
             <div className="page-head__title-icon"><FileText size={14} /></div>

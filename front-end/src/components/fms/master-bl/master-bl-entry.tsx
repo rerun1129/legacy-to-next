@@ -213,7 +213,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
   return (
     <FormProvider {...form}>
-    <form ref={formRef} onSubmit={form.handleSubmit(handleSave)}>
+    <form ref={formRef} onSubmit={form.handleSubmit(handleSave)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">
         <div className="page-head__title">
