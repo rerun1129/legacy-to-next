@@ -3,6 +3,7 @@ import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
+// NOTE: 이 패널의 cargo 수량/중량 필드는 house-bl-schema에 미포함 — 추후 스키마 확장 시 register 전환
 
 interface Props { variant?: AnyVariantConfig }
 

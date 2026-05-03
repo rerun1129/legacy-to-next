@@ -4,22 +4,39 @@ import { useRef, useState } from "react";
 
 interface Props {
   defaultValue?: string;
+  value?:        string;
+  onChange?:     (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onBlur?:       (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   placeholder?:  string;
   style?:        React.CSSProperties; // wrapper에 적용 (flex: 1, minHeight 등)
+  name?:         string;
 }
 
-export function LineNumberTextarea({ defaultValue = "", placeholder, style }: Props) {
-  const [value,   setValue]   = useState(String(defaultValue));
+export function LineNumberTextarea({ defaultValue = "", value, onChange, onBlur, placeholder, style, name }: Props) {
+  // controlled 모드: value prop이 있으면 사용, 없으면 내부 state
+  const [internalValue, setInternalValue] = useState(String(defaultValue));
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef   = useRef<HTMLDivElement>(null);
 
-  const lineCount = value.split("\n").length;
+  const controlled = value !== undefined;
+  const currentValue = controlled ? value : internalValue;
+  const lineCount = currentValue.split("\n").length;
 
   function syncScroll() {
     if (gutterRef.current && textareaRef.current) {
       gutterRef.current.scrollTop = textareaRef.current.scrollTop;
     }
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    if (!controlled) setInternalValue(e.target.value);
+    onChange?.(e);
+  }
+
+  function handleBlur(e: React.FocusEvent<HTMLTextAreaElement>) {
+    setFocused(false);
+    onBlur?.(e);
   }
 
   return (
@@ -62,12 +79,13 @@ export function LineNumberTextarea({ defaultValue = "", placeholder, style }: Pr
       {/* 실제 textarea */}
       <textarea
         ref={textareaRef}
-        value={value}
+        name={name}
+        value={currentValue}
         placeholder={placeholder}
-        onChange={e => setValue(e.target.value)}
+        onChange={handleChange}
         onScroll={syncScroll}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={handleBlur}
         style={{
           flex:       1,
           minWidth:   0,

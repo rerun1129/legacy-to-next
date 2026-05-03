@@ -1,8 +1,10 @@
+import { useFormContext } from "react-hook-form";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
@@ -29,6 +31,8 @@ const LEG_DATA: LegRow[] = [
 const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
 
 export function AirSchedulePanel({ variant }: Props) {
+  const { register } = useFormContext<HouseBlFormValues>();
+
   if (!variant) return null;
   const isExp      = variant.direction === "EXP";
   const panelScope = `air-schedule-panel.${variant.key}`;
@@ -40,8 +44,10 @@ export function AirSchedulePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label is-required">{isExp ? "Airline" : "Carrier"}</span>
           <div className="li__input" style={{ gap: 4 }}>
-            <input defaultValue={isExp ? "KE" : "OZ"} style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <input defaultValue={isExp ? "Korean Air" : "Asiana Airlines"} style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
+            <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+              {...register("airlineCode")} />
+            <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}
+              {...register("airlineName")} />
           </div>
         </div>
       ),

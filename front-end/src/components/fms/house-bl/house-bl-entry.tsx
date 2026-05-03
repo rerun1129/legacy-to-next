@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download } from "lucide-react";
@@ -15,22 +14,7 @@ import { EdiTab }      from "./tabs/edi-tab";
 import { OtherTab }    from "./tabs/other-tab";
 import { FreightTab }  from "./tabs/freight-tab";
 import { houseBlPort } from "@/lib/ports";
-
-// @hookform/resolvers 미설치로 zodResolver 없이 useForm 단독 사용. 검증은 submit 시 수동 호출.
-const HOUSE_BL_SCHEMA = z.object({
-  hbl:    z.string().max(35),
-  mbl:    z.string().max(35),
-  sType:  z.string(),
-  lType:  z.string(),
-  etd:    z.string().regex(/^\d{8}$/).or(z.literal("")).optional(),
-  eta:    z.string().regex(/^\d{8}$/).or(z.literal("")).optional(),
-  pol:    z.string().max(5).optional(),
-  pod:    z.string().max(5).optional(),
-  settle: z.enum(["PREPAID", "COLLECT"]),
-  expImp: z.enum(["EXP", "IMP"]),
-});
-
-type FormValues = z.infer<typeof HOUSE_BL_SCHEMA>;
+import type { HouseBlFormValues } from "./house-bl-schema";
 
 interface Props {
   variant: BLVariantConfig;
@@ -70,7 +54,7 @@ function renderMainTab(variant: BLVariantConfig) {
 }
 
 /** toolbar의 라벨명 → form field 이름 매핑 */
-const TOOLBAR_LABEL_TO_FIELD: Record<string, keyof FormValues> = {
+const TOOLBAR_LABEL_TO_FIELD: Record<string, keyof HouseBlFormValues> = {
   "HBL No":  "hbl",
   "HAWB No": "hbl",
   "MBL No":  "mbl",
@@ -87,11 +71,12 @@ export function HouseBLEntry({ variant, id }: Props) {
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const variantKey = variant.key;
 
   const defaults = getToolbarDefaults(variant);
 
   // form 초기화 - defaultValues는 DEFAULTS_SEA/DEFAULTS_AIR 기반
-  const form = useForm<FormValues>({
+  const form = useForm<HouseBlFormValues>({
     defaultValues: {
       hbl:    defaults["HBL No"] ?? defaults["HAWB No"] ?? "",
       mbl:    defaults["MBL No"] ?? defaults["MAWB No"] ?? "",
@@ -103,6 +88,22 @@ export function HouseBLEntry({ variant, id }: Props) {
       pod:    "",
       settle: "PREPAID",
       expImp: variant.direction,
+      // Party
+      shipperCode: "", shipperName: "", shipperAddr: "",
+      consigneeCode: "", consigneeName: "", consigneeAddr: "",
+      notifyCode: "", notifyName: "", notifyAddr: "",
+      // Trade
+      paymentType: "", paymentPlace: "",
+      // Schedule (SEA)
+      linerCode: "", linerName: "",
+      vesselCode: "", vesselName: "", voyNo: "", onboardDate: "",
+      // Air Schedule
+      airlineCode: "", airlineName: "", flightNo: "", flightDate: "",
+      // Marks & Description
+      marksAndNumbers: "", descriptionOfGoods: "", natureOfGoods: "",
+      // Freight rows
+      freightSelling: [],
+      freightBuying: [],
     },
   });
 
@@ -132,7 +133,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   }, [detail, form]);
 
   const mutation = useMutation({
-    mutationFn: (data: FormValues) => {
+    mutationFn: (data: HouseBlFormValues) => {
       const req = {
         jobDiv: variant.mode as 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL',
         bound: variant.direction as 'EXP' | 'IMP',
@@ -175,104 +176,106 @@ export function HouseBLEntry({ variant, id }: Props) {
     { key: "freight", label: "Freight" },
   ];
 
-  function handleSubmit(raw: FormValues) {
+  function handleSubmit(raw: HouseBlFormValues) {
     mutation.mutate(raw);
   }
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)}>
-      {/* Page header */}
-      <div className="page-head">
-        <div className="page-head__title">
-          <div className="page-head__title-icon"><FileText size={14} /></div>
-          {getPageTitle(variant, 'House', 'Entry')}
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        {/* Page header */}
+        <div className="page-head">
+          <div className="page-head__title">
+            <div className="page-head__title-icon"><FileText size={14} /></div>
+            {getPageTitle(variant, 'House', 'Entry')}
+          </div>
+          <div className="page-head__meta">
+            <span className="badge badge--draft">DRAFT</span>
+          </div>
+          <div className="page-head__actions">
+            <button
+              type="button"
+              className="btn btn--sm btn--danger"
+              onClick={() => {
+                if (!isEdit) return;
+                if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
+              }}
+              disabled={!isEdit || deleteMutation.isPending}
+            >
+              <Trash2 size={12} />Delete
+            </button>
+            <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
+            <button type="button" className="btn btn--sm"><Download size={12} />Export</button>
+            {variant.printDocs.length > 0 && (
+              <button type="button" className="btn btn--sm btn--success"><Printer size={12} />Print</button>
+            )}
+            <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
+            <button
+              type="submit"
+              className="btn btn--sm btn--primary"
+              disabled={mutation.isPending}
+            >
+              <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
-        <div className="page-head__meta">
-          <span className="badge badge--draft">DRAFT</span>
-        </div>
-        <div className="page-head__actions">
-          <button
-            type="button"
-            className="btn btn--sm btn--danger"
-            onClick={() => {
-              if (!isEdit) return;
-              if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
-            }}
-            disabled={!isEdit || deleteMutation.isPending}
-          >
-            <Trash2 size={12} />Delete
-          </button>
-          <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
-          <button type="button" className="btn btn--sm"><Download size={12} />Export</button>
-          {variant.printDocs.length > 0 && (
-            <button type="button" className="btn btn--sm btn--success"><Printer size={12} />Print</button>
-          )}
-          <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
-          <button
-            type="submit"
-            className="btn btn--sm btn--primary"
-            disabled={mutation.isPending}
-          >
-            <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
-          </button>
-        </div>
-      </div>
 
-      {/* Toolbar */}
-      <div className="toolbar">
-        {toolbarFields.map((f) => {
-          const fieldName = TOOLBAR_LABEL_TO_FIELD[f];
-          const isRequired = REQUIRED_TOOLBAR_LABELS.has(f);
-          return (
-            <div key={f} className={`field${isRequired ? " is-required" : ""}`}>
-              <div className={`field__label${isRequired ? " is-required" : ""}`}>{f}</div>
-              <div className="field__input">
-                {fieldName ? (
-                  <>
-                    <input
-                      {...form.register(fieldName)}
-                      placeholder={f}
-                    />
-                    {form.formState.errors[fieldName] && (
-                      <span className="field__error">
-                        {form.formState.errors[fieldName]?.message}
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  // form과 미연결 필드(Shipment Type, Service Term 등)는 기존 방식 유지
-                  // TODO: 후속 작업 - 추가 필드 연결
-                  <input defaultValue={defaults[f] ?? ""} placeholder={f} />
-                )}
+        {/* Toolbar */}
+        <div className="toolbar">
+          {toolbarFields.map((f) => {
+            const fieldName = TOOLBAR_LABEL_TO_FIELD[f];
+            const isRequired = REQUIRED_TOOLBAR_LABELS.has(f);
+            return (
+              <div key={f} className={`field${isRequired ? " is-required" : ""}`}>
+                <div className={`field__label${isRequired ? " is-required" : ""}`}>{f}</div>
+                <div className="field__input">
+                  {fieldName ? (
+                    <>
+                      <input
+                        {...form.register(fieldName)}
+                        placeholder={f}
+                      />
+                      {form.formState.errors[fieldName] && (
+                        <span className="field__error">
+                          {form.formState.errors[fieldName]?.message}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    // form과 미연결 필드(Shipment Type, Service Term 등)는 기존 방식 유지
+                    // TODO: 후속 작업 - 추가 필드 연결
+                    <input defaultValue={defaults[f] ?? ""} placeholder={f} />
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Tabbar */}
-      <div className="tabbar">
-        {tabs.map((t) => (
-          <button
-            type="button"
-            key={t.key}
-            className={`tabbar__tab${tab === t.key ? " is-active" : ""}`}
-            onClick={() => handleTabChange(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-        <div className="tabbar__spacer" />
-        <div className="tabbar__meta">
-          <span>Last saved: 10 min ago</span>
+            );
+          })}
         </div>
-      </div>
 
-      {/* Tab content */}
-      {tab === "main"    && renderMainTab(variant)}
-      {tab === "edi"     && <EdiTab variant={variant} />}
-      {tab === "other"   && <OtherTab />}
-      {tab === "freight" && <FreightTab />}
-    </form>
+        {/* Tabbar */}
+        <div className="tabbar">
+          {tabs.map((t) => (
+            <button
+              type="button"
+              key={t.key}
+              className={`tabbar__tab${tab === t.key ? " is-active" : ""}`}
+              onClick={() => handleTabChange(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+          <div className="tabbar__spacer" />
+          <div className="tabbar__meta">
+            <span>Last saved: 10 min ago</span>
+          </div>
+        </div>
+
+        {/* Tab content */}
+        {tab === "main"    && renderMainTab(variant)}
+        {tab === "edi"     && <EdiTab variant={variant} />}
+        {tab === "other"   && <OtherTab />}
+        {tab === "freight" && <FreightTab />}
+      </form>
+    </FormProvider>
   );
 }

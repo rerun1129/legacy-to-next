@@ -1,8 +1,11 @@
+import type React from "react";
+import { useFormContext } from "react-hook-form";
 import { Search } from "lucide-react";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
@@ -21,18 +24,6 @@ function SchedField({ label, value, req, type = "text" }: { label: string; value
   );
 }
 
-function LinerField() {
-  return (
-    <div className="li">
-      <span className="li__label is-required">Liner</span>
-      <div className="li__input" style={{ gap: 4 }}>
-        <input placeholder="Code" defaultValue="COSCO" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-        <input defaultValue="COSCO SHIPPING" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
-      </div>
-    </div>
-  );
-}
-
 function LcnField({ label, req, code, name }: { label: string; req?: boolean; code: string; name: string }) {
   return (
     <div className="lcn">
@@ -45,22 +36,6 @@ function LcnField({ label, req, code, name }: { label: string; req?: boolean; co
     </div>
   );
 }
-
-// ── Field item 정의 ─────────────────────────────────────────
-const LINER_ITEMS: FieldItemDef[] = [
-  { key: "liner",    render: () => <LinerField /> },
-  { key: "vessel",   render: () => <SchedField label="Vessel"   value="COSCO EXCELLENCE" req /> },
-  { key: "voyage",   render: () => <SchedField label="Voyage"   value="0412E" req /> },
-  { key: "etd",      render: () => <SchedField label="ETD"      value="2026-04-24" req type="date" /> },
-  { key: "eta",      render: () => <SchedField label="ETA"      value="2026-05-08" req type="date" /> },
-  { key: "on-board", render: () => <SchedField label="On Board" value="" type="date" /> },
-];
-
-const PORT_ITEMS: FieldItemDef[] = [
-  { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
-  { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
-  { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
-];
 
 function IssueSection({ issueFields, panelScope }: { issueFields: string[]; panelScope: string }) {
   const issueItems: FieldItemDef[] = issueFields.map(f => ({
@@ -85,16 +60,68 @@ function DoDateSection() {
   return <SchedField label="D/O Date" value="" type="date" />;
 }
 
+// ── RHF-bound liner row ─────────────────────────────────────
+function LinerRow({ codeProps, nameProps }: { codeProps: React.InputHTMLAttributes<HTMLInputElement>; nameProps: React.InputHTMLAttributes<HTMLInputElement> }) {
+  return (
+    <div className="li">
+      <span className="li__label is-required">Liner</span>
+      <div className="li__input" style={{ gap: 4 }}>
+        <input placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...codeProps} />
+        <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} {...nameProps} />
+      </div>
+    </div>
+  );
+}
+
+function VesselRow({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
+  return (
+    <div className="li">
+      <span className="li__label is-required">Vessel</span>
+      <div className="li__input">
+        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
+      </div>
+    </div>
+  );
+}
+
+function VoyageRow({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
+  return (
+    <div className="li">
+      <span className="li__label is-required">Voyage</span>
+      <div className="li__input">
+        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
+      </div>
+    </div>
+  );
+}
+
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
+  const { register } = useFormContext<HouseBlFormValues>();
+
   if (!variant) return null;
   const panelScope = `schedule-panel.${variant.key}`;
+
+  const PORT_ITEMS: FieldItemDef[] = [
+    { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
+    { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
+    { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
+  ];
+
+  const linerItems: FieldItemDef[] = [
+    { key: "liner",    render: () => <LinerRow codeProps={register("linerCode")} nameProps={register("linerName")} /> },
+    { key: "vessel",   render: () => <VesselRow inputProps={register("vesselName")} /> },
+    { key: "voyage",   render: () => <VoyageRow inputProps={register("voyNo")} /> },
+    { key: "etd",      render: () => <SchedField label="ETD"      value="2026-04-24" req type="date" /> },
+    { key: "eta",      render: () => <SchedField label="ETA"      value="2026-05-08" req type="date" /> },
+    { key: "on-board", render: () => <SchedField label="On Board" value="" type="date" /> },
+  ];
 
   const fields: FieldWidgetDef[] = [
     {
       key:   "liner",
       label: "Liner & Vessel",
-      render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={LINER_ITEMS} />,
+      render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={linerItems} />,
     },
     {
       key:   "ports",
