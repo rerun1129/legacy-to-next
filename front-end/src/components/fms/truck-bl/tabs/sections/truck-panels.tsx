@@ -2,7 +2,6 @@ import { useFormContext, Controller } from "react-hook-form";
 import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { PanelDateInput }     from "@/components/shared/grid-cell-inputs";
-import { PackageField }       from "@/components/shared/panel-fields";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
@@ -67,17 +66,19 @@ type PartyDef = {
   role:    string;
   btn:     string | null;
   codeKey: keyof HouseBlFormValues;
+  nameKey: keyof HouseBlFormValues;
+  addrKey: keyof HouseBlFormValues;
 };
 
 const TRUCK_PARTIES: PartyDef[] = [
-  { key: "shipper",     role: "SHIPPER",     btn: null,           codeKey: "shipperCode"    },
-  { key: "consignee",   role: "CONSIGNEE",   btn: "To Order",     codeKey: "consigneeCode"  },
-  { key: "notify",      role: "NOTIFY",      btn: "Same as Cne.", codeKey: "notifyCode"     },
-  { key: "doc-partner", role: "DOC PARTNER", btn: null,           codeKey: "docPartnerCode" },
+  { key: "shipper",     role: "SHIPPER",     btn: null,           codeKey: "shipperCode",    nameKey: "shipperName",    addrKey: "shipperAddr"       },
+  { key: "consignee",   role: "CONSIGNEE",   btn: "To Order",     codeKey: "consigneeCode",  nameKey: "consigneeName",  addrKey: "consigneeAddr"     },
+  { key: "notify",      role: "NOTIFY",      btn: "Same as Cne.", codeKey: "notifyCode",     nameKey: "notifyName",     addrKey: "notifyAddr"        },
+  { key: "doc-partner", role: "DOC PARTNER", btn: null,           codeKey: "docPartnerCode", nameKey: "docPartnerName", addrKey: "docPartnerAddress" },
 ];
 
 function TruckPartyBlock({ party }: { party: PartyDef }) {
-  const { register, setValue } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
   return (
     <div className="party-block">
       <div className="party-block__head">
@@ -87,8 +88,7 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
             <input {...register(party.codeKey)} placeholder="Code" />
             <Search size={12} className="party-cn__icon" />
           </div>
-          {/* Company name은 별도 RHF 필드 없음 — 주소 첫 줄에 포함되는 자유 텍스트 */}
-          <input className="party-cn__name" placeholder="Company Name" />
+          <input {...register(party.nameKey)} className="party-cn__name" placeholder="Company Name" />
         </div>
         <div className="party-block__head-actions">
           {party.btn && <button className="party-block__head-btn">{party.btn}</button>}
@@ -101,11 +101,20 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
           </button>
         </div>
       </div>
-      {/*
-        LineNumberTextarea는 onChange: (value: string) 시그니처를 사용하는 자체 관리 컴포넌트.
-        RHF register와 직접 연결 불가 — 비제어 상태 유지.
-      */}
-      <LineNumberTextarea placeholder="Address (free text)" style={{ height: 100 }} />
+      <Controller
+        control={control}
+        name={party.addrKey}
+        render={({ field }) => (
+          <LineNumberTextarea
+            value={field.value as string}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            name={field.name}
+            placeholder="Address (free text)"
+            style={{ height: 100 }}
+          />
+        )}
+      />
     </div>
   );
 }
@@ -218,12 +227,34 @@ export function TruckSchedulePanel() {
 }
 
 // ── Cargo ──────────────────────────────────────────────────
-/*
-  PackageField는 qty/unit을 defaultValue로만 받는 비제어 컴포넌트.
-  register spread 불가 — 비제어 상태 유지.
-*/
+function TruckPackageField() {
+  const { register } = useFormContext<HouseBlFormValues>();
+  return (
+    <div className="li">
+      <span className="li__label">Package</span>
+      <div className="li__input" style={{ display: "flex", gap: 4 }}>
+        <input
+          type="number"
+          step="1"
+          {...register("pkgQty")}
+          style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}
+        />
+        <select {...register("pkgUnit")} style={WT_SEL}>
+          <option value="CTN">CTN</option>
+          <option value="PKG">PKG</option>
+          <option value="BAG">BAG</option>
+          <option value="PLT">PLT</option>
+          <option value="BOX">BOX</option>
+          <option value="PCS">PCS</option>
+          <option value="ROL">ROL</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
 const CARGO_ITEMS: FieldItemDef[] = [
-  { key: "package",   render: () => <PackageField qty="" unit="" /> },
+  { key: "package",   render: () => <TruckPackageField /> },
   { key: "gw",        render: () => <GWField /> },
   { key: "cbm",       render: () => <LiField label="CBM"        numeric registerKey="cbm" /> },
   { key: "charge-wt", render: () => <LiField label="Charge W/T" numeric registerKey="chargeWeightKg" /> },
@@ -241,48 +272,40 @@ export function TruckCargoPanel() {
 }
 
 // ── Document ───────────────────────────────────────────────
-function TruckDocumentItems() {
-  const { register, control } = useFormContext<HouseBlFormValues>();
-  const ITEMS: FieldItemDef[] = [
-    { key: "pickup-date", render: () => (
-      <div className="li">
-        <span className="li__label">Pick-up Date</span>
-        <div className="li__input">
-          <Controller
-            control={control}
-            name="pickupDate"
-            render={({ field }) => (
-              <PanelDateInput
-                value={field.value as string}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                ref={field.ref}
-              />
-            )}
-          />
-        </div>
-      </div>
-    )},
-    { key: "trucker", render: () => (
-      <div className="lcn" style={{ marginBottom: 4 }}>
-        <span className="lcn__label">Trucker</span>
-        <div className="lcn__code">
-          <input {...register("truckerCode")} placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-        </div>
-        <input className="lcn__name" {...register("truckerName")} placeholder="Trucker Name" />
-      </div>
-    )},
-    { key: "trucker-pic", render: () => <LiField label="Trucker PIC" registerKey="truckerPic" /> },
-  ];
-  return <FieldItemGrid itemScope="truck-document-panel" items={ITEMS} />;
-}
-
 export function TruckDocumentPanel() {
+  const { register, control } = useFormContext<HouseBlFormValues>();
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Document</span></div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <TruckDocumentItems />
+      <div className="panel__body" style={{ overflow: "auto", flex: 1, padding: "8px 0" }}>
+        {/* Pick-up Date */}
+        <div className="li">
+          <span className="li__label">Pick-up Date</span>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="pickupDate"
+              render={({ field }) => (
+                <PanelDateInput
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
+            />
+          </div>
+        </div>
+        {/* Trucker */}
+        <div className="lcn" style={{ marginBottom: 4 }}>
+          <span className="lcn__label">Trucker</span>
+          <div className="lcn__code">
+            <input {...register("truckerCode")} placeholder="Code" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+          </div>
+          <input className="lcn__name" {...register("truckerName")} placeholder="Trucker Name" />
+        </div>
+        {/* Trucker PIC */}
+        <LiField label="Trucker PIC" registerKey="truckerPic" />
       </div>
     </div>
   );
