@@ -4,7 +4,7 @@ import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 
 interface Props { variant?: AnyVariantConfig }
 
-const ROWS = [];
+const ROWS: { no: number; hbl: string; shipper: string; consignee: string; doc: string; pkg: number; unit: string; gw: number; cbm: number; }[] = [];
 
 export function MasterHouseBLGrid({ variant }: Props) {
   if (!variant) return null;
