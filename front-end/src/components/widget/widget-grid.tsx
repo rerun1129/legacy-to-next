@@ -56,7 +56,15 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
     () => registry.map(d => ({ key: d.key, ...d.defaultPosition })),
     [registry]
   );
-  const layout      = getLayout(userScope, defaults);
+  const rawLayout = getLayout(userScope, defaults);
+
+  // registry에 추가된 새 위젯 key가 저장된 레이아웃(visible+hidden 모두)에 없으면 visible에 자동 포함
+  const layout = useMemo(() => {
+    const known = new Set([...rawLayout.visible.map(w => w.key), ...rawLayout.hidden]);
+    const missing = defaults.filter(d => !known.has(d.key));
+    if (!missing.length) return rawLayout;
+    return { ...rawLayout, visible: [...rawLayout.visible, ...missing] };
+  }, [rawLayout, defaults]);
 
   const initLayoutRef = useRef(initLayout);
   useLayoutEffect(() => { initLayoutRef.current = initLayout; });
