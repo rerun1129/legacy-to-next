@@ -6,7 +6,6 @@ import { Save, Trash2, Truck, RotateCcw } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }  from "./tabs/main-truck";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
-import { useDraftPersist } from "@/lib/use-draft-persist";
 import { createEmptyTruckBlFormValues } from "./truck-bl-defaults";
 
 // label → RHF 필드 경로 매핑 (toolbar 5개)
@@ -23,11 +22,8 @@ export function TruckBLEntry() {
   const form = useForm<HouseBlFormValues>({
     defaultValues: createEmptyTruckBlFormValues(),
   });
-  const { clearDraft } = useDraftPersist(form, "draft:truck-bl:single:new");
-
   function handleResetEntry() {
     form.reset(createEmptyTruckBlFormValues());
-    clearDraft();
   }
 
   return (

@@ -161,6 +161,11 @@ export const SEA_DETAIL_SCHEMA = z.object({
   noOfContainerOrPackages: z.string().optional(),
   blType:                  z.string().optional(),
   deliveryCode:            z.string().max(5).optional(),
+  polName:                 z.string().optional(),
+  podName:                 z.string().optional(),
+  deliveryName:            z.string().optional(),
+  freightTermDetail:       z.string().optional(),
+  signature:               z.string().optional(),
 });
 
 // ── Root form schema ──────────────────────────────────────
@@ -206,9 +211,13 @@ export const HOUSE_BL_SCHEMA = z.object({
 
   // performance
   actualCustomerCode: z.string().max(20).optional(),
+  actualCustomerName: z.string().optional(),
   operatorCode:       z.string().optional(),
+  operatorName:       z.string().optional(),
   teamCode:           z.string().optional(),
+  teamName:           z.string().optional(),
   salesManCode:       z.string().optional(),
+  salesManName:       z.string().optional(),
 
   // trade (Coder: paymentType/paymentPlace 추가)
   masterBlId:   z.string().optional(),
@@ -218,6 +227,14 @@ export const HOUSE_BL_SCHEMA = z.object({
   hsCode:       z.string().optional(),
   paymentType:  z.string().optional(),
   paymentPlace: z.string().optional(),
+  currency:     z.string().optional(),
+  otherTerm:    z.string().optional(),
+  dvCarriage:   z.string().optional(),
+  insurance:    z.string().optional(),
+  dvCustoms:    z.string().optional(),
+  accountInfo:  z.string().optional(),
+  fhd:          z.string().optional(),
+  coLoad:       z.string().optional(),
 
   // truck toolbar
   truckBlNo:        z.string().optional(),

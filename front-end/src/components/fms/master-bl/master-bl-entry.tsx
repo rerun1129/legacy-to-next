@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { useDraftPersist } from "@/lib/use-draft-persist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -61,11 +60,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
-  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:master-bl:${variantKey}:${id ?? "new"}`);
-
-  // 수정 모드: draft가 없을 때만 서버 데이터로 reset (draft 우선)
   useEffect(() => {
-    if (!detail || hasDraft()) return;
+    if (!detail) return;
     form.reset({
       ...createEmptyMasterBlFormValues(),
       jobDiv: detail.jobDiv,
@@ -85,7 +81,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       cbm: detail.cbm ?? undefined,
       operatorCode: detail.operatorCode ?? "",
     });
-  }, [detail, form, hasDraft]);
+  }, [detail, form]);
 
   const mutation = useMutation({
     mutationFn: (data: MasterBlFormValues) => {
@@ -124,7 +120,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         : masterBlPort.create(req);
     },
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
       router.push(`/fms/master-bl/${variantKey}/list`);
     },
@@ -133,7 +128,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
       form.reset({
         ...createEmptyMasterBlFormValues(),
@@ -191,7 +185,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       jobDiv: variant.mode,
       bound: variant.direction ?? "EXP",
     });
-    clearDraft();
     formRef.current?.reset();
   }
 

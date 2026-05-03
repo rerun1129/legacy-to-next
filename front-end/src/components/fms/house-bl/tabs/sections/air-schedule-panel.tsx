@@ -1,4 +1,5 @@
-import { useFormContext } from "react-hook-form";
+import type React from "react";
+import { useFormContext, type FieldPath } from "react-hook-form";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
@@ -25,6 +26,13 @@ const LEG_COLS: GridColumn<LegRow>[] = [
 const LEG_DATA: LegRow[] = [];
 
 const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
+
+// 라벨 → RHF 필드명 매핑 (Air Issue Information 섹션)
+const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
+  "Issue Date":  "seaDetail.issueDate",
+  "Issue Place": "seaDetail.issuePlace",
+  "Signature":   "seaDetail.signature",
+};
 
 export function AirSchedulePanel({ variant }: Props) {
   const { register } = useFormContext<HouseBlFormValues>();
@@ -54,27 +62,30 @@ export function AirSchedulePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label is-required">Departure</span>
           <div className="li__input" style={{ gap: 4 }}>
-            <input defaultValue="" style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <input defaultValue="" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
+            <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register("pol")} />
+            <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} {...register("polName")} />
           </div>
         </div>
       ),
     },
   ];
 
-  const issueItems: FieldItemDef[] = variant.issueFields.map(f => ({
-    key:    f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
-    render: () => (
-      <div className="li">
-        <span className="li__label">{f}</span>
-        <div className="li__input">
-          {f.includes("Date")
-            ? <PanelDateInput defaultValue={""} />
-            : <input defaultValue={""} style={LI_ST} />}
+  const issueItems: FieldItemDef[] = variant.issueFields.map(f => {
+    const fieldName = AIR_ISSUE_LABEL_TO_FIELD[f];
+    return {
+      key:    f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+      render: () => (
+        <div className="li">
+          <span className="li__label">{f}</span>
+          <div className="li__input">
+            {f.includes("Date")
+              ? <PanelDateInput {...(fieldName ? register(fieldName) : {})} />
+              : <input style={LI_ST} {...(fieldName ? register(fieldName) : {})} />}
+          </div>
         </div>
-      </div>
-    ),
-  }));
+      ),
+    };
+  });
 
   const fields: FieldWidgetDef[] = [
     {

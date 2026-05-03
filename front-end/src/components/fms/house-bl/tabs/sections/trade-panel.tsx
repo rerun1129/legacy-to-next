@@ -1,33 +1,53 @@
 import type React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, type FieldPath } from "react-hook-form";
 import { Search } from "lucide-react";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
-function LiField({ label, value, req }: { label: string; value: string; req?: boolean }) {
+function LiField({
+  label,
+  name,
+  req,
+}: {
+  label: string;
+  name?: FieldPath<HouseBlFormValues>;
+  req?: boolean;
+}) {
+  const { register } = useFormContext<HouseBlFormValues>();
+  const registerProps = name ? register(name) : {};
   return (
     <div className="li">
       <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
       <div className="li__input">
-        <input defaultValue={value} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />
+        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...registerProps} />
       </div>
     </div>
   );
 }
 
-function LcnField({ label, code, name }: { label: string; code: string; name: string }) {
+function LcnField({
+  label,
+  req,
+  codeField,
+  nameField,
+}: {
+  label: string;
+  req?: boolean;
+  codeField: FieldPath<HouseBlFormValues>;
+  nameField: FieldPath<HouseBlFormValues>;
+}) {
+  const { register } = useFormContext<HouseBlFormValues>();
   return (
     <div className="lcn">
-      <span className="lcn__label is-required">{label}</span>
+      <span className={`lcn__label${req ? " is-required" : ""}`}>{label}</span>
       <div className="lcn__code" style={{ position: "relative" }}>
-        <input defaultValue={code} style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+        <input style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register(codeField)} />
         <Search size={12} className="lcn__icon" />
       </div>
-      <input className="lcn__name" defaultValue={name} placeholder="Name" />
+      <input className="lcn__name" placeholder="Name" {...register(nameField)} />
     </div>
   );
 }
@@ -55,22 +75,22 @@ function PaymentPlaceField({ inputProps }: { inputProps: React.InputHTMLAttribut
   );
 }
 
-const PERF_ITEMS: FieldItemDef[] = [
-  { key: "customer", render: () => <LcnField label="Actual Customer" code="" name="" /> },
-  { key: "sales",    render: () => <LcnField label="Sales Man"       code="" name="" /> },
-  { key: "operator", render: () => <LcnField label="Operator"        code="" name="" /> },
-  { key: "team",     render: () => <LcnField label="Team"            code="" name="" /> },
-];
-
 export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
   const { register } = useFormContext<HouseBlFormValues>();
   const panelScope = variant ? `trade-panel.${variant.key}` : "trade-panel";
 
   const tradeTermItems: FieldItemDef[] = [
-    { key: "incoterms",    render: () => <LiField label="Incoterms"    value="" req /> },
-    { key: "freight-term", render: () => <PaymentTypeField inputProps={{ ...register("paymentType"),  defaultValue: "" }} /> },
-    { key: "payable-at",   render: () => <PaymentPlaceField inputProps={{ ...register("paymentPlace"), defaultValue: "" }} /> },
-    { key: "co-load",      render: () => <LiField label="Co-Load"      value="" /> },
+    { key: "incoterms",    render: () => <LiField label="Incoterms"    name="incoterms" req /> },
+    { key: "freight-term", render: () => <PaymentTypeField inputProps={register("paymentType")} /> },
+    { key: "payable-at",   render: () => <PaymentPlaceField inputProps={register("paymentPlace")} /> },
+    { key: "co-load",      render: () => <LiField label="Co-Load"      name="coLoad" /> },
+  ];
+
+  const perfItems: FieldItemDef[] = [
+    { key: "customer", render: () => <LcnField label="Actual Customer" req codeField="actualCustomerCode" nameField="actualCustomerName" /> },
+    { key: "sales",    render: () => <LcnField label="Sales Man"       req codeField="salesManCode"       nameField="salesManName"       /> },
+    { key: "operator", render: () => <LcnField label="Operator"        req codeField="operatorCode"       nameField="operatorName"       /> },
+    { key: "team",     render: () => <LcnField label="Team"            req codeField="teamCode"           nameField="teamName"           /> },
   ];
 
   const fields: FieldWidgetDef[] = [
@@ -85,7 +105,7 @@ export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />Performance</div>
-          <FieldItemGrid itemScope={`${panelScope}.performance`} items={PERF_ITEMS} />
+          <FieldItemGrid itemScope={`${panelScope}.performance`} items={perfItems} />
         </>
       ),
     },

@@ -2,7 +2,6 @@
 
 import { useState }                                from "react";
 import { useForm, FormProvider }                  from "react-hook-form";
-import { useDraftPersist }                        from "@/lib/use-draft-persist";
 import { Save, Trash2, Package, Printer, RotateCcw } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
@@ -17,11 +16,9 @@ export function NonBLEntry() {
   });
 
   const { register } = methods;
-  const { clearDraft } = useDraftPersist(methods, "draft:non-bl:single:new");
 
   function handleResetEntry() {
     methods.reset(createEmptyNonBlFormValues());
-    clearDraft();
   }
 
   return (

@@ -6,7 +6,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search, RotateCcw } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { useDraftPersist } from "@/lib/use-draft-persist";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
@@ -110,10 +109,8 @@ export function HouseBLEntry({ variant, id }: Props) {
     enabled: isEdit,
   });
 
-  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:house-bl:${variant.key}:${id ?? "new"}`);
-
   useEffect(() => {
-    if (!detail || hasDraft()) return;
+    if (!detail) return;
     form.reset({
       ...createEmptyHouseBlFormValues(),
       hbl:    detail.hblNo ?? "",
@@ -127,7 +124,7 @@ export function HouseBLEntry({ variant, id }: Props) {
       settle: detail.freightTerm ?? "",
       expImp: detail.bound,
     });
-  }, [detail, form, hasDraft]);
+  }, [detail, form]);
 
   const mutation = useMutation({
     mutationFn: (data: HouseBlFormValues) => {
@@ -135,7 +132,6 @@ export function HouseBLEntry({ variant, id }: Props) {
       return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
     },
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       router.push(`/fms/house-bl/${variant.key}/list`);
     },
@@ -144,7 +140,6 @@ export function HouseBLEntry({ variant, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
       form.reset(createEmptyHouseBlFormValues());
       router.replace(`/fms/house-bl/${variant.key}/entry`);
@@ -169,7 +164,6 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   function handleResetEntry() {
     form.reset(createEmptyHouseBlFormValues());
-    clearDraft();
     formRef.current?.reset();
   }
 

@@ -130,7 +130,7 @@ export function TruckPartyPanel() {
 // ── Schedule ───────────────────────────────────────────────
 function TruckScheduleVesselDates() {
   const ITEMS: FieldItemDef[] = [
-    { key: "vessel", render: () => <LiField label="Vessel" readOnly /> },
+    { key: "vessel", render: () => <LiField label="Vessel" registerKey="vesselName" /> },
     /*
       PanelDateInput은 내부 상태를 직접 관리하는 비제어 컴포넌트.
       register spread 불가 — defaultValue="" 유지.
