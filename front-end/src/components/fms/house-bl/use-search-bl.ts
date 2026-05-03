@@ -13,7 +13,7 @@ interface FormValues {
   pol?: string;
   pod?: string;
   settle: 'PREPAID' | 'COLLECT';
-  expImp: 'EXP' | 'IMP';
+  expImp: 'EXP' | 'IMP' | null;
 }
 
 export function useSearchBl(form: UseFormReturn<FormValues>, variant: BLVariantConfig) {
