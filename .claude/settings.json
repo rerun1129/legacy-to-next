@@ -1,8 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(touch .claude/.review_skip)",
-      "Bash(cat .claude/.task_queue)"
+      "Bash(cat .claude/.task_queue)",
+      "Bash(echo backend > .claude/.coder_scope)",
+      "Bash(echo frontend > .claude/.coder_scope)",
+      "Bash(rm -f .claude/.coder_scope)"
     ]
   },
   "statusLine": {
@@ -10,14 +12,14 @@
     "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/statusline-command.sh'"
   },
   "hooks": {
-    "Stop": [
+    "PreToolUse": [
       {
-        "matcher": "",
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/hooks/invoke_reviewer.sh'",
-            "timeout": 1200
+            "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/hooks/restrict_coder_path.sh'",
+            "timeout": 10
           }
         ]
       }
