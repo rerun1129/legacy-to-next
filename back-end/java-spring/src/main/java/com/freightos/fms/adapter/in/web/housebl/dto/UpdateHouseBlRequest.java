@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.housebl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import java.math.BigDecimal;
@@ -28,7 +29,7 @@ public record UpdateHouseBlRequest(
         String etd,
         String eta,
         Integer pkgQty,
-        String pkgUnit,
+        WeightUnit pkgUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         String actualCustomerCode,

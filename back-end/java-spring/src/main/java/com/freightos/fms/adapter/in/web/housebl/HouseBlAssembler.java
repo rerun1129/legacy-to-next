@@ -87,7 +87,7 @@ public class HouseBlAssembler {
                 BlDate.of(req.etd()), BlDate.of(req.eta())
         );
         entity.updateCargoSummary(new CargoSummary(
-                Quantity.of(req.pkgQty()), WeightUnit.fromCode(req.pkgUnit()),
+                Quantity.of(req.pkgQty()), req.pkgUnit(),
                 Weight.of(req.grossWeightKg()), Volume.of(req.cbm())
         ));
         entity.assignOperator(
@@ -132,10 +132,10 @@ public class HouseBlAssembler {
         if (req.pkgQty() != null || req.pkgUnit() != null
                 || req.grossWeightKg() != null || req.cbm() != null) {
             entity.updateCargoSummary(new CargoSummary(
-                    req.pkgQty()        != null ? Quantity.of(req.pkgQty())          : entity.getPkgQty(),
-                    req.pkgUnit()       != null ? WeightUnit.fromCode(req.pkgUnit()) : entity.getPkgUnit(),
-                    req.grossWeightKg() != null ? Weight.of(req.grossWeightKg())     : entity.getGrossWeightKg(),
-                    req.cbm()           != null ? Volume.of(req.cbm())               : entity.getCbm()));
+                    req.pkgQty()        != null ? Quantity.of(req.pkgQty())      : entity.getPkgQty(),
+                    req.pkgUnit()       != null ? req.pkgUnit()                  : entity.getPkgUnit(),
+                    req.grossWeightKg() != null ? Weight.of(req.grossWeightKg()) : entity.getGrossWeightKg(),
+                    req.cbm()           != null ? Volume.of(req.cbm())           : entity.getCbm()));
         }
         if (req.operatorCode() != null || req.teamCode() != null || req.salesManCode() != null) {
             entity.assignOperator(
