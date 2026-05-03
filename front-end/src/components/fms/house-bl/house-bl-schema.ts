@@ -185,10 +185,12 @@ export const HOUSE_BL_SCHEMA = z.object({
   settlePartnerCode: z.string().max(20).optional(),
 
   // cargo summary
-  pkgQty:        z.string().optional(),
-  pkgUnit:       z.string().optional(),
-  grossWeightKg: z.string().optional(),
-  cbm:           z.string().optional(),
+  pkgQty:          z.string().optional(),
+  pkgUnit:         z.string().optional(),
+  grossWeightKg:   z.string().optional(),
+  cbm:             z.string().optional(),
+  rateClass:       z.string().optional(),
+  volumeWeightKg:  z.string().optional(),
 
   // performance
   actualCustomerCode: z.string().max(20).optional(),

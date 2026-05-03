@@ -34,6 +34,8 @@ export function createEmptyHouseBlFormValues(): HouseBlFormValues {
     pkgUnit: "",
     grossWeightKg: "",
     cbm: "",
+    rateClass: "",
+    volumeWeightKg: "",
     actualCustomerCode: "",
     actualCustomerName: "",
     operatorCode: "",

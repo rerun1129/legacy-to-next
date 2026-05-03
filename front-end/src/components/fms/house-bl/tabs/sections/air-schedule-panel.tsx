@@ -1,5 +1,5 @@
 import type React from "react";
-import { useFormContext, type FieldPath } from "react-hook-form";
+import { useFormContext, Controller, type FieldPath } from "react-hook-form";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
@@ -35,7 +35,7 @@ const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
 };
 
 export function AirSchedulePanel({ variant }: Props) {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
 
   if (!variant) return null;
   const isExp      = variant.direction === "EXP";
@@ -79,7 +79,20 @@ export function AirSchedulePanel({ variant }: Props) {
           <span className="li__label">{f}</span>
           <div className="li__input">
             {f.includes("Date")
-              ? <PanelDateInput {...(fieldName ? register(fieldName) : {})} />
+              ? fieldName
+                ? <Controller
+                    control={control}
+                    name={fieldName}
+                    render={({ field }) => (
+                      <PanelDateInput
+                        value={field.value as string}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                      />
+                    )}
+                  />
+                : <PanelDateInput />
               : <input style={LI_ST} {...(fieldName ? register(fieldName) : {})} />}
           </div>
         </div>

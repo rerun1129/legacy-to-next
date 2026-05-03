@@ -1,9 +1,10 @@
-import { PackageField } from "@/components/shared/panel-fields";
+"use client";
+
+import { useFormContext } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
-// NOTE: 이 패널의 cargo 수량/중량 필드는 house-bl-schema에 미포함 — 추후 스키마 확장 시 register 전환
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 
 interface Props { variant?: AnyVariantConfig }
 
@@ -13,45 +14,101 @@ const UNIT_SEL: React.CSSProperties = {
   border: "1px solid var(--border)", borderRadius: 4, background: "var(--surface-0)", color: "var(--ink)",
 };
 
-function LiField({ label, value, type = "text" }: { label: string; value: string; type?: string }) {
-  return (
-    <div className="li">
-      <span className="li__label">{label}</span>
-      <div className="li__input"><input type={type} step={type === "number" ? "any" : undefined} defaultValue={value} style={LI_ST} /></div>
-    </div>
-  );
-}
-
-function GWField() {
-  return (
-    <div className="li">
-      <span className="li__label">Gross W/T</span>
-      <div className="li__input" style={{ display: "flex", gap: 4 }}>
-        <input type="number" step="any" defaultValue="" style={{ ...LI_ST, flex: 1, width: undefined }} />
-        <select defaultValue="" style={UNIT_SEL}><option value=""></option><option>KGS</option><option>LBS</option></select>
-      </div>
-    </div>
-  );
-}
-
-const CARGO_ITEMS: FieldItemDef[] = [
-  { key: "packages",  render: () => <PackageField height={24} /> },
-  { key: "gross-wt",  render: () => <GWField /> },
-  { key: "volume-wt", render: () => <LiField label="Volume W/T" value="" type="number" /> },
-  { key: "charge-wt", render: () => <LiField label="Charge W/T" value="" type="number" /> },
-  { key: "rate-class", render: () => <LiField label="Rate Class" value="" /> },
-  { key: "cbm",       render: () => <LiField label="CBM"        value=""  type="number" /> },
-];
-
 export function AirCargoPanel({ variant }: Props) {
+  const { register } = useFormContext<HouseBlFormValues>();
   const panelScope = variant ? `air-cargo-panel.${variant.key}` : "air-cargo-panel";
+
+  const cargoItems: FieldItemDef[] = [
+    {
+      key: "packages",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Package</span>
+          <div className="li__input" style={{ display: "flex", gap: 4 }}>
+            <input
+              type="number"
+              step="1"
+              style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }}
+              {...register("pkgQty")}
+            />
+            <select style={UNIT_SEL} {...register("pkgUnit")}>
+              <option value=""></option>
+              <option>CTN</option><option>PKG</option><option>BAG</option>
+              <option>PLT</option><option>BOX</option><option>PCS</option><option>ROL</option>
+            </select>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "gross-wt",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Gross W/T</span>
+          <div className="li__input" style={{ display: "flex", gap: 4 }}>
+            <input
+              type="number"
+              step="any"
+              style={{ ...LI_ST, flex: 1, width: undefined }}
+              {...register("grossWeightKg")}
+            />
+            <select defaultValue="" style={UNIT_SEL}><option value=""></option><option>KGS</option><option>LBS</option></select>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "volume-wt",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Volume W/T</span>
+          <div className="li__input">
+            <input type="number" step="any" style={LI_ST} {...register("volumeWeightKg")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "charge-wt",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Charge W/T</span>
+          <div className="li__input">
+            <input type="number" step="any" style={LI_ST} {...register("chargeWeightKg")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "rate-class",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Rate Class</span>
+          <div className="li__input">
+            <input type="text" style={LI_ST} {...register("rateClass")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "cbm",
+      render: () => (
+        <div className="li">
+          <span className="li__label">CBM</span>
+          <div className="li__input">
+            <input type="number" step="any" style={LI_ST} {...register("cbm")} />
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   const fields: FieldWidgetDef[] = [
     {
       key:   "cargo",
       label: "Cargo",
       render: () => (
-        <FieldItemGrid itemScope={`${panelScope}.cargo`} items={CARGO_ITEMS} cols={1} shouldShowRowControls={false} />
+        <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} cols={1} shouldShowRowControls={false} />
       ),
     },
   ];

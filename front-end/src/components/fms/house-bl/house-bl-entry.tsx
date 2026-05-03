@@ -83,6 +83,7 @@ const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
   "Service Term":   "seaDetail.serviceTerm",
   "B/L Type":       "seaDetail.blType",
   "Master Ref":     "masterRefNo",
+  "Rate Class":     "rateClass",
 };
 
 const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type", "Settle"]);
