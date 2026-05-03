@@ -99,6 +99,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const variantKey = variant.key;
 
   const defaults = getToolbarDefaults(variant);
 
@@ -114,6 +115,20 @@ export function HouseBLEntry({ variant, id }: Props) {
       pod:    "",
       settle: "PREPAID",
       expImp: variant.direction,
+      // Party
+      shipperCode: "", shipperName: "", shipperAddr: "",
+      consigneeCode: "", consigneeName: "", consigneeAddr: "",
+      notifyCode: "", notifyName: "", notifyAddr: "",
+      // Trade
+      paymentType: "", paymentPlace: "",
+      // Schedule (SEA)
+      linerCode: "", linerName: "",
+      vesselCode: "", vesselName: "", voyNo: "", onboardDate: "",
+      // Air Schedule
+      airlineCode: "", airlineName: "", flightNo: "", flightDate: "",
+      // Marks & Description
+      marksAndNumbers: "", descriptionOfGoods: "", natureOfGoods: "",
+      // Freight / sub-entity rows
       itemHs:         [],
       freightSelling: [],
       freightBuying:  [],

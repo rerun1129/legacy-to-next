@@ -1,7 +1,11 @@
+import { useFormContext, Controller } from "react-hook-form";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function DescriptionPanel() {
+  const { control } = useFormContext<HouseBlFormValues>();
+
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
@@ -19,9 +23,19 @@ export function DescriptionPanel() {
             </select>
           </div>
         </div>
-        <LineNumberTextarea
-          defaultValue={""}
-          style={{ flex: 1, minHeight: 0 }}
+        <Controller
+          control={control}
+          name="descriptionOfGoods"
+          defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS\nSAID TO CONTAIN"}
+          render={({ field }) => (
+            <LineNumberTextarea
+              name={field.name}
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              style={{ flex: 1, minHeight: 0 }}
+            />
+          )}
         />
       </div>
     </div>

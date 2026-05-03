@@ -5,6 +5,7 @@ import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
+// NOTE: Reference Numbers / Additional Info 필드는 house-bl-schema 미포함 — 추후 스키마 확장 시 register 전환
 
 interface CoLoadRow {
   id: number;

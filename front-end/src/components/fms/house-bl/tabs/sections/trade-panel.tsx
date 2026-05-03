@@ -1,7 +1,10 @@
+import type React from "react";
+import { useFormContext } from "react-hook-form";
 import { Search } from "lucide-react";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
@@ -29,13 +32,28 @@ function LcnField({ label, code, name }: { label: string; code: string; name: st
   );
 }
 
-// ── Field item 정의 ─────────────────────────────────────────
-const TRADE_TERM_ITEMS: FieldItemDef[] = [
-  { key: "incoterms",    render: () => <LiField label="Incoterms"    value="" req /> },
-  { key: "freight-term", render: () => <LiField label="Freight Term" value="" req /> },
-  { key: "payable-at",   render: () => <LiField label="Payable At"   value="" /> },
-  { key: "co-load",      render: () => <LiField label="Co-Load"      value="" /> },
-];
+// ── RHF-bound fields ────────────────────────────────────────
+function PaymentTypeField({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
+  return (
+    <div className="li">
+      <span className="li__label is-required">Freight Term</span>
+      <div className="li__input">
+        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
+      </div>
+    </div>
+  );
+}
+
+function PaymentPlaceField({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
+  return (
+    <div className="li">
+      <span className="li__label">Payable At</span>
+      <div className="li__input">
+        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
+      </div>
+    </div>
+  );
+}
 
 const PERF_ITEMS: FieldItemDef[] = [
   { key: "customer", render: () => <LcnField label="Actual Customer" code="" name="" /> },
@@ -45,13 +63,21 @@ const PERF_ITEMS: FieldItemDef[] = [
 ];
 
 export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
+  const { register } = useFormContext<HouseBlFormValues>();
   const panelScope = variant ? `trade-panel.${variant.key}` : "trade-panel";
+
+  const tradeTermItems: FieldItemDef[] = [
+    { key: "incoterms",    render: () => <LiField label="Incoterms"    value="FOB"     req /> },
+    { key: "freight-term", render: () => <PaymentTypeField inputProps={{ ...register("paymentType"),  defaultValue: "Prepaid" }} /> },
+    { key: "payable-at",   render: () => <PaymentPlaceField inputProps={{ ...register("paymentPlace"), defaultValue: "ORIGIN" }} /> },
+    { key: "co-load",      render: () => <LiField label="Co-Load"      value="N" /> },
+  ];
 
   const fields: FieldWidgetDef[] = [
     {
       key:   "trade-terms",
       label: "Trade Terms",
-      render: () => <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={TRADE_TERM_ITEMS} />,
+      render: () => <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={tradeTermItems} />,
     },
     {
       key:   "performance",

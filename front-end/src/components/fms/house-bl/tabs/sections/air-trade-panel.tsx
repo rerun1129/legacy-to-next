@@ -1,6 +1,9 @@
+import type React from "react";
+import { useFormContext } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
@@ -16,25 +19,36 @@ function LiField({ label, value }: { label: string; value: string }) {
   );
 }
 
-const BASE_ITEMS: FieldItemDef[] = [
-  { key: "currency",     render: () => <LiField label="Currency"     value="" /> },
-  { key: "incoterms",   render: () => <LiField label="Incoterms"    value="" /> },
-  { key: "freight-term", render: () => <LiField label="Freight Term" value="" /> },
-  { key: "other-term",  render: () => <LiField label="Other Term"   value="" /> },
-  { key: "dv-carriage", render: () => <LiField label="D.V Carriage" value="" /> },
-  { key: "insurance",   render: () => <LiField label="Insurance"    value="" /> },
-  { key: "dv-customs",  render: () => <LiField label="D.V Customs"  value="" /> },
-  { key: "account-info", render: () => <LiField label="Account Info" value="" /> },
-];
+function FreightTermField({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
+  return (
+    <div className="li">
+      <span className="li__label">Freight Term</span>
+      <div className="li__input"><input style={LI_ST} {...inputProps} /></div>
+    </div>
+  );
+}
 
 const FHD_ITEM: FieldItemDef = { key: "fhd", render: () => <LiField label="F.H.D" value="" /> };
 
 export function AirTradePanel({ variant }: Props) {
+  const { register } = useFormContext<HouseBlFormValues>();
+
   if (!variant) return null;
   const panelScope = `air-trade-panel.${variant.key}`;
   const isImp      = variant.direction === "IMP";
 
-  const tradeItems: FieldItemDef[] = isImp ? [...BASE_ITEMS, FHD_ITEM] : BASE_ITEMS;
+  const baseItems: FieldItemDef[] = [
+    { key: "currency",     render: () => <LiField label="Currency"     value="USD" /> },
+    { key: "incoterms",   render: () => <LiField label="Incoterms"    value="DAP" /> },
+    { key: "freight-term", render: () => <FreightTermField inputProps={{ ...register("paymentType"), defaultValue: "Prepaid" }} /> },
+    { key: "other-term",  render: () => <LiField label="Other Term"   value="" /> },
+    { key: "dv-carriage", render: () => <LiField label="D.V Carriage" value="N.V.D." /> },
+    { key: "insurance",   render: () => <LiField label="Insurance"    value="NIL" /> },
+    { key: "dv-customs",  render: () => <LiField label="D.V Customs"  value="AS PER INV." /> },
+    { key: "account-info", render: () => <LiField label="Account Info" value="FREIGHT PREPAID" /> },
+  ];
+
+  const tradeItems: FieldItemDef[] = isImp ? [...baseItems, FHD_ITEM] : baseItems;
 
   const fields: FieldWidgetDef[] = [
     {

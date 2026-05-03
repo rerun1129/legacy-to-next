@@ -104,15 +104,20 @@ const ITEM_HS_SCHEMA = z.object({
 });
 
 // Freight Selling/Buying 공통 행
-const FREIGHT_ROW_SCHEMA = z.object({
+export const FREIGHT_ROW_SCHEMA = z.object({
   id:     z.number(),
   code:   z.string().optional(),
   desc:   z.string().optional(),
   qty:    z.string().optional(),
   unit:   z.string().optional(),
+  sell:   z.string().optional(),
+  buy:    z.string().optional(),
   amount: z.string().optional(),
   cur:    z.string().optional(),
+  remark: z.string().optional(),
 });
+
+export type FreightRow = z.infer<typeof FREIGHT_ROW_SCHEMA>;
 
 // Co-Load B/L 그리드 행
 const CO_LOAD_SCHEMA = z.object({
@@ -175,12 +180,18 @@ export const HOUSE_BL_SCHEMA = z.object({
   settle: z.enum(['PREPAID', 'COLLECT']),
   expImp: z.enum(['EXP', 'IMP']).nullable(),
 
-  // party fields
+  // party fields (Coder: name/addr 추가)
   shipperCode:      z.string().max(20).optional(),
+  shipperName:      z.string().optional(),
+  shipperAddr:      z.string().optional(),
   shipperAddress:   z.string().optional(),
   consigneeCode:    z.string().max(20).optional(),
+  consigneeName:    z.string().optional(),
+  consigneeAddr:    z.string().optional(),
   consigneeAddress: z.string().optional(),
   notifyCode:       z.string().max(20).optional(),
+  notifyName:       z.string().optional(),
+  notifyAddr:       z.string().optional(),
   notifyAddress:    z.string().optional(),
   docPartnerCode:   z.string().max(20).optional(),
   docPartnerAddress: z.string().optional(),
@@ -198,12 +209,14 @@ export const HOUSE_BL_SCHEMA = z.object({
   teamCode:           z.string().optional(),
   salesManCode:       z.string().optional(),
 
-  // trade
+  // trade (Coder: paymentType/paymentPlace 추가)
   masterBlId:   z.string().optional(),
   incoterms:    z.string().optional(),
   salesClass:   z.string().optional(),
   mainItemName: z.string().optional(),
   hsCode:       z.string().optional(),
+  paymentType:  z.string().optional(),
+  paymentPlace: z.string().optional(),
 
   // truck toolbar
   truckBlNo:        z.string().optional(),
@@ -229,6 +242,25 @@ export const HOUSE_BL_SCHEMA = z.object({
 
   // SEA detail
   seaDetail: SEA_DETAIL_SCHEMA.optional(),
+
+  // schedule fields (Coder)
+  linerCode:   z.string().optional(),
+  linerName:   z.string().optional(),
+  vesselCode:  z.string().optional(),
+  vesselName:  z.string().optional(),
+  voyNo:       z.string().optional(),
+  onboardDate: z.string().optional(),
+
+  // air schedule fields (Coder)
+  airlineCode: z.string().optional(),
+  airlineName: z.string().optional(),
+  flightNo:    z.string().optional(),
+  flightDate:  z.string().optional(),
+
+  // marks & description (Coder)
+  marksAndNumbers:    z.string().optional(),
+  descriptionOfGoods: z.string().optional(),
+  natureOfGoods:      z.string().optional(),
 
   // sub-entities
   desc:         DESC_SCHEMA.optional(),

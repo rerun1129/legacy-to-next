@@ -6,6 +6,7 @@ import { Plus, Minus } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import type { HouseBlFormValues } from "../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
+// NOTE: EDI Identifiers / Dangerous Goods / Filing Rules 필드는 house-bl-schema 미포함 — 추후 스키마 확장 시 register 전환
 
 // Korea Only 라이선스 (licenses 배열과 별개로 koreaLicenses로 관리)
 interface KoreaLicenseRow {

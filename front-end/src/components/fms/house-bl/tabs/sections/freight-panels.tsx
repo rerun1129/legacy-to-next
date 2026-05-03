@@ -1,60 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
-import { Search, Plus, Minus } from "lucide-react";
-import type { HouseBlFormValues } from "../../house-bl-schema";
+import { useMemo } from "react";
+import { useFormContext } from "react-hook-form";
+import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { HouseBlFormValues, FreightRow } from "@/components/fms/house-bl/house-bl-schema";
+// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 // ── Types ──────────────────────────────────────────────────
-interface FreightRow {
-  id: number;
-  code: string; desc: string; qty: string; unit: string; amount: string; cur: string;
-}
-
 interface AccountRow {
   id: number;
   docType: string; docNo: string; issueDate: string; amount: string; currency: string; status: string;
 }
 
-// ── Selling columns ────────────────────────────────────────
-const SELLING_COLS: GridColumn<FreightRow>[] = [
-  { key: "_no",    label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "code",   label: "Charge Code", isRequired: true,
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
-  { key: "desc",   label: "Description",
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "qty",    label: "Qty", className: "is-num",
-    render: (v) => <NumericCell defaultValue={String(v)} /> },
-  { key: "unit",   label: "Unit",
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "amount", label: "Amount",      className: "is-num", isRequired: true,
-    render: (v) => <NumericCell defaultValue={String(v)} /> },
-  { key: "cur",    label: "Currency",
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "_rem",   label: "Remark",      render: () => <input className="grid__cell-input" /> },
-];
 
-// ── Buying columns ─────────────────────────────────────────
-const BUYING_COLS: GridColumn<FreightRow>[] = [
-  { key: "_no",    label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "code",   label: "Charge Code", isRequired: true,
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
-  { key: "desc",   label: "Description",
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "qty",    label: "Qty", className: "is-num",
-    render: (v) => <NumericCell defaultValue={String(v)} /> },
-  { key: "unit",   label: "Unit",
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "amount", label: "Amount",      className: "is-num", isRequired: true,
-    render: (v) => <NumericCell defaultValue={String(v)} /> },
-  { key: "cur",    label: "Currency",
-    render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "_rem",   label: "Remark",      render: () => <input className="grid__cell-input" /> },
-];
 
 // ── Account columns ────────────────────────────────────────
 const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
@@ -68,7 +30,15 @@ const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
 
 const ACCOUNT_ROWS: AccountRow[] = [];
 
-const EMPTY_FREIGHT_ROW = { code: "", desc: "", qty: "", unit: "", amount: "", cur: "" };
+// ── Sample data ────────────────────────────────────────────
+const RATE_ROWS: FreightRow[] = [
+  { id: 1, code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
+  { id: 2, code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
+  { id: 3, code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
+  { id: 4, code: "LSF", desc: "Low Sulphur Fee",   qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
+  { id: 5, code: "THC", desc: "Terminal Handling", qty: "2 CONT", unit: "CONT", sell: "95.00",  buy: "80.00",  cur: "USD" },
+  { id: 6, code: "DOC", desc: "Documentation Fee", qty: "1 BL",  unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
+];
 
 // ── Rate input styles ──────────────────────────────────────
 const CUR_SELECT: React.CSSProperties = {
@@ -155,92 +125,74 @@ export function FreightRatePanel() {
 
 // ── Selling Panel ──────────────────────────────────────────
 export function FreightSellingPanel() {
-  const { control } = useFormContext<HouseBlFormValues>();
-  const { fields, append, remove } = useFieldArray({ control, name: "freightSelling" });
-  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+  const { register } = useFormContext<HouseBlFormValues>();
 
-  const selectedIdx = selectedKey !== null
-    ? fields.findIndex(f => f.id === selectedKey)
-    : -1;
-
-  function handleAdd() {
-    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
-    append({ ...EMPTY_FREIGHT_ROW, id: nextId });
-    setSelectedKey(null);
-  }
-
-  function handleRemove() {
-    if (fields.length === 0) return;
-    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    remove(targetIdx);
-    setSelectedKey(null);
-  }
+  const sellingCols: GridColumn<FreightRow>[] = useMemo(() => [
+    { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "code", label: "Charge Code", isRequired: true,
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightSelling.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
+    { key: "desc", label: "Description",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightSelling.${i}.desc`)} /> },
+    { key: "qty",  label: "Qty", className: "is-num",
+      render: (_, __, i) => <input type="number" step="any" className="grid__cell-input" {...register(`freightSelling.${i}.qty`)} /> },
+    { key: "unit", label: "Unit",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightSelling.${i}.unit`)} /> },
+    { key: "sell", label: "Rate", className: "is-num", isRequired: true,
+      render: (_, __, i) => <input type="number" step="any" className="grid__cell-input" {...register(`freightSelling.${i}.sell`)} /> },
+    { key: "_amt", label: "Amount", className: "is-num",
+      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.sell ?? "0") * 2).toFixed(2)} /> },
+    { key: "cur",  label: "Currency",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightSelling.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "_krw", label: "KRW Equiv.", className: "is-num",
+      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.sell ?? "0") * 2 * 1376.5).toFixed(0)} /> },
+    { key: "_rem", label: "Remark",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightSelling.${i}.remark`)} /> },
+  ], [register]);
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Selling / Debit</span>
-        <span className="panel__rowcount">{fields.length}</span>
-        <div className="panel__actions">
-          <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
-        </div>
       </div>
-      <GridList
-        columns={SELLING_COLS}
-        data={fields as unknown as FreightRow[]}
-        rowKey={(row) => row.id}
-        onRowClick={(row) => setSelectedKey(row.id)}
-        rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
-        style={{ flex: 1 }}
-      />
+      <GridList columns={sellingCols} data={RATE_ROWS} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
   );
 }
 
 // ── Buying Panel ───────────────────────────────────────────
 export function FreightBuyingPanel() {
-  const { control } = useFormContext<HouseBlFormValues>();
-  const { fields, append, remove } = useFieldArray({ control, name: "freightBuying" });
-  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+  const { register } = useFormContext<HouseBlFormValues>();
 
-  const selectedIdx = selectedKey !== null
-    ? fields.findIndex(f => f.id === selectedKey)
-    : -1;
-
-  function handleAdd() {
-    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
-    append({ ...EMPTY_FREIGHT_ROW, id: nextId });
-    setSelectedKey(null);
-  }
-
-  function handleRemove() {
-    if (fields.length === 0) return;
-    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    remove(targetIdx);
-    setSelectedKey(null);
-  }
+  const buyingCols: GridColumn<FreightRow>[] = useMemo(() => [
+    { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "code", label: "Charge Code", isRequired: true,
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightBuying.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
+    { key: "desc", label: "Description",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightBuying.${i}.desc`)} /> },
+    { key: "qty",  label: "Qty", className: "is-num",
+      render: (_, __, i) => <input type="number" step="any" className="grid__cell-input" {...register(`freightBuying.${i}.qty`)} /> },
+    { key: "unit", label: "Unit",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightBuying.${i}.unit`)} /> },
+    { key: "buy",  label: "Rate", className: "is-num", isRequired: true,
+      render: (_, __, i) => <input type="number" step="any" className="grid__cell-input" {...register(`freightBuying.${i}.buy`)} /> },
+    { key: "_amt", label: "Amount", className: "is-num",
+      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.buy ?? "0") * 2).toFixed(2)} /> },
+    { key: "cur",  label: "Currency",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightBuying.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "_krw", label: "KRW Equiv.", className: "is-num",
+      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.buy ?? "0") * 2 * 1376.5).toFixed(0)} /> },
+    { key: "_rem", label: "Remark",
+      render: (_, __, i) => <input className="grid__cell-input" {...register(`freightBuying.${i}.remark`)} /> },
+  ], [register]);
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Buying / Credit</span>
-        <span className="panel__rowcount">{fields.length}</span>
-        <div className="panel__actions">
-          <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
-        </div>
       </div>
-      <GridList
-        columns={BUYING_COLS}
-        data={fields as unknown as FreightRow[]}
-        rowKey={(row) => row.id}
-        onRowClick={(row) => setSelectedKey(row.id)}
-        rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
-        style={{ flex: 1 }}
-      />
+      <GridList columns={buyingCols} data={RATE_ROWS} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
   );
 }
