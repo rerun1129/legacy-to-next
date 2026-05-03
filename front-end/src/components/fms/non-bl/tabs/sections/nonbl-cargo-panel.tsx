@@ -59,7 +59,7 @@ export function NonBLCargoPanel() {
         <div className="li">
           <span className="li__label">Unit</span>
           <div className="li__input" style={{ gap: 4 }}>
-            <input {...register("cargoUnit")} placeholder="Code" style={{ flex: 1, width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+            <input placeholder="Code" style={{ flex: 1, width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
           </div>
         </div>
       ),
