@@ -39,7 +39,7 @@ export function MasterAirChargesPanel({ variant, form }: Props) {
             <thead>
               <tr>
                 <th className="row-num">#</th>
-                {AIR_CHARGE_COLS.map(c => <th key={c.key} className={c.numeric ? "is-num" : ""}>{c.label}</th>)}
+                {AIR_CHARGE_COLS.map(c => <th key={c.key} className={"numeric" in c && c.numeric ? "is-num" : ""}>{c.label}</th>)}
               </tr>
             </thead>
             <tbody />
@@ -82,7 +82,7 @@ function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
           <thead>
             <tr>
               <th className="row-num">#</th>
-              {AIR_CHARGE_COLS.map(c => <th key={c.key} className={c.numeric ? "is-num" : ""}>{c.label}</th>)}
+              {AIR_CHARGE_COLS.map(c => <th key={c.key} className={"numeric" in c && c.numeric ? "is-num" : ""}>{c.label}</th>)}
               <th style={{ width: 24 }} />
             </tr>
           </thead>
@@ -91,14 +91,14 @@ function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
               <tr key={field.id}>
                 <td className="row-num">{i + 1}</td>
                 {AIR_CHARGE_COLS.map(col => (
-                  <td key={col.key} className={col.numeric ? "is-num" : ""}>
+                  <td key={col.key} className={"numeric" in col && col.numeric ? "is-num" : ""}>
                     <input
-                      type={col.numeric ? "number" : "text"}
-                      step={col.numeric ? "any" : undefined}
+                      type={"numeric" in col && col.numeric ? "number" : "text"}
+                      step={"numeric" in col && col.numeric ? "any" : undefined}
                       className="grid__cell-input"
                       {...form.register(
                         `airCharges.${i}.${col.key as ColKey}` as const,
-                        col.numeric ? { valueAsNumber: true } : undefined,
+                        "numeric" in col && col.numeric ? { valueAsNumber: true } : undefined,
                       )}
                     />
                   </td>

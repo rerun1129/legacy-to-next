@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { houseBlPort } from "@/lib/ports";
 import { getBLVariant } from "@/lib/bl-variants";
-import type { HouseBlRow } from "@/domain/house-bl";
+import type { HouseBlRow, Bound } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
@@ -17,10 +17,12 @@ export function HouseBLListGrid({ variantKey }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
 
   // variant.mode → jobDiv (SEA/AIR), variant.direction → bound (EXP/IMP)
+  // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
   const { data: rows = [], isLoading, error } = useQuery({
     queryKey: ["house-bl", "list", variantKey],
     queryFn: () =>
-      houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction }),
+      houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction as Bound }),
+    enabled: variant.direction !== null,
   });
 
   if (isLoading) return <div className="p-4 text-sm text-muted-foreground">로딩 중...</div>;

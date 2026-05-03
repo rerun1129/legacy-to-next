@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 
 interface Props {
   defaultValue?: string;
@@ -17,11 +17,6 @@ export function LineNumberTextarea({ defaultValue = "", value, onChange, placeho
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef   = useRef<HTMLDivElement>(null);
-
-  // controlled로 전환되거나 외부 value가 변경될 때 내부 상태 동기화
-  useEffect(() => {
-    if (isControlled) setInternalValue(value);
-  }, [isControlled, value]);
 
   const displayValue = isControlled ? (value ?? "") : internalValue;
   const lineCount    = displayValue.split("\n").length;
