@@ -40,9 +40,37 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_wt_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal volumeWtKg;
 
-    public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
-    public void setWorkDivision(HouseBlNonBl.WorkDivision v) { this.workDivision = v; }
-    public void setOriginalBlRef(String v) { this.originalBlRef = v; }
-    public void setRton(BigDecimal v) { this.rton = v; }
-    public void setVolumeWtKg(BigDecimal v) { this.volumeWtKg = v; }
+    @Column(name = "liner_code", length = 10)
+    private String linerCode;
+
+    @Column(name = "liner_name", length = 100)
+    private String linerName;
+
+    @Column(name = "vessel_name", length = 100)
+    private String vesselName;
+
+    @Column(name = "voyage_no", length = 20)
+    private String voyageNo;
+
+    @Column(name = "final_dest_code", length = 5)
+    private String finalDestCode;
+
+    @Column(name = "final_dest_name", length = 100)
+    private String finalDestName;
+
+    @Column(name = "final_eta", length = 8)
+    private String finalEta;
+
+    public void setHouseBl(HouseBlJpaEntity v)                   { this.houseBl = v; }
+    public void setWorkDivision(HouseBlNonBl.WorkDivision v)     { this.workDivision = v; }
+    public void setOriginalBlRef(String v)                        { this.originalBlRef = v; }
+    public void setRton(BigDecimal v)                             { this.rton = v; }
+    public void setVolumeWtKg(BigDecimal v)                      { this.volumeWtKg = v; }
+    public void setLinerCode(String v)                            { this.linerCode = v; }
+    public void setLinerName(String v)                            { this.linerName = v; }
+    public void setVesselName(String v)                           { this.vesselName = v; }
+    public void setVoyageNo(String v)                             { this.voyageNo = v; }
+    public void setFinalDestCode(String v)                        { this.finalDestCode = v; }
+    public void setFinalDestName(String v)                        { this.finalDestName = v; }
+    public void setFinalEta(String v)                             { this.finalEta = v; }
 }

@@ -53,11 +53,17 @@ public class HouseBlAssembler {
             case SEA    -> HouseBlSea.create(req.bound());
             case AIR    -> HouseBlAir.create(req.bound());
             case TRUCK  -> HouseBlTruck.create(req.bound());
-            case NON_BL -> HouseBlNonBl.create(WorkDivision.SEA, req.bound());
+            case NON_BL -> {
+                WorkDivision wd = req.workDivision() != null
+                        ? WorkDivision.valueOf(req.workDivision())
+                        : WorkDivision.SEA;
+                yield HouseBlNonBl.create(wd, req.bound());
+            }
         };
 
         applyCommonCreate(entity, req);
         applySeaCreate(entity, req.seaDetail());
+        applyNonBlCreate(entity, req);
         sub.applyAllCreate(entity, req);
         return entity;
     }
@@ -69,6 +75,7 @@ public class HouseBlAssembler {
     public void applyToEntity(UpdateHouseBlRequest req, HouseBl entity) {
         applyCommonUpdate(entity, req);
         applySeaUpdate(entity, req.seaDetail());
+        applyNonBlUpdate(entity, req);
         sub.applyAllUpdate(entity, req);
     }
 
@@ -210,5 +217,29 @@ public class HouseBlAssembler {
                     sayInfo     != null ? sayInfo                           : sea.getSayInformation(),
                     noOfCtnr    != null ? noOfCtnr                         : sea.getNoOfContainerOrPackages());
         }
+    }
+
+    // ── Non B/L 확장 필드 매핑 ────────────────────────────────────────
+
+    private void applyNonBlCreate(HouseBl entity, CreateHouseBlRequest req) {
+        if (!(entity instanceof HouseBlNonBl nonBl)) return;
+        nonBl.updateNonBlFields(
+                BlNumber.of(req.originalBlRef()),
+                Rton.of(req.rton()),
+                Weight.of(req.volumeWeightKg()));
+        nonBl.updateScheduleFields(
+                req.linerCode(), req.linerName(), req.vesselName(), req.voyageNo(),
+                req.finalDestCode(), req.finalDestName(), req.finalEta());
+    }
+
+    private void applyNonBlUpdate(HouseBl entity, UpdateHouseBlRequest req) {
+        if (!(entity instanceof HouseBlNonBl nonBl)) return;
+        nonBl.updateNonBlFields(
+                BlNumber.of(req.originalBlRef()),
+                Rton.of(req.rton()),
+                Weight.of(req.volumeWeightKg()));
+        nonBl.updateScheduleFields(
+                req.linerCode(), req.linerName(), req.vesselName(), req.voyageNo(),
+                req.finalDestCode(), req.finalDestName(), req.finalEta());
     }
 }

@@ -28,6 +28,15 @@ public class HouseBlNonBl extends HouseBl {
     private Rton rton;
     private Weight volumeWtKg;
 
+    // Schedule 확장 필드 (Non B/L 전용)
+    private String linerCode;
+    private String linerName;
+    private String vesselName;
+    private String voyageNo;
+    private String finalDestCode;
+    private String finalDestName;
+    private String finalEta;   // 형식: "yyyyMMdd"
+
     protected HouseBlNonBl(WorkDivision workDivision, Bound bound) {
         super(JobDiv.NON_BL, bound);
         this.workDivision = workDivision;
@@ -41,6 +50,18 @@ public class HouseBlNonBl extends HouseBl {
         this.originalBlRef = originalBlRef;
         this.rton          = rton;
         this.volumeWtKg    = volumeWtKg;
+    }
+
+    public void updateScheduleFields(String linerCode, String linerName, String vesselName,
+                                     String voyageNo, String finalDestCode, String finalDestName,
+                                     String finalEta) {
+        this.linerCode      = linerCode;
+        this.linerName      = linerName;
+        this.vesselName     = vesselName;
+        this.voyageNo       = voyageNo;
+        this.finalDestCode  = finalDestCode;
+        this.finalDestName  = finalDestName;
+        this.finalEta       = finalEta;
     }
 
     public enum WorkDivision {

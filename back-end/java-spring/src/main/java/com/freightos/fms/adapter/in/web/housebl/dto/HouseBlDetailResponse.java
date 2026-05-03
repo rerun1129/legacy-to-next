@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlSea;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -43,9 +44,24 @@ public record HouseBlDetailResponse(
         String salesManCode,
         Long masterBlId,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        // Non B/L 전용 필드
+        String originalBlRef,
+        String workDivision,
+        String linerCode,
+        String linerName,
+        String vesselName,
+        String voyageNo,
+        String finalDestCode,
+        String finalDestName,
+        String finalEta,
+        BigDecimal volumeWeightKg,
+        BigDecimal rton
 ) {
     public static HouseBlDetailResponse from(HouseBl entity) {
+        HouseBlNonBl nonBl = entity instanceof HouseBlNonBl n ? n : null;
+
         return new HouseBlDetailResponse(
                 entity.getId(),
                 mapOrNull(entity.getHblNo(), BlNumber::value),
@@ -73,7 +89,20 @@ public record HouseBlDetailResponse(
                 mapOrNull(entity.getSalesManCode(), EmployeeCode::value),
                 entity.getMasterBlId(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+
+                // Non B/L 전용 필드
+                nonBl != null ? mapOrNull(nonBl.getOriginalBlRef(), BlNumber::value) : null,
+                nonBl != null && nonBl.getWorkDivision() != null ? nonBl.getWorkDivision().name() : null,
+                nonBl != null ? nonBl.getLinerCode() : null,
+                nonBl != null ? nonBl.getLinerName() : null,
+                nonBl != null ? nonBl.getVesselName() : null,
+                nonBl != null ? nonBl.getVoyageNo() : null,
+                nonBl != null ? nonBl.getFinalDestCode() : null,
+                nonBl != null ? nonBl.getFinalDestName() : null,
+                nonBl != null ? nonBl.getFinalEta() : null,
+                nonBl != null ? mapOrNull(nonBl.getVolumeWtKg(), Weight::kg) : null,
+                nonBl != null ? mapOrNull(nonBl.getRton(), Rton::ton) : null
         );
     }
 }

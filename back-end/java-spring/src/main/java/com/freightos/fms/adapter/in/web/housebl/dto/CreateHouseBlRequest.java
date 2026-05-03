@@ -44,6 +44,19 @@ public record CreateHouseBlRequest(
         @Size(max = 35) String mblNo,
         @Size(max = 35) String masterRefNo,
 
+        // Non B/L 전용 필드
+        String workDivision,
+        String originalBlRef,
+        String linerCode,
+        String linerName,
+        String vesselName,
+        String voyageNo,
+        String finalDestCode,
+        String finalDestName,
+        @Pattern(regexp = "\\d{8}") String finalEta,
+        @DecimalMin("0") BigDecimal volumeWeightKg,
+        @DecimalMin("0") BigDecimal rton,
+
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
 

@@ -44,6 +44,19 @@ public record UpdateHouseBlRequest(
         String mblNo,
         String masterRefNo,
 
+        // Non B/L 전용 필드
+        String workDivision,
+        String originalBlRef,
+        String linerCode,
+        String linerName,
+        String vesselName,
+        String voyageNo,
+        String finalDestCode,
+        String finalDestName,
+        String finalEta,
+        BigDecimal volumeWeightKg,
+        BigDecimal rton,
+
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
 

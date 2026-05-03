@@ -184,6 +184,9 @@ public class HouseBlMapper {
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {
         domain.updateNonBlFields(BlNumber.of(jpa.getOriginalBlRef()),
                 Rton.of(jpa.getRton()), Weight.of(jpa.getVolumeWtKg()));
+        domain.updateScheduleFields(
+                jpa.getLinerCode(), jpa.getLinerName(), jpa.getVesselName(), jpa.getVoyageNo(),
+                jpa.getFinalDestCode(), jpa.getFinalDestName(), jpa.getFinalEta());
     }
 
     private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
@@ -318,5 +321,12 @@ public class HouseBlMapper {
         jpa.setOriginalBlRef(mapOrNull(domain.getOriginalBlRef(), BlNumber::value));
         jpa.setRton(mapOrNull(domain.getRton(), Rton::ton));
         jpa.setVolumeWtKg(mapOrNull(domain.getVolumeWtKg(), Weight::kg));
+        jpa.setLinerCode(domain.getLinerCode());
+        jpa.setLinerName(domain.getLinerName());
+        jpa.setVesselName(domain.getVesselName());
+        jpa.setVoyageNo(domain.getVoyageNo());
+        jpa.setFinalDestCode(domain.getFinalDestCode());
+        jpa.setFinalDestName(domain.getFinalDestName());
+        jpa.setFinalEta(domain.getFinalEta());
     }
 }
