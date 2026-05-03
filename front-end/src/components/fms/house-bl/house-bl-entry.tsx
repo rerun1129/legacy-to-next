@@ -157,7 +157,7 @@ export function HouseBLEntry({ variant, id }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
       form.reset();
-      router.replace(`/fms/house-bl/${variantKey}/entry`);
+      router.replace(`/fms/house-bl/${variant.key}/entry`);
     },
   });
 

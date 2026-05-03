@@ -132,9 +132,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
   function handleSave(raw: FormValues) {
     const req: CreateMasterBlRequest = {
-      jobDiv: variant.mode as 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL',
-      bound: variant.direction as 'EXP' | 'IMP',
-      freightTerm: 'PREPAID',
       ...raw,
     };
     mutation.mutate(req as FormValues);
