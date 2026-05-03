@@ -37,9 +37,10 @@ export function MasterHouseBLGrid({ variant }: Props) {
   }
 
   function handleRemove() {
-    if (selectedIdx === null) return;
+    if (fields.length === 0) return;
+    const targetIdx = selectedIdx ?? fields.length - 1;
     if (window.confirm("삭제하시겠습니까?")) {
-      remove(selectedIdx);
+      remove(targetIdx);
       setSelectedIdx(null);
     }
   }
@@ -58,7 +59,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
             type="button"
             className="btn btn--sm"
             onClick={handleRemove}
-            disabled={selectedIdx === null}
+            disabled={fields.length === 0}
           >
             <Minus size={12} />
           </button>
