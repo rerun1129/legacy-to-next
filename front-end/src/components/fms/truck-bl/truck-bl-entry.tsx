@@ -1,14 +1,40 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, FormProvider } from "react-hook-form";
 import { Save, Trash2, Truck } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }  from "./tabs/main-truck";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useDraftPersist } from "@/lib/use-draft-persist";
+
+// label → RHF 필드 경로 매핑 (toolbar 5개)
+const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
+  "Truck B/L No": "truckBlNo",
+  "Settle":       "truckSettle",
+  "Incoterms":    "incoterms",
+  "Freight Term": "truckFreightTerm",
+  "Status":       "truckStatus",
+};
 
 export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
+  const form = useForm<HouseBlFormValues>({
+    defaultValues: {
+      freightSelling: [],
+      freightBuying: [],
+      truckOrders: [],
+      truckBlNo:        "",
+      truckSettle:      "",
+      incoterms:        "",
+      truckFreightTerm: "",
+      truckStatus:      "",
+    },
+  });
+  const { clearDraft: _clearDraft } = useDraftPersist(form, "draft:truck-bl:new");
 
   return (
+    <FormProvider {...form}>
     <>
       {/* Page header — NO Print button per PRD §S-06 */}
       <div className="page-head">
@@ -30,18 +56,18 @@ export function TruckBLEntry() {
       {/* Toolbar: Document Key fields */}
       <div className="toolbar" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
         {[
-          { l: "Truck B/L No",    v: "",  req: true  },
-          { l: "Settle",          v: "",  req: true  },
-          { l: "Incoterms",       v: "",  req: false },
-          { l: "Freight Term",    v: "",  req: false },
-          { l: "Status",          v: "",  req: false },
+          { l: "Truck B/L No",    req: true  },
+          { l: "Settle",          req: true  },
+          { l: "Incoterms",       req: false },
+          { l: "Freight Term",    req: false },
+          { l: "Status",          req: false },
         ].map((f) => (
           <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
             <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>
             <div className="field__input">
               <input
-                defaultValue={f.v}
-                placeholder={f.l === "Truck B/L No" ? "Auto on save" : f.v || f.l}
+                {...form.register(TOOLBAR_REGISTER[f.l])}
+                placeholder={f.l === "Truck B/L No" ? "Auto on save" : f.l}
               />
             </div>
           </div>
@@ -58,9 +84,10 @@ export function TruckBLEntry() {
         <div className="tabbar__spacer" />
       </div>
 
-      {tab === "main" && <MainTruck />}
-
-      {tab === "freight" && <FreightTab />}
+      {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MainTruck /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
     </>
+    </FormProvider>
   );
 }

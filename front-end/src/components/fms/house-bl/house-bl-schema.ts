@@ -205,6 +205,28 @@ export const HOUSE_BL_SCHEMA = z.object({
   mainItemName: z.string().optional(),
   hsCode:       z.string().optional(),
 
+  // truck toolbar
+  truckBlNo:        z.string().optional(),
+  truckSettle:      z.string().optional(),
+  truckFreightTerm: z.string().optional(),
+  truckStatus:      z.string().optional(),
+
+  // truck schedule / location names
+  polName:     z.string().optional(),
+  podName:     z.string().optional(),
+
+  // truck cargo
+  chargeWeightKg: z.string().optional(),
+
+  // truck document
+  pickupDate:   z.string().regex(/^\d{8}$/).or(z.literal('')).optional(),
+  truckerCode:  z.string().optional(),
+  truckerName:  z.string().optional(),
+  truckerPic:   z.string().optional(),
+
+  // truck performance
+  customerPic: z.string().optional(),
+
   // SEA detail
   seaDetail: SEA_DETAIL_SCHEMA.optional(),
 
