@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { useDraftPersist } from "@/lib/use-draft-persist";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
@@ -128,23 +129,24 @@ export function HouseBLEntry({ variant, id }: Props) {
     enabled: isEdit,
   });
 
-  // 수정 모드: 서버 데이터 로드 시 form reset
+  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:house-bl:${variant.key}:${id ?? "new"}`);
+
+  // 수정 모드: draft가 없을 때만 서버 데이터로 reset (draft 우선)
   useEffect(() => {
-    if (detail) {
-      form.reset({
-        hbl:    detail.hblNo ?? "",
-        mbl:    detail.masterBlId != null ? String(detail.masterBlId) : "",
-        sType:  detail.shipmentType ?? "",
-        lType:  detail.blType ?? "",
-        etd:    detail.etd ?? "",
-        eta:    detail.eta ?? "",
-        pol:    detail.polCode ?? "",
-        pod:    detail.podCode ?? "",
-        settle: "PREPAID",
-        expImp: detail.bound,
-      });
-    }
-  }, [detail, form]);
+    if (!detail || hasDraft()) return;
+    form.reset({
+      hbl:    detail.hblNo ?? "",
+      mbl:    detail.masterBlId != null ? String(detail.masterBlId) : "",
+      sType:  detail.shipmentType ?? "",
+      lType:  detail.blType ?? "",
+      etd:    detail.etd ?? "",
+      eta:    detail.eta ?? "",
+      pol:    detail.polCode ?? "",
+      pod:    detail.podCode ?? "",
+      settle: "PREPAID",
+      expImp: detail.bound,
+    });
+  }, [detail, form, hasDraft]);
 
   const mutation = useMutation({
     mutationFn: (data: HouseBlFormValues) => {
@@ -152,6 +154,7 @@ export function HouseBLEntry({ variant, id }: Props) {
       return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
     },
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       router.push(`/fms/house-bl/${variant.key}/list`);
     },
@@ -160,6 +163,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
       form.reset();
       router.replace(`/fms/house-bl/${variant.key}/entry`);
@@ -292,11 +296,11 @@ export function HouseBLEntry({ variant, id }: Props) {
           </div>
         </div>
 
-        {/* Tab content */}
-        {tab === "main"    && renderMainTab(variant)}
-        {tab === "edi"     && <EdiTab variant={variant} />}
-        {tab === "other"   && <OtherTab />}
-        {tab === "freight" && <FreightTab />}
+        {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
+        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant)}</div>
+        <div style={{ display: tab === "edi"     ? "contents" : "none" }}><EdiTab variant={variant} /></div>
+        <div style={{ display: tab === "other"   ? "contents" : "none" }}><OtherTab /></div>
+        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
       </form>
       </FormProvider>
 

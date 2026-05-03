@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
+import { useDraftPersist } from "@/lib/use-draft-persist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -102,8 +103,11 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
+  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:master-bl:${variantKey}:${id ?? "new"}`);
+
+  // 수정 모드: draft가 없을 때만 서버 데이터로 reset (draft 우선)
   useEffect(() => {
-    if (!detail) return;
+    if (!detail || hasDraft()) return;
     form.reset({
       jobDiv: detail.jobDiv,
       bound: detail.bound,
@@ -122,7 +126,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       cbm: detail.cbm ?? undefined,
       operatorCode: detail.operatorCode ?? "",
     });
-  }, [detail, form]);
+  }, [detail, form, hasDraft]);
 
   const mutation = useMutation({
     mutationFn: (data: MasterBlFormValues) => {
@@ -161,6 +165,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         : masterBlPort.create(req);
     },
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
       router.push(`/fms/master-bl/${variantKey}/list`);
     },
@@ -169,6 +174,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
       form.reset();
       router.replace(`/fms/master-bl/${variantKey}/entry`);
@@ -231,6 +237,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
 
   return (
+    <FormProvider {...form}>
     <form onSubmit={form.handleSubmit(handleSave)}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">
@@ -305,11 +312,12 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         </div>
       )}
 
-      {/* Tab content */}
-      {tab === "main"    && <MasterMainTab variant={variant} form={form} />}
-      {tab === "edi"     && <MasterEdiTab variant={variant} />}
-      {tab === "other"   && <OtherTab />}
-      {tab === "freight" && <FreightTab />}
+      {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab variant={variant} form={form} /></div>
+      <div style={{ display: tab === "edi"     ? "contents" : "none" }}><MasterEdiTab variant={variant} /></div>
+      <div style={{ display: tab === "other"   ? "contents" : "none" }}><OtherTab /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
     </form>
+    </FormProvider>
   );
 }

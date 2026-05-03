@@ -2,6 +2,7 @@
 
 import { useState }                       from "react";
 import { useForm, FormProvider }           from "react-hook-form";
+import { useDraftPersist }                 from "@/lib/use-draft-persist";
 import { Save, Trash2, Package, Printer } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
@@ -13,6 +14,7 @@ export function NonBLEntry() {
   const [tab,     setTab]     = useState("main");
   const [workDiv, setWorkDiv] = useState<WorkDiv>("Sea");
   const methods = useForm<NonBlFormValues>({ defaultValues: { containers: [], dimensions: [] } });
+  const { clearDraft: _clearDraft } = useDraftPersist(methods, "draft:non-bl:new");
 
   return (
     <FormProvider {...methods}>
@@ -61,8 +63,9 @@ export function NonBLEntry() {
         <div className="tabbar__spacer" />
       </div>
 
-      {tab === "main"    && <MainNonBL />}
-      {tab === "freight" && <FreightTab />}
+      {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MainNonBL /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
     </>
     </FormProvider>
   );
