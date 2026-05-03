@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { Save, Copy, Trash2, Layers, Send, RefreshCw } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
 import type { CreateMasterBlRequest, UpdateMasterBlRequest, ConsolidatedHouseBlSummary } from "@/domain/master-bl";
+import type { MasterBlFormValues } from "./master-bl-schema";
 import { MasterMainTab } from "./tabs/main-tab";
 import { MasterEdiTab }  from "./tabs/edi-tab";
 import { OtherTab }      from "@/components/fms/house-bl/tabs/other-tab";
@@ -23,27 +23,6 @@ interface Props {
 
 const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type", "Status"] as const;
 const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "Status", "", "", "", ""] as const;
-
-// freightTerm 값이 null일 수 있으므로 detail reset 시 기본값 fallback 처리
-const MASTER_BL_SCHEMA = z.object({
-  jobDiv: z.enum(["SEA", "AIR", "TRUCK", "NON_BL"]),
-  bound: z.enum(["EXP", "IMP"]),
-  mblNo: z.string().max(35).optional(),
-  masterRefNo: z.string().max(35).optional(),
-  freightTerm: z.enum(["PREPAID", "COLLECT"]),
-  shipperCode: z.string().max(20).optional(),
-  consigneeCode: z.string().max(20).optional(),
-  polCode: z.string().max(5).optional(),
-  podCode: z.string().max(5).optional(),
-  etd: z.string().regex(/^\d{8}$/).optional().or(z.literal("")),
-  eta: z.string().regex(/^\d{8}$/).optional().or(z.literal("")),
-  pkgQty: z.number().min(0).optional(),
-  grossWeightKg: z.number().min(0).optional(),
-  cbm: z.number().min(0).optional(),
-  operatorCode: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof MASTER_BL_SCHEMA>;
 
 function getToolbarFields(mode: string) {
   return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
@@ -71,7 +50,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     enabled: isEdit,
   });
 
-  const form = useForm<FormValues>({
+  const form = useForm<MasterBlFormValues>({
     defaultValues: {
       jobDiv: "SEA",
       bound: "EXP",
@@ -79,12 +58,46 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       mblNo: "",
       masterRefNo: "",
       shipperCode: "",
+      shipperAddress: "",
       consigneeCode: "",
+      consigneeAddress: "",
+      notifyCode: "",
+      notifyAddress: "",
       polCode: "",
       podCode: "",
       etd: "",
       eta: "",
+      pkgUnit: "",
+      hsCode: "",
+      mainItemName: "",
+      settlePartnerCode: "",
       operatorCode: "",
+      seaDetail: {
+        loadType: "",
+        linerCode: "",
+        vesselCode: "",
+        vesselName: "",
+        voyageNo: "",
+        onboardDate: "",
+        vesselNationality: "",
+        weightUnit: "",
+        serviceTerm: "",
+        blType: "",
+        porCode: "",
+        finalDestCode: "",
+        lineBkgNo: "",
+        issueDate: "",
+      },
+      desc: {
+        marks: "",
+        description: "",
+        descClause1: "",
+        descClause2: "",
+        remark: "",
+      },
+      dims: [],
+      scheduleLegs: [],
+      airCharges: [],
     },
   });
 
@@ -111,10 +124,41 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   }, [detail, form]);
 
   const mutation = useMutation({
-    mutationFn: (data: FormValues) =>
-      isEdit
-        ? masterBlPort.update(id!, data as UpdateMasterBlRequest)
-        : masterBlPort.create(data as CreateMasterBlRequest),
+    mutationFn: (data: MasterBlFormValues) => {
+      const req: CreateMasterBlRequest = {
+        jobDiv:       data.jobDiv,
+        bound:        data.bound,
+        freightTerm:  data.freightTerm,
+        mblNo:        data.mblNo || undefined,
+        masterRefNo:  data.masterRefNo || undefined,
+        shipperCode:      data.shipperCode || undefined,
+        shipperAddress:   data.shipperAddress || undefined,
+        consigneeCode:    data.consigneeCode || undefined,
+        consigneeAddress: data.consigneeAddress || undefined,
+        notifyCode:       data.notifyCode || undefined,
+        notifyAddress:    data.notifyAddress || undefined,
+        polCode:  data.polCode || undefined,
+        podCode:  data.podCode || undefined,
+        etd:      data.etd || undefined,
+        eta:      data.eta || undefined,
+        pkgQty:        data.pkgQty,
+        pkgUnit:       data.pkgUnit || undefined,
+        grossWeightKg: data.grossWeightKg,
+        cbm:           data.cbm,
+        hsCode:        data.hsCode || undefined,
+        mainItemName:  data.mainItemName || undefined,
+        settlePartnerCode: data.settlePartnerCode || undefined,
+        operatorCode:  data.operatorCode || undefined,
+        seaDetail:    data.seaDetail,
+        desc:         data.desc,
+        dims:         data.dims && data.dims.length > 0 ? data.dims : undefined,
+        scheduleLegs: data.scheduleLegs && data.scheduleLegs.length > 0 ? data.scheduleLegs : undefined,
+        airCharges:   data.airCharges && data.airCharges.length > 0 ? data.airCharges : undefined,
+      };
+      return isEdit
+        ? masterBlPort.update(id!, req as UpdateMasterBlRequest)
+        : masterBlPort.create(req);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
       router.push(`/fms/master-bl/${variantKey}/list`);
@@ -130,11 +174,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
-  function handleSave(raw: FormValues) {
-    const req: CreateMasterBlRequest = {
-      ...raw,
-    };
-    mutation.mutate(req as FormValues);
+  function handleSave(raw: MasterBlFormValues) {
+    mutation.mutate(raw);
   }
 
   const tabs = [
@@ -227,7 +268,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       )}
 
       {/* Tab content */}
-      {tab === "main"    && <MasterMainTab variant={variant} />}
+      {tab === "main"    && <MasterMainTab variant={variant} form={form} />}
       {tab === "edi"     && <MasterEdiTab variant={variant} />}
       {tab === "other"   && <OtherTab />}
       {tab === "freight" && <FreightTab />}

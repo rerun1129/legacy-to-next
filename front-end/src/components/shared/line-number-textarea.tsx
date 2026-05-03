@@ -1,20 +1,36 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface Props {
   defaultValue?: string;
+  value?:        string;
+  onChange?:     (value: string) => void;
   placeholder?:  string;
-  style?:        React.CSSProperties; // wrapper에 적용 (flex: 1, minHeight 등)
+  style?:        React.CSSProperties;
 }
 
-export function LineNumberTextarea({ defaultValue = "", placeholder, style }: Props) {
-  const [value,   setValue]   = useState(String(defaultValue));
+export function LineNumberTextarea({ defaultValue = "", value, onChange, placeholder, style }: Props) {
+  // controlled 모드: value prop이 있으면 외부 state를 따름
+  const isControlled = value !== undefined;
+  const [internalValue, setInternalValue] = useState(String(defaultValue));
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef   = useRef<HTMLDivElement>(null);
 
-  const lineCount = value.split("\n").length;
+  // controlled로 전환되거나 외부 value가 변경될 때 내부 상태 동기화
+  useEffect(() => {
+    if (isControlled) setInternalValue(value);
+  }, [isControlled, value]);
+
+  const displayValue = isControlled ? (value ?? "") : internalValue;
+  const lineCount    = displayValue.split("\n").length;
+
+  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const next = e.target.value;
+    if (!isControlled) setInternalValue(next);
+    onChange?.(next);
+  }
 
   function syncScroll() {
     if (gutterRef.current && textareaRef.current) {
@@ -62,9 +78,9 @@ export function LineNumberTextarea({ defaultValue = "", placeholder, style }: Pr
       {/* 실제 textarea */}
       <textarea
         ref={textareaRef}
-        value={value}
+        value={displayValue}
         placeholder={placeholder}
-        onChange={e => setValue(e.target.value)}
+        onChange={handleChange}
         onScroll={syncScroll}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
