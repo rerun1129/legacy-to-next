@@ -45,10 +45,8 @@ export function ContainerGridPanel() {
   function handleRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedKey(null);
-    }
+    remove(targetIdx);
+    setSelectedKey(null);
   }
 
   return (
@@ -66,7 +64,7 @@ export function ContainerGridPanel() {
         columns={CONTAINER_COLS}
         data={fields as unknown as ContainerRow[]}
         rowKey={(_, i) => fields[i].id}
-        onRowClick={(_, i) => setSelectedKey(fields[i].id === selectedKey ? null : fields[i].id)}
+        onRowClick={(_, i) => setSelectedKey(fields[i].id)}
         rowClassName={(_, i) => fields[i]?.id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1, minHeight: 0 }}
       />

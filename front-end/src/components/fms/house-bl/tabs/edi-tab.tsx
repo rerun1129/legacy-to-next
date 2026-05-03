@@ -43,10 +43,8 @@ export function EdiTab({ variant }: Props) {
   function handleLicenseRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedKey(null);
-    }
+    remove(targetIdx);
+    setSelectedKey(null);
   }
 
   return (
@@ -126,7 +124,7 @@ export function EdiTab({ variant }: Props) {
                     columns={KOREA_LICENSE_COLS}
                     data={fields as unknown as KoreaLicenseRow[]}
                     rowKey={(row) => row.id}
-                    onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+                    onRowClick={(row) => setSelectedKey(row.id)}
                     rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
                   />
                 </div>

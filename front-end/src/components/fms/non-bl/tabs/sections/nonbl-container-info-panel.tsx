@@ -49,10 +49,8 @@ export function NonBLContainerInfoPanel() {
   function handleRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedKey(null);
-    }
+    remove(targetIdx);
+    setSelectedKey(null);
   }
 
   return (
@@ -71,8 +69,8 @@ export function NonBLContainerInfoPanel() {
           columns={COLS}
           data={fields as unknown as ContainerInfoRow[]}
           rowKey={(r) => r.id}
-          selectedRowKey={selectedKey !== null ? Number(selectedKey) : null}
-          onSelectRow={(row) => setSelectedKey(row ? String(row.id) : null)}
+          onRowClick={(row) => setSelectedKey(String(row.id))}
+          rowClassName={(row) => String(row.id) === selectedKey ? "is-selected" : undefined}
         />
       </div>
     </div>

@@ -172,10 +172,8 @@ export function FreightSellingPanel() {
   function handleRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedKey(null);
-    }
+    remove(targetIdx);
+    setSelectedKey(null);
   }
 
   return (
@@ -193,7 +191,7 @@ export function FreightSellingPanel() {
         columns={SELLING_COLS}
         data={fields as unknown as FreightRow[]}
         rowKey={(row) => row.id}
-        onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+        onRowClick={(row) => setSelectedKey(row.id)}
         rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1 }}
       />
@@ -220,10 +218,8 @@ export function FreightBuyingPanel() {
   function handleRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedKey(null);
-    }
+    remove(targetIdx);
+    setSelectedKey(null);
   }
 
   return (
@@ -241,7 +237,7 @@ export function FreightBuyingPanel() {
         columns={BUYING_COLS}
         data={fields as unknown as FreightRow[]}
         rowKey={(row) => row.id}
-        onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+        onRowClick={(row) => setSelectedKey(row.id)}
         rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1 }}
       />

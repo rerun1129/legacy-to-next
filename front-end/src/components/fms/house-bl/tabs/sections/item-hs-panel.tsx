@@ -44,10 +44,8 @@ export function ItemHsPanel() {
   function handleRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedKey(null);
-    }
+    remove(targetIdx);
+    setSelectedKey(null);
   }
 
   return (
@@ -65,7 +63,7 @@ export function ItemHsPanel() {
         columns={ITEM_COLS}
         data={fields as unknown as ItemRow[]}
         rowKey={(r) => r.id}
-        onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+        onRowClick={(row) => setSelectedKey(row.id)}
         rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1, minHeight: 0 }}
       />

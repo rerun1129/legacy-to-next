@@ -39,10 +39,8 @@ export function MasterHouseBLGrid({ variant }: Props) {
   function handleRemove() {
     if (fields.length === 0) return;
     const targetIdx = selectedIdx ?? fields.length - 1;
-    if (window.confirm("삭제하시겠습니까?")) {
-      remove(targetIdx);
-      setSelectedIdx(null);
-    }
+    remove(targetIdx);
+    setSelectedIdx(null);
   }
 
   return (
@@ -91,7 +89,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
               <tr
                 key={field.rhfKey}
                 className={idx === selectedIdx ? "is-selected" : undefined}
-                onClick={() => setSelectedIdx(idx === selectedIdx ? null : idx)}
+                onClick={() => setSelectedIdx(idx)}
                 style={{ cursor: "pointer" }}
               >
                 <td className="row-num">{idx + 1}</td>
