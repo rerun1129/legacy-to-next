@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -50,6 +50,8 @@ function renderRows<T>(
   emptyMessage: string | undefined,
   selectedRowKey?: string | number | null,
   onSelectRow?: (row: T | null, index: number | null) => void,
+  selectedCell?: { rowKey: string | number; colKey: string } | null,
+  setSelectedCell?: React.Dispatch<React.SetStateAction<{ rowKey: string | number; colKey: string } | null>>,
 ): React.ReactNode {
   if (data.length === 0) {
     return (
@@ -91,11 +93,29 @@ function renderRows<T>(
             typeof col.key === "string"
               ? (row as Record<string, unknown>)[col.key]
               : (row[col.key as keyof T] as unknown);
+          const ck = String(col.key);
+          const isCellSelected =
+            selectedCell?.rowKey === key && selectedCell?.colKey === ck;
           return (
             <td
-              key={String(col.key)}
+              key={ck}
               style={{ width: col.width ?? col.minWidth, textAlign: col.align }}
-              className={col.className}
+              className={
+                [col.className, isCellSelected ? "is-cell-selected" : undefined]
+                  .filter(Boolean)
+                  .join(" ") || undefined
+              }
+              onClick={
+                setSelectedCell
+                  ? () => {
+                      setSelectedCell((prev) =>
+                        prev?.rowKey === key && prev?.colKey === ck
+                          ? null
+                          : { rowKey: key, colKey: ck }
+                      );
+                    }
+                  : undefined
+              }
             >
               {col.render ? col.render(rawValue, row, rowIndex) : String(rawValue ?? "")}
             </td>
@@ -124,6 +144,26 @@ function ManagedGridList<T>({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDragOutside, setIsDragOutside] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
+  const [selectedCell, setSelectedCell] = useState<{
+    rowKey: string | number;
+    colKey: string;
+  } | null>(null);
+  // rowKey prop은 호출처마다 매 렌더에 새 함수가 전달될 수 있으므로
+  // ref로 보관해 useEffect 의존성 루프를 방지
+  const rowKeyRef = useRef(rowKey);
+  rowKeyRef.current = rowKey;
+
+  useEffect(() => {
+    if (selectedCell == null) return;
+    const rk = rowKeyRef.current;
+    const exists = data.some((row, i) => {
+      const k = rk
+        ? rk(row, i)
+        : ((row as Record<string, unknown>).id as string | number | undefined) ?? i;
+      return k === selectedCell.rowKey;
+    });
+    if (!exists) setSelectedCell(null);
+  }, [data, selectedCell]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -204,7 +244,7 @@ function ManagedGridList<T>({
             </SortableContext>
           </thead>
           <tbody>
-            {renderRows(visibleColumns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow)}
+            {renderRows(visibleColumns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow, selectedCell, setSelectedCell)}
           </tbody>
         </table>
         <DragOverlay>
@@ -239,6 +279,27 @@ function PlainGridList<T>({
   selectedRowKey,
   onSelectRow,
 }: Omit<GridListProps<T>, "gridId">) {
+  const [selectedCell, setSelectedCell] = useState<{
+    rowKey: string | number;
+    colKey: string;
+  } | null>(null);
+  // rowKey prop은 호출처마다 매 렌더에 새 함수가 전달될 수 있으므로
+  // ref로 보관해 useEffect 의존성 루프를 방지
+  const rowKeyRef = useRef(rowKey);
+  rowKeyRef.current = rowKey;
+
+  useEffect(() => {
+    if (selectedCell == null) return;
+    const rk = rowKeyRef.current;
+    const exists = data.some((row, i) => {
+      const k = rk
+        ? rk(row, i)
+        : ((row as Record<string, unknown>).id as string | number | undefined) ?? i;
+      return k === selectedCell.rowKey;
+    });
+    if (!exists) setSelectedCell(null);
+  }, [data, selectedCell]);
+
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`} style={style}>
       <table className="grid--list">
@@ -261,7 +322,7 @@ function PlainGridList<T>({
           </tr>
         </thead>
         <tbody>
-          {renderRows(columns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow)}
+          {renderRows(columns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow, selectedCell, setSelectedCell)}
         </tbody>
       </table>
     </div>

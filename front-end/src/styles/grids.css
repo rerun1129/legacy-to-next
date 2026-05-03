@@ -185,3 +185,12 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   font-size: var(--fs-sm, 12px);
   color: var(--ink-muted, #888);
 }
+
+/* 셀 단위 선택 강조 — 행 강조와 동시에 표시 가능 */
+.grid--list tbody td.is-cell-selected,
+.grid tbody td.is-cell-selected {
+  outline: 2px solid var(--accent, #2563eb);
+  outline-offset: -2px;
+  position: relative;
+  z-index: 1;
+}
