@@ -1,0 +1,35 @@
+import type { NonBlFormValues } from "./non-bl-schema";
+
+export function createEmptyNonBlFormValues(): NonBlFormValues {
+  return {
+    nonBlNo:  "",
+    workDiv:  "Sea",
+    status:   "",
+    refNo:    "",
+    actualCustomerCode: "", actualCustomerName: "",
+    shipperCode:        "", shipperName:        "",
+    consigneeCode:      "", consigneeName:      "",
+    notifyCode:         "", notifyName:         "",
+    settlePartnerCode:  "", settlePartnerName:  "",
+    linerCode:    "", linerName:    "",
+    vesselName:   "", voyNo:        "",
+    etd:          "", eta:          "",
+    polCode:      "", polName:      "",
+    podCode:      "", podName:      "",
+    finalDestCode: "", finalDestName: "",
+    finalEta:     "",
+    mainItem:  "", hsCode:    "",
+    cargoQty:  undefined, cargoUnit: "",
+    grossWt:   undefined, volWt:     undefined,
+    totalCbm:  undefined, rton:      undefined,
+    salesClass:   "",
+    salesManCode: "", salesManName: "",
+    operatorCode: "", operatorName: "",
+    teamCode:     "", teamName:     "",
+    remark:        "",
+    freightSelling: [],
+    freightBuying:  [],
+    containers: [],
+    dimensions: [],
+  };
+}
