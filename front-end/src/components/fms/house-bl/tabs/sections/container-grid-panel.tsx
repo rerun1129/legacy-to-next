@@ -8,7 +8,6 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 
 interface ContainerRow {
-  id: number;
   cno: string; type: string; seal: string; pkg: number; pkgT: string;
   gw: string; cbm: number; vgm: string;
 }
@@ -39,7 +38,7 @@ export function ContainerGridPanel() {
     : -1;
 
   function handleAdd() {
-    append({ ...EMPTY_CONTAINER_ROW, id: fields.length + 1 });
+    append({ ...EMPTY_CONTAINER_ROW });
     setSelectedKey(null);
   }
 

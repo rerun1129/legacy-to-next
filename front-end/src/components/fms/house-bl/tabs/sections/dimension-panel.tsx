@@ -8,7 +8,6 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 
 interface DimRow {
-  id: number;
   length: string; width: string; height: string;
   qty: string; cbm: string; volWt: string;
 }
@@ -37,7 +36,7 @@ export function DimensionPanel() {
     : -1;
 
   function handleAdd() {
-    append({ ...EMPTY_DIM_ROW, id: fields.length + 1 });
+    append({ ...EMPTY_DIM_ROW });
     setSelectedKey(null);
   }
 
