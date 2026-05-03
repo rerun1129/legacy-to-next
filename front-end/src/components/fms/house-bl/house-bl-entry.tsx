@@ -4,14 +4,12 @@ import { useRef, useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search, RotateCcw } from "lucide-react";
+import { Save, Printer, Copy, Trash2, FileText, Download, RefreshCw, Search, RotateCcw } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
 import { MainTabAir }  from "./tabs/main-air";
-import { EdiTab }      from "./tabs/edi-tab";
-import { OtherTab }    from "./tabs/other-tab";
 import { FreightTab }  from "./tabs/freight-tab";
 import { houseBlPort } from "@/lib/ports";
 import type { HouseBlFormValues } from "./house-bl-schema";
@@ -155,8 +153,6 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   const tabs = [
     { key: "main",    label: "Main"    },
-    { key: "edi",     label: "EDI"     },
-    { key: "other",   label: "Other"   },
     { key: "freight", label: "Freight" },
   ];
 
@@ -208,7 +204,6 @@ export function HouseBLEntry({ variant, id }: Props) {
             {variant.printDocs.length > 0 && (
               <button type="button" className="btn btn--sm btn--success"><Printer size={12} />Print</button>
             )}
-            <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
             <button
               type="button"
               className="btn btn--sm btn--secondary"
@@ -277,8 +272,6 @@ export function HouseBLEntry({ variant, id }: Props) {
         </div>
 
         <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant)}</div>
-        <div style={{ display: tab === "edi"     ? "contents" : "none" }}><EdiTab variant={variant} /></div>
-        <div style={{ display: tab === "other"   ? "contents" : "none" }}><OtherTab /></div>
         <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
       </form>
       </FormProvider>

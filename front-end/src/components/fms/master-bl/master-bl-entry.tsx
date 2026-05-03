@@ -7,14 +7,12 @@ import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { createEmptyMasterBlFormValues, TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
-import { Save, Copy, Trash2, Layers, Send, RefreshCw, Search, RotateCcw } from "lucide-react";
+import { Save, Copy, Trash2, Layers, RefreshCw, Search, RotateCcw } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
 import type { CreateMasterBlRequest, UpdateMasterBlRequest, ConsolidatedHouseBlSummary } from "@/domain/master-bl";
 import { MasterMainTab } from "./tabs/main-tab";
-import { MasterEdiTab }  from "./tabs/edi-tab";
-import { OtherTab }      from "@/components/fms/house-bl/tabs/other-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 
 interface Props {
@@ -194,8 +192,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
   const tabs = [
     { key: "main",    label: "Main"    },
-    { key: "edi",     label: "EDI"     },
-    { key: "other",   label: "Other"   },
     { key: "freight", label: "Freight" },
   ];
 
@@ -238,7 +234,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <button type="button" className="btn btn--sm">
             <RefreshCw size={12} />{modeLabels.changeBLNo}
           </button>
-          <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
             <RotateCcw size={12} />Reset
           </button>
@@ -290,8 +285,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab variant={variant} form={form} /></div>
-      <div style={{ display: tab === "edi"     ? "contents" : "none" }}><MasterEdiTab variant={variant} /></div>
-      <div style={{ display: tab === "other"   ? "contents" : "none" }}><OtherTab /></div>
       <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
     </form>
     </FormProvider>

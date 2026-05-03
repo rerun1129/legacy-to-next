@@ -127,7 +127,5 @@ export function createEmptyHouseBlFormValues(): HouseBlFormValues {
     itemHs: [],
     freightSelling: [],
     freightBuying: [],
-    coLoadBls: [],
-    koreaLicenses: [],
   };
 }

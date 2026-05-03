@@ -119,25 +119,6 @@ export const FREIGHT_ROW_SCHEMA = z.object({
 
 export type FreightRow = z.infer<typeof FREIGHT_ROW_SCHEMA>;
 
-// Co-Load B/L 그리드 행
-const CO_LOAD_SCHEMA = z.object({
-  id:        z.number(),
-  hblNo:     z.string().optional(),
-  shipper:   z.string().optional(),
-  consignee: z.string().optional(),
-  pkg:       z.string().optional(),
-  gw:        z.string().optional(),
-  cbm:       z.string().optional(),
-});
-
-// EDI / Korea License (수출신고필증)
-const KOREA_LICENSE_SCHEMA = z.object({
-  id:        z.number(),
-  licenseNo: z.string().optional(),
-  amount:    z.string().optional(),
-  cur:       z.string().optional(),
-});
-
 export const SEA_DETAIL_SCHEMA = z.object({
   loadType:                z.string().optional(),
   linerCode:               z.string().optional(),
@@ -291,8 +272,6 @@ export const HOUSE_BL_SCHEMA = z.object({
   itemHs:         z.array(ITEM_HS_SCHEMA).optional(),
   freightSelling: z.array(FREIGHT_ROW_SCHEMA).optional(),
   freightBuying:  z.array(FREIGHT_ROW_SCHEMA).optional(),
-  coLoadBls:      z.array(CO_LOAD_SCHEMA).optional(),
-  koreaLicenses:  z.array(KOREA_LICENSE_SCHEMA).optional(),
 });
 
 export type HouseBlFormValues = z.infer<typeof HOUSE_BL_SCHEMA>;
