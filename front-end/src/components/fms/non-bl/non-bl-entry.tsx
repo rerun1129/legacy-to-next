@@ -13,7 +13,7 @@ import { useBLDraftStore }                        from "@/lib/use-bl-draft-store
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
 
-  const { clearDraft } = useBLDraftStore();
+  const clearDraft = useBLDraftStore(state => state.clearDraft);
 
   const methods = useForm<NonBlFormValues>({
     defaultValues: createEmptyNonBlFormValues(),

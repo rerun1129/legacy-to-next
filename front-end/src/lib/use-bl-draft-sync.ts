@@ -11,7 +11,8 @@ export function useBlDraftSync<T extends FieldValues>(
   form: UseFormReturn<T>,
   key: string,
 ): void {
-  const { getDraft, setDraft } = useBLDraftStore();
+  const getDraft = useBLDraftStore(state => state.getDraft);
+  const setDraft = useBLDraftStore(state => state.setDraft);
   const restoredRef = useRef(false);
   // 클로저 stale 방지용 — zustand 액션은 안정 참조이지만 ref로 명시
   const setDraftRef = useRef(setDraft);

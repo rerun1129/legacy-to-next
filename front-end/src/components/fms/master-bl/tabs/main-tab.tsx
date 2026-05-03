@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import type { WidgetDef }           from "@/components/widget/widget-registry";
@@ -31,6 +32,6 @@ function makeRegistry(form: UseFormReturn<MasterBlFormValues>): WidgetDef[] {
 
 export function MasterMainTab({ variant, form }: Props) {
   const scope    = `master-bl-entry.main.${variant.key}`;
-  const registry = makeRegistry(form);
+  const registry = useMemo(() => makeRegistry(form), [form]);
   return <WidgetGrid scope={scope} variant={variant} registry={registry} />;
 }

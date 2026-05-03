@@ -104,7 +104,7 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   const defaults = getToolbarDefaults(variant);
 
-  const { clearDraft } = useBLDraftStore();
+  const clearDraft = useBLDraftStore(state => state.clearDraft);
 
   const form = useForm<HouseBlFormValues>({
     defaultValues: createEmptyHouseBlFormValues(),

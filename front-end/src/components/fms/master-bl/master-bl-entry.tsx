@@ -52,7 +52,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     enabled: isEdit,
   });
 
-  const { clearDraft } = useBLDraftStore();
+  const clearDraft = useBLDraftStore(state => state.clearDraft);
 
   const form = useForm<MasterBlFormValues>({
     defaultValues: {

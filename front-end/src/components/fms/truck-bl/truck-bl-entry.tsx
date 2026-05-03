@@ -21,7 +21,7 @@ const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
 
 export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
-  const { clearDraft } = useBLDraftStore();
+  const clearDraft = useBLDraftStore(state => state.clearDraft);
 
   const form = useForm<HouseBlFormValues>({
     defaultValues: createEmptyTruckBlFormValues(),
