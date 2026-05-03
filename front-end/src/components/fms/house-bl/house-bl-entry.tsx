@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search } from "lucide-react";
@@ -113,6 +113,11 @@ export function HouseBLEntry({ variant, id }: Props) {
       pod:    "",
       settle: "PREPAID",
       expImp: variant.direction,
+      itemHs:         [],
+      freightSelling: [],
+      freightBuying:  [],
+      coLoadBls:      [],
+      koreaLicenses:  [],
     },
   });
 
@@ -186,6 +191,7 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   return (
     <>
+      <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {/* Page header */}
         <div className="page-head">
@@ -292,6 +298,7 @@ export function HouseBLEntry({ variant, id }: Props) {
         {tab === "other"   && <OtherTab />}
         {tab === "freight" && <FreightTab />}
       </form>
+      </FormProvider>
 
       {/* Switch B/L 모달: canSwitchBl이 true일 때만 렌더 (id는 활성 조건에서 보장) */}
       {canSwitchBl && (
