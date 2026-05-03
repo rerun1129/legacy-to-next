@@ -92,6 +92,47 @@ export const AIR_CHARGE_SCHEMA = z.object({
   rate:           z.string().optional(),
 });
 
+// House-BL Item/HS 그리드 행
+const ITEM_HS_SCHEMA = z.object({
+  id:    z.number(),
+  hs:    z.string().optional(),
+  desc:  z.string().optional(),
+  qty:   z.string().optional(),
+  unit:  z.string().optional(),
+  value: z.string().optional(),
+  cur:   z.string().optional(),
+});
+
+// Freight Selling/Buying 공통 행
+const FREIGHT_ROW_SCHEMA = z.object({
+  id:     z.number(),
+  code:   z.string().optional(),
+  desc:   z.string().optional(),
+  qty:    z.string().optional(),
+  unit:   z.string().optional(),
+  amount: z.string().optional(),
+  cur:    z.string().optional(),
+});
+
+// Co-Load B/L 그리드 행
+const CO_LOAD_SCHEMA = z.object({
+  id:        z.number(),
+  hblNo:     z.string().optional(),
+  shipper:   z.string().optional(),
+  consignee: z.string().optional(),
+  pkg:       z.string().optional(),
+  gw:        z.string().optional(),
+  cbm:       z.string().optional(),
+});
+
+// EDI / Korea License (수출신고필증)
+const KOREA_LICENSE_SCHEMA = z.object({
+  id:        z.number(),
+  licenseNo: z.string().optional(),
+  amount:    z.string().optional(),
+  cur:       z.string().optional(),
+});
+
 export const SEA_DETAIL_SCHEMA = z.object({
   loadType:                z.string().optional(),
   linerCode:               z.string().optional(),
@@ -175,6 +216,11 @@ export const HOUSE_BL_SCHEMA = z.object({
   licenses:     z.array(LICENSE_SCHEMA).optional(),
   truckOrders:  z.array(TRUCK_ORDER_SCHEMA).optional(),
   airCharges:   z.array(AIR_CHARGE_SCHEMA).optional(),
+  itemHs:         z.array(ITEM_HS_SCHEMA).optional(),
+  freightSelling: z.array(FREIGHT_ROW_SCHEMA).optional(),
+  freightBuying:  z.array(FREIGHT_ROW_SCHEMA).optional(),
+  coLoadBls:      z.array(CO_LOAD_SCHEMA).optional(),
+  koreaLicenses:  z.array(KOREA_LICENSE_SCHEMA).optional(),
 });
 
 export type HouseBlFormValues = z.infer<typeof HOUSE_BL_SCHEMA>;

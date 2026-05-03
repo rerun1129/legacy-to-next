@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { Plus, Minus } from "lucide-react";
+import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface ItemRow {
   id: number;
@@ -17,18 +22,52 @@ const ITEM_COLS: GridColumn<ItemRow>[] = [
   { key: "cur",   label: "Currency",    width: 80,  render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
 ];
 
-const ITEM_DATA: ItemRow[] = [];
+const EMPTY_ITEM_HS_ROW = {
+  hs: "", desc: "", qty: "", unit: "", value: "", cur: "",
+};
 
 export function ItemHsPanel() {
+  const { control } = useFormContext<HouseBlFormValues>();
+  const { fields, append, remove } = useFieldArray({ control, name: "itemHs" });
+  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+
+  const selectedIdx = selectedKey !== null
+    ? fields.findIndex(f => f.id === selectedKey)
+    : -1;
+
+  function handleAdd() {
+    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
+    append({ ...EMPTY_ITEM_HS_ROW, id: nextId });
+    setSelectedKey(null);
+  }
+
+  function handleRemove() {
+    if (selectedKey === null || selectedIdx === -1) return;
+    if (window.confirm("삭제하시겠습니까?")) {
+      remove(selectedIdx);
+      setSelectedKey(null);
+    }
+  }
+
   return (
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Item / HS Code</span>
-        <span className="panel__rowcount">{ITEM_DATA.length}</span>
-        <div className="panel__actions"><button className="btn btn--sm">+</button></div>
+        <span className="panel__rowcount">{fields.length}</span>
+        <div className="panel__actions">
+          <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
+          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={selectedKey === null}><Minus size={12} /></button>
+        </div>
       </div>
-      <GridList columns={ITEM_COLS} data={ITEM_DATA} rowKey={(row) => row.id} style={{ flex: 1, minHeight: 0 }} />
+      <GridList
+        columns={ITEM_COLS}
+        data={fields as unknown as ItemRow[]}
+        rowKey={(r) => r.id}
+        onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+        rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
+        style={{ flex: 1, minHeight: 0 }}
+      />
     </div>
   );
 }

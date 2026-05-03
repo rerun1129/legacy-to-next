@@ -1,11 +1,16 @@
+"use client";
+
+import { useState } from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { Plus, Minus } from "lucide-react";
+import type { HouseBlFormValues } from "../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
 interface CoLoadRow {
   id: number;
-  hblNo: string; shipper: string; consignee: string; pkg: string; gw: string; cbm: string; remark: string;
+  hblNo: string; shipper: string; consignee: string;
+  pkg: string; gw: string; cbm: string;
 }
-
-const CO_LOAD_ROWS: CoLoadRow[] = [];
 
 const CO_LOAD_COLS: GridColumn<CoLoadRow>[] = [
   { key: "_no",       label: "#",         className: "row-num", render: (_, __, i) => i + 1 },
@@ -15,10 +20,35 @@ const CO_LOAD_COLS: GridColumn<CoLoadRow>[] = [
   { key: "pkg",       label: "Pkg",       className: "is-num" },
   { key: "gw",        label: "G/W",       className: "is-num" },
   { key: "cbm",       label: "CBM",       className: "is-num" },
-  { key: "remark",    label: "Remark" },
 ];
 
+const EMPTY_CO_LOAD_ROW = {
+  hblNo: "", shipper: "", consignee: "", pkg: "", gw: "", cbm: "",
+};
+
 export function OtherTab() {
+  const { control } = useFormContext<HouseBlFormValues>();
+  const { fields, append, remove } = useFieldArray({ control, name: "coLoadBls" });
+  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+
+  const selectedIdx = selectedKey !== null
+    ? fields.findIndex(f => f.id === selectedKey)
+    : -1;
+
+  function handleAdd() {
+    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
+    append({ ...EMPTY_CO_LOAD_ROW, id: nextId });
+    setSelectedKey(null);
+  }
+
+  function handleRemove() {
+    if (selectedKey === null || selectedIdx === -1) return;
+    if (window.confirm("삭제하시겠습니까?")) {
+      remove(selectedIdx);
+      setSelectedKey(null);
+    }
+  }
+
   return (
     <div style={{ flex: 1, overflow: "hidden", padding: "12px 16px" }}>
       <div style={{ display: "flex", gap: 10, height: "100%" }}>
@@ -72,16 +102,19 @@ export function OtherTab() {
           <div className="panel__head">
             <div className="panel__title-accent" />
             <span className="panel__title">Co-Load B/L</span>
-            <span className="panel__rowcount">{CO_LOAD_ROWS.length}</span>
+            <span className="panel__rowcount">{fields.length}</span>
             <div className="panel__actions">
-              <button className="btn btn--sm">+</button>
+              <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
+              <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={selectedKey === null}><Minus size={12} /></button>
             </div>
           </div>
           <div className="grid-wrap" style={{ flex: 1, overflow: "auto" }}>
             <GridList
               columns={CO_LOAD_COLS}
-              data={CO_LOAD_ROWS}
+              data={fields as unknown as CoLoadRow[]}
               rowKey={(row) => row.id}
+              onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+              rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
             />
           </div>
         </div>

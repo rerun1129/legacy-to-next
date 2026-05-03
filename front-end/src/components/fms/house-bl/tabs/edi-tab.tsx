@@ -1,33 +1,52 @@
+"use client";
+
+import { useState } from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { Plus, Minus } from "lucide-react";
 import type { BLVariantConfig } from "@/lib/bl-variants";
+import type { HouseBlFormValues } from "../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 
-interface LicenseRow {
+// Korea Only 라이선스 (licenses 배열과 별개로 koreaLicenses로 관리)
+interface KoreaLicenseRow {
   id: number;
-  exportNo: string; qty: string; unit: string; weight: string;
-  symCode: string; symQty: string; symUnit: string;
-  splitYn: string; seq: string; progress: string;
+  licenseNo: string; amount: string; cur: string;
 }
 
-const LICENSE_ROWS: LicenseRow[] = [];
-
-const LICENSE_COLS: GridColumn<LicenseRow>[] = [
+const KOREA_LICENSE_COLS: GridColumn<KoreaLicenseRow>[] = [
   { key: "_no",       label: "#",                    className: "row-num",   render: (_, __, i) => i + 1 },
-  { key: "exportNo",  label: "수출신고번호 / 화물관리번호" },
-  { key: "qty",       label: "수량",                  className: "is-num" },
-  { key: "unit",      label: "단위" },
-  { key: "weight",    label: "중량",                  className: "is-num" },
-  { key: "symCode",   label: "동시포장: 기호" },
-  { key: "symQty",    label: "수량",                  className: "is-num" },
-  { key: "symUnit",   label: "단위" },
-  { key: "splitYn",   label: "분할여부" },
-  { key: "seq",       label: "차수" },
-  { key: "progress",  label: "진행내역" },
+  { key: "licenseNo", label: "수출신고번호 / 화물관리번호" },
+  { key: "amount",    label: "금액",                  className: "is-num" },
+  { key: "cur",       label: "통화" },
 ];
+
+const EMPTY_KOREA_LICENSE_ROW = { licenseNo: "", amount: "", cur: "" };
 
 interface Props { variant?: BLVariantConfig }
 
 export function EdiTab({ variant }: Props) {
   const isExp = variant ? variant.direction === "EXP" : true;
+  const { control } = useFormContext<HouseBlFormValues>();
+  const { fields, append, remove } = useFieldArray({ control, name: "koreaLicenses" });
+  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+
+  const selectedIdx = selectedKey !== null
+    ? fields.findIndex(f => f.id === selectedKey)
+    : -1;
+
+  function handleLicenseAdd() {
+    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
+    append({ ...EMPTY_KOREA_LICENSE_ROW, id: nextId });
+    setSelectedKey(null);
+  }
+
+  function handleLicenseRemove() {
+    if (selectedKey === null || selectedIdx === -1) return;
+    if (window.confirm("삭제하시겠습니까?")) {
+      remove(selectedIdx);
+      setSelectedKey(null);
+    }
+  }
 
   return (
     <div style={{ flex: 1, overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
@@ -94,12 +113,20 @@ export function EdiTab({ variant }: Props) {
             {/* License section — EXP variants only */}
             {isExp && (
               <div style={{ marginTop: 16 }}>
-                <div className="subhead"><div className="subhead__bar" />License (수출신고필증) — Korea Only<div className="panel__actions" style={{ marginLeft: "auto" }}><button className="btn btn--sm">+ 추가</button></div></div>
+                <div className="subhead">
+                  <div className="subhead__bar" />License (수출신고필증) — Korea Only
+                  <div className="panel__actions" style={{ marginLeft: "auto" }}>
+                    <button type="button" className="btn btn--sm" onClick={handleLicenseAdd}><Plus size={12} /></button>
+                    <button type="button" className="btn btn--sm" onClick={handleLicenseRemove} disabled={selectedKey === null}><Minus size={12} /></button>
+                  </div>
+                </div>
                 <div style={{ overflow: "auto" }}>
                   <GridList
-                    columns={LICENSE_COLS}
-                    data={LICENSE_ROWS}
+                    columns={KOREA_LICENSE_COLS}
+                    data={fields as unknown as KoreaLicenseRow[]}
                     rowKey={(row) => row.id}
+                    onRowClick={(row) => setSelectedKey(row.id === selectedKey ? null : row.id)}
+                    rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
                   />
                 </div>
               </div>
