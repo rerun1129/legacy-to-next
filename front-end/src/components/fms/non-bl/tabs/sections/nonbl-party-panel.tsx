@@ -1,46 +1,101 @@
 "use client";
 
+import { useFormContext } from "react-hook-form";
 import { Search } from "lucide-react";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
+import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
 
-const NON_PARTIES = [
-  { key: "actual-customer", role: "ACTUAL CUSTOMER", req: true,  btn: null           },
-  { key: "shipper",         role: "SHIPPER",         req: false, btn: null           },
-  { key: "consignee",       role: "CONSIGNEE",       req: false, btn: null           },
-  { key: "notify",          role: "NOTIFY",          req: false, btn: null           },
-  { key: "settle-partner",   role: "SETTLE PARTNER",   req: false, btn: null           },
-] as const;
+interface PartyBlockProps {
+  role:       string;
+  req:        boolean;
+  codeProps:  React.InputHTMLAttributes<HTMLInputElement>;
+  nameProps:  React.InputHTMLAttributes<HTMLInputElement>;
+}
 
-function PartyBlock({ party }: { party: typeof NON_PARTIES[number] }) {
+function PartyBlock({ role, req, codeProps, nameProps }: PartyBlockProps) {
   return (
     <div className="party-block" style={{ paddingBottom: 8 }}>
       <div className="party-block__head">
-        <span className={party.req ? "is-required" : undefined} style={{ fontSize: 11, minWidth: 120, flexShrink: 0 }}>
-          {party.role}
+        <span className={req ? "is-required" : undefined} style={{ fontSize: 11, minWidth: 120, flexShrink: 0 }}>
+          {role}
         </span>
         <div className="party-cn">
           <div className="party-cn__code">
-            <input placeholder="Code" />
+            <input placeholder="Code" {...codeProps} />
             <Search size={12} className="party-cn__icon" />
           </div>
-          <input className="party-cn__name" placeholder="Company Name" />
+          <input className="party-cn__name" placeholder="Company Name" {...nameProps} />
         </div>
-        {party.btn && (
-          <div className="party-block__head-actions">
-            <button className="party-block__head-btn">{party.btn}</button>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
 export function NonBLPartyPanel() {
-  const fields: FieldWidgetDef[] = NON_PARTIES.map(p => ({
-    key:    p.key,
-    label:  p.role,
-    render: () => <PartyBlock party={p} />,
-  }));
+  const { register } = useFormContext<NonBlFormValues>();
+
+  const fields: FieldWidgetDef[] = [
+    {
+      key:    "actual-customer",
+      label:  "ACTUAL CUSTOMER",
+      render: () => (
+        <PartyBlock
+          role="ACTUAL CUSTOMER"
+          req={true}
+          codeProps={register("actualCustomerCode")}
+          nameProps={register("actualCustomerName")}
+        />
+      ),
+    },
+    {
+      key:    "shipper",
+      label:  "SHIPPER",
+      render: () => (
+        <PartyBlock
+          role="SHIPPER"
+          req={false}
+          codeProps={register("shipperCode")}
+          nameProps={register("shipperName")}
+        />
+      ),
+    },
+    {
+      key:    "consignee",
+      label:  "CONSIGNEE",
+      render: () => (
+        <PartyBlock
+          role="CONSIGNEE"
+          req={false}
+          codeProps={register("consigneeCode")}
+          nameProps={register("consigneeName")}
+        />
+      ),
+    },
+    {
+      key:    "notify",
+      label:  "NOTIFY",
+      render: () => (
+        <PartyBlock
+          role="NOTIFY"
+          req={false}
+          codeProps={register("notifyCode")}
+          nameProps={register("notifyName")}
+        />
+      ),
+    },
+    {
+      key:    "settle-partner",
+      label:  "SETTLE PARTNER",
+      render: () => (
+        <PartyBlock
+          role="SETTLE PARTNER"
+          req={false}
+          codeProps={register("settlePartnerCode")}
+          nameProps={register("settlePartnerName")}
+        />
+      ),
+    },
+  ];
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>

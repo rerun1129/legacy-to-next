@@ -21,7 +21,7 @@ export function createEmptyNonBlFormValues(): NonBlFormValues {
     mainItem:  "", hsCode:    "",
     cargoQty:  undefined, cargoUnit: "",
     grossWt:   undefined, volWt:     undefined,
-    totalCbm:  undefined, rton:      undefined,
+    totalCbm:  undefined, rton:      1,
     salesClass:   "",
     salesManCode: "", salesManName: "",
     operatorCode: "", operatorName: "",

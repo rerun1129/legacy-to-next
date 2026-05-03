@@ -83,13 +83,13 @@ export function NonBLEntry() {
         <div className="field is-required">
           <div className="field__label is-required">Operator</div>
           <div className="field__input">
-            <input defaultValue="KYS" placeholder="Operator" />
+            <input {...register("operatorCode")} placeholder="Operator" />
           </div>
         </div>
         <div className="field is-required">
           <div className="field__label is-required">Team</div>
           <div className="field__input">
-            <input defaultValue="OPS" placeholder="Team" />
+            <input {...register("teamCode")} placeholder="Team" />
           </div>
         </div>
       </div>
