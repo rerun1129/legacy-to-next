@@ -4,16 +4,8 @@ import { NumericCell } from "@/components/shared/grid-cell-inputs";
 
 interface Props { variant?: AnyVariantConfig }
 
-const SEA_ROWS = [
-  { cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500,  unit: "CTN", gw: "12,400", cbm: "22.5" },
-  { cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800,  unit: "CTN", gw: "18,200", cbm: "65.0" },
-  { cno: "MSKU3456789", type: "40GP", seal: "SL345678", pkg: 650,  unit: "CTN", gw: "15,800", cbm: "60.2" },
-];
-const AIR_ROWS = [
-  { length: "120", width: "80",  height: "90",  qty: "1300", cbm: "87.5",  volWt: "14583" },
-  { length: "100", width: "70",  height: "80",  qty: "200",  cbm: "15.0",  volWt: "2500"  },
-  { length: "60",  width: "50",  height: "40",  qty: "500",  cbm: "6.0",   volWt: "1000"  },
-];
+const SEA_ROWS: { cno: string; type: string; seal: string; pkg: number; unit: string; gw: string; cbm: string }[] = [];
+const AIR_ROWS: { length: string; width: string; height: string; qty: string; cbm: string; volWt: string }[] = [];
 
 export function MasterContainerDimPanel({ variant }: Props) {
   if (!variant) return null;

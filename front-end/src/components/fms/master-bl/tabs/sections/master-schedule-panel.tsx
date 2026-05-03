@@ -20,10 +20,7 @@ const LEG_COLS: GridColumn<LegRow>[] = [
   { key: "arrival",   width: 96, align: "center", label: "Arrival",  render: v => <DateCell defaultValue={String(v)} /> },
   { key: "arrTime",   width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
 ];
-const LEG_DATA: LegRow[] = [
-  { id: 1, to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
-  { id: 2, to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
-];
+const LEG_DATA: LegRow[] = [];
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function SchedField({ label, value, req, type = "text" }: { label: string; value?: string; req?: boolean; type?: string }) {
@@ -67,20 +64,20 @@ function LcnField({ label, req, code, name }: { label: string; req?: boolean; co
 // ── Sea schedule ────────────────────────────────────────────
 function buildSeaFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
   const linerItems: FieldItemDef[] = [
-    { key: "liner",  render: () => <CodeNameField label="Liner"  code="COSCO" name="COSCO SHIPPING" req /> },
-    { key: "vessel", render: () => <SchedField    label="Vessel" value="COSCO EXCELLENCE" req /> },
-    { key: "voyage", render: () => <SchedField    label="Voyage" value="0412E" req /> },
-    { key: "etd",    render: () => <SchedField    label="ETD"    value="2026-04-24" req type="date" /> },
-    { key: "eta",    render: () => <SchedField    label="ETA"    value="2026-05-08" req type="date" /> },
+    { key: "liner",  render: () => <CodeNameField label="Liner"  code="" name="" req /> },
+    { key: "vessel", render: () => <SchedField    label="Vessel" value="" req /> },
+    { key: "voyage", render: () => <SchedField    label="Voyage" value="" req /> },
+    { key: "etd",    render: () => <SchedField    label="ETD"    value="" req type="date" /> },
+    { key: "eta",    render: () => <SchedField    label="ETA"    value="" req type="date" /> },
   ];
   const portItems: FieldItemDef[] = [
-    { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
-    { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
+    { key: "pol",      render: () => <LcnField label="POL"      req  code="" name="" /> },
+    { key: "pod",      render: () => <LcnField label="POD"      req  code="" name="" /> },
     { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
   ];
   const issueItems: FieldItemDef[] = [
-    { key: "issue-date",   render: () => <SchedField label="Issue Date"   value="2026-04-20" type="date" /> },
-    { key: "freight-term", render: () => <SchedField label="Freight Term" value="Prepaid" /> },
+    { key: "issue-date",   render: () => <SchedField label="Issue Date"   value="" type="date" /> },
+    { key: "freight-term", render: () => <SchedField label="Freight Term" value="" /> },
   ];
 
   return [
@@ -93,13 +90,13 @@ function buildSeaFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
 // ── Air schedule ────────────────────────────────────────────
 function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
   const carrierItems: FieldItemDef[] = [
-    { key: "carrier",   render: () => <CodeNameField label={isExp ? "Airline" : "Carrier"} code={isExp ? "KE" : "OZ"} name={isExp ? "Korean Air" : "Asiana Airlines"} req /> },
-    { key: "departure", render: () => <CodeNameField label="Departure" code="ICN" name="Incheon Int'l" req /> },
+    { key: "carrier",   render: () => <CodeNameField label={isExp ? "Airline" : "Carrier"} code="" name="" req /> },
+    { key: "departure", render: () => <CodeNameField label="Departure" code="" name="" req /> },
   ];
   const issueItems: FieldItemDef[] = [
-    { key: "issue-date",  render: () => <SchedField label="Issue Date"  value="2026-04-20" type="date" /> },
+    { key: "issue-date",  render: () => <SchedField label="Issue Date"  value="" type="date" /> },
     { key: "signature",   render: () => <SchedField label="Signature"   value="" /> },
-    { key: "issue-place", render: () => <SchedField label="Issue Place" value="INCHEON" /> },
+    { key: "issue-place", render: () => <SchedField label="Issue Place" value="" /> },
   ];
 
   return [

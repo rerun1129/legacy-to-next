@@ -25,9 +25,9 @@ export function ListFilter() {
             <div className="lcn">
               <span className="lcn__label">ETD</span>
               <div className="lcn__daterange">
-                <input type="date" defaultValue="2026-04-01" />
+                <input type="date" defaultValue="" />
                 <span className="lcn__tilde">~</span>
-                <input type="date" defaultValue="2026-04-30" />
+                <input type="date" defaultValue="" />
               </div>
             </div>
 

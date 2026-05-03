@@ -54,7 +54,7 @@ export function MasterMarksPanel() {
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Marks &amp; Numbers</span></div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <LineNumberTextarea defaultValue="MADE IN KOREA" style={{ flex: 1, minHeight: 0 }} />
+        <LineNumberTextarea defaultValue="" style={{ flex: 1, minHeight: 0 }} />
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ export function MasterGoodsDescPanel({ variant }: Props) {
   if (!variant) return null;
   const isSea = variant.mode === "SEA";
   const title = isSea ? "Description of Goods" : "Nature of Goods";
-  const content = isSea ? "SAID TO CONTAIN\nELECTRONIC GOODS" : "CONSOLIDATION SHIPMENT\nAS PER ATTACHED MANIFEST";
+  const content = "";
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{title}</span></div>

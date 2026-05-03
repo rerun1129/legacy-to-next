@@ -27,7 +27,7 @@ function LiField({ label, value, numeric }: { label: string; value: string; nume
   );
 }
 
-function GWField({ value = "30600" }: { value?: string }) {
+function GWField({ value = "" }: { value?: string }) {
   return (
     <div className="li">
       <span className="li__label">G/W</span>
@@ -46,17 +46,17 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const panelScope = `master-cargo-doc.${variant.key}`;
 
   const cargoBase: FieldItemDef[] = [
-    { key: "main-item", render: () => <LiField label="Main Item" value="ELECTRONIC GOODS" /> },
-    { key: "hs-code",   render: () => <LiField label="HS Code"   value="8517.13" /> },
-    { key: "package",   render: () => <PackageField qty="1300" unit="CTN" height={24} /> },
-    { key: "gw",        render: () => <GWField value="30600" /> },
-    { key: "cbm",       render: () => <LiField label="CBM"       value="87.5"  numeric /> },
+    { key: "main-item", render: () => <LiField label="Main Item" value="" /> },
+    { key: "hs-code",   render: () => <LiField label="HS Code"   value="" /> },
+    { key: "package",   render: () => <PackageField qty="" unit="" height={24} /> },
+    { key: "gw",        render: () => <GWField value="" /> },
+    { key: "cbm",       render: () => <LiField label="CBM"       value=""  numeric /> },
   ];
   const cargoExtras: FieldItemDef[] = isSea
     ? [{ key: "r-ton", render: () => <LiField label="R/Ton" value="" numeric /> }]
     : [
-        { key: "vol-wt",     render: () => <LiField label="Volume W/T" value="14583" numeric /> },
-        { key: "charge-wt",  render: () => <LiField label="Charge W/T" value="30600" numeric /> },
+        { key: "vol-wt",     render: () => <LiField label="Volume W/T" value="" numeric /> },
+        { key: "charge-wt",  render: () => <LiField label="Charge W/T" value="" numeric /> },
         { key: "rate-class", render: () => <LiField label="Rate Class" value="GCR" /> },
       ];
   const cargoItems = [...cargoBase, ...cargoExtras];
@@ -64,8 +64,8 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const seaDoc: FieldItemDef[] = [
     { key: "settle",   render: () => <LiField label="Settle Partner" value="" /> },
     { key: "co-load",  render: () => <LiField label="Co-Load Agent"  value="" /> },
-    { key: "operator", render: () => <LiField label="Operator"       value="KYS" /> },
-    { key: "team",     render: () => <LiField label="Team"           value="SEA-EXP" /> },
+    { key: "operator", render: () => <LiField label="Operator"       value="" /> },
+    { key: "team",     render: () => <LiField label="Team"           value="" /> },
   ];
   const airDocBase: FieldItemDef[] = [
     { key: "co-load-type",  render: () => <LiField label="Co-Load Type"  value="" /> },
@@ -77,8 +77,8 @@ export function MasterCargoDocPanel({ variant }: Props) {
     : [];
   const airDocTail: FieldItemDef[] = [
     { key: "settle",   render: () => <LiField label="Settle Partner" value="" /> },
-    { key: "operator", render: () => <LiField label="Operator"       value="KYS" /> },
-    { key: "team",     render: () => <LiField label="Team"           value="AIR-EXP" /> },
+    { key: "operator", render: () => <LiField label="Operator"       value="" /> },
+    { key: "team",     render: () => <LiField label="Team"           value="" /> },
   ];
   const docItems = isSea ? seaDoc : [...airDocBase, ...airDocSec, ...airDocTail];
 

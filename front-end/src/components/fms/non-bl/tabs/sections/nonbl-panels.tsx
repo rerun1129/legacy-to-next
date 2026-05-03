@@ -68,10 +68,10 @@ export function NonBLPartyPanel() {
 // ── Schedule ───────────────────────────────────────────────
 const DATE_ITEMS: FieldItemDef[] = [
   { key: "etd", render: () => (
-    <div className="li"><span className="li__label is-required">ETD</span><div className="li__input"><PanelDateInput defaultValue="2026-04-24" required /></div></div>
+    <div className="li"><span className="li__label is-required">ETD</span><div className="li__input"><PanelDateInput defaultValue="" required /></div></div>
   )},
   { key: "eta", render: () => (
-    <div className="li"><span className="li__label is-required">ETA</span><div className="li__input"><PanelDateInput defaultValue="2026-05-08" required /></div></div>
+    <div className="li"><span className="li__label is-required">ETA</span><div className="li__input"><PanelDateInput defaultValue="" required /></div></div>
   )},
 ];
 
@@ -79,15 +79,15 @@ const PORT_ITEMS: FieldItemDef[] = [
   { key: "pol", render: () => (
     <div className="lcn" style={{ marginBottom: 4 }}>
       <span className="lcn__label is-required">POL</span>
-      <div className="lcn__code"><input defaultValue="KRBSAN" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-      <input className="lcn__name" defaultValue="Busan" />
+      <div className="lcn__code"><input defaultValue="" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" defaultValue="" />
     </div>
   )},
   { key: "pod", render: () => (
     <div className="lcn" style={{ marginBottom: 4 }}>
       <span className="lcn__label is-required">POD</span>
-      <div className="lcn__code"><input defaultValue="CNSHA" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-      <input className="lcn__name" defaultValue="Shanghai" />
+      <div className="lcn__code"><input defaultValue="" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" defaultValue="" />
     </div>
   )},
 ];
@@ -112,10 +112,7 @@ export function NonBLSchedulePanel() {
 type WorkDiv = "Sea" | "Air" | "Warehouse" | "Trucking";
 
 interface ContainerRow { id: number; cno: string; type: string; pkg: string; gw: string; cbm: string; }
-const CONTAINER_ROWS: ContainerRow[] = [
-  { id: 1, cno: "CSNU1234567", type: "20GP", pkg: "500 CTN", gw: "12,400", cbm: "22.5" },
-  { id: 2, cno: "TCKU9876543", type: "40HC", pkg: "800 CTN", gw: "18,200", cbm: "65.0" },
-];
+const CONTAINER_ROWS: ContainerRow[] = [];
 const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
   { key: "_no", label: "#", render: (_, __, i) => i + 1 },
   { key: "cno", label: "Container No." }, { key: "type", label: "Type" },

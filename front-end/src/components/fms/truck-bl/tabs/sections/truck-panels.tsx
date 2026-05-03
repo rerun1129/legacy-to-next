@@ -27,7 +27,7 @@ function LiField({ label, value, req, readOnly, numeric }: { label: string; valu
   );
 }
 
-function GWField({ value = "30600" }: { value?: string }) {
+function GWField({ value = "" }: { value?: string }) {
   return (
     <div className="li">
       <span className="li__label">G/W</span>
@@ -91,10 +91,10 @@ export function TruckPartyPanel() {
 const VESSEL_DATE_ITEMS: FieldItemDef[] = [
   { key: "vessel", render: () => <LiField label="Vessel" value="TRUCK" readOnly /> },
   { key: "etd",    render: () => (
-    <div className="li"><span className="li__label is-required">ETD</span><div className="li__input"><PanelDateInput defaultValue="2026-04-24" required /></div></div>
+    <div className="li"><span className="li__label is-required">ETD</span><div className="li__input"><PanelDateInput defaultValue="" required /></div></div>
   )},
   { key: "eta",    render: () => (
-    <div className="li"><span className="li__label is-required">ETA</span><div className="li__input"><PanelDateInput defaultValue="2026-04-25" required /></div></div>
+    <div className="li"><span className="li__label is-required">ETA</span><div className="li__input"><PanelDateInput defaultValue="" required /></div></div>
   )},
 ];
 
@@ -102,15 +102,15 @@ const TRUCK_PORT_ITEMS: FieldItemDef[] = [
   { key: "pol", render: () => (
     <div className="lcn" style={{ marginBottom: 4 }}>
       <span className="lcn__label is-required">POL</span>
-      <div className="lcn__code" style={{ position: "relative" }}><input defaultValue="KRBSAN" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-      <input className="lcn__name" defaultValue="Busan" placeholder="Location" />
+      <div className="lcn__code" style={{ position: "relative" }}><input defaultValue="" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" defaultValue="" placeholder="Location" />
     </div>
   )},
   { key: "pod", render: () => (
     <div className="lcn" style={{ marginBottom: 4 }}>
       <span className="lcn__label is-required">POD</span>
-      <div className="lcn__code" style={{ position: "relative" }}><input defaultValue="KRSEL" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
-      <input className="lcn__name" defaultValue="Seoul" placeholder="Location" />
+      <div className="lcn__code" style={{ position: "relative" }}><input defaultValue="" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} /></div>
+      <input className="lcn__name" defaultValue="" placeholder="Location" />
     </div>
   )},
 ];
@@ -133,10 +133,10 @@ export function TruckSchedulePanel() {
 
 // ── Cargo ──────────────────────────────────────────────────
 const CARGO_ITEMS: FieldItemDef[] = [
-  { key: "package",   render: () => <PackageField qty="1300" unit="CTN" /> },
-  { key: "gw",        render: () => <GWField value="30600" /> },
-  { key: "cbm",       render: () => <LiField label="CBM"        value="87.5"  numeric /> },
-  { key: "charge-wt", render: () => <LiField label="Charge W/T" value="30600" numeric /> },
+  { key: "package",   render: () => <PackageField qty="" unit="" /> },
+  { key: "gw",        render: () => <GWField value="" /> },
+  { key: "cbm",       render: () => <LiField label="CBM"        value="" numeric /> },
+  { key: "charge-wt", render: () => <LiField label="Charge W/T" value="" numeric /> },
 ];
 
 export function TruckCargoPanel() {
@@ -153,7 +153,7 @@ export function TruckCargoPanel() {
 // ── Document ───────────────────────────────────────────────
 const DOC_ITEMS: FieldItemDef[] = [
   { key: "pickup-date", render: () => (
-    <div className="li"><span className="li__label">Pick-up Date</span><div className="li__input"><PanelDateInput defaultValue="2026-04-23" /></div></div>
+    <div className="li"><span className="li__label">Pick-up Date</span><div className="li__input"><PanelDateInput defaultValue="" /></div></div>
   )},
   { key: "trucker", render: () => (
     <div className="lcn" style={{ marginBottom: 4 }}>
