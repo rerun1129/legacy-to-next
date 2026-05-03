@@ -7,13 +7,14 @@ import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
+import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlSea;
+import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HouseBlAssemblerTest {
 
@@ -64,8 +65,8 @@ class HouseBlAssemblerTest {
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=TRUCK → UnsupportedOperationException")
-    void toEntity_truckJobDiv_throwsUnsupportedOperationException() {
+    @DisplayName("toEntity: jobDiv=TRUCK → HouseBlTruck 인스턴스 생성, jobDiv 일치")
+    void toEntity_truckJobDiv_returnsHouseBlTruckWithCorrectJobDiv() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.TRUCK, Bound.EXP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -77,14 +78,16 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null, null
         );
 
-        assertThatThrownBy(() -> assembler.toEntity(request))
-                .isInstanceOf(UnsupportedOperationException.class)
-                .hasMessageContaining("TRUCK");
+        HouseBl result = assembler.toEntity(request);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isInstanceOf(HouseBlTruck.class);
+        assertThat(result.getJobDiv()).isEqualTo(JobDiv.TRUCK);
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=NON_BL → UnsupportedOperationException")
-    void toEntity_nonBlJobDiv_throwsUnsupportedOperationException() {
+    @DisplayName("toEntity: jobDiv=NON_BL → HouseBlNonBl 인스턴스 생성, jobDiv 일치")
+    void toEntity_nonBlJobDiv_returnsHouseBlNonBlWithCorrectJobDiv() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.NON_BL, Bound.EXP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -96,8 +99,11 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null, null
         );
 
-        assertThatThrownBy(() -> assembler.toEntity(request))
-                .isInstanceOf(UnsupportedOperationException.class);
+        HouseBl result = assembler.toEntity(request);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isInstanceOf(HouseBlNonBl.class);
+        assertThat(result.getJobDiv()).isEqualTo(JobDiv.NON_BL);
     }
 
     @Test
