@@ -14,15 +14,9 @@ interface PartyConfig {
 }
 
 function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
-  const defaultCode =
-    cfg.role === "SHIPPER"    ? "HJTR001"  :
-    cfg.role === "CONSIGNEE"  ? "SHTRC001" : "";
-  const defaultName =
-    cfg.role === "SHIPPER"    ? "한진무역(주)"              :
-    cfg.role === "CONSIGNEE"  ? "SHANGHAI TRADING CO., LTD." : "";
-  const defaultAddr =
-    cfg.role === "SHIPPER"    ? "서울특별시 중구 을지로 100\n한진무역 빌딩 12층\nTEL: +82-2-1234-5678" :
-    cfg.role === "CONSIGNEE"  ? "1200 LUJIAZUI RING ROAD\nPUDONG NEW DISTRICT\nSHANGHAI 200120, CHINA" : "";
+  const defaultCode = "";
+  const defaultName = "";
+  const defaultAddr = "";
 
   const isRequired = cfg.role === "CONSIGNEE" ? !isExp : cfg.required;
 

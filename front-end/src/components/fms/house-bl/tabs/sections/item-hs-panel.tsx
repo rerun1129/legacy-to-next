@@ -17,14 +17,7 @@ const ITEM_COLS: GridColumn<ItemRow>[] = [
   { key: "cur",   label: "Currency",    width: 80,  render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
 ];
 
-const ITEM_DATA: ItemRow[] = [
-  { id: 1, hs: "8517.13", desc: "MOBILE PHONE PARTS",         qty: "1300", unit: "CTN", value: "48500.00", cur: "USD" },
-  { id: 2, hs: "8517.62", desc: "WIRELESS MODULE PARTS",      qty: "200",  unit: "CTN", value: "12000.00", cur: "USD" },
-  { id: 3, hs: "8542.31", desc: "SEMICONDUCTOR IC CHIPS",     qty: "500",  unit: "CTN", value: "35000.00", cur: "USD" },
-  { id: 4, hs: "8504.40", desc: "POWER SUPPLY UNITS",         qty: "150",  unit: "CTN", value: "8500.00",  cur: "USD" },
-  { id: 5, hs: "8516.40", desc: "FLAT IRON HEATING ELEMENTS", qty: "200",  unit: "CTN", value: "6200.00",  cur: "USD" },
-  { id: 6, hs: "8536.20", desc: "AUTOMATIC CIRCUIT BREAKERS", qty: "80",   unit: "CTN", value: "3200.00",  cur: "USD" },
-];
+const ITEM_DATA: ItemRow[] = [];
 
 export function ItemHsPanel() {
   return (

@@ -49,16 +49,16 @@ function LcnField({ label, req, code, name }: { label: string; req?: boolean; co
 // ── Field item 정의 ─────────────────────────────────────────
 const LINER_ITEMS: FieldItemDef[] = [
   { key: "liner",    render: () => <LinerField /> },
-  { key: "vessel",   render: () => <SchedField label="Vessel"   value="COSCO EXCELLENCE" req /> },
-  { key: "voyage",   render: () => <SchedField label="Voyage"   value="0412E" req /> },
-  { key: "etd",      render: () => <SchedField label="ETD"      value="2026-04-24" req type="date" /> },
-  { key: "eta",      render: () => <SchedField label="ETA"      value="2026-05-08" req type="date" /> },
+  { key: "vessel",   render: () => <SchedField label="Vessel"   value="" req /> },
+  { key: "voyage",   render: () => <SchedField label="Voyage"   value="" req /> },
+  { key: "etd",      render: () => <SchedField label="ETD"      value="" req type="date" /> },
+  { key: "eta",      render: () => <SchedField label="ETA"      value="" req type="date" /> },
   { key: "on-board", render: () => <SchedField label="On Board" value="" type="date" /> },
 ];
 
 const PORT_ITEMS: FieldItemDef[] = [
-  { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
-  { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
+  { key: "pol",      render: () => <LcnField label="POL"      req  code="" name="" /> },
+  { key: "pod",      render: () => <LcnField label="POD"      req  code="" name="" /> },
   { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
 ];
 
@@ -68,7 +68,7 @@ function IssueSection({ issueFields, panelScope }: { issueFields: string[]; pane
     render: () => (
       <SchedField
         label={f}
-        value={f === "Issue Date" ? "2026-04-20" : f === "No. of B/L" ? "3" : f === "Issue Place" ? "BUSAN" : ""}
+        value={""}
         type={f.includes("Date") ? "date" : "text"}
       />
     ),

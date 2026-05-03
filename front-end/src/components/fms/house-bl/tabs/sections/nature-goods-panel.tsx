@@ -10,7 +10,7 @@ export function NatureGoodsPanel() {
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <LineNumberTextarea
-          defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS"}
+          defaultValue={""}
           style={{ flex: 1, minHeight: 0 }}
         />
       </div>

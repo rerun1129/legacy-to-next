@@ -31,17 +31,17 @@ function LcnField({ label, code, name }: { label: string; code: string; name: st
 
 // ── Field item 정의 ─────────────────────────────────────────
 const TRADE_TERM_ITEMS: FieldItemDef[] = [
-  { key: "incoterms",    render: () => <LiField label="Incoterms"    value="FOB"     req /> },
-  { key: "freight-term", render: () => <LiField label="Freight Term" value="Prepaid" req /> },
-  { key: "payable-at",   render: () => <LiField label="Payable At"   value="ORIGIN" /> },
-  { key: "co-load",      render: () => <LiField label="Co-Load"      value="N" /> },
+  { key: "incoterms",    render: () => <LiField label="Incoterms"    value="" req /> },
+  { key: "freight-term", render: () => <LiField label="Freight Term" value="" req /> },
+  { key: "payable-at",   render: () => <LiField label="Payable At"   value="" /> },
+  { key: "co-load",      render: () => <LiField label="Co-Load"      value="" /> },
 ];
 
 const PERF_ITEMS: FieldItemDef[] = [
-  { key: "customer", render: () => <LcnField label="Actual Customer" code="HJTR001" name="한진무역(주)" /> },
-  { key: "sales",    render: () => <LcnField label="Sales Man"       code="LJY"     name="이진영" /> },
-  { key: "operator", render: () => <LcnField label="Operator"        code="KYS"     name="김영선" /> },
-  { key: "team",     render: () => <LcnField label="Team"            code="SEA-EXP" name="해상수출팀" /> },
+  { key: "customer", render: () => <LcnField label="Actual Customer" code="" name="" /> },
+  { key: "sales",    render: () => <LcnField label="Sales Man"       code="" name="" /> },
+  { key: "operator", render: () => <LcnField label="Operator"        code="" name="" /> },
+  { key: "team",     render: () => <LcnField label="Team"            code="" name="" /> },
 ];
 
 export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {

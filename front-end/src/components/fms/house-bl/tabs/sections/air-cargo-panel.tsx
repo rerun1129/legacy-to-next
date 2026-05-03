@@ -26,7 +26,7 @@ function GWField() {
     <div className="li">
       <span className="li__label">Gross W/T</span>
       <div className="li__input" style={{ display: "flex", gap: 4 }}>
-        <input type="number" step="any" defaultValue="30600" style={{ ...LI_ST, flex: 1, width: undefined }} />
+        <input type="number" step="any" defaultValue="" style={{ ...LI_ST, flex: 1, width: undefined }} />
         <select style={UNIT_SEL}><option>KGS</option><option>LBS</option></select>
       </div>
     </div>
@@ -36,10 +36,10 @@ function GWField() {
 const CARGO_ITEMS: FieldItemDef[] = [
   { key: "packages",  render: () => <PackageField height={24} /> },
   { key: "gross-wt",  render: () => <GWField /> },
-  { key: "volume-wt", render: () => <LiField label="Volume W/T" value="14583" type="number" /> },
-  { key: "charge-wt", render: () => <LiField label="Charge W/T" value="30600" type="number" /> },
-  { key: "rate-class", render: () => <LiField label="Rate Class" value="GCR" /> },
-  { key: "cbm",       render: () => <LiField label="CBM"        value="87.5"  type="number" /> },
+  { key: "volume-wt", render: () => <LiField label="Volume W/T" value="" type="number" /> },
+  { key: "charge-wt", render: () => <LiField label="Charge W/T" value="" type="number" /> },
+  { key: "rate-class", render: () => <LiField label="Rate Class" value="" /> },
+  { key: "cbm",       render: () => <LiField label="CBM"        value=""  type="number" /> },
 ];
 
 export function AirCargoPanel({ variant }: Props) {
