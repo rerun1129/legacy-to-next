@@ -29,7 +29,7 @@ const EMPTY_DIM_ROW = {
 
 export function DimensionPanel() {
   const { control } = useFormContext<HouseBlFormValues>();
-  const { fields, append, remove } = useFieldArray({ control, name: "dims" });
+  const { fields, append, remove } = useFieldArray({ control, name: "dims", keyName: "rhfKey" });
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
 
   const selectedIdx = selectedKey !== null

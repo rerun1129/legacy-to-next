@@ -31,7 +31,7 @@ const EMPTY_CONTAINER_ROW = {
 
 export function ContainerGridPanel() {
   const { control } = useFormContext<HouseBlFormValues>();
-  const { fields, append, remove } = useFieldArray({ control, name: "containers" });
+  const { fields, append, remove } = useFieldArray({ control, name: "containers", keyName: "rhfKey" });
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
 
   const selectedIdx = selectedKey !== null
