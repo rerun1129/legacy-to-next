@@ -5,7 +5,6 @@ import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
@@ -63,7 +62,7 @@ public class HouseBlAssembler {
 
         entity.updateCargoSummary(new CargoSummary(
                 Quantity.of(req.pkgQty()),
-                WeightUnit.fromCode(req.pkgUnit()),
+                req.pkgUnit(),
                 Weight.of(req.grossWeightKg()),
                 Volume.of(req.cbm())
         ));
@@ -121,10 +120,10 @@ public class HouseBlAssembler {
         if (req.pkgQty() != null || req.pkgUnit() != null
                 || req.grossWeightKg() != null || req.cbm() != null) {
             entity.updateCargoSummary(new CargoSummary(
-                    req.pkgQty()        != null ? Quantity.of(req.pkgQty())          : entity.getPkgQty(),
-                    req.pkgUnit()       != null ? WeightUnit.fromCode(req.pkgUnit())  : entity.getPkgUnit(),
-                    req.grossWeightKg() != null ? Weight.of(req.grossWeightKg())      : entity.getGrossWeightKg(),
-                    req.cbm()           != null ? Volume.of(req.cbm())                : entity.getCbm()
+                    req.pkgQty()        != null ? Quantity.of(req.pkgQty())     : entity.getPkgQty(),
+                    req.pkgUnit()       != null ? req.pkgUnit()                 : entity.getPkgUnit(),
+                    req.grossWeightKg() != null ? Weight.of(req.grossWeightKg()) : entity.getGrossWeightKg(),
+                    req.cbm()           != null ? Volume.of(req.cbm())           : entity.getCbm()
             ));
         }
 
