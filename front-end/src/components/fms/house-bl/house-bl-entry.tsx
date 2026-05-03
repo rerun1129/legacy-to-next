@@ -70,7 +70,7 @@ function renderMainTab(variant: BLVariantConfig) {
   return <MainTabSea variant={variant} />;
 }
 
-const TOOLBAR_LABEL_TO_FIELD: Record<string, keyof HouseBlFormValues> = {
+const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
   "HBL No":         "hbl",
   "HAWB No":        "hbl",
   "Truck B/L No":   "hbl",
@@ -79,6 +79,10 @@ const TOOLBAR_LABEL_TO_FIELD: Record<string, keyof HouseBlFormValues> = {
   "MAWB No":        "mbl",
   "Load Type":      "lType",
   "Settle":         "settle",
+  "Shipment Type":  "sType",
+  "Service Term":   "seaDetail.serviceTerm",
+  "B/L Type":       "seaDetail.blType",
+  "Master Ref":     "masterRefNo",
 };
 
 const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type", "Settle"]);
@@ -247,12 +251,12 @@ export function HouseBLEntry({ variant, id }: Props) {
                   {fieldName ? (
                     <>
                       <input
-                        {...form.register(fieldName)}
+                        {...(form.register as (n: string) => object)(fieldName)}
                         placeholder={f}
                       />
-                      {form.formState.errors[fieldName] && (
+                      {(form.formState.errors as Record<string, unknown>)[fieldName] && (
                         <span className="field__error">
-                          {form.formState.errors[fieldName]?.message}
+                          {(form.formState.errors as Record<string, { message?: string }>)[fieldName]?.message}
                         </span>
                       )}
                     </>

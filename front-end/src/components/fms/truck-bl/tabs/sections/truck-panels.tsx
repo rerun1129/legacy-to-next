@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { Search } from "lucide-react";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { PanelDateInput }     from "@/components/shared/grid-cell-inputs";
@@ -129,22 +129,47 @@ export function TruckPartyPanel() {
 
 // ── Schedule ───────────────────────────────────────────────
 function TruckScheduleVesselDates() {
+  const { control } = useFormContext<HouseBlFormValues>();
   const ITEMS: FieldItemDef[] = [
     { key: "vessel", render: () => <LiField label="Vessel" registerKey="vesselName" /> },
-    /*
-      PanelDateInput은 내부 상태를 직접 관리하는 비제어 컴포넌트.
-      register spread 불가 — defaultValue="" 유지.
-    */
     { key: "etd",    render: () => (
       <div className="li">
         <span className="li__label is-required">ETD</span>
-        <div className="li__input"><PanelDateInput defaultValue="" required /></div>
+        <div className="li__input">
+          <Controller
+            control={control}
+            name="etd"
+            render={({ field }) => (
+              <PanelDateInput
+                required
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
+        </div>
       </div>
     )},
     { key: "eta",    render: () => (
       <div className="li">
         <span className="li__label is-required">ETA</span>
-        <div className="li__input"><PanelDateInput defaultValue="" required /></div>
+        <div className="li__input">
+          <Controller
+            control={control}
+            name="eta"
+            render={({ field }) => (
+              <PanelDateInput
+                required
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
+        </div>
       </div>
     )},
   ];
@@ -217,16 +242,25 @@ export function TruckCargoPanel() {
 
 // ── Document ───────────────────────────────────────────────
 function TruckDocumentItems() {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
   const ITEMS: FieldItemDef[] = [
     { key: "pickup-date", render: () => (
       <div className="li">
         <span className="li__label">Pick-up Date</span>
-        {/*
-          PanelDateInput은 내부 상태를 직접 관리하는 비제어 컴포넌트.
-          register spread 불가 — defaultValue="" 유지.
-        */}
-        <div className="li__input"><PanelDateInput defaultValue="" /></div>
+        <div className="li__input">
+          <Controller
+            control={control}
+            name="pickupDate"
+            render={({ field }) => (
+              <PanelDateInput
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
+        </div>
       </div>
     )},
     { key: "trucker", render: () => (

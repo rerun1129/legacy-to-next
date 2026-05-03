@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { Search } from "lucide-react";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
@@ -9,7 +9,7 @@ import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
 
 export function NonBLSchedulePanel() {
-  const { register } = useFormContext<NonBlFormValues>();
+  const { register, control } = useFormContext<NonBlFormValues>();
 
   const linerVesselItems: FieldItemDef[] = useMemo(() => [
     {
@@ -51,7 +51,21 @@ export function NonBLSchedulePanel() {
       render: () => (
         <div className="li">
           <span className="li__label is-required">ETD</span>
-          <div className="li__input"><PanelDateInput required {...register("etd")} /></div>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="etd"
+              render={({ field }) => (
+                <PanelDateInput
+                  required
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
+            />
+          </div>
         </div>
       ),
     },
@@ -60,11 +74,25 @@ export function NonBLSchedulePanel() {
       render: () => (
         <div className="li">
           <span className="li__label is-required">ETA</span>
-          <div className="li__input"><PanelDateInput required {...register("eta")} /></div>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="eta"
+              render={({ field }) => (
+                <PanelDateInput
+                  required
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
+            />
+          </div>
         </div>
       ),
     },
-  ], [register]);
+  ], [register, control]);
 
   const portItems: FieldItemDef[] = useMemo(() => [
     {
@@ -111,11 +139,24 @@ export function NonBLSchedulePanel() {
       render: () => (
         <div className="li">
           <span className="li__label">Final ETA</span>
-          <div className="li__input"><PanelDateInput {...register("finalEta")} /></div>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="finalEta"
+              render={({ field }) => (
+                <PanelDateInput
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
+            />
+          </div>
         </div>
       ),
     },
-  ], [register]);
+  ], [register, control]);
 
   const fields: FieldWidgetDef[] = [
     {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormContext, type UseFormReturn } from "react-hook-form";
+import { useFormContext, Controller, type UseFormReturn } from "react-hook-form";
 import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
@@ -26,14 +26,28 @@ const LEG_DATA: LegRow[] = [];
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function SchedField({ label, name, req, type = "text" }: { label: string; name: string; req?: boolean; type?: string }) {
-  const { register } = useFormContext();
+  const { register, control } = useFormContext();
   return (
     <div className="li">
       <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
       <div className="li__input">
-        {type === "date"
-          ? <PanelDateInput required={req} {...register(name)} />
-          : <input style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} {...register(name)} />}
+        {type === "date" ? (
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <PanelDateInput
+                required={req}
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
+        ) : (
+          <input style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} {...register(name)} />
+        )}
       </div>
     </div>
   );

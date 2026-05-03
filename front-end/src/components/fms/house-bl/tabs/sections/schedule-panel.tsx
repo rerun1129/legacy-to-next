@@ -1,5 +1,5 @@
 import type React from "react";
-import { useFormContext, type FieldPath } from "react-hook-form";
+import { useFormContext, Controller, type FieldPath } from "react-hook-form";
 import { Search } from "lucide-react";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
@@ -30,14 +30,28 @@ function SchedField({
   req?: boolean;
   type?: string;
 }) {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
   return (
     <div className="li">
       <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
       <div className="li__input">
-        {type === "date"
-          ? <PanelDateInput required={req} {...register(name)} />
-          : <input type={type} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...register(name)} />}
+        {type === "date" ? (
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <PanelDateInput
+                required={req}
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
+        ) : (
+          <input type={type} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...register(name)} />
+        )}
       </div>
     </div>
   );
