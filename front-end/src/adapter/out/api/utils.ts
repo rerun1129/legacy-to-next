@@ -10,8 +10,9 @@ function resolveUrl(input: RequestInfo): RequestInfo {
 }
 
 export function toSearchParams(filter: Record<string, unknown>): URLSearchParams {
+  // null, undefined, 빈 문자열은 query string에서 제외
   return Object.entries(filter)
-    .filter(([, v]) => v != null)
+    .filter(([, v]) => v != null && v !== '')
     .reduce((p, [k, v]) => { p.set(k, String(v)); return p; }, new URLSearchParams());
 }
 

@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import { ChevronUp, RotateCcw, Search } from "lucide-react";
-import type { HouseBlFilter } from "@/domain/house-bl";
+import type { MasterBlFilter } from "@/domain/master-bl";
 
 interface Props {
-  onSearch: (filter: Partial<HouseBlFilter>) => void;
+  onSearch: (filter: Partial<MasterBlFilter>) => void;
   onReset: () => void;
 }
 
-export function ListFilter({ onSearch, onReset }: Props) {
+export function MasterBlListFilter({ onSearch, onReset }: Props) {
   const [collapsed, setCollapsed] = useState(false);
-  const [hblNo, setHblNo] = useState('');
   const [mblNo, setMblNo] = useState('');
   const [shipperCode, setShipperCode] = useState('');
   const [consigneeCode, setConsigneeCode] = useState('');
@@ -22,7 +21,6 @@ export function ListFilter({ onSearch, onReset }: Props) {
 
   function handleSearch() {
     onSearch({
-      hblNo: hblNo || undefined,
       mblNo: mblNo || undefined,
       shipperCode: shipperCode || undefined,
       consigneeCode: consigneeCode || undefined,
@@ -34,7 +32,6 @@ export function ListFilter({ onSearch, onReset }: Props) {
   }
 
   function handleReset() {
-    setHblNo('');
     setMblNo('');
     setShipperCode('');
     setConsigneeCode('');
@@ -58,18 +55,6 @@ export function ListFilter({ onSearch, onReset }: Props) {
                 <span className="lcn__tilde">~</span>
                 <input type="date" value={etdTo} onChange={(e) => setEtdTo(e.target.value)} />
               </div>
-            </div>
-
-            {/* HBL No */}
-            <div className="lcn">
-              <span className="lcn__label">HBL No</span>
-              <input
-                className="lcn__name"
-                placeholder="HBL Number"
-                style={{ gridColumn: "2 / span 2" }}
-                value={hblNo}
-                onChange={(e) => setHblNo(e.target.value)}
-              />
             </div>
 
             {/* MBL No */}

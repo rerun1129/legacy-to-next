@@ -5,22 +5,25 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { houseBlPort } from "@/lib/ports";
 import { getBLVariant } from "@/lib/bl-variants";
-import type { HouseBlRow } from "@/domain/house-bl";
+import type { HouseBlRow, HouseBlFilter } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 
-interface Props { variantKey: string }
+interface Props {
+  variantKey: string;
+  extraFilter?: Partial<HouseBlFilter>;
+}
 
-export function HouseBLListGrid({ variantKey }: Props) {
+export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
   const router  = useRouter();
   const variant = getBLVariant(variantKey);
   const [selected, setSelected] = useState<number | null>(null);
 
   // variant.mode → jobDiv (SEA/AIR), variant.direction → bound (EXP/IMP)
   const { data: rows = [], isLoading, error } = useQuery({
-    queryKey: ["house-bl", "list", variantKey],
+    queryKey: ["house-bl", "list", variantKey, extraFilter],
     queryFn: () =>
-      houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction }),
+      houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction, ...extraFilter }),
   });
 
   if (isLoading) return <div className="p-4 text-sm text-muted-foreground">로딩 중...</div>;

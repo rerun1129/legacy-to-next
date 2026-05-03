@@ -35,6 +35,13 @@ export interface ConsolidatedHouseBlSummary {
 export interface MasterBlFilter {
   jobDiv?: JobDiv;
   bound: Bound;
+  mblNo?: string;
+  shipperCode?: string;
+  consigneeCode?: string;
+  polCode?: string;
+  podCode?: string;
+  etdFrom?: string;
+  etdTo?: string;
   page?: number;
   size?: number;
 }
