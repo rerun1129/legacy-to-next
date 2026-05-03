@@ -30,11 +30,11 @@ export function TruckBLEntry() {
       {/* Toolbar: Document Key fields */}
       <div className="toolbar" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
         {[
-          { l: "Truck B/L No",    v: "",           req: true  },
-          { l: "Settle",          v: "PREPAID",    req: true  },
-          { l: "Incoterms",       v: "DAP",        req: false },
-          { l: "Freight Term",    v: "Prepaid",    req: false },
-          { l: "Status",          v: "DRAFT",      req: false },
+          { l: "Truck B/L No",    v: "",  req: true  },
+          { l: "Settle",          v: "",  req: true  },
+          { l: "Incoterms",       v: "",  req: false },
+          { l: "Freight Term",    v: "",  req: false },
+          { l: "Status",          v: "",  req: false },
         ].map((f) => (
           <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
             <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>
