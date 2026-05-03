@@ -17,8 +17,6 @@ public class SwitchBl extends BaseEntity {
     private Long switchBlId;
     private Long houseBlId;
     private String switchBlNo;
-    private String blType;
-    private String incoterms;
     private CustomerCode shipperCode;
     private CustomerCode consigneeCode;
     private CustomerCode notifyCode;
@@ -43,11 +41,9 @@ public class SwitchBl extends BaseEntity {
         this.switchBlId = switchBlId;
     }
 
-    public void updateDetails(String switchBlNo, String blType, String incoterms,
+    public void updateDetails(String switchBlNo,
                               CustomerCode shipperCode, CustomerCode consigneeCode, CustomerCode notifyCode) {
         this.switchBlNo    = switchBlNo;
-        this.blType        = blType;
-        this.incoterms     = incoterms;
         this.shipperCode   = shipperCode;
         this.consigneeCode = consigneeCode;
         this.notifyCode    = notifyCode;

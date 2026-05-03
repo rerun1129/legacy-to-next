@@ -10,8 +10,6 @@ import { SwitchBlPartyPanel } from "./switch-bl-party-panel";
 
 export interface SwitchBlFormValues {
   switchBlNo: string;
-  blType: string;
-  incoterms: string;
   shipperCode: string;
   shipperAddress: string;
   consigneeCode: string;
@@ -28,7 +26,7 @@ interface SwitchBlModalProps {
   onClose: () => void;
 }
 
-// ── Toolbar (Switch B/L No, House B/L No, Incoterms, B/L Type) ────────────
+// ── Toolbar (Switch B/L No, House B/L No) ─────────────────────────────────
 interface ToolbarProps {
   houseBlId: number;
   form: ReturnType<typeof useForm<SwitchBlFormValues>>;
@@ -49,18 +47,6 @@ function SwitchBlToolbar({ houseBlId, form }: ToolbarProps) {
         <div className="field__input">
           {/* read-only: houseBlId 표시 */}
           <input value={String(houseBlId)} readOnly />
-        </div>
-      </div>
-      <div className="field">
-        <div className="field__label">Incoterms</div>
-        <div className="field__input">
-          <input {...register("incoterms")} placeholder="Incoterms" />
-        </div>
-      </div>
-      <div className="field is-required">
-        <div className="field__label is-required">B/L Type</div>
-        <div className="field__input">
-          <input {...register("blType")} placeholder="B/L Type" />
         </div>
       </div>
     </div>
@@ -103,8 +89,6 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
   const form = useForm<SwitchBlFormValues>({
     defaultValues: {
       switchBlNo: "",
-      blType: "",
-      incoterms: "",
       shipperCode: "",
       shipperAddress: "",
       consigneeCode: "",
@@ -127,8 +111,6 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
     if (existing) {
       form.reset({
         switchBlNo: existing.switchBlNo ?? "",
-        blType: existing.blType ?? "",
-        incoterms: existing.incoterms ?? "",
         shipperCode: existing.shipperCode ?? "",
         shipperAddress: existing.shipperAddress ?? "",
         consigneeCode: existing.consigneeCode ?? "",
@@ -151,8 +133,6 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
       const body = {
         houseBlId,
         switchBlNo: values.switchBlNo || undefined,
-        blType: values.blType || undefined,
-        incoterms: values.incoterms || undefined,
         shipperCode: values.shipperCode,
         shipperAddress: values.shipperAddress || undefined,
         consigneeCode: values.consigneeCode || undefined,

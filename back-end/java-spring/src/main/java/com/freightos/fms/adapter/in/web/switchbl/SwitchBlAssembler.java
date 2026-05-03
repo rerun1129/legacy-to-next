@@ -24,8 +24,6 @@ public class SwitchBlAssembler {
         );
         entity.updateDetails(
                 req.switchBlNo(),
-                req.blType(),
-                req.incoterms(),
                 CustomerCode.of(req.shipperCode(), req.shipperAddress()),
                 CustomerCode.of(req.consigneeCode(), req.consigneeAddress()),
                 CustomerCode.of(req.notifyCode(), req.notifyAddress())
@@ -43,8 +41,6 @@ public class SwitchBlAssembler {
     public void applyToEntity(UpdateSwitchBlRequest req, SwitchBl entity) {
         entity.updateDetails(
                 req.switchBlNo()   != null ? req.switchBlNo()   : entity.getSwitchBlNo(),
-                req.blType()       != null ? req.blType()       : entity.getBlType(),
-                req.incoterms()    != null ? req.incoterms()    : entity.getIncoterms(),
                 req.shipperCode()  != null
                         ? CustomerCode.of(req.shipperCode(), req.shipperAddress())
                         : entity.getShipperCode(),

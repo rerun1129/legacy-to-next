@@ -22,7 +22,7 @@ class SwitchBlMapperTest {
     @DisplayName("applyFields: 도메인 필수·선택 필드가 모두 JPA 엔티티에 복사된다")
     void applyFields_setsAllMandatoryFields() {
         SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
-        domain.updateDetails("SBL-001", "ORIGINAL", "FOB",
+        domain.updateDetails("SBL-001",
                 CustomerCode.of("SHIP01"), CustomerCode.of("CONS01"), CustomerCode.of("NOTIF01"));
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
@@ -33,8 +33,6 @@ class SwitchBlMapperTest {
         mapper.applyFields(domain, jpa);
 
         assertThat(jpa.getSwitchBlNo()).isEqualTo("SBL-001");
-        assertThat(jpa.getBlType()).isEqualTo("ORIGINAL");
-        assertThat(jpa.getIncoterms()).isEqualTo("FOB");
         assertThat(jpa.getShipperCode()).isEqualTo("SHIP01");
         assertThat(jpa.getConsigneeCode()).isEqualTo("CONS01");
         assertThat(jpa.getNotifyCode()).isEqualTo("NOTIF01");
@@ -45,31 +43,29 @@ class SwitchBlMapperTest {
     @DisplayName("applyFields: consigneeCode/notifyCode/blType/incoterms null 이어도 NPE 없이 동작한다")
     void applyFields_nullOptionalFields_doesNotThrow() {
         SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
-        domain.updateDetails(null, null, null, CustomerCode.of("SHIP01"), null, null);
+        domain.updateDetails(null, CustomerCode.of("SHIP01"), null, null);
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
 
         mapper.applyFields(domain, jpa);
 
         assertThat(jpa.getSwitchBlNo()).isNull();
-        assertThat(jpa.getBlType()).isNull();
-        assertThat(jpa.getIncoterms()).isNull();
         assertThat(jpa.getShipperCode()).isEqualTo("SHIP01");
         assertThat(jpa.getConsigneeCode()).isNull();
         assertThat(jpa.getNotifyCode()).isNull();
     }
 
     @Test
-    @DisplayName("applyFields: blType=ORIGINAL 이 JPA 엔티티에 그대로 세팅된다")
-    void applyFields_blTypeOriginal_copiedToJpa() {
+    @DisplayName("applyFields: switchBlNo 가 JPA 엔티티에 그대로 세팅된다")
+    void applyFields_switchBlNo_copiedToJpa() {
         SwitchBl domain = SwitchBl.create(5L, CustomerCode.of("SHIP05"));
-        domain.updateDetails("SBL-005", "ORIGINAL", null, CustomerCode.of("SHIP05"), null, null);
+        domain.updateDetails("SBL-005", CustomerCode.of("SHIP05"), null, null);
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
 
         mapper.applyFields(domain, jpa);
 
-        assertThat(jpa.getBlType()).isEqualTo("ORIGINAL");
+        assertThat(jpa.getSwitchBlNo()).isEqualTo("SBL-005");
     }
 
     // ── toDomain (JPA → 도메인) ───────────────────────────────────────
@@ -83,8 +79,6 @@ class SwitchBlMapperTest {
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
         jpa.setHouseBl(houseBlJpa);
         jpa.setSwitchBlNo("SBL-001");
-        jpa.setBlType("SURRENDER");
-        jpa.setIncoterms("FOB");
         jpa.setShipperCode("SHIP01");
         jpa.setConsigneeCode("CONS01");
         jpa.setNotifyCode("NOTIF01");
@@ -92,8 +86,6 @@ class SwitchBlMapperTest {
         SwitchBl domain = mapper.toDomain(jpa);
 
         assertThat(domain.getSwitchBlNo()).isEqualTo("SBL-001");
-        assertThat(domain.getBlType()).isEqualTo("SURRENDER");
-        assertThat(domain.getIncoterms()).isEqualTo("FOB");
         assertThat(domain.getShipperCode().value()).isEqualTo("SHIP01");
         assertThat(domain.getConsigneeCode().value()).isEqualTo("CONS01");
         assertThat(domain.getNotifyCode().value()).isEqualTo("NOTIF01");
@@ -101,7 +93,7 @@ class SwitchBlMapperTest {
     }
 
     @Test
-    @DisplayName("toDomain: switchBlNo/blType/incoterms/consigneeCode/notifyCode null 이면 도메인도 null 로 유지된다")
+    @DisplayName("toDomain: switchBlNo/consigneeCode/notifyCode null 이면 도메인도 null 로 유지된다")
     void toDomain_nullOptionalFields_returnsDomainWithNulls() {
         HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
         houseBlJpa.setHouseBlId(30L);
@@ -114,8 +106,6 @@ class SwitchBlMapperTest {
 
         assertThat(domain.getShipperCode().value()).isEqualTo("SHIP02");
         assertThat(domain.getSwitchBlNo()).isNull();
-        assertThat(domain.getBlType()).isNull();
-        assertThat(domain.getIncoterms()).isNull();
         assertThat(domain.getConsigneeCode()).isNull();
         assertThat(domain.getNotifyCode()).isNull();
     }

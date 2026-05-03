@@ -7,8 +7,6 @@ export interface SwitchBl {
   id: number;
   houseBlId: number;
   switchBlNo?: string | null;
-  blType?: string | null;
-  incoterms?: string | null;
   shipperCode: string;
   shipperAddress?: string | null;
   consigneeCode?: string | null;
@@ -21,8 +19,6 @@ export interface SwitchBl {
 export interface CreateSwitchBlRequest {
   houseBlId: number;
   switchBlNo?: string;
-  blType?: string;
-  incoterms?: string;
   shipperCode: string;
   shipperAddress?: string;
   consigneeCode?: string;

@@ -14,8 +14,6 @@ export const mockSwitchBlPort: SwitchBlPort = {
       id: Date.now(),
       houseBlId: req.houseBlId,
       switchBlNo: req.switchBlNo ?? null,
-      blType: req.blType ?? null,
-      incoterms: req.incoterms ?? null,
       shipperCode: req.shipperCode,
       shipperAddress: req.shipperAddress ?? null,
       consigneeCode: req.consigneeCode ?? null,

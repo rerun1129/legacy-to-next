@@ -4,8 +4,6 @@ import type { Page } from '@playwright/test';
 //
 // [Toolbar — register 연결 필드]
 //   register("switchBlNo")  → input placeholder="Switch B/L No"
-//   register("incoterms")   → input placeholder="Incoterms"
-//   register("blType")      → input placeholder="B/L Type"
 //   input readOnly           → House B/L No (수정 불가)
 //
 // [SwitchBlPartyPanel]
@@ -26,8 +24,6 @@ export async function fillSwitchBlForm(page: Page, ts: number): Promise<void> {
 
   // Toolbar 필드
   await page.fill('input[placeholder="Switch B/L No"]', `SBL${ts}`);
-  await page.fill('input[placeholder="B/L Type"]', 'SURRENDER');
-  await page.fill('input[placeholder="Incoterms"]', 'FOB');
 
   // Party 코드
   await page.fill('input[placeholder="Shipper Code"]', 'SHIPPER01');
