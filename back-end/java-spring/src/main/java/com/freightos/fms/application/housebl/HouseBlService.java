@@ -6,6 +6,7 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
@@ -27,6 +28,11 @@ public class HouseBlService implements HouseBlUseCase {
     @Override
     public PagedResult<HouseBlSummary> getHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
         return houseBlPort.findHouseBlsByJobDivAndBound(jobDiv, bound, PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
+    }
+
+    @Override
+    public PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest) {
+        return houseBlPort.searchHouseBls(filter, pageRequest);
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -41,7 +43,27 @@ public class HouseBlController {
             @Parameter(description = "운송 모드") @RequestParam JobDiv jobDiv,
             @Parameter(description = "방향")     @RequestParam Bound  bound,
             @RequestParam(defaultValue = "0")  @Min(0)  int page,
-            @RequestParam(defaultValue = "50") @Min(1)  int size) {
+            @RequestParam(defaultValue = "50") @Min(1)  int size,
+            @RequestParam(required = false) String hblNo,
+            @RequestParam(required = false) String mblNo,
+            @RequestParam(required = false) String shipperCode,
+            @RequestParam(required = false) String consigneeCode,
+            @RequestParam(required = false) String polCode,
+            @RequestParam(required = false) String podCode,
+            @RequestParam(required = false) String etdFrom,
+            @RequestParam(required = false) String etdTo) {
+
+        boolean hasFilter = StringUtils.hasText(hblNo) || StringUtils.hasText(mblNo)
+                || StringUtils.hasText(shipperCode) || StringUtils.hasText(consigneeCode)
+                || StringUtils.hasText(polCode) || StringUtils.hasText(podCode)
+                || StringUtils.hasText(etdFrom) || StringUtils.hasText(etdTo);
+
+        if (hasFilter) {
+            HouseBlFilter filter = HouseBlFilter.of(jobDiv, bound, hblNo, mblNo,
+                    shipperCode, consigneeCode, polCode, podCode, etdFrom, etdTo);
+            return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
+                    houseBlUseCase.searchHouseBls(filter, PageRequest.of(page, size)))));
+        }
 
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
                 houseBlUseCase.getHouseBlsByJobDivAndBound(jobDiv, bound, PageRequest.of(page, size)))));

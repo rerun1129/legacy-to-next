@@ -7,6 +7,7 @@ import com.freightos.fms.adapter.in.web.masterbl.dto.UpdateMasterBlRequest;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -38,7 +40,27 @@ public class MasterBlController {
     public ResponseEntity<ApiResponse<PagedResult<MasterBlSummaryResponse>>> getMasterBlsByBound(
             @RequestParam Bound bound,
             @RequestParam(defaultValue = "0")  @Min(0) int page,
-            @RequestParam(defaultValue = "50") @Min(1) int size) {
+            @RequestParam(defaultValue = "50") @Min(1) int size,
+            @RequestParam(required = false) String mblNo,
+            @RequestParam(required = false) String shipperCode,
+            @RequestParam(required = false) String consigneeCode,
+            @RequestParam(required = false) String polCode,
+            @RequestParam(required = false) String podCode,
+            @RequestParam(required = false) String etdFrom,
+            @RequestParam(required = false) String etdTo) {
+
+        boolean hasFilter = StringUtils.hasText(mblNo) || StringUtils.hasText(shipperCode)
+                || StringUtils.hasText(consigneeCode) || StringUtils.hasText(polCode)
+                || StringUtils.hasText(podCode) || StringUtils.hasText(etdFrom)
+                || StringUtils.hasText(etdTo);
+
+        if (hasFilter) {
+            MasterBlFilter filter = new MasterBlFilter(bound, mblNo, shipperCode, consigneeCode,
+                    polCode, podCode, etdFrom, etdTo);
+            return ResponseEntity.ok(ApiResponse.of(
+                    masterBlAssembler.toSummaryPage(masterBlUseCase.searchMasterBls(filter, PageRequest.of(page, size)))));
+        }
+
         return ResponseEntity.ok(ApiResponse.of(
                 masterBlAssembler.toSummaryPage(masterBlUseCase.getMasterBlsByBound(bound, PageRequest.of(page, size)))));
     }

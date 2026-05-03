@@ -9,6 +9,7 @@ import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.masterbl.MasterBlDetail;
+import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
@@ -281,5 +282,39 @@ class MasterBlServiceTest {
 
         assertThat(result).isEqualTo(mockMasterBl);
         then(masterBlPort).should().saveMasterBl(mockMasterBl);
+    }
+
+    // ── searchMasterBls ───────────────────────────────────────
+
+    @Test
+    @DisplayName("searchMasterBls - filter와 pageRequest를 port에 위임하고 결과를 그대로 반환")
+    void searchMasterBls_delegatesToPort() {
+        MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
+        PageRequest pageRequest = PageRequest.of(0, 20);
+        MasterBl mockEntity = mock(MasterBl.class);
+        PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 20);
+        given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
+
+        PagedResult<MasterBl> result = masterBlService.searchMasterBls(filter, pageRequest);
+
+        assertThat(result.getContent()).hasSize(1);
+        then(masterBlPort).should().searchMasterBls(filter, pageRequest);
+    }
+
+    @Test
+    @DisplayName("searchMasterBls - port PagedResult 메타(totalElements/totalPages/page/size) 그대로 반영")
+    void searchMasterBls_returnsPagedResultWithCorrectMeta() {
+        MasterBlFilter filter = new MasterBlFilter(Bound.IMP, null, "SHIP01", null, "KRPUS", null, null, null);
+        PageRequest pageRequest = PageRequest.of(2, 15);
+        MasterBl mockEntity = mock(MasterBl.class);
+        PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 50L, 4, 2, 15);
+        given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
+
+        PagedResult<MasterBl> result = masterBlService.searchMasterBls(filter, pageRequest);
+
+        assertThat(result.getTotalElements()).isEqualTo(50L);
+        assertThat(result.getTotalPages()).isEqualTo(4);
+        assertThat(result.getPage()).isEqualTo(2);
+        assertThat(result.getSize()).isEqualTo(15);
     }
 }
