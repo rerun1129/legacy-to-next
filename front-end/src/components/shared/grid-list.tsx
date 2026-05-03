@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -151,7 +151,10 @@ function ManagedGridList<T>({
   // rowKey prop은 호출처마다 매 렌더에 새 함수가 전달될 수 있으므로
   // ref로 보관해 useEffect 의존성 루프를 방지
   const rowKeyRef = useRef(rowKey);
-  rowKeyRef.current = rowKey;
+  // 렌더 body에서 ref.current 직접 대입 금지 — useLayoutEffect로 동기 갱신
+  useLayoutEffect(() => {
+    rowKeyRef.current = rowKey;
+  });
 
   useEffect(() => {
     if (selectedCell == null) return;
@@ -286,7 +289,10 @@ function PlainGridList<T>({
   // rowKey prop은 호출처마다 매 렌더에 새 함수가 전달될 수 있으므로
   // ref로 보관해 useEffect 의존성 루프를 방지
   const rowKeyRef = useRef(rowKey);
-  rowKeyRef.current = rowKey;
+  // 렌더 body에서 ref.current 직접 대입 금지 — useLayoutEffect로 동기 갱신
+  useLayoutEffect(() => {
+    rowKeyRef.current = rowKey;
+  });
 
   useEffect(() => {
     if (selectedCell == null) return;

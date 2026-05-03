@@ -71,16 +71,6 @@ const ACCOUNT_ROWS: AccountRow[] = [];
 const EMPTY_FREIGHT_ROW = { code: "", desc: "", qty: "", unit: "", amount: "", cur: "" };
 
 // ── Rate input styles ──────────────────────────────────────
-const CODE_INPUT: React.CSSProperties = {
-  height: 22, padding: "0 24px 0 8px", fontSize: 10,
-  background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4,
-  color: "var(--ink)", fontFamily: "var(--font-mono)", outline: "none", width: 90, flexShrink: 0,
-};
-const NAME_INPUT: React.CSSProperties = {
-  height: 22, padding: "0 8px", fontSize: 10,
-  background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4,
-  color: "var(--ink)", outline: "none", flex: 1, marginLeft: 6, minWidth: 0,
-};
 const CUR_SELECT: React.CSSProperties = {
   height: 22, padding: "0 6px", fontSize: 10,
   background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4,
