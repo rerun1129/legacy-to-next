@@ -6,9 +6,9 @@ import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-
 const NON_PARTIES = [
   { key: "actual-customer", role: "ACTUAL CUSTOMER", req: true,  btn: null           },
   { key: "shipper",         role: "SHIPPER",         req: false, btn: null           },
-  { key: "consignee",       role: "CONSIGNEE",       req: false, btn: "To Order"     },
-  { key: "notify",          role: "NOTIFY",          req: false, btn: "Same as Cne." },
-  { key: "sales-partner",   role: "Sales Partner",   req: false, btn: null           },
+  { key: "consignee",       role: "CONSIGNEE",       req: false, btn: null           },
+  { key: "notify",          role: "NOTIFY",          req: false, btn: null           },
+  { key: "settle-partner",   role: "SETTLE PARTNER",   req: false, btn: null           },
 ] as const;
 
 function PartyBlock({ party }: { party: typeof NON_PARTIES[number] }) {

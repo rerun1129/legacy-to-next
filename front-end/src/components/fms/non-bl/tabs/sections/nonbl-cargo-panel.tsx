@@ -47,8 +47,7 @@ const CARGO_ITEMS: FieldItemDef[] = [
       <div className="li">
         <span className="li__label">Unit</span>
         <div className="li__input" style={{ gap: 4 }}>
-          <input placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-          <Search size={12} style={{ flexShrink: 0, color: "var(--ink-muted)", cursor: "pointer" }} />
+          <input placeholder="Code" style={{ flex: 1, width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
         </div>
       </div>
     ),

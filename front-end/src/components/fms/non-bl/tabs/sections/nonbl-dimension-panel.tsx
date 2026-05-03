@@ -6,13 +6,13 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 interface DimRow { id: number; length: string; width: string; height: string; qty: string; cbm: string; volWt: string; }
 
 const COLS: GridColumn<DimRow>[] = [
-  { key: "_no",   label: "#",          className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "length", label: "Length",    className: "is-num" },
-  { key: "width",  label: "Width",     className: "is-num" },
-  { key: "height", label: "Height",    className: "is-num" },
-  { key: "qty",    label: "Qty",       className: "is-num" },
-  { key: "cbm",    label: "CBM",       className: "is-num" },
-  { key: "volWt",  label: "Volume Wt.", className: "is-num" },
+  { key: "_no",   label: "#",           width: 50, className: "row-num", render: (_, __, i) => i + 1 },
+  { key: "length", label: "Length",     width: 80, className: "is-num" },
+  { key: "width",  label: "Width",      width: 80, className: "is-num" },
+  { key: "height", label: "Height",     width: 80, className: "is-num" },
+  { key: "qty",    label: "Qty",        width: 80, className: "is-num" },
+  { key: "cbm",    label: "CBM",        width: 80, className: "is-num" },
+  { key: "volWt",  label: "Volume Wt.", width: 80, className: "is-num" },
 ];
 
 export function NonBLDimensionPanel() {

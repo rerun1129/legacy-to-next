@@ -15,14 +15,16 @@ interface ContainerInfoRow {
 }
 
 const COLS: GridColumn<ContainerInfoRow>[] = [
-  { key: "_no",      label: "#",                 className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "cno",      label: "Container No." },
-  { key: "contType", label: "Cont.Type" },
-  { key: "sealNo1",  label: "Seal No. 1" },
-  { key: "pkg",      label: "Package",     className: "is-num" },
-  { key: "pkgUnit",  label: "Package Unit" },
-  { key: "grossWt",  label: "Gross W/T",   className: "is-num" },
-  { key: "cbm",      label: "CBM",         className: "is-num" },
+  { key: "_no",      width: 50, label: "#",                 className: "row-num", render: (_, __, i) => i + 1 },
+  { key: "cno",      width: 80, label: "Container No." },
+  { key: "contType", width: 80, label: "Cont.Type" },
+  { key: "sealNo1",  width: 80, label: "Seal No. 1" },
+  { key: "sealNo2",  width: 80, label: "Seal No. 2" },
+  { key: "sealNo3",  width: 80, label: "Seal No. 3" },
+  { key: "pkg",      width: 80, label: "Package",     className: "is-num" },
+  { key: "pkgUnit",  width: 80, label: "Unit" },
+  { key: "grossWt",  width: 80, label: "Gross W/T",   className: "is-num" },
+  { key: "cbm",      width: 80, label: "CBM",         className: "is-num" },
 ];
 
 export function NonBLContainerInfoPanel() {
@@ -32,7 +34,6 @@ export function NonBLContainerInfoPanel() {
         <div className="panel__title-accent" />
         <span className="panel__title">Container Information</span>
         <div className="panel__actions">
-          <button className="btn btn--sm btn--ghost" onClick={() => { /* TODO */ }}>Container → Cargo</button>
           <button className="btn btn--sm btn--ghost" onClick={() => { /* TODO */ }}><Plus size={12} /></button>
           <button className="btn btn--sm btn--ghost" onClick={() => { /* TODO */ }}><Minus size={12} /></button>
         </div>
