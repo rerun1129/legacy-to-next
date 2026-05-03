@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search } from "lucide-react";
+import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, RotateCcw, Search } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { useDraftPersist } from "@/lib/use-draft-persist";
 import type { BLVariantConfig } from "@/lib/bl-variants";
@@ -95,6 +95,7 @@ interface Props {
 export function HouseBLEntry({ variant, id }: Props) {
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
@@ -201,6 +202,12 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   const { handleSearchBl } = useSearchBl(form, variant);
 
+  function handleResetEntry() {
+    form.reset();
+    clearDraft();
+    formRef.current?.reset();
+  }
+
   function handleSubmit(raw: HouseBlFormValues) {
     mutation.mutate(raw);
   }
@@ -211,7 +218,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   return (
     <>
       <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         {/* Page header */}
         <div className="page-head">
           <div className="page-head__title">
@@ -250,6 +257,9 @@ export function HouseBLEntry({ variant, id }: Props) {
               onClick={() => setIsSwitchBlModalOpen(true)}
             >
               <RefreshCw size={12} />Switch B/L
+            </button>
+            <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+              <RotateCcw size={12} />Reset
             </button>
             <button
               type="submit"

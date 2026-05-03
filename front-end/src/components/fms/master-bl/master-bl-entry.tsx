@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useDraftPersist } from "@/lib/use-draft-persist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { MASTER_BL_DEFAULT_VALUES, TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
-import { Save, Copy, Trash2, Layers, Send, RefreshCw, Search } from "lucide-react";
+import { Save, Copy, Trash2, Layers, Send, RefreshCw, RotateCcw, Search } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
@@ -32,6 +32,7 @@ function getToolbarFields(mode: string) {
 
 export function MasterBLEntry({ variantKey, id }: Props) {
   const [tab, setTab] = useState("main");
+  const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -174,6 +175,16 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       });
   }
 
+  function handleResetEntry() {
+    form.reset({
+      ...MASTER_BL_DEFAULT_VALUES,
+      jobDiv: variant.mode,
+      bound: variant.direction ?? "EXP",
+    });
+    clearDraft();
+    formRef.current?.reset();
+  }
+
   function handleSave(raw: MasterBlFormValues) {
     mutation.mutate(raw);
   }
@@ -192,7 +203,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
   return (
     <FormProvider {...form}>
-    <form onSubmit={form.handleSubmit(handleSave)}>
+    <form ref={formRef} onSubmit={form.handleSubmit(handleSave)}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">
         <div className="page-head__title">
@@ -222,6 +233,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
             <RefreshCw size={12} />{modeLabels.changeBLNo}
           </button>
           <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
+          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+            <RotateCcw size={12} />Reset
+          </button>
           <button type="submit" className="btn btn--sm btn--primary" disabled={mutation.isPending}>
             <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
           </button>
