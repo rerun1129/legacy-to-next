@@ -20,11 +20,7 @@ const LEG_COLS: GridColumn<LegRow>[] = [
   { key: "arrTime",   width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
 ];
 
-const LEG_DATA: LegRow[] = [
-  { id: 1, to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
-  { id: 2, to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
-  { id: 3, to: "LAX", by: "OZ", flight: "OZ202", onBoard: "2026-04-30", boardTime: "22:00", arrival: "2026-05-01", arrTime: "19:30" },
-];
+const LEG_DATA: LegRow[] = [];
 
 const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
 
@@ -40,8 +36,8 @@ export function AirSchedulePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label is-required">{isExp ? "Airline" : "Carrier"}</span>
           <div className="li__input" style={{ gap: 4 }}>
-            <input defaultValue={isExp ? "KE" : "OZ"} style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <input defaultValue={isExp ? "Korean Air" : "Asiana Airlines"} style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
+            <input defaultValue="" style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+            <input defaultValue="" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
           </div>
         </div>
       ),
@@ -52,8 +48,8 @@ export function AirSchedulePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label is-required">Departure</span>
           <div className="li__input" style={{ gap: 4 }}>
-            <input defaultValue="ICN" style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <input defaultValue="Incheon Int'l" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
+            <input defaultValue="" style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
+            <input defaultValue="" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
           </div>
         </div>
       ),
@@ -67,8 +63,8 @@ export function AirSchedulePanel({ variant }: Props) {
         <span className="li__label">{f}</span>
         <div className="li__input">
           {f.includes("Date")
-            ? <PanelDateInput defaultValue={f === "Issue Date" ? "2026-04-20" : ""} />
-            : <input defaultValue={f === "Issue Place" ? "INCHEON" : ""} style={LI_ST} />}
+            ? <PanelDateInput defaultValue={""} />
+            : <input defaultValue={""} style={LI_ST} />}
         </div>
       </div>
     ),

@@ -74,23 +74,9 @@ const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
 ];
 
 // ── Sample data ────────────────────────────────────────────
-const RATE_ROWS: RateRow[] = [
-  { id: 1, code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
-  { id: 2, code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
-  { id: 3, code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
-  { id: 4, code: "LSF", desc: "Low Sulphur Fee",   qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
-  { id: 5, code: "THC", desc: "Terminal Handling", qty: "2 CONT", unit: "CONT", sell: "95.00",  buy: "80.00",  cur: "USD" },
-  { id: 6, code: "DOC", desc: "Documentation Fee", qty: "1 BL",  unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
-];
+const RATE_ROWS: RateRow[] = [];
 
-const ACCOUNT_ROWS: AccountRow[] = [
-  { id: 1, docType: "INVOICE",     docNo: "INV-20260415", issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
-  { id: 2, docType: "C/I",         docNo: "CI-20260415",  issueDate: "2026-04-15", amount: "48,500.00", currency: "USD", status: "발행완료" },
-  { id: 3, docType: "DEBIT NOTE",  docNo: "DN-20260420",  issueDate: "2026-04-20", amount: "1,490.00",  currency: "USD", status: "미결"    },
-  { id: 4, docType: "CREDIT NOTE", docNo: "CN-20260421",  issueDate: "2026-04-21", amount: "320.00",    currency: "USD", status: "미결"    },
-  { id: 5, docType: "RECEIPT",     docNo: "REC-20260423", issueDate: "2026-04-23", amount: "1,170.00",  currency: "USD", status: "수령"    },
-  { id: 6, docType: "B/L COPY",   docNo: "BLC-20260424", issueDate: "2026-04-24", amount: "0.00",      currency: "USD", status: "발행완료" },
-];
+const ACCOUNT_ROWS: AccountRow[] = [];
 
 // ── Rate input styles ──────────────────────────────────────
 const CODE_INPUT: React.CSSProperties = {
@@ -146,9 +132,9 @@ function ExRateItem({ label }: ExRateItemProps) {
     <div className="party-block__head">
       <span style={{ fontSize: 10, minWidth: 110, flexShrink: 0, color: "var(--ink-2)" }}>{label}</span>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <input type="date" defaultValue="2026-04-26" style={DATE_INPUT} />
+        <input type="date" defaultValue="" style={DATE_INPUT} />
         <select style={CUR_SELECT}><option>USD</option><option>KRW</option><option>EUR</option></select>
-        <input type="number" min="0" step="0.01" defaultValue="1376.50" style={RATE_INPUT} />
+        <input type="number" min="0" step="0.01" defaultValue="" style={RATE_INPUT} />
       </div>
     </div>
   );
@@ -156,9 +142,9 @@ function ExRateItem({ label }: ExRateItemProps) {
 
 // ── CUSTOMERS — 3-col FieldItemGrid ───────────────────────
 const CUSTOMER_ITEMS: FieldItemDef[] = [
-  { key: "actual-customer", label: "ACTUAL CUSTOMER", render: () => <CustomerItem label="ACTUAL CUSTOMER" code="HJTR001" name="한진무역(주)"    /> },
-  { key: "liner",           label: "LINER",           render: () => <CustomerItem label="LINER"           code="COSCO"   name="COSCO SHIPPING" /> },
-  { key: "settle-partner",  label: "SETTLE PARTNER",  render: () => <CustomerItem label="SETTLE PARTNER"  code="HJTR001" name="한진무역(주)"    /> },
+  { key: "actual-customer", label: "ACTUAL CUSTOMER", render: () => <CustomerItem label="ACTUAL CUSTOMER" code="" name="" /> },
+  { key: "liner",           label: "LINER",           render: () => <CustomerItem label="LINER"           code="" name="" /> },
+  { key: "settle-partner",  label: "SETTLE PARTNER",  render: () => <CustomerItem label="SETTLE PARTNER"  code="" name="" /> },
 ];
 
 // ── Ex. Rate Info — 3-col FieldItemGrid ───────────────────

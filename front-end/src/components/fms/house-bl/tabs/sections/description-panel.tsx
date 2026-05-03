@@ -20,7 +20,7 @@ export function DescriptionPanel() {
           </div>
         </div>
         <LineNumberTextarea
-          defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS\nSAID TO CONTAIN"}
+          defaultValue={""}
           style={{ flex: 1, minHeight: 0 }}
         />
       </div>

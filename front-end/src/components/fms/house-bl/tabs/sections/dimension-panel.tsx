@@ -14,14 +14,7 @@ const COLS: GridColumn<DimRow>[] = [
   { key: "volWt",  label: "Volume Wt.", className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
 ];
 
-const DATA: DimRow[] = [
-  { id: 1, length: "120", width: "80",  height: "90",  qty: "1300", cbm: "87.5",  volWt: "14583" },
-  { id: 2, length: "100", width: "70",  height: "80",  qty: "200",  cbm: "15.0",  volWt: "2500"  },
-  { id: 3, length: "150", width: "100", height: "120", qty: "50",   cbm: "22.5",  volWt: "3750"  },
-  { id: 4, length: "60",  width: "50",  height: "40",  qty: "500",  cbm: "6.0",   volWt: "1000"  },
-  { id: 5, length: "200", width: "120", height: "150", qty: "20",   cbm: "72.0",  volWt: "12000" },
-  { id: 6, length: "80",  width: "60",  height: "50",  qty: "300",  cbm: "7.2",   volWt: "1200"  },
-];
+const DATA: DimRow[] = [];
 
 export function DimensionPanel() {
   return (

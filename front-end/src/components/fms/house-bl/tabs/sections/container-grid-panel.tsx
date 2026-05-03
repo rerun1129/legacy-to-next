@@ -20,14 +20,7 @@ const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
   { key: "vgm",  label: "VGM",          width: 90,  className: "is-num", render: (v) => <NumericCell defaultValue={String(v)} /> },
 ];
 
-const CONTAINER_DATA: ContainerRow[] = [
-  { id: 1, cno: "CSNU1234567", type: "20GP", seal: "SL123456", pkg: 500, pkgT: "CTN", gw: "12400", cbm: 22.5, vgm: "12540" },
-  { id: 2, cno: "TCKU9876543", type: "40HC", seal: "SL789012", pkg: 800, pkgT: "CTN", gw: "18200", cbm: 65.0, vgm: "18380" },
-  { id: 3, cno: "MSKU3456789", type: "40GP", seal: "SL345678", pkg: 650, pkgT: "CTN", gw: "15800", cbm: 60.2, vgm: "15960" },
-  { id: 4, cno: "HLXU2345678", type: "20GP", seal: "SL456789", pkg: 420, pkgT: "CTN", gw: "10500", cbm: 21.0, vgm: "10640" },
-  { id: 5, cno: "GESU5678901", type: "40HC", seal: "SL567890", pkg: 750, pkgT: "CTN", gw: "19400", cbm: 67.5, vgm: "19580" },
-  { id: 6, cno: "TCNU8901234", type: "20GP", seal: "SL678901", pkg: 350, pkgT: "CTN", gw: "8750",  cbm: 19.8, vgm: "8900"  },
-];
+const CONTAINER_DATA: ContainerRow[] = [];
 
 export function ContainerGridPanel() {
   return (

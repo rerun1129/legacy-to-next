@@ -17,17 +17,17 @@ function LiField({ label, value }: { label: string; value: string }) {
 }
 
 const BASE_ITEMS: FieldItemDef[] = [
-  { key: "currency",     render: () => <LiField label="Currency"     value="USD" /> },
-  { key: "incoterms",   render: () => <LiField label="Incoterms"    value="DAP" /> },
-  { key: "freight-term", render: () => <LiField label="Freight Term" value="Prepaid" /> },
+  { key: "currency",     render: () => <LiField label="Currency"     value="" /> },
+  { key: "incoterms",   render: () => <LiField label="Incoterms"    value="" /> },
+  { key: "freight-term", render: () => <LiField label="Freight Term" value="" /> },
   { key: "other-term",  render: () => <LiField label="Other Term"   value="" /> },
-  { key: "dv-carriage", render: () => <LiField label="D.V Carriage" value="N.V.D." /> },
-  { key: "insurance",   render: () => <LiField label="Insurance"    value="NIL" /> },
-  { key: "dv-customs",  render: () => <LiField label="D.V Customs"  value="AS PER INV." /> },
-  { key: "account-info", render: () => <LiField label="Account Info" value="FREIGHT PREPAID" /> },
+  { key: "dv-carriage", render: () => <LiField label="D.V Carriage" value="" /> },
+  { key: "insurance",   render: () => <LiField label="Insurance"    value="" /> },
+  { key: "dv-customs",  render: () => <LiField label="D.V Customs"  value="" /> },
+  { key: "account-info", render: () => <LiField label="Account Info" value="" /> },
 ];
 
-const FHD_ITEM: FieldItemDef = { key: "fhd", render: () => <LiField label="F.H.D" value="Not" /> };
+const FHD_ITEM: FieldItemDef = { key: "fhd", render: () => <LiField label="F.H.D" value="" /> };
 
 export function AirTradePanel({ variant }: Props) {
   if (!variant) return null;

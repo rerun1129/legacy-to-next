@@ -10,7 +10,7 @@ export function MarksPanel() {
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <LineNumberTextarea
-          defaultValue={"MADE IN KOREA\nCTN NO. 1-500\nGROSS WT: 12,400 KGS"}
+          defaultValue={""}
           style={{ flex: 1, minHeight: 0 }}
         />
       </div>
