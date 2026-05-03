@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -97,9 +99,15 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   const defaults = getToolbarDefaults(variant);
 
+  const { clearDraft } = useBLDraftStore();
+
   const form = useForm<HouseBlFormValues>({
     defaultValues: createEmptyHouseBlFormValues(),
   });
+
+  useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
+
+  const detailLoadedRef = useRef<boolean>(false);
 
   const { data: detail } = useQuery({
     queryKey: ["house-bl", "detail", id],
@@ -108,7 +116,9 @@ export function HouseBLEntry({ variant, id }: Props) {
   });
 
   useEffect(() => {
+    if (detailLoadedRef.current) return;
     if (!detail) return;
+    detailLoadedRef.current = true;
     form.reset({
       ...createEmptyHouseBlFormValues(),
       hbl:    detail.hblNo ?? "",
@@ -160,6 +170,7 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   function handleResetEntry() {
     form.reset(createEmptyHouseBlFormValues());
+    clearDraft(`house:${variant.key}:${id ?? "new"}`);
     formRef.current?.reset();
   }
 

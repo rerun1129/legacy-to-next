@@ -7,6 +7,8 @@ import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }  from "./tabs/main-truck";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { createEmptyTruckBlFormValues } from "./truck-bl-defaults";
+import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 
 // label → RHF 필드 경로 매핑 (toolbar 5개)
 const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
@@ -19,11 +21,17 @@ const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
 
 export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
+  const { clearDraft } = useBLDraftStore();
+
   const form = useForm<HouseBlFormValues>({
     defaultValues: createEmptyTruckBlFormValues(),
   });
+
+  useBlDraftSync(form, "truck::new");
+
   function handleResetEntry() {
     form.reset(createEmptyTruckBlFormValues());
+    clearDraft("truck::new");
   }
 
   return (

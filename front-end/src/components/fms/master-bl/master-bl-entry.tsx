@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -50,6 +52,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     enabled: isEdit,
   });
 
+  const { clearDraft } = useBLDraftStore();
+
   const form = useForm<MasterBlFormValues>({
     defaultValues: {
       ...createEmptyMasterBlFormValues(),
@@ -58,8 +62,14 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
+  useBlDraftSync(form, `master:${variantKey}:${id ?? "new"}`);
+
+  const detailLoadedRef = useRef<boolean>(false);
+
   useEffect(() => {
+    if (detailLoadedRef.current) return;
     if (!detail) return;
+    detailLoadedRef.current = true;
     form.reset({
       ...createEmptyMasterBlFormValues(),
       jobDiv: detail.jobDiv,
@@ -183,6 +193,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       jobDiv: variant.mode,
       bound: variant.direction ?? "EXP",
     });
+    clearDraft(`master:${variantKey}:${id ?? "new"}`);
     formRef.current?.reset();
   }
 

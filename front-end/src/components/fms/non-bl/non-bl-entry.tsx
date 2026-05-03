@@ -7,18 +7,25 @@ import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
 import type { NonBlFormValues }                   from "./non-bl-schema";
 import { createEmptyNonBlFormValues }             from "./non-bl-defaults";
+import { useBlDraftSync }                         from "@/lib/use-bl-draft-sync";
+import { useBLDraftStore }                        from "@/lib/use-bl-draft-store";
 
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
+
+  const { clearDraft } = useBLDraftStore();
 
   const methods = useForm<NonBlFormValues>({
     defaultValues: createEmptyNonBlFormValues(),
   });
 
+  useBlDraftSync(methods, "non::new");
+
   const { register } = methods;
 
   function handleResetEntry() {
     methods.reset(createEmptyNonBlFormValues());
+    clearDraft("non::new");
   }
 
   return (
