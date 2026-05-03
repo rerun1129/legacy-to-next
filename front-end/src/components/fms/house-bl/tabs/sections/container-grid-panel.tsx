@@ -8,8 +8,8 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 
 interface ContainerRow {
-  cno: string; type: string; seal: string; pkg: number; pkgT: string;
-  gw: string; cbm: number; vgm: string;
+  cno: string; type: string; seal: string; pkg: string; pkgT: string;
+  gw: string; cbm: string; vgm: string;
 }
 
 const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
@@ -25,7 +25,7 @@ const CONTAINER_COLS: GridColumn<ContainerRow>[] = [
 ];
 
 const EMPTY_CONTAINER_ROW = {
-  cno: "", type: "", seal: "", pkg: 0, pkgT: "", gw: "", cbm: 0, vgm: "",
+  cno: "", type: "", seal: "", pkg: "", pkgT: "", gw: "", cbm: "", vgm: "",
 };
 
 export function ContainerGridPanel() {
