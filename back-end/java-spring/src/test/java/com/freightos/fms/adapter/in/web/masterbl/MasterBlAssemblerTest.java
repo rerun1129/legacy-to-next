@@ -25,7 +25,8 @@ class MasterBlAssemblerTest {
                 MasterBlJobDiv.SEA, Bound.EXP, null, null,
                 FreightTerm.PREPAID,
                 null, null, null, null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         MasterBl result = assembler.toEntity(request);
@@ -41,7 +42,8 @@ class MasterBlAssemblerTest {
                 MasterBlJobDiv.AIR, Bound.IMP, null, null,
                 FreightTerm.PREPAID,
                 null, null, null, null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         MasterBl result = assembler.toEntity(request);
@@ -57,7 +59,8 @@ class MasterBlAssemblerTest {
                 MasterBlJobDiv.SEA, Bound.IMP, null, null,
                 FreightTerm.PREPAID,
                 null, null, null, null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         MasterBl result = assembler.toEntity(request);
@@ -73,7 +76,8 @@ class MasterBlAssemblerTest {
                 MasterBlJobDiv.AIR, Bound.EXP, null, null,
                 FreightTerm.PREPAID,
                 null, null, null, null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         MasterBl result = assembler.toEntity(request);

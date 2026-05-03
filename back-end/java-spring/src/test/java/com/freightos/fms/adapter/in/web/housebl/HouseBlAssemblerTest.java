@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.housebl;
 
+import com.freightos.fms.adapter.in.web.housebl.HouseBlSubAssembler;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
@@ -16,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HouseBlAssemblerTest {
 
-    private final HouseBlAssembler assembler = new HouseBlAssembler();
+    private final HouseBlAssembler assembler = new HouseBlAssembler(new HouseBlSubAssembler());
 
     // ── toEntity(CreateHouseBlRequest) ────────────────────────────────
 
@@ -29,7 +30,9 @@ class HouseBlAssemblerTest {
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
-                null, null, null, null
+                null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
@@ -48,7 +51,9 @@ class HouseBlAssemblerTest {
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
-                null, null, null, null
+                null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
@@ -67,7 +72,9 @@ class HouseBlAssemblerTest {
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
-                null, null, null, null
+                null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null
         );
 
         assertThatThrownBy(() -> assembler.toEntity(request))
@@ -84,7 +91,9 @@ class HouseBlAssemblerTest {
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
-                null, null, null, null
+                null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null
         );
 
         assertThatThrownBy(() -> assembler.toEntity(request))
@@ -100,7 +109,9 @@ class HouseBlAssemblerTest {
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
-                null, null, null, null
+                null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
