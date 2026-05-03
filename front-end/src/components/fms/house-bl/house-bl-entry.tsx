@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search, RotateCcw } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { useDraftPersist } from "@/lib/use-draft-persist";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
@@ -91,7 +92,6 @@ interface Props {
 export function HouseBLEntry({ variant, id }: Props) {
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const isEdit = Boolean(id);
@@ -110,8 +110,10 @@ export function HouseBLEntry({ variant, id }: Props) {
     enabled: isEdit,
   });
 
+  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:house-bl:${variant.key}:${id ?? "new"}`);
+
   useEffect(() => {
-    if (!detail) return;
+    if (!detail || hasDraft()) return;
     form.reset({
       ...createEmptyHouseBlFormValues(),
       hbl:    detail.hblNo ?? "",
@@ -125,7 +127,7 @@ export function HouseBLEntry({ variant, id }: Props) {
       settle: detail.freightTerm ?? "",
       expImp: detail.bound,
     });
-  }, [detail, form]);
+  }, [detail, form, hasDraft]);
 
   const mutation = useMutation({
     mutationFn: (data: HouseBlFormValues) => {
@@ -133,6 +135,7 @@ export function HouseBLEntry({ variant, id }: Props) {
       return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
     },
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       router.push(`/fms/house-bl/${variant.key}/list`);
     },
@@ -141,6 +144,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
       form.reset(createEmptyHouseBlFormValues());
       router.replace(`/fms/house-bl/${variant.key}/entry`);
@@ -165,8 +169,8 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   function handleResetEntry() {
     form.reset(createEmptyHouseBlFormValues());
+    clearDraft();
     formRef.current?.reset();
-    setResetKey((key) => key + 1);
   }
 
   function handleSubmit(raw: HouseBlFormValues) {
@@ -178,7 +182,7 @@ export function HouseBLEntry({ variant, id }: Props) {
   return (
     <>
       <FormProvider {...form}>
-      <form key={resetKey} ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
+      <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <div className="page-head">
           <div className="page-head__title">
             <div className="page-head__title-icon"><FileText size={14} /></div>
@@ -218,6 +222,9 @@ export function HouseBLEntry({ variant, id }: Props) {
               onClick={() => setIsSwitchBlModalOpen(true)}
             >
               <RefreshCw size={12} />Switch B/L
+            </button>
+            <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+              <RotateCcw size={12} />Reset
             </button>
             <button
               type="submit"

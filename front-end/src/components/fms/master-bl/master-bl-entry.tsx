@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import { useDraftPersist } from "@/lib/use-draft-persist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -31,7 +32,6 @@ function getToolbarFields(mode: string) {
 
 export function MasterBLEntry({ variantKey, id }: Props) {
   const [tab, setTab] = useState("main");
-  const [resetKey, setResetKey] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const router = useRouter();
@@ -61,9 +61,11 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
+  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:master-bl:${variantKey}:${id ?? "new"}`);
+
   // 수정 모드: draft가 없을 때만 서버 데이터로 reset (draft 우선)
   useEffect(() => {
-    if (!detail) return;
+    if (!detail || hasDraft()) return;
     form.reset({
       ...createEmptyMasterBlFormValues(),
       jobDiv: detail.jobDiv,
@@ -83,7 +85,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       cbm: detail.cbm ?? undefined,
       operatorCode: detail.operatorCode ?? "",
     });
-  }, [detail, form]);
+  }, [detail, form, hasDraft]);
 
   const mutation = useMutation({
     mutationFn: (data: MasterBlFormValues) => {
@@ -122,6 +124,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         : masterBlPort.create(req);
     },
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
       router.push(`/fms/master-bl/${variantKey}/list`);
     },
@@ -130,6 +133,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
+      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
       form.reset({
         ...createEmptyMasterBlFormValues(),
@@ -181,18 +185,18 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       });
   }
 
-  function handleSave(raw: MasterBlFormValues) {
-    mutation.mutate(raw);
-  }
-
   function handleResetEntry() {
     form.reset({
       ...createEmptyMasterBlFormValues(),
       jobDiv: variant.mode,
       bound: variant.direction ?? "EXP",
     });
+    clearDraft();
     formRef.current?.reset();
-    setResetKey((key) => key + 1);
+  }
+
+  function handleSave(raw: MasterBlFormValues) {
+    mutation.mutate(raw);
   }
 
   const tabs = [
@@ -209,7 +213,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
   return (
     <FormProvider {...form}>
-    <form key={resetKey} ref={formRef} onSubmit={form.handleSubmit(handleSave)}>
+    <form ref={formRef} onSubmit={form.handleSubmit(handleSave)}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">
         <div className="page-head__title">
@@ -242,6 +246,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
             <RefreshCw size={12} />{modeLabels.changeBLNo}
           </button>
           <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
+          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+            <RotateCcw size={12} />Reset
+          </button>
           <button type="submit" className="btn btn--sm btn--primary" disabled={mutation.isPending}>
             <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
           </button>
