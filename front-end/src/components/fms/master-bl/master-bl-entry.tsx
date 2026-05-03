@@ -229,17 +229,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
             <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
             <div className="field__input">
-              <input defaultValue={
-                f === "MBL No" ? "COSCO2404195" :
-                f === "MAWB No" ? "180-12345678" :
-                f === "Master Ref" ? "MR-2026-04195" :
-                f === "Load Type" ? "FCL" :
-                f === "Service Term" ? "CY/CY" :
-                f === "B/L Type" ? "OBL" :
-                f === "Line Bkg. No" ? "BKG-COSCO-0412" :
-                f === "Shipment Type" ? "FCL" :
-                ""
-              } placeholder={f || ""} />
+              <input defaultValue="" placeholder={f || ""} />
             </div>
           </div>
         ))}

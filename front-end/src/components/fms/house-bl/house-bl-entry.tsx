@@ -34,13 +34,13 @@ const TOOLBAR_FIELDS_NON_BL = [
 ] as const;
 
 const DEFAULTS_SEA: Record<string, string> = {
-  "Shipment Type": "FCL", "Settle": "PREPAID", "HBL No": "HBLKR24041956",
-  "MBL No": "COSCO2404195", "Load Type": "CY/CY", "Service Term": "FCL",
-  "B/L Type": "OBL", "Master Ref": "",
+  "Shipment Type": "", "Settle": "", "HBL No": "",
+  "MBL No": "", "Load Type": "", "Service Term": "",
+  "B/L Type": "", "Master Ref": "",
 };
 const DEFAULTS_AIR: Record<string, string> = {
-  "Shipment Type": "GCR", "Settle": "PREPAID", "HAWB No": "HAWBKR24041001",
-  "MAWB No": "180-12345678", "Rate Class": "GCR", "Service Term": "D2D",
+  "Shipment Type": "", "Settle": "", "HAWB No": "",
+  "MAWB No": "", "Rate Class": "", "Service Term": "",
   "B/L Type": "", "Master Ref": "",
 };
 const DEFAULTS_TRUCK: Record<string, string> = {
