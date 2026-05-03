@@ -1,16 +1,16 @@
-export type Mode = 'SEA' | 'AIR'
+export type Mode = 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL'
 export type Direction = 'EXP' | 'IMP'
-export type BLVariantKey = 'sea-exp' | 'sea-imp' | 'air-exp' | 'air-imp'
+export type BLVariantKey = 'sea-exp' | 'sea-imp' | 'air-exp' | 'air-imp' | 'truck' | 'non-bl'
 
 export interface BLVariantConfig {
   key: BLVariantKey
   mode: Mode
-  direction: Direction
+  direction: Direction | null  // TRUCK/NON_BL은 방향 무관
   label: string          // "SEA/EXP"
-  modeLabel: string      // "해상" | "항공"
-  dirLabel: string       // "수출" | "수입"
-  blNoLabel: string      // "HBL No" | "HAWB No"
-  mblNoLabel: string     // "MBL No" | "MAWB No"
+  modeLabel: string      // "해상" | "항공" | "트럭" | ""
+  dirLabel: string       // "수출" | "수입" | ""
+  blNoLabel: string      // "HBL No" | "HAWB No" | "Truck B/L No" | "Non B/L No"
+  mblNoLabel: string     // "MBL No" | "MAWB No" | ""
   hasContainer: boolean  // SEA only
   hasDimension: boolean  // AIR only
   hasIssueInfo: boolean  // EXP: true, IMP-AIR: false
@@ -56,15 +56,35 @@ export const BL_VARIANTS: Record<BLVariantKey, BLVariantConfig> = {
     issueFields: [],
     printDocs: [],
   },
+  'truck': {
+    key: 'truck', mode: 'TRUCK', direction: null,
+    label: 'Truck B/L', modeLabel: 'TRUCK', dirLabel: '',
+    blNoLabel: 'Truck B/L No', mblNoLabel: '',
+    hasContainer: false, hasDimension: false,
+    hasIssueInfo: false, hasDoDate: false,
+    issueFields: [],
+    printDocs: [],
+  },
+  'non-bl': {
+    key: 'non-bl', mode: 'NON_BL', direction: null,
+    label: 'Non B/L', modeLabel: 'NON_BL', dirLabel: '',
+    blNoLabel: 'Non B/L No', mblNoLabel: '',
+    hasContainer: false, hasDimension: false,
+    hasIssueInfo: false, hasDoDate: false,
+    issueFields: [],
+    printDocs: [],
+  },
 }
 
-export const BL_VARIANT_KEYS: BLVariantKey[] = ['sea-exp', 'sea-imp', 'air-exp', 'air-imp']
+export const BL_VARIANT_KEYS: BLVariantKey[] = ['sea-exp', 'sea-imp', 'air-exp', 'air-imp', 'truck', 'non-bl']
 
 export function getBLVariant(key: string): BLVariantConfig {
   return BL_VARIANTS[key as BLVariantKey] ?? BL_VARIANTS['sea-exp']
 }
 
 export function getPageTitle(variant: BLVariantConfig, blType: 'House' | 'Master', pageType: 'Entry' | 'List'): string {
+  if (variant.mode === 'TRUCK') return `Truck ${blType} B/L ${pageType}`;
+  if (variant.mode === 'NON_BL') return `Non ${blType} B/L ${pageType}`;
   const modeStr = variant.mode === 'SEA' ? 'Sea' : 'Air';
   const dirStr  = variant.direction === 'EXP' ? 'Export' : 'Import';
   return `${modeStr} ${dirStr} ${blType} B/L ${pageType}`;
@@ -112,6 +132,22 @@ export const MASTER_VARIANTS: Record<BLVariantKey, MasterVariantConfig> = {
     ...BL_VARIANTS['air-imp'],
     blNoLabel: 'MAWB No', mblNoLabel: 'Master Ref No',
     bottomActions: ['Profit/Loss', 'House B/L Load', 'M/F Send', 'AFR Send', 'EDMS'],
+    hasLineBkgNo: false,
+    toolbarColumnCount: 4,
+    printDocs: [],
+  },
+  'truck': {
+    ...BL_VARIANTS['truck'],
+    blNoLabel: 'Truck B/L No', mblNoLabel: '',
+    bottomActions: [],
+    hasLineBkgNo: false,
+    toolbarColumnCount: 4,
+    printDocs: [],
+  },
+  'non-bl': {
+    ...BL_VARIANTS['non-bl'],
+    blNoLabel: 'Non B/L No', mblNoLabel: '',
+    bottomActions: [],
     hasLineBkgNo: false,
     toolbarColumnCount: 4,
     printDocs: [],
