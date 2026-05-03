@@ -35,6 +35,7 @@ export interface HouseBlDetail extends HouseBlRow {
 export interface HouseBlFilter {
   jobDiv: JobDiv;
   bound: Bound;
+  hblNo?: string;
   page?: number;
   size?: number;
 }

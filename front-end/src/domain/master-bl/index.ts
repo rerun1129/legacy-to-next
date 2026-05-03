@@ -35,6 +35,7 @@ export interface ConsolidatedHouseBlSummary {
 export interface MasterBlFilter {
   jobDiv?: JobDiv;
   bound: Bound;
+  mblNo?: string;
   page?: number;
   size?: number;
 }
