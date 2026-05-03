@@ -26,14 +26,12 @@ export function NonBLEntry() {
         </div>
       </div>
 
-      <div className="toolbar" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
+      <div className="toolbar" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
         {[
           { l: "Non B/L No",    v: "",      req: true  },
           { l: "Work Division", v: workDiv, req: true  },
           { l: "Status",        v: "",      req: false },
           { l: "Ref. No.",      v: "",      req: false },
-          { l: "Operator",      v: "",      req: true  },
-          { l: "Team",          v: "",      req: true  },
         ].map(f => (
           <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
             <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>

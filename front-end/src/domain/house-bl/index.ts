@@ -30,6 +30,15 @@ export interface HouseBlDetail extends HouseBlRow {
   salesManCode: string | null;
   masterBlId: number | null;
   updatedAt: string | null;
+  linerCode?: string;
+  linerName?: string;
+  vesselName?: string;
+  voyageNo?: string;
+  finalDestCode?: string;
+  finalDestName?: string;
+  finalEta?: string;
+  volumeWeightKg?: number;
+  rton?: number;
 }
 
 export interface HouseBlFilter {

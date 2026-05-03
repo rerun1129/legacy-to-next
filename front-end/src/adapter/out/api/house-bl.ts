@@ -36,6 +36,15 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   salesManCode: z.string().nullable(),
   masterBlId: z.number().nullable(),
   updatedAt: z.string().nullable(),
+  linerCode: z.string().optional(),
+  linerName: z.string().optional(),
+  vesselName: z.string().optional(),
+  voyageNo: z.string().optional(),
+  finalDestCode: z.string().optional(),
+  finalDestName: z.string().optional(),
+  finalEta: z.string().optional(),
+  volumeWeightKg: z.number().optional(),
+  rton: z.number().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
