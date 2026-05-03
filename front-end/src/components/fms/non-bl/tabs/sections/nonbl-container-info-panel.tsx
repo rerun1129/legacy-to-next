@@ -1,13 +1,19 @@
 "use client";
 
-import { Plus, Minus } from "lucide-react";
-import { GridList, type GridColumn } from "@/components/shared/grid-list";
+import { useState }                              from "react";
+import { useFormContext, useFieldArray }          from "react-hook-form";
+import { Plus, Minus }                           from "lucide-react";
+import { GridList, type GridColumn }             from "@/components/shared/grid-list";
+import type { NonBlFormValues }                  from "../../non-bl-schema";
+import { EMPTY_CONTAINER_ROW }                   from "../../non-bl-schema";
 
 interface ContainerInfoRow {
   id: number;
   cno: string;
   contType: string;
   sealNo1: string;
+  sealNo2: string;
+  sealNo3: string;
   pkg: number;
   pkgUnit: string;
   grossWt: number;
@@ -28,18 +34,45 @@ const COLS: GridColumn<ContainerInfoRow>[] = [
 ];
 
 export function NonBLContainerInfoPanel() {
+  const { control } = useFormContext<NonBlFormValues>();
+  const { fields, append, remove } = useFieldArray({ control, name: "containers" });
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const selectedIdx = fields.findIndex(f => f.id === Number(selectedKey));
+
+  function handleAdd() {
+    const nextId = Math.max(0, ...fields.map(f => f.id)) + 1;
+    append({ ...EMPTY_CONTAINER_ROW, id: nextId });
+    setSelectedKey(null);
+  }
+
+  function handleRemove() {
+    if (selectedKey === null || selectedIdx === -1) return;
+    if (window.confirm("삭제하시겠습니까?")) {
+      remove(selectedIdx);
+      setSelectedKey(null);
+    }
+  }
+
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Container Information</span>
+        <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button className="btn btn--sm btn--ghost" onClick={() => { /* TODO */ }}><Plus size={12} /></button>
-          <button className="btn btn--sm btn--ghost" onClick={() => { /* TODO */ }}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}><Plus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove}><Minus size={12} /></button>
         </div>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <GridList columns={COLS} data={[]} rowKey={(r) => r.id} />
+        <GridList
+          columns={COLS}
+          data={fields as unknown as ContainerInfoRow[]}
+          rowKey={(r) => r.id}
+          selectedRowKey={selectedKey !== null ? Number(selectedKey) : null}
+          onSelectRow={(row) => setSelectedKey(row ? String(row.id) : null)}
+        />
       </div>
     </div>
   );

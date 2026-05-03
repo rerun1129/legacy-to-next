@@ -1,17 +1,21 @@
 "use client";
 
-import { useState }       from "react";
+import { useState }                       from "react";
+import { useForm, FormProvider }           from "react-hook-form";
 import { Save, Trash2, Package, Printer } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
+import type { NonBlFormValues }            from "./non-bl-schema";
 
 type WorkDiv = "Sea" | "Air" | "Warehouse" | "Trucking";
 
 export function NonBLEntry() {
   const [tab,     setTab]     = useState("main");
   const [workDiv, setWorkDiv] = useState<WorkDiv>("Sea");
+  const methods = useForm<NonBlFormValues>({ defaultValues: { containers: [], dimensions: [] } });
 
   return (
+    <FormProvider {...methods}>
     <>
       <div className="page-head">
         <div className="page-head__title">
@@ -60,5 +64,6 @@ export function NonBLEntry() {
       {tab === "main"    && <MainNonBL />}
       {tab === "freight" && <FreightTab />}
     </>
+    </FormProvider>
   );
 }
