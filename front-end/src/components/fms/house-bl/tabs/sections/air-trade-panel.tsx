@@ -38,14 +38,14 @@ export function AirTradePanel({ variant }: Props) {
   const isImp      = variant.direction === "IMP";
 
   const baseItems: FieldItemDef[] = [
-    { key: "currency",     render: () => <LiField label="Currency"     value="USD" /> },
-    { key: "incoterms",   render: () => <LiField label="Incoterms"    value="DAP" /> },
-    { key: "freight-term", render: () => <FreightTermField inputProps={{ ...register("paymentType"), defaultValue: "Prepaid" }} /> },
+    { key: "currency",     render: () => <LiField label="Currency"     value="" /> },
+    { key: "incoterms",   render: () => <LiField label="Incoterms"    value="" /> },
+    { key: "freight-term", render: () => <FreightTermField inputProps={{ ...register("paymentType"), defaultValue: "" }} /> },
     { key: "other-term",  render: () => <LiField label="Other Term"   value="" /> },
-    { key: "dv-carriage", render: () => <LiField label="D.V Carriage" value="N.V.D." /> },
-    { key: "insurance",   render: () => <LiField label="Insurance"    value="NIL" /> },
-    { key: "dv-customs",  render: () => <LiField label="D.V Customs"  value="AS PER INV." /> },
-    { key: "account-info", render: () => <LiField label="Account Info" value="FREIGHT PREPAID" /> },
+    { key: "dv-carriage", render: () => <LiField label="D.V Carriage" value="" /> },
+    { key: "insurance",   render: () => <LiField label="Insurance"    value="" /> },
+    { key: "dv-customs",  render: () => <LiField label="D.V Customs"  value="" /> },
+    { key: "account-info", render: () => <LiField label="Account Info" value="" /> },
   ];
 
   const tradeItems: FieldItemDef[] = isImp ? [...baseItems, FHD_ITEM] : baseItems;

@@ -16,7 +16,7 @@ export function MarksPanel() {
         <Controller
           control={control}
           name="marksAndNumbers"
-          defaultValue={"MADE IN KOREA\nCTN NO. 1-500\nGROSS WT: 12,400 KGS"}
+          defaultValue=""
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

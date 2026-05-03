@@ -1,12 +1,14 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, type UseFormReturn } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { MasterBlFormValues } from "../../master-bl-schema";
 
 interface Props {
   variant?: AnyVariantConfig;
+  form?:    UseFormReturn<MasterBlFormValues>;
 }
 
 const UNIT_SEL: React.CSSProperties = {
@@ -39,7 +41,7 @@ function GWField() {
           style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }}
           {...register("grossWeightKg", { valueAsNumber: true })}
         />
-        <select style={UNIT_SEL}><option>KGS</option><option>LBS</option></select>
+        <select defaultValue="" style={UNIT_SEL}><option value=""></option><option>KGS</option><option>LBS</option></select>
       </div>
     </div>
   );
@@ -59,8 +61,8 @@ function PackageFieldRegistered() {
           style={{ flex: 1, height: 24, padding: "0 6px", fontSize: 10 }}
           {...register("pkgQty", { valueAsNumber: true })}
         />
-        <select style={sel}>
-          <option>CTN</option><option>PKG</option><option>BAG</option>
+        <select defaultValue="" style={sel}>
+          <option value=""></option><option>CTN</option><option>PKG</option><option>BAG</option>
           <option>PLT</option><option>BOX</option><option>PCS</option><option>ROL</option>
         </select>
       </div>

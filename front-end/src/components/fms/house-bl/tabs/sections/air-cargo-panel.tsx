@@ -28,7 +28,7 @@ function GWField() {
       <span className="li__label">Gross W/T</span>
       <div className="li__input" style={{ display: "flex", gap: 4 }}>
         <input type="number" step="any" defaultValue="" style={{ ...LI_ST, flex: 1, width: undefined }} />
-        <select style={UNIT_SEL}><option>KGS</option><option>LBS</option></select>
+        <select defaultValue="" style={UNIT_SEL}><option value=""></option><option>KGS</option><option>LBS</option></select>
       </div>
     </div>
   );

@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { useDraftPersist } from "@/lib/use-draft-persist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { MASTER_BL_DEFAULT_VALUES, TOOLBAR_TO_FIELD } from "./master-bl-schema";
+import { createEmptyMasterBlFormValues, TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
-import { Save, Copy, Trash2, Layers, Send, RefreshCw, Search } from "lucide-react";
+import { Save, Copy, Trash2, Layers, Send, RefreshCw, Search, RotateCcw } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
@@ -32,6 +31,8 @@ function getToolbarFields(mode: string) {
 
 export function MasterBLEntry({ variantKey, id }: Props) {
   const [tab, setTab] = useState("main");
+  const [resetKey, setResetKey] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -53,19 +54,22 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   });
 
   const form = useForm<MasterBlFormValues>({
-    defaultValues: MASTER_BL_DEFAULT_VALUES,
+    defaultValues: {
+      ...createEmptyMasterBlFormValues(),
+      jobDiv: variant.mode,
+      bound: variant.direction ?? "EXP",
+    },
   });
-
-  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:master-bl:${variantKey}:${id ?? "new"}`);
 
   // 수정 모드: draft가 없을 때만 서버 데이터로 reset (draft 우선)
   useEffect(() => {
-    if (!detail || hasDraft()) return;
+    if (!detail) return;
     form.reset({
+      ...createEmptyMasterBlFormValues(),
       jobDiv: detail.jobDiv,
       bound: detail.bound,
       // detail.freightTerm이 null이면 기본값 유지 (DB 레거시 데이터 대응)
-      freightTerm: detail.freightTerm ?? "PREPAID",
+      freightTerm: detail.freightTerm ?? "",
       mblNo: detail.mblNo ?? "",
       masterRefNo: detail.masterRefNo ?? "",
       shipperCode: detail.shipperCode ?? "",
@@ -79,14 +83,14 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       cbm: detail.cbm ?? undefined,
       operatorCode: detail.operatorCode ?? "",
     });
-  }, [detail, form, hasDraft]);
+  }, [detail, form]);
 
   const mutation = useMutation({
     mutationFn: (data: MasterBlFormValues) => {
       const req: CreateMasterBlRequest = {
         jobDiv:       data.jobDiv,
         bound:        data.bound,
-        freightTerm:  data.freightTerm,
+        freightTerm:  (data.freightTerm as 'PREPAID' | 'COLLECT') || 'PREPAID',
         mblNo:        data.mblNo || undefined,
         masterRefNo:  data.masterRefNo || undefined,
         shipperCode:      data.shipperCode || undefined,
@@ -118,7 +122,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         : masterBlPort.create(req);
     },
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
       router.push(`/fms/master-bl/${variantKey}/list`);
     },
@@ -127,9 +130,12 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
-      form.reset();
+      form.reset({
+        ...createEmptyMasterBlFormValues(),
+        jobDiv: variant.mode,
+        bound: variant.direction ?? "EXP",
+      });
       router.replace(`/fms/master-bl/${variantKey}/entry`);
     },
   });
@@ -150,9 +156,10 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         }
         return masterBlPort.getById(rows[0].id).then((detail) => {
           form.reset({
+            ...createEmptyMasterBlFormValues(),
             jobDiv: detail.jobDiv,
             bound: detail.bound,
-            freightTerm: detail.freightTerm ?? 'PREPAID',
+            freightTerm: detail.freightTerm ?? '',
             mblNo: detail.mblNo ?? '',
             masterRefNo: detail.masterRefNo ?? '',
             shipperCode: detail.shipperCode ?? '',
@@ -178,6 +185,16 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     mutation.mutate(raw);
   }
 
+  function handleResetEntry() {
+    form.reset({
+      ...createEmptyMasterBlFormValues(),
+      jobDiv: variant.mode,
+      bound: variant.direction ?? "EXP",
+    });
+    formRef.current?.reset();
+    setResetKey((key) => key + 1);
+  }
+
   const tabs = [
     { key: "main",    label: "Main"    },
     { key: "edi",     label: "EDI"     },
@@ -192,7 +209,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
 
   return (
     <FormProvider {...form}>
-    <form onSubmit={form.handleSubmit(handleSave)}>
+    <form key={resetKey} ref={formRef} onSubmit={form.handleSubmit(handleSave)}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">
         <div className="page-head__title">
@@ -203,6 +220,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
+          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+            <RotateCcw size={12} />Reset
+          </button>
           <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
             <Search size={12} />Search B/L
           </button>

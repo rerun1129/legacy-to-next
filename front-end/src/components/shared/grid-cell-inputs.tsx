@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import type { ChangeEvent, CSSProperties, FocusEvent, InputHTMLAttributes } from "react";
 import { Calendar } from "lucide-react";
 
 function toDateMask(raw: string) {
@@ -28,7 +29,7 @@ function isValidTime(raw: string) {
 
 const TOOLTIP_MS = 5000;
 const errorBg = "rgba(220,38,38,0.13)";
-const tooltipStyle: React.CSSProperties = {
+const tooltipStyle: CSSProperties = {
   position: "absolute",
   bottom: "calc(100% + 2px)",
   left: 0,
@@ -44,19 +45,64 @@ const tooltipStyle: React.CSSProperties = {
 
 type StyleState = { focused: boolean; error: boolean };
 
-function DateInputBase({ defaultValue = "", inputClassName, getInputStyle }: {
+function cellInputClass(className?: string) {
+  return className ? `grid__cell-input ${className}` : "grid__cell-input";
+}
+
+export const TextCell = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  function TextCell({ className, ...props }, ref) { return <input ref={ref} className={cellInputClass(className)} {...props} />; }
+);
+
+type DateInputBaseProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "className" | "style" | "type" | "value" | "defaultValue" | "maxLength"
+> & {
   defaultValue?: string;
+  value?: string;
   inputClassName?: string;
-  getInputStyle?: (s: StyleState) => React.CSSProperties;
-}) {
+  getInputStyle?: (s: StyleState) => CSSProperties;
+};
+
+const DateInputBase = forwardRef<HTMLInputElement, DateInputBaseProps>(function DateInputBase({
+  defaultValue = "",
+  value,
+  inputClassName,
+  getInputStyle,
+  onChange,
+  onBlur,
+  onFocus,
+  ...inputProps
+}, ref) {
   const [focused, setFocused]        = useState(false);
-  const [raw, setRaw]                = useState(defaultValue.replace(/-/g, ""));
+  const [internalRaw, setInternalRaw] = useState(defaultValue.replace(/-/g, ""));
   const [error, setError]            = useState(false);
   const [tooltipVisible, setTooltip] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dateRef  = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const controlled = value !== undefined;
+  const raw = controlled ? String(value).replace(/-/g, "") : internalRaw;
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  function bindInput(node: HTMLInputElement | null) {
+    inputRef.current = node;
+    if (typeof ref === "function") ref(node); else if (ref) ref.current = node;
+  }
+
+  function setRaw(nextRaw: string) {
+    if (!controlled) setInternalRaw(nextRaw);
+  }
+
+  function notifyChange(nextRaw: string, e: ChangeEvent<HTMLInputElement> | FocusEvent<HTMLInputElement>) {
+    if (!inputRef.current) return;
+    inputRef.current.value = nextRaw;
+    onChange?.({
+      ...e,
+      target: inputRef.current,
+      currentTarget: inputRef.current,
+    } as ChangeEvent<HTMLInputElement>);
+  }
 
   const triggerTooltip = () => {
     setTooltip(true);
@@ -64,18 +110,33 @@ function DateInputBase({ defaultValue = "", inputClassName, getInputStyle }: {
     timerRef.current = setTimeout(() => setTooltip(false), TOOLTIP_MS);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRaw(e.target.value.replace(/\D/g, "").slice(0, 8));
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextRaw = e.target.value.replace(/\D/g, "").slice(0, 8);
+    e.target.value = nextRaw;
+    setRaw(nextRaw);
     setError(false);
     setTooltip(false);
     if (timerRef.current) clearTimeout(timerRef.current);
+    onChange?.(e);
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     setFocused(false);
-    if (raw.length === 0) return;
-    if (!isValidDate(raw)) { setRaw(""); setError(true); triggerTooltip(); }
+    if (raw.length === 0) {
+      onBlur?.(e);
+      return;
+    }
+    if (!isValidDate(raw)) { setRaw(""); notifyChange("", e); setError(true); triggerTooltip(); }
     else                   { setError(false); setTooltip(false); }
+    onBlur?.(e);
+  };
+
+  const handlePickerChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextRaw = e.target.value.replace(/-/g, "");
+    setRaw(nextRaw);
+    setError(false);
+    setTooltip(false);
+    notifyChange(nextRaw, e);
   };
 
   const calendarValue = raw.length === 8
@@ -89,11 +150,13 @@ function DateInputBase({ defaultValue = "", inputClassName, getInputStyle }: {
   return (
     <div style={{ position: "relative", width: "100%" }}>
       <input
+        {...inputProps}
+        ref={bindInput}
         className={inputClassName}
         style={computedStyle}
         value={focused ? raw : toDateMask(raw)}
         onChange={handleChange}
-        onFocus={() => setFocused(true)}
+        onFocus={(e) => { setFocused(true); onFocus?.(e); }}
         onBlur={handleBlur}
         placeholder="yyyyMMdd"
         maxLength={focused ? 8 : 10}
@@ -111,19 +174,27 @@ function DateInputBase({ defaultValue = "", inputClassName, getInputStyle }: {
         ref={dateRef}
         type="date"
         value={calendarValue}
-        onChange={e => { setRaw(e.target.value.replace(/-/g, "")); setError(false); setTooltip(false); }}
+        onChange={handlePickerChange}
         tabIndex={-1}
         style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 1, height: 1, top: 0, left: 0 }}
       />
       {tooltipVisible && <div style={tooltipStyle}>유효하지 않은 날짜</div>}
     </div>
   );
-}
+});
 
-export function NumericCell({ defaultValue }: { defaultValue?: string | number }) {
-  const v = typeof defaultValue === "string" ? defaultValue.replace(/,/g, "") : defaultValue;
-  return <input type="number" step="any" className="grid__cell-input" defaultValue={v} />;
-}
+type NumericCellProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "defaultValue"> & {
+  defaultValue?: string | number;
+};
+
+export const NumericCell = forwardRef<HTMLInputElement, NumericCellProps>(
+  function NumericCell({ defaultValue, className, step = "any", ...props }, ref) {
+    const v = typeof defaultValue === "string" ? defaultValue.replace(/,/g, "") : defaultValue;
+    return (
+      <input ref={ref} type="number" step={step} className={cellInputClass(className)} defaultValue={v} {...props} />
+    );
+  }
+);
 
 export function DateCell({ defaultValue }: { defaultValue?: string }) {
   return (
@@ -135,12 +206,16 @@ export function DateCell({ defaultValue }: { defaultValue?: string }) {
   );
 }
 
-export function PanelDateInput({ defaultValue, required }: { defaultValue?: string; required?: boolean }) {
+type PanelDateInputProps = DateInputBaseProps & { required?: boolean };
+
+export const PanelDateInput = forwardRef<HTMLInputElement, PanelDateInputProps>(
+  function PanelDateInput({ defaultValue, required, ...props }, ref) {
   return (
     <DateInputBase
+      ref={ref}
       defaultValue={defaultValue}
       getInputStyle={({ focused, error }) => {
-        const base: React.CSSProperties = {
+        const base: CSSProperties = {
           width: "100%", height: 22, fontSize: 10,
           background: error ? errorBg : "var(--surface-1)",
           borderWidth: 1,
@@ -172,9 +247,10 @@ export function PanelDateInput({ defaultValue, required }: { defaultValue?: stri
         };
         return { ...base, padding: "0 20px 0 8px" };
       }}
+      {...props}
     />
   );
-}
+});
 
 export function TimeCell({ defaultValue = "" }: { defaultValue?: string }) {
   const [focused, setFocused]        = useState(false);
@@ -191,7 +267,7 @@ export function TimeCell({ defaultValue = "" }: { defaultValue?: string }) {
     timerRef.current = setTimeout(() => setTooltip(false), TOOLTIP_MS);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRaw(e.target.value.replace(/\D/g, "").slice(0, 4));
     setError(false);
     setTooltip(false);

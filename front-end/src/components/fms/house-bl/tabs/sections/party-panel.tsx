@@ -22,7 +22,7 @@ const ROLE_FIELDS: Record<PartyRole, [keyof HouseBlFormValues, keyof HouseBlForm
   "SHIPPER":     ["shipperCode",   "shipperName",   "shipperAddr"],
   "CONSIGNEE":   ["consigneeCode", "consigneeName", "consigneeAddr"],
   "NOTIFY":      ["notifyCode",    "notifyName",    "notifyAddr"],
-  "DOC PARTNER": null,
+  "DOC PARTNER": ["docPartnerCode", "docPartnerName", "docPartnerAddress"],
 };
 
 const DEFAULT_CODE: Partial<Record<PartyRole, string>> = {
@@ -118,8 +118,8 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
 export function PartyPanel({ variant, isExp = false }: Props) {
   const panelScope = variant ? `party-panel.${variant.key}` : "party-panel";
   const PARTY_CONFIGS: PartyConfig[] = [
-    { key: "shipper",     role: "SHIPPER",     filled: true,  required: false },
-    { key: "consignee",   role: "CONSIGNEE",   filled: true,  required: !isExp },
+    { key: "shipper",     role: "SHIPPER",     filled: false, required: false },
+    { key: "consignee",   role: "CONSIGNEE",   filled: false, required: !isExp },
     { key: "notify",      role: "NOTIFY",      filled: false, required: false  },
     { key: "doc-partner", role: "DOC PARTNER", filled: false, required: true   },
   ];

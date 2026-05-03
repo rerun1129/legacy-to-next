@@ -26,7 +26,7 @@ export function DescriptionPanel() {
         <Controller
           control={control}
           name="descriptionOfGoods"
-          defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS\nSAID TO CONTAIN"}
+          defaultValue=""
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

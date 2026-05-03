@@ -2,21 +2,10 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { BLVariantConfig } from '@/lib/bl-variants';
 import type { JobDiv, Bound } from '@/domain/house-bl';
 import { houseBlPort } from '@/lib/ports';
+import type { HouseBlFormValues } from './house-bl-schema';
+import { createEmptyHouseBlFormValues } from './house-bl-defaults';
 
-interface FormValues {
-  hbl: string;
-  mbl: string;
-  sType: string;
-  lType: string;
-  etd?: string;
-  eta?: string;
-  pol?: string;
-  pod?: string;
-  settle: 'PREPAID' | 'COLLECT';
-  expImp: 'EXP' | 'IMP' | null;
-}
-
-export function useSearchBl(form: UseFormReturn<FormValues>, variant: BLVariantConfig) {
+export function useSearchBl(form: UseFormReturn<HouseBlFormValues>, variant: BLVariantConfig) {
   function handleSearchBl() {
     const blNo = form.getValues('hbl');
     if (!blNo?.trim()) return;
@@ -34,6 +23,7 @@ export function useSearchBl(form: UseFormReturn<FormValues>, variant: BLVariantC
         }
         return houseBlPort.getById(rows[0].id).then((detail) => {
           form.reset({
+            ...createEmptyHouseBlFormValues(),
             hbl:    detail.hblNo ?? '',
             mbl:    detail.masterBlId != null ? String(detail.masterBlId) : '',
             sType:  detail.shipmentType ?? '',
@@ -42,7 +32,7 @@ export function useSearchBl(form: UseFormReturn<FormValues>, variant: BLVariantC
             eta:    detail.eta ?? '',
             pol:    detail.polCode ?? '',
             pod:    detail.podCode ?? '',
-            settle: 'PREPAID',
+            settle: detail.freightTerm ?? '',
             expImp: detail.bound,
           });
         });

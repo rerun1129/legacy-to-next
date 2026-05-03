@@ -1,4 +1,4 @@
-export function PackageField({ qty = "1300", unit = "CTN", height = 22 }: {
+export function PackageField({ qty = "", unit = "", height = 22 }: {
   qty?: string; unit?: string; height?: number;
 }) {
   const sel: React.CSSProperties = {
@@ -12,7 +12,7 @@ export function PackageField({ qty = "1300", unit = "CTN", height = 22 }: {
         <input type="number" step="1" defaultValue={qty}
           style={{ flex: 1, height, padding: "0 6px", fontSize: 10 }} />
         <select defaultValue={unit} style={sel}>
-          <option>CTN</option><option>PKG</option><option>BAG</option>
+          <option value=""></option><option>CTN</option><option>PKG</option><option>BAG</option>
           <option>PLT</option><option>BOX</option><option>PCS</option><option>ROL</option>
         </select>
       </div>

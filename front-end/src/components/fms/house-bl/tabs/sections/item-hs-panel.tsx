@@ -1,42 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { NumericCell } from "@/components/shared/grid-cell-inputs";
+import { NumericCell, TextCell } from "@/components/shared/grid-cell-inputs";
 
-interface ItemRow {
-  id: number;
-  hs: string; desc: string; qty: string; unit: string; value: string; cur: string;
-}
+type ItemRow = NonNullable<HouseBlFormValues["itemHs"]>[number];
 
-const ITEM_COLS: GridColumn<ItemRow>[] = [
-  { key: "_no",   label: "#",           width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "hs",    label: "HS Code",     width: 100, render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "desc",  label: "Description", width: 200, render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "qty",   label: "Qty",         width: 70,  className: "is-num", render: (v) => <NumericCell defaultValue={String(v)} /> },
-  { key: "unit",  label: "Unit",        width: 60,  render: (v) => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "value", label: "Value",       width: 100, className: "is-num", render: (v) => <NumericCell defaultValue={String(v)} /> },
-  { key: "cur",   label: "Currency",    width: 80,  render: (v) => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-];
-
-const EMPTY_ITEM_HS_ROW = {
+const EMPTY_ITEM_HS_ROW: Omit<ItemRow, "id"> = {
   hs: "", desc: "", qty: "", unit: "", value: "", cur: "",
 };
 
 export function ItemHsPanel() {
-  const { control } = useFormContext<HouseBlFormValues>();
-  const { fields, append, remove } = useFieldArray({ control, name: "itemHs" });
+  const { control, register } = useFormContext<HouseBlFormValues>();
+  const { fields, append, remove } = useFieldArray({ control, name: "itemHs", keyName: "fieldId" });
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
+  const columns = useMemo<GridColumn<ItemRow>[]>(() => [
+    { key: "_no",   label: "#",           width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "hs",    label: "HS Code",     width: 100, render: (_, __, i) => <TextCell {...register(`itemHs.${i}.hs`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "desc",  label: "Description", width: 200, render: (_, __, i) => <TextCell {...register(`itemHs.${i}.desc`)} /> },
+    { key: "qty",   label: "Qty",         width: 70,  className: "is-num", render: (_, __, i) => <NumericCell {...register(`itemHs.${i}.qty`)} /> },
+    { key: "unit",  label: "Unit",        width: 60,  render: (_, __, i) => <TextCell {...register(`itemHs.${i}.unit`)} /> },
+    { key: "value", label: "Value",       width: 100, className: "is-num", render: (_, __, i) => <NumericCell {...register(`itemHs.${i}.value`)} /> },
+    { key: "cur",   label: "Currency",    width: 80,  render: (_, __, i) => <TextCell {...register(`itemHs.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+  ], [register]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
     : -1;
 
   function handleAdd() {
-    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : 1;
+    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id ?? 0)) + 1 : 1;
     append({ ...EMPTY_ITEM_HS_ROW, id: nextId });
     setSelectedKey(null);
   }
@@ -60,9 +56,9 @@ export function ItemHsPanel() {
         </div>
       </div>
       <GridList
-        columns={ITEM_COLS}
+        columns={columns}
         data={fields as unknown as ItemRow[]}
-        rowKey={(r) => r.id}
+        rowKey={(_, i) => fields[i].fieldId}
         onRowClick={(row) => setSelectedKey(row.id)}
         rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1, minHeight: 0 }}

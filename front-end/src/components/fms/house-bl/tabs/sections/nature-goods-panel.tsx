@@ -16,7 +16,7 @@ export function NatureGoodsPanel() {
         <Controller
           control={control}
           name="natureOfGoods"
-          defaultValue={"ELECTRONIC GOODS\n(MOBILE PHONE PARTS)\n1,300 CARTONS"}
+          defaultValue=""
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

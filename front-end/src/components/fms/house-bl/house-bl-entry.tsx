@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search } from "lucide-react";
+import { Save, Printer, Copy, Trash2, FileText, Send, Download, RefreshCw, Search, RotateCcw } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { useDraftPersist } from "@/lib/use-draft-persist";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
@@ -16,11 +15,10 @@ import { OtherTab }    from "./tabs/other-tab";
 import { FreightTab }  from "./tabs/freight-tab";
 import { houseBlPort } from "@/lib/ports";
 import type { HouseBlFormValues } from "./house-bl-schema";
+import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import { buildHouseBlRequest } from "./house-bl-submit";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { useSearchBl } from "./use-search-bl";
-
-// @hookform/resolvers 미설치로 zodResolver 없이 useForm 단독 사용. 검증은 submit 시 수동 호출.
 
 const TOOLBAR_FIELDS_SEA = [
   "Shipment Type", "Settle", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
@@ -46,10 +44,10 @@ const DEFAULTS_AIR: Record<string, string> = {
   "B/L Type": "", "Master Ref": "",
 };
 const DEFAULTS_TRUCK: Record<string, string> = {
-  "Truck B/L No": "", "Settle": "PREPAID",
+  "Truck B/L No": "", "Settle": "",
 };
 const DEFAULTS_NON_BL: Record<string, string> = {
-  "Non B/L No": "", "Settle": "PREPAID",
+  "Non B/L No": "", "Settle": "",
 };
 
 function getToolbarFields(variant: BLVariantConfig) {
@@ -69,11 +67,9 @@ function getToolbarDefaults(variant: BLVariantConfig) {
 function renderMainTab(variant: BLVariantConfig) {
   if (variant.mode === "SEA")  return <MainTabSea variant={variant} />;
   if (variant.mode === "AIR")  return <MainTabAir variant={variant} />;
-  // TRUCK/NON_BL: TruckOrderPanel은 MainTabSea 안의 분기로 처리 예정
   return <MainTabSea variant={variant} />;
 }
 
-/** toolbar의 라벨명 → form field 이름 매핑 */
 const TOOLBAR_LABEL_TO_FIELD: Record<string, keyof HouseBlFormValues> = {
   "HBL No":         "hbl",
   "HAWB No":        "hbl",
@@ -95,61 +91,29 @@ interface Props {
 export function HouseBLEntry({ variant, id }: Props) {
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
   const router = useRouter();
-  const variantKey = variant.key;
 
   const defaults = getToolbarDefaults(variant);
 
   const form = useForm<HouseBlFormValues>({
-    defaultValues: {
-      hbl:    defaults["HBL No"] ?? defaults["HAWB No"] ?? defaults["Truck B/L No"] ?? defaults["Non B/L No"] ?? "",
-      mbl:    defaults["MBL No"] ?? defaults["MAWB No"] ?? "",
-      sType:  defaults["Shipment Type"] ?? "",
-      lType:  defaults["Load Type"] ?? "",
-      etd:    "",
-      eta:    "",
-      pol:    "",
-      pod:    "",
-      settle: "PREPAID",
-      expImp: variant.direction,
-      // Party
-      shipperCode: "", shipperName: "", shipperAddr: "",
-      consigneeCode: "", consigneeName: "", consigneeAddr: "",
-      notifyCode: "", notifyName: "", notifyAddr: "",
-      // Trade
-      paymentType: "", paymentPlace: "",
-      // Schedule (SEA)
-      linerCode: "", linerName: "",
-      vesselCode: "", vesselName: "", voyNo: "", onboardDate: "",
-      // Air Schedule
-      airlineCode: "", airlineName: "", flightNo: "", flightDate: "",
-      // Marks & Description
-      marksAndNumbers: "", descriptionOfGoods: "", natureOfGoods: "",
-      // Freight / sub-entity rows
-      itemHs:         [],
-      freightSelling: [],
-      freightBuying:  [],
-      coLoadBls:      [],
-      koreaLicenses:  [],
-    },
+    defaultValues: createEmptyHouseBlFormValues(),
   });
 
-  // 수정 모드: 기존 데이터 fetch
   const { data: detail } = useQuery({
     queryKey: ["house-bl", "detail", id],
     queryFn: () => houseBlPort.getById(id!),
     enabled: isEdit,
   });
 
-  const { clearDraft, hasDraft } = useDraftPersist(form, `draft:house-bl:${variant.key}:${id ?? "new"}`);
-
-  // 수정 모드: draft가 없을 때만 서버 데이터로 reset (draft 우선)
   useEffect(() => {
-    if (!detail || hasDraft()) return;
+    if (!detail) return;
     form.reset({
+      ...createEmptyHouseBlFormValues(),
       hbl:    detail.hblNo ?? "",
       mbl:    detail.masterBlId != null ? String(detail.masterBlId) : "",
       sType:  detail.shipmentType ?? "",
@@ -158,10 +122,10 @@ export function HouseBLEntry({ variant, id }: Props) {
       eta:    detail.eta ?? "",
       pol:    detail.polCode ?? "",
       pod:    detail.podCode ?? "",
-      settle: "PREPAID",
+      settle: detail.freightTerm ?? "",
       expImp: detail.bound,
     });
-  }, [detail, form, hasDraft]);
+  }, [detail, form]);
 
   const mutation = useMutation({
     mutationFn: (data: HouseBlFormValues) => {
@@ -169,7 +133,6 @@ export function HouseBLEntry({ variant, id }: Props) {
       return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
     },
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       router.push(`/fms/house-bl/${variant.key}/list`);
     },
@@ -178,9 +141,8 @@ export function HouseBLEntry({ variant, id }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
-      clearDraft();
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
-      form.reset();
+      form.reset(createEmptyHouseBlFormValues());
       router.replace(`/fms/house-bl/${variant.key}/entry`);
     },
   });
@@ -201,18 +163,22 @@ export function HouseBLEntry({ variant, id }: Props) {
 
   const { handleSearchBl } = useSearchBl(form, variant);
 
+  function handleResetEntry() {
+    form.reset(createEmptyHouseBlFormValues());
+    formRef.current?.reset();
+    setResetKey((key) => key + 1);
+  }
+
   function handleSubmit(raw: HouseBlFormValues) {
     mutation.mutate(raw);
   }
 
-  // Switch B/L 버튼 활성 조건: 수정 모드이고 SEA variant
   const canSwitchBl = isEdit && id != null && variant.key.startsWith('sea-');
 
   return (
     <>
       <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        {/* Page header */}
+      <form key={resetKey} ref={formRef} onSubmit={form.handleSubmit(handleSubmit)}>
         <div className="page-head">
           <div className="page-head__title">
             <div className="page-head__title-icon"><FileText size={14} /></div>
@@ -222,6 +188,9 @@ export function HouseBLEntry({ variant, id }: Props) {
             <span className="badge badge--draft">DRAFT</span>
           </div>
           <div className="page-head__actions">
+            <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
+              <RotateCcw size={12} />Reset
+            </button>
             <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
               <Search size={12} />Search B/L
             </button>
@@ -242,7 +211,6 @@ export function HouseBLEntry({ variant, id }: Props) {
               <button type="button" className="btn btn--sm btn--success"><Printer size={12} />Print</button>
             )}
             <button type="button" className="btn btn--sm btn--info"><Send size={12} />EDI</button>
-            {/* Switch B/L: SEA 수정 모드에서만 활성 */}
             <button
               type="button"
               className="btn btn--sm btn--secondary"
@@ -261,7 +229,6 @@ export function HouseBLEntry({ variant, id }: Props) {
           </div>
         </div>
 
-        {/* Toolbar */}
         <div className="toolbar">
           {toolbarFields.map((f) => {
             const fieldName = TOOLBAR_LABEL_TO_FIELD[f];
@@ -283,8 +250,6 @@ export function HouseBLEntry({ variant, id }: Props) {
                       )}
                     </>
                   ) : (
-                    // form과 미연결 필드(Shipment Type, Service Term 등)
-                    // TODO: 후속 작업 - 추가 필드 연결
                     <input defaultValue={defaults[f] ?? ""} placeholder={f} />
                   )}
                 </div>
@@ -293,7 +258,6 @@ export function HouseBLEntry({ variant, id }: Props) {
           })}
         </div>
 
-        {/* Tabbar */}
         <div className="tabbar">
           {tabs.map((t) => (
             <button
@@ -311,7 +275,6 @@ export function HouseBLEntry({ variant, id }: Props) {
           </div>
         </div>
 
-        {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
         <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant)}</div>
         <div style={{ display: tab === "edi"     ? "contents" : "none" }}><EdiTab variant={variant} /></div>
         <div style={{ display: tab === "other"   ? "contents" : "none" }}><OtherTab /></div>
@@ -319,7 +282,6 @@ export function HouseBLEntry({ variant, id }: Props) {
       </form>
       </FormProvider>
 
-      {/* Switch B/L 모달: canSwitchBl이 true일 때만 렌더 (id는 활성 조건에서 보장) */}
       {canSwitchBl && (
         <SwitchBlModal
           houseBlId={id!}

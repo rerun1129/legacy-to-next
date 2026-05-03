@@ -1,35 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
 
-interface DimRow {
-  length: string; width: string; height: string;
-  qty: string; cbm: string; volWt: string;
-}
+type DimRow = NonNullable<HouseBlFormValues["dims"]>[number];
 
-const COLS: GridColumn<DimRow>[] = [
-  { key: "_no",    label: "#",          className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "length", label: "Length",     className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
-  { key: "width",  label: "Width",      className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
-  { key: "height", label: "Height",     className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
-  { key: "qty",    label: "Qty",        className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
-  { key: "cbm",    label: "CBM",        className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
-  { key: "volWt",  label: "Volume Wt.", className: "is-num",  render: v => <NumericCell defaultValue={String(v)} /> },
-];
-
-const EMPTY_DIM_ROW = {
-  length: "", width: "", height: "", qty: "", cbm: "", volWt: "",
+const EMPTY_DIM_ROW: DimRow = {
+  lengthCm: "",
+  widthCm: "",
+  heightCm: "",
+  quantity: "",
+  cbm: "",
+  volumeWeightKg: "",
 };
 
 export function DimensionPanel() {
-  const { control } = useFormContext<HouseBlFormValues>();
+  const { control, register } = useFormContext<HouseBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dims" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const columns = useMemo<GridColumn<DimRow>[]>(() => [
+    { key: "_no",            label: "#",          className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "lengthCm",       label: "Length",     className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.lengthCm`)} /> },
+    { key: "widthCm",        label: "Width",      className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.widthCm`)} /> },
+    { key: "heightCm",       label: "Height",     className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.heightCm`)} /> },
+    { key: "quantity",       label: "Qty",        className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.quantity`)} /> },
+    { key: "cbm",            label: "CBM",        className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.cbm`)} /> },
+    { key: "volumeWeightKg", label: "Volume Wt.", className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.volumeWeightKg`)} /> },
+  ], [register]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
@@ -59,7 +60,7 @@ export function DimensionPanel() {
         </div>
       </div>
       <GridList
-        columns={COLS}
+        columns={columns}
         data={fields as unknown as DimRow[]}
         rowKey={(_, i) => fields[i].id}
         onRowClick={(_, i) => setSelectedKey(fields[i].id)}

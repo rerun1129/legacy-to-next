@@ -67,10 +67,10 @@ export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
   const panelScope = variant ? `trade-panel.${variant.key}` : "trade-panel";
 
   const tradeTermItems: FieldItemDef[] = [
-    { key: "incoterms",    render: () => <LiField label="Incoterms"    value="FOB"     req /> },
-    { key: "freight-term", render: () => <PaymentTypeField inputProps={{ ...register("paymentType"),  defaultValue: "Prepaid" }} /> },
-    { key: "payable-at",   render: () => <PaymentPlaceField inputProps={{ ...register("paymentPlace"), defaultValue: "ORIGIN" }} /> },
-    { key: "co-load",      render: () => <LiField label="Co-Load"      value="N" /> },
+    { key: "incoterms",    render: () => <LiField label="Incoterms"    value="" req /> },
+    { key: "freight-term", render: () => <PaymentTypeField inputProps={{ ...register("paymentType"),  defaultValue: "" }} /> },
+    { key: "payable-at",   render: () => <PaymentPlaceField inputProps={{ ...register("paymentPlace"), defaultValue: "" }} /> },
+    { key: "co-load",      render: () => <LiField label="Co-Load"      value="" /> },
   ];
 
   const fields: FieldWidgetDef[] = [

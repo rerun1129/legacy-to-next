@@ -57,7 +57,7 @@ export const MASTER_BL_SCHEMA = z.object({
   bound:        z.enum(["EXP", "IMP"]),
   mblNo:        z.string().max(35).optional(),
   masterRefNo:  z.string().max(35).optional(),
-  freightTerm:  z.enum(["PREPAID", "COLLECT"]),
+  freightTerm:  z.enum(["", "PREPAID", "COLLECT"]),
 
   shipperCode:      z.string().max(20).optional(),
   shipperAddress:   z.string().optional(),
@@ -144,10 +144,11 @@ export const TOOLBAR_TO_FIELD: Partial<Record<string, string>> = {
   "Status":        "mblStatus",
 };
 
-export const MASTER_BL_DEFAULT_VALUES: MasterBlFormValues = {
+export function createEmptyMasterBlFormValues(): MasterBlFormValues {
+  return {
   jobDiv: "SEA",
   bound: "EXP",
-  freightTerm: "PREPAID",
+  freightTerm: "",
   mblNo: "",
   masterRefNo: "",
   shipperCode: "",
@@ -211,4 +212,7 @@ export const MASTER_BL_DEFAULT_VALUES: MasterBlFormValues = {
   scheduleLegs: [],
   airCharges: [],
   houseBls: [],
-};
+  };
+}
+
+export const MASTER_BL_DEFAULT_VALUES: MasterBlFormValues = createEmptyMasterBlFormValues();

@@ -1,14 +1,15 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, type UseFormReturn } from "react-hook-form";
 import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import type { MasterBlFormValues } from "../../master-bl-schema";
 
-interface Props { variant?: AnyVariantConfig }
+interface Props { variant?: AnyVariantConfig; form?: UseFormReturn<MasterBlFormValues> }
 interface LegRow { id: number; to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
 
 const LEG_COLS: GridColumn<LegRow>[] = [
@@ -21,10 +22,7 @@ const LEG_COLS: GridColumn<LegRow>[] = [
   { key: "arrival",   width: 96, align: "center", label: "Arrival",  render: v => <DateCell defaultValue={String(v)} /> },
   { key: "arrTime",   width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
 ];
-const LEG_DATA: LegRow[] = [
-  { id: 1, to: "PVG", by: "KE", flight: "KE851", onBoard: "2026-04-26", boardTime: "09:30", arrival: "2026-04-26", arrTime: "11:45" },
-  { id: 2, to: "NRT", by: "KE", flight: "KE701", onBoard: "2026-04-27", boardTime: "08:00", arrival: "2026-04-27", arrTime: "09:20" },
-];
+const LEG_DATA: LegRow[] = [];
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function SchedField({ label, name, req, type = "text" }: { label: string; name: string; req?: boolean; type?: string }) {

@@ -1,5 +1,5 @@
 import type React from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext, type FieldPath } from "react-hook-form";
 import { Search } from "lucide-react";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
@@ -11,14 +11,28 @@ import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schem
 interface Props { variant?: AnyVariantConfig }
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
-function SchedField({ label, value, req, type = "text" }: { label: string; value: string; req?: boolean; type?: string }) {
+function SchedField({
+  label,
+  value,
+  req,
+  type = "text",
+  inputProps,
+  dateProps,
+}: {
+  label: string;
+  value: string;
+  req?: boolean;
+  type?: string;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  dateProps?: React.ComponentProps<typeof PanelDateInput>;
+}) {
   return (
     <div className="li">
       <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
       <div className="li__input">
         {type === "date"
-          ? <PanelDateInput defaultValue={value} required={req} />
-          : <input type={type} defaultValue={value} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} />}
+          ? <PanelDateInput defaultValue={value} required={req} {...dateProps} />
+          : <input type={type} defaultValue={value} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />}
       </div>
     </div>
   );
@@ -99,14 +113,41 @@ function VoyageRow({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLI
 
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { control, register } = useFormContext<HouseBlFormValues>();
 
   if (!variant) return null;
   const panelScope = `schedule-panel.${variant.key}`;
+  const renderDateField = (
+    name: FieldPath<HouseBlFormValues>,
+    label: string,
+    value = "",
+    req?: boolean,
+  ) => (
+    <Controller
+      control={control}
+      name={name}
+      defaultValue={value as never}
+      render={({ field }) => (
+        <SchedField
+          label={label}
+          value={value}
+          req={req}
+          type="date"
+          dateProps={{
+            name: field.name,
+            value: String(field.value ?? ""),
+            onChange: field.onChange,
+            onBlur: field.onBlur,
+            ref: field.ref,
+          }}
+        />
+      )}
+    />
+  );
 
   const PORT_ITEMS: FieldItemDef[] = [
-    { key: "pol",      render: () => <LcnField label="POL"      req  code="KRBSAN" name="Busan" /> },
-    { key: "pod",      render: () => <LcnField label="POD"      req  code="CNSHA"  name="Shanghai" /> },
+    { key: "pol",      render: () => <LcnField label="POL"      req  code=""       name="" /> },
+    { key: "pod",      render: () => <LcnField label="POD"      req  code=""       name="" /> },
     { key: "delivery", render: () => <LcnField label="Delivery"      code=""       name="" /> },
   ];
 
@@ -114,9 +155,9 @@ export function SchedulePanel({ variant }: Props) {
     { key: "liner",    render: () => <LinerRow codeProps={register("linerCode")} nameProps={register("linerName")} /> },
     { key: "vessel",   render: () => <VesselRow inputProps={register("vesselName")} /> },
     { key: "voyage",   render: () => <VoyageRow inputProps={register("voyNo")} /> },
-    { key: "etd",      render: () => <SchedField label="ETD"      value="2026-04-24" req type="date" /> },
-    { key: "eta",      render: () => <SchedField label="ETA"      value="2026-05-08" req type="date" /> },
-    { key: "on-board", render: () => <SchedField label="On Board" value="" type="date" /> },
+    { key: "etd",      render: () => renderDateField("etd", "ETD", "", true) },
+    { key: "eta",      render: () => renderDateField("eta", "ETA", "", true) },
+    { key: "on-board", render: () => renderDateField("seaDetail.onboardDate", "On Board") },
   ];
 
   const fields: FieldWidgetDef[] = [

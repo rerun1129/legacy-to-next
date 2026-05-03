@@ -177,7 +177,7 @@ export const HOUSE_BL_SCHEMA = z.object({
   eta:    z.string().regex(/^\d{8}$/).or(z.literal('')).optional(),
   pol:    z.string().max(5).optional(),
   pod:    z.string().max(5).optional(),
-  settle: z.enum(['PREPAID', 'COLLECT']),
+  settle: z.enum(['', 'PREPAID', 'COLLECT']),
   expImp: z.enum(['EXP', 'IMP']).nullable(),
 
   // party fields (Coder: name/addr 추가)
@@ -194,6 +194,7 @@ export const HOUSE_BL_SCHEMA = z.object({
   notifyAddr:       z.string().optional(),
   notifyAddress:    z.string().optional(),
   docPartnerCode:   z.string().max(20).optional(),
+  docPartnerName:   z.string().optional(),
   docPartnerAddress: z.string().optional(),
   settlePartnerCode: z.string().max(20).optional(),
 

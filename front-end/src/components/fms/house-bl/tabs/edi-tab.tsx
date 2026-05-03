@@ -149,7 +149,7 @@ export function EdiTab({ variant }: Props) {
                 { label: "Bond Type",       value: "Single" },
                 { label: "Bond Holder",     value: "" },
                 { label: "AMS Filing Date", value: "" },
-                { label: "AMS Status",      value: "N/A" },
+                { label: "AMS Status",      value: "" },
               ].map((f) => (
                 <div key={f.label} className="li">
                   <span className="li__label">{f.label}</span>
@@ -163,7 +163,7 @@ export function EdiTab({ variant }: Props) {
             <div className="sched-list">
               {[
                 { label: "AFR Filing Date", value: "" },
-                { label: "AFR Status",      value: "N/A" },
+                { label: "AFR Status",      value: "" },
                 { label: "MIC Code",        value: "" },
               ].map((f) => (
                 <div key={f.label} className="li">
@@ -177,7 +177,7 @@ export function EdiTab({ variant }: Props) {
             <div className="subhead" style={{ marginTop: 16 }}><div className="subhead__bar" />China ACDD</div>
             <div className="sched-list">
               {[
-                { label: "ACDD Status", value: "N/A" },
+                { label: "ACDD Status", value: "" },
                 { label: "Filing Code", value: "" },
               ].map((f) => (
                 <div key={f.label} className="li">

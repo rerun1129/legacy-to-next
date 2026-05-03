@@ -31,14 +31,7 @@ const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
 const ACCOUNT_ROWS: AccountRow[] = [];
 
 // ── Sample data ────────────────────────────────────────────
-const RATE_ROWS: FreightRow[] = [
-  { id: 1, code: "OFR", desc: "Ocean Freight",     qty: "2 CONT", unit: "CONT", sell: "400.00", buy: "320.00", cur: "USD" },
-  { id: 2, code: "BAF", desc: "Bunker Adjustment", qty: "2 CONT", unit: "CONT", sell: "120.00", buy: "100.00", cur: "USD" },
-  { id: 3, code: "CAF", desc: "Currency Adj.",     qty: "2 CONT", unit: "CONT", sell: "50.00",  buy: "40.00",  cur: "USD" },
-  { id: 4, code: "LSF", desc: "Low Sulphur Fee",   qty: "2 CONT", unit: "CONT", sell: "80.00",  buy: "65.00",  cur: "USD" },
-  { id: 5, code: "THC", desc: "Terminal Handling", qty: "2 CONT", unit: "CONT", sell: "95.00",  buy: "80.00",  cur: "USD" },
-  { id: 6, code: "DOC", desc: "Documentation Fee", qty: "1 BL",  unit: "BL",   sell: "45.00",  buy: "30.00",  cur: "USD" },
-];
+const RATE_ROWS: FreightRow[] = [];
 
 // ── Rate input styles ──────────────────────────────────────
 const CUR_SELECT: React.CSSProperties = {
@@ -85,7 +78,7 @@ function ExRateItem({ label }: ExRateItemProps) {
       <span style={{ fontSize: 10, minWidth: 110, flexShrink: 0, color: "var(--ink-2)" }}>{label}</span>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <input type="date" defaultValue="" style={DATE_INPUT} />
-        <select style={CUR_SELECT}><option>USD</option><option>KRW</option><option>EUR</option></select>
+        <select defaultValue="" style={CUR_SELECT}><option value=""></option><option>USD</option><option>KRW</option><option>EUR</option></select>
         <input type="number" min="0" step="0.01" defaultValue="" style={RATE_INPUT} />
       </div>
     </div>
