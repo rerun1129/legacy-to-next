@@ -44,7 +44,7 @@ const toggleStyle = (active: boolean): React.CSSProperties => ({
   color: active ? "#fff" : "#333",
 });
 
-export default function InputsPreviewPage() {
+export function InputsSection() {
   const [variant, setVariant] = useState<BoxVariant>("panel");
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
