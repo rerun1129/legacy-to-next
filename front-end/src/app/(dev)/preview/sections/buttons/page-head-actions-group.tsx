@@ -2,17 +2,11 @@
 
 import { useState } from "react";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
+import { Button } from "@/components/shared/button";
 import { VariantToggle } from "./_variant-toggle";
 import { ACTION_SPECIMENS } from "./_actions-data";
-import type { BtnVariant, ActionSpecimen } from "./_specimen-types";
+import type { ToggleableVariant, ActionSpecimen } from "./_specimen-types";
 import { sectionStyle, labelStyle } from "./_shared";
-
-const VARIANT_CLASS: Record<BtnVariant, string> = {
-  search: "btn btn--search",
-  transaction: "btn btn--transaction",
-  danger: "btn btn--danger",
-  normal: "btn btn--normal",
-};
 
 interface ActionCardProps {
   specimen: ActionSpecimen;
@@ -20,21 +14,16 @@ interface ActionCardProps {
 }
 
 function ActionCard({ specimen, onShowModal }: ActionCardProps) {
-  const [variant, setVariant] = useState<BtnVariant>(specimen.defaultVariant);
+  const [variant, setVariant] = useState<ToggleableVariant>(specimen.defaultVariant);
   const Icon = specimen.icon;
 
   return (
     <div className="specimen-card">
       <div style={labelStyle}>{specimen.label}</div>
       <VariantToggle value={variant} onChange={setVariant} />
-      <button
-        type="button"
-        className={VARIANT_CLASS[variant]}
-        onClick={() => onShowModal(specimen.confirmMessage)}
-      >
-        <Icon size={12} />
+      <Button variant={variant} leftIcon={<Icon size={12} />} onClick={() => onShowModal(specimen.confirmMessage)}>
         {specimen.label}
-      </button>
+      </Button>
     </div>
   );
 }

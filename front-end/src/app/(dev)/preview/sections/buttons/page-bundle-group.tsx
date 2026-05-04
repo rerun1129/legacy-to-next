@@ -2,18 +2,11 @@
 
 import { useState } from "react";
 import { ConfirmModal } from "@/components/shared/confirm-modal";
+import { Button } from "@/components/shared/button";
 import { VariantToggle } from "./_variant-toggle";
 import { PAGE_BUNDLES } from "./_bundles-data";
-import type { BtnVariant, ButtonInBundle, PageBundle } from "./_specimen-types";
+import type { ToggleableVariant, ButtonInBundle, PageBundle } from "./_specimen-types";
 import { sectionStyle, labelStyle } from "./_shared";
-
-const VARIANT_CLASS: Record<BtnVariant | "default", string> = {
-  search: "btn btn--search",
-  transaction: "btn btn--transaction",
-  danger: "btn btn--danger",
-  normal: "btn btn--normal",
-  default: "btn",
-};
 
 interface BundleBtnProps {
   btn: ButtonInBundle;
@@ -21,31 +14,26 @@ interface BundleBtnProps {
 }
 
 function BundleBtn({ btn, onShowModal }: BundleBtnProps) {
-  const [variant, setVariant] = useState<BtnVariant | "default">(
+  const [variant, setVariant] = useState<ToggleableVariant | "default">(
     btn.initialVariant
   );
   const Icon = btn.icon;
 
-  // "default" variant는 VariantToggle에서 BtnVariant로만 변경 가능하므로
+  // "default" variant는 VariantToggle에서 ToggleableVariant로만 변경 가능하므로
   // toggle 표시 시 "default"면 normal을 초기값으로 사용
-  const toggleValue: BtnVariant =
+  const toggleValue: ToggleableVariant =
     variant === "default" ? "normal" : variant;
 
-  function handleVariantChange(v: BtnVariant) {
+  function handleVariantChange(v: ToggleableVariant) {
     setVariant(v);
   }
 
   return (
     <div className="specimen-bundle__btn-wrap">
       <VariantToggle value={toggleValue} onChange={handleVariantChange} />
-      <button
-        type={btn.type ?? "button"}
-        className={VARIANT_CLASS[variant]}
-        onClick={() => onShowModal(btn.confirmMessage)}
-      >
-        {Icon && <Icon size={12} />}
+      <Button type={btn.type} variant={variant} leftIcon={Icon ? <Icon size={12} /> : undefined} onClick={() => onShowModal(btn.confirmMessage)}>
         {btn.label}
-      </button>
+      </Button>
     </div>
   );
 }

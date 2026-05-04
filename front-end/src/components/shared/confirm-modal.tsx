@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/shared/button";
+
 interface ConfirmModalProps {
   isOpen: boolean;
   title?: string;
@@ -25,13 +27,9 @@ export function ConfirmModal({
         <div className="modal__title">{title}</div>
         <div className="modal__body">{message}</div>
         <div className="modal__actions">
-          <button
-            type="button"
-            className="btn btn--primary"
-            onClick={onConfirm}
-          >
+          <Button variant="primary" onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

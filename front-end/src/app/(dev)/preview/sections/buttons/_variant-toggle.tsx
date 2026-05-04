@@ -1,9 +1,9 @@
 "use client";
 
-import type { BtnVariant } from "./_specimen-types";
+import type { ToggleableVariant } from "./_specimen-types";
 
-const VARIANTS: BtnVariant[] = ["search", "transaction", "danger", "normal"];
-const LABELS: Record<BtnVariant, string> = {
+const VARIANTS: ToggleableVariant[] = ["search", "transaction", "danger", "normal"];
+const LABELS: Record<ToggleableVariant, string> = {
   search: "Search",
   transaction: "Transaction",
   danger: "Danger",
@@ -11,8 +11,8 @@ const LABELS: Record<BtnVariant, string> = {
 };
 
 interface VariantToggleProps {
-  value: BtnVariant;
-  onChange: (v: BtnVariant) => void;
+  value: ToggleableVariant;
+  onChange: (v: ToggleableVariant) => void;
 }
 
 export function VariantToggle({ value, onChange }: VariantToggleProps) {
