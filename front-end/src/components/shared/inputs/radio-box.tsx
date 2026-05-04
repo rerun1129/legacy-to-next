@@ -37,7 +37,7 @@ export const RadioBox = forwardRef<HTMLInputElement, RadioBoxProps>(
           </span>
         )}
         <div className="rdo__options">
-          {options.map((opt, i) => (
+          {options.map((opt) => (
             <label key={opt.value} className="rdo__option">
               <input
                 type="radio"
@@ -45,9 +45,8 @@ export const RadioBox = forwardRef<HTMLInputElement, RadioBoxProps>(
                 value={opt.value}
                 disabled={disabled || isDisabledByReadOnly}
                 required={required}
-                className={required ? "is-required" : undefined}
                 onChange={onChange}
-                ref={i === 0 ? ref : undefined}
+                ref={ref}
                 {...rest}
               />
               {opt.label}

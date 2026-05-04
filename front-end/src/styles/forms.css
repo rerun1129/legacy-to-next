@@ -305,7 +305,6 @@
 .rdo__option { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 .rdo__field[data-readonly] .rdo__option { cursor: not-allowed; }
 .rdo__field[data-disabled] .rdo__option { opacity: 0.5; cursor: not-allowed; }
-input[type="radio"].is-required { outline: 2px solid var(--required-bar); outline-offset: 1px; }
 
 /* =========================================================
    Standard panel input (.box-panel)
