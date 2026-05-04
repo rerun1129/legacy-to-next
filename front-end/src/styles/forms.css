@@ -271,7 +271,7 @@
   width: 100%;
 }
 .box-panel:disabled { opacity: 0.5; cursor: not-allowed; }
-.box-panel[readonly] { background: var(--surface); cursor: default; }
+.box-panel[readonly] { background: var(--bg-sunken); color: var(--ink); opacity: 1; cursor: default; }
 .box-panel.is-required {
   padding: 0 8px 0 11px;
   border-color: color-mix(in srgb, var(--required-bar) 30%, var(--border));
