@@ -31,7 +31,7 @@ const TOOLTIP_MS = 5000;
 const errorBg = "rgba(220,38,38,0.13)";
 const tooltipStyle: CSSProperties = {
   position: "absolute",
-  bottom: "calc(100% + 2px)",
+  top: "calc(100% + 2px)",
   left: 0,
   backgroundColor: "#dc2626",
   color: "#fff",
@@ -156,7 +156,13 @@ const DateInputBase = forwardRef<HTMLInputElement, DateInputBaseProps>(function 
         style={computedStyle}
         value={focused ? raw : toDateMask(raw)}
         onChange={handleChange}
-        onFocus={(e) => { setFocused(true); onFocus?.(e); }}
+        onFocus={(e) => {
+          setFocused(true);
+          requestAnimationFrame(() => {
+            inputRef.current?.select();
+          });
+          onFocus?.(e);
+        }}
         onBlur={handleBlur}
         placeholder="yyyyMMdd"
         maxLength={focused ? 8 : 10}
