@@ -217,7 +217,6 @@ export function InputsSection() {
 
       {/* LinkBox – External URL */}
       <div style={sectionStyle}>
-        <div style={{ fontWeight: 600, marginBottom: 6 }}>LinkBox (External URL)</div>
         <LinkBox
           label="LinkBox (External URL)"
           variant={variant}
@@ -230,7 +229,6 @@ export function InputsSection() {
 
       {/* LinkBox – Menu Route */}
       <div style={sectionStyle}>
-        <div style={{ fontWeight: 600, marginBottom: 6 }}>LinkBox (Menu Route)</div>
         <LinkBox
           label="LinkBox (Menu Route)"
           variant={variant}
