@@ -42,15 +42,15 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
       { id: 1, length: "60",  width: "40", height: "30", qty: "10",
         cbm: "0.072", volWt: "12.000",
         type: "BOX",    date: "20260504", text: "sample row 1",
-        code: "KRPUS",  codeName: "Busan Port", linkUrl: "" },
+        code: "KRPUS",  codeName: "Busan Port", linkUrl: "Service A" },
       { id: 2, length: "100", width: "80", height: "60", qty: "5",
         cbm: "0.480", volWt: "80.000",
         type: "PALLET", date: "",         text: "",
-        code: "",       codeName: "",     linkUrl: "" },
+        code: "",       codeName: "",     linkUrl: "Service B" },
       { id: 3, length: "",    width: "",   height: "",   qty: "",
         cbm: "",      volWt: "",
         type: "DRUM",   date: "20260601", text: "third row",
-        code: "USNYC",  codeName: "New York", linkUrl: "" },
+        code: "USNYC",  codeName: "New York", linkUrl: "Service C" },
     ],
   };
 }
@@ -171,10 +171,10 @@ export function GridPreviewPanel() {
           readOnly={readOnly}
           inputProps={{
             className: "grid__cell-input",
-            placeholder: "URL or route",
+            placeholder: "Display Name",
             ...register(`dimensions.${i}.linkUrl`),
           }}
-          onLink={() => alert(`Navigate row ${i + 1}`)}
+          onLink={() => alert(`Navigate to: /menu/detail/${i + 1}`)}
         />
       ),
     },

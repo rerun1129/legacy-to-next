@@ -52,7 +52,7 @@ export function InputsSection() {
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
 
-  const { register, getValues, watch } = useForm<FormValues>({
+  const { register, getValues } = useForm<FormValues>({
     defaultValues: {
       text: "sample text",
       area: "line 1\nline 2",
@@ -65,8 +65,8 @@ export function InputsSection() {
       amountDec2: "",
       amountDec3: "",
       unit: "KG",
-      linkUrl: "",
-      linkMenu: "",
+      linkUrl: "External Docs",
+      linkMenu: "User Management",
     },
   });
 
@@ -223,8 +223,8 @@ export function InputsSection() {
           variant={variant}
           required={required}
           readOnly={readOnly}
-          onLink={() => alert("Open: " + watch("linkUrl"))}
-          inputProps={{ placeholder: "https://...", ...register("linkUrl") }}
+          onLink={() => alert("Navigate to: https://docs.example.com")}
+          inputProps={{ placeholder: "Display Name", ...register("linkUrl") }}
         />
       </div>
 
@@ -236,8 +236,8 @@ export function InputsSection() {
           variant={variant}
           required={required}
           readOnly={readOnly}
-          onLink={() => alert("Navigate: " + watch("linkMenu"))}
-          inputProps={{ placeholder: "/menu/path", ...register("linkMenu") }}
+          onLink={() => alert("Navigate to: /admin/user-management")}
+          inputProps={{ placeholder: "Display Name", ...register("linkMenu") }}
         />
       </div>
     </div>
