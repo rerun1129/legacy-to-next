@@ -17,8 +17,7 @@ color: green
 
 3. 아래 명령을 **프로젝트 루트에서** 순서대로 **전부 실행**. 어느 명령이 실패해도 중단하지 않고 나머지도 끝까지 실행한다. 각 명령의 성공/실패·출력을 독립적으로 캡처해 둔다:
    ```bash
-   OUT=$(cd <프로젝트 루트> && <명령> 2>&1); RC=$?
-   [ $RC -eq 0 ] && echo "<명령> PASS" || { echo "<명령> FAIL (exit $RC)"; echo "$OUT"; }
+   cd <프로젝트 루트> && <명령> 2>&1; RC=$?; [ $RC -eq 0 ] && echo "<명령> PASS" || echo "<명령> FAIL (exit $RC)"
    ```
    실행 순서:
    - `npm --prefix front-end run lint`
@@ -29,7 +28,7 @@ color: green
    TypeScript 컴파일러는 첫 번째 오류에서 멈추므로 `build` 출력만으로는 전체 타입 오류를 볼 수 없다.
    build가 FAIL이면 즉시 아래 명령을 추가로 실행해 **모든 타입 오류를 한 번에 수집**한다:
    ```bash
-   npx --prefix front-end tsc --noEmit 2>&1
+   cd <프로젝트 루트> && npx --prefix front-end tsc --noEmit 2>&1
    ```
    이 출력 전체를 캡처해 build FAIL 결과와 함께 보고.
 

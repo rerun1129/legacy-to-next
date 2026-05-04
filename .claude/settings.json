@@ -11,7 +11,13 @@
       "Bash(npm --prefix front-end test *)",
       "Bash(npx --prefix front-end tsc --noEmit)",
       "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring test)",
-      "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring build)"
+      "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring build)",
+      "Bash(cd * && npm --prefix front-end run lint *)",
+      "Bash(cd * && npm --prefix front-end run build *)",
+      "Bash(cd * && npm --prefix front-end run test *)",
+      "Bash(cd * && npm --prefix front-end test *)",
+      "Bash(cd * && npx --prefix front-end tsc --noEmit *)",
+      "Bash(cd * && back-end/java-spring/gradlew.bat *)"
     ]
   },
   "statusLine": {
