@@ -48,7 +48,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
                   disabled={disabled}
                   {...codeProps}
                 />
-                {onLookup && (
+                {onLookup && !readOnly && !disabled && (
                   <button
                     type="button"
                     onClick={onLookup}
@@ -91,7 +91,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
             disabled={disabled}
             {...restCodeProps}
           />
-          {onLookup && (
+          {onLookup && !readOnly && !disabled && (
             <button
               type="button"
               onClick={onLookup}
