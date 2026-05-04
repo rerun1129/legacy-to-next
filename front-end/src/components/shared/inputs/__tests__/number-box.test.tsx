@@ -59,7 +59,7 @@ describe("NumberBox", () => {
   describe("handleBlur", () => {
     it("decimalPlaces 없을 때 '000000' blur → value가 '0'으로 정규화", () => {
       render(<NumberBox />);
-      const input = screen.getByRole("spinbutton");
+      const input = screen.getByRole("spinbutton") as HTMLInputElement;
       Object.defineProperty(input, "value", { configurable: true, writable: true, value: "000000" });
       fireEvent.blur(input);
       expect(input.value).toBe("0");
@@ -67,7 +67,7 @@ describe("NumberBox", () => {
 
     it("decimalPlaces 없을 때 '007' blur → value가 '7'으로 정규화", () => {
       render(<NumberBox />);
-      const input = screen.getByRole("spinbutton");
+      const input = screen.getByRole("spinbutton") as HTMLInputElement;
       Object.defineProperty(input, "value", { configurable: true, writable: true, value: "007" });
       fireEvent.blur(input);
       expect(input.value).toBe("7");
@@ -75,7 +75,7 @@ describe("NumberBox", () => {
 
     it("decimalPlaces=2일 때 '1.5' blur → value가 '1.50'으로 포맷", () => {
       render(<NumberBox decimalPlaces={2} />);
-      const input = screen.getByRole("spinbutton");
+      const input = screen.getByRole("spinbutton") as HTMLInputElement;
       Object.defineProperty(input, "value", { configurable: true, writable: true, value: "1.5" });
       fireEvent.blur(input);
       expect(input.value).toBe("1.50");
@@ -83,7 +83,7 @@ describe("NumberBox", () => {
 
     it("decimalPlaces=2일 때 '' blur → value가 '0.00'으로 채움", () => {
       render(<NumberBox decimalPlaces={2} />);
-      const input = screen.getByRole("spinbutton");
+      const input = screen.getByRole("spinbutton") as HTMLInputElement;
       Object.defineProperty(input, "value", { configurable: true, writable: true, value: "" });
       fireEvent.blur(input);
       expect(input.value).toBe("0.00");
