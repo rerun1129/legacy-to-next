@@ -4,7 +4,14 @@
       "Bash(cat .claude/.task_queue)",
       "Bash(echo backend > .claude/.coder_scope)",
       "Bash(echo frontend > .claude/.coder_scope)",
-      "Bash(rm -f .claude/.coder_scope)"
+      "Bash(rm -f .claude/.coder_scope)",
+      "Bash(npm --prefix front-end run lint)",
+      "Bash(npm --prefix front-end run build)",
+      "Bash(npm --prefix front-end run test)",
+      "Bash(npm --prefix front-end test *)",
+      "Bash(npx --prefix front-end tsc --noEmit)",
+      "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring test)",
+      "Bash(back-end/java-spring/gradlew.bat -p back-end/java-spring build)"
     ]
   },
   "statusLine": {
