@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { BACKEND_BASE } from './config';
 
 // bl-variants.ts BL_VARIANT_KEYS: ['sea-exp', 'sea-imp', 'air-exp', 'air-imp']
 // sea-exp: hasContainer·hasIssueInfo 모두 true, 입력 필드가 가장 풍부한 variant
@@ -172,7 +173,7 @@ let houseBlCreatedId: number;
 test.describe.serial('House B/L CRUD', () => {
   test('C — 신규 등록 후 id 추출', async ({ page }) => {
     // 백엔드 API를 직접 호출해서 HBL 생성 (UI form submit 우회 — E2E C단계 격리)
-    const res = await page.request.post('http://localhost:8080/api/house-bl', {
+    const res = await page.request.post(`${BACKEND_BASE}/api/house-bl`, {
       data: {
         jobDiv: 'SEA', bound: 'EXP', hblNo: 'HBLTEST0001',
         shipmentType: 'HOUSE', freightTerm: 'PREPAID',
@@ -230,7 +231,7 @@ test.describe.serial('House B/L CRUD', () => {
 
   test('D — 삭제 (API 직접 호출 후 list 확인)', async ({ page }) => {
     // DELETE API 직접 호출
-    const res = await page.request.delete(`http://localhost:8080/api/house-bl/${houseBlCreatedId}`);
+    const res = await page.request.delete(`${BACKEND_BASE}/api/house-bl/${houseBlCreatedId}`);
     expect(res.ok()).toBeTruthy();
 
     // list에서 삭제된 항목이 없는지는 확인 어려우므로 에러 없음만 확인
@@ -239,7 +240,7 @@ test.describe.serial('House B/L CRUD', () => {
   });
 
   test('C(마지막) — 삭제 후 재등록으로 DB 레코드 유지 (API 직접 호출)', async ({ page }) => {
-    const res = await page.request.post('http://localhost:8080/api/house-bl', {
+    const res = await page.request.post(`${BACKEND_BASE}/api/house-bl`, {
       data: {
         jobDiv: 'SEA', bound: 'EXP', hblNo: `HBL${Date.now()}`,
         shipmentType: 'HOUSE', freightTerm: 'PREPAID',
@@ -264,7 +265,7 @@ test.describe.serial('Master B/L CRUD', () => {
     // 매 실행마다 고유한 mblNo 생성 (중복 방지)
     const uniqueMbl = `MBL${Date.now()}`;
     // 백엔드 API 직접 호출로 MBL 생성
-    const res = await page.request.post('http://localhost:8080/api/master-bl', {
+    const res = await page.request.post(`${BACKEND_BASE}/api/master-bl`, {
       data: {
         jobDiv: 'SEA', bound: 'EXP', mblNo: uniqueMbl,
         masterRefNo: 'MREF0001', freightTerm: 'PREPAID',
@@ -340,7 +341,7 @@ test.describe.serial('Master B/L CRUD', () => {
   });
 
   test('C(마지막) — 삭제 후 재등록으로 DB 레코드 유지 (API 직접 호출)', async ({ page }) => {
-    const res = await page.request.post('http://localhost:8080/api/master-bl', {
+    const res = await page.request.post(`${BACKEND_BASE}/api/master-bl`, {
       data: {
         jobDiv: 'SEA', bound: 'EXP', mblNo: `MBL${Date.now()}`,
         freightTerm: 'PREPAID', polCode: 'KRBSA', podCode: 'USLAX',

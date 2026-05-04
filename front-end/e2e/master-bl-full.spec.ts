@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { fillMasterBlForm, type MasterBlVariant } from './helpers/master-bl-form';
+import { BACKEND_BASE } from './config';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = `${BACKEND_BASE}/api`;
 
 // ── 공유 상태: serial 테스트 내에서 CREATE → GET 간 id 전달 ──────────────
 let seaExpId: number;

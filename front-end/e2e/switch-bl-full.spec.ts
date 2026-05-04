@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { fillSwitchBlForm } from './helpers/switch-bl-form';
+import { BACKEND_BASE } from './config';
 
 // Switch B/L 시나리오 전제:
 //   - House B/L이 저장된 상태(id 존재)에서만 entry 페이지에서 Switch B/L 버튼이 활성화됨
@@ -11,7 +12,7 @@ test.describe.serial('Switch B/L E2E — sea-exp', () => {
 
   test.beforeAll(async ({ request }) => {
     // House B/L API 직접 생성 (SEA / EXP — Switch B/L 버튼 활성 조건 충족)
-    const res = await request.post('http://localhost:8080/api/house-bl', {
+    const res = await request.post(`${BACKEND_BASE}/api/house-bl`, {
       data: {
         jobDiv: 'SEA',
         bound: 'EXP',
@@ -61,7 +62,7 @@ test.describe.serial('Switch B/L E2E — sea-exp', () => {
 
     // API 검증: 저장된 Switch B/L 데이터 확인
     const apiRes = await page.request.get(
-      `http://localhost:8080/api/switch-bl/by-house-bl/${houseBlId}`,
+      `${BACKEND_BASE}/api/switch-bl/by-house-bl/${houseBlId}`,
     );
     expect(apiRes.ok()).toBeTruthy();
     const apiBody = await apiRes.json();
@@ -115,7 +116,7 @@ test.describe.serial('Switch B/L E2E — sea-exp', () => {
 
     // API 검증: 삭제 후 404 응답 확인
     const apiRes = await page.request.get(
-      `http://localhost:8080/api/switch-bl/by-house-bl/${houseBlId}`,
+      `${BACKEND_BASE}/api/switch-bl/by-house-bl/${houseBlId}`,
     );
     // 미존재 시 404 반환 (switch-bl-modal.tsx getByHouseBlId → NotFoundError → null)
     expect(apiRes.status()).toBe(404);
@@ -127,7 +128,7 @@ test.describe.serial('Switch B/L E2E — sea-imp', () => {
 
   test.beforeAll(async ({ request }) => {
     // House B/L API 직접 생성 (SEA / IMP)
-    const res = await request.post('http://localhost:8080/api/house-bl', {
+    const res = await request.post(`${BACKEND_BASE}/api/house-bl`, {
       data: {
         jobDiv: 'SEA',
         bound: 'IMP',
@@ -168,7 +169,7 @@ test.describe.serial('Switch B/L E2E — sea-imp', () => {
 
     // API 검증
     const apiRes = await page.request.get(
-      `http://localhost:8080/api/switch-bl/by-house-bl/${houseBlId}`,
+      `${BACKEND_BASE}/api/switch-bl/by-house-bl/${houseBlId}`,
     );
     expect(apiRes.ok()).toBeTruthy();
     const apiBody = await apiRes.json();

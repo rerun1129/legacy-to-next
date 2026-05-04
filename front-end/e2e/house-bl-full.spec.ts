@@ -8,9 +8,10 @@ import {
   buildAirExpPayload, buildAirImpPayload,
   buildTruckPayload,  buildNonBlPayload,
 } from './helpers/house-bl-form';
+import { BACKEND_BASE } from './config';
 
 // ── 공통 상수 ─────────────────────────────────────────────────────────────
-const API_BASE = 'http://localhost:8080/api/house-bl';
+const API_BASE = `${BACKEND_BASE}/api/house-bl`;
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 // ── 공통 검증 헬퍼 ────────────────────────────────────────────────────────
