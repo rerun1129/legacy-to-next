@@ -2,11 +2,12 @@
 
 import type { BtnVariant } from "./_specimen-types";
 
-const VARIANTS: BtnVariant[] = ["primary", "ghost", "danger"];
+const VARIANTS: BtnVariant[] = ["search", "transaction", "danger", "normal"];
 const LABELS: Record<BtnVariant, string> = {
-  primary: "Primary",
-  ghost: "Ghost",
+  search: "Search",
+  transaction: "Transaction",
   danger: "Danger",
+  normal: "Normal",
 };
 
 interface VariantToggleProps {

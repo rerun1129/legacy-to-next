@@ -35,7 +35,7 @@
 }
 
 /* =========================================================
-   Preview: Variant toggle (3-way segment control)
+   Preview: Variant toggle (4-way segment control)
    ========================================================= */
 .variant-toggle {
   display: inline-flex;
@@ -62,18 +62,23 @@
   font-weight: 600;
 }
 
-.variant-toggle__btn.is-active--primary {
-  background: var(--accent);
+.variant-toggle__btn.is-active--search {
+  background: var(--info);
   color: #fff;
 }
 
-.variant-toggle__btn.is-active--ghost {
-  background: var(--ink-2);
+.variant-toggle__btn.is-active--transaction {
+  background: var(--success);
   color: #fff;
 }
 
 .variant-toggle__btn.is-active--danger {
   background: var(--danger);
+  color: #fff;
+}
+
+.variant-toggle__btn.is-active--normal {
+  background: var(--ink-3);
   color: #fff;
 }
 

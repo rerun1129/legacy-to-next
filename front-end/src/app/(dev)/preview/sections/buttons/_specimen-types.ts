@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 
-export type BtnVariant = 'primary' | 'ghost' | 'danger';
+export type BtnVariant = 'search' | 'transaction' | 'danger' | 'normal';
 
 export interface ActionSpecimen {
   id: string;

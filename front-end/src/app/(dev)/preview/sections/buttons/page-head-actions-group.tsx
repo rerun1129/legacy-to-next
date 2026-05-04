@@ -8,9 +8,10 @@ import type { BtnVariant, ActionSpecimen } from "./_specimen-types";
 import { sectionStyle, labelStyle } from "./_shared";
 
 const VARIANT_CLASS: Record<BtnVariant, string> = {
-  primary: "btn btn--primary btn--sm",
-  ghost: "btn btn--ghost btn--sm",
-  danger: "btn btn--danger btn--sm",
+  search: "btn btn--search",
+  transaction: "btn btn--transaction",
+  danger: "btn btn--danger",
+  normal: "btn btn--normal",
 };
 
 interface ActionCardProps {

@@ -8,10 +8,11 @@ import type { BtnVariant, ButtonInBundle, PageBundle } from "./_specimen-types";
 import { sectionStyle, labelStyle } from "./_shared";
 
 const VARIANT_CLASS: Record<BtnVariant | "default", string> = {
-  primary: "btn btn--primary btn--sm",
-  ghost: "btn btn--ghost btn--sm",
-  danger: "btn btn--danger btn--sm",
-  default: "btn btn--sm",
+  search: "btn btn--search",
+  transaction: "btn btn--transaction",
+  danger: "btn btn--danger",
+  normal: "btn btn--normal",
+  default: "btn",
 };
 
 interface BundleBtnProps {
@@ -26,9 +27,9 @@ function BundleBtn({ btn, onShowModal }: BundleBtnProps) {
   const Icon = btn.icon;
 
   // "default" variant는 VariantToggle에서 BtnVariant로만 변경 가능하므로
-  // toggle 표시 시 "default"면 primary를 초기값으로 사용
+  // toggle 표시 시 "default"면 normal을 초기값으로 사용
   const toggleValue: BtnVariant =
-    variant === "default" ? "primary" : variant;
+    variant === "default" ? "normal" : variant;
 
   function handleVariantChange(v: BtnVariant) {
     setVariant(v);
