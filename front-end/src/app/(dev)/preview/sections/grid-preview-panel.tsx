@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -56,6 +56,8 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
 export function GridPreviewPanel() {
   const { control, register } = useFormContext<DimPreviewFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
+  const [required, setRequired] = useState(false);
+  const [readOnly, setReadOnly]   = useState(false);
 
   const cols = useMemo<GridColumn<DimPreviewRow>[]>(() => [
     {
@@ -65,43 +67,67 @@ export function GridPreviewPanel() {
     {
       key: "length", label: "Length", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input className="grid__cell-input is-num" {...register(`dimensions.${i}.length`)} />
+        <input
+          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
+          readOnly={readOnly}
+          {...register(`dimensions.${i}.length`)}
+        />
       ),
     },
     {
       key: "width", label: "Width", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input className="grid__cell-input is-num" {...register(`dimensions.${i}.width`)} />
+        <input
+          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
+          readOnly={readOnly}
+          {...register(`dimensions.${i}.width`)}
+        />
       ),
     },
     {
       key: "height", label: "Height", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input className="grid__cell-input is-num" {...register(`dimensions.${i}.height`)} />
+        <input
+          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
+          readOnly={readOnly}
+          {...register(`dimensions.${i}.height`)}
+        />
       ),
     },
     {
       key: "qty", label: "Qty", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input className="grid__cell-input is-num" {...register(`dimensions.${i}.qty`)} />
+        <input
+          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
+          readOnly={readOnly}
+          {...register(`dimensions.${i}.qty`)}
+        />
       ),
     },
     {
       key: "cbm", label: "CBM", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input className="grid__cell-input is-num" {...register(`dimensions.${i}.cbm`)} />
+        <input
+          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
+          readOnly={readOnly}
+          {...register(`dimensions.${i}.cbm`)}
+        />
       ),
     },
     {
       key: "volWt", label: "Volume Wt.", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input className="grid__cell-input is-num" {...register(`dimensions.${i}.volWt`)} />
+        <input
+          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
+          readOnly={readOnly}
+          {...register(`dimensions.${i}.volWt`)}
+        />
       ),
     },
     {
       key: "type", label: "TYPE", width: 90,
       render: (_v, _r, i) => (
-        <DropBox variant="cell" options={TYPE_OPTIONS} {...register(`dimensions.${i}.type`)} />
+        <DropBox variant="cell" options={TYPE_OPTIONS} required={required} readOnly={readOnly} {...register(`dimensions.${i}.type`)} />
       ),
     },
     {
@@ -112,7 +138,7 @@ export function GridPreviewPanel() {
     {
       key: "text", label: "TEXT", width: 140,
       render: (_v, _r, i) => (
-        <TextBox variant="cell" {...register(`dimensions.${i}.text`)} />
+        <TextBox variant="cell" required={required} readOnly={readOnly} {...register(`dimensions.${i}.text`)} />
       ),
     },
     {
@@ -120,6 +146,8 @@ export function GridPreviewPanel() {
       render: (_v, _r, i) => (
         <CodeBox
           kind="lcn"
+          required={required}
+          readOnly={readOnly}
           codeProps={{
             className: "grid__cell-input",
             placeholder: "Code",
@@ -134,7 +162,7 @@ export function GridPreviewPanel() {
         />
       ),
     },
-  ], [register]);
+  ], [register, required, readOnly]);
 
   function handleAdd() {
     const nextId = Math.max(0, ...fields.map((f) => f.id)) + 1;
@@ -157,6 +185,32 @@ export function GridPreviewPanel() {
         <span className="panel__title">Dimension</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
+          <button
+            type="button"
+            onClick={() => setRequired((v) => !v)}
+            style={{
+              padding: "0 8px", fontSize: 10, height: 22,
+              border: "1px solid var(--border)", borderRadius: 4,
+              background: required ? "var(--accent)" : "var(--surface)",
+              color: required ? "#fff" : "var(--ink-3)",
+              cursor: "pointer",
+            }}
+          >
+            required
+          </button>
+          <button
+            type="button"
+            onClick={() => setReadOnly((v) => !v)}
+            style={{
+              padding: "0 8px", fontSize: 10, height: 22,
+              border: "1px solid var(--border)", borderRadius: 4,
+              background: readOnly ? "var(--accent)" : "var(--surface)",
+              color: readOnly ? "#fff" : "var(--ink-3)",
+              cursor: "pointer",
+            }}
+          >
+            readOnly
+          </button>
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}>
             <Plus size={12} />
           </button>
