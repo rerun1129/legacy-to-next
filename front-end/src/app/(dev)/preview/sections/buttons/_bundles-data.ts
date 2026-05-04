@@ -8,6 +8,7 @@ import {
   Download,
   Printer,
   ArrowLeftRight,
+  FilePlus,
 } from "lucide-react";
 import type { PageBundle } from "./_specimen-types";
 
@@ -143,38 +144,12 @@ export const PAGE_BUNDLES: PageBundle[] = [
     pageLabel: "Non B/L Entry",
     sourceFile: "components/fms/non-bl/non-bl-entry.tsx",
     buttons: [
-      {
-        id: "reset",
-        label: "Reset",
-        icon: RotateCcw,
-        initialVariant: "normal",
-        type: "button",
-        confirmMessage: "Reset 버튼이 클릭되었습니다.",
-      },
-      {
-        id: "delete",
-        label: "Delete",
-        icon: Trash2,
-        initialVariant: "danger",
-        type: "button",
-        confirmMessage: "Delete 버튼이 클릭되었습니다.",
-      },
-      {
-        id: "print",
-        label: "Print",
-        icon: Printer,
-        initialVariant: "normal",
-        type: "button",
-        confirmMessage: "Print 버튼이 클릭되었습니다.",
-      },
-      {
-        id: "save",
-        label: "Save",
-        icon: Save,
-        initialVariant: "transaction",
-        type: "submit",
-        confirmMessage: "Save 버튼이 클릭되었습니다.",
-      },
+      { id: "new", label: "New", icon: FilePlus, initialVariant: "normal", type: "button", confirmMessage: "New 버튼이 클릭되었습니다." },
+      { id: "search", label: "Search", icon: Search, initialVariant: "search", type: "button", confirmMessage: "Search 버튼이 클릭되었습니다." },
+      { id: "save", label: "Save", icon: Save, initialVariant: "transaction", type: "submit", confirmMessage: "Save 버튼이 클릭되었습니다." },
+      { id: "delete", label: "Delete", icon: Trash2, initialVariant: "danger", type: "button", confirmMessage: "Delete 버튼이 클릭되었습니다." },
+      { id: "copy", label: "Copy", icon: Copy, initialVariant: "normal", type: "button", confirmMessage: "Copy 버튼이 클릭되었습니다." },
+      { id: "change-bl-no", label: "Change BL No", icon: RefreshCw, initialVariant: "transaction", type: "button", confirmMessage: "Change BL No 버튼이 클릭되었습니다." },
     ],
   },
   {

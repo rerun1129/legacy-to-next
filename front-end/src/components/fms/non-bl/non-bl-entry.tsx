@@ -2,7 +2,7 @@
 
 import { useState }                                from "react";
 import { useForm, FormProvider }                  from "react-hook-form";
-import { Save, Trash2, Package, Printer, FilePlus } from "lucide-react";
+import { Save, Trash2, Package, FilePlus, Search, Copy, RefreshCw } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
 import type { NonBlFormValues }                   from "./non-bl-schema";
@@ -41,9 +41,21 @@ export function NonBLEntry() {
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
             <FilePlus size={12} />New
           </button>
-          <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
-          <button className="btn btn--sm btn--success"><Printer size={12} />Print</button>
-          <button className="btn btn--sm btn--primary"><Save size={12} />Save</button>
+          <button type="button" className="btn btn--sm btn--search">
+            <Search size={12} />Search
+          </button>
+          <button type="button" className="btn btn--sm btn--transaction">
+            <Save size={12} />Save
+          </button>
+          <button type="button" className="btn btn--sm btn--danger">
+            <Trash2 size={12} />Delete
+          </button>
+          <button type="button" className="btn btn--sm">
+            <Copy size={12} />Copy
+          </button>
+          <button type="button" className="btn btn--sm btn--transaction">
+            <RefreshCw size={12} />Change BL No
+          </button>
         </div>
       </div>
 
