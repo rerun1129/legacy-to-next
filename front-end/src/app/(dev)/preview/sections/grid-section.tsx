@@ -1,12 +1,10 @@
 "use client";
 
 import { useForm, FormProvider } from "react-hook-form";
-import { NonBLDimensionPanel } from "@/components/fms/non-bl/tabs/sections/nonbl-dimension-panel";
-import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
-import { createEmptyNonBlFormValues } from "@/components/fms/non-bl/non-bl-defaults";
+import { GridPreviewPanel, type DimPreviewFormValues, createDimPreviewDefaults } from "./grid-preview-panel";
 
 export function GridSection() {
-  const methods = useForm<NonBlFormValues>({ defaultValues: createEmptyNonBlFormValues() });
+  const methods = useForm<DimPreviewFormValues>({ defaultValues: createDimPreviewDefaults() });
 
   return (
     <div style={{ padding: "24px 24px 0", fontFamily: "inherit", fontSize: 12 }}>
@@ -18,10 +16,10 @@ export function GridSection() {
         getValues
       </button>
       <div style={{ borderTop: "1px solid #ddd", paddingTop: 12 }}>
-        <div style={{ fontWeight: 600, marginBottom: 8 }}>Standard Grid (Non B/L Dimension)</div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Grid Preview (Cell Inputs Demo)</div>
         <FormProvider {...methods}>
           <div style={{ height: 480 }}>
-            <NonBLDimensionPanel />
+            <GridPreviewPanel />
           </div>
         </FormProvider>
       </div>
