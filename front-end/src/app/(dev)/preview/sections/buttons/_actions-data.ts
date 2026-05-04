@@ -8,6 +8,7 @@ import {
   Download,
   Printer,
   ArrowLeftRight,
+  FilePlus,
 } from "lucide-react";
 import type { ActionSpecimen } from "./_specimen-types";
 
@@ -25,6 +26,13 @@ export const ACTION_SPECIMENS: ActionSpecimen[] = [
     icon: RotateCcw,
     defaultVariant: "normal",
     confirmMessage: "Reset 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "new",
+    label: "New",
+    icon: FilePlus,
+    defaultVariant: "normal",
+    confirmMessage: "New 버튼이 클릭되었습니다.",
   },
   {
     id: "search",

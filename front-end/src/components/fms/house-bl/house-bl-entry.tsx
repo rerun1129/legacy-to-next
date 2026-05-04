@@ -6,7 +6,7 @@ import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Save, Printer, Copy, Trash2, FileText, Download, RefreshCw, Search, RotateCcw } from "lucide-react";
+import { Save, Printer, Copy, Trash2, FileText, Download, RefreshCw, Search, FilePlus } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
@@ -199,7 +199,7 @@ export function HouseBLEntry({ variant, id }: Props) {
           </div>
           <div className="page-head__actions">
             <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-              <RotateCcw size={12} />Reset
+              <FilePlus size={12} />New
             </button>
             <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
               <Search size={12} />Search B/L
@@ -229,7 +229,7 @@ export function HouseBLEntry({ variant, id }: Props) {
               <RefreshCw size={12} />Switch B/L
             </button>
             <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-              <RotateCcw size={12} />Reset
+              <FilePlus size={12} />New
             </button>
             <button
               type="submit"

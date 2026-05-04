@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { createEmptyMasterBlFormValues, TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
-import { Save, Copy, Trash2, Layers, RefreshCw, Search, RotateCcw } from "lucide-react";
+import { Save, Copy, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
@@ -225,7 +225,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         </div>
         <div className="page-head__actions">
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <RotateCcw size={12} />Reset
+            <FilePlus size={12} />New
           </button>
           <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
             <Search size={12} />Search B/L
@@ -246,7 +246,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
             <RefreshCw size={12} />{modeLabels.changeBLNo}
           </button>
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <RotateCcw size={12} />Reset
+            <FilePlus size={12} />New
           </button>
           <button type="submit" className="btn btn--sm btn--primary" disabled={mutation.isPending}>
             <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import { Save, Trash2, Truck, RotateCcw } from "lucide-react";
+import { Save, Trash2, Truck, FilePlus } from "lucide-react";
 import { FreightTab } from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }  from "./tabs/main-truck";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
@@ -48,7 +48,7 @@ export function TruckBLEntry() {
         </div>
         <div className="page-head__actions">
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <RotateCcw size={12} />Reset
+            <FilePlus size={12} />New
           </button>
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm btn--primary">

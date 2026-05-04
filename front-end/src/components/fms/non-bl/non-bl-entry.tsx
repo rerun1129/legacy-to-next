@@ -2,7 +2,7 @@
 
 import { useState }                                from "react";
 import { useForm, FormProvider }                  from "react-hook-form";
-import { Save, Trash2, Package, Printer, RotateCcw } from "lucide-react";
+import { Save, Trash2, Package, Printer, FilePlus } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
 import type { NonBlFormValues }                   from "./non-bl-schema";
@@ -39,7 +39,7 @@ export function NonBLEntry() {
         <div className="page-head__meta"><span className="badge badge--draft">DRAFT</span></div>
         <div className="page-head__actions">
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <RotateCcw size={12} />Reset
+            <FilePlus size={12} />New
           </button>
           <button className="btn btn--sm btn--danger"><Trash2 size={12} />Delete</button>
           <button className="btn btn--sm btn--success"><Printer size={12} />Print</button>
