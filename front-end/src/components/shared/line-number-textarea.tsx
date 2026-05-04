@@ -44,13 +44,15 @@ export function LineNumberTextarea({ defaultValue = "", value, onChange, onBlur,
   return (
     <div
       style={{
-        display:     "flex",
-        border:      `1px solid ${required && !readOnly ? "color-mix(in srgb, var(--required-bar) 30%, var(--border))" : focused ? "var(--focus-ring)" : "var(--border)"}`,
-        borderRadius: 5,
-        background:  readOnly ? "var(--bg-sunken)" : "var(--surface-2)",
-        overflow:    "hidden",
-        boxShadow:   focused && !readOnly ? "0 0 0 3px var(--focus-glow)" : undefined,
-        borderLeft:  required && !readOnly ? "3px solid var(--required-bar)" : undefined,
+        display:         "flex",
+        borderTop:       `1px solid ${required && !readOnly ? "color-mix(in srgb, var(--required-bar) 30%, var(--border))" : focused ? "var(--focus-ring)" : "var(--border)"}`,
+        borderRight:     `1px solid ${required && !readOnly ? "color-mix(in srgb, var(--required-bar) 30%, var(--border))" : focused ? "var(--focus-ring)" : "var(--border)"}`,
+        borderBottom:    `1px solid ${required && !readOnly ? "color-mix(in srgb, var(--required-bar) 30%, var(--border))" : focused ? "var(--focus-ring)" : "var(--border)"}`,
+        borderLeft:      required && !readOnly ? "3px solid var(--required-bar)" : `1px solid ${focused ? "var(--focus-ring)" : "var(--border)"}`,
+        borderRadius:    5,
+        background:      readOnly ? "var(--bg-sunken)" : "var(--surface-2)",
+        overflow:        "hidden",
+        boxShadow:       focused && !readOnly ? "0 0 0 3px var(--focus-glow)" : undefined,
         ...style,
       }}
     >
