@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useRef, useCallback } from "react";
 import type { InputHTMLAttributes, FocusEvent, KeyboardEvent, ClipboardEvent, ChangeEvent } from "react";
 import type { BoxBaseProps } from "./_types";
-import { panelStyle, cellStyle, cellRequiredStyle } from "./_styles";
+import { panelClass, cellClass } from "./_styles";
 
 export type NumberBoxProps = BoxBaseProps &
   Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "required" | "readOnly" | "disabled"> & {
@@ -83,20 +83,15 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
     };
 
     if (variant === "cell") {
-      const baseClass = cellStyle();
-      const combinedClass = className ? `${baseClass} ${className}` : baseClass;
-      const inlineStyle: React.CSSProperties = {
-        textAlign: "right",
-        ...cellRequiredStyle({ required }),
-        ...style,
-      };
+      const base = cellClass({ required });
+      const combined = className ? `${base} ${className}` : base;
       return (
         <input
           ref={setRef}
           type="number"
           step={resolvedStep}
-          className={combinedClass}
-          style={inlineStyle}
+          className={combined}
+          style={{ textAlign: "right", ...style }}
           readOnly={readOnly}
           disabled={disabled}
           onBlur={handleBlur}
@@ -107,18 +102,15 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
       );
     }
 
-    const inlineStyle: React.CSSProperties = {
-      ...panelStyle({ required, readOnly, disabled }),
-      textAlign: "right",
-      ...style,
-    };
+    const base = panelClass({ required });
+    const combined = className ? `${base} ${className}` : base;
     return (
       <input
         ref={setRef}
         type="number"
         step={resolvedStep}
-        className={className}
-        style={inlineStyle}
+        className={combined}
+        style={{ textAlign: "right", ...style }}
         readOnly={readOnly}
         disabled={disabled}
         onBlur={handleBlur}

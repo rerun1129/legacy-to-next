@@ -3,7 +3,6 @@
 import { forwardRef } from "react";
 import { Search } from "lucide-react";
 import type { CodeBoxProps } from "./_types";
-import { panelStyle } from "./_styles";
 
 const lookupBtnStyle: React.CSSProperties = {
   position: "absolute",
@@ -35,45 +34,40 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
     },
     ref
   ) {
-    const codeInputStyle: React.CSSProperties = {
-      ...panelStyle({ required, readOnly, disabled }),
-      fontFamily: mono ? "var(--font-mono)" : undefined,
-      paddingRight: onLookup ? "24px" : undefined,
-    };
-
-    const nameInputStyle = panelStyle({ readOnly, disabled });
-
     if (kind === "party-cn") {
       return (
-        <>
-          <div className="party-cn__code" style={{ position: "relative" }}>
-            <input
-              ref={ref}
-              className={mono ? "text-mono" : undefined}
-              style={codeInputStyle}
-              readOnly={readOnly}
-              disabled={disabled}
-              {...codeProps}
-            />
-            {onLookup && (
-              <button
-                type="button"
-                onClick={onLookup}
-                style={lookupBtnStyle}
-                aria-label={lookupAriaLabel ?? "Lookup"}
-              >
-                <Search size={12} className="party-cn__icon" />
-              </button>
-            )}
+        <div className="party-block">
+          <div className="party-block__head">
+            <span className={required ? "is-required" : undefined}>{label}</span>
+            <div className="party-cn">
+              <div className="party-cn__code" style={{ position: "relative" }}>
+                <input
+                  ref={ref}
+                  className={mono ? "text-mono" : undefined}
+                  readOnly={readOnly}
+                  disabled={disabled}
+                  {...codeProps}
+                />
+                {onLookup && (
+                  <button
+                    type="button"
+                    onClick={onLookup}
+                    style={lookupBtnStyle}
+                    aria-label={lookupAriaLabel ?? "Lookup"}
+                  >
+                    <Search size={12} className="party-cn__icon" />
+                  </button>
+                )}
+              </div>
+              <input
+                className="party-cn__name"
+                readOnly={readOnly}
+                disabled={disabled}
+                {...nameProps}
+              />
+            </div>
           </div>
-          <input
-            className="party-cn__name"
-            style={nameInputStyle}
-            readOnly={readOnly}
-            disabled={disabled}
-            {...nameProps}
-          />
-        </>
+        </div>
       );
     }
 
@@ -88,7 +82,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
         <div className="lcn__code" style={{ position: "relative" }}>
           <input
             ref={ref}
-            style={codeInputStyle}
+            className={mono ? "text-mono" : undefined}
             readOnly={readOnly}
             disabled={disabled}
             {...codeProps}
@@ -106,7 +100,6 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
         </div>
         <input
           className="lcn__name"
-          style={nameInputStyle}
           readOnly={readOnly}
           disabled={disabled}
           {...nameProps}

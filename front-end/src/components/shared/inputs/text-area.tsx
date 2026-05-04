@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import type { TextareaHTMLAttributes } from "react";
 import type { BoxBaseProps } from "./_types";
-import { panelStyle, cellStyle, cellRequiredStyle } from "./_styles";
+import { panelClass, cellClass } from "./_styles";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 
 export type TextAreaProps = BoxBaseProps &
@@ -17,9 +17,6 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     { variant = "panel", required, readOnly, disabled, className, style, lineNumbers, rows, ...rest },
     ref
   ) {
-    // lineNumbers=true 시 LineNumberTextarea에 위임
-    // LineNumberTextarea는 name/value/onChange/onBlur/placeholder/style만 수신
-    // readOnly/required/disabled는 LineNumberTextarea가 미지원 (향후 확장 대상)
     if (lineNumbers) {
       const { name, value, onChange, onBlur, placeholder, defaultValue } = rest;
       return (
@@ -36,20 +33,13 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     }
 
     if (variant === "cell") {
-      const baseClass = cellStyle();
-      const combinedClass = className ? `${baseClass} ${className}` : baseClass;
-      // cell textarea: height auto, 100% fill
-      const inlineStyle: React.CSSProperties = {
-        height: "100%",
-        resize: "none",
-        ...cellRequiredStyle({ required }),
-        ...style,
-      };
+      const base = cellClass({ required });
+      const combined = className ? `${base} ${className}` : base;
       return (
         <textarea
           ref={ref}
-          className={combinedClass}
-          style={inlineStyle}
+          className={combined}
+          style={{ height: "100%", resize: "none", ...style }}
           readOnly={readOnly}
           disabled={disabled}
           rows={rows}
@@ -58,18 +48,13 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       );
     }
 
-    const base = panelStyle({ required, readOnly, disabled });
-    const inlineStyle: React.CSSProperties = {
-      ...base,
-      height: rows ? undefined : 72,
-      resize: "vertical",
-      ...style,
-    };
+    const base = panelClass({ required });
+    const combined = className ? `${base} ${className}` : base;
     return (
       <textarea
         ref={ref}
-        className={className}
-        style={inlineStyle}
+        className={combined}
+        style={style}
         readOnly={readOnly}
         disabled={disabled}
         rows={rows}

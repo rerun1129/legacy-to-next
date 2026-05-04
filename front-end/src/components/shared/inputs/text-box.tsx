@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import type { InputHTMLAttributes } from "react";
 import type { BoxBaseProps } from "./_types";
-import { panelStyle, cellStyle, cellRequiredStyle } from "./_styles";
+import { panelClass, cellClass } from "./_styles";
 
 export type TextBoxProps = BoxBaseProps &
   Omit<InputHTMLAttributes<HTMLInputElement>, "required" | "readOnly" | "disabled">;
@@ -14,14 +14,13 @@ export const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(
     ref
   ) {
     if (variant === "cell") {
-      const baseClass = cellStyle();
-      const combinedClass = className ? `${baseClass} ${className}` : baseClass;
-      const inlineStyle = { ...cellRequiredStyle({ required }), ...style };
+      const base = cellClass({ required });
+      const combined = className ? `${base} ${className}` : base;
       return (
         <input
           ref={ref}
-          className={combinedClass}
-          style={inlineStyle}
+          className={combined}
+          style={style}
           readOnly={readOnly}
           disabled={disabled}
           {...rest}
@@ -29,12 +28,13 @@ export const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(
       );
     }
 
-    const inlineStyle = { ...panelStyle({ required, readOnly, disabled }), ...style };
+    const base = panelClass({ required });
+    const combined = className ? `${base} ${className}` : base;
     return (
       <input
         ref={ref}
-        className={className}
-        style={inlineStyle}
+        className={combined}
+        style={style}
         readOnly={readOnly}
         disabled={disabled}
         {...rest}

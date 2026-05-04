@@ -32,10 +32,11 @@ describe("TextBox", () => {
     expect(document.getElementById("rhf-output")?.textContent).toBe("hello");
   });
 
-  it("required prop → boxShadow에 inset 3px 0 0 포함", () => {
+  it("required prop → className에 box-panel is-required 포함", () => {
     render(<TextBox required data-testid="input" />);
     const input = screen.getByTestId("input");
-    expect(input.style.boxShadow).toContain("inset 3px 0 0");
+    expect(input).toHaveClass("box-panel");
+    expect(input).toHaveClass("is-required");
   });
 
   it("readOnly prop → DOM readOnly attribute === true", () => {

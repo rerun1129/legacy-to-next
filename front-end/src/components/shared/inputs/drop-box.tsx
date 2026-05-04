@@ -2,7 +2,7 @@
 
 import { forwardRef } from "react";
 import type { DropBoxProps } from "./_types";
-import { panelStyle, cellStyle, cellRequiredStyle } from "./_styles";
+import { panelClass, cellClass } from "./_styles";
 
 export const DropBox = forwardRef<HTMLSelectElement, DropBoxProps>(
   function DropBox(
@@ -19,21 +19,16 @@ export const DropBox = forwardRef<HTMLSelectElement, DropBoxProps>(
     },
     ref
   ) {
-    // select는 readOnly 속성 미지원 → disabled로 대체하고 시각 스타일 적용
     const isDisabledByReadOnly = readOnly && !disabled;
 
     if (variant === "cell") {
-      const baseClass = cellStyle();
-      const combinedClass = className ? `${baseClass} ${className}` : baseClass;
-      const inlineStyle: React.CSSProperties = {
-        ...cellRequiredStyle({ required }),
-        ...style,
-      };
+      const base = cellClass({ required });
+      const combined = className ? `${base} ${className}` : base;
       return (
         <select
           ref={ref}
-          className={combinedClass}
-          style={inlineStyle}
+          className={combined}
+          style={style}
           disabled={disabled || isDisabledByReadOnly}
           {...rest}
         >
@@ -47,15 +42,13 @@ export const DropBox = forwardRef<HTMLSelectElement, DropBoxProps>(
       );
     }
 
-    const inlineStyle: React.CSSProperties = {
-      ...panelStyle({ required, readOnly, disabled }),
-      ...style,
-    };
+    const base = panelClass({ required });
+    const combined = className ? `${base} ${className}` : base;
     return (
       <select
         ref={ref}
-        className={className}
-        style={inlineStyle}
+        className={combined}
+        style={style}
         disabled={disabled || isDisabledByReadOnly}
         {...rest}
       >

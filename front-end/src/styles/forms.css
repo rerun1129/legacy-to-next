@@ -252,3 +252,35 @@
 
 .sched-list { display: flex; flex-direction: column; gap: 3px; }
 .sched-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* =========================================================
+   Standard panel input (.box-panel)
+   — 엔트리 .field.is-required .field__input 과 동일 시그니처.
+     컴포넌트가 wrapper 없이 단독으로 쓰일 때 적용.
+   ========================================================= */
+.box-panel {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+}
+.box-panel:disabled { opacity: 0.5; cursor: not-allowed; }
+.box-panel[readonly] { background: var(--surface); cursor: default; }
+.box-panel.is-required {
+  padding: 0 8px 0 11px;
+  border-color: color-mix(in srgb, var(--required-bar) 30%, var(--border));
+  box-shadow: inset 3px 0 0 var(--required-bar);
+}
+.box-panel.is-required:focus {
+  background: var(--required-soft);
+  border-color: color-mix(in srgb, var(--required-bar) 55%, var(--border));
+  box-shadow: inset 4px 0 0 var(--required-bar),
+              0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
+}
+textarea.box-panel { height: auto; min-height: 22px; resize: vertical; }
