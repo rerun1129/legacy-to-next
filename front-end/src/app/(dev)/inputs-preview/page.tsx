@@ -17,6 +17,9 @@ type FormValues = {
   partyCn: string;
   partyName: string;
   amount: string;
+  amountInt: string;
+  amountDec2: string;
+  amountDec3: string;
   unit: string;
 };
 
@@ -55,6 +58,9 @@ export default function InputsPreviewPage() {
       partyCn: "CONSIG",
       partyName: "Test Consignee",
       amount: "1000",
+      amountInt: "",
+      amountDec2: "",
+      amountDec3: "",
       unit: "KG",
     },
   });
@@ -149,13 +155,44 @@ export default function InputsPreviewPage() {
       {/* NumberBox */}
       <div style={sectionStyle}>
         <div style={{ fontWeight: 600, marginBottom: 6 }}>NumberBox</div>
-        <NumberBox
-          variant={variant}
-          required={required}
-          readOnly={readOnly}
-          placeholder="0"
-          {...register("amount")}
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* 기본: step=1, 정수 전용 */}
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>기본 (정수, step=1)</div>
+            <NumberBox
+              variant={variant}
+              required={required}
+              readOnly={readOnly}
+              placeholder="0"
+              style={{ width: 160 }}
+              {...register("amountInt")}
+            />
+          </div>
+          {/* 소수점 2자리: 금액/환율용 */}
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>decimalPlaces=2 (금액·환율)</div>
+            <NumberBox
+              variant={variant}
+              required={required}
+              readOnly={readOnly}
+              decimalPlaces={2}
+              style={{ width: 160 }}
+              {...register("amountDec2")}
+            />
+          </div>
+          {/* 소수점 3자리: 중량용 */}
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>decimalPlaces=3 (중량·부피)</div>
+            <NumberBox
+              variant={variant}
+              required={required}
+              readOnly={readOnly}
+              decimalPlaces={3}
+              style={{ width: 160 }}
+              {...register("amountDec3")}
+            />
+          </div>
+        </div>
       </div>
 
       {/* DropBox */}
