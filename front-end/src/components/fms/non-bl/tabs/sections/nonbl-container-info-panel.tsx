@@ -54,7 +54,7 @@ export function NonBLContainerInfoPanel() {
   }
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Container Information</span>
@@ -64,15 +64,14 @@ export function NonBLContainerInfoPanel() {
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <GridList
-          columns={cols}
-          data={fields as unknown as ContainerInfoRow[]}
-          rowKey={(r) => r.id}
-          onRowClick={(row) => setSelectedKey(String(row.id))}
-          rowClassName={(row) => String(row.id) === selectedKey ? "is-selected" : undefined}
-        />
-      </div>
+      <GridList
+        columns={cols}
+        data={fields as unknown as ContainerInfoRow[]}
+        rowKey={(r) => r.id}
+        onRowClick={(row) => setSelectedKey(String(row.id))}
+        rowClassName={(row) => String(row.id) === selectedKey ? "is-selected" : undefined}
+        style={{ flex: 1, minHeight: 0 }}
+      />
     </div>
   );
 }
