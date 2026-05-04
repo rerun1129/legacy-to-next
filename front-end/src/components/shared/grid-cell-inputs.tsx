@@ -202,11 +202,12 @@ export const NumericCell = forwardRef<HTMLInputElement, NumericCellProps>(
   }
 );
 
-export function DateCell({ defaultValue }: { defaultValue?: string }) {
+export function DateCell({ defaultValue, required, readOnly }: { defaultValue?: string; required?: boolean; readOnly?: boolean }) {
   return (
     <DateInputBase
       defaultValue={defaultValue}
-      inputClassName="grid__cell-input"
+      readOnly={readOnly}
+      inputClassName={`grid__cell-input${required ? " is-required" : ""}`}
       getInputStyle={({ error }) => ({ paddingRight: 18, backgroundColor: error ? errorBg : undefined })}
     />
   );

@@ -72,6 +72,10 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
     }
 
     // kind="lcn" (default)
+    const { className: codeCn, ...restCodeProps } = codeProps;
+    const baseCodeCn = codeCn ?? (mono ? "text-mono" : undefined);
+    const mergedCodeCn = [baseCodeCn, required ? "is-required" : undefined].filter(Boolean).join(" ") || undefined;
+
     return (
       <div className="lcn">
         {label && (
@@ -82,10 +86,10 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
         <div className="lcn__code" style={{ position: "relative" }}>
           <input
             ref={ref}
-            className={mono ? "text-mono" : undefined}
+            className={mergedCodeCn}
             readOnly={readOnly}
             disabled={disabled}
-            {...codeProps}
+            {...restCodeProps}
           />
           {onLookup && (
             <button

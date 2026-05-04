@@ -132,8 +132,7 @@ export function GridPreviewPanel() {
     },
     {
       key: "date", label: "DATE", width: 110,
-      // DateCell은 비제어 시연용이므로 defaultValue 없이 마운트
-      render: () => <DateCell />,
+      render: () => <DateCell required={required} readOnly={readOnly} />,
     },
     {
       key: "text", label: "TEXT", width: 140,
