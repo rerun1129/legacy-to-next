@@ -295,8 +295,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       )}
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
-      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab variant={variant} form={form} /></div>
-      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab variant={variant} form={form} active={tab === "main"} /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab active={tab === "freight"} /></div>
     </form>
     </FormProvider>
   );

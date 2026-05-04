@@ -75,17 +75,16 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
 
   function handleDragStart(e: React.MouseEvent, key: string) {
     if (e.button !== 0) return;
+    e.preventDefault();
 
     const container = containerRef.current!;
     const origIndex = visibleDefs.findIndex(f => f.key === key);
     const itemEls   = Array.from(container.querySelectorAll<HTMLElement>(".field-widget-item"));
     const containerTop = container.getBoundingClientRect().top;
 
-    const centers    = itemEls.map(el => {
-      const r = el.getBoundingClientRect();
-      return r.top + r.height / 2 - containerTop;
-    });
-    const itemHeight = itemEls[origIndex]?.getBoundingClientRect().height ?? 60;
+    const rects      = itemEls.map(el => el.getBoundingClientRect());
+    const centers    = rects.map(r => r.top + r.height / 2 - containerTop);
+    const itemHeight = rects[origIndex]?.height ?? 60;
     const startY     = e.clientY;
 
     // 클로저 내 가변 변수 — setState 콜백 안에서 다른 setState 호출 방지
@@ -93,13 +92,15 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
     let latestDeltaY = 0;
 
     const onMove = (ev: MouseEvent) => {
-      const deltaY  = ev.clientY - startY;
-      latestDeltaY  = deltaY;
-      const dragCenter = centers[origIndex] + deltaY;
-      const rest    = centers.filter((_, i) => i !== origIndex);
-      let   insertIdx  = 0;
+      const deltaY = ev.clientY - startY;
+      latestDeltaY = deltaY;
+      // 마우스 Y 좌표 기준으로 위치 결정 (위/아래 대칭, 스크롤 시 cTop 재계산)
+      const cTop   = container.getBoundingClientRect().top;
+      const mouseY = ev.clientY - cTop;
+      const rest   = centers.filter((_, i) => i !== origIndex);
+      let   insertIdx = 0;
       for (let i = 0; i < rest.length; i++) {
-        if (dragCenter > rest[i]) insertIdx = i + 1;
+        if (mouseY > rest[i]) insertIdx = i + 1;
       }
       latestInsert = insertIdx;
       setDragState({ key, origIndex, deltaY, insertIndex: insertIdx, itemHeight });

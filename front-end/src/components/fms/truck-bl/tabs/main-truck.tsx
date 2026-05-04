@@ -10,6 +10,6 @@ const TRUCK_REGISTRY: WidgetDef[] = [
   { key: "perf-truck",    label: "Performance", component: TruckPerformancePanel, defaultPosition: { col: 4, row: 2, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
 ];
 
-export function MainTruck() {
-  return <WidgetGrid scope="truck-bl-entry.main" registry={TRUCK_REGISTRY} />;
+export function MainTruck({ active }: { active?: boolean }) {
+  return <WidgetGrid scope="truck-bl-entry.main" registry={TRUCK_REGISTRY} active={active} />;
 }

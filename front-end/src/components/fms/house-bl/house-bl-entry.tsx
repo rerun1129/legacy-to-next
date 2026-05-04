@@ -64,10 +64,10 @@ function getToolbarDefaults(variant: BLVariantConfig) {
   return DEFAULTS_NON_BL;
 }
 
-function renderMainTab(variant: BLVariantConfig) {
-  if (variant.mode === "SEA")  return <MainTabSea variant={variant} />;
-  if (variant.mode === "AIR")  return <MainTabAir variant={variant} />;
-  return <MainTabSea variant={variant} />;
+function renderMainTab(variant: BLVariantConfig, active: boolean) {
+  if (variant.mode === "SEA")  return <MainTabSea variant={variant} active={active} />;
+  if (variant.mode === "AIR")  return <MainTabAir variant={variant} active={active} />;
+  return <MainTabSea variant={variant} active={active} />;
 }
 
 const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
@@ -287,8 +287,8 @@ export function HouseBLEntry({ variant, id }: Props) {
           </div>
         </div>
 
-        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant)}</div>
-        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
+        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main")}</div>
+        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab active={tab === "freight"} /></div>
       </form>
       </FormProvider>
 

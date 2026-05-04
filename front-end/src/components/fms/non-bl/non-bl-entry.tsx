@@ -92,8 +92,8 @@ export function NonBLEntry() {
       </div>
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
-      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MainNonBL /></div>
-      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab /></div>
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MainNonBL    active={tab === "main"}    /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab   active={tab === "freight"} /></div>
     </>
     </FormProvider>
   );

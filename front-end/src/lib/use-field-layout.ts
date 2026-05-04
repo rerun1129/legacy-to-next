@@ -49,11 +49,24 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         const patched    = missing.length > 0
           ? { ...layout, hidden: [...layout.hidden, ...missing] }
           : layout;
-        // itemRows 가 있으면 order 를 flat 으로 동기화해서 반환
+        // itemRows가 있으면 flat으로 order 동기화 — 단 defaults 모두 포함 시만 (stale 방지)
+        let result = patched;
         if (patched.itemRows) {
-          return { ...patched, order: patched.itemRows.flat() };
+          const flat    = patched.itemRows.flat();
+          const flatSet = new Set(flat);
+          const valid   = defaults.every(k => flatSet.has(k) || hiddenSet.has(k));
+          if (valid) result = { ...patched, order: flat };
+          // stale itemRows 감지: 무시하고 order 사용
         }
-        return patched;
+        // rowIds 중복 감지 시 제거 → field-item-grid의 r${rowIdx} fallback 사용 (initItemRows에서 복구)
+        if (result.rowIds) {
+          const seen = new Set<string>();
+          if (result.rowIds.some(id => seen.size === seen.add(id).size)) {
+            const { rowIds: _dup, ...noRowIds } = result;
+            return noRowIds;
+          }
+        }
+        return result;
       },
 
       initFieldLayout(scope, defaults) {
@@ -64,7 +77,18 @@ export const useFieldLayout = create<FieldLayoutStore>()(
       // FieldItemGrid 전용: cols 개씩 split 행으로 초기화
       initItemRows(scope, items, cols = 2) {
         const layout = get().layouts[scope];
-        if (layout?.itemRows) return;
+        if (layout?.itemRows) {
+          // rowIds 중복 감지 시 자동 재생성
+          if (layout.rowIds) {
+            const seen = new Set<string>();
+            const hasDup = layout.rowIds.some(id => seen.size === seen.add(id).size);
+            if (hasDup) {
+              const fresh = layout.itemRows.map(() => nextRowId());
+              set(s => ({ layouts: { ...s.layouts, [scope]: { ...s.layouts[scope]!, rowIds: fresh } } }));
+            }
+          }
+          return;
+        }
         const rows: string[][] = [];
         for (let i = 0; i < items.length; i += cols) rows.push(items.slice(i, i + cols));
         const rowIds = rows.map(() => nextRowId());

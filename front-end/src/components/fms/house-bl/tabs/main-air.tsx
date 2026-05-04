@@ -10,7 +10,7 @@ import { MarksPanel }           from "./sections/marks-panel";
 import { NatureGoodsPanel }     from "./sections/nature-goods-panel";
 import { ItemHsPanel }          from "./sections/item-hs-panel";
 
-interface Props { variant: BLVariantConfig }
+interface Props { variant: BLVariantConfig; active?: boolean }
 
 export const HOUSE_BL_AIR_REGISTRY: WidgetDef[] = [
   { key: "party-air",    label: "Party",           component: PartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 6 }, minColSpan: 1, minRowSpan: 2 },
@@ -23,7 +23,7 @@ export const HOUSE_BL_AIR_REGISTRY: WidgetDef[] = [
   { key: "item-hs-air",  label: "Item / HS Code",  component: ItemHsPanel,      defaultPosition: { col: 4, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 2, minRowSpan: 2 },
 ];
 
-export function MainTabAir({ variant }: Props) {
+export function MainTabAir({ variant, active }: Props) {
   const scope = `house-bl-entry.main.${variant.key}`;
-  return <WidgetGrid scope={scope} variant={variant} registry={HOUSE_BL_AIR_REGISTRY} />;
+  return <WidgetGrid scope={scope} variant={variant} registry={HOUSE_BL_AIR_REGISTRY} active={active} />;
 }

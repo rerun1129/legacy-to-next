@@ -14,6 +14,6 @@ const FREIGHT_REGISTRY: WidgetDef[] = [
   { key: "account-docs", label: "Account Documents", component: FreightAccountPanel, defaultPosition: { col: 0, row: 5, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
 ];
 
-export function FreightTab() {
-  return <WidgetGrid scope="freight-tab" variant={undefined} registry={FREIGHT_REGISTRY} />;
+export function FreightTab({ active }: { active?: boolean }) {
+  return <WidgetGrid scope="freight-tab" variant={undefined} registry={FREIGHT_REGISTRY} active={active} />;
 }

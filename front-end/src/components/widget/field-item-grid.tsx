@@ -170,7 +170,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
         }
 
         return (
-          <div key={rowIds[rowIdx] ?? keys.join('|')} style={{ marginBottom: 2 }}>
+          <div key={rowIds[rowIdx] ?? `r${rowIdx}-${keys.join('|')}`} style={{ marginBottom: 2 }}>
             {/* 행 컨트롤 바 */}
             {editMode && (
               <div className="field-item-row-bar">

@@ -13,7 +13,8 @@ import { MasterAirChargesPanel }    from "./sections/master-air-charges-panel";
 
 interface Props {
   variant: MasterVariantConfig;
-  form: UseFormReturn<MasterBlFormValues>;
+  form:    UseFormReturn<MasterBlFormValues>;
+  active?: boolean;
 }
 
 function makeRegistry(form: UseFormReturn<MasterBlFormValues>): WidgetDef[] {
@@ -30,8 +31,8 @@ function makeRegistry(form: UseFormReturn<MasterBlFormValues>): WidgetDef[] {
   ];
 }
 
-export function MasterMainTab({ variant, form }: Props) {
+export function MasterMainTab({ variant, form, active }: Props) {
   const scope    = `master-bl-entry.main.${variant.key}`;
   const registry = useMemo(() => makeRegistry(form), [form]);
-  return <WidgetGrid scope={scope} variant={variant} registry={registry} />;
+  return <WidgetGrid scope={scope} variant={variant} registry={registry} active={active} />;
 }

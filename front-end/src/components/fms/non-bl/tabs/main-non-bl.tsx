@@ -20,6 +20,6 @@ const NON_BL_REGISTRY: WidgetDef[] = [
   { key: "remark-nonbl",         label: "Remark",                component: NonBLRemarkPanel,        defaultPosition: { col: 4, row: 4, colSpan: 2, rowSpan: 1 }, minColSpan: 1, minRowSpan: 1 },
 ];
 
-export function MainNonBL() {
-  return <WidgetGrid scope="non-bl-entry.main" registry={NON_BL_REGISTRY} />;
+export function MainNonBL({ active }: { active?: boolean }) {
+  return <WidgetGrid scope="non-bl-entry.main" registry={NON_BL_REGISTRY} active={active} />;
 }

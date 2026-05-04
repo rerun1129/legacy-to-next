@@ -167,7 +167,7 @@ export function NonBLSchedulePanel() {
     {
       key:    "ports",
       label:  "Ports",
-      render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={portItems} shouldShowRowControls={false} />,
+      render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={portItems} />,
     },
   ];
 

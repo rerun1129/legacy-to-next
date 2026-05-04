@@ -19,6 +19,7 @@ interface Props {
   scope:    string;
   variant?: AnyVariantConfig;
   registry: WidgetDef[];       // 엔트리 타입별 레지스트리
+  active?:  boolean;           // false이면 WidgetPalette 포탈 렌더 억제
 }
 
 function buildRegistryMap(registry: WidgetDef[]) {
@@ -33,7 +34,7 @@ function toRGLLayout(visible: { key: string; col: number; row: number; colSpan: 
   }));
 }
 
-export function WidgetGrid({ scope, variant, registry }: Props) {
+export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -125,7 +126,7 @@ export function WidgetGrid({ scope, variant, registry }: Props) {
         </GridLayout>
       )}
 
-      {editMode && (
+      {editMode && active && (
         <WidgetPalette
           scope={scope}
           registry={registry}
