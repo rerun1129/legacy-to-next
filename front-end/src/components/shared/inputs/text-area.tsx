@@ -28,6 +28,8 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           onBlur={onBlur}
           placeholder={placeholder}
           style={style}
+          readOnly={readOnly}
+          required={required}
         />
       );
     }

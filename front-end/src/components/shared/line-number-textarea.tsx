@@ -8,11 +8,13 @@ interface Props {
   onChange?:     (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur?:       (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   placeholder?:  string;
-  style?:        React.CSSProperties; // wrapper에 적용 (flex: 1, minHeight 등)
+  style?:        React.CSSProperties;
   name?:         string;
+  readOnly?:     boolean;
+  required?:     boolean;
 }
 
-export function LineNumberTextarea({ defaultValue = "", value, onChange, onBlur, placeholder, style, name }: Props) {
+export function LineNumberTextarea({ defaultValue = "", value, onChange, onBlur, placeholder, style, name, readOnly, required }: Props) {
   // controlled 모드: value prop이 있으면 사용, 없으면 내부 state
   const [internalValue, setInternalValue] = useState(String(defaultValue));
   const [focused, setFocused] = useState(false);
@@ -43,11 +45,12 @@ export function LineNumberTextarea({ defaultValue = "", value, onChange, onBlur,
     <div
       style={{
         display:     "flex",
-        border:      `1px solid ${focused ? "var(--focus-ring)" : "var(--border)"}`,
+        border:      `1px solid ${required && !readOnly ? "color-mix(in srgb, var(--required-bar) 30%, var(--border))" : focused ? "var(--focus-ring)" : "var(--border)"}`,
         borderRadius: 5,
-        background:  "var(--surface-2)",
+        background:  readOnly ? "var(--bg-sunken)" : "var(--surface-2)",
         overflow:    "hidden",
-        boxShadow:   focused ? "0 0 0 3px var(--focus-glow)" : undefined,
+        boxShadow:   focused && !readOnly ? "0 0 0 3px var(--focus-glow)" : undefined,
+        borderLeft:  required && !readOnly ? "3px solid var(--required-bar)" : undefined,
         ...style,
       }}
     >
@@ -82,6 +85,7 @@ export function LineNumberTextarea({ defaultValue = "", value, onChange, onBlur,
         name={name}
         value={currentValue}
         placeholder={placeholder}
+        readOnly={readOnly}
         onChange={handleChange}
         onScroll={syncScroll}
         onFocus={() => setFocused(true)}

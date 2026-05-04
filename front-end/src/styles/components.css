@@ -49,6 +49,7 @@
 }
 .party-cn__code > input { font-family: var(--font-mono); padding-right: 22px; }
 .party-cn__code > input:focus, .party-cn__name:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); outline: none; }
+.party-cn__code > input[readonly], .party-cn__name[readonly] { background: var(--bg-sunken); color: var(--ink); opacity: 1; cursor: default; }
 .party-cn__icon { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; color: var(--ink-4); cursor: pointer; }
 .party-cn__icon:hover { color: var(--accent); }
 .party-block__head .party-cn { flex: 1 1 auto; min-width: 180px; margin: 0; }
