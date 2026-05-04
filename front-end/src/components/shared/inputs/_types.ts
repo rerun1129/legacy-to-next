@@ -40,3 +40,13 @@ export interface LinkBoxProps extends BoxBaseProps {
   onLink?: () => void;
   linkAriaLabel?: string;
 }
+
+export interface RadioBoxOption { value: string; label: string }
+export interface RadioBoxProps extends BoxBaseProps {
+  label?: string;
+  name: string;
+  options: RadioBoxOption[];
+  value?: string;
+  defaultValue?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+}

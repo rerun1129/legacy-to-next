@@ -8,6 +8,7 @@ import { CodeBox } from "@/components/shared/inputs/code-box";
 import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
+import { RadioBox } from "@/components/shared/inputs/radio-box";
 import type { BoxVariant } from "@/components/shared/inputs";
 
 type FormValues = {
@@ -24,6 +25,7 @@ type FormValues = {
   unit: string;
   linkUrl: string;
   linkMenu: string;
+  radioMode: string;
 };
 
 const UNIT_OPTIONS = [
@@ -67,6 +69,7 @@ export function InputsSection() {
       unit: "KG",
       linkUrl: "External Docs",
       linkMenu: "User Management",
+      radioMode: "A",
     },
   });
 
@@ -236,6 +239,23 @@ export function InputsSection() {
           readOnly={readOnly}
           onLink={() => alert("Navigate to: /admin/user-management")}
           inputProps={{ placeholder: "Display Name", ...register("linkMenu") }}
+        />
+      </div>
+
+      {/* RadioBox */}
+      <div style={sectionStyle}>
+        <RadioBox
+          label="RadioBox (Mode)"
+          name="radioMode"
+          variant={variant}
+          required={required}
+          readOnly={readOnly}
+          options={[
+            { value: "A", label: "Option A" },
+            { value: "B", label: "Option B" },
+            { value: "C", label: "Option C" },
+          ]}
+          {...register("radioMode")}
         />
       </div>
     </div>
