@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -56,7 +56,6 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
 export function GridPreviewPanel() {
   const { control, register } = useFormContext<DimPreviewFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const cols = useMemo<GridColumn<DimPreviewRow>[]>(() => [
     {
@@ -137,8 +136,6 @@ export function GridPreviewPanel() {
     },
   ], [register]);
 
-  const selectedIdx = fields.findIndex((f) => f.id === Number(selectedKey));
-
   function handleAdd() {
     const nextId = Math.max(0, ...fields.map((f) => f.id)) + 1;
     append({
@@ -146,15 +143,11 @@ export function GridPreviewPanel() {
       length: "", width: "", height: "", qty: "", cbm: "", volWt: "",
       type: "", date: "", text: "", code: "", codeName: "",
     });
-    setSelectedKey(null);
   }
 
   function handleRemove() {
     if (fields.length === 0) return;
-    const targetIdx =
-      selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
-    remove(targetIdx);
-    setSelectedKey(null);
+    remove(fields.length - 1);
   }
 
   return (
@@ -181,8 +174,6 @@ export function GridPreviewPanel() {
         columns={cols}
         data={fields as unknown as DimPreviewRow[]}
         rowKey={(r) => r.id}
-        onRowClick={(row) => setSelectedKey(String(row.id))}
-        rowClassName={(row) => (String(row.id) === selectedKey ? "is-selected" : undefined)}
         style={{ flex: 1, minHeight: 0 }}
       />
     </div>

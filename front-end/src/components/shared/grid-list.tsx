@@ -105,11 +105,6 @@ function renderRows<T>(
                   .filter(Boolean)
                   .join(" ") || undefined
               }
-              onFocus={
-                setSelectedCell
-                  ? () => setSelectedCell({ rowKey: key, colKey: ck })
-                  : undefined
-              }
               onClick={
                 setSelectedCell
                   ? () => {
