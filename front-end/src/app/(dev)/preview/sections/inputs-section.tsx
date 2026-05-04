@@ -9,6 +9,7 @@ import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { RadioBox } from "@/components/shared/inputs/radio-box";
+import { TimeBox } from "@/components/shared/inputs";
 import type { BoxVariant } from "@/components/shared/inputs";
 
 type FormValues = {
@@ -26,6 +27,8 @@ type FormValues = {
   linkUrl: string;
   linkMenu: string;
   radioMode: string;
+  time: string;
+  timeCell: string;
 };
 
 const UNIT_OPTIONS = [
@@ -70,6 +73,8 @@ export function InputsSection() {
       linkUrl: "External Docs",
       linkMenu: "User Management",
       radioMode: "A",
+      time: "0930",
+      timeCell: "",
     },
   });
 
@@ -256,6 +261,31 @@ export function InputsSection() {
           ]}
           {...register("radioMode")}
         />
+      </div>
+
+      {/* TimeBox */}
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>TimeBox</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>panel variant</div>
+            <TimeBox
+              variant="panel"
+              required={required}
+              readOnly={readOnly}
+              {...register("time")}
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>cell variant</div>
+            <TimeBox
+              variant="cell"
+              required={required}
+              readOnly={readOnly}
+              {...register("timeCell")}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

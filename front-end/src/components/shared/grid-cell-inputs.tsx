@@ -1,5 +1,6 @@
 "use client";
 import { forwardRef, useEffect, useRef, useState } from "react";
+import type React from "react";
 import type { ChangeEvent, CSSProperties, FocusEvent, InputHTMLAttributes } from "react";
 import { Calendar } from "lucide-react";
 
@@ -7,11 +8,6 @@ function toDateMask(raw: string) {
   const d = raw.replace(/\D/g, "").slice(0, 8);
   return d.length === 8 ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : d;
 }
-function toTimeMask(raw: string) {
-  const t = raw.replace(/\D/g, "").slice(0, 4);
-  return t.length === 4 ? `${t.slice(0, 2)}:${t.slice(2, 4)}` : t;
-}
-
 function isValidDate(raw: string) {
   if (raw.length !== 8) return false;
   const y = parseInt(raw.slice(0, 4), 10);
@@ -20,13 +16,6 @@ function isValidDate(raw: string) {
   if (m < 1 || m > 12) return false;
   return d >= 1 && d <= new Date(y, m, 0).getDate();
 }
-function isValidTime(raw: string) {
-  if (raw.length !== 4) return false;
-  const h = parseInt(raw.slice(0, 2), 10);
-  const m = parseInt(raw.slice(2, 4), 10);
-  return h >= 0 && h <= 23 && m >= 0 && m <= 59;
-}
-
 const TOOLTIP_MS = 5000;
 const errorBg = "rgba(220,38,38,0.13)";
 const tooltipStyle: CSSProperties = {
@@ -202,16 +191,33 @@ export const NumericCell = forwardRef<HTMLInputElement, NumericCellProps>(
   }
 );
 
-export function DateCell({ defaultValue, required, readOnly }: { defaultValue?: string; required?: boolean; readOnly?: boolean }) {
-  return (
-    <DateInputBase
-      defaultValue={defaultValue}
-      readOnly={readOnly}
-      inputClassName={`grid__cell-input${required ? " is-required" : ""}`}
-      getInputStyle={({ error }) => ({ paddingRight: 18, backgroundColor: error ? errorBg : undefined })}
-    />
-  );
-}
+type DateCellProps = {
+  defaultValue?: string;
+  value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
+  required?: boolean;
+  readOnly?: boolean;
+  name?: string;
+};
+
+export const DateCell = forwardRef<HTMLInputElement, DateCellProps>(
+  function DateCell({ defaultValue, value, onChange, onBlur, required, readOnly, name }, ref) {
+    return (
+      <DateInputBase
+        ref={ref}
+        name={name}
+        defaultValue={defaultValue}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        readOnly={readOnly}
+        inputClassName={`grid__cell-input${required ? " is-required" : ""}`}
+        getInputStyle={({ error }) => ({ paddingRight: 18, backgroundColor: error ? errorBg : undefined })}
+      />
+    );
+  }
+);
 
 type PanelDateInputProps = DateInputBaseProps & { required?: boolean };
 
@@ -259,48 +265,3 @@ export const PanelDateInput = forwardRef<HTMLInputElement, PanelDateInputProps>(
   );
 });
 
-export function TimeCell({ defaultValue = "" }: { defaultValue?: string }) {
-  const [focused, setFocused]        = useState(false);
-  const [raw, setRaw]                = useState(defaultValue.replace(":", ""));
-  const [error, setError]            = useState(false);
-  const [tooltipVisible, setTooltip] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
-
-  const triggerTooltip = () => {
-    setTooltip(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setTooltip(false), TOOLTIP_MS);
-  };
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setRaw(e.target.value.replace(/\D/g, "").slice(0, 4));
-    setError(false);
-    setTooltip(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
-  };
-
-  const handleBlur = () => {
-    setFocused(false);
-    if (raw.length === 0) return;
-    if (!isValidTime(raw)) { setRaw(""); setError(true); triggerTooltip(); }
-    else                   { setError(false); setTooltip(false); }
-  };
-
-  return (
-    <div style={{ position: "relative", width: "100%" }}>
-      <input
-        className="grid__cell-input"
-        style={{ backgroundColor: error ? errorBg : undefined }}
-        value={focused ? raw : toTimeMask(raw)}
-        onChange={handleChange}
-        onFocus={() => setFocused(true)}
-        onBlur={handleBlur}
-        placeholder="HHmm"
-        maxLength={focused ? 4 : 5}
-      />
-      {tooltipVisible && <div style={tooltipStyle}>유효하지 않은 시간</div>}
-    </div>
-  );
-}

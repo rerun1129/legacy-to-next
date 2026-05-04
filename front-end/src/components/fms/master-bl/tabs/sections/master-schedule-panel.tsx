@@ -1,28 +1,16 @@
 "use client";
 
-import { useFormContext, Controller, type UseFormReturn } from "react-hook-form";
-import { Search } from "lucide-react";
-import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { DateCell, TimeCell, PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { useFormContext, useFieldArray, Controller, type UseFormReturn, type UseFormRegister, type Control } from "react-hook-form";
+import { Plus, Minus, Search } from "lucide-react";
+import { GridList } from "@/components/shared/grid-list";
+import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/air-schedule-legs-cols";
 
 interface Props { variant?: AnyVariantConfig; form?: UseFormReturn<MasterBlFormValues> }
-interface LegRow { id: number; to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string; }
-
-const LEG_COLS: GridColumn<LegRow>[] = [
-  { key: "_no",       width: 32, align: "center", label: "#",        className: "row-num", render: (_, __, i) => i + 1 },
-  { key: "to",        width: 40, align: "center", label: "To",       render: v => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
-  { key: "by",        width: 32, align: "center", label: "By",       render: v => <input className="grid__cell-input" defaultValue={String(v)} /> },
-  { key: "flight",    width: 50, align: "center", label: "Flight",   render: v => <input className="grid__cell-input" defaultValue={String(v)} style={{ fontFamily: "var(--font-mono)" }} /> },
-  { key: "onBoard",   width: 96, align: "center", label: "On Board", render: v => <DateCell defaultValue={String(v)} /> },
-  { key: "boardTime", width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
-  { key: "arrival",   width: 96, align: "center", label: "Arrival",  render: v => <DateCell defaultValue={String(v)} /> },
-  { key: "arrTime",   width: 58, align: "center", label: "Time",     render: v => <TimeCell defaultValue={String(v)} /> },
-];
-const LEG_DATA: LegRow[] = [];
 
 // ── 공통 헬퍼 ──────────────────────────────────────────────
 function SchedField({ label, name, req, type = "text" }: { label: string; name: string; req?: boolean; type?: string }) {
@@ -107,7 +95,12 @@ function buildSeaFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
 }
 
 // ── Air schedule ────────────────────────────────────────────
-function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
+function buildAirFields(
+  panelScope: string,
+  isExp: boolean,
+  register: UseFormRegister<MasterBlFormValues>,
+  control: Control<MasterBlFormValues>,
+): FieldWidgetDef[] {
   const carrierItems: FieldItemDef[] = [
     { key: "carrier",   render: () => <CodeNameField label={isExp ? "Airline" : "Carrier"} codeField="seaDetail.linerCode" nameField="seaDetail.linerName" req /> },
     { key: "departure", render: () => <CodeNameField label="Departure" codeField="polCode" nameField="seaDetail.polName" req /> },
@@ -125,26 +118,60 @@ function buildAirFields(panelScope: string, isExp: boolean): FieldWidgetDef[] {
     },
     {
       key: "legs", label: "Schedule Legs",
-      render: () => (
-        <>
-          <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
-          <div style={{ overflow: "auto" }}>
-            <GridList columns={LEG_COLS} data={LEG_DATA} rowKey={(row) => row.id} />
-          </div>
-        </>
-      ),
+      render: () => <AirLegsWidget register={register} control={control} />,
     },
     ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
   ];
 }
 
+function AirLegsWidget({
+  register,
+  control,
+}: {
+  register: UseFormRegister<MasterBlFormValues>;
+  control: Control<MasterBlFormValues>;
+}) {
+  const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
+
+  function handleAdd() {
+    append({ toCode: "", byCarrier: "", flightNo: "", onBoardDt: "", onBoardTm: "", arrivalDt: "", arrivalTm: "" });
+  }
+  function handleRemove() {
+    if (fields.length > 0) remove(fields.length - 1);
+  }
+
+  return (
+    <>
+      <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
+      <div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <span className="panel__rowcount">{fields.length}</span>
+          <div className="panel__actions" style={{ display: "flex", gap: 4 }}>
+            <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}><Plus size={12} /></button>
+            <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          </div>
+        </div>
+        <div style={{ overflow: "auto" }}>
+          <GridList
+            columns={buildAirScheduleLegCols(register, "scheduleLegs")}
+            data={fields as unknown as LegRow[]}
+            rowKey={(row) => row.id ?? ""}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function MasterSchedulePanel({ variant }: Props) {
+  const { register, control } = useFormContext<MasterBlFormValues>();
+
   if (!variant) return null;
   const panelScope = `master-schedule-panel.${variant.key}`;
   const isExp      = variant.direction === "EXP";
   const fields     = variant.mode === "SEA"
     ? buildSeaFields(panelScope, isExp)
-    : buildAirFields(panelScope, isExp);
+    : buildAirFields(panelScope, isExp, register, control);
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>

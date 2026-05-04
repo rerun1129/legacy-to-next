@@ -50,3 +50,11 @@ export interface RadioBoxProps extends BoxBaseProps {
   defaultValue?: string;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
+
+export type TimeBoxProps = BoxBaseProps & {
+  value?: string;
+  defaultValue?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
+  name?: string;
+};

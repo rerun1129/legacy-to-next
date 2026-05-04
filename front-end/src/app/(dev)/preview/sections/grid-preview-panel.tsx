@@ -9,6 +9,7 @@ import { DropBox } from "@/components/shared/inputs/drop-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { DateCell } from "@/components/shared/grid-cell-inputs";
+import { TimeBox } from "@/components/shared/inputs";
 
 interface DimPreviewRow {
   id: number;
@@ -20,6 +21,7 @@ interface DimPreviewRow {
   volWt: string;
   type: string;
   date: string;
+  time?: string;
   text: string;
   code: string;
   codeName: string;
@@ -41,15 +43,15 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
     dimensions: [
       { id: 1, length: "60",  width: "40", height: "30", qty: "10",
         cbm: "0.072", volWt: "12.000",
-        type: "BOX",    date: "20260504", text: "sample row 1",
+        type: "BOX",    date: "20260504", time: "0930", text: "sample row 1",
         code: "KRPUS",  codeName: "Busan Port", linkUrl: "Service A" },
       { id: 2, length: "100", width: "80", height: "60", qty: "5",
         cbm: "0.480", volWt: "80.000",
-        type: "PALLET", date: "",         text: "",
+        type: "PALLET", date: "",         time: "",     text: "",
         code: "",       codeName: "",     linkUrl: "Service B" },
       { id: 3, length: "",    width: "",   height: "",   qty: "",
         cbm: "",      volWt: "",
-        type: "DRUM",   date: "20260601", text: "third row",
+        type: "DRUM",   date: "20260601", time: "1430", text: "third row",
         code: "USNYC",  codeName: "New York", linkUrl: "Service C" },
     ],
   };
@@ -134,7 +136,13 @@ export function GridPreviewPanel() {
     },
     {
       key: "date", label: "DATE", width: 110,
-      render: () => <DateCell required={required} readOnly={readOnly} />,
+      render: (_v, _r, i) => <DateCell required={required} readOnly={readOnly} {...register(`dimensions.${i}.date`)} />,
+    },
+    {
+      key: "time", label: "TIME", width: 90,
+      render: (_v, _r, i) => (
+        <TimeBox variant="cell" required={required} readOnly={readOnly} {...register(`dimensions.${i}.time`)} />
+      ),
     },
     {
       key: "text", label: "TEXT", width: 140,
@@ -185,7 +193,7 @@ export function GridPreviewPanel() {
     append({
       id: nextId,
       length: "", width: "", height: "", qty: "", cbm: "", volWt: "",
-      type: "", date: "", text: "", code: "", codeName: "", linkUrl: "",
+      type: "", date: "", time: "", text: "", code: "", codeName: "", linkUrl: "",
     });
   }
 
