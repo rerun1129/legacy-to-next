@@ -60,6 +60,8 @@
 .btn--ghost:hover { background: var(--surface-2); }
 .btn--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, var(--border)); background: var(--surface); }
 .btn--danger:hover { background: var(--danger-soft); }
+.btn--success { color: var(--success); border-color: color-mix(in srgb, var(--success) 30%, var(--border)); background: var(--surface); }
+.btn--success:hover { background: var(--success-soft); }
 .btn--search { background: var(--info); border-color: var(--info); color: #fff; }
 .btn--search:hover { background: color-mix(in srgb, var(--info) 85%, black); border-color: color-mix(in srgb, var(--info) 85%, black); }
 .btn--transaction { background: var(--success); border-color: var(--success); color: #fff; }
