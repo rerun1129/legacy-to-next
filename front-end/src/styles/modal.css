@@ -1,0 +1,125 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 280px;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal__title {
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  margin-bottom: 12px;
+}
+
+.modal__body {
+  color: var(--ink-2);
+  margin-bottom: 20px;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* =========================================================
+   Preview: Variant toggle (3-way segment control)
+   ========================================================= */
+.variant-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--surface-2);
+  margin-bottom: 6px;
+}
+
+.variant-toggle__btn {
+  border: none;
+  padding: 2px 6px;
+  font-size: 10px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.variant-toggle__btn.is-active {
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.variant-toggle__btn.is-active--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.variant-toggle__btn.is-active--ghost {
+  background: var(--ink-2);
+  color: #fff;
+}
+
+.variant-toggle__btn.is-active--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* =========================================================
+   Preview: Specimen card & bundle layout
+   ========================================================= */
+.specimen-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.specimen-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.specimen-bundle {
+  border-top: 1px solid var(--divider);
+  padding: 12px 0;
+}
+
+.specimen-bundle__header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 2px;
+}
+
+.specimen-bundle__source {
+  font-size: 10px;
+  color: var(--ink-4);
+  font-family: monospace;
+  margin-bottom: 8px;
+}
+
+.specimen-bundle__btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.specimen-bundle__btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}

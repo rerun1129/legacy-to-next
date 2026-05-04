@@ -1,0 +1,85 @@
+import {
+  Save,
+  RotateCcw,
+  Search,
+  Trash2,
+  Copy,
+  RefreshCw,
+  Download,
+  Printer,
+  ArrowLeftRight,
+} from "lucide-react";
+import type { ActionSpecimen } from "./_specimen-types";
+
+export const ACTION_SPECIMENS: ActionSpecimen[] = [
+  {
+    id: "save",
+    label: "Save",
+    icon: Save,
+    defaultVariant: "primary",
+    confirmMessage: "Save 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "reset",
+    label: "Reset",
+    icon: RotateCcw,
+    defaultVariant: "ghost",
+    confirmMessage: "Reset 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "search",
+    label: "Search",
+    icon: Search,
+    defaultVariant: "primary",
+    confirmMessage: "Search 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "search-bl",
+    label: "Search B/L",
+    icon: Search,
+    defaultVariant: "primary",
+    confirmMessage: "Search B/L 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "delete",
+    label: "Delete",
+    icon: Trash2,
+    defaultVariant: "danger",
+    confirmMessage: "Delete 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "copy",
+    label: "Copy",
+    icon: Copy,
+    defaultVariant: "ghost",
+    confirmMessage: "Copy 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "change-bl",
+    label: "Change BL No",
+    icon: RefreshCw,
+    defaultVariant: "ghost",
+    confirmMessage: "Change BL No 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "export",
+    label: "Export",
+    icon: Download,
+    defaultVariant: "ghost",
+    confirmMessage: "Export 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "print",
+    label: "Print",
+    icon: Printer,
+    defaultVariant: "ghost",
+    confirmMessage: "Print 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "switch-bl",
+    label: "Switch B/L",
+    icon: ArrowLeftRight,
+    defaultVariant: "ghost",
+    confirmMessage: "Switch B/L 버튼이 클릭되었습니다.",
+  },
+];
