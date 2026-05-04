@@ -114,25 +114,6 @@ public class HouseBlSubAssembler {
         }).toList());
     }
 
-    // ── License ──────────────────────────────────────────────────────
-
-    /** 변환된 라이선스 파라미터. */
-    public record LicenseParams(
-            String licenseNo, Integer pkgQty, String pkgUnit, BigDecimal grossWeightKg,
-            String combinedPackingMark, Integer combinedPackingQty, String combinedPackingUnit,
-            boolean partialShipment, Integer partialShipmentSeq, String hsnNo) {}
-
-    public void applyLicenses(HouseBl entity, List<LicenseParams> params) {
-        if (params == null || params.isEmpty()) return;
-        entity.initLicenses(params.stream().map(p -> {
-            HouseBlLicense l = HouseBlLicense.create(null);
-            l.updateDetails(p.licenseNo(), p.pkgQty(), p.pkgUnit(), p.grossWeightKg(),
-                    p.combinedPackingMark(), p.combinedPackingQty(), p.combinedPackingUnit(),
-                    p.partialShipment(), p.partialShipmentSeq(), p.hsnNo());
-            return l;
-        }).toList());
-    }
-
     // ── TruckOrder ───────────────────────────────────────────────────
 
     /** 변환된 트럭 오더 파라미터. */
@@ -165,7 +146,6 @@ public class HouseBlSubAssembler {
         applyDims(entity, req.dims());
         applyContainers(entity, toContainerParams(req.containers()));
         applyScheduleLegs(entity, req.scheduleLegs());
-        applyLicenses(entity, toLicenseParams(req.licenses()));
         applyTruckOrders(entity, toTruckOrderParams(req.truckOrders()));
         applyAirCharges(entity, req.airCharges());
     }
@@ -176,7 +156,6 @@ public class HouseBlSubAssembler {
         applyDimsUpdate(entity, req.dims());
         applyContainers(entity, toContainerParamsU(req.containers()));
         applyScheduleLegsUpdate(entity, req.scheduleLegs());
-        applyLicenses(entity, toLicenseParamsU(req.licenses()));
         applyTruckOrders(entity, toTruckOrderParamsU(req.truckOrders()));
         applyAirChargesUpdate(entity, req.airCharges());
     }
@@ -197,22 +176,6 @@ public class HouseBlSubAssembler {
                 c.sealNo1(), c.sealNo2(), c.sealNo3(), c.sealNo4(), c.sealNo5(), c.sealNo6(),
                 c.pkgQty(), c.pkgUnit(), c.grossWeightKg(), c.netWeightKg(), c.cbm(),
                 c.vgmKg(), Boolean.TRUE.equals(c.soc()), c.seq() != null ? c.seq() : 1)).toList();
-    }
-
-    private List<LicenseParams> toLicenseParams(List<CreateHouseBlRequest.LicenseRequest> reqs) {
-        if (reqs == null) return List.of();
-        return reqs.stream().map(l -> new LicenseParams(
-                l.licenseNo(), l.pkgQty(), l.pkgUnit(), l.grossWeightKg(),
-                l.combinedPackingMark(), l.combinedPackingQty(), l.combinedPackingUnit(),
-                Boolean.TRUE.equals(l.partialShipment()), l.partialShipmentSeq(), l.hsnNo())).toList();
-    }
-
-    private List<LicenseParams> toLicenseParamsU(List<UpdateHouseBlRequest.LicenseRequest> reqs) {
-        if (reqs == null) return List.of();
-        return reqs.stream().map(l -> new LicenseParams(
-                l.licenseNo(), l.pkgQty(), l.pkgUnit(), l.grossWeightKg(),
-                l.combinedPackingMark(), l.combinedPackingQty(), l.combinedPackingUnit(),
-                Boolean.TRUE.equals(l.partialShipment()), l.partialShipmentSeq(), l.hsnNo())).toList();
     }
 
     private List<TruckOrderParams> toTruckOrderParams(List<CreateHouseBlRequest.TruckOrderRequest> reqs) {

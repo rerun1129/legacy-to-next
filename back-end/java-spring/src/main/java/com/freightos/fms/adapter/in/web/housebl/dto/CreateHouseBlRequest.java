@@ -65,7 +65,6 @@ public record CreateHouseBlRequest(
         List<DimRequest> dims,
         List<ContainerRequest> containers,
         List<ScheduleLegRequest> scheduleLegs,
-        List<LicenseRequest> licenses,
         List<TruckOrderRequest> truckOrders,
         List<AirChargeRequest> airCharges
 ) {
@@ -146,20 +145,6 @@ public record CreateHouseBlRequest(
             String onBoardTm,
             @Pattern(regexp = "\\d{8}") String arrivalDt,
             String arrivalTm
-    ) {}
-
-    /** 라이선스 / 패킹 명세 1행. */
-    public record LicenseRequest(
-            String licenseNo,
-            @Min(0) Integer pkgQty,
-            String pkgUnit,
-            @DecimalMin("0") BigDecimal grossWeightKg,
-            String combinedPackingMark,
-            @Min(0) Integer combinedPackingQty,
-            String combinedPackingUnit,
-            Boolean partialShipment,
-            Integer partialShipmentSeq,
-            String hsnNo
     ) {}
 
     /** 트럭 오더 1행. */

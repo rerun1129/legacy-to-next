@@ -304,66 +304,6 @@ class HouseBlMapperTest {
         assertThat(result.isEmpty()).isTrue();
     }
 
-    // ── E-17 LICENSE ────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("toLicenseDomain: 수출면장 모든 필드가 도메인으로 복사된다")
-    void toLicenseDomain_mapsAllFields() {
-        HouseBlLicenseJpaEntity licJpa = new HouseBlLicenseJpaEntity();
-        licJpa.setHouseBlId(1L);
-        licJpa.setLicenseNo("LC-001");
-        licJpa.setPkgQty(10);
-        licJpa.setPkgUnit("CTN");
-        licJpa.setGrossWeightKg(BigDecimal.valueOf(100.0));
-        licJpa.setPartialShipment(true);
-        licJpa.setPartialShipmentSeq(2);
-        licJpa.setHsnNo("1234.56");
-
-        HouseBlLicense domain = cargoMapper.toLicenseDomain(licJpa);
-
-        assertThat(domain.getLicenseNo()).isEqualTo("LC-001");
-        assertThat(domain.getPkgQty()).isEqualTo(10);
-        assertThat(domain.isPartialShipment()).isTrue();
-        assertThat(domain.getPartialShipmentSeq()).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("applyLicenseFields: 도메인 → JPA 모든 수출면장 필드가 세팅된다")
-    void applyLicenseFields_setsAllFieldsToJpa() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
-        HouseBlLicense domain = HouseBlLicense.create(1L);
-        domain.updateDetails("LC-001", 10, "CTN", BigDecimal.valueOf(100.0),
-                null, null, null, true, 2, "1234.56");
-        HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
-
-        cargoMapper.applyLicenseFields(domain, jpa, houseBlJpa);
-
-        assertThat(jpa.getLicenseNo()).isEqualTo("LC-001");
-        assertThat(jpa.getPkgQty()).isEqualTo(10);
-        assertThat(jpa.getPkgUnit()).isEqualTo("CTN");
-        assertThat(jpa.getGrossWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(100.0));
-        assertThat(jpa.isPartialShipment()).isTrue();
-        assertThat(jpa.getPartialShipmentSeq()).isEqualTo(2);
-        assertThat(jpa.getHsnNo()).isEqualTo("1234.56");
-    }
-
-    @Test
-    @DisplayName("toLicenseDomainList: 3개 JPA 엔티티 → 크기 3인 도메인 리스트 반환")
-    void toLicenseDomainList_returnsCorrectSize() {
-        HouseBlLicenseJpaEntity lic1 = new HouseBlLicenseJpaEntity();
-        lic1.setHouseBlId(1L);
-        HouseBlLicenseJpaEntity lic2 = new HouseBlLicenseJpaEntity();
-        lic2.setHouseBlId(1L);
-        HouseBlLicenseJpaEntity lic3 = new HouseBlLicenseJpaEntity();
-        lic3.setHouseBlId(1L);
-
-        List<HouseBlLicense> result = cargoMapper.toLicenseDomainList(List.of(lic1, lic2, lic3));
-
-        assertThat(result).hasSize(3);
-    }
-
     // ── E-19 SCHEDULE LEG ───────────────────────────────────────────
 
     @Test

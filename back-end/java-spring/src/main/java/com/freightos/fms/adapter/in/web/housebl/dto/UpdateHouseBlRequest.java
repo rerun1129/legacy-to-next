@@ -65,7 +65,6 @@ public record UpdateHouseBlRequest(
         List<DimRequest> dims,
         List<ContainerRequest> containers,
         List<ScheduleLegRequest> scheduleLegs,
-        List<LicenseRequest> licenses,
         List<TruckOrderRequest> truckOrders,
         List<AirChargeRequest> airCharges
 ) {
@@ -145,20 +144,6 @@ public record UpdateHouseBlRequest(
             String onBoardTm,
             String arrivalDt,
             String arrivalTm
-    ) {}
-
-    /** 라이선스 / 패킹 명세 1행. */
-    public record LicenseRequest(
-            String licenseNo,
-            Integer pkgQty,
-            String pkgUnit,
-            BigDecimal grossWeightKg,
-            String combinedPackingMark,
-            Integer combinedPackingQty,
-            String combinedPackingUnit,
-            Boolean partialShipment,
-            Integer partialShipmentSeq,
-            String hsnNo
     ) {}
 
     /** 트럭 오더 1행. */

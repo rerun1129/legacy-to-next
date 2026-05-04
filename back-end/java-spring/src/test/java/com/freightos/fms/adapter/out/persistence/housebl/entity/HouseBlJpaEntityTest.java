@@ -79,22 +79,6 @@ class HouseBlJpaEntityTest {
         assertThat(entity.getScheduleLegs()).containsExactly(leg1, leg2);
     }
 
-    // ── syncLicenses ──────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("syncLicenses: 기존 license를 새 license로 전부 대체한다")
-    void syncLicenses_replacesAllExistingItems() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        HouseBlLicenseJpaEntity oldLic = new HouseBlLicenseJpaEntity();
-        entity.syncLicenses(List.of(oldLic));
-
-        HouseBlLicenseJpaEntity newLic = new HouseBlLicenseJpaEntity();
-        entity.syncLicenses(List.of(newLic));
-
-        assertThat(entity.getLicenses()).containsExactly(newLic);
-        assertThat(entity.getLicenses()).doesNotContain(oldLic);
-    }
-
     // ── replaceDesc ─────────────────────────────────────────────────
 
     @Test

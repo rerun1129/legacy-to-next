@@ -48,7 +48,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(AIR) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(AIR): syncDims→syncScheduleLegs→syncLicenses→replaceDesc 순서 후 airRepository.save 호출")
+    @DisplayName("saveHouseBl(AIR): syncDims→syncScheduleLegs→replaceDesc 순서 후 airRepository.save 호출")
     void saveAirHouseBl_callsSyncInOrderThenSavesAirExt() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -62,7 +62,6 @@ class HouseBlPersistenceAdapterTest {
         InOrder order = inOrder(savedJpa, houseBlAirRepository);
         order.verify(savedJpa).syncDims(any());
         order.verify(savedJpa).syncScheduleLegs(any());
-        order.verify(savedJpa).syncLicenses(any());
         order.verify(savedJpa).replaceDesc(any());
         order.verify(houseBlAirRepository).save(any());
     }
@@ -87,7 +86,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(SEA) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(SEA): syncContainers→syncLicenses→replaceDesc 순서 후 seaRepository.save 호출")
+    @DisplayName("saveHouseBl(SEA): syncContainers→replaceDesc 순서 후 seaRepository.save 호출")
     void saveSeaHouseBl_syncsContainersLicensesDescThenSavesSeaExt() {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -100,7 +99,6 @@ class HouseBlPersistenceAdapterTest {
 
         InOrder order = inOrder(savedJpa, houseBlSeaRepository);
         order.verify(savedJpa).syncContainers(any());
-        order.verify(savedJpa).syncLicenses(any());
         order.verify(savedJpa).replaceDesc(any());
         order.verify(houseBlSeaRepository).save(any());
     }
@@ -125,7 +123,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) ────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/syncScheduleLegs/syncLicenses/replaceDesc는 없다")
+    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/syncScheduleLegs/replaceDesc는 없다")
     void saveTruckHouseBl_syncsDimsOnly_skipsLegsLicensesDesc() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -139,7 +137,6 @@ class HouseBlPersistenceAdapterTest {
         then(savedJpa).should().syncDims(any());
         then(savedJpa).should(never()).syncContainers(any());
         then(savedJpa).should(never()).syncScheduleLegs(any());
-        then(savedJpa).should(never()).syncLicenses(any());
         then(savedJpa).should(never()).replaceDesc(any());
         then(houseBlTruckRepository).should().save(any());
     }
@@ -312,7 +309,6 @@ class HouseBlPersistenceAdapterTest {
         // SEA 전용 sync는 호출하지 않음
         then(savedJpa).should(never()).syncContainers(any());
         then(savedJpa).should(never()).syncScheduleLegs(any());
-        then(savedJpa).should(never()).syncLicenses(any());
     }
 
     // ── deleteHouseBl — ext 삭제 후 본체 삭제 순서 ────────────────────

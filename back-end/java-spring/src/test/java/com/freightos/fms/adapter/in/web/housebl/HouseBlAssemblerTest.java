@@ -35,7 +35,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
@@ -58,7 +58,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
@@ -81,7 +81,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
@@ -104,7 +104,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);
@@ -127,7 +127,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null
         );
 
         HouseBl result = assembler.toEntity(request);

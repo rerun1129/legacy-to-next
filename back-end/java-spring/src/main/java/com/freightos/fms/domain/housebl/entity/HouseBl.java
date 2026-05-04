@@ -85,10 +85,6 @@ public abstract class HouseBl extends BaseEntity {
     //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
     private List<HouseBlScheduleLeg> scheduleLegs = new ArrayList<>();
 
-    // ── License (AIR/SEA에서 채워짐, 다른 모드는 빈 컬렉션이 정상.
-    //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
-    private List<HouseBlLicense> licenses = new ArrayList<>();
-
     // ── TruckOrder (TRUCK에서만 채워짐, 다른 모드는 빈 컬렉션이 정상.
     //    본체 위치는 @OneToMany mappedBy 정합성 + 구조 일관성 확보) ───
     private List<HouseBlTruckOrder> truckOrders = new ArrayList<>();
@@ -181,10 +177,6 @@ public abstract class HouseBl extends BaseEntity {
 
     public void initScheduleLegs(List<HouseBlScheduleLeg> scheduleLegs) {
         this.scheduleLegs = new ArrayList<>(scheduleLegs);
-    }
-
-    public void initLicenses(List<HouseBlLicense> licenses) {
-        this.licenses = new ArrayList<>(licenses);
     }
 
     public void initTruckOrders(List<HouseBlTruckOrder> truckOrders) {

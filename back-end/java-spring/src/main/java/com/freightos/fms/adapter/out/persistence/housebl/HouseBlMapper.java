@@ -39,10 +39,6 @@ public class HouseBlMapper {
                 .map(c -> toContainerDomain(c, domain))
                 .collect(Collectors.toList());
         domain.initContainers(containers);
-        List<HouseBlLicense> licenses = jpa.getLicenses().stream()
-                .map(cargoMapper::toLicenseDomain)
-                .collect(Collectors.toList());
-        domain.initLicenses(licenses);
         if (jpa.getDesc() != null) {
             domain.initDesc(docMapper.toDescDomain(jpa.getDesc()));
         }
@@ -61,10 +57,6 @@ public class HouseBlMapper {
                 .map(docMapper::toScheduleLegDomain)
                 .collect(Collectors.toList());
         domain.initScheduleLegs(scheduleLegs);
-        List<HouseBlLicense> licenses = jpa.getLicenses().stream()
-                .map(cargoMapper::toLicenseDomain)
-                .collect(Collectors.toList());
-        domain.initLicenses(licenses);
         List<HouseBlAirCharge> airCharges = jpa.getAirCharges().stream()
                 .map(docMapper::toAirChargeDomain)
                 .collect(Collectors.toList());

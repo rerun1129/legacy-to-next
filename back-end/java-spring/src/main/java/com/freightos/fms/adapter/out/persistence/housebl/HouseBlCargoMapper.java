@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /**
- * House B/L 화물(컨테이너·DIM·라이선스) JPA ↔ Domain 변환 매퍼.
+ * House B/L 화물(컨테이너·DIM) JPA ↔ Domain 변환 매퍼.
  */
 @Component
 public class HouseBlCargoMapper {
@@ -71,40 +71,4 @@ public class HouseBlCargoMapper {
         return jpa;
     }
 
-    // ── E-17 LICENSE ──────────────────────────────────────────────────
-
-    public HouseBlLicense toLicenseDomain(HouseBlLicenseJpaEntity jpa) {
-        HouseBlLicense domain = HouseBlLicense.create(
-                jpa.getHouseBlId());
-        domain.assignIdentity(jpa.getHouseBlLicenseId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
-                jpa.getCreatedBy(), jpa.getUpdatedBy());
-        domain.updateDetails(jpa.getLicenseNo(), jpa.getPkgQty(), jpa.getPkgUnit(),
-                jpa.getGrossWeightKg(), jpa.getCombinedPackingMark(),
-                jpa.getCombinedPackingQty(), jpa.getCombinedPackingUnit(),
-                jpa.isPartialShipment(), jpa.getPartialShipmentSeq(), jpa.getHsnNo());
-        return domain;
-    }
-
-    public List<HouseBlLicense> toLicenseDomainList(List<HouseBlLicenseJpaEntity> jpaList) {
-        return jpaList.stream().map(this::toLicenseDomain).collect(Collectors.toList());
-    }
-
-    public void applyLicenseFields(HouseBlLicense domain, HouseBlLicenseJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setLicenseNo(domain.getLicenseNo());
-        jpa.setPkgQty(domain.getPkgQty());
-        jpa.setPkgUnit(domain.getPkgUnit());
-        jpa.setGrossWeightKg(domain.getGrossWeightKg());
-        jpa.setCombinedPackingMark(domain.getCombinedPackingMark());
-        jpa.setCombinedPackingQty(domain.getCombinedPackingQty());
-        jpa.setCombinedPackingUnit(domain.getCombinedPackingUnit());
-        jpa.setPartialShipment(domain.isPartialShipment());
-        jpa.setPartialShipmentSeq(domain.getPartialShipmentSeq());
-        jpa.setHsnNo(domain.getHsnNo());
-    }
-
-    public HouseBlLicenseJpaEntity toLicenseJpa(HouseBlLicense l, HouseBlJpaEntity houseBl) {
-        HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
-        applyLicenseFields(l, jpa, houseBl);
-        return jpa;
-    }
 }

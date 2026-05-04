@@ -5,7 +5,6 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlContainer
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlLicenseJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckOrderJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -56,12 +55,6 @@ class HouseBlMappingIntegrationTest {
         return d;
     }
 
-    private HouseBlLicenseJpaEntity license(String licenseNo) {
-        HouseBlLicenseJpaEntity l = new HouseBlLicenseJpaEntity();
-        l.setLicenseNo(licenseNo);
-        return l;
-    }
-
     private HouseBlScheduleLegJpaEntity scheduleLeg(String toCode) {
         HouseBlScheduleLegJpaEntity leg = new HouseBlScheduleLegJpaEntity();
         leg.setToCode(toCode);
@@ -99,12 +92,11 @@ class HouseBlMappingIntegrationTest {
     // ── 테스트 ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Sea 모드 save→load: containers 2건 + dims 1건 + licenses 1건 라운드트립")
+    @DisplayName("Sea 모드 save→load: containers 2건 + dims 1건 라운드트립")
     void seaMode_fullRoundTrip_allChildrenRestored() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         parent.syncContainers(List.of(container("CONT001"), container("CONT002")));
         parent.syncDims(List.of(dim()));
-        parent.syncLicenses(List.of(license("LIC-001")));
 
         em.persist(parent);
         em.flush();
@@ -115,19 +107,17 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded).isNotNull();
         assertThat(loaded.getContainers()).hasSize(2);
         assertThat(loaded.getDims()).hasSize(1);
-        assertThat(loaded.getLicenses()).hasSize(1);
         assertThat(loaded.getScheduleLegs()).isEmpty();
         assertThat(loaded.getTruckOrders()).isEmpty();
         assertThat(loaded.getAirCharges()).isEmpty();
     }
 
     @Test
-    @DisplayName("Air 모드 save→load: dims/scheduleLegs/licenses/airCharges 채움, containers/truckOrders 빈 목록")
+    @DisplayName("Air 모드 save→load: dims/scheduleLegs/airCharges 채움, containers/truckOrders 빈 목록")
     void airMode_fullRoundTrip_correctCollections() {
         HouseBlJpaEntity parent = newParent(JobDiv.AIR);
         parent.syncDims(List.of(dim()));
         parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
-        parent.syncLicenses(List.of(license("LIC-AIR")));
         parent.syncAirCharges(List.of(airCharge("FUEL")));
 
         em.persist(parent);
@@ -140,7 +130,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getTruckOrders()).isEmpty();
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getScheduleLegs()).hasSize(1);
-        assertThat(loaded.getLicenses()).hasSize(1);
         assertThat(loaded.getAirCharges()).hasSize(1);
     }
 
@@ -161,7 +150,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getContainers()).isEmpty();
         assertThat(loaded.getScheduleLegs()).isEmpty();
-        assertThat(loaded.getLicenses()).isEmpty();
         assertThat(loaded.getAirCharges()).isEmpty();
     }
 
@@ -180,7 +168,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getContainers()).isEmpty();
         assertThat(loaded.getScheduleLegs()).isEmpty();
-        assertThat(loaded.getLicenses()).isEmpty();
         assertThat(loaded.getTruckOrders()).isEmpty();
         assertThat(loaded.getAirCharges()).isEmpty();
     }
@@ -200,7 +187,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getContainers()).isNotNull().isEmpty();
         assertThat(loaded.getDims()).isNotNull().isEmpty();
         assertThat(loaded.getScheduleLegs()).isNotNull().isEmpty();
-        assertThat(loaded.getLicenses()).isNotNull().isEmpty();
         assertThat(loaded.getTruckOrders()).isNotNull().isEmpty();
         assertThat(loaded.getAirCharges()).isNotNull().isEmpty();
     }
@@ -290,12 +276,11 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("부모 delete → House/Container/Dim/License/ScheduleLeg/TruckOrder/AirCharge 자식 row count 모두 0 (cascade)")
+    @DisplayName("부모 delete → House/Container/Dim/ScheduleLeg/TruckOrder/AirCharge 자식 row count 모두 0 (cascade)")
     void parentDelete_cascadeDeleteAllChildren() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         parent.syncContainers(List.of(container("CONT-DEL")));
         parent.syncDims(List.of(dim()));
-        parent.syncLicenses(List.of(license("LIC-DEL")));
         parent.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
         parent.syncTruckOrders(List.of(truckOrder("TRUCK-DEL")));
         parent.syncAirCharges(List.of(airCharge("FUEL-DEL")));
@@ -313,7 +298,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(em.find(HouseBlJpaEntity.class, parentId)).isNull();
         assertThat(countChildren("HouseBlContainerJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlDimJpaEntity", parentId)).isZero();
-        assertThat(countChildren("HouseBlLicenseJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlScheduleLegJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlTruckOrderJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlAirChargeJpaEntity", parentId)).isZero();
@@ -397,35 +381,6 @@ class HouseBlMappingIntegrationTest {
 
         long count = countChildren("HouseBlScheduleLegJpaEntity", parent.getHouseBlId());
         assertThat(count).isZero();
-    }
-
-    @Test
-    @DisplayName("syncLicenses: 2건 저장 후 다른 2건으로 교체 → DB count==2, 기존 ID 없음")
-    void syncLicenses_replaceTwo_orphanRemovedAndNewInserted() {
-        HouseBlJpaEntity parent = newParent(JobDiv.SEA);
-        parent.syncLicenses(List.of(license("LIC-OLD-1"), license("LIC-OLD-2")));
-
-        em.persist(parent);
-        em.flush();
-        em.clear();
-
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        List<Long> oldIds = loaded.getLicenses().stream()
-                .map(HouseBlLicenseJpaEntity::getHouseBlLicenseId)
-                .toList();
-
-        loaded.syncLicenses(List.of(license("LIC-NEW-1"), license("LIC-NEW-2")));
-        em.flush();
-        em.clear();
-
-        long count = countChildren("HouseBlLicenseJpaEntity", parent.getHouseBlId());
-        assertThat(count).isEqualTo(2);
-
-        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        List<Long> newIds = reloaded.getLicenses().stream()
-                .map(HouseBlLicenseJpaEntity::getHouseBlLicenseId)
-                .toList();
-        assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
     }
 
     @Test

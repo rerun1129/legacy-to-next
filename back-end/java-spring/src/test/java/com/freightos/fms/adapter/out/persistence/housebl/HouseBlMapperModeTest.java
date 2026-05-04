@@ -26,19 +26,17 @@ class HouseBlMapperModeTest {
     // ── AIR ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toAirDomain: dim 2개/scheduleLeg 1개/license 1개/desc 있으면 모두 도메인에 포함, containers는 빈 컬렉션")
+    @DisplayName("toAirDomain: dim 2개/scheduleLeg 1개/desc 있으면 모두 도메인에 포함, containers는 빈 컬렉션")
     void toAirDomain_includesDimsScheduleLegsLicensesDesc() {
         HouseBlJpaEntity jpa = airJpa(1L);
         jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
         jpa.syncScheduleLegs(List.of(legJpa(jpa)));
-        jpa.syncLicenses(List.of(licenseJpa(jpa)));
         jpa.replaceDesc(descJpa(jpa));
 
         HouseBlAir domain = mapper.toAirDomain(jpa, null);
 
         assertThat(domain.getDims()).hasSize(2);
         assertThat(domain.getScheduleLegs()).hasSize(1);
-        assertThat(domain.getLicenses()).hasSize(1);
         assertThat(domain.getDesc()).isNotNull();
         assertThat(domain.getContainers()).isEmpty();
     }
@@ -52,7 +50,6 @@ class HouseBlMapperModeTest {
 
         assertThat(domain.getDims()).isEmpty();
         assertThat(domain.getScheduleLegs()).isEmpty();
-        assertThat(domain.getLicenses()).isEmpty();
         assertThat(domain.getDesc()).isNull();
     }
 
@@ -75,17 +72,15 @@ class HouseBlMapperModeTest {
     // ── SEA ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toSeaDomain: containers/licenses/desc 포함, dims와 scheduleLegs는 빈 컬렉션")
+    @DisplayName("toSeaDomain: containers/desc 포함, dims와 scheduleLegs는 빈 컬렉션")
     void toSeaDomain_includesContainersLicensesDesc_excludesDimsAndLegs() {
         HouseBlJpaEntity jpa = seaJpa(4L);
         jpa.syncContainers(List.of(containerJpa(jpa), containerJpa(jpa)));
-        jpa.syncLicenses(List.of(licenseJpa(jpa)));
         jpa.replaceDesc(descJpa(jpa));
 
         HouseBlSea domain = mapper.toSeaDomain(jpa, null);
 
         assertThat(domain.getContainers()).hasSize(2);
-        assertThat(domain.getLicenses()).hasSize(1);
         assertThat(domain.getDesc()).isNotNull();
         assertThat(domain.getDims()).isEmpty();
         assertThat(domain.getScheduleLegs()).isEmpty();
@@ -99,14 +94,13 @@ class HouseBlMapperModeTest {
         HouseBlSea domain = mapper.toSeaDomain(jpa, null);
 
         assertThat(domain.getContainers()).isEmpty();
-        assertThat(domain.getLicenses()).isEmpty();
         assertThat(domain.getDesc()).isNull();
     }
 
     // ── TRUCK ─────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toTruckDomain: dims만 포함, containers/scheduleLegs/licenses 빈 컬렉션, desc null")
+    @DisplayName("toTruckDomain: dims만 포함, containers/scheduleLegs 빈 컬렉션, desc null")
     void toTruckDomain_includesDimsOnly_excludesContainersLegsLicensesAndDesc() {
         HouseBlJpaEntity jpa = truckJpa(6L);
         jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
@@ -116,7 +110,6 @@ class HouseBlMapperModeTest {
         assertThat(domain.getDims()).hasSize(2);
         assertThat(domain.getContainers()).isEmpty();
         assertThat(domain.getScheduleLegs()).isEmpty();
-        assertThat(domain.getLicenses()).isEmpty();
         assertThat(domain.getDesc()).isNull();
     }
 
@@ -133,7 +126,7 @@ class HouseBlMapperModeTest {
     // ── NON_BL ───────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toNonBlDomain: containers/dims/desc 포함, scheduleLegs/licenses 빈 컬렉션")
+    @DisplayName("toNonBlDomain: containers/dims/desc 포함, scheduleLegs 빈 컬렉션")
     void toNonBlDomain_includesContainersDimsDesc_excludesLicensesAndLegs() {
         HouseBlJpaEntity jpa = nonBlJpa(8L);
         jpa.syncContainers(List.of(containerJpa(jpa)));
@@ -146,7 +139,6 @@ class HouseBlMapperModeTest {
         assertThat(domain.getDims()).hasSize(1);
         assertThat(domain.getDesc()).isNotNull();
         assertThat(domain.getScheduleLegs()).isEmpty();
-        assertThat(domain.getLicenses()).isEmpty();
     }
 
     @Test
@@ -207,12 +199,6 @@ class HouseBlMapperModeTest {
         jpa.setToCode("NRT");
         jpa.setOnBoardDt("20260501");
         jpa.setArrivalDt("20260502");
-        return jpa;
-    }
-
-    private HouseBlLicenseJpaEntity licenseJpa(HouseBlJpaEntity parent) {
-        HouseBlLicenseJpaEntity jpa = new HouseBlLicenseJpaEntity();
-        jpa.setHouseBlId(parent.getHouseBlId());
         return jpa;
     }
 
