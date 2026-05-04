@@ -66,7 +66,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .grid tbody tr:hover td { background: var(--surface-2); }
 .grid tbody tr.is-selected td { background: var(--accent-soft); }
-.grid__empty { padding: 40px 12px; text-align: center; color: var(--ink-muted); font-size: var(--fs-sm); }
+.grid__empty { height: var(--row-h); padding: 0 8px; text-align: center; vertical-align: middle; color: var(--ink-3); font-size: var(--fs-xs); }
 .grid-wrap { position: relative; overflow: auto; border-top: 1px solid var(--divider); }
 .grid-foot {
   display: flex; align-items: center; gap: 12px; padding: 8px 14px;

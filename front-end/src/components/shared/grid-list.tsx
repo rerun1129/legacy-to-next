@@ -135,7 +135,7 @@ function ManagedGridList<T>({
   rowClassName,
   className,
   style,
-  emptyMessage,
+  emptyMessage = "No rows.",
   selectedRowKey,
   onSelectRow,
 }: GridListProps<T> & { gridId: string }) {
@@ -278,7 +278,7 @@ function PlainGridList<T>({
   rowClassName,
   className,
   style,
-  emptyMessage,
+  emptyMessage = "No rows.",
   selectedRowKey,
   onSelectRow,
 }: Omit<GridListProps<T>, "gridId">) {
