@@ -27,6 +27,7 @@ export const NON_BL_SCHEMA = z.object({
   // 툴바
   nonBlNo:  z.string().optional(),
   workDiv:  z.string().optional(),
+  bound:    z.string().optional(),
   status:   z.string().optional(),
   refNo:    z.string().optional(),
 

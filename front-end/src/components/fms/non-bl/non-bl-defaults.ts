@@ -4,6 +4,7 @@ export function createEmptyNonBlFormValues(): NonBlFormValues {
   return {
     nonBlNo:  "",
     workDiv:  "Sea",
+    bound:    "",
     status:   "",
     refNo:    "",
     actualCustomerCode: "", actualCustomerName: "",
