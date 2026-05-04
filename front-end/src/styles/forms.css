@@ -255,6 +255,39 @@
 .sched-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 /* =========================================================
+   LNK (link-box: single input + external-link icon button)
+   ========================================================= */
+.lnk { display: flex; flex-direction: column; gap: 4px; }
+.lnk__label { font-size: 12px; font-weight: 500; color: var(--ink); white-space: nowrap; position: relative; }
+.lnk__label.is-required { color: var(--required); font-weight: 600; }
+.lnk__label.is-required::before { display: none !important; content: none !important; }
+.lnk__label.is-required::after {
+  content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--required-bar); opacity: var(--required-show-dot);
+  margin-left: 4px; vertical-align: middle;
+}
+.lnk__field { position: relative; display: flex; }
+.lnk__field > input {
+  width: 100%; height: 22px; padding: 0 24px 0 8px; font-size: 10px;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--ink); box-sizing: border-box; font-family: inherit;
+}
+.lnk__field > input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.lnk__field > input[readonly] { background: var(--bg-sunken); color: var(--ink); opacity: 1; cursor: default; }
+.lnk__field > input:disabled { opacity: 0.5; cursor: not-allowed; }
+.lnk__field > input.is-required {
+  padding-left: 11px;
+  border-color: color-mix(in srgb, var(--required-bar) 30%, var(--border));
+  box-shadow: inset 3px 0 0 var(--required-bar);
+}
+.lnk__field > input.is-required:focus {
+  background: var(--required-soft);
+  border-color: color-mix(in srgb, var(--required-bar) 55%, var(--border));
+  box-shadow: inset 4px 0 0 var(--required-bar),
+              0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
+}
+
+/* =========================================================
    Standard panel input (.box-panel)
    — 엔트리 .field.is-required .field__input 과 동일 시그니처.
      컴포넌트가 wrapper 없이 단독으로 쓰일 때 적용.

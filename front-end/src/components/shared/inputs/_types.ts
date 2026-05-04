@@ -33,3 +33,10 @@ export interface DropBoxProps extends BoxBaseProps,
   options: DropBoxOption[];
   placeholder?: string;
 }
+
+export interface LinkBoxProps extends BoxBaseProps {
+  inputProps?: InputHTMLAttributes<HTMLInputElement>;
+  label?: string;
+  onLink?: () => void;
+  linkAriaLabel?: string;
+}

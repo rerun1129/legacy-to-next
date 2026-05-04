@@ -7,6 +7,7 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
+import { LinkBox } from "@/components/shared/inputs/link-box";
 import { DateCell } from "@/components/shared/grid-cell-inputs";
 
 interface DimPreviewRow {
@@ -22,6 +23,7 @@ interface DimPreviewRow {
   text: string;
   code: string;
   codeName: string;
+  linkUrl?: string;
 }
 
 export interface DimPreviewFormValues {
@@ -40,15 +42,15 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
       { id: 1, length: "60",  width: "40", height: "30", qty: "10",
         cbm: "0.072", volWt: "12.000",
         type: "BOX",    date: "20260504", text: "sample row 1",
-        code: "KRPUS",  codeName: "Busan Port" },
+        code: "KRPUS",  codeName: "Busan Port", linkUrl: "" },
       { id: 2, length: "100", width: "80", height: "60", qty: "5",
         cbm: "0.480", volWt: "80.000",
         type: "PALLET", date: "",         text: "",
-        code: "",       codeName: "" },
+        code: "",       codeName: "",     linkUrl: "" },
       { id: 3, length: "",    width: "",   height: "",   qty: "",
         cbm: "",      volWt: "",
         type: "DRUM",   date: "20260601", text: "third row",
-        code: "USNYC",  codeName: "New York" },
+        code: "USNYC",  codeName: "New York", linkUrl: "" },
     ],
   };
 }
@@ -161,6 +163,21 @@ export function GridPreviewPanel() {
         />
       ),
     },
+    {
+      key: "linkBox", label: "LINK_BOX", width: 200,
+      render: (_v, _r, i) => (
+        <LinkBox
+          required={required}
+          readOnly={readOnly}
+          inputProps={{
+            className: "grid__cell-input",
+            placeholder: "URL or route",
+            ...register(`dimensions.${i}.linkUrl`),
+          }}
+          onLink={() => alert(`Navigate row ${i + 1}`)}
+        />
+      ),
+    },
   ], [register, required, readOnly]);
 
   function handleAdd() {
@@ -168,7 +185,7 @@ export function GridPreviewPanel() {
     append({
       id: nextId,
       length: "", width: "", height: "", qty: "", cbm: "", volWt: "",
-      type: "", date: "", text: "", code: "", codeName: "",
+      type: "", date: "", text: "", code: "", codeName: "", linkUrl: "",
     });
   }
 

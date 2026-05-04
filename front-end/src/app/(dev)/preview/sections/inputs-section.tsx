@@ -7,6 +7,7 @@ import { TextArea } from "@/components/shared/inputs/text-area";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
+import { LinkBox } from "@/components/shared/inputs/link-box";
 import type { BoxVariant } from "@/components/shared/inputs";
 
 type FormValues = {
@@ -21,6 +22,8 @@ type FormValues = {
   amountDec2: string;
   amountDec3: string;
   unit: string;
+  linkUrl: string;
+  linkMenu: string;
 };
 
 const UNIT_OPTIONS = [
@@ -49,7 +52,7 @@ export function InputsSection() {
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
 
-  const { register, getValues } = useForm<FormValues>({
+  const { register, getValues, watch } = useForm<FormValues>({
     defaultValues: {
       text: "sample text",
       area: "line 1\nline 2",
@@ -62,6 +65,8 @@ export function InputsSection() {
       amountDec2: "",
       amountDec3: "",
       unit: "KG",
+      linkUrl: "",
+      linkMenu: "",
     },
   });
 
@@ -207,6 +212,32 @@ export function InputsSection() {
           options={UNIT_OPTIONS}
           placeholder="단위 선택"
           {...register("unit")}
+        />
+      </div>
+
+      {/* LinkBox – External URL */}
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>LinkBox (External URL)</div>
+        <LinkBox
+          label="LinkBox (External URL)"
+          variant={variant}
+          required={required}
+          readOnly={readOnly}
+          onLink={() => alert("Open: " + watch("linkUrl"))}
+          inputProps={{ placeholder: "https://...", ...register("linkUrl") }}
+        />
+      </div>
+
+      {/* LinkBox – Menu Route */}
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>LinkBox (Menu Route)</div>
+        <LinkBox
+          label="LinkBox (Menu Route)"
+          variant={variant}
+          required={required}
+          readOnly={readOnly}
+          onLink={() => alert("Navigate: " + watch("linkMenu"))}
+          inputProps={{ placeholder: "/menu/path", ...register("linkMenu") }}
         />
       </div>
     </div>
