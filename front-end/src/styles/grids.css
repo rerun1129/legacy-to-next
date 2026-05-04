@@ -204,4 +204,4 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   z-index: 1;
 }
 /* 견본 그리드: 클릭 시 셀 outline 제거 */
-.grid--demo td.is-cell-selected { outline: none; }
+.grid--demo .grid--list tbody td.is-cell-selected { outline: none; }
