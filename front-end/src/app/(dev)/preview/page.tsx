@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { InputsSection } from "./sections/inputs-section";
 import { GridSection } from "./sections/grid-section";
+import { ButtonsSection } from "./sections/buttons-section";
 
-type SectionId = "inputs" | "grid";
+type SectionId = "inputs" | "grid" | "buttons";
 
 const MENU: { id: SectionId; label: string }[] = [
   { id: "inputs", label: "Inputs" },
   { id: "grid", label: "Grid" },
+  { id: "buttons", label: "Buttons" },
 ];
 
 export default function PreviewPage() {
@@ -49,6 +51,7 @@ export default function PreviewPage() {
       <main style={{ flex: 1, overflow: "auto" }}>
         {active === "inputs" && <InputsSection />}
         {active === "grid" && <GridSection />}
+        {active === "buttons" && <ButtonsSection />}
       </main>
     </div>
   );
