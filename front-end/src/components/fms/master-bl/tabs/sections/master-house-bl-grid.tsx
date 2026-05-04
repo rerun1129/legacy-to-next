@@ -81,7 +81,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
             {fields.length === 0 && (
               <tr>
                 <td colSpan={isSea ? 10 : 8} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
-                  No rows. Click + to add.
+                  No rows.
                 </td>
               </tr>
             )}
