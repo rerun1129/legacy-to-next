@@ -174,6 +174,7 @@ export function GridPreviewPanel() {
         columns={cols}
         data={fields as unknown as DimPreviewRow[]}
         rowKey={(r) => r.id}
+        className="grid--demo"
         style={{ flex: 1, minHeight: 0 }}
       />
     </div>
