@@ -235,12 +235,12 @@ export function GridPreviewPanel() {
           >
             readOnly
           </button>
-          <button type="button" className="btn btn--sm btn--icon" onClick={handleAdd}>
+          <button type="button" className="btn btn--sm btn--icon btn--transaction" onClick={handleAdd}>
             <Plus size={12} />
           </button>
           <button
             type="button"
-            className="btn btn--sm btn--icon"
+            className="btn btn--sm btn--icon btn--danger"
             onClick={handleRemove}
             disabled={fields.length === 0}
           >
