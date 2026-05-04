@@ -74,7 +74,7 @@ export function NonBLDocumentPanel() {
         <div className="panel__title-accent" />
         <span className="panel__title">Document</span>
       </div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+      <div className="panel__body" style={{ overflow: "auto", flex: 2 }}>
         <FieldItemGrid itemScope="nonbl-document-panel" items={DOCUMENT_ITEMS} />
       </div>
     </div>

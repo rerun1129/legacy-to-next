@@ -69,27 +69,15 @@ export function NonBLEntry() {
           </div>
         </div>
         <div className="field">
-          <div className="field__label">Status</div>
+          <div className="field__label">Bound</div>
           <div className="field__input">
-            <input {...register("status")} placeholder="Status" />
+            <input {...register("bound")} placeholder="Bound" />
           </div>
         </div>
         <div className="field">
           <div className="field__label">Ref. No.</div>
           <div className="field__input">
             <input {...register("refNo")} placeholder="Ref. No." />
-          </div>
-        </div>
-        <div className="field is-required">
-          <div className="field__label is-required">Operator</div>
-          <div className="field__input">
-            <input {...register("operatorCode")} placeholder="Operator" />
-          </div>
-        </div>
-        <div className="field is-required">
-          <div className="field__label is-required">Team</div>
-          <div className="field__input">
-            <input {...register("teamCode")} placeholder="Team" />
           </div>
         </div>
       </div>
