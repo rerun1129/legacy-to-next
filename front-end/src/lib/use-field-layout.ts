@@ -42,11 +42,18 @@ export const useFieldLayout = create<FieldLayoutStore>()(
       getFieldLayout(scope, defaults) {
         const layout = get().layouts[scope];
         if (!layout) return { order: defaults, hidden: [] };
+        // 보정: defaults에 있지만 visible(itemRows or order)에도 hidden에도 없는 key를 hidden에 자동 포함
+        const visibleSet = new Set(layout.itemRows ? layout.itemRows.flat() : layout.order);
+        const hiddenSet  = new Set(layout.hidden);
+        const missing    = defaults.filter(k => !visibleSet.has(k) && !hiddenSet.has(k));
+        const patched    = missing.length > 0
+          ? { ...layout, hidden: [...layout.hidden, ...missing] }
+          : layout;
         // itemRows 가 있으면 order 를 flat 으로 동기화해서 반환
-        if (layout.itemRows) {
-          return { ...layout, order: layout.itemRows.flat() };
+        if (patched.itemRows) {
+          return { ...patched, order: patched.itemRows.flat() };
         }
-        return layout;
+        return patched;
       },
 
       initFieldLayout(scope, defaults) {
