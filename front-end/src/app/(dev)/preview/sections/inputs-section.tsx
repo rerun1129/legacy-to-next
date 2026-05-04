@@ -246,7 +246,6 @@ export function InputsSection() {
       <div style={sectionStyle}>
         <RadioBox
           label="RadioBox (Mode)"
-          name="radioMode"
           variant={variant}
           required={required}
           readOnly={readOnly}
