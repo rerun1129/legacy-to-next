@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { TextBox } from "@/components/shared/inputs/text-box";
@@ -9,42 +10,22 @@ import { DropBox } from "@/components/shared/inputs/drop-box";
 import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DateCell } from "@/components/shared/grid-cell-inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { nonBlPort } from "@/lib/ports";
+import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
 
-type NonBlRow = {
-  id: number;
-  nonBlNo: string;
-  bound: string;
-  etd: string;
-  eta: string;
-  pol: string;
-  pod: string;
-  vesselName: string;
-  voyNo: string;
-  shipperCode: string;
-  shipperName: string;
-  consigneeCode: string;
-  consigneeName: string;
-  notifyCode: string;
-  notifyName: string;
-  settlePartnerCode: string;
-  settlePartnerName: string;
-  linerCode: string;
-  linerName: string;
-  actualCustomerCode: string;
-  actualCustomerName: string;
-  pkgQty: string;
-  pkgUnit: string;
-  grossWt: string;
-  cbm: string;
-  teamName: string;
-};
+interface Props {
+  extraFilter: NonBlFilter;
+}
 
-const ROWS: NonBlRow[] = [];
-
-export function NonBlGrid() {
+export function NonBlGrid({ extraFilter }: Props) {
   const router = useRouter();
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<number | null>(null);
   const { options: boundOptions } = useEnumOptions("Bound");
+
+  const { data: rows = [], isLoading, error } = useQuery({
+    queryKey: ["non-bl", "list", extraFilter],
+    queryFn: () => nonBlPort.list(extraFilter),
+  });
 
   const columns: GridColumn<NonBlRow>[] = [
     {
@@ -208,21 +189,49 @@ export function NonBlGrid() {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div className="panel__head">
+          <div className="panel__title-accent" />
+          <span className="panel__title">Non B/L</span>
+        </div>
+        <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
+          <span className="text-muted">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div className="panel__head">
+          <div className="panel__title-accent" />
+          <span className="panel__title">Non B/L</span>
+        </div>
+        <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
+          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Non B/L</span>
-        <span className="panel__rowcount">{ROWS.length}</span>
+        <span className="panel__rowcount">{rows.length}</span>
         <ColumnVisibilityMenu<NonBlRow> gridId="non-bl" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
         <GridList<NonBlRow>
           columns={columns}
-          data={ROWS}
-          onRowClick={(row) => setSelected(row.nonBlNo)}
+          data={rows}
+          onRowClick={(row) => setSelected(row.id)}
           rowKey={(row) => row.id}
-          rowClassName={(row) => (selected === row.nonBlNo ? "is-selected" : undefined)}
+          rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="non-bl"
         />
       </div>

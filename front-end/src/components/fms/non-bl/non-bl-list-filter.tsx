@@ -8,34 +8,16 @@ import { TextBox } from "@/components/shared/inputs/text-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { useEnumOptions } from "@/application/enums/use-enum";
-
-export interface NonBlListFilterValues {
-  bound: string;
-  dateFrom: string;
-  dateTo: string;
-  linerCode: string;
-  linerName: string;
-  nonBlNo: string;
-  partyCode: string;
-  partyName: string;
-  portCode: string;
-  portName: string;
-  vessel: string;
-  voyage: string;
-  operatorCode: string;
-  operatorName: string;
-  teamCode: string;
-  teamName: string;
-}
+import type { NonBlFilter } from "@/domain/non-bl";
 
 interface Props {
-  form: UseFormReturn<NonBlListFilterValues>;
+  form: UseFormReturn<NonBlFilter>;
 }
 
 export function NonBlListFilter({ form }: Props) {
   useListFilterSync(form, "/fms/non-bl/list");
-  const { options: boundOptions, isLoading: boundLoading, placeholder: boundPlaceholder } = useEnumOptions("Bound")
-  const boundOptionsWithAll = [{ value: "", label: "ALL" }, ...boundOptions]
+  const { options: boundOptions, isLoading: boundLoading, placeholder: boundPlaceholder } = useEnumOptions("Bound");
+  const boundOptionsWithAll = [{ value: "", label: "ALL" }, ...boundOptions];
   const dateFrom = useWatch({ control: form.control, name: "dateFrom" });
   const dateTo   = useWatch({ control: form.control, name: "dateTo" });
   const { register } = form;
