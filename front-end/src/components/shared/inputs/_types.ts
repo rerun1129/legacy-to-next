@@ -23,7 +23,7 @@ export interface CodeBoxProps extends BoxBaseProps {
   label?: string;
   codeProps: InputHTMLAttributes<HTMLInputElement>;
   nameProps: InputHTMLAttributes<HTMLInputElement>;
-  onLookup?: () => void;
+  onLookup: () => void;
   mono?: boolean;
   lookupAriaLabel?: string;
 }

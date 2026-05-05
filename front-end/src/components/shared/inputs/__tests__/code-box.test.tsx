@@ -5,15 +5,10 @@ import { CodeBox } from "../code-box";
 const baseProps = {
   codeProps: { "data-testid": "code-input" } as React.InputHTMLAttributes<HTMLInputElement>,
   nameProps: { "data-testid": "name-input" } as React.InputHTMLAttributes<HTMLInputElement>,
+  onLookup: vi.fn(),
 };
 
 describe("CodeBox", () => {
-  it("onLookup 미제공 시 Search 아이콘 미렌더", () => {
-    const { container } = render(<CodeBox {...baseProps} />);
-    // lucide Search는 svg로 렌더됨
-    expect(container.querySelector("svg")).toBeNull();
-  });
-
   it("onLookup 제공 시 Search 버튼 렌더 및 클릭 시 콜백 호출", () => {
     const onLookup = vi.fn();
     render(<CodeBox {...baseProps} onLookup={onLookup} lookupAriaLabel="Search" />);

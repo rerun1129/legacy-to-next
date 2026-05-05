@@ -37,6 +37,7 @@ export function NonBlListFilter() {
             label="Liner"
             codeProps={{ placeholder: "Code" }}
             nameProps={{ placeholder: "Name" }}
+            onLookup={() => {}}
           />
 
           <div className="lcn">
@@ -54,6 +55,7 @@ export function NonBlListFilter() {
             label="Party"
             codeProps={{ placeholder: "Code" }}
             nameProps={{ placeholder: "Name" }}
+            onLookup={() => {}}
           />
 
           <CodeBox
@@ -61,6 +63,7 @@ export function NonBlListFilter() {
             label="Port"
             codeProps={{ placeholder: "Code" }}
             nameProps={{ placeholder: "Name" }}
+            onLookup={() => {}}
           />
 
           <div className="lcn">
@@ -74,6 +77,7 @@ export function NonBlListFilter() {
             label="Operator"
             codeProps={{ placeholder: "Code" }}
             nameProps={{ placeholder: "Name" }}
+            onLookup={() => {}}
           />
 
           {/* Row 3 */}
@@ -82,6 +86,7 @@ export function NonBlListFilter() {
             label="Team"
             codeProps={{ placeholder: "Code" }}
             nameProps={{ placeholder: "Name" }}
+            onLookup={() => {}}
           />
         </div>
       </div>
