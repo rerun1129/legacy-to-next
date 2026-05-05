@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
-import { TextBox } from "@/components/shared/inputs/text-box";
-import { DropBox } from "@/components/shared/inputs/drop-box";
-import { NumberBox } from "@/components/shared/inputs/number-box";
-import { DateCell } from "@/components/shared/grid-cell-inputs";
 import { Pagination } from "@/components/shared/pagination";
-import { useEnumOptions } from "@/application/enums/use-enum";
 import { nonBlPort } from "@/lib/ports";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
 
@@ -24,7 +19,6 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(true);
-  const { options: boundOptions } = useEnumOptions("Bound");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["non-bl", "list", extraFilter, showAll ? "all" : currentPage],
@@ -45,156 +39,34 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
           onDoubleClick={() => router.push("/fms/non-bl/entry")}
           style={{ cursor: "pointer" }}
         >
-          <TextBox variant="cell" readOnly value={String(v ?? "")} />
+          {String(v ?? "")}
         </div>
       ),
     },
-    {
-      key: "bound",
-      label: "Bound",
-      minWidth: 90,
-      render: (v) => (
-        <DropBox variant="cell" readOnly options={boundOptions} value={String(v ?? "")} />
-      ),
-    },
-    {
-      key: "etd",
-      label: "ETD",
-      minWidth: 110,
-      render: (v) => <DateCell readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "eta",
-      label: "ETA",
-      minWidth: 110,
-      render: (v) => <DateCell readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "pol",
-      label: "POL",
-      minWidth: 80,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "pod",
-      label: "POD",
-      minWidth: 80,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "vesselName",
-      label: "Vessel",
-      minWidth: 130,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "voyNo",
-      label: "Voyage",
-      minWidth: 80,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "shipperCode",
-      label: "Shipper",
-      minWidth: 90,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "shipperName",
-      label: "Shipper Name",
-      minWidth: 140,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "consigneeCode",
-      label: "Consignee",
-      minWidth: 90,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "consigneeName",
-      label: "Consignee Name",
-      minWidth: 150,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "notifyCode",
-      label: "Notify",
-      minWidth: 90,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "notifyName",
-      label: "Notify Name",
-      minWidth: 140,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "settlePartnerCode",
-      label: "Partner",
-      minWidth: 90,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "settlePartnerName",
-      label: "Partner Name",
-      minWidth: 140,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "linerCode",
-      label: "Liner",
-      minWidth: 80,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "linerName",
-      label: "Liner Name",
-      minWidth: 120,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "actualCustomerCode",
-      label: "Actual Customer",
-      minWidth: 110,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "actualCustomerName",
-      label: "Actual Customer Name",
-      minWidth: 160,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "pkgQty",
-      label: "Package",
-      minWidth: 80,
-      render: (v) => <NumberBox variant="cell" decimalPlaces={0} readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "pkgUnit",
-      label: "Package Unit",
-      minWidth: 90,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "grossWt",
-      label: "Gross W/T",
-      minWidth: 100,
-      render: (v) => <NumberBox variant="cell" decimalPlaces={3} readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "cbm",
-      label: "CBM",
-      minWidth: 90,
-      render: (v) => <NumberBox variant="cell" decimalPlaces={3} readOnly value={String(v ?? "")} />,
-    },
-    {
-      key: "teamName",
-      label: "Team Name",
-      minWidth: 90,
-      render: (v) => <TextBox variant="cell" readOnly value={String(v ?? "")} />,
-    },
+    { key: "bound", label: "Bound", minWidth: 90 },
+    { key: "etd", label: "ETD", minWidth: 110 },
+    { key: "eta", label: "ETA", minWidth: 110 },
+    { key: "pol", label: "POL", minWidth: 80 },
+    { key: "pod", label: "POD", minWidth: 80 },
+    { key: "vesselName", label: "Vessel", minWidth: 130 },
+    { key: "voyNo", label: "Voyage", minWidth: 80 },
+    { key: "shipperCode", label: "Shipper", minWidth: 90 },
+    { key: "shipperName", label: "Shipper Name", minWidth: 140 },
+    { key: "consigneeCode", label: "Consignee", minWidth: 90 },
+    { key: "consigneeName", label: "Consignee Name", minWidth: 150 },
+    { key: "notifyCode", label: "Notify", minWidth: 90 },
+    { key: "notifyName", label: "Notify Name", minWidth: 140 },
+    { key: "settlePartnerCode", label: "Partner", minWidth: 90 },
+    { key: "settlePartnerName", label: "Partner Name", minWidth: 140 },
+    { key: "linerCode", label: "Liner", minWidth: 80 },
+    { key: "linerName", label: "Liner Name", minWidth: 120 },
+    { key: "actualCustomerCode", label: "Actual Customer", minWidth: 110 },
+    { key: "actualCustomerName", label: "Actual Customer Name", minWidth: 160 },
+    { key: "pkgQty", label: "Package", minWidth: 80 },
+    { key: "pkgUnit", label: "Package Unit", minWidth: 90 },
+    { key: "grossWt", label: "Gross W/T", minWidth: 100 },
+    { key: "cbm", label: "CBM", minWidth: 90 },
+    { key: "teamName", label: "Team Name", minWidth: 90 },
   ];
 
   if (extraFilter !== null && isLoading) {

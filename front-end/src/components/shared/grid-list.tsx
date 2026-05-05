@@ -172,7 +172,7 @@ function ManagedGridList<T>({
     count: data.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => ROW_HEIGHT_PX,
-    overscan: 10,
+    overscan: 30,
   });
   const virtualRows = rowVirtualizer.getVirtualItems();
   const totalSize = rowVirtualizer.getTotalSize();
@@ -351,7 +351,7 @@ function PlainGridList<T>({
     count: data.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => ROW_HEIGHT_PX,
-    overscan: 10,
+    overscan: 30,
   });
   const virtualRows = rowVirtualizer.getVirtualItems();
   const totalSize = rowVirtualizer.getTotalSize();
