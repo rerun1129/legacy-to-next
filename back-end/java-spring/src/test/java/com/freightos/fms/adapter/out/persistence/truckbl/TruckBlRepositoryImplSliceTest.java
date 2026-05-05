@@ -102,7 +102,7 @@ class TruckBlRepositoryImplSliceTest {
 
         assertThat(result.getContent()).hasSize(1);
         TruckBlSummary s = result.getContent().get(0);
-        assertThat(s.houseBlId()).isNotNull();
+        assertThat(s.id()).isNotNull();
         assertThat(s.hblNo()).isEqualTo("TRUCK-FULL");
         assertThat(s.jobDiv()).isEqualTo(JobDiv.TRUCK);
         assertThat(s.bound()).isEqualTo(Bound.EXP);

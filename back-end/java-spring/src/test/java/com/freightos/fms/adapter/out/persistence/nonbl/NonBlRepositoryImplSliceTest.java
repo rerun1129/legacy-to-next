@@ -123,7 +123,7 @@ class NonBlRepositoryImplSliceTest {
 
         assertThat(result.getContent()).hasSize(1);
         NonBlSummary s = result.getContent().get(0);
-        assertThat(s.houseBlId()).isNotNull();
+        assertThat(s.id()).isNotNull();
         assertThat(s.hblNo()).isEqualTo("NONBL-FULL");
         assertThat(s.jobDiv()).isEqualTo(JobDiv.NON_BL);
         assertThat(s.bound()).isEqualTo(Bound.EXP);
