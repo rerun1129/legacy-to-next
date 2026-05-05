@@ -45,7 +45,6 @@
 }
 .grid__cell-input[readonly],
 .grid__cell-input:disabled {
-  background: var(--bg-sunken);
   color: var(--ink);
   opacity: 1;
   cursor: default;
