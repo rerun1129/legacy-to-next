@@ -139,6 +139,24 @@ mock 메서드명 변경 시 `given(port.method(` 패턴만 교체하면 `then(p
 
 ---
 
+## QA 에이전트 빌드·테스트 명령어 자동 허용
+
+QA 에이전트가 실행하는 빌드·테스트 명령어는 허가 요청 없이 자동 진행한다.
+
+**Why:** QA 흐름에서 불필요한 중단을 방지하기 위해 사용자가 명시 지시.
+
+**How to apply:** 새 PC에서 작업 시작 시 `.claude/settings.json`의 `permissions.allow`에 다음 명령어 등록:
+- `npm --prefix front-end run lint`
+- `npm --prefix front-end run build`
+- `npm --prefix front-end run test` / `npm --prefix front-end test *`
+- `npx --prefix front-end tsc --noEmit`
+- `back-end/java-spring/gradlew.bat -p back-end/java-spring test`
+- `back-end/java-spring/gradlew.bat -p back-end/java-spring build`
+
+신규 QA 명령어가 추가될 경우 `settings.json` `permissions.allow`에 함께 추가.
+
+---
+
 ## CLAUDE.md 간결 유지 방침
 
 CLAUDE.md는 최대한 짧게 유지한다. 파이프라인 동작에 직접 영향을 주지 않는 참조 정보는 추가하지 않는다.
