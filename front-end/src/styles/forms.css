@@ -228,18 +228,20 @@
 .lcn__select { height: 26px; padding: 0 8px; font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
 .lcn__select:focus { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 2px var(--focus-glow); }
 .lcn__label-select {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: none;
-  padding: 0;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--ink);
   cursor: pointer;
-  font: inherit;
-  color: inherit;
-  line-height: 1;
+  width: 100%;
 }
 .lcn__label-select:focus {
   outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
 .li { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: center; gap: 8px; padding: 2px 0; }
