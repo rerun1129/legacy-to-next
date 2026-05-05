@@ -4,7 +4,7 @@ import type { NonBlRow, NonBlFilter } from '@/domain/non-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
 
-const NON_BL_BASE = '/api/house-bl';
+const NON_BL_BASE = '/api/non-bl';
 
 /**
  * BE HouseBlSummaryResponse 필드(camelCase) 기준 스키마.
@@ -77,7 +77,7 @@ export const API_NON_BL_PORT: NonBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
   async list(filter: NonBlFilter, page: number, size = 50): Promise<NonBlPageResult> {
     // FE NonBlFilter 키 → BE JSON body 키 명시 매핑 (이름 불일치 항목: nonBlNo→hblNo, dateFrom→etdFrom, dateTo→etdTo)
-    const body: Record<string, unknown> = { jobDiv: 'NON_BL', page: page - 1, size };
+    const body: Record<string, unknown> = { page: page - 1, size };
     if (filter.bound)        body.bound        = filter.bound;
     if (filter.nonBlNo)      body.hblNo        = filter.nonBlNo;
     if (filter.dateFrom)     body.etdFrom      = filter.dateFrom;

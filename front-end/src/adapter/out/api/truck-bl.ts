@@ -4,7 +4,7 @@ import type { TruckBlRow, TruckBlFilter } from '@/domain/truck-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
 
-const TRUCK_BL_BASE = '/api/house-bl';
+const TRUCK_BL_BASE = '/api/truck-bl';
 
 /**
  * BE HouseBlSummaryResponse 필드(camelCase) 기준 스키마.
@@ -19,15 +19,11 @@ const TRUCK_BL_ROW_SCHEMA = z.object({
   eta: z.string().nullable().transform((v) => v ?? ''),
   polCode: z.string().nullable().transform((v) => v ?? ''),
   podCode: z.string().nullable().transform((v) => v ?? ''),
-  vesselName: z.string().nullable().transform((v) => v ?? ''),
-  voyageNo: z.string().nullable().transform((v) => v ?? ''),
+  truckerCode: z.string().nullable().transform((v) => v ?? ''),
   shipperCode: z.string().nullable().transform((v) => v ?? ''),
   consigneeCode: z.string().nullable().transform((v) => v ?? ''),
   notifyCode: z.string().nullable().transform((v) => v ?? ''),
-  settlePartnerCode: z.string().nullable().transform((v) => v ?? ''),
-  actualCustomerCode: z.string().nullable().transform((v) => v ?? ''),
-  linerCode: z.string().nullable().transform((v) => v ?? ''),
-  linerName: z.string().nullable().transform((v) => v ?? ''),
+  docPartnerCode: z.string().nullable().transform((v) => v ?? ''),
   pkgQty: z.number().nullable().transform((v) => String(v ?? '')),
   pkgUnit: z.string().nullable().transform((v) => v ?? ''),
   grossWeightKg: z.number().nullable().transform((v) => String(v ?? '')),
@@ -40,20 +36,16 @@ const TRUCK_BL_ROW_SCHEMA = z.object({
   eta: raw.eta,
   pol: raw.polCode,
   pod: raw.podCode,
-  vesselName: raw.vesselName,
-  voyNo: raw.voyageNo,
+  truckerCode: raw.truckerCode,
+  truckerName: '',
   shipperCode: raw.shipperCode,
   shipperName: '',
   consigneeCode: raw.consigneeCode,
   consigneeName: '',
   notifyCode: raw.notifyCode,
   notifyName: '',
-  settlePartnerCode: raw.settlePartnerCode,
-  settlePartnerName: '',
-  linerCode: raw.linerCode,
-  linerName: raw.linerName,
-  actualCustomerCode: raw.actualCustomerCode,
-  actualCustomerName: '',
+  docPartnerCode: raw.docPartnerCode,
+  docPartnerName: '',
   pkgQty: raw.pkgQty,
   pkgUnit: raw.pkgUnit,
   grossWt: raw.grossWeightKg,
@@ -77,7 +69,7 @@ export const API_TRUCK_BL_PORT: TruckBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
   async list(filter: TruckBlFilter, page: number, size = 50): Promise<TruckBlPageResult> {
     // FE TruckBlFilter 키 → BE JSON body 키 명시 매핑 (이름 불일치 항목: truckBlNo→hblNo, dateFrom→etdFrom, dateTo→etdTo)
-    const body: Record<string, unknown> = { jobDiv: 'TRUCK', page: page - 1, size };
+    const body: Record<string, unknown> = { page: page - 1, size };
     if (filter.bound)        body.bound        = filter.bound;
     if (filter.truckBlNo)    body.hblNo        = filter.truckBlNo;
     if (filter.dateFrom)     body.etdFrom      = filter.dateFrom;
