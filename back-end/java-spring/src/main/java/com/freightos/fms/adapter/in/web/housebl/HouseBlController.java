@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.in.web.housebl;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
+import com.freightos.fms.adapter.in.web.housebl.dto.SearchHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
@@ -87,6 +88,23 @@ public class HouseBlController {
 
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
                 houseBlUseCase.getHouseBlsByJobDivAndBound(jobDiv, bound, PageRequest.of(page, size)))));
+    }
+
+    @Operation(summary = "House B/L 검색 (POST body)")
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<PagedResult<HouseBlSummaryResponse>>> searchHouseBls(
+            @Valid @RequestBody SearchHouseBlRequest req) {
+        HouseBlFilter filter = HouseBlFilter.of(
+                req.jobDiv(), req.bound(),
+                req.hblNo(), null,
+                null, null,
+                null, null,
+                req.etdFrom(), req.etdTo(),
+                req.vessel(), req.voyage(),
+                req.linerCode(), req.operatorCode(),
+                req.teamCode(), req.partyCode(), req.portCode());
+        return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
+                houseBlUseCase.searchHouseBls(filter, PageRequest.of(req.page(), req.size())))));
     }
 
     @Operation(summary = "House B/L 생성")

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { NonBlPort, NonBlPageResult } from '@/application/non-bl/ports';
 import type { NonBlRow, NonBlFilter } from '@/domain/non-bl';
 import { ResponseParseError } from './errors';
-import { toSearchParams, fetchJson } from './utils';
+import { fetchJson } from './utils';
 
 const NON_BL_BASE = '/api/house-bl';
 
@@ -76,13 +76,23 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
 export const API_NON_BL_PORT: NonBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
   async list(filter: NonBlFilter, page: number, size = 50): Promise<NonBlPageResult> {
-    const params = toSearchParams({
-      jobDiv: 'NON_BL',
-      ...(filter as unknown as Record<string, unknown>),
-      page: page - 1,
-      size,
+    // FE NonBlFilter 키 → BE JSON body 키 명시 매핑 (이름 불일치 항목: nonBlNo→hblNo, dateFrom→etdFrom, dateTo→etdTo)
+    const body: Record<string, unknown> = { jobDiv: 'NON_BL', page: page - 1, size };
+    if (filter.bound)        body.bound        = filter.bound;
+    if (filter.nonBlNo)      body.hblNo        = filter.nonBlNo;
+    if (filter.dateFrom)     body.etdFrom      = filter.dateFrom;
+    if (filter.dateTo)       body.etdTo        = filter.dateTo;
+    if (filter.linerCode)    body.linerCode    = filter.linerCode;
+    if (filter.partyCode)    body.partyCode    = filter.partyCode;
+    if (filter.portCode)     body.portCode     = filter.portCode;
+    if (filter.vessel)       body.vessel       = filter.vessel;
+    if (filter.voyage)       body.voyage       = filter.voyage;
+    if (filter.operatorCode) body.operatorCode = filter.operatorCode;
+    if (filter.teamCode)     body.teamCode     = filter.teamCode;
+    const json = await fetchJson(`${NON_BL_BASE}/search`, {
+      method: 'POST',
+      body: JSON.stringify(body),
     });
-    const json = await fetchJson(`${NON_BL_BASE}?${params}`);
     const parsed = apiResponse(pagedResult(NON_BL_ROW_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid non-bl list response: ${parsed.error.message}`);
     const { content, totalPages, totalElements, page: p, size: s } = parsed.data.data;

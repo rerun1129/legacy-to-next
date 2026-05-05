@@ -1,7 +1,7 @@
 "use client";
 
+import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
-import { useWatch } from "react-hook-form";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
@@ -18,12 +18,7 @@ export function NonBlListFilter({ form }: Props) {
   useListFilterSync(form, "/fms/non-bl/list");
   const { options: boundOptions, isLoading: boundLoading, placeholder: boundPlaceholder } = useEnumOptions("Bound");
   const boundOptionsWithAll = [{ value: "", label: "ALL" }, ...boundOptions];
-  const dateFrom = useWatch({ control: form.control, name: "dateFrom" });
-  const dateTo   = useWatch({ control: form.control, name: "dateTo" });
   const { register } = form;
-  // ref를 분리해 react-hook-form의 DOM 직접 조작을 차단 — reset 시 마스크 플리커 방지
-  const { ref: _fromRef, ...fromReg } = register("dateFrom");
-  const { ref: _toRef,   ...toReg   } = register("dateTo");
 
   return (
     <div className="search-card">
@@ -42,11 +37,35 @@ export function NonBlListFilter({ form }: Props) {
             />
           </div>
 
-          <DateRangeBox
-            label="Date"
-            required
-            fromProps={{ ...fromReg, value: dateFrom, placeholder: "From" }}
-            toProps={{ ...toReg,   value: dateTo,   placeholder: "To" }}
+          <Controller
+            control={form.control}
+            name="dateFrom"
+            render={({ field: fromField }) => (
+              <Controller
+                control={form.control}
+                name="dateTo"
+                render={({ field: toField }) => (
+                  <DateRangeBox
+                    label="Date"
+                    required
+                    fromProps={{
+                      name: fromField.name,
+                      value: fromField.value ?? "",
+                      onChange: fromField.onChange,
+                      onBlur: fromField.onBlur,
+                      placeholder: "From",
+                    }}
+                    toProps={{
+                      name: toField.name,
+                      value: toField.value ?? "",
+                      onChange: toField.onChange,
+                      onBlur: toField.onBlur,
+                      placeholder: "To",
+                    }}
+                  />
+                )}
+              />
+            )}
           />
 
           <CodeBox
