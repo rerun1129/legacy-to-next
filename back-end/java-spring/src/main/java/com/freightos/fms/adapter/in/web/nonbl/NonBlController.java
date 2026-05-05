@@ -7,7 +7,6 @@ import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.SearchNonBlRequest;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.domain.nonbl.port.in.NonBlSearchUseCase;
-import com.freightos.fms.domain.nonbl.projection.NonBlSummary;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NonBlController {
 
     private final NonBlSearchUseCase nonBlSearchUseCase;
+    private final NonBlAssembler nonBlAssembler;
 
     @Operation(summary = "Non B/L 검색 (POST body)")
     @PostMapping("/search")
@@ -43,8 +43,7 @@ public class NonBlController {
                 req.operatorCode(),
                 req.teamCode())
                 .withKinds(req.dateKind(), req.partyKind(), req.portKind());
-        PagedResult<NonBlSummary> summaries = nonBlSearchUseCase.searchNonBls(
-                filter, PageRequest.of(req.page(), req.size()));
-        return ResponseEntity.ok(ApiResponse.of(summaries.map(NonBlSummaryResponse::from)));
+        return ResponseEntity.ok(ApiResponse.of(nonBlAssembler.toSummaryPage(
+                nonBlSearchUseCase.searchNonBls(filter, PageRequest.of(req.page(), req.size())))));
     }
 }

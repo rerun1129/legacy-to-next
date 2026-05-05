@@ -42,11 +42,6 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     @Override
-    public PagedResult<HouseBlSummary> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
-        return houseBlRepository.findSummariesByJobDivAndBound(jobDiv, bound, pageRequest);
-    }
-
-    @Override
     public PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest) {
         return houseBlRepository.searchSummaries(filter, pageRequest);
     }

@@ -31,7 +31,7 @@ public class SwitchBlController {
 
     @Operation(summary = "Switch B/L 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse<SwitchBlResponse>> create(
+    public ResponseEntity<ApiResponse<SwitchBlResponse>> createSwitchBl(
             @Valid @RequestBody CreateSwitchBlRequest request,
             UriComponentsBuilder uriBuilder) {
         SwitchBl saved = switchBlUseCase.createSwitchBl(switchBlAssembler.toEntity(request));
@@ -42,13 +42,13 @@ public class SwitchBlController {
 
     @Operation(summary = "Switch B/L 단건 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SwitchBlResponse>> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<SwitchBlResponse>> getSwitchBlById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.of(switchBlAssembler.toResponse(switchBlUseCase.findSwitchBlById(id))));
     }
 
     @Operation(summary = "Switch B/L 조회 by House B/L ID (미존재 시 204 반환)")
     @GetMapping("/by-house-bl/{houseBlId}")
-    public ResponseEntity<ApiResponse<SwitchBlResponse>> getByHouseBlId(@PathVariable Long houseBlId) {
+    public ResponseEntity<ApiResponse<SwitchBlResponse>> getSwitchBlByHouseBlId(@PathVariable Long houseBlId) {
         Optional<SwitchBl> found = switchBlUseCase.findOptionalByHouseBlId(houseBlId);
         if (found.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -58,7 +58,7 @@ public class SwitchBlController {
 
     @Operation(summary = "Switch B/L 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<SwitchBlResponse>> update(
+    public ResponseEntity<ApiResponse<SwitchBlResponse>> updateSwitchBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateSwitchBlRequest req) {
         SwitchBl entity = switchBlUseCase.findSwitchBlById(id);
@@ -69,7 +69,7 @@ public class SwitchBlController {
 
     @Operation(summary = "Switch B/L 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteSwitchBl(@PathVariable Long id) {
         switchBlUseCase.deleteSwitchBl(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.SWITCH_BL_DELETED.message()));
     }

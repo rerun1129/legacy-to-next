@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { HouseBlPort } from '@/application/house-bl/ports';
 import type { HouseBlRow, HouseBlDetail, HouseBlFilter, CreateHouseBlRequest, UpdateHouseBlRequest } from '@/domain/house-bl';
 import { ResponseParseError } from './errors';
-import { toSearchParams, fetchJson } from './utils';
+import { fetchJson } from './utils';
 
 
 const HOUSE_BL_BASE = '/api/house-bl';
@@ -64,7 +64,12 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
 
 export const API_HOUSE_BL_PORT: HouseBlPort = {
   async list(filter: HouseBlFilter): Promise<HouseBlRow[]> {
-    const json = await fetchJson(`${HOUSE_BL_BASE}?${toSearchParams(filter as unknown as Record<string, unknown>)}`);
+    // GET → POST /search 전환
+    const json = await fetchJson(`${HOUSE_BL_BASE}/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(filter),
+    });
     const parsed = apiResponse(pagedResult(HOUSE_BL_ROW_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid list response: ${parsed.error.message}`);
     return parsed.data.data.content;

@@ -7,7 +7,6 @@ import com.freightos.fms.adapter.in.web.truckbl.dto.SearchTruckBlRequest;
 import com.freightos.fms.adapter.in.web.truckbl.dto.TruckBlSummaryResponse;
 import com.freightos.fms.domain.truckbl.TruckBlFilter;
 import com.freightos.fms.domain.truckbl.port.in.TruckBlSearchUseCase;
-import com.freightos.fms.domain.truckbl.projection.TruckBlSummary;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TruckBlController {
 
     private final TruckBlSearchUseCase truckBlSearchUseCase;
+    private final TruckBlAssembler truckBlAssembler;
 
     @Operation(summary = "Truck B/L 검색 (POST body)")
     @PostMapping("/search")
@@ -42,8 +42,7 @@ public class TruckBlController {
                 req.operatorCode(),
                 req.teamCode())
                 .withKinds(req.dateKind(), req.partyKind(), req.portKind());
-        PagedResult<TruckBlSummary> summaries = truckBlSearchUseCase.searchTruckBls(
-                filter, PageRequest.of(req.page(), req.size()));
-        return ResponseEntity.ok(ApiResponse.of(summaries.map(TruckBlSummaryResponse::from)));
+        return ResponseEntity.ok(ApiResponse.of(truckBlAssembler.toSummaryPage(
+                truckBlSearchUseCase.searchTruckBls(filter, PageRequest.of(req.page(), req.size())))));
     }
 }

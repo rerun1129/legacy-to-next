@@ -4,12 +4,10 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlAirJpaEn
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlNonBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaJpaEntity; // Q-class: 첫 compileJava 후 생성됨
-import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.enums.DateKind;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.querydsl.core.types.dsl.StringPath;
@@ -30,57 +28,6 @@ import java.util.List;
 public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    @Override
-    public PagedResult<HouseBlSummary> findSummariesByJobDivAndBound(
-            JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
-
-        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
-        QHouseBlNonBlJpaEntity nonBl = QHouseBlNonBlJpaEntity.houseBlNonBlJpaEntity;
-
-        List<HouseBlSummary> content = queryFactory
-            .select(Projections.constructor(HouseBlSummary.class,
-                h.houseBlId,
-                h.hblNo,
-                h.jobDiv,
-                h.bound,
-                h.polCode,
-                h.podCode,
-                h.etd,
-                h.eta,
-                h.shipperCode,
-                h.consigneeCode,
-                h.pkgQty,
-                h.pkgUnit,
-                h.createdAt,
-                h.notifyCode,
-                h.settlePartnerCode,
-                h.actualCustomerCode,
-                h.grossWeightKg,
-                h.cbm,
-                nonBl.vesselName,
-                nonBl.voyageNo,
-                nonBl.linerCode,
-                nonBl.linerName
-            ))
-            .from(h)
-            .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
-            .where(h.jobDiv.eq(jobDiv).and(h.bound.eq(bound)))
-            .orderBy(h.createdAt.desc())
-            .offset((long) pageRequest.getPage() * pageRequest.getSize())
-            .limit(pageRequest.getSize())
-            .fetch();
-
-        long total = queryFactory
-            .select(h.count())
-            .from(h)
-            .where(h.jobDiv.eq(jobDiv).and(h.bound.eq(bound)))
-            .fetchOne();
-
-        int totalPages = (int) Math.ceil((double) total / pageRequest.getSize());
-
-        return PagedResult.of(content, total, totalPages, pageRequest.getPage(), pageRequest.getSize());
-    }
 
     @Override
     public PagedResult<HouseBlSummary> searchSummaries(HouseBlFilter filter, PageRequest pageRequest) {

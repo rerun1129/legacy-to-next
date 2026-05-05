@@ -2,7 +2,6 @@ package com.freightos.fms.application.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
@@ -13,9 +12,6 @@ import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,23 +37,6 @@ class HouseBlServiceTest {
 
     @InjectMocks
     private HouseBlService houseBlService;
-
-    @Test
-    @DisplayName("getHouseBlsByJobDivAndBound - jobDiv+bound 조건으로 port 위임 후 PagedResult 반환")
-    void getHouseBlsByJobDivAndBound_delegatesToPort() {
-        PageRequest pageRequest = PageRequest.of(0, 50);
-        PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
-        HouseBlSummary mockSummary = mock(HouseBlSummary.class);
-        PagedResult<HouseBlSummary> portResult = PagedResult.of(List.of(mockSummary), 1L, 1, 0, 50);
-        given(houseBlPort.findHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, sortedRequest))
-                .willReturn(portResult);
-
-        PagedResult<HouseBlSummary> result = houseBlService.getHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, pageRequest);
-
-        assertThat(result.getContent()).hasSize(1);
-        then(houseBlPort).should()
-                .findHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, sortedRequest);
-    }
 
     @Test
     @DisplayName("findHouseBlById - 존재하는 ID 조회 시 엔티티 반환")
@@ -96,14 +75,17 @@ class HouseBlServiceTest {
     }
 
     @Test
-    @DisplayName("save - port.saveHouseBl 위임 호출 후 port 반환값을 그대로 반환")
-    void save_delegatesToPort_returnsResult() {
+    @DisplayName("createHouseBl - port.saveHouseBl 위임 호출 후 저장된 엔티티의 ID를 반환")
+    void createHouseBl_delegatesToPort_returnsId() {
+        Long expectedId = 1L;
         HouseBl mockHouseBl = mock(HouseBl.class);
-        given(houseBlPort.saveHouseBl(mockHouseBl)).willReturn(mockHouseBl);
+        HouseBl mockSaved = mock(HouseBl.class);
+        given(mockSaved.getId()).willReturn(expectedId);
+        given(houseBlPort.saveHouseBl(mockHouseBl)).willReturn(mockSaved);
 
-        HouseBl result = houseBlService.save(mockHouseBl);
+        Long result = houseBlService.createHouseBl(mockHouseBl);
 
-        assertThat(result).isEqualTo(mockHouseBl);
+        assertThat(result).isEqualTo(expectedId);
         then(houseBlPort).should().saveHouseBl(mockHouseBl);
     }
 
@@ -117,52 +99,6 @@ class HouseBlServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class);
 
         then(houseBlPort).should(never()).deleteHouseBl(any());
-    }
-
-    static Stream<Arguments> jobDivAndBoundCombinations() {
-        return Stream.of(
-                Arguments.of(JobDiv.SEA, Bound.IMP),
-                Arguments.of(JobDiv.AIR, Bound.EXP),
-                Arguments.of(JobDiv.AIR, Bound.IMP)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("jobDivAndBoundCombinations")
-    @DisplayName("getHouseBlsByJobDivAndBound - 추가 JobDiv/Bound 조합에서 port 위임 및 sortBy=createdAt, DESC 검증")
-    void getHouseBlsByJobDivAndBound_additionalEnumCombinations(JobDiv jobDiv, Bound bound) {
-        PageRequest pageRequest = PageRequest.of(0, 20);
-        PageRequest sortedRequest = PageRequest.of(0, 20, "createdAt", SortDirection.DESC);
-        HouseBlSummary mockSummary = mock(HouseBlSummary.class);
-        PagedResult<HouseBlSummary> portResult = PagedResult.of(List.of(mockSummary), 1L, 1, 0, 20);
-        given(houseBlPort.findHouseBlsByJobDivAndBound(jobDiv, bound, sortedRequest))
-                .willReturn(portResult);
-
-        PagedResult<HouseBlSummary> result = houseBlService.getHouseBlsByJobDivAndBound(jobDiv, bound, pageRequest);
-
-        assertThat(result.getContent()).hasSize(1);
-        then(houseBlPort).should()
-                .findHouseBlsByJobDivAndBound(jobDiv, bound, sortedRequest);
-        assertThat(sortedRequest.getSortBy()).isEqualTo("createdAt");
-        assertThat(sortedRequest.getSortDirection()).isEqualTo(SortDirection.DESC);
-    }
-
-    @Test
-    @DisplayName("getHouseBlsByJobDivAndBound - port PagedResult 메타(totalElements/totalPages/page/size) 그대로 반영")
-    void getHouseBlsByJobDivAndBound_returnsPagedResultWithCorrectMeta() {
-        PageRequest pageRequest = PageRequest.of(2, 10);
-        PageRequest sortedRequest = PageRequest.of(2, 10, "createdAt", SortDirection.DESC);
-        HouseBlSummary mockSummary = mock(HouseBlSummary.class);
-        PagedResult<HouseBlSummary> portResult = PagedResult.of(List.of(mockSummary), 35L, 4, 2, 10);
-        given(houseBlPort.findHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, sortedRequest))
-                .willReturn(portResult);
-
-        PagedResult<HouseBlSummary> result = houseBlService.getHouseBlsByJobDivAndBound(JobDiv.SEA, Bound.EXP, pageRequest);
-
-        assertThat(result.getTotalElements()).isEqualTo(35L);
-        assertThat(result.getTotalPages()).isEqualTo(4);
-        assertThat(result.getPage()).isEqualTo(2);
-        assertThat(result.getSize()).isEqualTo(10);
     }
 
     @Test
@@ -206,5 +142,37 @@ class HouseBlServiceTest {
         assertThat(result.getTotalPages()).isEqualTo(3);
         assertThat(result.getPage()).isEqualTo(1);
         assertThat(result.getSize()).isEqualTo(10);
+    }
+
+    // ── updateHouseBl ────────────────────────────────────────
+
+    @Test
+    @DisplayName("updateHouseBl - Consumer patcher가 기존 엔티티에 accept 됨을 검증")
+    void updateHouseBl_patcherIsAccepted() {
+        Long id = 1L;
+        HouseBl mockEntity = mock(HouseBl.class);
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
+
+        boolean[] patcherCalled = {false};
+        Consumer<HouseBl> patcher = e -> patcherCalled[0] = true;
+
+        houseBlService.updateHouseBl(id, patcher);
+
+        assertThat(patcherCalled[0]).isTrue();
+    }
+
+    @Test
+    @DisplayName("updateHouseBl - patcher 실행 후 port.saveHouseBl 위임 검증")
+    void updateHouseBl_delegatesToPortSave() {
+        Long id = 1L;
+        HouseBl mockEntity = mock(HouseBl.class);
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
+
+        HouseBl result = houseBlService.updateHouseBl(id, e -> {});
+
+        assertThat(result).isEqualTo(mockEntity);
+        then(houseBlPort).should().saveHouseBl(mockEntity);
     }
 }

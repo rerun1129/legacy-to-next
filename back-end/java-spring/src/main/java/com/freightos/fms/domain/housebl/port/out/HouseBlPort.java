@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public interface HouseBlPort {
     Optional<HouseBl> findHouseBlById(Long id);
-    PagedResult<HouseBlSummary> findHouseBlsByJobDivAndBound(JobDiv jobDiv, Bound bound, PageRequest pageRequest);
     PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest);
     PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest);
     long countHouseBlsByMasterBlId(Long masterBlId);

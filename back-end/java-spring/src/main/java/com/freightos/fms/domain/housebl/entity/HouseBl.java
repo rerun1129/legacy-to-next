@@ -18,6 +18,7 @@ import java.util.List;
 
 /**
  * E-08 House B/L 공통 본체.
+ * 본체 공통 필드 일괄 변경 시 HouseBlUpdateFields record를 사용한다.
  * PRD §2.1: "공통 본체 + 모드별 확장" 구조.
  * 순수 도메인 엔티티 — JPA 어노테이션 없음.
  */
@@ -94,6 +95,93 @@ public abstract class HouseBl extends BaseEntity {
     private HouseBlDesc desc;
 
     // ── 도메인 메서드 ────────────────────────────────────────────
+
+    /**
+     * 본체 공통 필드 일괄 변경에 사용하는 그룹 record (P4: 파라미터 8개 이상).
+     * null 필드는 기존값을 유지한다 (PATCH 의미론).
+     */
+    public record HouseBlUpdateFields(
+            BlNumber hblNo,
+            ShipmentType shipmentType,
+            FreightTerm freightTerm,
+            CustomerCode shipperCode,
+            CustomerCode consigneeCode,
+            CustomerCode notifyCode,
+            CustomerCode docPartnerCode,
+            PortCode polCode,
+            PortCode podCode,
+            BlDate etd,
+            BlDate eta,
+            Quantity pkgQty,
+            WeightUnit pkgUnit,
+            Weight grossWeightKg,
+            Volume cbm,
+            CustomerCode actualCustomerCode,
+            EmployeeCode operatorCode,
+            TeamCode teamCode,
+            EmployeeCode salesManCode,
+            CustomerCode settlePartnerCode,
+            Incoterms incoterms,
+            SalesClass salesClass,
+            String mainItemName,
+            String hsCode,
+            Long masterBlId
+    ) {}
+
+    /**
+     * 본체 공통 필드를 일괄 갱신한다.
+     * null 필드는 기존값을 유지한다.
+     */
+    public void update(HouseBlUpdateFields fields) {
+        if (fields.hblNo() != null) this.hblNo = fields.hblNo();
+        if (fields.shipmentType() != null || fields.freightTerm() != null) {
+            updateBlStatus(
+                    fields.shipmentType() != null ? fields.shipmentType() : this.shipmentType,
+                    fields.freightTerm()  != null ? fields.freightTerm()  : this.freightTerm);
+        }
+        if (fields.shipperCode() != null || fields.consigneeCode() != null
+                || fields.notifyCode() != null || fields.docPartnerCode() != null) {
+            assignParties(
+                    fields.shipperCode()    != null ? fields.shipperCode()    : this.shipperCode,
+                    fields.consigneeCode()  != null ? fields.consigneeCode()  : this.consigneeCode,
+                    fields.notifyCode()     != null ? fields.notifyCode()     : this.notifyCode,
+                    fields.docPartnerCode() != null ? fields.docPartnerCode() : this.docPartnerCode,
+                    this.deliveryCode);
+        }
+        if (fields.polCode() != null || fields.podCode() != null
+                || fields.etd() != null || fields.eta() != null) {
+            updateSchedule(
+                    fields.polCode() != null ? fields.polCode() : this.polCode,
+                    fields.podCode() != null ? fields.podCode() : this.podCode,
+                    fields.etd()     != null ? fields.etd()     : this.etd,
+                    fields.eta()     != null ? fields.eta()     : this.eta);
+        }
+        if (fields.pkgQty() != null || fields.pkgUnit() != null
+                || fields.grossWeightKg() != null || fields.cbm() != null) {
+            updateCargoSummary(new CargoSummary(
+                    fields.pkgQty()        != null ? fields.pkgQty()        : this.pkgQty,
+                    fields.pkgUnit()       != null ? fields.pkgUnit()       : this.pkgUnit,
+                    fields.grossWeightKg() != null ? fields.grossWeightKg() : this.grossWeightKg,
+                    fields.cbm()           != null ? fields.cbm()           : this.cbm));
+        }
+        if (fields.operatorCode() != null || fields.teamCode() != null || fields.salesManCode() != null) {
+            assignOperator(
+                    fields.actualCustomerCode() != null ? fields.actualCustomerCode() : this.actualCustomerCode,
+                    fields.operatorCode()       != null ? fields.operatorCode()       : this.operatorCode,
+                    fields.teamCode()           != null ? fields.teamCode()           : this.teamCode,
+                    fields.salesManCode()       != null ? fields.salesManCode()       : this.salesManCode);
+        }
+        if (fields.settlePartnerCode() != null) assignSettlePartner(fields.settlePartnerCode());
+        if (fields.incoterms() != null || fields.salesClass() != null
+                || fields.mainItemName() != null || fields.hsCode() != null) {
+            updateTradeInfo(
+                    fields.incoterms()    != null ? fields.incoterms()    : this.incoterms,
+                    fields.salesClass()   != null ? fields.salesClass()   : this.salesClass,
+                    fields.mainItemName() != null ? fields.mainItemName() : this.mainItemName,
+                    fields.hsCode()       != null ? fields.hsCode()       : this.hsCode);
+        }
+        if (fields.masterBlId() != null) linkToMaster(fields.masterBlId());
+    }
 
     protected HouseBl(JobDiv jobDiv, Bound bound) {
         this.jobDiv = jobDiv;

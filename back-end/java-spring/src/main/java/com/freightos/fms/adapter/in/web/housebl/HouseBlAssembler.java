@@ -3,11 +3,13 @@ package com.freightos.fms.adapter.in.web.housebl;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
+import com.freightos.fms.adapter.in.web.housebl.dto.SearchHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
 import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
@@ -44,6 +46,14 @@ public class HouseBlAssembler {
         return HouseBlDetailResponse.from(source);
     }
 
+    public HouseBlFilter toFilter(SearchHouseBlRequest req) {
+        return HouseBlFilter.of(req.jobDiv(), req.bound(), req.hblNo(), req.mblNo(),
+                        req.shipperCode(), req.consigneeCode(), req.polCode(), req.podCode(),
+                        req.etdFrom(), req.etdTo(), req.vessel(), req.voyage(),
+                        req.linerCode(), req.operatorCode(), req.teamCode(), req.partyCode(), req.portCode())
+                .withKinds(req.dateKind(), req.partyKind(), req.portKind());
+    }
+
     /**
      * CREATE 요청을 도메인 엔티티로 변환한다.
      * jobDiv에 따라 적합한 서브클래스를 생성한다.
@@ -71,9 +81,10 @@ public class HouseBlAssembler {
     /**
      * UPDATE 요청을 기존 엔티티에 반영한다.
      * null 필드는 기존 값을 유지한다 (PATCH 의미론).
+     * 본체 공통 필드는 엔티티의 update() 메서드에 위임하고, SEA/NON_BL/sub 분기는 어셈블러 책임으로 유지한다.
      */
     public void applyToEntity(UpdateHouseBlRequest req, HouseBl entity) {
-        applyCommonUpdate(entity, req);
+        entity.update(toUpdateFields(req));
         applySeaUpdate(entity, req.seaDetail());
         applyNonBlUpdate(entity, req);
         sub.applyAllUpdate(entity, req);
@@ -109,59 +120,37 @@ public class HouseBlAssembler {
         if (req.masterBlId() != null) entity.linkToMaster(req.masterBlId());
     }
 
-    // ── 공통 필드 매핑 (UPDATE) ───────────────────────────────────────
+    // ── 공통 필드 record 변환 (UPDATE) ───────────────────────────────────────
 
-    private void applyCommonUpdate(HouseBl entity, UpdateHouseBlRequest req) {
-        if (req.hblNo() != null) entity.assignHblNo(BlNumber.of(req.hblNo()));
-        if (req.shipmentType() != null || req.freightTerm() != null) {
-            entity.updateBlStatus(
-                    req.shipmentType() != null ? req.shipmentType() : entity.getShipmentType(),
-                    req.freightTerm()  != null ? req.freightTerm()  : entity.getFreightTerm());
-        }
-        if (req.shipperCode() != null || req.consigneeCode() != null
-                || req.notifyCode() != null || req.docPartnerCode() != null) {
-            String deliveryCode = req.seaDetail() != null ? req.seaDetail().deliveryCode() : null;
-            entity.assignParties(
-                    req.shipperCode()    != null ? CustomerCode.of(req.shipperCode())    : entity.getShipperCode(),
-                    req.consigneeCode()  != null ? CustomerCode.of(req.consigneeCode())  : entity.getConsigneeCode(),
-                    req.notifyCode()     != null ? CustomerCode.of(req.notifyCode())     : entity.getNotifyCode(),
-                    req.docPartnerCode() != null ? CustomerCode.of(req.docPartnerCode()) : entity.getDocPartnerCode(),
-                    deliveryCode != null ? PortCode.of(deliveryCode) : entity.getDeliveryCode()
-            );
-        }
-        if (req.polCode() != null || req.podCode() != null || req.etd() != null || req.eta() != null) {
-            entity.updateSchedule(
-                    req.polCode() != null ? PortCode.of(req.polCode()) : entity.getPolCode(),
-                    req.podCode() != null ? PortCode.of(req.podCode()) : entity.getPodCode(),
-                    req.etd()     != null ? BlDate.of(req.etd())       : entity.getEtd(),
-                    req.eta()     != null ? BlDate.of(req.eta())       : entity.getEta());
-        }
-        if (req.pkgQty() != null || req.pkgUnit() != null
-                || req.grossWeightKg() != null || req.cbm() != null) {
-            entity.updateCargoSummary(new CargoSummary(
-                    req.pkgQty()        != null ? Quantity.of(req.pkgQty())      : entity.getPkgQty(),
-                    req.pkgUnit()       != null ? req.pkgUnit()                  : entity.getPkgUnit(),
-                    req.grossWeightKg() != null ? Weight.of(req.grossWeightKg()) : entity.getGrossWeightKg(),
-                    req.cbm()           != null ? Volume.of(req.cbm())           : entity.getCbm()));
-        }
-        if (req.operatorCode() != null || req.teamCode() != null || req.salesManCode() != null) {
-            entity.assignOperator(
-                    req.actualCustomerCode() != null
-                            ? CustomerCode.of(req.actualCustomerCode()) : entity.getActualCustomerCode(),
-                    req.operatorCode() != null ? EmployeeCode.of(req.operatorCode()) : entity.getOperatorCode(),
-                    req.teamCode()     != null ? TeamCode.of(req.teamCode())          : entity.getTeamCode(),
-                    req.salesManCode() != null ? EmployeeCode.of(req.salesManCode()) : entity.getSalesManCode());
-        }
-        if (req.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(req.settlePartnerCode()));
-        if (req.incoterms() != null || req.salesClass() != null
-                || req.mainItemName() != null || req.hsCode() != null) {
-            entity.updateTradeInfo(
-                    req.incoterms()    != null ? Incoterms.fromCode(req.incoterms()) : entity.getIncoterms(),
-                    req.salesClass()   != null ? SalesClass.fromCode(req.salesClass()) : entity.getSalesClass(),
-                    req.mainItemName() != null ? req.mainItemName() : entity.getMainItemName(),
-                    req.hsCode()       != null ? req.hsCode()       : entity.getHsCode());
-        }
-        if (req.masterBlId() != null) entity.linkToMaster(req.masterBlId());
+    private HouseBl.HouseBlUpdateFields toUpdateFields(UpdateHouseBlRequest req) {
+        String deliveryCode = req.seaDetail() != null ? req.seaDetail().deliveryCode() : null;
+        return new HouseBl.HouseBlUpdateFields(
+                req.hblNo()             != null ? BlNumber.of(req.hblNo())                  : null,
+                req.shipmentType(),
+                req.freightTerm(),
+                req.shipperCode()       != null ? CustomerCode.of(req.shipperCode())         : null,
+                req.consigneeCode()     != null ? CustomerCode.of(req.consigneeCode())       : null,
+                req.notifyCode()        != null ? CustomerCode.of(req.notifyCode())          : null,
+                req.docPartnerCode()    != null ? CustomerCode.of(req.docPartnerCode())      : null,
+                req.polCode()           != null ? PortCode.of(req.polCode())                 : null,
+                req.podCode()           != null ? PortCode.of(req.podCode())                 : null,
+                req.etd()               != null ? BlDate.of(req.etd())                       : null,
+                req.eta()               != null ? BlDate.of(req.eta())                       : null,
+                req.pkgQty()            != null ? Quantity.of(req.pkgQty())                  : null,
+                req.pkgUnit(),
+                req.grossWeightKg()     != null ? Weight.of(req.grossWeightKg())             : null,
+                req.cbm()               != null ? Volume.of(req.cbm())                       : null,
+                req.actualCustomerCode() != null ? CustomerCode.of(req.actualCustomerCode()) : null,
+                req.operatorCode()      != null ? EmployeeCode.of(req.operatorCode())        : null,
+                req.teamCode()          != null ? TeamCode.of(req.teamCode())                : null,
+                req.salesManCode()      != null ? EmployeeCode.of(req.salesManCode())        : null,
+                req.settlePartnerCode() != null ? CustomerCode.of(req.settlePartnerCode())   : null,
+                req.incoterms()         != null ? Incoterms.fromCode(req.incoterms())        : null,
+                req.salesClass()        != null ? SalesClass.fromCode(req.salesClass())      : null,
+                req.mainItemName(),
+                req.hsCode(),
+                req.masterBlId()
+        );
     }
 
     // ── SEA 확장 필드 매핑 ────────────────────────────────────────────
