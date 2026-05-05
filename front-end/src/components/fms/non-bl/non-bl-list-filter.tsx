@@ -42,6 +42,9 @@ export function NonBlListFilter({ form }: Props) {
   const dateFrom = useWatch({ control: form.control, name: "dateFrom" });
   const dateTo   = useWatch({ control: form.control, name: "dateTo" });
   const { register } = form;
+  // ref를 분리해 react-hook-form의 DOM 직접 조작을 차단 — reset 시 마스크 플리커 방지
+  const { ref: _fromRef, ...fromReg } = register("dateFrom");
+  const { ref: _toRef,   ...toReg   } = register("dateTo");
 
   return (
     <div className="search-card">
@@ -61,8 +64,8 @@ export function NonBlListFilter({ form }: Props) {
           <DateRangeBox
             label="Date"
             required
-            fromProps={{ ...register("dateFrom"), value: dateFrom, placeholder: "From" }}
-            toProps={{ ...register("dateTo"),   value: dateTo,   placeholder: "To" }}
+            fromProps={{ ...fromReg, value: dateFrom, placeholder: "From" }}
+            toProps={{ ...toReg,   value: dateTo,   placeholder: "To" }}
           />
 
           <CodeBox
