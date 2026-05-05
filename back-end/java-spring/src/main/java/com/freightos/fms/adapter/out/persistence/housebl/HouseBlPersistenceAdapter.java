@@ -11,7 +11,7 @@ import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import com.freightos.common.exception.ResourceNotFoundException;
-import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
+import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlCargoMapper;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDocMapper;

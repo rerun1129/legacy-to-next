@@ -11,7 +11,7 @@ import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
+import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

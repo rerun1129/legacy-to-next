@@ -6,7 +6,7 @@ import com.freightos.fms.adapter.in.web.switchbl.dto.SwitchBlResponse;
 import com.freightos.fms.adapter.in.web.switchbl.dto.UpdateSwitchBlRequest;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
-import com.freightos.fms.domain.switchbl.port.in.SwitchBlUseCase;
+import com.freightos.fms.application.switchbl.port.in.SwitchBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

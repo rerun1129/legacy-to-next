@@ -9,7 +9,7 @@ import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
+import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

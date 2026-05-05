@@ -7,7 +7,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.port.out.HouseBlPort;
+import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

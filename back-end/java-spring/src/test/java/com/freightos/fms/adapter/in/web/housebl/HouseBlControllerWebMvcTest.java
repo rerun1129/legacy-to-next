@@ -6,7 +6,7 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
-import com.freightos.fms.domain.housebl.port.in.HouseBlUseCase;
+import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

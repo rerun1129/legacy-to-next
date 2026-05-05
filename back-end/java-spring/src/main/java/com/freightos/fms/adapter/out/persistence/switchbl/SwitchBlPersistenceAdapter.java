@@ -6,7 +6,7 @@ import com.freightos.fms.adapter.out.persistence.switchbl.entity.SwitchBlJpaEnti
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
-import com.freightos.fms.domain.switchbl.port.out.SwitchBlPort;
+import com.freightos.fms.application.switchbl.port.out.SwitchBlPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

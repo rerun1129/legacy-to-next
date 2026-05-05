@@ -6,7 +6,7 @@ import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.truckbl.dto.SearchTruckBlRequest;
 import com.freightos.fms.adapter.in.web.truckbl.dto.TruckBlSummaryResponse;
 import com.freightos.fms.domain.truckbl.TruckBlFilter;
-import com.freightos.fms.domain.truckbl.port.in.TruckBlSearchUseCase;
+import com.freightos.fms.application.truckbl.port.in.TruckBlSearchUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

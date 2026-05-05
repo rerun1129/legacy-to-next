@@ -6,7 +6,7 @@ import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.SearchNonBlRequest;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
-import com.freightos.fms.domain.nonbl.port.in.NonBlSearchUseCase;
+import com.freightos.fms.application.nonbl.port.in.NonBlSearchUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

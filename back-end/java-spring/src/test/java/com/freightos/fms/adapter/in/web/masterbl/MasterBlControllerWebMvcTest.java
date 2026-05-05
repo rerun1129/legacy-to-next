@@ -8,7 +8,7 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.MasterBlDetail;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
-import com.freightos.fms.domain.masterbl.port.in.MasterBlUseCase;
+import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

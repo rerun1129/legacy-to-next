@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.enums.port.in;
+package com.freightos.fms.application.enums.port.in;
 
 import com.freightos.fms.domain.enums.EnumOption;
 

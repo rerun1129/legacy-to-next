@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.housebl.port.out;
+package com.freightos.fms.application.housebl.port.out;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;

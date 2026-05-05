@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.housebl.port.in;
+package com.freightos.fms.application.housebl.port.in;
 
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;

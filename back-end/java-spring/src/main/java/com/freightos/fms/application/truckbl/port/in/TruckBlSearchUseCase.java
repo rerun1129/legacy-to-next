@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.truckbl.port.in;
+package com.freightos.fms.application.truckbl.port.in;
 
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;

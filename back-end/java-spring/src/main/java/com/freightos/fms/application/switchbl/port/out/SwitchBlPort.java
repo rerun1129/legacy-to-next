@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.switchbl.port.out;
+package com.freightos.fms.application.switchbl.port.out;
 
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 

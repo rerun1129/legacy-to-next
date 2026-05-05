@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.masterbl.port.in;
+package com.freightos.fms.application.masterbl.port.in;
 
 import com.freightos.fms.domain.masterbl.MasterBlDetail;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
