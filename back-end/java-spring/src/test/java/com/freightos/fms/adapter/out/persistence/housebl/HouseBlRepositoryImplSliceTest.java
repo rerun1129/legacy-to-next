@@ -474,7 +474,7 @@ class HouseBlRepositoryImplSliceTest {
         persist(JobDiv.AIR, Bound.EXP, 2);
         em.flush();
 
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, null, null, null, null);
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(3);
@@ -499,7 +499,7 @@ class HouseBlRepositoryImplSliceTest {
         em.persist(noMatch);
         em.flush();
 
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "MATCH", null, null, null, null, null, null, null);
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "MATCH", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(2);
@@ -517,7 +517,7 @@ class HouseBlRepositoryImplSliceTest {
         em.persist(noMatch);
         em.flush();
 
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, "KRPUS", null, null, null);
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, "KRPUS", null, null, null, null, null, null, null, null, null, null);
         PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -538,7 +538,7 @@ class HouseBlRepositoryImplSliceTest {
         em.persist(afterRange);
         em.flush();
 
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, null, null, "20251130", "20251231");
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, null, null, null, null, null, null, "20251130", "20251231", null, null, null, null, null, null, null);
         PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -548,7 +548,7 @@ class HouseBlRepositoryImplSliceTest {
     @Test
     @DisplayName("searchSummaries: 매칭 0건 → 빈 리스트(null 아님)")
     void searchSummaries_zeroMatches_returnsEmptyPagedResult() {
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "NONEXISTENT", null, null, null, null, null, null, null);
+        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "NONEXISTENT", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PagedResult<HouseBlSummary> result = houseBlRepository.searchSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).isNotNull().isEmpty();
