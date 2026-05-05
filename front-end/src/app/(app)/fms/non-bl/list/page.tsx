@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { Package, RotateCcw, Search } from "lucide-react";
+import { Button } from "@/components/shared/button";
 import { NonBlGrid } from "@/components/fms/non-bl/non-bl-grid";
 import { NonBlListFilter } from "@/components/fms/non-bl/non-bl-list-filter";
 import type { NonBlListFilterValues } from "@/components/fms/non-bl/non-bl-list-filter";
@@ -46,14 +47,12 @@ export default function NonBLListPage() {
         </div>
         <div className="page-head__actions">
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-            <button className="btn btn--sm btn--ghost" onClick={() => form.reset(DEFAULT_VALUES)}>
-              <RotateCcw size={12} />
+            <Button size="sm" variant="ghost" leftIcon={<RotateCcw size={12} />} onClick={() => form.reset(DEFAULT_VALUES)}>
               Reset
-            </button>
-            <button className="btn btn--sm btn--primary">
-              <Search size={12} />
+            </Button>
+            <Button size="sm" variant="search" leftIcon={<Search size={12} />}>
               Search
-            </button>
+            </Button>
           </div>
         </div>
       </div>
