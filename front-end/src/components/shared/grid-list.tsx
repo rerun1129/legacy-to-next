@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   DndContext,
   type DragEndEvent,
@@ -41,90 +42,82 @@ export interface GridListProps<T> {
   onSelectRow?: (row: T | null, index: number | null) => void;
 }
 
-function renderRows<T>(
+/** 단일 행 렌더링 헬퍼 — ManagedGridList/PlainGridList 공유 */
+function renderSingleRow<T>(
+  row: T,
+  rowIndex: number,
   columns: GridColumn<T>[],
-  data: T[],
   rowKey: GridListProps<T>["rowKey"],
   rowClassName: GridListProps<T>["rowClassName"],
   onRowClick: GridListProps<T>["onRowClick"],
-  emptyMessage: string | undefined,
-  selectedRowKey?: string | number | null,
-  onSelectRow?: (row: T | null, index: number | null) => void,
-  selectedCell?: { rowKey: string | number; colKey: string } | null,
-  setSelectedCell?: React.Dispatch<React.SetStateAction<{ rowKey: string | number; colKey: string } | null>>,
+  selectedRowKey: string | number | null | undefined,
+  onSelectRow: ((row: T | null, index: number | null) => void) | undefined,
+  selectedCell: { rowKey: string | number; colKey: string } | null | undefined,
+  setSelectedCell: React.Dispatch<React.SetStateAction<{ rowKey: string | number; colKey: string } | null>> | undefined,
+  virtualKey?: string | number,
 ): React.ReactNode {
-  if (data.length === 0) {
-    return (
-      <tr>
-        <td colSpan={columns.length} className="grid__empty">
-          {emptyMessage}
-        </td>
-      </tr>
-    );
-  }
-  return data.map((row, rowIndex) => {
-    // rowKey 미제공 시 row.id → rowIndex 순으로 폴백.
-    // rowIndex는 이 그리드가 서버 페이지 고정 순서 데이터를 표시할 때만 허용됨(재정렬·삽입 없음).
-    const key = rowKey
-      ? rowKey(row, rowIndex)
-      : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
-    const extraClass = rowClassName ? rowClassName(row, rowIndex) : undefined;
-    const isSelected = selectedRowKey != null && key === selectedRowKey;
-    const finalClassName =
-      [extraClass, isSelected ? "is-selected" : undefined].filter(Boolean).join(" ") || undefined;
+  const key = rowKey
+    ? rowKey(row, rowIndex)
+    : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
+  const extraClass = rowClassName ? rowClassName(row, rowIndex) : undefined;
+  const isSelected = selectedRowKey != null && key === selectedRowKey;
+  const finalClassName =
+    [extraClass, isSelected ? "is-selected" : undefined].filter(Boolean).join(" ") || undefined;
 
-    function handleClick() {
-      if (onRowClick) onRowClick(row, rowIndex);
-      if (onSelectRow) {
-        // 같은 행 재클릭 시 선택 해제(null 전달), 그 외엔 해당 행 전달
-        onSelectRow(isSelected ? null : row, isSelected ? null : rowIndex);
-      }
+  function handleClick() {
+    if (onRowClick) onRowClick(row, rowIndex);
+    if (onSelectRow) {
+      // 같은 행 재클릭 시 선택 해제(null 전달), 그 외엔 해당 행 전달
+      onSelectRow(isSelected ? null : row, isSelected ? null : rowIndex);
     }
+  }
 
-    return (
-      <tr
-        key={key}
-        className={finalClassName}
-        onClick={onRowClick || onSelectRow ? handleClick : undefined}
-        style={onRowClick || onSelectRow ? { cursor: "pointer" } : undefined}
-      >
-        {columns.map((col) => {
-          const rawValue =
-            typeof col.key === "string"
-              ? (row as Record<string, unknown>)[col.key]
-              : (row[col.key as keyof T] as unknown);
-          const ck = String(col.key);
-          const isCellSelected =
-            selectedCell?.rowKey === key && selectedCell?.colKey === ck;
-          return (
-            <td
-              key={ck}
-              style={{ width: col.width ?? col.minWidth, textAlign: col.align }}
-              className={
-                [col.className, isCellSelected ? "is-cell-selected" : undefined]
-                  .filter(Boolean)
-                  .join(" ") || undefined
-              }
-              onClick={
-                setSelectedCell
-                  ? () => {
-                      setSelectedCell((prev) =>
-                        prev?.rowKey === key && prev?.colKey === ck
-                          ? null
-                          : { rowKey: key, colKey: ck }
-                      );
-                    }
-                  : undefined
-              }
-            >
-              {col.render ? col.render(rawValue, row, rowIndex) : String(rawValue ?? "")}
-            </td>
-          );
-        })}
-      </tr>
-    );
-  });
+  return (
+    <tr
+      key={virtualKey ?? key}
+      className={finalClassName}
+      onClick={onRowClick || onSelectRow ? handleClick : undefined}
+      style={onRowClick || onSelectRow ? { cursor: "pointer" } : undefined}
+    >
+      {columns.map((col) => {
+        const rawValue =
+          typeof col.key === "string"
+            ? (row as Record<string, unknown>)[col.key]
+            : (row[col.key as keyof T] as unknown);
+        const ck = String(col.key);
+        const isCellSelected =
+          selectedCell?.rowKey === key && selectedCell?.colKey === ck;
+        return (
+          <td
+            key={ck}
+            style={{ width: col.width ?? col.minWidth, textAlign: col.align }}
+            className={
+              [col.className, isCellSelected ? "is-cell-selected" : undefined]
+                .filter(Boolean)
+                .join(" ") || undefined
+            }
+            onClick={
+              setSelectedCell
+                ? () => {
+                    setSelectedCell((prev) =>
+                      prev?.rowKey === key && prev?.colKey === ck
+                        ? null
+                        : { rowKey: key, colKey: ck }
+                    );
+                  }
+                : undefined
+            }
+          >
+            {col.render ? col.render(rawValue, row, rowIndex) : String(rawValue ?? "")}
+          </td>
+        );
+      })}
+    </tr>
+  );
 }
+
+// --row-h 기본값 24px — tokens.css:21 정의 기준
+const ROW_HEIGHT_PX = 24;
 
 function ManagedGridList<T>({
   gridId,
@@ -144,6 +137,7 @@ function ManagedGridList<T>({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDragOutside, setIsDragOutside] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedCell, setSelectedCell] = useState<{
     rowKey: string | number;
     colKey: string;
@@ -173,6 +167,18 @@ function ManagedGridList<T>({
   );
   const ids = visibleColumns.map((c) => String(c.key));
   const activeCol = visibleColumns.find((c) => String(c.key) === activeId) ?? null;
+
+  const rowVirtualizer = useVirtualizer({
+    count: data.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ROW_HEIGHT_PX,
+    overscan: 10,
+  });
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom =
+    virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
 
   function isOutsideTable(rect: { left: number; right: number; top: number; bottom: number }) {
     const tableEl = tableRef.current;
@@ -218,7 +224,7 @@ function ManagedGridList<T>({
   }
 
   return (
-    <div className={`grid-wrap${className ? ` ${className}` : ""}`} style={style}>
+    <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={style}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -247,7 +253,41 @@ function ManagedGridList<T>({
             </SortableContext>
           </thead>
           <tbody>
-            {renderRows(visibleColumns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow, selectedCell, setSelectedCell)}
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={visibleColumns.length} className="grid__empty">
+                  {emptyMessage}
+                </td>
+              </tr>
+            ) : (
+              <>
+                {paddingTop > 0 && (
+                  <tr>
+                    <td colSpan={visibleColumns.length} style={{ height: paddingTop, padding: 0 }} />
+                  </tr>
+                )}
+                {virtualRows.map((virtualRow) =>
+                  renderSingleRow(
+                    data[virtualRow.index],
+                    virtualRow.index,
+                    visibleColumns,
+                    rowKey,
+                    rowClassName,
+                    onRowClick,
+                    selectedRowKey,
+                    onSelectRow,
+                    selectedCell,
+                    setSelectedCell,
+                    virtualRow.key,
+                  )
+                )}
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td colSpan={visibleColumns.length} style={{ height: paddingBottom, padding: 0 }} />
+                  </tr>
+                )}
+              </>
+            )}
           </tbody>
         </table>
         <DragOverlay>
@@ -282,6 +322,7 @@ function PlainGridList<T>({
   selectedRowKey,
   onSelectRow,
 }: Omit<GridListProps<T>, "gridId">) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedCell, setSelectedCell] = useState<{
     rowKey: string | number;
     colKey: string;
@@ -306,8 +347,20 @@ function PlainGridList<T>({
     if (!exists) setSelectedCell(null);
   }, [data, selectedCell]);
 
+  const rowVirtualizer = useVirtualizer({
+    count: data.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ROW_HEIGHT_PX,
+    overscan: 10,
+  });
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom =
+    virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
+
   return (
-    <div className={`grid-wrap${className ? ` ${className}` : ""}`} style={style}>
+    <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={style}>
       <table className="grid--list">
         <colgroup>
           {columns.map((col) => (
@@ -328,7 +381,41 @@ function PlainGridList<T>({
           </tr>
         </thead>
         <tbody>
-          {renderRows(columns, data, rowKey, rowClassName, onRowClick, emptyMessage, selectedRowKey, onSelectRow, selectedCell, setSelectedCell)}
+          {data.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="grid__empty">
+                {emptyMessage}
+              </td>
+            </tr>
+          ) : (
+            <>
+              {paddingTop > 0 && (
+                <tr>
+                  <td colSpan={columns.length} style={{ height: paddingTop, padding: 0 }} />
+                </tr>
+              )}
+              {virtualRows.map((virtualRow) =>
+                renderSingleRow(
+                  data[virtualRow.index],
+                  virtualRow.index,
+                  columns,
+                  rowKey,
+                  rowClassName,
+                  onRowClick,
+                  selectedRowKey,
+                  onSelectRow,
+                  selectedCell,
+                  setSelectedCell,
+                  virtualRow.key,
+                )
+              )}
+              {paddingBottom > 0 && (
+                <tr>
+                  <td colSpan={columns.length} style={{ height: paddingBottom, padding: 0 }} />
+                </tr>
+              )}
+            </>
+          )}
         </tbody>
       </table>
     </div>
