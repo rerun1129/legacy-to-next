@@ -5,6 +5,18 @@ import { DropBox } from "@/components/shared/inputs/drop-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 
+function getDefaultMonthRange() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const lastDate = new Date(y, m + 1, 0).getDate();
+  return {
+    from: `${y}${pad(m + 1)}01`,
+    to: `${y}${pad(m + 1)}${pad(lastDate)}`,
+  };
+}
+
 const BOUND_OPTIONS = [
   { value: "ALL", label: "ALL" },
   { value: "I", label: "Inbound" },
@@ -12,6 +24,7 @@ const BOUND_OPTIONS = [
 ];
 
 export function NonBlListFilter() {
+  const { from, to } = getDefaultMonthRange();
   return (
     <div className="search-card">
       <div className="search-card__body">
@@ -28,8 +41,9 @@ export function NonBlListFilter() {
 
           <DateRangeBox
             label="Date"
-            fromProps={{ placeholder: "From" }}
-            toProps={{ placeholder: "To" }}
+            required
+            fromProps={{ placeholder: "From", defaultValue: from }}
+            toProps={{ placeholder: "To", defaultValue: to }}
           />
 
           <CodeBox
