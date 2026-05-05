@@ -54,7 +54,7 @@ function renderSingleRow<T>(
   onSelectRow: ((row: T | null, index: number | null) => void) | undefined,
   selectedCell: { rowKey: string | number; colKey: string } | null | undefined,
   setSelectedCell: React.Dispatch<React.SetStateAction<{ rowKey: string | number; colKey: string } | null>> | undefined,
-  virtualKey?: string | number,
+  virtualKey?: string | number | bigint,
 ): React.ReactNode {
   const key = rowKey
     ? rowKey(row, rowIndex)
@@ -74,7 +74,7 @@ function renderSingleRow<T>(
 
   return (
     <tr
-      key={virtualKey ?? key}
+      key={virtualKey != null ? String(virtualKey) : key}
       className={finalClassName}
       onClick={onRowClick || onSelectRow ? handleClick : undefined}
       style={onRowClick || onSelectRow ? { cursor: "pointer" } : undefined}
