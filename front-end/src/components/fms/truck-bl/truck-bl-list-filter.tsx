@@ -4,7 +4,6 @@ import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
-import { TextBox } from "@/components/shared/inputs/text-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { useEnumOptions } from "@/application/enums/use-enum";
@@ -87,9 +86,9 @@ export function TruckBlListFilter({ form }: Props) {
 
           <CodeBox
             kind="lcn"
-            label="Liner"
-            codeProps={{ ...register("linerCode"), placeholder: "Code" }}
-            nameProps={{ ...register("linerName"), placeholder: "Name" }}
+            label="Trucker"
+            codeProps={{ ...register("truckerCode"), placeholder: "Code" }}
+            nameProps={{ ...register("truckerName"), placeholder: "Name" }}
             onLookup={() => {}}
           />
 
@@ -136,11 +135,13 @@ export function TruckBlListFilter({ form }: Props) {
             )}
           />
 
-          <div className="lcn">
-            <span className="lcn__label">Vessel/Voyage</span>
-            <TextBox variant="panel" placeholder="Vessel" {...register("vessel")} />
-            <TextBox variant="panel" placeholder="Voyage" {...register("voyage")} />
-          </div>
+          <CodeBox
+            kind="lcn"
+            label="DOC. Partner"
+            codeProps={{ ...register("docPartnerCode"), placeholder: "Code" }}
+            nameProps={{ ...register("docPartnerName"), placeholder: "Name" }}
+            onLookup={() => {}}
+          />
 
           <CodeBox
             kind="lcn"
