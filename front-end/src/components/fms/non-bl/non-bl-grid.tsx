@@ -8,12 +8,8 @@ import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu
 import { Pagination } from "@/components/shared/pagination";
 import { nonBlPort } from "@/lib/ports";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { fmtDate } from "@/lib/grid-formatters";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
-
-function fmtDate(v: unknown): string {
-  const s = String(v ?? '');
-  return s.length === 8 ? `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}` : s;
-}
 
 interface Props {
   extraFilter: NonBlFilter | null;
