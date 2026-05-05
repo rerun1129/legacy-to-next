@@ -15,7 +15,7 @@ export function useEnum(name: EnumName) {
     queryFn: () => enumPort.fetchEnum(name),
     // ENUM 값은 배포 중 변경되지 않으므로 무기한 캐싱
     staleTime: Infinity,
-    retry: 1,
+    retry: false,
   })
 }
 
@@ -24,7 +24,7 @@ export function useEnums(names: EnumName[]) {
     queryKey: enumKeys.many(names),
     queryFn: () => enumPort.fetchEnums(names),
     staleTime: Infinity,
-    retry: 1,
+    retry: false,
   })
 }
 

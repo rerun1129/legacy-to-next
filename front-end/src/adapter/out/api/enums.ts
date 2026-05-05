@@ -12,7 +12,7 @@ const ENUM_OPTION_SCHEMA = z.object({
 })
 
 const ENUM_MAP_RESPONSE_SCHEMA = z.object({
-  enums: z.record(z.array(ENUM_OPTION_SCHEMA)),
+  enums: z.record(z.string(), z.array(ENUM_OPTION_SCHEMA)),
   notFound: z.array(z.string()),
 })
 
