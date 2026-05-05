@@ -25,7 +25,7 @@ public record HouseBlSummaryResponse(
         String        shipperCode,
         String        consigneeCode,
         Integer       pkgQty,
-        WeightUnit    pkgUnit,
+        String        pkgUnit,
         LocalDateTime createdAt,
         String        notifyCode,
         String        settlePartnerCode,
@@ -50,7 +50,7 @@ public record HouseBlSummaryResponse(
                 mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 mapOrNull(entity.getPkgQty(), Quantity::count),
-                entity.getPkgUnit(),
+                mapOrNull(entity.getPkgUnit(), WeightUnit::getLabel),
                 entity.getCreatedAt(),
                 null, null, null, null, null, null, null, null, null
         );
@@ -70,7 +70,7 @@ public record HouseBlSummaryResponse(
                 summary.shipperCode(),
                 summary.consigneeCode(),
                 summary.pkgQty(),
-                WeightUnit.fromCode(summary.pkgUnit()),
+                summary.pkgUnit(),
                 summary.createdAt(),
                 summary.notifyCode(),
                 summary.settlePartnerCode(),
