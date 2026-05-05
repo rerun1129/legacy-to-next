@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
@@ -23,11 +23,16 @@ interface Props {
 export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const { options: boundOptions } = useEnumOptions("Bound");
 
+  useEffect(() => {
+    setShowAll(false);
+  }, [extraFilter]);
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["non-bl", "list", extraFilter, currentPage],
-    queryFn: () => nonBlPort.list(extraFilter!, currentPage),
+    queryKey: ["non-bl", "list", extraFilter, showAll ? "all" : currentPage],
+    queryFn: () => nonBlPort.list(extraFilter!, showAll ? 1 : currentPage, showAll ? 9999 : 50),
     enabled: extraFilter !== null,
   });
 
@@ -247,6 +252,8 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
         totalPages={totalPages}
         onPageChange={onPageChange}
         disabled={isLoading}
+        showAll={showAll}
+        onToggleShowAll={() => setShowAll(v => !v)}
       />
     </div>
   );
