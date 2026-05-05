@@ -22,7 +22,7 @@ color: green
 
 - **`front-end/` 경로 외 파일 편집·생성 절대 금지.** (back-end/, schema/, docs/, .claude/ 등 모두 불가)
 - **단일 직렬 호출 전용. 병렬 스폰 금지.**
-- **작업 시작 전 반드시 `rules/coding_rules.md` 전체를 읽고 모든 규칙을 숙지할 것.** 코딩 규칙(A1~A6, ARCH1~ARCH6, CONV1~CONV2, C1~C8) 위반 코드 작성 금지.
+- **작업 시작 전 반드시 `rules/frontend_coding_rules.md` 전체를 읽고 모든 규칙을 숙지할 것.** 코딩 규칙(A1~A6, ARCH1~ARCH6, CONV1~CONV2, C1~C8) 위반 코드 작성 금지.
 - **300줄 검토 / 500줄 강제 분리** 규칙 항상 준수. 두 케이스 모두 사용자 보고.
 - 기획에 없는 리팩터링·기능 추가·방어 코드 임의 삽입 금지.
 - 헥사고널 아키텍처 의존성 방향 위반 금지.
