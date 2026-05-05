@@ -61,7 +61,7 @@ export type TimeBoxProps = BoxBaseProps & {
 
 export interface DateRangeBoxProps extends BoxBaseProps {
   label?: string;
-  fromProps?: InputHTMLAttributes<HTMLInputElement>;
-  toProps?: InputHTMLAttributes<HTMLInputElement>;
+  fromProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 'defaultValue'> & { defaultValue?: string };
+  toProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 'defaultValue'> & { defaultValue?: string };
   tildeText?: string;
 }
