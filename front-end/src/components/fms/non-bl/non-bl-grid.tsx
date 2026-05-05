@@ -7,7 +7,13 @@ import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { nonBlPort } from "@/lib/ports";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
+
+function fmtDate(v: unknown): string {
+  const s = String(v ?? '');
+  return s.length === 8 ? `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}` : s;
+}
 
 interface Props {
   extraFilter: NonBlFilter | null;
@@ -17,6 +23,7 @@ interface Props {
 
 export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
   const router = useRouter();
+  const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(true);
 
@@ -43,9 +50,17 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
         </div>
       ),
     },
-    { key: "bound", label: "Bound", minWidth: 90 },
-    { key: "etd", label: "ETD", minWidth: 110 },
-    { key: "eta", label: "ETA", minWidth: 110 },
+    {
+      key: "bound",
+      label: "Bound",
+      minWidth: 90,
+      render: (v) => {
+        const code = String(v ?? '');
+        return boundOptions.find(o => o.value === code)?.label ?? code;
+      },
+    },
+    { key: "etd", label: "ETD", minWidth: 110, render: (v) => fmtDate(v) },
+    { key: "eta", label: "ETA", minWidth: 110, render: (v) => fmtDate(v) },
     { key: "pol", label: "POL", minWidth: 80 },
     { key: "pod", label: "POD", minWidth: 80 },
     { key: "vesselName", label: "Vessel", minWidth: 130 },
