@@ -90,11 +90,21 @@ class HouseBlControllerWebMvcTest {
     }
 
     @Test
-    @DisplayName("GET /api/house-bl?jobDiv=SEA: bound 파라미터 누락 → 400")
-    void getHouseBlsByJobDivAndBound_missingBound_returns400() throws Exception {
+    @DisplayName("GET /api/house-bl?jobDiv=SEA: bound 파라미터 누락 → 200 (jobDiv 기준 전체 조회)")
+    void getHouseBlsByJobDivAndBound_missingBound_returns200WithAllBounds() throws Exception {
+        HouseBlSummaryResponse mockItem = mock(HouseBlSummaryResponse.class);
+        PagedResult<HouseBlSummaryResponse> mockPage = PagedResult.of(
+                List.of(mockItem), 1L, 1, 0, 10);
+
+        given(houseBlUseCase.searchHouseBls(any(), any()))
+                .willReturn(mock(PagedResult.class));
+        given(houseBlAssembler.toSummaryPage(any())).willReturn(mockPage);
+
         mockMvc.perform(get("/api/house-bl")
                         .param("jobDiv", "SEA"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
+
+        then(houseBlUseCase).should().searchHouseBls(any(), any());
     }
 
     // ── GET /api/house-bl/{id} ────────────────────────────────────────
