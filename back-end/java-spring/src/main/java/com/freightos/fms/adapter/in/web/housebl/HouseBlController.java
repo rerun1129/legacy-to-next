@@ -41,7 +41,7 @@ public class HouseBlController {
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResult<HouseBlSummaryResponse>>> getHouseBlsByJobDivAndBound(
             @Parameter(description = "운송 모드") @RequestParam JobDiv jobDiv,
-            @Parameter(description = "방향")     @RequestParam Bound  bound,
+            @Parameter(description = "방향")     @RequestParam(required = false) Bound bound,
             @RequestParam(defaultValue = "0")  @Min(0)  int page,
             @RequestParam(defaultValue = "50") @Min(1)  int size,
             @RequestParam(required = false) String hblNo,
@@ -51,16 +51,36 @@ public class HouseBlController {
             @RequestParam(required = false) String polCode,
             @RequestParam(required = false) String podCode,
             @RequestParam(required = false) String etdFrom,
-            @RequestParam(required = false) String etdTo) {
+            @RequestParam(required = false) String etdTo,
+            @RequestParam(required = false) String vessel,
+            @RequestParam(required = false) String voyage,
+            @RequestParam(required = false) String linerCode,
+            @RequestParam(required = false) String operatorCode,
+            @RequestParam(required = false) String teamCode,
+            @RequestParam(required = false) String partyCode,
+            @RequestParam(required = false) String portCode) {
 
         boolean hasFilter = StringUtils.hasText(hblNo) || StringUtils.hasText(mblNo)
                 || StringUtils.hasText(shipperCode) || StringUtils.hasText(consigneeCode)
                 || StringUtils.hasText(polCode) || StringUtils.hasText(podCode)
-                || StringUtils.hasText(etdFrom) || StringUtils.hasText(etdTo);
+                || StringUtils.hasText(etdFrom) || StringUtils.hasText(etdTo)
+                || StringUtils.hasText(vessel) || StringUtils.hasText(voyage)
+                || StringUtils.hasText(linerCode) || StringUtils.hasText(operatorCode)
+                || StringUtils.hasText(teamCode) || StringUtils.hasText(partyCode)
+                || StringUtils.hasText(portCode);
 
         if (hasFilter) {
             HouseBlFilter filter = HouseBlFilter.of(jobDiv, bound, hblNo, mblNo,
-                    shipperCode, consigneeCode, polCode, podCode, etdFrom, etdTo);
+                    shipperCode, consigneeCode, polCode, podCode, etdFrom, etdTo,
+                    vessel, voyage, linerCode, operatorCode, teamCode, partyCode, portCode);
+            return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
+                    houseBlUseCase.searchHouseBls(filter, PageRequest.of(page, size)))));
+        }
+
+        if (bound == null) {
+            HouseBlFilter filter = HouseBlFilter.of(jobDiv, null, null, null,
+                    null, null, null, null, null, null,
+                    null, null, null, null, null, null, null);
             return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
                     houseBlUseCase.searchHouseBls(filter, PageRequest.of(page, size)))));
         }

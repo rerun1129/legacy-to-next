@@ -7,6 +7,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static com.freightos.common.util.VoMapper.mapOrNull;
@@ -25,7 +26,16 @@ public record HouseBlSummaryResponse(
         String        consigneeCode,
         Integer       pkgQty,
         WeightUnit    pkgUnit,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String        notifyCode,
+        String        settlePartnerCode,
+        String        actualCustomerCode,
+        BigDecimal    grossWeightKg,
+        BigDecimal    cbm,
+        String        vesselName,
+        String        voyageNo,
+        String        linerCode,
+        String        linerName
 ) {
     public static HouseBlSummaryResponse from(HouseBl entity) {
         return new HouseBlSummaryResponse(
@@ -41,7 +51,8 @@ public record HouseBlSummaryResponse(
                 mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 mapOrNull(entity.getPkgQty(), Quantity::count),
                 entity.getPkgUnit(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                null, null, null, null, null, null, null, null, null
         );
     }
 
@@ -60,7 +71,16 @@ public record HouseBlSummaryResponse(
                 summary.consigneeCode(),
                 summary.pkgQty(),
                 WeightUnit.fromCode(summary.pkgUnit()),
-                summary.createdAt()
+                summary.createdAt(),
+                summary.notifyCode(),
+                summary.settlePartnerCode(),
+                summary.actualCustomerCode(),
+                summary.grossWeightKg(),
+                summary.cbm(),
+                summary.vesselName(),
+                summary.voyageNo(),
+                summary.linerCode(),
+                summary.linerName()
         );
     }
 }

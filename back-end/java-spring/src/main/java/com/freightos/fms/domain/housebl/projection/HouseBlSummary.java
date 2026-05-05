@@ -3,6 +3,7 @@ package com.freightos.fms.domain.housebl.projection;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -23,5 +24,14 @@ public record HouseBlSummary(
     String consigneeCode,
     Integer pkgQty,
     String pkgUnit,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    String notifyCode,
+    String settlePartnerCode,
+    String actualCustomerCode,
+    BigDecimal grossWeightKg,
+    BigDecimal cbm,
+    String vesselName,
+    String voyageNo,
+    String linerCode,
+    String linerName
 ) {}

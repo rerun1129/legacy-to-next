@@ -10,7 +10,14 @@ public record HouseBlFilter(
     String polCode,
     String podCode,
     String etdFrom,
-    String etdTo
+    String etdTo,
+    String vessel,
+    String voyage,
+    String linerCode,
+    String operatorCode,
+    String teamCode,
+    String partyCode,
+    String portCode
 ) {
     public static HouseBlFilter of(
             com.freightos.fms.domain.housebl.enums.JobDiv jobDiv,
@@ -18,7 +25,13 @@ public record HouseBlFilter(
             String hblNo, String mblNo,
             String shipperCode, String consigneeCode,
             String polCode, String podCode,
-            String etdFrom, String etdTo) {
-        return new HouseBlFilter(jobDiv, bound, hblNo, mblNo, shipperCode, consigneeCode, polCode, podCode, etdFrom, etdTo);
+            String etdFrom, String etdTo,
+            String vessel, String voyage,
+            String linerCode, String operatorCode,
+            String teamCode, String partyCode,
+            String portCode) {
+        return new HouseBlFilter(jobDiv, bound, hblNo, mblNo, shipperCode, consigneeCode,
+                polCode, podCode, etdFrom, etdTo,
+                vessel, voyage, linerCode, operatorCode, teamCode, partyCode, portCode);
     }
 }

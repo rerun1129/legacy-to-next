@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlAirJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
+import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlNonBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
@@ -31,6 +32,7 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             JobDiv jobDiv, Bound bound, PageRequest pageRequest) {
 
         QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        QHouseBlNonBlJpaEntity nonBl = QHouseBlNonBlJpaEntity.houseBlNonBlJpaEntity;
 
         List<HouseBlSummary> content = queryFactory
             .select(Projections.constructor(HouseBlSummary.class,
@@ -46,9 +48,19 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
                 h.consigneeCode,
                 h.pkgQty,
                 h.pkgUnit,
-                h.createdAt
+                h.createdAt,
+                h.notifyCode,
+                h.settlePartnerCode,
+                h.actualCustomerCode,
+                h.grossWeightKg,
+                h.cbm,
+                nonBl.vesselName,
+                nonBl.voyageNo,
+                nonBl.linerCode,
+                nonBl.linerName
             ))
             .from(h)
+            .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
             .where(h.jobDiv.eq(jobDiv).and(h.bound.eq(bound)))
             .orderBy(h.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -69,10 +81,13 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
     @Override
     public PagedResult<HouseBlSummary> searchSummaries(HouseBlFilter filter, PageRequest pageRequest) {
         QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        QHouseBlNonBlJpaEntity nonBl = QHouseBlNonBlJpaEntity.houseBlNonBlJpaEntity;
 
         BooleanBuilder where = new BooleanBuilder();
         where.and(h.jobDiv.eq(filter.jobDiv()));
-        where.and(h.bound.eq(filter.bound()));
+        if (filter.bound() != null) {
+            where.and(h.bound.eq(filter.bound()));
+        }
 
         if (StringUtils.hasText(filter.hblNo())) {
             where.and(h.hblNo.containsIgnoreCase(filter.hblNo()));
@@ -98,6 +113,30 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
         if (StringUtils.hasText(filter.etdTo())) {
             where.and(h.etd.loe(filter.etdTo()));
         }
+        if (StringUtils.hasText(filter.vessel())) {
+            where.and(nonBl.vesselName.containsIgnoreCase(filter.vessel()));
+        }
+        if (StringUtils.hasText(filter.voyage())) {
+            where.and(nonBl.voyageNo.containsIgnoreCase(filter.voyage()));
+        }
+        if (StringUtils.hasText(filter.linerCode())) {
+            where.and(nonBl.linerCode.containsIgnoreCase(filter.linerCode()));
+        }
+        if (StringUtils.hasText(filter.operatorCode())) {
+            where.and(h.operatorCode.eq(filter.operatorCode()));
+        }
+        if (StringUtils.hasText(filter.teamCode())) {
+            where.and(h.teamCode.eq(filter.teamCode()));
+        }
+        if (StringUtils.hasText(filter.partyCode())) {
+            where.and(h.shipperCode.containsIgnoreCase(filter.partyCode())
+                    .or(h.consigneeCode.containsIgnoreCase(filter.partyCode()))
+                    .or(h.notifyCode.containsIgnoreCase(filter.partyCode())));
+        }
+        if (StringUtils.hasText(filter.portCode())) {
+            where.and(h.polCode.containsIgnoreCase(filter.portCode())
+                    .or(h.podCode.containsIgnoreCase(filter.portCode())));
+        }
 
         List<HouseBlSummary> content = queryFactory
             .select(Projections.constructor(HouseBlSummary.class,
@@ -113,9 +152,19 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
                 h.consigneeCode,
                 h.pkgQty,
                 h.pkgUnit,
-                h.createdAt
+                h.createdAt,
+                h.notifyCode,
+                h.settlePartnerCode,
+                h.actualCustomerCode,
+                h.grossWeightKg,
+                h.cbm,
+                nonBl.vesselName,
+                nonBl.voyageNo,
+                nonBl.linerCode,
+                nonBl.linerName
             ))
             .from(h)
+            .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
             .where(where)
             .orderBy(h.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -125,6 +174,7 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
         long total = queryFactory
             .select(h.count())
             .from(h)
+            .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
             .where(where)
             .fetchOne();
 
