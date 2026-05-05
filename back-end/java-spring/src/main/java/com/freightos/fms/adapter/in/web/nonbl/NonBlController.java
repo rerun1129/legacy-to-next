@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/non-bl")
 @RequiredArgsConstructor
-public class NonBlSearchController {
+public class NonBlController {
 
     private final NonBlSearchUseCase nonBlSearchUseCase;
 

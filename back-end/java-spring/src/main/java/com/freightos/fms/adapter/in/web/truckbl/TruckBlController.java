@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/truck-bl")
 @RequiredArgsConstructor
-public class TruckBlSearchController {
+public class TruckBlController {
 
     private final TruckBlSearchUseCase truckBlSearchUseCase;
 
