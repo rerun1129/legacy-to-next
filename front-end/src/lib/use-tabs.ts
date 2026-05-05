@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { listFilterStore } from "./use-list-filter-store";
 
 export interface Tab {
   id: string;
@@ -69,6 +70,7 @@ export const useTabs = create<TabStore>((set, get) => ({
     if (idx === -1) return "/dashboard";
     const next = tabs.filter((t) => t.id !== id);
     set({ tabs: next });
+    listFilterStore.getState().clearFilter(id);
     // navigate to: previous tab, or next tab, or dashboard fallback
     const target = next[Math.max(0, idx - 1)];
     return target?.href ?? "/dashboard";
@@ -93,6 +95,7 @@ export const useTabs = create<TabStore>((set, get) => ({
     const { tabs } = get();
     const target = tabs.find(t => t.id === id);
     if (!target) return;
+    tabs.filter(t => t.id !== id).forEach(t => listFilterStore.getState().clearFilter(t.id));
     set({ tabs: [target] });
   },
 
@@ -100,6 +103,7 @@ export const useTabs = create<TabStore>((set, get) => ({
     const { tabs } = get();
     const idx = tabs.findIndex(t => t.id === id);
     if (idx === -1) return;
+    tabs.slice(idx + 1).forEach(t => listFilterStore.getState().clearFilter(t.id));
     set({ tabs: tabs.slice(0, idx + 1) });
   },
 
@@ -107,6 +111,7 @@ export const useTabs = create<TabStore>((set, get) => ({
     const { tabs } = get();
     const idx = tabs.findIndex(t => t.id === id);
     if (idx === -1) return;
+    tabs.slice(0, idx).forEach(t => listFilterStore.getState().clearFilter(t.id));
     set({ tabs: tabs.slice(idx) });
   },
 
