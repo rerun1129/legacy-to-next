@@ -89,6 +89,9 @@ export const API_NON_BL_PORT: NonBlPort = {
     if (filter.voyage)       body.voyage       = filter.voyage;
     if (filter.operatorCode) body.operatorCode = filter.operatorCode;
     if (filter.teamCode)     body.teamCode     = filter.teamCode;
+    if (filter.dateKind)     body.dateKind     = filter.dateKind;
+    if (filter.partyKind)    body.partyKind    = filter.partyKind;
+    if (filter.portKind)     body.portKind     = filter.portKind;
     const json = await fetchJson(`${NON_BL_BASE}/search`, {
       method: 'POST',
       body: JSON.stringify(body),

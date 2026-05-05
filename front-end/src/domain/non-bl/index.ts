@@ -46,4 +46,7 @@ export interface NonBlFilter {
   teamName: string;
   page?: number;
   size?: number;
+  dateKind?: 'ETD' | 'ETA';
+  partyKind?: 'SHIPPER' | 'CONSIGNEE' | 'NOTIFY' | 'SETTLE_PARTNER';
+  portKind?: 'POL' | 'POD';
 }

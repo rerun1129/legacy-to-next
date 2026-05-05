@@ -10,6 +10,15 @@ import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { NonBlFilter } from "@/domain/non-bl";
 
+const DATE_KIND_OPTIONS = [{ value: 'ETD', label: 'ETD' }, { value: 'ETA', label: 'ETA' }]
+const PARTY_KIND_OPTIONS = [
+  { value: 'SHIPPER', label: 'Shipper' },
+  { value: 'CONSIGNEE', label: 'Consignee' },
+  { value: 'NOTIFY', label: 'Notify' },
+  { value: 'SETTLE_PARTNER', label: 'Settle Partner' },
+]
+const PORT_KIND_OPTIONS = [{ value: 'POL', label: 'POL' }, { value: 'POD', label: 'POD' }]
+
 interface Props {
   form: UseFormReturn<NonBlFilter>;
 }
@@ -39,29 +48,37 @@ export function NonBlListFilter({ form }: Props) {
 
           <Controller
             control={form.control}
-            name="dateFrom"
-            render={({ field: fromField }) => (
+            name="dateKind"
+            render={({ field: kindField }) => (
               <Controller
                 control={form.control}
-                name="dateTo"
-                render={({ field: toField }) => (
-                  <DateRangeBox
-                    label="Date"
-                    required
-                    fromProps={{
-                      name: fromField.name,
-                      value: fromField.value ?? "",
-                      onChange: fromField.onChange,
-                      onBlur: fromField.onBlur,
-                      placeholder: "From",
-                    }}
-                    toProps={{
-                      name: toField.name,
-                      value: toField.value ?? "",
-                      onChange: toField.onChange,
-                      onBlur: toField.onBlur,
-                      placeholder: "To",
-                    }}
+                name="dateFrom"
+                render={({ field: fromField }) => (
+                  <Controller
+                    control={form.control}
+                    name="dateTo"
+                    render={({ field: toField }) => (
+                      <DateRangeBox
+                        labelOptions={DATE_KIND_OPTIONS}
+                        labelValue={kindField.value}
+                        onLabelChange={kindField.onChange}
+                        required
+                        fromProps={{
+                          name: fromField.name,
+                          value: fromField.value ?? "",
+                          onChange: fromField.onChange,
+                          onBlur: fromField.onBlur,
+                          placeholder: "From",
+                        }}
+                        toProps={{
+                          name: toField.name,
+                          value: toField.value ?? "",
+                          onChange: toField.onChange,
+                          onBlur: toField.onBlur,
+                          placeholder: "To",
+                        }}
+                      />
+                    )}
                   />
                 )}
               />
@@ -87,20 +104,36 @@ export function NonBlListFilter({ form }: Props) {
           </div>
 
           {/* Row 2 */}
-          <CodeBox
-            kind="lcn"
-            label="Party"
-            codeProps={{ ...register("partyCode"), placeholder: "Code" }}
-            nameProps={{ ...register("partyName"), placeholder: "Name" }}
-            onLookup={() => {}}
+          <Controller
+            control={form.control}
+            name="partyKind"
+            render={({ field: kindField }) => (
+              <CodeBox
+                kind="lcn"
+                labelOptions={PARTY_KIND_OPTIONS}
+                labelValue={kindField.value}
+                onLabelChange={kindField.onChange}
+                codeProps={{ ...register("partyCode"), placeholder: "Code" }}
+                nameProps={{ ...register("partyName"), placeholder: "Name" }}
+                onLookup={() => {}}
+              />
+            )}
           />
 
-          <CodeBox
-            kind="lcn"
-            label="Port"
-            codeProps={{ ...register("portCode"), placeholder: "Code" }}
-            nameProps={{ ...register("portName"), placeholder: "Name" }}
-            onLookup={() => {}}
+          <Controller
+            control={form.control}
+            name="portKind"
+            render={({ field: kindField }) => (
+              <CodeBox
+                kind="lcn"
+                labelOptions={PORT_KIND_OPTIONS}
+                labelValue={kindField.value}
+                onLabelChange={kindField.onChange}
+                codeProps={{ ...register("portCode"), placeholder: "Code" }}
+                nameProps={{ ...register("portName"), placeholder: "Name" }}
+                onLookup={() => {}}
+              />
+            )}
           />
 
           <div className="lcn">

@@ -3,6 +3,7 @@
 import { forwardRef } from "react";
 import type { DateRangeBoxProps } from "./_types";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { LcnLabel } from "./lcn-label";
 
 export const DateRangeBox = forwardRef<HTMLDivElement, DateRangeBoxProps>(
   function DateRangeBox(
@@ -16,6 +17,9 @@ export const DateRangeBox = forwardRef<HTMLDivElement, DateRangeBoxProps>(
       disabled,
       className,
       style,
+      labelOptions,
+      labelValue,
+      onLabelChange,
     },
     ref
   ) {
@@ -23,10 +27,15 @@ export const DateRangeBox = forwardRef<HTMLDivElement, DateRangeBoxProps>(
 
     return (
       <div ref={ref} className={wrapperCn} style={style}>
-        {label && (
-          <span className={`lcn__label${required ? " is-required" : ""}`}>
+        {(label || labelOptions) && (
+          <LcnLabel
+            options={labelOptions}
+            value={labelValue}
+            onChange={onLabelChange}
+            required={required}
+          >
             {label}
-          </span>
+          </LcnLabel>
         )}
         <div className="lcn__daterange" style={{ gridColumn: "2 / span 2" }}>
           <PanelDateInput

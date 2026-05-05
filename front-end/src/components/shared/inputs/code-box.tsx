@@ -3,6 +3,7 @@
 import { forwardRef } from "react";
 import { Search } from "lucide-react";
 import type { CodeBoxProps } from "./_types";
+import { LcnLabel } from "./lcn-label";
 
 const lookupBtnStyle: React.CSSProperties = {
   position: "absolute",
@@ -31,6 +32,9 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       onLookup,
       mono = true,
       lookupAriaLabel,
+      labelOptions,
+      labelValue,
+      onLabelChange,
     },
     ref
   ) {
@@ -78,10 +82,15 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
 
     return (
       <div className="lcn">
-        {label && (
-          <span className={`lcn__label${required ? " is-required" : ""}`}>
+        {(label || labelOptions) && (
+          <LcnLabel
+            options={labelOptions}
+            value={labelValue}
+            onChange={onLabelChange}
+            required={required}
+          >
             {label}
-          </span>
+          </LcnLabel>
         )}
         <div className="lcn__code" style={{ position: "relative" }}>
           <input

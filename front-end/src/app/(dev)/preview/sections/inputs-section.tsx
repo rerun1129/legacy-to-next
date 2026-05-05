@@ -9,7 +9,7 @@ import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { RadioBox } from "@/components/shared/inputs/radio-box";
-import { TimeBox, DateRangeBox } from "@/components/shared/inputs";
+import { TimeBox, DateRangeBox, LcnLabel } from "@/components/shared/inputs";
 import type { BoxVariant } from "@/components/shared/inputs";
 
 type FormValues = {
@@ -57,6 +57,7 @@ export function InputsSection() {
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
 
+  const [lcnLabelKind, setLcnLabelKind] = useState("ETD");
   const { register, getValues } = useForm<FormValues>({
     defaultValues: {
       text: "sample text",
@@ -274,6 +275,20 @@ export function InputsSection() {
           fromProps={{ placeholder: "From" }}
           toProps={{ placeholder: "To" }}
         />
+      </div>
+
+      {/* LcnLabel select */}
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>LcnLabel (select)</div>
+        <div className="lcn">
+          <LcnLabel
+            options={[{ value: 'ETD', label: 'ETD' }, { value: 'ETA', label: 'ETA' }]}
+            value={lcnLabelKind}
+            onChange={setLcnLabelKind}
+            required={required}
+          />
+          <span style={{ fontSize: 11, color: '#666', gridColumn: '2 / span 2' }}>selected: {lcnLabelKind}</span>
+        </div>
       </div>
 
       {/* TimeBox */}

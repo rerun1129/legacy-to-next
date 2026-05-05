@@ -2,6 +2,8 @@ import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 
 export type BoxVariant = "panel" | "cell";
 
+export type LabelOption = { value: string; label: string };
+
 export interface BoxBaseProps {
   variant?: BoxVariant;
   required?: boolean;
@@ -26,6 +28,9 @@ export interface CodeBoxProps extends BoxBaseProps {
   onLookup: () => void;
   mono?: boolean;
   lookupAriaLabel?: string;
+  labelOptions?: LabelOption[];
+  labelValue?: string;
+  onLabelChange?: (v: string) => void;
 }
 
 export interface DropBoxProps extends BoxBaseProps,
@@ -64,4 +69,7 @@ export interface DateRangeBoxProps extends BoxBaseProps {
   fromProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 'defaultValue' | 'value'> & { defaultValue?: string; value?: string };
   toProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 'defaultValue' | 'value'> & { defaultValue?: string; value?: string };
   tildeText?: string;
+  labelOptions?: LabelOption[];
+  labelValue?: string;
+  onLabelChange?: (v: string) => void;
 }

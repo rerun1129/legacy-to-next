@@ -35,6 +35,9 @@ const DEFAULT_VALUES: NonBlFilter = {
   vessel: '', voyage: '',
   operatorCode: '', operatorName: '',
   teamCode: '', teamName: '',
+  dateKind: 'ETD',
+  partyKind: 'SHIPPER',
+  portKind: 'POL',
 };
 
 export function NonBlListClient() {
