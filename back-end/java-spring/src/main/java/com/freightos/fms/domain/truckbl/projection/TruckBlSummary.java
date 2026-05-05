@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * 도메인 계층에만 의존하므로 JPA 어노테이션·Q-class 의존 없음.
  */
 public record TruckBlSummary(
-    Long houseBlId,
+    Long id,
     String hblNo,
     JobDiv jobDiv,
     Bound bound,

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * HouseBlSummary의 22 필드를 그대로 유지한다.
  */
 public record NonBlSummary(
-    Long houseBlId,
+    Long id,
     String hblNo,
     JobDiv jobDiv,
     Bound bound,

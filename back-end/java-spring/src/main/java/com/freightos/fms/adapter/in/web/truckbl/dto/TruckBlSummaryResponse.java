@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /** Truck B/L 리스트 화면용 요약 DTO */
 public record TruckBlSummaryResponse(
-        Long          houseBlId,
+        Long          id,
         String        hblNo,
         JobDiv        jobDiv,
         Bound         bound,
@@ -31,7 +31,7 @@ public record TruckBlSummaryResponse(
     /** QueryDSL projection 결과로부터 응답 DTO 생성. TruckBlSummary 필드는 이미 raw 타입. */
     public static TruckBlSummaryResponse from(TruckBlSummary summary) {
         return new TruckBlSummaryResponse(
-                summary.houseBlId(),
+                summary.id(),
                 summary.hblNo(),
                 summary.jobDiv(),
                 summary.bound(),

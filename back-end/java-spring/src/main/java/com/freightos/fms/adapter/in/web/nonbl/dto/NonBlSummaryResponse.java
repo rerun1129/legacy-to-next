@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /** Non B/L 리스트 화면용 요약 DTO */
 public record NonBlSummaryResponse(
-        Long          houseBlId,
+        Long          id,
         String        hblNo,
         JobDiv        jobDiv,
         Bound         bound,
@@ -35,7 +35,7 @@ public record NonBlSummaryResponse(
     /** QueryDSL projection 결과로부터 응답 DTO 생성. NonBlSummary 필드는 이미 raw 타입. */
     public static NonBlSummaryResponse from(NonBlSummary summary) {
         return new NonBlSummaryResponse(
-                summary.houseBlId(),
+                summary.id(),
                 summary.hblNo(),
                 summary.jobDiv(),
                 summary.bound(),
