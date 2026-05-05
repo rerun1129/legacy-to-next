@@ -3,6 +3,6 @@ import type { NonBlFilter } from '@/domain/non-bl';
 
 export function createNonBlUseCases(port: NonBlPort) {
   return {
-    list: (filter: NonBlFilter) => port.list(filter),
+    list: (filter: NonBlFilter, page: number, size?: number) => port.list(filter, page, size),
   };
 }

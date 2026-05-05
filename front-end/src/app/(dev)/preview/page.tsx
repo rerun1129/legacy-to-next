@@ -4,13 +4,15 @@ import { useState } from "react";
 import { InputsSection } from "./sections/inputs-section";
 import { GridSection } from "./sections/grid-section";
 import { ButtonsSection } from "./sections/buttons-section";
+import { PaginationSection } from "./sections/pagination-section";
 
-type SectionId = "inputs" | "grid" | "buttons";
+type SectionId = "inputs" | "grid" | "buttons" | "pagination";
 
 const MENU: { id: SectionId; label: string }[] = [
   { id: "inputs", label: "Inputs" },
   { id: "grid", label: "Grid" },
   { id: "buttons", label: "Buttons" },
+  { id: "pagination", label: "Pagination" },
 ];
 
 export default function PreviewPage() {
@@ -52,6 +54,7 @@ export default function PreviewPage() {
         {active === "inputs" && <InputsSection />}
         {active === "grid" && <GridSection />}
         {active === "buttons" && <ButtonsSection />}
+        {active === "pagination" && <PaginationSection />}
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { NonBlPort } from '@/application/non-bl/ports';
+import type { NonBlPort, NonBlPageResult } from '@/application/non-bl/ports';
 import type { NonBlRow, NonBlFilter } from '@/domain/non-bl';
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
@@ -74,15 +74,18 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
 export const API_NON_BL_PORT: NonBlPort = {
-  async list(filter: NonBlFilter): Promise<NonBlRow[]> {
-    // jobDiv=NON_BL은 고정 필수 파라미터. bound가 빈 문자열이면 toSearchParams에서 자동 제외(ALL 조회).
+  // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
+  async list(filter: NonBlFilter, page: number, size = 50): Promise<NonBlPageResult> {
     const params = toSearchParams({
       jobDiv: 'NON_BL',
       ...(filter as unknown as Record<string, unknown>),
+      page: page - 1,
+      size,
     });
     const json = await fetchJson(`${NON_BL_BASE}?${params}`);
     const parsed = apiResponse(pagedResult(NON_BL_ROW_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid non-bl list response: ${parsed.error.message}`);
-    return parsed.data.data.content;
+    const { content, totalPages, totalElements, page: p, size: s } = parsed.data.data;
+    return { content, totalPages, totalElements, page: p + 1, size: s };
   },
 };

@@ -9,24 +9,30 @@ import { TextBox } from "@/components/shared/inputs/text-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DateCell } from "@/components/shared/grid-cell-inputs";
+import { Pagination } from "@/components/shared/pagination";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { nonBlPort } from "@/lib/ports";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
 
 interface Props {
   extraFilter: NonBlFilter | null;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
-export function NonBlGrid({ extraFilter }: Props) {
+export function NonBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<number | null>(null);
   const { options: boundOptions } = useEnumOptions("Bound");
 
-  const { data: rows = [], isLoading, error } = useQuery({
-    queryKey: ["non-bl", "list", extraFilter],
-    queryFn: () => nonBlPort.list(extraFilter!),
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["non-bl", "list", extraFilter, currentPage],
+    queryFn: () => nonBlPort.list(extraFilter!, currentPage),
     enabled: extraFilter !== null,
   });
+
+  const rows = data?.content ?? [];
+  const totalPages = data?.totalPages ?? 0;
 
   const columns: GridColumn<NonBlRow>[] = [
     {
@@ -223,7 +229,7 @@ export function NonBlGrid({ extraFilter }: Props) {
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Non B/L</span>
-        <span className="panel__rowcount">{rows.length}</span>
+        <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
         <ColumnVisibilityMenu<NonBlRow> gridId="non-bl" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
@@ -236,6 +242,12 @@ export function NonBlGrid({ extraFilter }: Props) {
           gridId="non-bl"
         />
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        disabled={isLoading}
+      />
     </div>
   );
 }

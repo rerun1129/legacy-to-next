@@ -40,6 +40,7 @@ const DEFAULT_VALUES: NonBlFilter = {
 export function NonBlListClient() {
   const form = useForm<NonBlFilter>({ defaultValues: DEFAULT_VALUES });
   const [extraFilter, setExtraFilter] = useState<NonBlFilter | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const qc = useQueryClient();
 
   return (
@@ -53,6 +54,7 @@ export function NonBlListClient() {
             onClick={() => {
               form.reset(DEFAULT_VALUES);
               setExtraFilter(null);
+              setCurrentPage(1);
             }}
           >
             Reset
@@ -63,6 +65,7 @@ export function NonBlListClient() {
             leftIcon={<Search size={12} />}
             onClick={() => form.handleSubmit((values) => {
               setExtraFilter(values);
+              setCurrentPage(1);
               qc.invalidateQueries({ queryKey: ['non-bl', 'list'] });
             })()}
           >
@@ -74,7 +77,7 @@ export function NonBlListClient() {
       <NonBlListFilter form={form} />
 
       <div style={{ flex: 1, overflow: 'auto', margin: '10px 14px 0', display: 'flex', flexDirection: 'column' }}>
-        <NonBlGrid extraFilter={extraFilter} />
+        <NonBlGrid extraFilter={extraFilter} currentPage={currentPage} onPageChange={setCurrentPage} />
       </div>
     </>
   );
