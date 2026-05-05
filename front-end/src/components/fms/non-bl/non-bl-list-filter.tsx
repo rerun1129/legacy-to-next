@@ -7,6 +7,7 @@ import { DropBox } from "@/components/shared/inputs/drop-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
+import { useEnumOptions } from "@/application/enums/use-enum";
 
 export interface NonBlListFilterValues {
   bound: string;
@@ -27,18 +28,14 @@ export interface NonBlListFilterValues {
   teamName: string;
 }
 
-const BOUND_OPTIONS = [
-  { value: "ALL", label: "ALL" },
-  { value: "I", label: "Inbound" },
-  { value: "O", label: "Outbound" },
-];
-
 interface Props {
   form: UseFormReturn<NonBlListFilterValues>;
 }
 
 export function NonBlListFilter({ form }: Props) {
   useListFilterSync(form, "/fms/non-bl/list");
+  const { options: boundOptions, isLoading: boundLoading, placeholder: boundPlaceholder } = useEnumOptions("Bound")
+  const boundOptionsWithAll = [{ value: "", label: "ALL" }, ...boundOptions]
   const dateFrom = useWatch({ control: form.control, name: "dateFrom" });
   const dateTo   = useWatch({ control: form.control, name: "dateTo" });
   const { register } = form;
@@ -55,7 +52,9 @@ export function NonBlListFilter({ form }: Props) {
             <span className="lcn__label">Bound</span>
             <DropBox
               variant="panel"
-              options={BOUND_OPTIONS}
+              options={boundOptionsWithAll}
+              disabled={boundLoading}
+              placeholder={boundPlaceholder}
               style={{ gridColumn: "2 / span 2" }}
               {...register("bound")}
             />

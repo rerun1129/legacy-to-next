@@ -23,7 +23,7 @@ function getDefaultMonthRange() {
 const { from, to } = getDefaultMonthRange();
 
 const DEFAULT_VALUES: NonBlListFilterValues = {
-  bound: "ALL",
+  bound: "",
   dateFrom: from,
   dateTo: to,
   linerCode: "", linerName: "",
