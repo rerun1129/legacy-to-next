@@ -9,124 +9,37 @@ import { DropBox } from "@/components/shared/inputs/drop-box";
 import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DateCell } from "@/components/shared/grid-cell-inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
-const ROWS = [
-  {
-    id: 1,
-    nonBlNo: "NBL-2026-04-001",
-    bound: "O",
-    etd: "20260424",
-    eta: "20260508",
-    pol: "KRBSAN",
-    pod: "CNSHA",
-    vesselName: "HYUNDAI BRAVE",
-    voyNo: "026E",
-    shipperCode: "SHP001",
-    shipperName: "한진무역(주)",
-    consigneeCode: "CNS001",
-    consigneeName: "SHANGHAI TRADING CO.",
-    notifyCode: "NTF001",
-    notifyName: "SHANGHAI TRADING CO.",
-    settlePartnerCode: "PTR001",
-    settlePartnerName: "한진로지스틱스",
-    linerCode: "HMM",
-    linerName: "현대상선",
-    actualCustomerCode: "CST001",
-    actualCustomerName: "한진무역(주)",
-    pkgQty: "120",
-    pkgUnit: "CTN",
-    grossWt: "1234.000",
-    cbm: "10.500",
-    teamName: "해운팀",
-  },
-  {
-    id: 2,
-    nonBlNo: "NBL-2026-04-002",
-    bound: "I",
-    etd: "20260422",
-    eta: "20260423",
-    pol: "JPNRT",
-    pod: "KRICN",
-    vesselName: "KOREA AIR 701",
-    voyNo: "KE701",
-    shipperCode: "SHP002",
-    shipperName: "LG전자(주)",
-    consigneeCode: "CNS002",
-    consigneeName: "LG JAPAN K.K.",
-    notifyCode: "NTF002",
-    notifyName: "LG JAPAN K.K.",
-    settlePartnerCode: "PTR002",
-    settlePartnerName: "대한항공 카고",
-    linerCode: "KE",
-    linerName: "대한항공",
-    actualCustomerCode: "CST002",
-    actualCustomerName: "LG전자(주)",
-    pkgQty: "45",
-    pkgUnit: "PLT",
-    grossWt: "560.000",
-    cbm: "4.200",
-    teamName: "항공팀",
-  },
-  {
-    id: 3,
-    nonBlNo: "NBL-2026-04-003",
-    bound: "O",
-    etd: "20260501",
-    eta: "20260520",
-    pol: "KRINCHON",
-    pod: "USNYC",
-    vesselName: "MAERSK SEALAND",
-    voyNo: "0142N",
-    shipperCode: "SHP003",
-    shipperName: "삼성전자",
-    consigneeCode: "CNS003",
-    consigneeName: "SAMSUNG AMERICA INC.",
-    notifyCode: "NTF003",
-    notifyName: "SAMSUNG AMERICA INC.",
-    settlePartnerCode: "PTR003",
-    settlePartnerName: "삼성SDS",
-    linerCode: "MSC",
-    linerName: "MSC SHIPPING",
-    actualCustomerCode: "CST003",
-    actualCustomerName: "삼성전자",
-    pkgQty: "200",
-    pkgUnit: "CTN",
-    grossWt: "3450.000",
-    cbm: "28.800",
-    teamName: "해운팀",
-  },
-  {
-    id: 4,
-    nonBlNo: "NBL-2026-04-004",
-    bound: "I",
-    etd: "20260425",
-    eta: "20260426",
-    pol: "CNSHA",
-    pod: "KRPUS",
-    vesselName: "COSCO SHIPPING",
-    voyNo: "S138E",
-    shipperCode: "SHP004",
-    shipperName: "포스코",
-    consigneeCode: "CNS004",
-    consigneeName: "평택항 터미널",
-    notifyCode: "NTF004",
-    notifyName: "포스코 물류",
-    settlePartnerCode: "PTR004",
-    settlePartnerName: "포스코 물류",
-    linerCode: "COSCO",
-    linerName: "코스코 해운",
-    actualCustomerCode: "CST004",
-    actualCustomerName: "포스코",
-    pkgQty: "80",
-    pkgUnit: "PLT",
-    grossWt: "9800.000",
-    cbm: "42.000",
-    teamName: "해운팀",
-  },
-];
+type NonBlRow = {
+  id: number;
+  nonBlNo: string;
+  bound: string;
+  etd: string;
+  eta: string;
+  pol: string;
+  pod: string;
+  vesselName: string;
+  voyNo: string;
+  shipperCode: string;
+  shipperName: string;
+  consigneeCode: string;
+  consigneeName: string;
+  notifyCode: string;
+  notifyName: string;
+  settlePartnerCode: string;
+  settlePartnerName: string;
+  linerCode: string;
+  linerName: string;
+  actualCustomerCode: string;
+  actualCustomerName: string;
+  pkgQty: string;
+  pkgUnit: string;
+  grossWt: string;
+  cbm: string;
+  teamName: string;
+};
 
-type NonBlRow = typeof ROWS[number];
+const ROWS: NonBlRow[] = [];
 
 export function NonBlGrid() {
   const router = useRouter();
