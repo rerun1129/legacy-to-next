@@ -58,3 +58,10 @@ export type TimeBoxProps = BoxBaseProps & {
   onBlur?: React.FocusEventHandler<HTMLInputElement>;
   name?: string;
 };
+
+export interface DateRangeBoxProps extends BoxBaseProps {
+  label?: string;
+  fromProps?: InputHTMLAttributes<HTMLInputElement>;
+  toProps?: InputHTMLAttributes<HTMLInputElement>;
+  tildeText?: string;
+}

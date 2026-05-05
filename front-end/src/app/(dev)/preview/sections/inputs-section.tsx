@@ -9,7 +9,7 @@ import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { RadioBox } from "@/components/shared/inputs/radio-box";
-import { TimeBox } from "@/components/shared/inputs";
+import { TimeBox, DateRangeBox } from "@/components/shared/inputs";
 import type { BoxVariant } from "@/components/shared/inputs";
 
 type FormValues = {
@@ -260,6 +260,19 @@ export function InputsSection() {
             { value: "C", label: "Option C" },
           ]}
           {...register("radioMode")}
+        />
+      </div>
+
+      {/* DateRangeBox */}
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>DateRangeBox</div>
+        <DateRangeBox
+          variant={variant}
+          required={required}
+          readOnly={readOnly}
+          label="Date"
+          fromProps={{ placeholder: "From" }}
+          toProps={{ placeholder: "To" }}
         />
       </div>
 
