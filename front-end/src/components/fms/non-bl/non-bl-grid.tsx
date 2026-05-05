@@ -14,7 +14,7 @@ import { nonBlPort } from "@/lib/ports";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
 
 interface Props {
-  extraFilter: NonBlFilter;
+  extraFilter: NonBlFilter | null;
 }
 
 export function NonBlGrid({ extraFilter }: Props) {
@@ -24,7 +24,8 @@ export function NonBlGrid({ extraFilter }: Props) {
 
   const { data: rows = [], isLoading, error } = useQuery({
     queryKey: ["non-bl", "list", extraFilter],
-    queryFn: () => nonBlPort.list(extraFilter),
+    queryFn: () => nonBlPort.list(extraFilter!),
+    enabled: extraFilter !== null,
   });
 
   const columns: GridColumn<NonBlRow>[] = [
@@ -189,7 +190,7 @@ export function NonBlGrid({ extraFilter }: Props) {
     },
   ];
 
-  if (isLoading) {
+  if (extraFilter !== null && isLoading) {
     return (
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">

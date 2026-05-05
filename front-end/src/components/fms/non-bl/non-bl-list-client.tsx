@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, Search } from 'lucide-react';
 import { Button } from '@/components/shared/button';
 import type { NonBlFilter } from '@/domain/non-bl';
@@ -38,7 +39,8 @@ const DEFAULT_VALUES: NonBlFilter = {
 
 export function NonBlListClient() {
   const form = useForm<NonBlFilter>({ defaultValues: DEFAULT_VALUES });
-  const [extraFilter, setExtraFilter] = useState<NonBlFilter>(DEFAULT_VALUES);
+  const [extraFilter, setExtraFilter] = useState<NonBlFilter | null>(null);
+  const qc = useQueryClient();
 
   return (
     <>
@@ -50,7 +52,7 @@ export function NonBlListClient() {
             leftIcon={<RotateCcw size={12} />}
             onClick={() => {
               form.reset(DEFAULT_VALUES);
-              setExtraFilter(DEFAULT_VALUES);
+              setExtraFilter(null);
             }}
           >
             Reset
@@ -59,7 +61,10 @@ export function NonBlListClient() {
             size="sm"
             variant="search"
             leftIcon={<Search size={12} />}
-            onClick={() => form.handleSubmit((values) => setExtraFilter(values))()}
+            onClick={() => form.handleSubmit((values) => {
+              setExtraFilter(values);
+              qc.invalidateQueries({ queryKey: ['non-bl', 'list'] });
+            })()}
           >
             Search
           </Button>
