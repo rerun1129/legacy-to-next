@@ -179,7 +179,7 @@ public class MasterBlAssembler {
                                 String porCode, String finalDestCode, BigDecimal rton) {
         if (vesselNationality != null) sea.updateVesselNationality(vesselNationality);
         if (weightUnit != null)        sea.updateWeightUnit(WeightUnit.fromCode(weightUnit));
-        if (serviceTerm != null)       sea.updateServiceTerm(ServiceTerm.fromCode(serviceTerm));
+        if (serviceTerm != null)       sea.updateServiceTerm(ServiceTerm.fromLabel(serviceTerm));
         if (blType != null)            sea.updateBlType(BlType.valueOf(blType));
         if (porCode != null || finalDestCode != null) {
             sea.updateRoute(PortCode.of(porCode), PortCode.of(finalDestCode));

@@ -39,13 +39,10 @@ class EnumRegistryTest {
         }
         map.put("VolumeDivisor", volumeOptions);
 
-        // NoOfBl — number→string 변환
+        // NoOfBl — name()을 code로, getLabel()을 label로 사용
         List<EnumOption> noOfBlOptions = new ArrayList<>();
         for (NoOfBl n : NoOfBl.values()) {
-            noOfBlOptions.add(new EnumOption(
-                    String.valueOf(n.getNumber()),
-                    String.valueOf(n.getNumber()),
-                    null));
+            noOfBlOptions.add(new EnumOption(n.name(), n.getLabel(), null));
         }
         map.put("NoOfBl", noOfBlOptions);
 
@@ -108,17 +105,17 @@ class EnumRegistryTest {
     }
 
     @Test
-    @DisplayName("NoOfBl — number가 string으로 변환되어 code/label에 설정됨")
-    void noOfBl_numberToStringConversion() {
+    @DisplayName("NoOfBl — name()이 code, getLabel()이 label로 설정됨")
+    void noOfBl_nameAndLabelMapping() {
         List<EnumOption> options = registry.getByName("NoOfBl").orElseThrow();
 
         assertThat(options).anySatisfy(opt -> {
-            assertThat(opt.code()).isEqualTo("0");
-            assertThat(opt.label()).isEqualTo("0");
+            assertThat(opt.code()).isEqualTo("ZERO");
+            assertThat(opt.label()).isEqualTo("ZERO(0)");
         });
         assertThat(options).anySatisfy(opt -> {
-            assertThat(opt.code()).isEqualTo("1");
-            assertThat(opt.label()).isEqualTo("1");
+            assertThat(opt.code()).isEqualTo("ONE");
+            assertThat(opt.label()).isEqualTo("ONE(1)");
         });
     }
 

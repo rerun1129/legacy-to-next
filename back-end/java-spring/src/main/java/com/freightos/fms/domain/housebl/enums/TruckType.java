@@ -11,25 +11,25 @@ public enum TruckType {
     T80("T80",  new BigDecimal("8.0"),  new BigDecimal("7.8")),
     T100("T100", new BigDecimal("10.0"), new BigDecimal("9.6"));
 
-    private final String code;
+    private final String label;
     private final BigDecimal tonnage;
     private final BigDecimal lengthMeter;
 
-    TruckType(String code, BigDecimal tonnage, BigDecimal lengthMeter) {
-        this.code        = code;
+    TruckType(String label, BigDecimal tonnage, BigDecimal lengthMeter) {
+        this.label       = label;
         this.tonnage     = tonnage;
         this.lengthMeter = lengthMeter;
     }
 
-    public String getCode() { return code; }
+    public String getLabel() { return label; }
     public BigDecimal getTonnage() { return tonnage; }
     public BigDecimal getLengthMeter() { return lengthMeter; }
 
-    public static TruckType fromCode(String code) {
-        if (code == null || code.isBlank()) return null;
+    public static TruckType fromLabel(String label) {
+        if (label == null || label.isBlank()) return null;
         for (TruckType t : values()) {
-            if (t.code.equals(code)) return t;
+            if (t.label.equals(label)) return t;
         }
-        throw new IllegalArgumentException("Unknown truck type code: " + code);
+        throw new IllegalArgumentException("Unknown truck type code: " + label);
     }
 }

@@ -131,7 +131,7 @@ public class HouseBlSubAssembler {
             o.updateDetails(new HouseBlTruckOrder.Details(
                     p.truckOrderNo(), p.pkgQty(), p.pkgUnit(),
                     Weight.of(p.grossWeightKg()), Volume.of(p.cbm()),
-                    p.truckNo(), TruckType.fromCode(p.truckType()), p.driver(), p.mobileNo(),
+                    p.truckNo(), TruckType.fromLabel(p.truckType()), p.driver(), p.mobileNo(),
                     ContainerNumber.of(p.containerNo()), ContainerType.fromCode(p.containerType()),
                     SealNumber.of(p.sealNo1()), SealNumber.of(p.sealNo2()), SealNumber.of(p.sealNo3())));
             return o;

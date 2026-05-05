@@ -68,19 +68,19 @@ class CommonEnumsFromCodeTest {
         @Test
         @DisplayName("유효한 코드 'CY/CY' → ServiceTerm.CY_CY 반환")
         void fromCode_validCyCy_returnsCyCy() {
-            assertThat(ServiceTerm.fromCode("CY/CY")).isEqualTo(ServiceTerm.CY_CY);
+            assertThat(ServiceTerm.fromLabel("CY/CY")).isEqualTo(ServiceTerm.CY_CY);
         }
 
         @Test
         @DisplayName("유효한 코드 'BULK' → ServiceTerm.BULK 반환")
         void fromCode_validBulk_returnsBulk() {
-            assertThat(ServiceTerm.fromCode("BULK")).isEqualTo(ServiceTerm.BULK);
+            assertThat(ServiceTerm.fromLabel("BULK")).isEqualTo(ServiceTerm.BULK);
         }
 
         @Test
         @DisplayName("존재하지 않는 코드 → IllegalArgumentException, 메시지에 코드 포함")
         void fromCode_unknownCode_throwsIae() {
-            assertThatThrownBy(() -> ServiceTerm.fromCode("UNKNOWN_CODE"))
+            assertThatThrownBy(() -> ServiceTerm.fromLabel("UNKNOWN_CODE"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Unknown service term code: UNKNOWN_CODE");
         }
@@ -88,13 +88,13 @@ class CommonEnumsFromCodeTest {
         @Test
         @DisplayName("null 전달 → null 반환")
         void fromCode_null_returnsNull() {
-            assertThat(ServiceTerm.fromCode(null)).isNull();
+            assertThat(ServiceTerm.fromLabel(null)).isNull();
         }
 
         @Test
         @DisplayName("빈 문자열 전달 → null 반환")
         void fromCode_blank_returnsNull() {
-            assertThat(ServiceTerm.fromCode("")).isNull();
+            assertThat(ServiceTerm.fromLabel("")).isNull();
         }
     }
 

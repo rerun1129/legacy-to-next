@@ -25,20 +25,32 @@ public class EnumRegistryFactory {
     public EnumRegistry enumRegistry() {
         Map<String, List<EnumOption>> map = new LinkedHashMap<>();
 
-        // common enums
+        // common enums — 메타 보유 (code/description 구분)
         register(map, "Per", Per.values(),
                 e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription()));
-        register(map, "Bound", Bound.values(), EnumOption::fromName);
-        register(map, "BlType", BlType.values(), EnumOption::fromName);
-        register(map, "FreightTerm", FreightTerm.values(), EnumOption::fromName);
-        register(map, "Incoterms", Incoterms.values(), EnumOption::fromName);
-        register(map, "ServiceTerm", ServiceTerm.values(), EnumOption::fromName);
-        register(map, "RateClass", RateClass.values(), EnumOption::fromName);
-        register(map, "WeightUnit", WeightUnit.values(), EnumOption::fromName);
-        register(map, "SecurityStatus", SecurityStatus.values(), EnumOption::fromName);
-        register(map, "LoadType", LoadType.values(), EnumOption::fromName);
-        register(map, "ShipmentType", ShipmentType.values(), EnumOption::fromName);
-        register(map, "SortDirection", SortDirection.values(), EnumOption::fromName);
+        // common enums — label 통일
+        register(map, "Bound", Bound.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "BlType", BlType.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "FreightTerm", FreightTerm.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "Incoterms", Incoterms.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "ServiceTerm", ServiceTerm.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "RateClass", RateClass.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "WeightUnit", WeightUnit.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "SecurityStatus", SecurityStatus.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "LoadType", LoadType.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "ShipmentType", ShipmentType.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "SortDirection", SortDirection.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "VolumeDivisor", VolumeDivisor.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         // DescClause1/2의 label은 public 필드
@@ -46,7 +58,7 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.name(), e.label, null));
         register(map, "DescClause2", DescClause2.values(),
                 e -> new EnumOption(e.name(), e.label, null));
-        // housebl enums with description
+        // housebl enums — 메타 보유 (description)
         register(map, "Fhd", Fhd.values(),
                 e -> new EnumOption(e.name(), e.getDescription(), e.getDescription()));
         register(map, "FlightType", FlightType.values(),
@@ -59,16 +71,18 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription()));
         register(map, "ContainerType", ContainerType.values(),
                 e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription()));
-        // TruckType: code만 있고 별도 description 없으므로 code를 label로 사용
+        // housebl enums — label 통일
         register(map, "TruckType", TruckType.values(),
-                e -> new EnumOption(e.getCode(), e.getCode(), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "SalesClass", SalesClass.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "NoOfBl", NoOfBl.values(),
-                e -> new EnumOption(String.valueOf(e.getNumber()), String.valueOf(e.getNumber()), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null));
         // 같은 이름의 JobDiv가 housebl/masterbl 양쪽에 있으므로 네임스페이스로 구분
-        register(map, "housebl.JobDiv", JobDiv.values(), EnumOption::fromName);
-        register(map, "masterbl.MasterBlJobDiv", MasterBlJobDiv.values(), EnumOption::fromName);
+        register(map, "housebl.JobDiv", JobDiv.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "masterbl.MasterBlJobDiv", MasterBlJobDiv.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
         // PackageUnit은 values().length == 0이므로 register 내부에서 skip됨
         register(map, "PackageUnit", PackageUnit.values(), EnumOption::fromName);
 

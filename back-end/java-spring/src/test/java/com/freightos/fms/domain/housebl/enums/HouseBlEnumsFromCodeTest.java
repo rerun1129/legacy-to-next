@@ -66,19 +66,19 @@ class HouseBlEnumsFromCodeTest {
         @Test
         @DisplayName("유효한 코드 'T12' → TruckType.T12 반환")
         void fromCode_validT12_returnsT12() {
-            assertThat(TruckType.fromCode("T12")).isEqualTo(TruckType.T12);
+            assertThat(TruckType.fromLabel("T12")).isEqualTo(TruckType.T12);
         }
 
         @Test
         @DisplayName("유효한 코드 'T100' → TruckType.T100 반환")
         void fromCode_validT100_returnsT100() {
-            assertThat(TruckType.fromCode("T100")).isEqualTo(TruckType.T100);
+            assertThat(TruckType.fromLabel("T100")).isEqualTo(TruckType.T100);
         }
 
         @Test
         @DisplayName("존재하지 않는 코드 → IllegalArgumentException, 메시지에 코드 포함")
         void fromCode_unknownCode_throwsIae() {
-            assertThatThrownBy(() -> TruckType.fromCode("UNKNOWN_CODE"))
+            assertThatThrownBy(() -> TruckType.fromLabel("UNKNOWN_CODE"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Unknown truck type code: UNKNOWN_CODE");
         }
@@ -86,13 +86,13 @@ class HouseBlEnumsFromCodeTest {
         @Test
         @DisplayName("null 전달 → null 반환")
         void fromCode_null_returnsNull() {
-            assertThat(TruckType.fromCode(null)).isNull();
+            assertThat(TruckType.fromLabel(null)).isNull();
         }
 
         @Test
         @DisplayName("빈 문자열 전달 → null 반환")
         void fromCode_blank_returnsNull() {
-            assertThat(TruckType.fromCode("")).isNull();
+            assertThat(TruckType.fromLabel("")).isNull();
         }
     }
 

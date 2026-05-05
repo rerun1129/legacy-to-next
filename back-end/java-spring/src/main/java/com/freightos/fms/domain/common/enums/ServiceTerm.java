@@ -30,17 +30,17 @@ public enum ServiceTerm {
     TML_CY("TML/CY"),
     TML_DOOR("TML/DOOR");
 
-    private final String code;
+    private final String label;
 
-    ServiceTerm(String code) { this.code = code; }
+    ServiceTerm(String label) { this.label = label; }
 
-    public String getCode() { return code; }
+    public String getLabel() { return label; }
 
-    public static ServiceTerm fromCode(String code) {
-        if (code == null || code.isBlank()) return null;
+    public static ServiceTerm fromLabel(String label) {
+        if (label == null || label.isBlank()) return null;
         for (ServiceTerm t : values()) {
-            if (t.code.equals(code)) return t;
+            if (t.label.equals(label)) return t;
         }
-        throw new IllegalArgumentException("Unknown service term code: " + code);
+        throw new IllegalArgumentException("Unknown service term code: " + label);
     }
 }

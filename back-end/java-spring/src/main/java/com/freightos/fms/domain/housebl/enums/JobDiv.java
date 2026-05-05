@@ -5,8 +5,14 @@ package com.freightos.fms.domain.housebl.enums;
  * DDL 컬럼명: job_div
  */
 public enum JobDiv {
-    SEA,
-    AIR,
-    TRUCK,
-    NON_BL
+    SEA("Sea"),
+    AIR("Air"),
+    TRUCK("Truck"),
+    NON_BL("Non B/L");
+
+    private final String label;
+
+    JobDiv(String label) { this.label = label; }
+
+    public String getLabel() { return label; }
 }

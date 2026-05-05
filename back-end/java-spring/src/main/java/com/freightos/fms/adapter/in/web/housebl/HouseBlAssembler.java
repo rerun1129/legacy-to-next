@@ -211,7 +211,7 @@ public class HouseBlAssembler {
                                      java.math.BigDecimal rton, String sayInfo, String noOfCtnr) {
         if (serviceTerm != null || weightUnit != null || rton != null || sayInfo != null || noOfCtnr != null) {
             sea.updateSeaCargoTerms(
-                    serviceTerm != null ? ServiceTerm.fromCode(serviceTerm) : sea.getServiceTerm(),
+                    serviceTerm != null ? ServiceTerm.fromLabel(serviceTerm) : sea.getServiceTerm(),
                     weightUnit  != null ? WeightUnit.fromCode(weightUnit)   : sea.getWeightUnit(),
                     rton        != null ? Rton.of(rton)                     : sea.getRton(),
                     sayInfo     != null ? sayInfo                           : sea.getSayInformation(),
