@@ -1,6 +1,7 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
@@ -38,6 +39,8 @@ interface Props {
 
 export function NonBlListFilter({ form }: Props) {
   useListFilterSync(form, "/fms/non-bl/list");
+  const dateFrom = useWatch({ control: form.control, name: "dateFrom" });
+  const dateTo   = useWatch({ control: form.control, name: "dateTo" });
   const { register } = form;
 
   return (
@@ -58,8 +61,8 @@ export function NonBlListFilter({ form }: Props) {
           <DateRangeBox
             label="Date"
             required
-            fromProps={{ ...register("dateFrom"), placeholder: "From" }}
-            toProps={{ ...register("dateTo"), placeholder: "To" }}
+            fromProps={{ ...register("dateFrom"), value: dateFrom, placeholder: "From" }}
+            toProps={{ ...register("dateTo"),   value: dateTo,   placeholder: "To" }}
           />
 
           <CodeBox
