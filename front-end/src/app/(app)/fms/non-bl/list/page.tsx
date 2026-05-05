@@ -47,7 +47,7 @@ export default function NonBLListPage() {
         </div>
         <div className="page-head__actions">
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-            <Button size="sm" variant="ghost" leftIcon={<RotateCcw size={12} />} onClick={() => form.reset(DEFAULT_VALUES)}>
+            <Button size="sm" variant="normal" leftIcon={<RotateCcw size={12} />} onClick={() => form.reset(DEFAULT_VALUES)}>
               Reset
             </Button>
             <Button size="sm" variant="search" leftIcon={<Search size={12} />}>

@@ -27,7 +27,7 @@ export function ConfirmModal({
         <div className="modal__title">{title}</div>
         <div className="modal__body">{message}</div>
         <div className="modal__actions">
-          <Button variant="primary" onClick={onConfirm}>
+          <Button variant="transaction" onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </div>

@@ -4,11 +4,11 @@ import { createRef } from "react";
 import { Button } from "../button";
 
 describe("Button", () => {
-  it('variant="primary" → className에 btn + btn--primary 포함', () => {
-    render(<Button variant="primary" data-testid="btn">Label</Button>);
+  it('variant="transaction" → className에 btn + btn--transaction 포함', () => {
+    render(<Button variant="transaction" data-testid="btn">Label</Button>);
     const btn = screen.getByTestId("btn");
     expect(btn).toHaveClass("btn");
-    expect(btn).toHaveClass("btn--primary");
+    expect(btn).toHaveClass("btn--transaction");
   });
 
   it('size="sm" → className에 btn--sm 포함', () => {
