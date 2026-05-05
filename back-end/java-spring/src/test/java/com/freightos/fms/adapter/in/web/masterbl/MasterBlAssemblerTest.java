@@ -1,11 +1,9 @@
 package com.freightos.fms.adapter.in.web.masterbl;
 
 import com.freightos.fms.adapter.in.web.masterbl.dto.CreateMasterBlRequest;
+import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
-import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
-import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,11 +14,11 @@ class MasterBlAssemblerTest {
 
     private final MasterBlAssembler assembler = new MasterBlAssembler();
 
-    // ── toEntity(CreateMasterBlRequest) ──────────────────────────────
+    // ── toCreateCommand(CreateMasterBlRequest) ────────────────────────
 
     @Test
-    @DisplayName("toEntity: jobDiv=SEA, bound=EXP → MasterBlSea 인스턴스 생성, bound 일치")
-    void toEntity_seaExp_returnsMasterBlSeaWithCorrectBound() {
+    @DisplayName("toCreateCommand: jobDiv=SEA, bound=EXP → Command의 jobDiv·bound 일치")
+    void toCreateCommand_seaExp_returnsCommandWithCorrectJobDivAndBound() {
         CreateMasterBlRequest request = new CreateMasterBlRequest(
                 MasterBlJobDiv.SEA, Bound.EXP, null, null,
                 FreightTerm.PREPAID,
@@ -29,15 +27,16 @@ class MasterBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
-        MasterBl result = assembler.toEntity(request);
+        CreateMasterBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(MasterBlSea.class);
-        assertThat(result.getBound()).isEqualTo(Bound.EXP);
+        assertThat(result).isNotNull();
+        assertThat(result.jobDiv()).isEqualTo(MasterBlJobDiv.SEA);
+        assertThat(result.bound()).isEqualTo(Bound.EXP);
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=AIR, bound=IMP → MasterBlAir 인스턴스 생성, bound 일치")
-    void toEntity_airImp_returnsMasterBlAirWithCorrectBound() {
+    @DisplayName("toCreateCommand: jobDiv=AIR, bound=IMP → Command의 jobDiv·bound 일치")
+    void toCreateCommand_airImp_returnsCommandWithCorrectJobDivAndBound() {
         CreateMasterBlRequest request = new CreateMasterBlRequest(
                 MasterBlJobDiv.AIR, Bound.IMP, null, null,
                 FreightTerm.PREPAID,
@@ -46,15 +45,16 @@ class MasterBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
-        MasterBl result = assembler.toEntity(request);
+        CreateMasterBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(MasterBlAir.class);
-        assertThat(result.getBound()).isEqualTo(Bound.IMP);
+        assertThat(result).isNotNull();
+        assertThat(result.jobDiv()).isEqualTo(MasterBlJobDiv.AIR);
+        assertThat(result.bound()).isEqualTo(Bound.IMP);
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=SEA, bound=IMP → MasterBlSea, bound IMP 확인")
-    void toEntity_seaImp_returnsMasterBlSeaWithImpBound() {
+    @DisplayName("toCreateCommand: jobDiv=SEA, bound=IMP → Command의 bound IMP 확인")
+    void toCreateCommand_seaImp_returnsCommandWithImpBound() {
         CreateMasterBlRequest request = new CreateMasterBlRequest(
                 MasterBlJobDiv.SEA, Bound.IMP, null, null,
                 FreightTerm.PREPAID,
@@ -63,15 +63,15 @@ class MasterBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
-        MasterBl result = assembler.toEntity(request);
+        CreateMasterBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(MasterBlSea.class);
-        assertThat(result.getBound()).isEqualTo(Bound.IMP);
+        assertThat(result.jobDiv()).isEqualTo(MasterBlJobDiv.SEA);
+        assertThat(result.bound()).isEqualTo(Bound.IMP);
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=AIR, bound=EXP → MasterBlAir, jobDiv AIR 확인")
-    void toEntity_airExp_returnsMasterBlAirWithAirJobDiv() {
+    @DisplayName("toCreateCommand: jobDiv=AIR, bound=EXP → Command의 jobDiv AIR 확인")
+    void toCreateCommand_airExp_returnsCommandWithAirJobDiv() {
         CreateMasterBlRequest request = new CreateMasterBlRequest(
                 MasterBlJobDiv.AIR, Bound.EXP, null, null,
                 FreightTerm.PREPAID,
@@ -80,9 +80,8 @@ class MasterBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
-        MasterBl result = assembler.toEntity(request);
+        CreateMasterBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(MasterBlAir.class);
-        assertThat(result.getJobDiv()).isEqualTo(MasterBlJobDiv.AIR);
+        assertThat(result.jobDiv()).isEqualTo(MasterBlJobDiv.AIR);
     }
 }

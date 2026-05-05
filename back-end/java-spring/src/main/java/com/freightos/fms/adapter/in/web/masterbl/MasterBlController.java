@@ -5,10 +5,10 @@ import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.UpdateMasterBlRequest;
 import com.freightos.common.response.ApiResponse;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
@@ -55,8 +55,7 @@ public class MasterBlController {
                 || StringUtils.hasText(etdTo);
 
         if (hasFilter) {
-            MasterBlFilter filter = new MasterBlFilter(bound, mblNo, shipperCode, consigneeCode,
-                    polCode, podCode, etdFrom, etdTo);
+            MasterBlFilter filter = new MasterBlFilter(bound, mblNo, shipperCode, consigneeCode, polCode, podCode, etdFrom, etdTo);
             return ResponseEntity.ok(ApiResponse.of(
                     masterBlAssembler.toSummaryPage(masterBlUseCase.searchMasterBls(filter, PageRequest.of(page, size)))));
         }
@@ -70,17 +69,16 @@ public class MasterBlController {
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> createMasterBl(
             @Valid @RequestBody CreateMasterBlRequest request,
             UriComponentsBuilder uriBuilder) {
-        MasterBl saved = masterBlUseCase.save(masterBlAssembler.toEntity(request));
-        URI location = uriBuilder.path("/api/master-bl/{id}").buildAndExpand(saved.getId()).toUri();
+        MasterBlDetailResult result = masterBlUseCase.createMasterBl(masterBlAssembler.toCreateCommand(request));
+        URI location = uriBuilder.path("/api/master-bl/{id}").buildAndExpand(result.id()).toUri();
         return ResponseEntity.created(location)
-                .body(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(saved.getId())),
-                        MessageCode.MASTER_BL_CREATED.message()));
+                .body(ApiResponse.of(masterBlAssembler.toDetail(result), MessageCode.MASTER_BL_CREATED.message()));
     }
 
     @Operation(summary = "Master B/L 단건 조회")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> findMasterBlById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(id))));
+        return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlById(id))));
     }
 
     @Operation(summary = "Master B/L 수정")
@@ -88,12 +86,8 @@ public class MasterBlController {
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> updateMasterBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateMasterBlRequest req) {
-        MasterBl entity = masterBlUseCase.findMasterBlById(id);
-        masterBlAssembler.applyToEntity(req, entity);
-        masterBlUseCase.save(entity);
-        return ResponseEntity.ok(ApiResponse.of(
-                masterBlAssembler.toDetail(masterBlUseCase.findMasterBlDetailById(id)),
-                MessageCode.MASTER_BL_UPDATED.message()));
+        MasterBlDetailResult result = masterBlUseCase.updateMasterBl(id, masterBlAssembler.toUpdateCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(result), MessageCode.MASTER_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Master B/L 삭제")

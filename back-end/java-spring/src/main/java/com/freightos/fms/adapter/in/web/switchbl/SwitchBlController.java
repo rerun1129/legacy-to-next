@@ -4,8 +4,8 @@ import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.switchbl.dto.CreateSwitchBlRequest;
 import com.freightos.fms.adapter.in.web.switchbl.dto.SwitchBlResponse;
 import com.freightos.fms.adapter.in.web.switchbl.dto.UpdateSwitchBlRequest;
+import com.freightos.fms.application.switchbl.projection.SwitchBlDetailResult;
 import com.freightos.fms.common.response.MessageCode;
-import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.application.switchbl.port.in.SwitchBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,10 +34,10 @@ public class SwitchBlController {
     public ResponseEntity<ApiResponse<SwitchBlResponse>> createSwitchBl(
             @Valid @RequestBody CreateSwitchBlRequest request,
             UriComponentsBuilder uriBuilder) {
-        SwitchBl saved = switchBlUseCase.createSwitchBl(switchBlAssembler.toEntity(request));
-        URI location = uriBuilder.path("/api/switch-bl/{id}").buildAndExpand(saved.getSwitchBlId()).toUri();
+        SwitchBlDetailResult result = switchBlUseCase.createSwitchBl(switchBlAssembler.toCreateCommand(request));
+        URI location = uriBuilder.path("/api/switch-bl/{id}").buildAndExpand(result.switchBlId()).toUri();
         return ResponseEntity.created(location)
-                .body(ApiResponse.of(switchBlAssembler.toResponse(saved), MessageCode.SWITCH_BL_CREATED.message()));
+                .body(ApiResponse.of(switchBlAssembler.toResponse(result), MessageCode.SWITCH_BL_CREATED.message()));
     }
 
     @Operation(summary = "Switch B/L 단건 조회")
@@ -49,7 +49,7 @@ public class SwitchBlController {
     @Operation(summary = "Switch B/L 조회 by House B/L ID (미존재 시 204 반환)")
     @GetMapping("/by-house-bl/{houseBlId}")
     public ResponseEntity<ApiResponse<SwitchBlResponse>> getSwitchBlByHouseBlId(@PathVariable Long houseBlId) {
-        Optional<SwitchBl> found = switchBlUseCase.findOptionalByHouseBlId(houseBlId);
+        Optional<SwitchBlDetailResult> found = switchBlUseCase.findOptionalByHouseBlId(houseBlId);
         if (found.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -61,10 +61,8 @@ public class SwitchBlController {
     public ResponseEntity<ApiResponse<SwitchBlResponse>> updateSwitchBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateSwitchBlRequest req) {
-        SwitchBl entity = switchBlUseCase.findSwitchBlById(id);
-        switchBlAssembler.applyToEntity(req, entity);
-        SwitchBl saved = switchBlUseCase.updateSwitchBl(entity);
-        return ResponseEntity.ok(ApiResponse.of(switchBlAssembler.toResponse(saved), MessageCode.SWITCH_BL_UPDATED.message()));
+        SwitchBlDetailResult result = switchBlUseCase.updateSwitchBl(id, switchBlAssembler.toUpdateCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(switchBlAssembler.toResponse(result), MessageCode.SWITCH_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Switch B/L 삭제")

@@ -1,10 +1,6 @@
 package com.freightos.fms.adapter.in.web.switchbl.dto;
 
-import com.freightos.fms.domain.common.vo.CustomerCode;
-import com.freightos.fms.domain.switchbl.entity.SwitchBl;
-import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
-
-import static com.freightos.common.util.VoMapper.mapOrNull;
+import com.freightos.fms.application.switchbl.projection.SwitchBlDetailResult;
 
 /** Switch B/L 응답 DTO. */
 public record SwitchBlResponse(
@@ -21,21 +17,20 @@ public record SwitchBlResponse(
         String marks,
         String natureQuantity
 ) {
-    public static SwitchBlResponse from(SwitchBl domain) {
-        SwitchBlDescription desc = domain.getDescription();
+    public static SwitchBlResponse from(SwitchBlDetailResult result) {
         return new SwitchBlResponse(
-                domain.getId(),
-                domain.getSwitchBlId(),
-                domain.getHouseBlId(),
-                domain.getSwitchBlNo(),
-                mapOrNull(domain.getShipperCode(), CustomerCode::value),
-                mapOrNull(domain.getShipperCode(), CustomerCode::address),
-                mapOrNull(domain.getConsigneeCode(), CustomerCode::value),
-                mapOrNull(domain.getConsigneeCode(), CustomerCode::address),
-                mapOrNull(domain.getNotifyCode(), CustomerCode::value),
-                mapOrNull(domain.getNotifyCode(), CustomerCode::address),
-                desc != null ? desc.getMarks() : null,
-                desc != null ? desc.getNatureQuantity() : null
+                result.id(),
+                result.switchBlId(),
+                result.houseBlId(),
+                result.switchBlNo(),
+                result.shipperCode(),
+                result.shipperAddress(),
+                result.consigneeCode(),
+                result.consigneeAddress(),
+                result.notifyCode(),
+                result.notifyAddress(),
+                result.marks(),
+                result.natureQuantity()
         );
     }
 }

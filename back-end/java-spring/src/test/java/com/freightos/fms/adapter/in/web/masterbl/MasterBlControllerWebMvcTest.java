@@ -3,11 +3,12 @@ package com.freightos.fms.adapter.in.web.masterbl;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
+import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.domain.masterbl.MasterBlDetail;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,9 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,19 +57,18 @@ class MasterBlControllerWebMvcTest {
     // ── GET /api/master-bl/{id} ───────────────────────────────────────
 
     @Test
-    @DisplayName("GET /api/master-bl/{id}: useCase.findMasterBlDetailById 호출 (findMasterBlById 회귀 차단), 200 응답")
-    void getMasterBlById_invokesFindMasterBlDetailByIdUseCase() throws Exception {
+    @DisplayName("GET /api/master-bl/{id}: useCase.findMasterBlById 호출, 200 응답")
+    void getMasterBlById_invokesFindMasterBlByIdUseCase() throws Exception {
         Long id = 1L;
-        MasterBlDetail mockDetail = mock(MasterBlDetail.class);
+        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
         MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
 
-        given(masterBlUseCase.findMasterBlDetailById(id)).willReturn(mockDetail);
-        given(masterBlAssembler.toDetail(mockDetail)).willReturn(mockResponse);
+        given(masterBlUseCase.findMasterBlById(id)).willReturn(mockResult);
+        given(masterBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
 
         mockMvc.perform(get("/api/master-bl/{id}", id)).andExpect(status().isOk());
 
-        then(masterBlUseCase).should().findMasterBlDetailById(id);
-        then(masterBlUseCase).should(never()).findMasterBlById(any());
+        then(masterBlUseCase).should().findMasterBlById(id);
     }
 
     // ── GET /api/master-bl ────────────────────────────────────────────
@@ -116,7 +114,7 @@ class MasterBlControllerWebMvcTest {
     @DisplayName("GET /api/master-bl/1: UseCase가 ResourceNotFoundException 던질 때 → 404, ProblemDetail 응답")
     void findMasterBlById_whenNotFound_returnsError() throws Exception {
         Long id = 1L;
-        given(masterBlUseCase.findMasterBlDetailById(id))
+        given(masterBlUseCase.findMasterBlById(id))
                 .willThrow(new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
 
         mockMvc.perform(get("/api/master-bl/{id}", id))
@@ -145,14 +143,14 @@ class MasterBlControllerWebMvcTest {
     @Test
     @DisplayName("POST /api/master-bl: jobDiv=SEA, bound=EXP happy path → 201 + Location 헤더")
     void createMasterBl_happyPath_returns201WithLocation() throws Exception {
-        MasterBl mockEntity = mock(MasterBl.class);
-        MasterBlDetail mockDetail = mock(MasterBlDetail.class);
+        Long id = 1L;
+        CreateMasterBlCommand mockCommand = mock(CreateMasterBlCommand.class);
+        MasterBlDetailResult mockSavedResult = mock(MasterBlDetailResult.class);
         MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
-        given(mockEntity.getId()).willReturn(1L);
-        given(masterBlAssembler.toEntity(any())).willReturn(mockEntity);
-        given(masterBlUseCase.save(mockEntity)).willReturn(mockEntity);
-        given(masterBlUseCase.findMasterBlDetailById(1L)).willReturn(mockDetail);
-        given(masterBlAssembler.toDetail(mockDetail)).willReturn(mockResponse);
+        given(mockSavedResult.id()).willReturn(id);
+        given(masterBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
+        given(masterBlUseCase.createMasterBl(any(CreateMasterBlCommand.class))).willReturn(mockSavedResult);
+        given(masterBlAssembler.toDetail(mockSavedResult)).willReturn(mockResponse);
 
         mockMvc.perform(post("/api/master-bl")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +158,7 @@ class MasterBlControllerWebMvcTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/master-bl/1")));
 
-        then(masterBlUseCase).should().save(mockEntity);
+        then(masterBlUseCase).should().createMasterBl(any(CreateMasterBlCommand.class));
     }
 
     @Test
@@ -178,29 +176,28 @@ class MasterBlControllerWebMvcTest {
     @DisplayName("PUT /api/master-bl/1: happy path → 200")
     void updateMasterBl_happyPath_returns200() throws Exception {
         Long id = 1L;
-        MasterBl mockEntity = mock(MasterBl.class);
-        MasterBlDetail mockDetail = mock(MasterBlDetail.class);
+        UpdateMasterBlCommand mockCommand = mock(UpdateMasterBlCommand.class);
+        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
         MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
-        given(mockEntity.getId()).willReturn(id);
-        given(masterBlUseCase.findMasterBlById(id)).willReturn(mockEntity);
-        given(masterBlUseCase.save(mockEntity)).willReturn(mockEntity);
-        given(masterBlUseCase.findMasterBlDetailById(id)).willReturn(mockDetail);
-        given(masterBlAssembler.toDetail(mockDetail)).willReturn(mockResponse);
+        given(masterBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
+        given(masterBlUseCase.updateMasterBl(eq(id), eq(mockCommand))).willReturn(mockResult);
+        given(masterBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
 
         mockMvc.perform(put("/api/master-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isOk());
 
-        then(masterBlUseCase).should().findMasterBlById(id);
-        then(masterBlUseCase).should().save(mockEntity);
+        then(masterBlUseCase).should().updateMasterBl(eq(id), any(UpdateMasterBlCommand.class));
     }
 
     @Test
     @DisplayName("PUT /api/master-bl/999: 존재하지 않는 id → 404")
     void updateMasterBl_whenNotFound_returns404() throws Exception {
         Long id = 999L;
-        given(masterBlUseCase.findMasterBlById(id))
+        UpdateMasterBlCommand mockCommand = mock(UpdateMasterBlCommand.class);
+        given(masterBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
+        given(masterBlUseCase.updateMasterBl(eq(id), eq(mockCommand)))
                 .willThrow(new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
 
         mockMvc.perform(put("/api/master-bl/{id}", id)
