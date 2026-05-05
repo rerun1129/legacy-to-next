@@ -102,7 +102,8 @@ public class HouseBlController {
                 req.etdFrom(), req.etdTo(),
                 req.vessel(), req.voyage(),
                 req.linerCode(), req.operatorCode(),
-                req.teamCode(), req.partyCode(), req.portCode());
+                req.teamCode(), req.partyCode(), req.portCode())
+                .withKinds(req.dateKind(), req.partyKind(), req.portKind());
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
                 houseBlUseCase.searchHouseBls(filter, PageRequest.of(req.page(), req.size())))));
     }

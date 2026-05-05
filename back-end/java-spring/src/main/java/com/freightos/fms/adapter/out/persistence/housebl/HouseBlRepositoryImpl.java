@@ -8,7 +8,11 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
+import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.PartyKind;
+import com.freightos.fms.domain.housebl.enums.PortKind;
+import com.querydsl.core.types.dsl.StringPath;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
@@ -107,11 +111,10 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
         if (StringUtils.hasText(filter.podCode())) {
             where.and(h.podCode.eq(filter.podCode()));
         }
-        if (StringUtils.hasText(filter.etdFrom())) {
-            where.and(h.etd.goe(filter.etdFrom()));
-        }
-        if (StringUtils.hasText(filter.etdTo())) {
-            where.and(h.etd.loe(filter.etdTo()));
+        if (StringUtils.hasText(filter.etdFrom()) || StringUtils.hasText(filter.etdTo())) {
+            StringPath datePath = filter.dateKind() == DateKind.ETA ? h.eta : h.etd;
+            if (StringUtils.hasText(filter.etdFrom())) where.and(datePath.goe(filter.etdFrom()));
+            if (StringUtils.hasText(filter.etdTo()))   where.and(datePath.loe(filter.etdTo()));
         }
         if (StringUtils.hasText(filter.vessel())) {
             where.and(nonBl.vesselName.containsIgnoreCase(filter.vessel()));
@@ -129,13 +132,30 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             where.and(h.teamCode.eq(filter.teamCode()));
         }
         if (StringUtils.hasText(filter.partyCode())) {
-            where.and(h.shipperCode.containsIgnoreCase(filter.partyCode())
-                    .or(h.consigneeCode.containsIgnoreCase(filter.partyCode()))
-                    .or(h.notifyCode.containsIgnoreCase(filter.partyCode())));
+            if (filter.partyKind() == null) {
+                where.and(h.shipperCode.eq(filter.partyCode())
+                        .or(h.consigneeCode.eq(filter.partyCode()))
+                        .or(h.notifyCode.eq(filter.partyCode())));
+            } else {
+                StringPath col = switch (filter.partyKind()) {
+                    case SHIPPER -> h.shipperCode;
+                    case CONSIGNEE -> h.consigneeCode;
+                    case NOTIFY -> h.notifyCode;
+                    case SETTLE_PARTNER -> h.settlePartnerCode;
+                };
+                where.and(col.eq(filter.partyCode()));
+            }
         }
         if (StringUtils.hasText(filter.portCode())) {
-            where.and(h.polCode.containsIgnoreCase(filter.portCode())
-                    .or(h.podCode.containsIgnoreCase(filter.portCode())));
+            if (filter.portKind() == null) {
+                where.and(h.polCode.eq(filter.portCode()).or(h.podCode.eq(filter.portCode())));
+            } else {
+                StringPath col = switch (filter.portKind()) {
+                    case POL -> h.polCode;
+                    case POD -> h.podCode;
+                };
+                where.and(col.eq(filter.portCode()));
+            }
         }
 
         List<HouseBlSummary> content = queryFactory

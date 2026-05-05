@@ -1,7 +1,10 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.PartyKind;
+import com.freightos.fms.domain.housebl.enums.PortKind;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -19,5 +22,8 @@ public record SearchHouseBlRequest(
     String operatorCode,
     String teamCode,
     @NotNull @Min(0) Integer page,
-    @NotNull @Min(1) Integer size
+    @NotNull @Min(1) Integer size,
+    DateKind dateKind,
+    PartyKind partyKind,
+    PortKind portKind
 ) {}
