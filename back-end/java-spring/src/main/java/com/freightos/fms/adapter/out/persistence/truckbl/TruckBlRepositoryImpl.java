@@ -41,6 +41,12 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
         if (StringUtils.hasText(filter.hblNo())) {
             where.and(h.hblNo.containsIgnoreCase(filter.hblNo()));
         }
+        if (StringUtils.hasText(filter.truckerCode())) {
+            where.and(truck.truckerCode.containsIgnoreCase(filter.truckerCode()));
+        }
+        if (StringUtils.hasText(filter.docPartnerCode())) {
+            where.and(h.docPartnerCode.containsIgnoreCase(filter.docPartnerCode()));
+        }
         if (StringUtils.hasText(filter.etdFrom()) || StringUtils.hasText(filter.etdTo())) {
             StringPath datePath = filter.dateKind() == DateKind.ETA ? h.eta : h.etd;
             if (StringUtils.hasText(filter.etdFrom())) where.and(datePath.goe(filter.etdFrom()));

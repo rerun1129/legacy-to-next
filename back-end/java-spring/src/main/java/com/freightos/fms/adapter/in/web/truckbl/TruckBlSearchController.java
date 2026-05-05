@@ -35,11 +35,10 @@ public class TruckBlSearchController {
                 req.truckBlNo(),
                 req.etdFrom(),
                 req.etdTo(),
-                req.linerCode(),
+                req.truckerCode(),
+                req.docPartnerCode(),
                 req.partyCode(),
                 req.portCode(),
-                req.vessel(),
-                req.voyage(),
                 req.operatorCode(),
                 req.teamCode())
                 .withKinds(req.dateKind(), req.partyKind(), req.portKind());

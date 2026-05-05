@@ -84,7 +84,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBlWithTruckExt(Bound.EXP, "TRUCK-002", "TRUCKER02");
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(2);
@@ -97,7 +97,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBlWithTruckExt(Bound.EXP, "TRUCK-FULL", "TRUCKER-X");
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(null, "TRUCK-FULL", null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = TruckBlFilter.of(null, "TRUCK-FULL", null, null, null, null, null, null, null, null);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -124,7 +124,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBl(JobDiv.TRUCK, Bound.EXP);
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -134,7 +134,7 @@ class TruckBlRepositoryImplSliceTest {
     @Test
     @DisplayName("searchTruckBlSummaries: 매칭 0건 → 빈 리스트(null 아님)")
     void searchTruckBlSummaries_zeroMatches_returnsEmptyPagedResult() {
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, "NONEXISTENT", null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, "NONEXISTENT", null, null, null, null, null, null, null, null);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).isNotNull().isEmpty();
@@ -148,7 +148,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBlWithTruckExt(Bound.IMP, "TRUCK-IMP", "TRUCKER-IMP");
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);

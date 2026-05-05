@@ -14,11 +14,10 @@ public record TruckBlFilter(
     String hblNo,
     String etdFrom,
     String etdTo,
-    String linerCode,
+    String truckerCode,
+    String docPartnerCode,
     String partyCode,
     String portCode,
-    String vessel,
-    String voyage,
     String operatorCode,
     String teamCode,
     DateKind dateKind,
@@ -30,15 +29,14 @@ public record TruckBlFilter(
             String hblNo,
             String etdFrom,
             String etdTo,
-            String linerCode,
+            String truckerCode,
+            String docPartnerCode,
             String partyCode,
             String portCode,
-            String vessel,
-            String voyage,
             String operatorCode,
             String teamCode) {
-        return new TruckBlFilter(bound, hblNo, etdFrom, etdTo, linerCode,
-                partyCode, portCode, vessel, voyage, operatorCode, teamCode,
+        return new TruckBlFilter(bound, hblNo, etdFrom, etdTo, truckerCode,
+                docPartnerCode, partyCode, portCode, operatorCode, teamCode,
                 null, null, null);
     }
 
@@ -46,8 +44,8 @@ public record TruckBlFilter(
         return new TruckBlFilter(
                 this.bound(), this.hblNo(),
                 this.etdFrom(), this.etdTo(),
-                this.linerCode(), this.partyCode(), this.portCode(),
-                this.vessel(), this.voyage(),
+                this.truckerCode(), this.docPartnerCode(),
+                this.partyCode(), this.portCode(),
                 this.operatorCode(), this.teamCode(),
                 dateKind, partyKind, portKind);
     }
