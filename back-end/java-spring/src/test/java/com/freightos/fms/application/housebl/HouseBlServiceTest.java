@@ -1,6 +1,9 @@
 package com.freightos.fms.application.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
@@ -19,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,20 +37,26 @@ class HouseBlServiceTest {
     @Mock
     private HouseBlPort houseBlPort;
 
+    @Mock
+    private HouseBlFactory houseBlFactory;
+
     @InjectMocks
     private HouseBlService houseBlService;
 
     @Test
-    @DisplayName("findHouseBlById - 존재하는 ID 조회 시 엔티티 반환")
-    void findHouseBlById_existingId_returnsEntity() {
+    @DisplayName("findHouseBlById - 존재하는 ID 조회 시 HouseBlDetailResult 반환")
+    void findHouseBlById_existingId_returnsDetailResult() {
         Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
+        HouseBlDetailResult mockResult = mock(HouseBlDetailResult.class);
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mockResult);
 
-        HouseBl result = houseBlService.findHouseBlById(id);
+        HouseBlDetailResult result = houseBlService.findHouseBlById(id);
 
-        assertThat(result).isEqualTo(mockEntity);
+        assertThat(result).isEqualTo(mockResult);
         then(houseBlPort).should().findHouseBlById(id);
+        then(houseBlFactory).should().toDetailResult(mockEntity);
     }
 
     @Test
@@ -75,18 +83,21 @@ class HouseBlServiceTest {
     }
 
     @Test
-    @DisplayName("createHouseBl - port.saveHouseBl 위임 호출 후 저장된 엔티티의 ID를 반환")
+    @DisplayName("createHouseBl - factory로 엔티티 생성 후 port.saveHouseBl 위임 호출, 저장된 엔티티의 ID를 반환")
     void createHouseBl_delegatesToPort_returnsId() {
         Long expectedId = 1L;
-        HouseBl mockHouseBl = mock(HouseBl.class);
+        CreateHouseBlCommand mockCommand = mock(CreateHouseBlCommand.class);
+        HouseBl mockEntity = mock(HouseBl.class);
         HouseBl mockSaved = mock(HouseBl.class);
+        given(houseBlFactory.toEntity(mockCommand)).willReturn(mockEntity);
         given(mockSaved.getId()).willReturn(expectedId);
-        given(houseBlPort.saveHouseBl(mockHouseBl)).willReturn(mockSaved);
+        given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockSaved);
 
-        Long result = houseBlService.createHouseBl(mockHouseBl);
+        Long result = houseBlService.createHouseBl(mockCommand);
 
         assertThat(result).isEqualTo(expectedId);
-        then(houseBlPort).should().saveHouseBl(mockHouseBl);
+        then(houseBlFactory).should().toEntity(mockCommand);
+        then(houseBlPort).should().saveHouseBl(mockEntity);
     }
 
     @Test
@@ -147,32 +158,35 @@ class HouseBlServiceTest {
     // ── updateHouseBl ────────────────────────────────────────
 
     @Test
-    @DisplayName("updateHouseBl - Consumer patcher가 기존 엔티티에 accept 됨을 검증")
-    void updateHouseBl_patcherIsAccepted() {
+    @DisplayName("updateHouseBl - factory.applyToEntity가 기존 엔티티에 호출됨을 검증")
+    void updateHouseBl_factoryApplyToEntityIsCalled() {
         Long id = 1L;
+        UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
         HouseBl mockEntity = mock(HouseBl.class);
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
+        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mock(HouseBlDetailResult.class));
 
-        boolean[] patcherCalled = {false};
-        Consumer<HouseBl> patcher = e -> patcherCalled[0] = true;
+        houseBlService.updateHouseBl(id, mockCommand);
 
-        houseBlService.updateHouseBl(id, patcher);
-
-        assertThat(patcherCalled[0]).isTrue();
+        then(houseBlFactory).should().applyToEntity(mockCommand, mockEntity);
     }
 
     @Test
-    @DisplayName("updateHouseBl - patcher 실행 후 port.saveHouseBl 위임 검증")
+    @DisplayName("updateHouseBl - factory 적용 후 port.saveHouseBl 위임 및 HouseBlDetailResult 반환 검증")
     void updateHouseBl_delegatesToPortSave() {
         Long id = 1L;
+        UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
         HouseBl mockEntity = mock(HouseBl.class);
+        HouseBlDetailResult mockResult = mock(HouseBlDetailResult.class);
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
+        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mockResult);
 
-        HouseBl result = houseBlService.updateHouseBl(id, e -> {});
+        HouseBlDetailResult result = houseBlService.updateHouseBl(id, mockCommand);
 
-        assertThat(result).isEqualTo(mockEntity);
+        assertThat(result).isEqualTo(mockResult);
         then(houseBlPort).should().saveHouseBl(mockEntity);
+        then(houseBlFactory).should().toDetailResult(mockEntity);
     }
 }

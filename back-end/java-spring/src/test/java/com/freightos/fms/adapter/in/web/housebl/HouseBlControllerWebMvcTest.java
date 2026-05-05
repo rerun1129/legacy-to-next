@@ -5,7 +5,9 @@ import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -111,8 +112,7 @@ class HouseBlControllerWebMvcTest {
         Long id = 1L;
         HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
 
-        given(houseBlUseCase.findHouseBlById(id)).willReturn(mock(
-                com.freightos.fms.domain.housebl.entity.HouseBl.class));
+        given(houseBlUseCase.findHouseBlById(id)).willReturn(mock(HouseBlDetailResult.class));
         given(houseBlAssembler.toDetail(any())).willReturn(mockResponse);
 
         mockMvc.perform(get("/api/house-bl/{id}", id))
@@ -168,13 +168,13 @@ class HouseBlControllerWebMvcTest {
     @DisplayName("POST /api/house-bl: jobDiv=SEA, bound=EXP happy path → 201 + Location 헤더")
     void createHouseBl_happyPath_returns201WithLocation() throws Exception {
         Long id = 1L;
-        HouseBl mockEntity = mock(HouseBl.class);
-        HouseBl mockSavedEntity = mock(HouseBl.class);
+        CreateHouseBlCommand mockCommand = mock(CreateHouseBlCommand.class);
+        HouseBlDetailResult mockSavedResult = mock(HouseBlDetailResult.class);
         HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
-        given(houseBlAssembler.toEntity(any())).willReturn(mockEntity);
-        given(houseBlUseCase.createHouseBl(mockEntity)).willReturn(id);
-        given(houseBlUseCase.findHouseBlById(id)).willReturn(mockSavedEntity);
-        given(houseBlAssembler.toDetail(mockSavedEntity)).willReturn(mockResponse);
+        given(houseBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
+        given(houseBlUseCase.createHouseBl(any(CreateHouseBlCommand.class))).willReturn(id);
+        given(houseBlUseCase.findHouseBlById(id)).willReturn(mockSavedResult);
+        given(houseBlAssembler.toDetail(mockSavedResult)).willReturn(mockResponse);
 
         mockMvc.perform(post("/api/house-bl")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -182,7 +182,7 @@ class HouseBlControllerWebMvcTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/house-bl/1")));
 
-        then(houseBlUseCase).should().createHouseBl(mockEntity);
+        then(houseBlUseCase).should().createHouseBl(any(CreateHouseBlCommand.class));
         then(houseBlUseCase).should().findHouseBlById(id);
     }
 
@@ -201,24 +201,28 @@ class HouseBlControllerWebMvcTest {
     @DisplayName("PUT /api/house-bl/1: happy path → 200")
     void updateHouseBl_happyPath_returns200() throws Exception {
         Long id = 1L;
-        HouseBl mockEntity = mock(HouseBl.class);
+        UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
+        HouseBlDetailResult mockResult = mock(HouseBlDetailResult.class);
         HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
-        given(houseBlUseCase.updateHouseBl(eq(id), any(Consumer.class))).willReturn(mockEntity);
-        given(houseBlAssembler.toDetail(mockEntity)).willReturn(mockResponse);
+        given(houseBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
+        given(houseBlUseCase.updateHouseBl(eq(id), eq(mockCommand))).willReturn(mockResult);
+        given(houseBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
 
         mockMvc.perform(put("/api/house-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isOk());
 
-        then(houseBlUseCase).should().updateHouseBl(eq(id), any(Consumer.class));
+        then(houseBlUseCase).should().updateHouseBl(eq(id), any(UpdateHouseBlCommand.class));
     }
 
     @Test
     @DisplayName("PUT /api/house-bl/999: 존재하지 않는 id → 404")
     void updateHouseBl_whenNotFound_returns404() throws Exception {
         Long id = 999L;
-        given(houseBlUseCase.updateHouseBl(eq(id), any(Consumer.class)))
+        UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
+        given(houseBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
+        given(houseBlUseCase.updateHouseBl(eq(id), eq(mockCommand)))
                 .willThrow(new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
 
         mockMvc.perform(put("/api/house-bl/{id}", id)

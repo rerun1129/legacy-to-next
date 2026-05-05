@@ -44,7 +44,7 @@ public class HouseBlController {
     public ResponseEntity<ApiResponse<HouseBlDetailResponse>> createHouseBl(
             @Valid @RequestBody CreateHouseBlRequest request,
             UriComponentsBuilder uriBuilder) {
-        Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toEntity(request));
+        Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toCreateCommand(request));
         URI location = uriBuilder.path("/api/house-bl/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location)
                 .body(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.findHouseBlById(id)), MessageCode.HOUSE_BL_CREATED.message()));
@@ -62,7 +62,7 @@ public class HouseBlController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateHouseBlRequest req) {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(
-                houseBlUseCase.updateHouseBl(id, e -> houseBlAssembler.applyToEntity(req, e)))));
+                houseBlUseCase.updateHouseBl(id, houseBlAssembler.toUpdateCommand(req)))));
     }
 
     @Operation(summary = "House B/L 삭제")

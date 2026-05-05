@@ -1,15 +1,10 @@
 package com.freightos.fms.adapter.in.web.housebl;
 
-import com.freightos.fms.adapter.in.web.housebl.HouseBlSubAssembler;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
-import com.freightos.fms.domain.housebl.entity.HouseBl;
-import com.freightos.fms.domain.housebl.entity.HouseBlAir;
-import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
-import com.freightos.fms.domain.housebl.entity.HouseBlSea;
-import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HouseBlAssemblerTest {
 
-    private final HouseBlAssembler assembler = new HouseBlAssembler(new HouseBlSubAssembler());
+    private final HouseBlAssembler assembler = new HouseBlAssembler();
 
-    // ── toEntity(CreateHouseBlRequest) ────────────────────────────────
+    // ── toCreateCommand(CreateHouseBlRequest) ─────────────────────────
 
     @Test
-    @DisplayName("toEntity: jobDiv=SEA, bound=EXP → HouseBlSea 인스턴스 생성, jobDiv·bound 일치")
-    void toEntity_seaExp_returnsHouseBlSeaWithCorrectJobDivAndBound() {
+    @DisplayName("toCreateCommand: jobDiv=SEA, bound=EXP → Command의 jobDiv·bound 일치")
+    void toCreateCommand_seaExp_returnsCommandWithCorrectJobDivAndBound() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.SEA, Bound.EXP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -38,16 +33,16 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null
         );
 
-        HouseBl result = assembler.toEntity(request);
+        CreateHouseBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(HouseBlSea.class);
-        assertThat(result.getJobDiv()).isEqualTo(JobDiv.SEA);
-        assertThat(result.getBound()).isEqualTo(Bound.EXP);
+        assertThat(result).isNotNull();
+        assertThat(result.jobDiv()).isEqualTo("SEA");
+        assertThat(result.bound()).isEqualTo("EXP");
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=AIR, bound=IMP → HouseBlAir 인스턴스 생성, bound 일치")
-    void toEntity_airImp_returnsHouseBlAirWithCorrectBound() {
+    @DisplayName("toCreateCommand: jobDiv=AIR, bound=IMP → Command의 jobDiv·bound 일치")
+    void toCreateCommand_airImp_returnsCommandWithCorrectBound() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.AIR, Bound.IMP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -61,16 +56,16 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null
         );
 
-        HouseBl result = assembler.toEntity(request);
+        CreateHouseBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(HouseBlAir.class);
-        assertThat(result.getJobDiv()).isEqualTo(JobDiv.AIR);
-        assertThat(result.getBound()).isEqualTo(Bound.IMP);
+        assertThat(result).isNotNull();
+        assertThat(result.jobDiv()).isEqualTo("AIR");
+        assertThat(result.bound()).isEqualTo("IMP");
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=TRUCK → HouseBlTruck 인스턴스 생성, jobDiv 일치")
-    void toEntity_truckJobDiv_returnsHouseBlTruckWithCorrectJobDiv() {
+    @DisplayName("toCreateCommand: jobDiv=TRUCK → Command의 jobDiv 일치")
+    void toCreateCommand_truckJobDiv_returnsCommandWithCorrectJobDiv() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.TRUCK, Bound.EXP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -84,16 +79,15 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null
         );
 
-        HouseBl result = assembler.toEntity(request);
+        CreateHouseBlCommand result = assembler.toCreateCommand(request);
 
         assertThat(result).isNotNull();
-        assertThat(result).isInstanceOf(HouseBlTruck.class);
-        assertThat(result.getJobDiv()).isEqualTo(JobDiv.TRUCK);
+        assertThat(result.jobDiv()).isEqualTo("TRUCK");
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=NON_BL → HouseBlNonBl 인스턴스 생성, jobDiv 일치")
-    void toEntity_nonBlJobDiv_returnsHouseBlNonBlWithCorrectJobDiv() {
+    @DisplayName("toCreateCommand: jobDiv=NON_BL → Command의 jobDiv 일치")
+    void toCreateCommand_nonBlJobDiv_returnsCommandWithCorrectJobDiv() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.NON_BL, Bound.EXP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -107,16 +101,15 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null
         );
 
-        HouseBl result = assembler.toEntity(request);
+        CreateHouseBlCommand result = assembler.toCreateCommand(request);
 
         assertThat(result).isNotNull();
-        assertThat(result).isInstanceOf(HouseBlNonBl.class);
-        assertThat(result.getJobDiv()).isEqualTo(JobDiv.NON_BL);
+        assertThat(result.jobDiv()).isEqualTo("NON_BL");
     }
 
     @Test
-    @DisplayName("toEntity: jobDiv=SEA, bound=IMP → HouseBlSea, bound IMP 확인")
-    void toEntity_seaImp_returnsHouseBlSeaWithImpBound() {
+    @DisplayName("toCreateCommand: jobDiv=SEA, bound=IMP → Command의 bound IMP 확인")
+    void toCreateCommand_seaImp_returnsCommandWithImpBound() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
                 JobDiv.SEA, Bound.IMP, null,
                 ShipmentType.HOUSE, FreightTerm.PREPAID,
@@ -130,9 +123,8 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null
         );
 
-        HouseBl result = assembler.toEntity(request);
+        CreateHouseBlCommand result = assembler.toCreateCommand(request);
 
-        assertThat(result).isInstanceOf(HouseBlSea.class);
-        assertThat(result.getBound()).isEqualTo(Bound.IMP);
+        assertThat(result.bound()).isEqualTo("IMP");
     }
 }

@@ -4,6 +4,9 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
@@ -14,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.function.Consumer;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
 public class HouseBlService implements HouseBlUseCase {
 
     private final HouseBlPort houseBlPort;
+    private final HouseBlFactory houseBlFactory;
 
     @Override
     public PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest) {
@@ -30,29 +32,34 @@ public class HouseBlService implements HouseBlUseCase {
     }
 
     @Override
-    public HouseBl findHouseBlById(Long id) {
-        return houseBlPort.findHouseBlById(id).orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
+    public HouseBlDetailResult findHouseBlById(Long id) {
+        return houseBlFactory.toDetailResult(findEntityById(id));
     }
 
     @Override
     @Transactional
-    public Long createHouseBl(HouseBl houseBl) {
-        log.debug("Creating HouseBl: {}", houseBl.getHblNo());
-        return houseBlPort.saveHouseBl(houseBl).getId();
+    public Long createHouseBl(CreateHouseBlCommand command) {
+        HouseBl entity = houseBlFactory.toEntity(command);
+        log.debug("Creating HouseBl: {}", entity.getHblNo());
+        return houseBlPort.saveHouseBl(entity).getId();
     }
 
     @Override
     @Transactional
-    public HouseBl updateHouseBl(Long id, Consumer<HouseBl> patcher) {
-        HouseBl existing = findHouseBlById(id);
-        patcher.accept(existing);
-        return houseBlPort.saveHouseBl(existing);
+    public HouseBlDetailResult updateHouseBl(Long id, UpdateHouseBlCommand command) {
+        HouseBl existing = findEntityById(id);
+        houseBlFactory.applyToEntity(command, existing);
+        return houseBlFactory.toDetailResult(houseBlPort.saveHouseBl(existing));
     }
 
     @Override
     @Transactional
     public void deleteHouseBlById(Long id) {
-        houseBlPort.deleteHouseBl(findHouseBlById(id));
+        houseBlPort.deleteHouseBl(findEntityById(id));
         log.info("Deleted HouseBl id={}", id);
+    }
+
+    private HouseBl findEntityById(Long id) {
+        return houseBlPort.findHouseBlById(id).orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
     }
 }

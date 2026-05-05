@@ -2,16 +2,16 @@ package com.freightos.fms.application.housebl.port.in;
 
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
-import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
-
-import java.util.function.Consumer;
 
 public interface HouseBlUseCase {
     PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest);
-    HouseBl findHouseBlById(Long id);
-    Long createHouseBl(HouseBl houseBl);
-    HouseBl updateHouseBl(Long id, Consumer<HouseBl> patcher);
+    HouseBlDetailResult findHouseBlById(Long id);
+    Long createHouseBl(CreateHouseBlCommand command);
+    HouseBlDetailResult updateHouseBl(Long id, UpdateHouseBlCommand command);
     void deleteHouseBlById(Long id);
 }
