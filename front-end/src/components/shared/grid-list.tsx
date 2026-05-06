@@ -40,6 +40,8 @@ export interface GridListProps<T> {
   gridId?: string;
   selectedRowKey?: string | number | null;
   onSelectRow?: (row: T | null, index: number | null) => void;
+  isLoading?: boolean;
+  skeletonRowCount?: number;
 }
 
 /** 단일 행 렌더링 헬퍼 — ManagedGridList/PlainGridList 공유 */
@@ -131,6 +133,8 @@ function ManagedGridList<T>({
   emptyMessage = "No rows.",
   selectedRowKey,
   onSelectRow,
+  isLoading = false,
+  skeletonRowCount = 12,
 }: GridListProps<T> & { gridId: string }) {
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
@@ -148,6 +152,15 @@ function ManagedGridList<T>({
   // 렌더 body에서 ref.current 직접 대입 금지 — useLayoutEffect로 동기 갱신
   useLayoutEffect(() => {
     rowKeyRef.current = rowKey;
+  });
+
+  // list-wrap(부모)의 높이를 매 렌더마다 직접 읽는다.
+  // ResizeObserver 콜백은 비동기라 초기 렌더에서 높이가 0으로 잡히는 문제가 있어 교체.
+  const [containerH, setContainerH] = useState(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    const h = scrollRef.current?.parentElement?.clientHeight ?? 0;
+    if (h > 0 && h !== containerH) setContainerH(h);
   });
 
   useEffect(() => {
@@ -224,7 +237,7 @@ function ManagedGridList<T>({
   }
 
   return (
-    <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={style}>
+    <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={{ ...style, overflowY: isLoading ? 'hidden' : undefined }}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -253,7 +266,24 @@ function ManagedGridList<T>({
             </SortableContext>
           </thead>
           <tbody>
-            {data.length === 0 ? (
+            {isLoading ? (
+              Array.from(
+                {
+                  length: containerH > 0
+                    ? Math.ceil(containerH / ROW_HEIGHT_PX) + 10
+                    : (skeletonRowCount ?? 20),
+                },
+                (_, i) => (
+                  <tr key={`skel-${i}`}>
+                    {visibleColumns.map((col) => (
+                      <td key={String(col.key)}>
+                        <div className="h-3 w-full rounded animate-pulse" style={{ backgroundColor: 'var(--surface-3)' }} />
+                      </td>
+                    ))}
+                  </tr>
+                )
+              )
+            ) : data.length === 0 ? (
               <tr>
                 <td colSpan={visibleColumns.length} className="grid__empty">
                   {emptyMessage}
@@ -321,6 +351,8 @@ function PlainGridList<T>({
   emptyMessage = "No rows.",
   selectedRowKey,
   onSelectRow,
+  isLoading = false,
+  skeletonRowCount = 12,
 }: Omit<GridListProps<T>, "gridId">) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedCell, setSelectedCell] = useState<{
@@ -333,6 +365,15 @@ function PlainGridList<T>({
   // 렌더 body에서 ref.current 직접 대입 금지 — useLayoutEffect로 동기 갱신
   useLayoutEffect(() => {
     rowKeyRef.current = rowKey;
+  });
+
+  // list-wrap(부모)의 높이를 매 렌더마다 직접 읽는다.
+  // ResizeObserver 콜백은 비동기라 초기 렌더에서 높이가 0으로 잡히는 문제가 있어 교체.
+  const [containerH, setContainerH] = useState(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    const h = scrollRef.current?.parentElement?.clientHeight ?? 0;
+    if (h > 0 && h !== containerH) setContainerH(h);
   });
 
   useEffect(() => {
@@ -360,7 +401,7 @@ function PlainGridList<T>({
     virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
 
   return (
-    <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={style}>
+    <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={{ ...style, overflowY: isLoading ? 'hidden' : undefined }}>
       <table className="grid--list">
         <colgroup>
           {columns.map((col) => (
@@ -381,7 +422,24 @@ function PlainGridList<T>({
           </tr>
         </thead>
         <tbody>
-          {data.length === 0 ? (
+          {isLoading ? (
+            Array.from(
+              {
+                length: containerH > 0
+                  ? Math.ceil(containerH / ROW_HEIGHT_PX) + 10
+                  : (skeletonRowCount ?? 20),
+              },
+              (_, i) => (
+                <tr key={`skel-${i}`}>
+                  {columns.map((col) => (
+                    <td key={String(col.key)}>
+                      <div className="h-3 w-full rounded animate-pulse" style={{ backgroundColor: 'var(--surface-3)' }} />
+                    </td>
+                  ))}
+                </tr>
+              )
+            )
+          ) : data.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="grid__empty">
                 {emptyMessage}

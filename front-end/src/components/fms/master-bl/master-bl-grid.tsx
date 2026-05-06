@@ -23,7 +23,7 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const modeLabels = getModeLabels(variant.mode);
 
   // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
-  const { data: rows = [], isLoading, error } = useQuery({
+  const { data: rows = [], isFetching, error } = useQuery({
     queryKey: ["master-bl", "list", variantKey, extraFilter],
     queryFn: () => masterBlPort.list({ bound: variant.direction as Bound, ...extraFilter }),
     enabled: variant.direction !== null,
@@ -120,20 +120,6 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="panel__head">
-          <div className="panel__title-accent" />
-          <span className="panel__title">Master B/L</span>
-        </div>
-        <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-          <span className="text-muted">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -164,6 +150,7 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
           rowKey={(row) => row.id ?? row.mblNo}
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="master-bl"
+          isLoading={isFetching}
         />
       </div>
     </div>

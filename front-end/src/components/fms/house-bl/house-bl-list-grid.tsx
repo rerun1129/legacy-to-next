@@ -21,14 +21,13 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
 
   // variant.mode → jobDiv (SEA/AIR), variant.direction → bound (EXP/IMP)
   // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
-  const { data: rows = [], isLoading, error } = useQuery({
+  const { data: rows = [], isFetching, error } = useQuery({
     queryKey: ["house-bl", "list", variantKey, extraFilter],
     queryFn: () =>
       houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction as Bound, ...extraFilter }),
     enabled: variant.direction !== null,
   });
 
-  if (isLoading) return <div className="p-4 text-sm text-muted-foreground">로딩 중...</div>;
   if (error) return <div className="p-4 text-sm text-destructive">데이터를 불러올 수 없습니다.</div>;
 
   function handleHblDoubleClick(row: HouseBlRow) {
@@ -159,6 +158,7 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
             onRowClick={(row) => setSelected(row.id)}
             rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
             gridId="house-bl-list"
+            isLoading={isFetching}
           />
         </div>
       </div>

@@ -57,7 +57,11 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
   };
 }
 
-export function GridPreviewPanel() {
+interface GridPreviewPanelProps {
+  isLoading?: boolean;
+}
+
+export function GridPreviewPanel({ isLoading = false }: GridPreviewPanelProps) {
   const { control, register } = useFormContext<DimPreviewFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
   const [required, setRequired] = useState(false);
@@ -254,6 +258,7 @@ export function GridPreviewPanel() {
         rowKey={(r) => r.id}
         className="grid--demo"
         style={{ flex: 1, minHeight: 0 }}
+        isLoading={isLoading}
       />
     </div>
   );

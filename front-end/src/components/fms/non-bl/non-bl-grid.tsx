@@ -24,7 +24,7 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
   const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isFetching, error } = useQuery({
     queryKey: ["non-bl", "list", extraFilter, showAll ? "all" : currentPage],
     queryFn: () => nonBlPort.list(extraFilter!, showAll ? 1 : currentPage, showAll ? 10000000 : 50),
     enabled: extraFilter !== null,
@@ -83,20 +83,6 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
     { key: "teamName", label: "Team Name", minWidth: 90 },
   ];
 
-  if (extraFilter !== null && isLoading) {
-    return (
-      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="panel__head">
-          <div className="panel__title-accent" />
-          <span className="panel__title">Non B/L</span>
-        </div>
-        <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-          <span className="text-muted">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -127,13 +113,14 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
           rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="non-bl"
+          isLoading={extraFilter !== null && isFetching}
         />
       </div>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={onPageChange}
-        disabled={isLoading}
+        disabled={isFetching}
         showAll={showAll}
         onToggleShowAll={onToggleShowAll}
       />
