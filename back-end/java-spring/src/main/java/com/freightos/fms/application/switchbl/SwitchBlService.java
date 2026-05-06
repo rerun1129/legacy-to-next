@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +30,6 @@ public class SwitchBlService implements SwitchBlUseCase {
         SwitchBl entity = switchBlPort.findSwitchBlByHouseBlId(houseBlId)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.SWITCH_BL_NOT_FOUND));
         return switchBlFactory.toDetailResult(entity);
-    }
-
-    @Override
-    public Optional<SwitchBlDetailResult> findOptionalByHouseBlId(Long houseBlId) {
-        return switchBlPort.findSwitchBlByHouseBlId(houseBlId)
-                .map(switchBlFactory::toDetailResult);
     }
 
     @Override
