@@ -5,8 +5,9 @@ import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,31 +24,6 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
     @Override
     public PagedResult<MasterBlSummaryResult> searchByFilter(MasterBlFilter filter, PageRequest pageRequest) {
         QMasterBlJpaEntity m = QMasterBlJpaEntity.masterBlJpaEntity;
-
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(m.bound.eq(filter.bound()));
-
-        if (StringUtils.hasText(filter.mblNo())) {
-            where.and(m.mblNo.containsIgnoreCase(filter.mblNo()));
-        }
-        if (StringUtils.hasText(filter.shipperCode())) {
-            where.and(m.shipperCode.containsIgnoreCase(filter.shipperCode()));
-        }
-        if (StringUtils.hasText(filter.consigneeCode())) {
-            where.and(m.consigneeCode.containsIgnoreCase(filter.consigneeCode()));
-        }
-        if (StringUtils.hasText(filter.polCode())) {
-            where.and(m.polCode.eq(filter.polCode()));
-        }
-        if (StringUtils.hasText(filter.podCode())) {
-            where.and(m.podCode.eq(filter.podCode()));
-        }
-        if (StringUtils.hasText(filter.etdFrom())) {
-            where.and(m.etd.goe(filter.etdFrom()));
-        }
-        if (StringUtils.hasText(filter.etdTo())) {
-            where.and(m.etd.loe(filter.etdTo()));
-        }
 
         List<MasterBlSummaryResult> content = queryFactory
             .select(Projections.constructor(MasterBlSummaryResult.class,
@@ -66,7 +42,16 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
                 m.createdAt
             ))
             .from(m)
-            .where(where)
+            .where(
+                m.bound.eq(filter.bound()),
+                containsIgnoreCase(m.mblNo, filter.mblNo()),
+                containsIgnoreCase(m.shipperCode, filter.shipperCode()),
+                containsIgnoreCase(m.consigneeCode, filter.consigneeCode()),
+                eqString(m.polCode, filter.polCode()),
+                eqString(m.podCode, filter.podCode()),
+                StringUtils.hasText(filter.etdFrom()) ? m.etd.goe(filter.etdFrom()) : null,
+                StringUtils.hasText(filter.etdTo())   ? m.etd.loe(filter.etdTo())   : null
+            )
             .orderBy(m.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
             .limit(pageRequest.getSize())
@@ -75,11 +60,28 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
         long total = queryFactory
             .select(m.count())
             .from(m)
-            .where(where)
+            .where(
+                m.bound.eq(filter.bound()),
+                containsIgnoreCase(m.mblNo, filter.mblNo()),
+                containsIgnoreCase(m.shipperCode, filter.shipperCode()),
+                containsIgnoreCase(m.consigneeCode, filter.consigneeCode()),
+                eqString(m.polCode, filter.polCode()),
+                eqString(m.podCode, filter.podCode()),
+                StringUtils.hasText(filter.etdFrom()) ? m.etd.goe(filter.etdFrom()) : null,
+                StringUtils.hasText(filter.etdTo())   ? m.etd.loe(filter.etdTo())   : null
+            )
             .fetchOne();
 
         int totalPages = (int) Math.ceil((double) total / pageRequest.getSize());
 
         return PagedResult.of(content, total, totalPages, pageRequest.getPage(), pageRequest.getSize());
+    }
+
+    private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
+        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+    }
+
+    private static BooleanExpression eqString(StringPath col, String v) {
+        return StringUtils.hasText(v) ? col.eq(v) : null;
     }
 }

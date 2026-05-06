@@ -14,8 +14,8 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -33,77 +33,6 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
     public PagedResult<HouseBlSummary> searchSummaries(HouseBlFilter filter, PageRequest pageRequest) {
         QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
         QHouseBlNonBlJpaEntity nonBl = QHouseBlNonBlJpaEntity.houseBlNonBlJpaEntity;
-
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(h.jobDiv.eq(filter.jobDiv()));
-        if (filter.bound() != null) {
-            where.and(h.bound.eq(filter.bound()));
-        }
-
-        if (StringUtils.hasText(filter.hblNo())) {
-            where.and(h.hblNo.containsIgnoreCase(filter.hblNo()));
-        }
-        if (StringUtils.hasText(filter.mblNo())) {
-            where.and(h.mblNo.containsIgnoreCase(filter.mblNo()));
-        }
-        if (StringUtils.hasText(filter.shipperCode())) {
-            where.and(h.shipperCode.containsIgnoreCase(filter.shipperCode()));
-        }
-        if (StringUtils.hasText(filter.consigneeCode())) {
-            where.and(h.consigneeCode.containsIgnoreCase(filter.consigneeCode()));
-        }
-        if (StringUtils.hasText(filter.polCode())) {
-            where.and(h.polCode.eq(filter.polCode()));
-        }
-        if (StringUtils.hasText(filter.podCode())) {
-            where.and(h.podCode.eq(filter.podCode()));
-        }
-        if (StringUtils.hasText(filter.etdFrom()) || StringUtils.hasText(filter.etdTo())) {
-            StringPath datePath = filter.dateKind() == DateKind.ETA ? h.eta : h.etd;
-            if (StringUtils.hasText(filter.etdFrom())) where.and(datePath.goe(filter.etdFrom()));
-            if (StringUtils.hasText(filter.etdTo()))   where.and(datePath.loe(filter.etdTo()));
-        }
-        if (StringUtils.hasText(filter.vessel())) {
-            where.and(nonBl.vesselName.containsIgnoreCase(filter.vessel()));
-        }
-        if (StringUtils.hasText(filter.voyage())) {
-            where.and(nonBl.voyageNo.containsIgnoreCase(filter.voyage()));
-        }
-        if (StringUtils.hasText(filter.linerCode())) {
-            where.and(nonBl.linerCode.containsIgnoreCase(filter.linerCode()));
-        }
-        if (StringUtils.hasText(filter.operatorCode())) {
-            where.and(h.operatorCode.eq(filter.operatorCode()));
-        }
-        if (StringUtils.hasText(filter.teamCode())) {
-            where.and(h.teamCode.eq(filter.teamCode()));
-        }
-        if (StringUtils.hasText(filter.partyCode())) {
-            if (filter.partyKind() == null) {
-                where.and(h.shipperCode.eq(filter.partyCode())
-                        .or(h.consigneeCode.eq(filter.partyCode()))
-                        .or(h.notifyCode.eq(filter.partyCode())));
-            } else {
-                StringPath col = switch (filter.partyKind()) {
-                    case SHIPPER -> h.shipperCode;
-                    case CONSIGNEE -> h.consigneeCode;
-                    case NOTIFY -> h.notifyCode;
-                    case SETTLE_PARTNER -> h.settlePartnerCode;
-                };
-                where.and(col.eq(filter.partyCode()));
-            }
-        }
-        if (StringUtils.hasText(filter.portCode())) {
-            if (filter.portKind() == null) {
-                where.and(h.polCode.eq(filter.portCode()).or(h.podCode.eq(filter.portCode())));
-            } else {
-                StringPath col = switch (filter.portKind()) {
-                    case POL -> h.polCode;
-                    case POD -> h.podCode;
-                };
-                where.and(col.eq(filter.portCode()));
-            }
-        }
 
         List<HouseBlSummary> content = queryFactory
             .select(Projections.constructor(HouseBlSummary.class,
@@ -132,7 +61,24 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             ))
             .from(h)
             .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
-            .where(where)
+            .where(
+                h.jobDiv.eq(filter.jobDiv()),
+                filter.bound() != null ? h.bound.eq(filter.bound()) : null,
+                containsIgnoreCase(h.hblNo, filter.hblNo()),
+                containsIgnoreCase(h.mblNo, filter.mblNo()),
+                containsIgnoreCase(h.shipperCode, filter.shipperCode()),
+                containsIgnoreCase(h.consigneeCode, filter.consigneeCode()),
+                eqString(h.polCode, filter.polCode()),
+                eqString(h.podCode, filter.podCode()),
+                dateBetween(h, filter.dateKind(), filter.etdFrom(), filter.etdTo()),
+                containsIgnoreCase(nonBl.vesselName, filter.vessel()),
+                containsIgnoreCase(nonBl.voyageNo, filter.voyage()),
+                containsIgnoreCase(nonBl.linerCode, filter.linerCode()),
+                eqString(h.operatorCode, filter.operatorCode()),
+                eqString(h.teamCode, filter.teamCode()),
+                eqParty(h, filter.partyCode(), filter.partyKind()),
+                eqPort(h, filter.portCode(), filter.portKind())
+            )
             .orderBy(h.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
             .limit(pageRequest.getSize())
@@ -142,7 +88,24 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .select(h.count())
             .from(h)
             .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
-            .where(where)
+            .where(
+                h.jobDiv.eq(filter.jobDiv()),
+                filter.bound() != null ? h.bound.eq(filter.bound()) : null,
+                containsIgnoreCase(h.hblNo, filter.hblNo()),
+                containsIgnoreCase(h.mblNo, filter.mblNo()),
+                containsIgnoreCase(h.shipperCode, filter.shipperCode()),
+                containsIgnoreCase(h.consigneeCode, filter.consigneeCode()),
+                eqString(h.polCode, filter.polCode()),
+                eqString(h.podCode, filter.podCode()),
+                dateBetween(h, filter.dateKind(), filter.etdFrom(), filter.etdTo()),
+                containsIgnoreCase(nonBl.vesselName, filter.vessel()),
+                containsIgnoreCase(nonBl.voyageNo, filter.voyage()),
+                containsIgnoreCase(nonBl.linerCode, filter.linerCode()),
+                eqString(h.operatorCode, filter.operatorCode()),
+                eqString(h.teamCode, filter.teamCode()),
+                eqParty(h, filter.partyCode(), filter.partyKind()),
+                eqPort(h, filter.portCode(), filter.portKind())
+            )
             .fetchOne();
 
         int totalPages = (int) Math.ceil((double) total / pageRequest.getSize());
@@ -203,5 +166,49 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .where(h.masterBlId.eq(masterBlId))
             .orderBy(h.createdAt.desc())
             .fetch();
+    }
+
+    private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
+        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+    }
+
+    private static BooleanExpression eqString(StringPath col, String v) {
+        return StringUtils.hasText(v) ? col.eq(v) : null;
+    }
+
+    private static BooleanExpression dateBetween(
+            QHouseBlJpaEntity h, DateKind kind, String from, String to) {
+        if (!StringUtils.hasText(from) && !StringUtils.hasText(to)) return null;
+        StringPath col = (kind == DateKind.ETA) ? h.eta : h.etd;
+        BooleanExpression e = null;
+        if (StringUtils.hasText(from)) e = col.goe(from);
+        if (StringUtils.hasText(to))   e = (e == null) ? col.loe(to) : e.and(col.loe(to));
+        return e;
+    }
+
+    private static BooleanExpression eqParty(QHouseBlJpaEntity h, String code, PartyKind kind) {
+        if (!StringUtils.hasText(code)) return null;
+        if (kind == null) {
+            return h.shipperCode.eq(code).or(h.consigneeCode.eq(code)).or(h.notifyCode.eq(code));
+        }
+        StringPath col = switch (kind) {
+            case SHIPPER        -> h.shipperCode;
+            case CONSIGNEE      -> h.consigneeCode;
+            case NOTIFY         -> h.notifyCode;
+            case SETTLE_PARTNER -> h.settlePartnerCode;
+        };
+        return col.eq(code);
+    }
+
+    private static BooleanExpression eqPort(QHouseBlJpaEntity h, String code, PortKind kind) {
+        if (!StringUtils.hasText(code)) return null;
+        if (kind == null) {
+            return h.polCode.eq(code).or(h.podCode.eq(code));
+        }
+        StringPath col = switch (kind) {
+            case POL -> h.polCode;
+            case POD -> h.podCode;
+        };
+        return col.eq(code);
     }
 }
