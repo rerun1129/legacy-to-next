@@ -28,6 +28,8 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
     queryKey: ["non-bl", "list", extraFilter, showAll ? "all" : currentPage],
     queryFn: () => nonBlPort.list(extraFilter!, showAll ? 1 : currentPage, showAll ? 10000000 : 50),
     enabled: extraFilter !== null,
+    staleTime: Infinity,
+    refetchOnMount: false,
   });
 
   const rows = data?.content ?? [];

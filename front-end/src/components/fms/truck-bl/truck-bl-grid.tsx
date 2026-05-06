@@ -28,6 +28,8 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
     queryKey: ["truck-bl", "list", extraFilter, showAll ? "all" : currentPage],
     queryFn: () => truckBlPort.list(extraFilter!, showAll ? 1 : currentPage, showAll ? 10000000 : 50),
     enabled: extraFilter !== null,
+    staleTime: Infinity,
+    refetchOnMount: false,
   });
 
   const rows = data?.content ?? [];
