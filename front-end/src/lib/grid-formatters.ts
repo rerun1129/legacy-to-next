@@ -22,3 +22,10 @@ export function fmtNumber(v: unknown, decimals = 0): string {
   if (v == null || v === '' || isNaN(n)) return '';
   return n.toFixed(decimals);
 }
+
+/**
+ * 중량 값을 소수점 3자리 형식으로 변환. 빈값은 '' 반환.
+ */
+export function fmtWeight(v: unknown): string {
+  return fmtNumber(v, 3);
+}
