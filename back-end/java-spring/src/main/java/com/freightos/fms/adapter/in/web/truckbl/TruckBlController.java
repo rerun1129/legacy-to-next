@@ -5,7 +5,6 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.truckbl.dto.SearchTruckBlRequest;
 import com.freightos.fms.adapter.in.web.truckbl.dto.TruckBlSummaryResponse;
-import com.freightos.fms.domain.truckbl.TruckBlFilter;
 import com.freightos.fms.application.truckbl.port.in.TruckBlSearchUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,19 +29,9 @@ public class TruckBlController {
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<PagedResult<TruckBlSummaryResponse>>> searchTruckBls(
             @Valid @RequestBody SearchTruckBlRequest req) {
-        TruckBlFilter filter = TruckBlFilter.of(
-                req.bound(),
-                req.truckBlNo(),
-                req.etdFrom(),
-                req.etdTo(),
-                req.truckerCode(),
-                req.docPartnerCode(),
-                req.partyCode(),
-                req.portCode(),
-                req.operatorCode(),
-                req.teamCode())
-                .withKinds(req.dateKind(), req.partyKind(), req.portKind());
         return ResponseEntity.ok(ApiResponse.of(truckBlAssembler.toSummaryPage(
-                truckBlSearchUseCase.searchTruckBls(filter, PageRequest.of(req.page(), req.size())))));
+                truckBlSearchUseCase.searchTruckBls(
+                        truckBlAssembler.toSearchCommand(req),
+                        PageRequest.of(req.page(), req.size())))));
     }
 }

@@ -7,9 +7,9 @@ import com.freightos.fms.adapter.in.web.housebl.dto.SearchHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
-import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import org.springframework.stereotype.Component;
 
@@ -31,12 +31,21 @@ public class HouseBlAssembler {
         return HouseBlDetailResponse.from(result);
     }
 
-    public HouseBlFilter toFilter(SearchHouseBlRequest req) {
-        return HouseBlFilter.of(req.jobDiv(), req.bound(), req.hblNo(), req.mblNo(),
-                        req.shipperCode(), req.consigneeCode(), req.polCode(), req.podCode(),
-                        req.etdFrom(), req.etdTo(), req.vessel(), req.voyage(),
-                        req.linerCode(), req.operatorCode(), req.teamCode(), req.partyCode(), req.portCode())
-                .withKinds(req.dateKind(), req.partyKind(), req.portKind());
+    public SearchHouseBlCommand toSearchCommand(SearchHouseBlRequest req) {
+        return new SearchHouseBlCommand(
+                req.jobDiv() != null ? req.jobDiv().name() : null,
+                req.bound() != null ? req.bound().name() : null,
+                req.hblNo(), req.mblNo(),
+                req.shipperCode(), req.consigneeCode(),
+                req.polCode(), req.podCode(),
+                req.etdFrom(), req.etdTo(),
+                req.vessel(), req.voyage(),
+                req.linerCode(), req.operatorCode(),
+                req.teamCode(), req.partyCode(), req.portCode(),
+                req.dateKind() != null ? req.dateKind().name() : null,
+                req.partyKind() != null ? req.partyKind().name() : null,
+                req.portKind() != null ? req.portKind().name() : null
+        );
     }
 
     /** CREATE 요청 DTO를 커맨드로 변환한다. VO 변환은 없으며 1:1 필드 복사만 수행한다. */

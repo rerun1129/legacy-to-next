@@ -1,8 +1,13 @@
 package com.freightos.fms.application.housebl;
 
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.domain.housebl.HouseBlFilter;
+import com.freightos.fms.domain.housebl.enums.DateKind;
+import com.freightos.fms.domain.housebl.enums.PartyKind;
+import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
@@ -220,6 +225,26 @@ public class HouseBlFactory {
         sub.applyScheduleLegsUpdate(entity, cmd.scheduleLegs());
         sub.applyTruckOrdersUpdate(entity, cmd.truckOrders());
         sub.applyAirChargesUpdate(entity, cmd.airCharges());
+    }
+
+    // ── SearchCommand → Domain Filter 변환 ───────────────────────────
+
+    public HouseBlFilter toFilter(SearchHouseBlCommand cmd) {
+        return HouseBlFilter.of(
+                cmd.jobDiv() != null ? JobDiv.valueOf(cmd.jobDiv()) : null,
+                cmd.bound() != null ? Bound.valueOf(cmd.bound()) : null,
+                cmd.hblNo(), cmd.mblNo(),
+                cmd.shipperCode(), cmd.consigneeCode(),
+                cmd.polCode(), cmd.podCode(),
+                cmd.etdFrom(), cmd.etdTo(),
+                cmd.vessel(), cmd.voyage(),
+                cmd.linerCode(), cmd.operatorCode(),
+                cmd.teamCode(), cmd.partyCode(), cmd.portCode()
+        ).withKinds(
+                cmd.dateKind() != null ? DateKind.valueOf(cmd.dateKind()) : null,
+                cmd.partyKind() != null ? PartyKind.valueOf(cmd.partyKind()) : null,
+                cmd.portKind() != null ? PortKind.valueOf(cmd.portKind()) : null
+        );
     }
 
     // ── Entity → Projection 변환 ─────────────────────────────────────

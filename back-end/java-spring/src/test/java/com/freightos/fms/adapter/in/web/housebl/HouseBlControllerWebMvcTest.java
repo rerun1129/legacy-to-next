@@ -6,6 +6,7 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
@@ -64,7 +65,7 @@ class HouseBlControllerWebMvcTest {
 
         given(houseBlUseCase.searchHouseBls(any(), any())).willReturn(mock(PagedResult.class));
         given(houseBlAssembler.toSummaryPage(any())).willReturn(mockPage);
-        given(houseBlAssembler.toFilter(any())).willReturn(mock(com.freightos.fms.domain.housebl.HouseBlFilter.class));
+        given(houseBlAssembler.toSearchCommand(any())).willReturn(mock(SearchHouseBlCommand.class));
 
         mockMvc.perform(post("/api/house-bl/search")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +95,7 @@ class HouseBlControllerWebMvcTest {
 
         given(houseBlUseCase.searchHouseBls(any(), any())).willReturn(mock(PagedResult.class));
         given(houseBlAssembler.toSummaryPage(any())).willReturn(mockPage);
-        given(houseBlAssembler.toFilter(any())).willReturn(mock(com.freightos.fms.domain.housebl.HouseBlFilter.class));
+        given(houseBlAssembler.toSearchCommand(any())).willReturn(mock(SearchHouseBlCommand.class));
 
         mockMvc.perform(post("/api/house-bl/search")
                         .contentType(MediaType.APPLICATION_JSON)

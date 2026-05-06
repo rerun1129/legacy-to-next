@@ -36,7 +36,7 @@ public class HouseBlController {
     public ResponseEntity<ApiResponse<PagedResult<HouseBlSummaryResponse>>> searchHouseBls(
             @Valid @RequestBody SearchHouseBlRequest req) {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
-                houseBlUseCase.searchHouseBls(houseBlAssembler.toFilter(req), PageRequest.of(req.page(), req.size())))));
+                houseBlUseCase.searchHouseBls(houseBlAssembler.toSearchCommand(req), PageRequest.of(req.page(), req.size())))));
     }
 
     @Operation(summary = "House B/L 생성")

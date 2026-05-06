@@ -2,6 +2,7 @@ package com.freightos.fms.application.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -126,13 +127,19 @@ class HouseBlServiceTest {
     @Test
     @DisplayName("searchHouseBls - filter와 pageRequest를 port에 위임하고 결과를 그대로 반환")
     void searchHouseBls_delegatesToPort() {
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.SEA, Bound.EXP, "HBL-001", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        SearchHouseBlCommand cmd = new SearchHouseBlCommand(
+                "SEA", "EXP", "HBL-001", null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null);
+        HouseBlFilter filter = HouseBlFilter.of(
+                JobDiv.SEA, Bound.EXP, "HBL-001", null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(0, 20);
         HouseBlSummary mockSummary = mock(HouseBlSummary.class);
         PagedResult<HouseBlSummary> portResult = PagedResult.of(List.of(mockSummary), 1L, 1, 0, 20);
+        given(houseBlFactory.toFilter(cmd)).willReturn(filter);
         given(houseBlPort.searchHouseBls(filter, pageRequest)).willReturn(portResult);
 
-        PagedResult<HouseBlSummary> result = houseBlService.searchHouseBls(filter, pageRequest);
+        PagedResult<HouseBlSummary> result = houseBlService.searchHouseBls(cmd, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         then(houseBlPort).should().searchHouseBls(filter, pageRequest);
@@ -141,13 +148,19 @@ class HouseBlServiceTest {
     @Test
     @DisplayName("searchHouseBls - port PagedResult 메타(totalElements/totalPages/page/size) 그대로 반영")
     void searchHouseBls_returnsPagedResultWithCorrectMeta() {
-        HouseBlFilter filter = HouseBlFilter.of(JobDiv.AIR, Bound.IMP, null, null, "SHIP01", null, null, null, null, null, null, null, null, null, null, null, null);
+        SearchHouseBlCommand cmd = new SearchHouseBlCommand(
+                "AIR", "IMP", null, null, "SHIP01", null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null);
+        HouseBlFilter filter = HouseBlFilter.of(
+                JobDiv.AIR, Bound.IMP, null, null, "SHIP01", null, null, null,
+                null, null, null, null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(1, 10);
         HouseBlSummary mockSummary = mock(HouseBlSummary.class);
         PagedResult<HouseBlSummary> portResult = PagedResult.of(List.of(mockSummary), 25L, 3, 1, 10);
+        given(houseBlFactory.toFilter(cmd)).willReturn(filter);
         given(houseBlPort.searchHouseBls(filter, pageRequest)).willReturn(portResult);
 
-        PagedResult<HouseBlSummary> result = houseBlService.searchHouseBls(filter, pageRequest);
+        PagedResult<HouseBlSummary> result = houseBlService.searchHouseBls(cmd, pageRequest);
 
         assertThat(result.getTotalElements()).isEqualTo(25L);
         assertThat(result.getTotalPages()).isEqualTo(3);

@@ -5,7 +5,6 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.SearchNonBlRequest;
-import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.application.nonbl.port.in.NonBlSearchUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,20 +29,9 @@ public class NonBlController {
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<PagedResult<NonBlSummaryResponse>>> searchNonBls(
             @Valid @RequestBody SearchNonBlRequest req) {
-        NonBlFilter filter = NonBlFilter.of(
-                req.bound(),
-                req.hblNo(),
-                req.etdFrom(),
-                req.etdTo(),
-                req.linerCode(),
-                req.partyCode(),
-                req.portCode(),
-                req.vessel(),
-                req.voyage(),
-                req.operatorCode(),
-                req.teamCode())
-                .withKinds(req.dateKind(), req.partyKind(), req.portKind());
         return ResponseEntity.ok(ApiResponse.of(nonBlAssembler.toSummaryPage(
-                nonBlSearchUseCase.searchNonBls(filter, PageRequest.of(req.page(), req.size())))));
+                nonBlSearchUseCase.searchNonBls(
+                        nonBlAssembler.toSearchCommand(req),
+                        PageRequest.of(req.page(), req.size())))));
     }
 }

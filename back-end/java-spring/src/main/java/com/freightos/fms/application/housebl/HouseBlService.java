@@ -5,9 +5,9 @@ import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
+import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
-import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
@@ -27,8 +27,8 @@ public class HouseBlService implements HouseBlUseCase {
     private final HouseBlFactory houseBlFactory;
 
     @Override
-    public PagedResult<HouseBlSummary> searchHouseBls(HouseBlFilter filter, PageRequest pageRequest) {
-        return houseBlPort.searchHouseBls(filter, pageRequest);
+    public PagedResult<HouseBlSummary> searchHouseBls(SearchHouseBlCommand cmd, PageRequest pageRequest) {
+        return houseBlPort.searchHouseBls(houseBlFactory.toFilter(cmd), pageRequest);
     }
 
     @Override
