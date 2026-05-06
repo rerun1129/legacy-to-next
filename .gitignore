@@ -2,6 +2,7 @@
 # 백엔드/프론트엔드 공통
 # pipeline test
 
+.idea/
 .DS_Store
 .playwright-mcp/
 .env*
