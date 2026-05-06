@@ -1,8 +1,7 @@
 package com.freightos.fms.application.enums;
 
 import com.freightos.common.exception.ResourceNotFoundException;
-import com.freightos.fms.domain.enums.EnumOption;
-import com.freightos.fms.domain.enums.EnumRegistry;
+import com.freightos.fms.application.enums.projection.EnumOption;
 import com.freightos.fms.application.enums.port.in.EnumQueryResult;
 import com.freightos.fms.application.enums.port.in.EnumQueryUseCase;
 import org.springframework.stereotype.Service;

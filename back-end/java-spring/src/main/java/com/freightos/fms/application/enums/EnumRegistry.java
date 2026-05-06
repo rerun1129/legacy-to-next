@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.enums;
+package com.freightos.fms.application.enums;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -10,11 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 등록된 ENUM 옵션 목록의 단일 진실 공급원(SSOT).
- * Spring 의존 없이 순수 자바로 유지하여 도메인 레이어 경계를 지킨다.
- * etag는 부팅 시 한 번 계산되며, 클라이언트 캐시 무효화에 사용된다.
- */
+import com.freightos.fms.application.enums.projection.EnumOption;
+
 public final class EnumRegistry {
 
     private final Map<String, List<EnumOption>> store;
@@ -58,7 +55,6 @@ public final class EnumRegistry {
             }
             return hex.toString();
         } catch (NoSuchAlgorithmException e) {
-            // SHA-256은 Java 표준이므로 도달할 수 없는 경로
             throw new IllegalStateException("SHA-256 알고리즘을 사용할 수 없습니다.", e);
         }
     }

@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.in.web.enums;
 
 import com.freightos.fms.adapter.in.web.enums.dto.EnumMapResponse;
 import com.freightos.fms.adapter.in.web.enums.dto.EnumOptionResponse;
-import com.freightos.fms.domain.enums.EnumOption;
+import com.freightos.fms.application.enums.projection.EnumOption;
 import com.freightos.fms.application.enums.port.in.EnumQueryResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

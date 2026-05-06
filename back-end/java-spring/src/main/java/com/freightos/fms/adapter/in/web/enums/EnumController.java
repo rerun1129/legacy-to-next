@@ -3,7 +3,7 @@ package com.freightos.fms.adapter.in.web.enums;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.enums.dto.EnumMapResponse;
 import com.freightos.fms.adapter.in.web.enums.dto.EnumOptionResponse;
-import com.freightos.fms.domain.enums.EnumRegistry;
+import com.freightos.fms.application.enums.EnumRegistry;
 import com.freightos.fms.application.enums.port.in.EnumQueryResult;
 import com.freightos.fms.application.enums.port.in.EnumQueryUseCase;
 import io.swagger.v3.oas.annotations.Operation;

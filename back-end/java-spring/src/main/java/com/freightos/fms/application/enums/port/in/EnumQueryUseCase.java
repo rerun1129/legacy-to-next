@@ -1,6 +1,6 @@
 package com.freightos.fms.application.enums.port.in;
 
-import com.freightos.fms.domain.enums.EnumOption;
+import com.freightos.fms.application.enums.projection.EnumOption;
 
 import java.util.List;
 

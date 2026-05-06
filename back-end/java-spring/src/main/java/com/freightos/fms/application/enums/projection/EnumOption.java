@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.enums;
+package com.freightos.fms.application.enums.projection;
 
 public record EnumOption(String code, String label, String description) {
 

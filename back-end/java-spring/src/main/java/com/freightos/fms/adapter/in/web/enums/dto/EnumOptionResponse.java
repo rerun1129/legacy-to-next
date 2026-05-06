@@ -1,7 +1,7 @@
 package com.freightos.fms.adapter.in.web.enums.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.freightos.fms.domain.enums.EnumOption;
+import com.freightos.fms.application.enums.projection.EnumOption;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record EnumOptionResponse(String code, String label, String description) {

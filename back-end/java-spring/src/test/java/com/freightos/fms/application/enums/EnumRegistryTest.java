@@ -1,5 +1,6 @@
-package com.freightos.fms.domain.enums;
+package com.freightos.fms.application.enums;
 
+import com.freightos.fms.application.enums.projection.EnumOption;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.enums.VolumeDivisor;
@@ -25,21 +26,18 @@ class EnumRegistryTest {
     void setUp() {
         Map<String, List<EnumOption>> map = new LinkedHashMap<>();
 
-        // Bound — 메타 없음, fromName 사용
         List<EnumOption> boundOptions = new ArrayList<>();
         for (Bound b : Bound.values()) {
             boundOptions.add(EnumOption.fromName(b));
         }
         map.put("Bound", boundOptions);
 
-        // VolumeDivisor — label 보유
         List<EnumOption> volumeOptions = new ArrayList<>();
         for (VolumeDivisor v : VolumeDivisor.values()) {
             volumeOptions.add(new EnumOption(v.name(), v.getLabel(), null));
         }
         map.put("VolumeDivisor", volumeOptions);
 
-        // NoOfBl — name()을 code로, getLabel()을 label로 사용
         List<EnumOption> noOfBlOptions = new ArrayList<>();
         for (NoOfBl n : NoOfBl.values()) {
             noOfBlOptions.add(new EnumOption(n.name(), n.getLabel(), null));
@@ -73,10 +71,6 @@ class EnumRegistryTest {
         List<EnumOption> first = List.of(EnumOption.fromName(Bound.EXP));
         map.put("Bound", first);
 
-        // 두 번째 등록 시도 — register helper 미사용, 직접 map 구성 후 registry 생성은 정상이므로
-        // 실제 중복 검증은 EnumRegistryFactory.register()가 담당한다.
-        // EnumRegistry.of() 자체에는 중복 키 보호가 없으므로 팩토리 레벨에서 검증한다.
-        // 여기서는 팩토리 없이 직접 register 헬퍼 로직을 재현하여 예외를 검증한다.
         assertThatThrownBy(() -> {
             if (map.containsKey("Bound")) {
                 throw new IllegalStateException("중복 ENUM 키: Bound");
@@ -122,7 +116,6 @@ class EnumRegistryTest {
     @Test
     @DisplayName("PackageUnit — values() 길이 0, 등록 skip되어 getByName은 Optional.empty()")
     void packageUnit_emptyEnum_notRegistered() {
-        // PackageUnit은 setUp()에서 등록하지 않음 (values().length == 0 → skip)
         assertThat(PackageUnit.values()).isEmpty();
         assertThat(registry.getByName("PackageUnit")).isEmpty();
     }

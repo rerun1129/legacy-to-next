@@ -1,8 +1,7 @@
 package com.freightos.fms.application.enums;
 
 import com.freightos.fms.domain.common.enums.*;
-import com.freightos.fms.domain.enums.EnumOption;
-import com.freightos.fms.domain.enums.EnumRegistry;
+import com.freightos.fms.application.enums.projection.EnumOption;
 import com.freightos.fms.domain.housebl.enums.*;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.springframework.context.annotation.Bean;
