@@ -5,13 +5,9 @@ import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.DescClause1;
-import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.LoadType;
-import com.freightos.fms.domain.common.enums.Per;
-import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
@@ -19,11 +15,9 @@ import com.freightos.common.util.VoMapper;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.entity.HouseBlNonBl.WorkDivision;
-import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
-import com.freightos.fms.domain.housebl.enums.TruckType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,6 +28,12 @@ import java.util.List;
  */
 @Component
 public class HouseBlFactory {
+
+    private final HouseBlSubFactory sub;
+
+    public HouseBlFactory(HouseBlSubFactory sub) {
+        this.sub = sub;
+    }
 
     // ── CREATE ────────────────────────────────────────────────────────
 
@@ -203,175 +203,23 @@ public class HouseBlFactory {
     // ── Sub 엔티티 일괄 적용 (CREATE) ────────────────────────────────
 
     private void applySubCreate(HouseBl entity, CreateHouseBlCommand cmd) {
-        applyDesc(entity, cmd.desc());
-        applyDims(entity, cmd.dims());
-        applyContainers(entity, cmd.containers());
-        applyScheduleLegs(entity, cmd.scheduleLegs());
-        applyTruckOrders(entity, cmd.truckOrders());
-        applyAirCharges(entity, cmd.airCharges());
+        sub.applyDesc(entity, cmd.desc());
+        sub.applyDims(entity, cmd.dims());
+        sub.applyContainers(entity, cmd.containers());
+        sub.applyScheduleLegs(entity, cmd.scheduleLegs());
+        sub.applyTruckOrders(entity, cmd.truckOrders());
+        sub.applyAirCharges(entity, cmd.airCharges());
     }
 
     // ── Sub 엔티티 일괄 적용 (UPDATE) ────────────────────────────────
 
     private void applySubUpdate(HouseBl entity, UpdateHouseBlCommand cmd) {
-        applyDescUpdate(entity, cmd.desc());
-        applyDimsUpdate(entity, cmd.dims());
-        applyContainersUpdate(entity, cmd.containers());
-        applyScheduleLegsUpdate(entity, cmd.scheduleLegs());
-        applyTruckOrdersUpdate(entity, cmd.truckOrders());
-        applyAirChargesUpdate(entity, cmd.airCharges());
-    }
-
-    // ── Desc ─────────────────────────────────────────────────────────
-
-    private void applyDesc(HouseBl entity, CreateHouseBlCommand.DescCommand r) {
-        if (r == null) return;
-        HouseBlDesc desc = HouseBlDesc.create(null);
-        desc.updateContent(r.marks(), r.description(),
-                DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()), r.remark());
-        entity.initDesc(desc);
-    }
-
-    private void applyDescUpdate(HouseBl entity, UpdateHouseBlCommand.DescCommand r) {
-        if (r == null) return;
-        HouseBlDesc desc = HouseBlDesc.create(null);
-        desc.updateContent(r.marks(), r.description(),
-                DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()), r.remark());
-        entity.initDesc(desc);
-    }
-
-    // ── Dims ──────────────────────────────────────────────────────────
-
-    private void applyDims(HouseBl entity, List<CreateHouseBlCommand.DimCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initDims(cmds.stream()
-                .map(c -> HouseBlDim.create(null,
-                        c.lengthCm(), c.widthCm(), c.heightCm(), c.quantity(), c.cbm(), c.volumeWeightKg()))
-                .toList());
-    }
-
-    private void applyDimsUpdate(HouseBl entity, List<UpdateHouseBlCommand.DimCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initDims(cmds.stream()
-                .map(c -> HouseBlDim.create(null,
-                        c.lengthCm(), c.widthCm(), c.heightCm(), c.quantity(), c.cbm(), c.volumeWeightKg()))
-                .toList());
-    }
-
-    // ── Containers ───────────────────────────────────────────────────
-
-    private void applyContainers(HouseBl entity, List<CreateHouseBlCommand.ContainerCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initContainers(cmds.stream().map(c -> {
-            HouseBlContainer container = HouseBlContainer.of(
-                    entity, ContainerNumber.of(c.containerNo()),
-                    ContainerType.fromCode(c.containerType()),
-                    c.lengthFeet() != null ? c.lengthFeet() : 20);
-            container.updateDetails(new HouseBlContainer.Details(
-                    SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
-                    SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),
-                    Quantity.of(c.pkgQty()), c.pkgUnit() != null ? WeightUnit.fromCode(c.pkgUnit()) : null,
-                    Weight.of(c.grossWeightKg()), Weight.of(c.netWeightKg()),
-                    Volume.of(c.cbm()), Weight.of(c.vgmKg()), Boolean.TRUE.equals(c.soc()),
-                    c.seq() != null ? c.seq() : 1));
-            return container;
-        }).toList());
-    }
-
-    private void applyContainersUpdate(HouseBl entity, List<UpdateHouseBlCommand.ContainerCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initContainers(cmds.stream().map(c -> {
-            HouseBlContainer container = HouseBlContainer.of(
-                    entity, ContainerNumber.of(c.containerNo()),
-                    ContainerType.fromCode(c.containerType()),
-                    c.lengthFeet() != null ? c.lengthFeet() : 20);
-            container.updateDetails(new HouseBlContainer.Details(
-                    SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
-                    SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),
-                    Quantity.of(c.pkgQty()), c.pkgUnit() != null ? WeightUnit.fromCode(c.pkgUnit()) : null,
-                    Weight.of(c.grossWeightKg()), Weight.of(c.netWeightKg()),
-                    Volume.of(c.cbm()), Weight.of(c.vgmKg()), Boolean.TRUE.equals(c.soc()),
-                    c.seq() != null ? c.seq() : 1));
-            return container;
-        }).toList());
-    }
-
-    // ── ScheduleLegs ─────────────────────────────────────────────────
-
-    private void applyScheduleLegs(HouseBl entity, List<CreateHouseBlCommand.ScheduleLegCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initScheduleLegs(cmds.stream().map(c -> {
-            HouseBlScheduleLeg leg = HouseBlScheduleLeg.create(null, c.toCode(), c.onBoardDt(), c.arrivalDt());
-            leg.updateDetails(c.toCode(), c.byCarrier(), c.flightNo(), c.onBoardDt(), c.onBoardTm(), c.arrivalDt(), c.arrivalTm());
-            return leg;
-        }).toList());
-    }
-
-    private void applyScheduleLegsUpdate(HouseBl entity, List<UpdateHouseBlCommand.ScheduleLegCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initScheduleLegs(cmds.stream().map(c -> {
-            HouseBlScheduleLeg leg = HouseBlScheduleLeg.create(null, c.toCode(), c.onBoardDt(), c.arrivalDt());
-            leg.updateDetails(c.toCode(), c.byCarrier(), c.flightNo(), c.onBoardDt(), c.onBoardTm(), c.arrivalDt(), c.arrivalTm());
-            return leg;
-        }).toList());
-    }
-
-    // ── TruckOrders ──────────────────────────────────────────────────
-
-    private void applyTruckOrders(HouseBl entity, List<CreateHouseBlCommand.TruckOrderCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initTruckOrders(cmds.stream().map(c -> {
-            HouseBlTruckOrder o = HouseBlTruckOrder.create(null);
-            o.updateDetails(new HouseBlTruckOrder.Details(
-                    c.truckOrderNo(), c.pkgQty(), c.pkgUnit(),
-                    Weight.of(c.grossWeightKg()), Volume.of(c.cbm()),
-                    c.truckNo(), TruckType.fromLabel(c.truckType()), c.driver(), c.mobileNo(),
-                    ContainerNumber.of(c.containerNo()), ContainerType.fromCode(c.containerType()),
-                    SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3())));
-            return o;
-        }).toList());
-    }
-
-    private void applyTruckOrdersUpdate(HouseBl entity, List<UpdateHouseBlCommand.TruckOrderCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initTruckOrders(cmds.stream().map(c -> {
-            HouseBlTruckOrder o = HouseBlTruckOrder.create(null);
-            o.updateDetails(new HouseBlTruckOrder.Details(
-                    c.truckOrderNo(), c.pkgQty(), c.pkgUnit(),
-                    Weight.of(c.grossWeightKg()), Volume.of(c.cbm()),
-                    c.truckNo(), TruckType.fromLabel(c.truckType()), c.driver(), c.mobileNo(),
-                    ContainerNumber.of(c.containerNo()), ContainerType.fromCode(c.containerType()),
-                    SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3())));
-            return o;
-        }).toList());
-    }
-
-    // ── AirCharges ───────────────────────────────────────────────────
-
-    private void applyAirCharges(HouseBl entity, List<CreateHouseBlCommand.AirChargeCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initAirCharges(cmds.stream().map(c -> {
-            HouseBlAirCharge charge = HouseBlAirCharge.create(null);
-            charge.updateDetails(new HouseBlAirCharge.Details(
-                    c.freightCode(), CurrencyCode.of(c.currencyCode()), Per.fromCode(c.per()),
-                    c.freightTerm() != null ? FreightTerm.valueOf(c.freightTerm()) : null,
-                    Weight.of(c.grossWeightKg()), RateClass.fromCode(c.rateClass()),
-                    Weight.of(c.chargeWeightKg()), c.rate()));
-            return charge;
-        }).toList());
-    }
-
-    private void applyAirChargesUpdate(HouseBl entity, List<UpdateHouseBlCommand.AirChargeCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return;
-        entity.initAirCharges(cmds.stream().map(c -> {
-            HouseBlAirCharge charge = HouseBlAirCharge.create(null);
-            charge.updateDetails(new HouseBlAirCharge.Details(
-                    c.freightCode(), CurrencyCode.of(c.currencyCode()), Per.fromCode(c.per()),
-                    c.freightTerm() != null ? FreightTerm.valueOf(c.freightTerm()) : null,
-                    Weight.of(c.grossWeightKg()), RateClass.fromCode(c.rateClass()),
-                    Weight.of(c.chargeWeightKg()), c.rate()));
-            return charge;
-        }).toList());
+        sub.applyDescUpdate(entity, cmd.desc());
+        sub.applyDimsUpdate(entity, cmd.dims());
+        sub.applyContainersUpdate(entity, cmd.containers());
+        sub.applyScheduleLegsUpdate(entity, cmd.scheduleLegs());
+        sub.applyTruckOrdersUpdate(entity, cmd.truckOrders());
+        sub.applyAirChargesUpdate(entity, cmd.airCharges());
     }
 
     // ── Entity → Projection 변환 ─────────────────────────────────────
