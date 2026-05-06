@@ -1,8 +1,5 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -10,11 +7,11 @@ import java.util.List;
 
 /** Master B/L 신규 등록 요청 DTO. */
 public record CreateMasterBlRequest(
-        @NotNull MasterBlJobDiv jobDiv,
-        @NotNull Bound bound,
+        @NotNull String jobDiv,
+        @NotNull String bound,
         @Size(max = 35) String mblNo,
         @Size(max = 35) String masterRefNo,
-        @NotNull FreightTerm freightTerm,
+        @NotNull String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
         @Size(max = 20) String consigneeCode,

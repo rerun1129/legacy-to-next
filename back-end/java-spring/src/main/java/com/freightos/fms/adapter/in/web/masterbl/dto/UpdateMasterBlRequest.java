@@ -1,9 +1,5 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -13,11 +9,11 @@ import java.util.List;
  * 내부 record는 CreateMasterBlRequest와 구조 동일, import 사이클 방지를 위해 별도 정의.
  */
 public record UpdateMasterBlRequest(
-        MasterBlJobDiv jobDiv,
-        Bound bound,
+        String jobDiv,
+        String bound,
         String mblNo,
         String masterRefNo,
-        FreightTerm freightTerm,
+        String freightTerm,
         String shipperCode,
         String shipperAddress,
         String consigneeCode,

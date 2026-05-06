@@ -166,7 +166,7 @@ class MasterBlServiceTest {
         SearchMasterBlCommand cmd = new SearchMasterBlCommand("EXP", "MBL-001", null, null, null, null, null, null);
         MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(0, 20);
-        MasterBlSummaryResult summary = new MasterBlSummaryResult(1L, "MBL-001", null, null, Bound.EXP, null, null, null, null, null, null, null, null);
+        MasterBlSummaryResult summary = new MasterBlSummaryResult(1L, "MBL-001", null, null, "EXP", null, null, null, null, null, null, null, null);
         PagedResult<MasterBlSummaryResult> portResult = PagedResult.of(List.of(summary), 1L, 1, 0, 20);
         given(masterBlFactory.toFilter(cmd)).willReturn(filter);
         given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
@@ -183,7 +183,7 @@ class MasterBlServiceTest {
         SearchMasterBlCommand cmd = new SearchMasterBlCommand("IMP", null, "SHIP01", null, "KRPUS", null, null, null);
         MasterBlFilter filter = new MasterBlFilter(Bound.IMP, null, "SHIP01", null, "KRPUS", null, null, null);
         PageRequest pageRequest = PageRequest.of(2, 15);
-        MasterBlSummaryResult summary = new MasterBlSummaryResult(2L, "MBL-002", null, null, Bound.IMP, null, null, null, null, null, null, null, null);
+        MasterBlSummaryResult summary = new MasterBlSummaryResult(2L, "MBL-002", null, null, "IMP", null, null, null, null, null, null, null, null);
         PagedResult<MasterBlSummaryResult> portResult = PagedResult.of(List.of(summary), 50L, 4, 2, 15);
         given(masterBlFactory.toFilter(cmd)).willReturn(filter);
         given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);

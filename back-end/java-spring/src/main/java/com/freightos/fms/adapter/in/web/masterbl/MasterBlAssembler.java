@@ -28,7 +28,7 @@ public class MasterBlAssembler {
 
     public SearchMasterBlCommand toSearchCommand(SearchMasterBlRequest req) {
         return new SearchMasterBlCommand(
-                req.bound() != null ? req.bound().name() : null,
+                req.bound(),
                 req.mblNo(),
                 req.shipperCode(),
                 req.consigneeCode(),

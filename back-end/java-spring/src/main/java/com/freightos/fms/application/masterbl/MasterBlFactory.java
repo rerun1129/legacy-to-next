@@ -3,6 +3,7 @@ package com.freightos.fms.application.masterbl;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -29,6 +30,8 @@ import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.TeamCode;
 import com.freightos.fms.domain.common.vo.Weight;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
@@ -54,14 +57,14 @@ public class MasterBlFactory {
     // ── CREATE ────────────────────────────────────────────────────────
 
     public MasterBl toEntity(CreateMasterBlCommand cmd) {
-        MasterBl entity = cmd.jobDiv() == MasterBlJobDiv.SEA
-                ? MasterBlSea.create(cmd.bound())
-                : MasterBlAir.create(cmd.bound());
+        MasterBl entity = MasterBlJobDiv.SEA.name().equals(cmd.jobDiv())
+                ? MasterBlSea.create(Bound.valueOf(cmd.bound()))
+                : MasterBlAir.create(Bound.valueOf(cmd.bound()));
 
         entity.assignMblNo(BlNumber.of(cmd.mblNo()), BlNumber.of(cmd.masterRefNo()));
         entity.assignParties(CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()), CustomerCode.of(cmd.notifyCode()));
         entity.updateSchedule(PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()), BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
-        entity.updateFreightAndOperator(cmd.freightTerm(), EmployeeCode.of(cmd.operatorCode()), null);
+        entity.updateFreightAndOperator(cmd.freightTerm() != null ? FreightTerm.valueOf(cmd.freightTerm()) : null, EmployeeCode.of(cmd.operatorCode()), null);
         entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), WeightUnit.fromCode(cmd.pkgUnit()), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         if (cmd.mainItemName() != null || cmd.hsCode() != null) entity.updateTradeInfo(cmd.mainItemName(), cmd.hsCode());
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
@@ -90,8 +93,8 @@ public class MasterBlFactory {
                 cmd.eta()     != null ? BlDate.of(cmd.eta())       : entity.getEta()
         );
         entity.updateFreightAndOperator(
-                cmd.freightTerm()  != null ? cmd.freightTerm()                    : entity.getFreightTerm(),
-                cmd.operatorCode() != null ? EmployeeCode.of(cmd.operatorCode())  : entity.getOperatorCode(),
+                cmd.freightTerm()  != null ? FreightTerm.valueOf(cmd.freightTerm()) : entity.getFreightTerm(),
+                cmd.operatorCode() != null ? EmployeeCode.of(cmd.operatorCode())    : entity.getOperatorCode(),
                 entity.getTeamCode()
         );
         entity.updateCargoSummary(new CargoSummary(
@@ -134,9 +137,9 @@ public class MasterBlFactory {
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getMblNo(), BlNumber::value),
                 VoMapper.mapOrNull(entity.getMasterRefNo(), BlNumber::value),
-                entity.getJobDiv(),
-                entity.getBound(),
-                entity.getShipmentType(),
+                entity.getJobDiv() != null ? entity.getJobDiv().name() : null,
+                entity.getBound() != null ? entity.getBound().name() : null,
+                entity.getShipmentType() != null ? entity.getShipmentType().name() : null,
                 VoMapper.mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getNotifyCode(), CustomerCode::value),
@@ -144,16 +147,16 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(entity.getPodCode(), PortCode::value),
                 VoMapper.mapOrNull(entity.getEtd(), BlDate::asString),
                 VoMapper.mapOrNull(entity.getEta(), BlDate::asString),
-                entity.getFreightTerm(),
+                entity.getFreightTerm() != null ? entity.getFreightTerm().name() : null,
                 VoMapper.mapOrNull(entity.getOperatorCode(), EmployeeCode::value),
                 VoMapper.mapOrNull(entity.getTeamCode(), TeamCode::value),
                 VoMapper.mapOrNull(entity.getPkgQty(), Quantity::count),
-                entity.getPkgUnit(),
+                entity.getPkgUnit() != null ? entity.getPkgUnit().name() : null,
                 VoMapper.mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
-                consolidatedHouseBls
+                toConsoledViews(consolidatedHouseBls)
         );
     }
 
@@ -191,6 +194,28 @@ public class MasterBlFactory {
         if (blType != null)            sea.updateBlType(BlType.valueOf(blType));
         if (porCode != null || finalDestCode != null) sea.updateRoute(PortCode.of(porCode), PortCode.of(finalDestCode));
         if (rton != null)              sea.updateRton(Rton.of(rton));
+    }
+
+    // ── ConsoledHouseBlSummary → ConsoledHouseBlSummaryView 변환 ─────
+
+    private List<ConsoledHouseBlSummaryView> toConsoledViews(List<ConsoledHouseBlSummary> sources) {
+        if (sources == null) return List.of();
+        return sources.stream().map(this::toConsoledView).toList();
+    }
+
+    private ConsoledHouseBlSummaryView toConsoledView(ConsoledHouseBlSummary summary) {
+        return switch (summary) {
+            case ConsoledHouseBlSeaSummary s -> new ConsoledHouseBlSummaryView(
+                    s.houseBlId(), s.hblNo(), s.shipperCode(), s.consigneeCode(), s.docPartnerCode(),
+                    s.pkgQty(), s.pkgUnit(), s.grossWeightKg(), s.cbm(),
+                    s.etd(), s.eta(), s.vesselName(), s.voyageNo(), s.polCode(), s.podCode(), null
+            );
+            case ConsoledHouseBlAirSummary a -> new ConsoledHouseBlSummaryView(
+                    a.houseBlId(), a.hblNo(), a.shipperCode(), a.consigneeCode(), a.docPartnerCode(),
+                    a.pkgQty(), a.pkgUnit(), a.grossWeightKg(), a.cbm(),
+                    null, null, null, null, null, null, a.chargeWeightKg()
+            );
+        };
     }
 
     // ── Sub 엔티티 파라미터 변환 ──────────────────────────────────────

@@ -213,7 +213,7 @@ class MasterBlPersistenceAdapterTest {
         MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        MasterBlSummaryResult summary = new MasterBlSummaryResult(1L, "MBL-001", null, null, Bound.EXP, null, null, null, null, null, null, null, null);
+        MasterBlSummaryResult summary = new MasterBlSummaryResult(1L, "MBL-001", null, null, "EXP", null, null, null, null, null, null, null, null);
         PagedResult<MasterBlSummaryResult> repoResult = PagedResult.of(List.of(summary), 1L, 1, 0, 10);
 
         given(masterBlRepository.searchByFilter(filter, pageRequest)).willReturn(repoResult);

@@ -1,8 +1,6 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
 import java.time.LocalDateTime;
 
@@ -11,8 +9,8 @@ public record MasterBlSummaryResponse(
         Long id,
         String mblNo,
         String masterRefNo,
-        MasterBlJobDiv jobDiv,
-        Bound bound,
+        String jobDiv,
+        String bound,
         String shipperCode,
         String consigneeCode,
         String polCode,
@@ -22,7 +20,6 @@ public record MasterBlSummaryResponse(
         String operatorCode,
         LocalDateTime createdAt
 ) {
-    /** QueryDSL projection 결과로부터 응답 DTO 생성. MasterBlSummaryResult 필드는 이미 raw 타입. */
     public static MasterBlSummaryResponse from(MasterBlSummaryResult result) {
         return new MasterBlSummaryResponse(
                 result.id(),

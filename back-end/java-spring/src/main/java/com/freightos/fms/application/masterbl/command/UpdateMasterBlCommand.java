@@ -1,9 +1,5 @@
 package com.freightos.fms.application.masterbl.command;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -11,11 +7,11 @@ import java.util.List;
  * Master B/L 수정 커맨드. null 필드는 기존 값 유지(PATCH 의미론).
  */
 public record UpdateMasterBlCommand(
-        MasterBlJobDiv jobDiv,
-        Bound bound,
+        String jobDiv,
+        String bound,
         String mblNo,
         String masterRefNo,
-        FreightTerm freightTerm,
+        String freightTerm,
         String shipperCode,
         String shipperAddress,
         String consigneeCode,

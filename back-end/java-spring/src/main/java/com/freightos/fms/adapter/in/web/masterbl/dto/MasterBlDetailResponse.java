@@ -1,12 +1,7 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.ShipmentType;
-import com.freightos.fms.domain.common.enums.WeightUnit;
-import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,9 +12,9 @@ public record MasterBlDetailResponse(
         Long id,
         String mblNo,
         String masterRefNo,
-        MasterBlJobDiv jobDiv,
-        Bound bound,
-        ShipmentType shipmentType,
+        String jobDiv,
+        String bound,
+        String shipmentType,
         String shipperCode,
         String consigneeCode,
         String notifyCode,
@@ -27,16 +22,16 @@ public record MasterBlDetailResponse(
         String podCode,
         String etd,
         String eta,
-        FreightTerm freightTerm,
+        String freightTerm,
         String operatorCode,
         String teamCode,
         Integer pkgQty,
-        WeightUnit pkgUnit,
+        String pkgUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<ConsoledHouseBlSummary> consolidatedHouseBls
+        List<ConsoledHouseBlSummaryView> consolidatedHouseBls
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailResult result) {
         return new MasterBlDetailResponse(
