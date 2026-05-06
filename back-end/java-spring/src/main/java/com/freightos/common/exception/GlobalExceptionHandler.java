@@ -58,6 +58,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(pd);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        log.warn("IllegalArgumentException: {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setType(URI.create(TYPE_BASE + "INVALID_ARGUMENT"));
+        pd.setTitle("Bad Request");
+        pd.setDetail(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGeneric(Exception ex, WebRequest request) {
         log.error("Unhandled exception", ex);

@@ -108,6 +108,9 @@ class MasterBlControllerWebMvcTest {
     @Test
     @DisplayName("GET /api/master-bl?bound=INVALID: 유효하지 않은 bound 값 → 400")
     void searchMasterBls_invalidBound_returns400() throws Exception {
+        given(masterBlAssembler.toSearchCommand(any()))
+                .willThrow(new IllegalArgumentException("No enum constant for INVALID"));
+
         mockMvc.perform(get("/api/master-bl")
                         .param("bound", "INVALID")
                         .param("page", "0")
