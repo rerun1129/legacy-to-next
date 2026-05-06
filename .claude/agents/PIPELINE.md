@@ -44,6 +44,7 @@ rm -f .claude/.coder_scope
 
 - 공유영역 작업(메인 직접 처리)에는 마커를 생성하지 않는다.
 - Backend/Frontend-coder 호출이 에러로 중단되더라도 마커를 반드시 삭제해 다음 호출을 오염시키지 않는다.
+- **경로 표기는 항상 `.claude/.coder_scope` 상대경로만 사용**. 프로젝트 절대경로(예: `C:\...\.claude\.coder_scope`) 금지. 향후 추가되는 모든 센티넬 파일도 동일하게 `.claude/` 하위 상대경로로 표기.
 
 ## 핸드오프
 
