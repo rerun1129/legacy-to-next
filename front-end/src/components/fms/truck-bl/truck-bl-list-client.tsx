@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, Search } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Button } from '@/components/shared/button';
 import type { TruckBlFilter } from '@/domain/truck-bl';
 import { TruckBlListFilter } from './truck-bl-list-filter';
 import { TruckBlGrid } from './truck-bl-grid';
+import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -40,11 +41,30 @@ const DEFAULT_VALUES: TruckBlFilter = {
   portKind: 'POL',
 };
 
+const SCOPE = "/fms/truck-bl/list";
+
+type TruckBlSearchState = SavedSearchState & { extraFilter: TruckBlFilter | null };
+
 export function TruckBlListClient() {
   const form = useForm<TruckBlFilter>({ defaultValues: DEFAULT_VALUES });
-  const [extraFilter, setExtraFilter] = useState<TruckBlFilter | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const qc = useQueryClient();
+
+  const [extraFilter, setExtraFilter] = useState<TruckBlFilter | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as TruckBlSearchState | undefined;
+    return s?.extraFilter ?? null;
+  });
+  const [currentPage, setCurrentPage] = useState(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE);
+    return s?.currentPage ?? 1;
+  });
+  const [showAll, setShowAll] = useState(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE);
+    return s?.showAll ?? true;
+  });
+
+  useEffect(() => {
+    listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, showAll });
+  }, [extraFilter, currentPage, showAll]);
 
   return (
     <>
@@ -58,6 +78,7 @@ export function TruckBlListClient() {
               form.reset(DEFAULT_VALUES);
               setExtraFilter(null);
               setCurrentPage(1);
+              setShowAll(true);
             }}
           >
             Reset
@@ -80,7 +101,13 @@ export function TruckBlListClient() {
       <TruckBlListFilter form={form} />
 
       <div style={{ flex: 1, overflow: 'auto', margin: '10px 14px 0', display: 'flex', flexDirection: 'column' }}>
-        <TruckBlGrid extraFilter={extraFilter} currentPage={currentPage} onPageChange={setCurrentPage} />
+        <TruckBlGrid
+          extraFilter={extraFilter}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          showAll={showAll}
+          onToggleShowAll={() => setShowAll(v => !v)}
+        />
       </div>
     </>
   );

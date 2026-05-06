@@ -15,13 +15,14 @@ interface Props {
   extraFilter: TruckBlFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
+  showAll: boolean;
+  onToggleShowAll: () => void;
 }
 
-export function TruckBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
+export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll }: Props) {
   const router = useRouter();
   const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
-  const [showAll, setShowAll] = useState(true);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["truck-bl", "list", extraFilter, showAll ? "all" : currentPage],
@@ -128,7 +129,7 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange }: Props) {
         onPageChange={onPageChange}
         disabled={isLoading}
         showAll={showAll}
-        onToggleShowAll={() => setShowAll(v => !v)}
+        onToggleShowAll={onToggleShowAll}
       />
     </div>
   );
