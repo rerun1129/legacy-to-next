@@ -88,7 +88,7 @@ class TruckBlRepositoryImplSliceTest {
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(2);
-        result.getContent().forEach(s -> assertThat(s.jobDiv()).isEqualTo(JobDiv.TRUCK));
+        result.getContent().forEach(s -> assertThat(s.jobDiv()).isEqualTo("TRUCK"));
     }
 
     @Test
@@ -104,8 +104,8 @@ class TruckBlRepositoryImplSliceTest {
         TruckBlSummary s = result.getContent().get(0);
         assertThat(s.id()).isNotNull();
         assertThat(s.hblNo()).isEqualTo("TRUCK-FULL");
-        assertThat(s.jobDiv()).isEqualTo(JobDiv.TRUCK);
-        assertThat(s.bound()).isEqualTo(Bound.EXP);
+        assertThat(s.jobDiv()).isEqualTo("TRUCK");
+        assertThat(s.bound()).isEqualTo("EXP");
         assertThat(s.polCode()).isEqualTo("KRPUS");
         assertThat(s.podCode()).isEqualTo("USNYC");
         assertThat(s.shipperCode()).isEqualTo("SHIP01");
@@ -152,6 +152,6 @@ class TruckBlRepositoryImplSliceTest {
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).bound()).isEqualTo(Bound.EXP);
+        assertThat(result.getContent().get(0).bound()).isEqualTo("EXP");
     }
 }

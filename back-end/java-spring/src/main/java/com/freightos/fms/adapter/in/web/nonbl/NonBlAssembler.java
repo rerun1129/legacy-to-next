@@ -16,16 +16,16 @@ public class NonBlAssembler {
 
     public SearchNonBlCommand toSearchCommand(SearchNonBlRequest req) {
         return new SearchNonBlCommand(
-                req.bound() != null ? req.bound().name() : null,
+                req.bound(),
                 req.hblNo(),
                 req.etdFrom(), req.etdTo(),
                 req.linerCode(),
                 req.partyCode(), req.portCode(),
                 req.vessel(), req.voyage(),
                 req.operatorCode(), req.teamCode(),
-                req.dateKind() != null ? req.dateKind().name() : null,
-                req.partyKind() != null ? req.partyKind().name() : null,
-                req.portKind() != null ? req.portKind().name() : null
+                req.dateKind(),
+                req.partyKind(),
+                req.portKind()
         );
     }
 }

@@ -1,21 +1,18 @@
 package com.freightos.fms.application.truckbl.projection;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * Truck B/L 리스트 조회 전용 projection.
  * QueryDSL Projections.constructor 로 직접 채워지며,
- * 도메인 계층에만 의존하므로 JPA 어노테이션·Q-class 의존 없음.
+ * application 경계에서 enum 필드를 String으로 통일한다.
  */
 public record TruckBlSummary(
     Long id,
     String hblNo,
-    JobDiv jobDiv,
-    Bound bound,
+    String jobDiv,
+    String bound,
     String polCode,
     String podCode,
     String etd,

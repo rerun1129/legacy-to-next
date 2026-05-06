@@ -16,15 +16,15 @@ public class TruckBlAssembler {
 
     public SearchTruckBlCommand toSearchCommand(SearchTruckBlRequest req) {
         return new SearchTruckBlCommand(
-                req.bound() != null ? req.bound().name() : null,
+                req.bound(),
                 req.truckBlNo(),
                 req.etdFrom(), req.etdTo(),
                 req.truckerCode(), req.docPartnerCode(),
                 req.partyCode(), req.portCode(),
                 req.operatorCode(), req.teamCode(),
-                req.dateKind() != null ? req.dateKind().name() : null,
-                req.partyKind() != null ? req.partyKind().name() : null,
-                req.portKind() != null ? req.portKind().name() : null
+                req.dateKind(),
+                req.partyKind(),
+                req.portKind()
         );
     }
 }

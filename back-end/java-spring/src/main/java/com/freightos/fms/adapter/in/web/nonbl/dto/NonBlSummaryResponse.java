@@ -1,7 +1,5 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 
 import java.math.BigDecimal;
@@ -11,8 +9,8 @@ import java.time.LocalDateTime;
 public record NonBlSummaryResponse(
         Long          id,
         String        hblNo,
-        JobDiv        jobDiv,
-        Bound         bound,
+        String        jobDiv,
+        String        bound,
         String        polCode,
         String        podCode,
         String        etd,
@@ -32,7 +30,7 @@ public record NonBlSummaryResponse(
         String        linerCode,
         String        linerName
 ) {
-    /** QueryDSL projection 결과로부터 응답 DTO 생성. NonBlSummary 필드는 이미 raw 타입. */
+    /** QueryDSL projection 결과로부터 응답 DTO 생성. NonBlSummary 필드는 이미 String 타입. */
     public static NonBlSummaryResponse from(NonBlSummary summary) {
         return new NonBlSummaryResponse(
                 summary.id(),

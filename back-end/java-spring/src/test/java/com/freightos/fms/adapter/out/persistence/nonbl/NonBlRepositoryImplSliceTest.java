@@ -93,7 +93,7 @@ class NonBlRepositoryImplSliceTest {
         PagedResult<NonBlSummary> result = nonBlRepositoryCustom.searchNonBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(2);
-        result.getContent().forEach(s -> assertThat(s.jobDiv()).isEqualTo(JobDiv.NON_BL));
+        result.getContent().forEach(s -> assertThat(s.jobDiv()).isEqualTo("NON_BL"));
     }
 
     @Test
@@ -125,8 +125,8 @@ class NonBlRepositoryImplSliceTest {
         NonBlSummary s = result.getContent().get(0);
         assertThat(s.id()).isNotNull();
         assertThat(s.hblNo()).isEqualTo("NONBL-FULL");
-        assertThat(s.jobDiv()).isEqualTo(JobDiv.NON_BL);
-        assertThat(s.bound()).isEqualTo(Bound.EXP);
+        assertThat(s.jobDiv()).isEqualTo("NON_BL");
+        assertThat(s.bound()).isEqualTo("EXP");
         assertThat(s.polCode()).isEqualTo("KRPUS");
         assertThat(s.podCode()).isEqualTo("USNYC");
         assertThat(s.shipperCode()).isEqualTo("SHIP01");
@@ -177,6 +177,6 @@ class NonBlRepositoryImplSliceTest {
         PagedResult<NonBlSummary> result = nonBlRepositoryCustom.searchNonBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).bound()).isEqualTo(Bound.EXP);
+        assertThat(result.getContent().get(0).bound()).isEqualTo("EXP");
     }
 }
