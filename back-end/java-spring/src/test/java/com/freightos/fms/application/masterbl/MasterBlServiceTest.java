@@ -1,11 +1,9 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
-import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
-import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
@@ -50,36 +48,6 @@ class MasterBlServiceTest {
 
     @InjectMocks
     private MasterBlService masterBlService;
-
-    @Test
-    @DisplayName("list - Bound.EXP 조회 시 port.getMasterBlsByBound(EXP) 위임")
-    void list_exp_delegatesToPort() {
-        PageRequest pageRequest = PageRequest.of(0, 50);
-        PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
-        MasterBl mockEntity = mock(MasterBl.class);
-        PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(masterBlPort.getMasterBlsByBound(Bound.EXP, sortedRequest)).willReturn(expected);
-
-        PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.EXP, pageRequest);
-
-        assertThat(result.getContent()).hasSize(1);
-        then(masterBlPort).should().getMasterBlsByBound(Bound.EXP, sortedRequest);
-    }
-
-    @Test
-    @DisplayName("list - Bound.IMP 조회 시 port.getMasterBlsByBound(IMP) 위임")
-    void list_imp_delegatesToPort() {
-        PageRequest pageRequest = PageRequest.of(0, 50);
-        PageRequest sortedRequest = PageRequest.of(0, 50, "createdAt", SortDirection.DESC);
-        MasterBl mockEntity = mock(MasterBl.class);
-        PagedResult<MasterBl> expected = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 50);
-        given(masterBlPort.getMasterBlsByBound(Bound.IMP, sortedRequest)).willReturn(expected);
-
-        PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.IMP, pageRequest);
-
-        assertThat(result.getContent()).hasSize(1);
-        then(masterBlPort).should().getMasterBlsByBound(Bound.IMP, sortedRequest);
-    }
 
     @Test
     @DisplayName("findMasterBlById - 존재하는 ID 조회 시 MasterBlDetailResult 반환")
@@ -189,35 +157,20 @@ class MasterBlServiceTest {
         then(masterBlPort).should(never()).deleteMasterBl(any());
     }
 
-    @Test
-    @DisplayName("getMasterBlsByBound - port PagedResult 메타(totalElements/totalPages/page/size) 그대로 반영")
-    void getMasterBlsByBound_returnsPagedResultWithCorrectMeta() {
-        PageRequest pageRequest = PageRequest.of(1, 15);
-        PageRequest sortedRequest = PageRequest.of(1, 15, "createdAt", SortDirection.DESC);
-        MasterBl mockEntity = mock(MasterBl.class);
-        PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 42L, 3, 1, 15);
-        given(masterBlPort.getMasterBlsByBound(Bound.EXP, sortedRequest)).willReturn(portResult);
-
-        PagedResult<MasterBl> result = masterBlService.getMasterBlsByBound(Bound.EXP, pageRequest);
-
-        assertThat(result.getTotalElements()).isEqualTo(42L);
-        assertThat(result.getTotalPages()).isEqualTo(3);
-        assertThat(result.getPage()).isEqualTo(1);
-        assertThat(result.getSize()).isEqualTo(15);
-    }
-
     // ── searchMasterBls ───────────────────────────────────────────────
 
     @Test
-    @DisplayName("searchMasterBls - filter와 pageRequest를 port에 위임하고 결과를 그대로 반환")
+    @DisplayName("searchMasterBls - SearchMasterBlCommand와 pageRequest를 port에 위임하고 결과를 그대로 반환")
     void searchMasterBls_delegatesToPort() {
+        SearchMasterBlCommand cmd = new SearchMasterBlCommand("EXP", "MBL-001", null, null, null, null, null, null);
         MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(0, 20);
         MasterBl mockEntity = mock(MasterBl.class);
         PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 20);
+        given(masterBlFactory.toFilter(cmd)).willReturn(filter);
         given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
 
-        PagedResult<MasterBl> result = masterBlService.searchMasterBls(filter, pageRequest);
+        PagedResult<MasterBl> result = masterBlService.searchMasterBls(cmd, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         then(masterBlPort).should().searchMasterBls(filter, pageRequest);
@@ -226,13 +179,15 @@ class MasterBlServiceTest {
     @Test
     @DisplayName("searchMasterBls - port PagedResult 메타(totalElements/totalPages/page/size) 그대로 반영")
     void searchMasterBls_returnsPagedResultWithCorrectMeta() {
+        SearchMasterBlCommand cmd = new SearchMasterBlCommand("IMP", null, "SHIP01", null, "KRPUS", null, null, null);
         MasterBlFilter filter = new MasterBlFilter(Bound.IMP, null, "SHIP01", null, "KRPUS", null, null, null);
         PageRequest pageRequest = PageRequest.of(2, 15);
         MasterBl mockEntity = mock(MasterBl.class);
         PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 50L, 4, 2, 15);
+        given(masterBlFactory.toFilter(cmd)).willReturn(filter);
         given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
 
-        PagedResult<MasterBl> result = masterBlService.searchMasterBls(filter, pageRequest);
+        PagedResult<MasterBl> result = masterBlService.searchMasterBls(cmd, pageRequest);
 
         assertThat(result.getTotalElements()).isEqualTo(50L);
         assertThat(result.getTotalPages()).isEqualTo(4);

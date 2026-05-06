@@ -4,10 +4,10 @@ import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
+import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.common.response.MessageCode;
-import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import org.junit.jupiter.api.DisplayName;
@@ -74,37 +74,44 @@ class MasterBlControllerWebMvcTest {
     // ── GET /api/master-bl ────────────────────────────────────────────
 
     @Test
-    @DisplayName("GET /api/master-bl?bound=EXP: 200 응답 및 응답 본문 검증")
-    void getMasterBlsByBound_happyPath_returns200() throws Exception {
+    @DisplayName("GET /api/master-bl?bound=EXP&page=0&size=50: 200 응답 및 응답 본문 검증")
+    void searchMasterBls_happyPath_returns200() throws Exception {
         MasterBlSummaryResponse mockItem = mock(MasterBlSummaryResponse.class);
         PagedResult<MasterBlSummaryResponse> mockPage = PagedResult.of(
                 List.of(mockItem), 1L, 1, 0, 50);
 
-        given(masterBlUseCase.getMasterBlsByBound(eq(Bound.EXP), any()))
-                .willReturn(mock(PagedResult.class));
+        SearchMasterBlCommand mockCmd = new SearchMasterBlCommand("EXP", null, null, null, null, null, null, null);
+        given(masterBlAssembler.toSearchCommand(any())).willReturn(mockCmd);
+        given(masterBlUseCase.searchMasterBls(any(), any())).willReturn(PagedResult.of(List.of(), 0L, 0, 0, 50));
         given(masterBlAssembler.toSummaryPage(any())).willReturn(mockPage);
 
         mockMvc.perform(get("/api/master-bl")
-                        .param("bound", "EXP"))
+                        .param("bound", "EXP")
+                        .param("page", "0")
+                        .param("size", "50"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.totalElements").value(1))
                 .andExpect(jsonPath("$.data.page").value(0));
 
-        then(masterBlUseCase).should().getMasterBlsByBound(eq(Bound.EXP), any());
+        then(masterBlUseCase).should().searchMasterBls(any(), any());
     }
 
     @Test
     @DisplayName("GET /api/master-bl: bound 파라미터 누락 → 400")
-    void getMasterBlsByBound_missingBound_returns400() throws Exception {
-        mockMvc.perform(get("/api/master-bl"))
+    void searchMasterBls_missingBound_returns400() throws Exception {
+        mockMvc.perform(get("/api/master-bl")
+                        .param("page", "0")
+                        .param("size", "50"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("GET /api/master-bl?bound=INVALID: 유효하지 않은 bound 값 → 400")
-    void getMasterBlsByBound_invalidBound_returns400() throws Exception {
+    void searchMasterBls_invalidBound_returns400() throws Exception {
         mockMvc.perform(get("/api/master-bl")
-                        .param("bound", "INVALID"))
+                        .param("bound", "INVALID")
+                        .param("page", "0")
+                        .param("size", "50"))
                 .andExpect(status().isBadRequest());
     }
 

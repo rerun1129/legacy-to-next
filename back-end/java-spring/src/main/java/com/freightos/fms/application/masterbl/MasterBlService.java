@@ -3,17 +3,15 @@ package com.freightos.fms.application.masterbl;
 import com.freightos.common.exception.FmsException;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
+import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.common.response.MessageCode;
 import org.springframework.http.HttpStatus;
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
-import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
@@ -37,13 +35,8 @@ public class MasterBlService implements MasterBlUseCase {
     private final MasterBlFactory masterBlFactory;
 
     @Override
-    public PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest) {
-        return masterBlPort.getMasterBlsByBound(bound, PageRequest.of(pageRequest.getPage(), pageRequest.getSize(), "createdAt", SortDirection.DESC));
-    }
-
-    @Override
-    public PagedResult<MasterBl> searchMasterBls(MasterBlFilter filter, PageRequest pageRequest) {
-        return masterBlPort.searchMasterBls(filter, pageRequest);
+    public PagedResult<MasterBl> searchMasterBls(SearchMasterBlCommand cmd, PageRequest pageRequest) {
+        return masterBlPort.searchMasterBls(masterBlFactory.toFilter(cmd), pageRequest);
     }
 
     @Override

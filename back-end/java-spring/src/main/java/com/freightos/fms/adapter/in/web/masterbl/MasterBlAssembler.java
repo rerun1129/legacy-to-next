@@ -3,8 +3,10 @@ package com.freightos.fms.adapter.in.web.masterbl;
 import com.freightos.fms.adapter.in.web.masterbl.dto.CreateMasterBlRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
+import com.freightos.fms.adapter.in.web.masterbl.dto.SearchMasterBlRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.UpdateMasterBlRequest;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
+import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.common.model.PagedResult;
@@ -22,6 +24,19 @@ public class MasterBlAssembler {
 
     public MasterBlDetailResponse toDetail(MasterBlDetailResult result) {
         return MasterBlDetailResponse.from(result);
+    }
+
+    public SearchMasterBlCommand toSearchCommand(SearchMasterBlRequest req) {
+        return new SearchMasterBlCommand(
+                req.bound() != null ? req.bound().name() : null,
+                req.mblNo(),
+                req.shipperCode(),
+                req.consigneeCode(),
+                req.polCode(),
+                req.podCode(),
+                req.etdFrom(),
+                req.etdTo()
+        );
     }
 
     public CreateMasterBlCommand toCreateCommand(CreateMasterBlRequest req) {

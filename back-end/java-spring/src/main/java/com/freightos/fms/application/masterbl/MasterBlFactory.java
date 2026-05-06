@@ -1,9 +1,11 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
+import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.domain.common.enums.BlType;
+import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.FreightTerm;
@@ -12,6 +14,7 @@ import com.freightos.fms.domain.common.enums.Per;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.WeightUnit;
+import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.CargoSummary;
@@ -107,6 +110,21 @@ public class MasterBlFactory {
 
         if (cmd.seaDetail() != null) applySeaUpdate(entity, cmd.seaDetail());
         applySubEntities(entity, toDescParams(cmd.desc()), toDimParams(cmd.dims()), toLegParams(cmd.scheduleLegs()), toChargeParams(cmd.airCharges()));
+    }
+
+    // ── SearchCommand → Domain Filter 변환 ───────────────────────────
+
+    public MasterBlFilter toFilter(SearchMasterBlCommand cmd) {
+        return new MasterBlFilter(
+                cmd.bound() != null ? Bound.valueOf(cmd.bound()) : null,
+                cmd.mblNo(),
+                cmd.shipperCode(),
+                cmd.consigneeCode(),
+                cmd.polCode(),
+                cmd.podCode(),
+                cmd.etdFrom(),
+                cmd.etdTo()
+        );
     }
 
     // ── Entity → Projection 변환 ─────────────────────────────────────
