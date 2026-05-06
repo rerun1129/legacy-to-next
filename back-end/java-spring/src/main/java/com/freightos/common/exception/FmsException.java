@@ -18,4 +18,8 @@ public class FmsException extends RuntimeException {
     public FmsException(HttpStatus status, String message) {
         this(status, status.name(), message);
     }
+
+    public static FmsException conflict(String errorCode, String message) {
+        return new FmsException(HttpStatus.CONFLICT, errorCode, message);
+    }
 }

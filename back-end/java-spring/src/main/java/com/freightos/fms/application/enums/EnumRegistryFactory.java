@@ -98,7 +98,7 @@ public class EnumRegistryFactory {
             return;
         }
         if (map.containsKey(key)) {
-            throw new IllegalStateException("중복 ENUM 키: " + key);
+            throw new IllegalStateException("Duplicate enum key: " + key);
         }
         List<EnumOption> options = new ArrayList<>(values.length);
         for (T value : values) {

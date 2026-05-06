@@ -10,17 +10,15 @@ import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.application.switchbl.port.in.SwitchBlUseCase;
 import com.freightos.fms.application.switchbl.port.out.SwitchBlPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SwitchBlService implements SwitchBlUseCase {
-
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SwitchBlService.class);
 
     private final SwitchBlPort switchBlPort;
     private final SwitchBlFactory switchBlFactory;
@@ -42,7 +40,7 @@ public class SwitchBlService implements SwitchBlUseCase {
     public SwitchBlDetailResult createSwitchBl(CreateSwitchBlCommand command) {
         // House B/L 1:1 UNIQUE 제약 — 동일 houseBlId에 이미 Switch B/L이 존재하면 중복 거부
         if (switchBlPort.findSwitchBlByHouseBlId(command.houseBlId()).isPresent()) {
-            throw new FmsException(HttpStatus.CONFLICT, "DUPLICATE_SWITCH_BL",
+            throw FmsException.conflict("DUPLICATE_SWITCH_BL",
                     "Switch B/L already exists for houseBlId: " + command.houseBlId());
         }
         SwitchBl saved = switchBlPort.saveSwitchBl(switchBlFactory.toEntity(command));

@@ -21,7 +21,7 @@ class HouseBlMapperModeTest {
 
     private final HouseBlCargoMapper cargoMapper = new HouseBlCargoMapper();
     private final HouseBlDocMapper docMapper = new HouseBlDocMapper();
-    private final HouseBlMapper mapper = new HouseBlMapper(cargoMapper, docMapper);
+    private final HouseBlJpaToDomainMapper mapper = new HouseBlJpaToDomainMapper(cargoMapper, docMapper);
 
     // ── AIR ──────────────────────────────────────────────────────────
 

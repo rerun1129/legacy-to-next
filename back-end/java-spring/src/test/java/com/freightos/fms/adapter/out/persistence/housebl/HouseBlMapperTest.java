@@ -25,7 +25,8 @@ class HouseBlMapperTest {
 
     private final HouseBlCargoMapper cargoMapper = new HouseBlCargoMapper();
     private final HouseBlDocMapper docMapper = new HouseBlDocMapper();
-    private final HouseBlMapper mapper = new HouseBlMapper(cargoMapper, docMapper);
+    private final HouseBlJpaToDomainMapper jpaToDomainMapper = new HouseBlJpaToDomainMapper(cargoMapper, docMapper);
+    private final HouseBlDomainToJpaMapper domainToJpaMapper = new HouseBlDomainToJpaMapper();
 
     // ── applyCommonFields ────────────────────────────────────────────
 
@@ -35,7 +36,7 @@ class HouseBlMapperTest {
         HouseBlAir domain = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        mapper.applyCommonFields(domain, jpa);
+        domainToJpaMapper.applyCommonFields(domain, jpa);
 
         assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.AIR);
         assertThat(jpa.getBound()).isEqualTo(Bound.EXP);
@@ -47,7 +48,7 @@ class HouseBlMapperTest {
         HouseBlSea domain = HouseBlSea.create(Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        mapper.applyCommonFields(domain, jpa);
+        domainToJpaMapper.applyCommonFields(domain, jpa);
 
         assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.SEA);
     }
@@ -58,7 +59,7 @@ class HouseBlMapperTest {
         HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        mapper.applyCommonFields(domain, jpa);
+        domainToJpaMapper.applyCommonFields(domain, jpa);
 
         assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.TRUCK);
     }
@@ -69,7 +70,7 @@ class HouseBlMapperTest {
         HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        mapper.applyCommonFields(domain, jpa);
+        domainToJpaMapper.applyCommonFields(domain, jpa);
 
         assertThat(jpa.getJobDiv()).isEqualTo(JobDiv.NON_BL);
     }
@@ -82,7 +83,7 @@ class HouseBlMapperTest {
         HouseBlSea domain = HouseBlSea.create(Bound.EXP);
         HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
 
-        mapper.applySeaFields(domain, jpa);
+        domainToJpaMapper.applySeaFields(domain, jpa);
 
         assertThat(jpa.isTriangle()).isFalse();
     }
@@ -95,7 +96,7 @@ class HouseBlMapperTest {
         HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
         HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
 
-        mapper.applyTruckFields(domain, jpa);
+        domainToJpaMapper.applyTruckFields(domain, jpa);
 
         assertThat(jpa.getVesselName()).isEqualTo("TRUCK");
     }
@@ -108,7 +109,7 @@ class HouseBlMapperTest {
         HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlNonBlJpaEntity jpa = new HouseBlNonBlJpaEntity();
 
-        mapper.applyNonBlFields(domain, jpa);
+        domainToJpaMapper.applyNonBlFields(domain, jpa);
 
         assertThat(jpa.getWorkDivision()).isEqualTo(HouseBlNonBl.WorkDivision.SEA);
     }
@@ -125,7 +126,7 @@ class HouseBlMapperTest {
         parentJpa.setConsigneeCode("CONSIGNEE01");
         parentJpa.setPkgQty(10);
         parentJpa.setGrossWeightKg(BigDecimal.valueOf(250.0));
-        HouseBlAir domain = mapper.toAirDomain(parentJpa, null);
+        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlAir.class);
         assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER01");
@@ -145,7 +146,7 @@ class HouseBlMapperTest {
         parentJpa.setPkgQty(5);
         parentJpa.setCbm(BigDecimal.valueOf(30.0));
 
-        HouseBlSea domain = mapper.toSeaDomain(parentJpa, null);
+        HouseBlSea domain = jpaToDomainMapper.toSeaDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlSea.class);
         assertThat(domain.getHblNo().value()).isEqualTo("HBL-SEA-001");
@@ -162,7 +163,7 @@ class HouseBlMapperTest {
         parentJpa.setJobDiv(JobDiv.TRUCK);
         parentJpa.setBound(Bound.EXP);
 
-        HouseBl domain = mapper.toTruckDomain(parentJpa, null);
+        HouseBl domain = jpaToDomainMapper.toTruckDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlTruck.class);
     }
@@ -174,7 +175,7 @@ class HouseBlMapperTest {
         parentJpa.setJobDiv(JobDiv.NON_BL);
         parentJpa.setBound(Bound.EXP);
 
-        HouseBl domain = mapper.toNonBlDomain(parentJpa, null);
+        HouseBl domain = jpaToDomainMapper.toNonBlDomain(parentJpa, null);
 
         assertThat(domain).isInstanceOf(HouseBlNonBl.class);
         assertThat(((HouseBlNonBl) domain).getWorkDivision()).isNull();
@@ -188,7 +189,7 @@ class HouseBlMapperTest {
         parentJpa.setBound(Bound.EXP);
         parentJpa.setHouseBlId(42L);
 
-        HouseBlAir domain = mapper.toAirDomain(parentJpa, null);
+        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, null);
 
         assertThat(domain.getId()).isEqualTo(42L);
     }
@@ -379,7 +380,7 @@ class HouseBlMapperTest {
         HouseBlSea domain = HouseBlSea.create(Bound.EXP);
         HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
 
-        mapper.applySeaFields(domain, jpa);
+        domainToJpaMapper.applySeaFields(domain, jpa);
 
         // vesselVoyage == null 이므로 if 블록 미진입 → JPA 필드는 초기값(null) 유지
         assertThat(jpa.getVesselName()).isNull();
@@ -395,7 +396,7 @@ class HouseBlMapperTest {
                 null);
         HouseBlSeaJpaEntity jpa = new HouseBlSeaJpaEntity();
 
-        mapper.applySeaFields(domain, jpa);
+        domainToJpaMapper.applySeaFields(domain, jpa);
 
         assertThat(jpa.getVesselName()).isEqualTo("MSC OSCAR");
         assertThat(jpa.getVoyageNo()).isEqualTo("V001W");
@@ -410,7 +411,7 @@ class HouseBlMapperTest {
         HouseBlAir domain = HouseBlAir.create(Bound.EXP);
         HouseBlAirJpaEntity jpa = new HouseBlAirJpaEntity();
 
-        mapper.applyAirFields(domain, jpa);
+        domainToJpaMapper.applyAirFields(domain, jpa);
 
         assertThat(jpa.getHandlingInfoCode()).isNull();
         assertThat(jpa.getHandlingInfoText()).isNull();
@@ -426,7 +427,7 @@ class HouseBlMapperTest {
         // mapper의 vv != null 분기를 통해 vesselName = "TRUCK" 이 세팅된다
         HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
 
-        mapper.applyTruckFields(domain, jpa);
+        domainToJpaMapper.applyTruckFields(domain, jpa);
 
         assertThat(jpa.getVesselName()).isEqualTo("TRUCK");
         assertThat(jpa.getVoyageNo()).isNull();
@@ -442,7 +443,7 @@ class HouseBlMapperTest {
                 null, null, null, null, null, null, null, null, null));
         HouseBlTruckJpaEntity jpa = new HouseBlTruckJpaEntity();
 
-        mapper.applyTruckFields(domain, jpa);
+        domainToJpaMapper.applyTruckFields(domain, jpa);
 
         // updateTruckFields가 vesselName을 "TRUCK"으로 강제하므로 JPA도 "TRUCK"
         assertThat(jpa.getVesselName()).isEqualTo("TRUCK");
@@ -458,7 +459,7 @@ class HouseBlMapperTest {
         // domain.getMasterBlId() == null (linkToMaster 미호출)
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
 
-        mapper.applyCommonFields(domain, jpa);
+        domainToJpaMapper.applyCommonFields(domain, jpa);
 
         assertThat(jpa.getMasterBlId()).isNull();
     }
@@ -478,7 +479,7 @@ class HouseBlMapperTest {
         nonBlJpa.setRton(BigDecimal.valueOf(12.5));
         nonBlJpa.setVolumeWtKg(BigDecimal.valueOf(100.0));
 
-        HouseBlNonBl domain = mapper.toNonBlDomain(parentJpa, nonBlJpa);
+        HouseBlNonBl domain = jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa);
 
         assertThat(domain.getOriginalBlRef().value()).isEqualTo("REF-001");
         assertThat(domain.getRton().ton()).isEqualByComparingTo(BigDecimal.valueOf(12.5));

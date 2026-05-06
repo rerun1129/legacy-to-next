@@ -13,8 +13,6 @@ import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
-import com.freightos.fms.adapter.out.persistence.housebl.HouseBlCargoMapper;
-import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDocMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -32,7 +30,8 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     private final HouseBlAirRepository houseBlAirRepository;
     private final HouseBlTruckRepository houseBlTruckRepository;
     private final HouseBlNonBlRepository houseBlNonBlRepository;
-    private final HouseBlMapper houseBlMapper;
+    private final HouseBlJpaToDomainMapper jpaToDomainMapper;
+    private final HouseBlDomainToJpaMapper domainToJpaMapper;
     private final HouseBlCargoMapper houseBlCargoMapper;
     private final HouseBlDocMapper houseBlDocMapper;
 
@@ -69,7 +68,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         } else {
             parentJpa = new HouseBlJpaEntity();
         }
-        houseBlMapper.applyCommonFields(domain, parentJpa);
+        domainToJpaMapper.applyCommonFields(domain, parentJpa);
         final HouseBlJpaEntity savedJpa = houseBlRepository.save(parentJpa);
 
         // extension 엔티티 save/update
@@ -77,7 +76,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             case HouseBlSea sea -> {
                 HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlSeaJpaEntity::new);
                 seaJpa.setHouseBl(savedJpa);
-                houseBlMapper.applySeaFields(sea, seaJpa);
+                domainToJpaMapper.applySeaFields(sea, seaJpa);
                 // 컨테이너 동기화 (SEA 전용)
                 List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
@@ -90,7 +89,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             case HouseBlAir air -> {
                 HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlAirJpaEntity::new);
                 airJpa.setHouseBl(savedJpa);
-                houseBlMapper.applyAirFields(air, airJpa);
+                domainToJpaMapper.applyAirFields(air, airJpa);
                 List<HouseBlDimJpaEntity> airDims = air.getDims().stream()
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
@@ -112,7 +111,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             case HouseBlTruck truck -> {
                 HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlTruckJpaEntity::new);
                 truckJpa.setHouseBl(savedJpa);
-                houseBlMapper.applyTruckFields(truck, truckJpa);
+                domainToJpaMapper.applyTruckFields(truck, truckJpa);
                 List<HouseBlDimJpaEntity> truckDims = truck.getDims().stream()
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
@@ -126,7 +125,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             case HouseBlNonBl nonBl -> {
                 HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlNonBlJpaEntity::new);
                 nonBlJpa.setHouseBl(savedJpa);
-                houseBlMapper.applyNonBlFields(nonBl, nonBlJpa);
+                domainToJpaMapper.applyNonBlFields(nonBl, nonBlJpa);
                 List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
                 List<HouseBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
@@ -174,10 +173,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     private HouseBl loadWithExt(HouseBlJpaEntity jpa) {
         Long id = jpa.getHouseBlId();
         return switch (jpa.getJobDiv()) {
-            case SEA    -> houseBlMapper.toSeaDomain(jpa, houseBlSeaRepository.findByHouseBlHouseBlId(id).orElse(null));
-            case AIR    -> houseBlMapper.toAirDomain(jpa, houseBlAirRepository.findByHouseBlHouseBlId(id).orElse(null));
-            case TRUCK  -> houseBlMapper.toTruckDomain(jpa, houseBlTruckRepository.findByHouseBlHouseBlId(id).orElse(null));
-            case NON_BL -> houseBlMapper.toNonBlDomain(jpa, houseBlNonBlRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case SEA    -> jpaToDomainMapper.toSeaDomain(jpa, houseBlSeaRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case AIR    -> jpaToDomainMapper.toAirDomain(jpa, houseBlAirRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case TRUCK  -> jpaToDomainMapper.toTruckDomain(jpa, houseBlTruckRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case NON_BL -> jpaToDomainMapper.toNonBlDomain(jpa, houseBlNonBlRepository.findByHouseBlHouseBlId(id).orElse(null));
         };
     }
 }

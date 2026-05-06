@@ -8,7 +8,6 @@ import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.common.response.MessageCode;
-import org.springframework.http.HttpStatus;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
@@ -19,17 +18,17 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MasterBlService implements MasterBlUseCase {
-
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MasterBlService.class);
 
     private final MasterBlPort masterBlPort;
     private final HouseBlPort houseBlPort;
@@ -50,7 +49,7 @@ public class MasterBlService implements MasterBlUseCase {
     @Transactional
     public MasterBlDetailResult createMasterBl(CreateMasterBlCommand command) {
         if (command.mblNo() != null && masterBlPort.existsByMblNo(command.mblNo())) {
-            throw new FmsException(HttpStatus.CONFLICT, "DUPLICATE_MBL_NO", "MBL No already exists: " + command.mblNo());
+            throw FmsException.conflict("DUPLICATE_MBL_NO", "MBL No already exists: " + command.mblNo());
         }
         MasterBl saved = masterBlPort.saveMasterBl(masterBlFactory.toEntity(command));
         log.info("Created MasterBl id={}", saved.getId());

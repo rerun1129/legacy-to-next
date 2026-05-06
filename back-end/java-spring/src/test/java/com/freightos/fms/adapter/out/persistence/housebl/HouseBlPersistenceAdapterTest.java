@@ -40,7 +40,8 @@ class HouseBlPersistenceAdapterTest {
     @Mock private HouseBlAirRepository houseBlAirRepository;
     @Mock private HouseBlTruckRepository houseBlTruckRepository;
     @Mock private HouseBlNonBlRepository houseBlNonBlRepository;
-    @Mock private HouseBlMapper houseBlMapper;
+    @Mock private HouseBlJpaToDomainMapper jpaToDomainMapper;
+    @Mock private HouseBlDomainToJpaMapper domainToJpaMapper;
 
     @InjectMocks
     private HouseBlPersistenceAdapter adapter;
@@ -55,7 +56,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.AIR);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toAirDomain(eq(savedJpa), any())).willReturn(air);
+        given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any())).willReturn(air);
 
         adapter.saveHouseBl(air);
 
@@ -74,7 +75,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.AIR);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toAirDomain(eq(savedJpa), any())).willReturn(air);
+        given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any())).willReturn(air);
 
         adapter.saveHouseBl(air);
 
@@ -93,7 +94,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.SEA);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlSeaRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toSeaDomain(eq(savedJpa), any())).willReturn(sea);
+        given(jpaToDomainMapper.toSeaDomain(eq(savedJpa), any())).willReturn(sea);
 
         adapter.saveHouseBl(sea);
 
@@ -111,7 +112,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.SEA);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlSeaRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toSeaDomain(eq(savedJpa), any())).willReturn(sea);
+        given(jpaToDomainMapper.toSeaDomain(eq(savedJpa), any())).willReturn(sea);
 
         adapter.saveHouseBl(sea);
 
@@ -130,7 +131,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.TRUCK);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
+        given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
 
         adapter.saveHouseBl(truck);
 
@@ -151,7 +152,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.NON_BL);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
+        given(jpaToDomainMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
 
         adapter.saveHouseBl(nonBl);
 
@@ -173,15 +174,15 @@ class HouseBlPersistenceAdapterTest {
         HouseBlAir expected = HouseBlAir.create(Bound.EXP);
         given(houseBlRepository.findById(1L)).willReturn(Optional.of(jpa));
         given(houseBlAirRepository.findByHouseBlHouseBlId(1L)).willReturn(Optional.empty());
-        given(houseBlMapper.toAirDomain(eq(jpa), any())).willReturn(expected);
+        given(jpaToDomainMapper.toAirDomain(eq(jpa), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(1L);
 
         assertThat(result).contains(expected);
-        then(houseBlMapper).should().toAirDomain(eq(jpa), any());
-        then(houseBlMapper).should(never()).toSeaDomain(any(), any());
-        then(houseBlMapper).should(never()).toTruckDomain(any(), any());
-        then(houseBlMapper).should(never()).toNonBlDomain(any(), any());
+        then(jpaToDomainMapper).should().toAirDomain(eq(jpa), any());
+        then(jpaToDomainMapper).should(never()).toSeaDomain(any(), any());
+        then(jpaToDomainMapper).should(never()).toTruckDomain(any(), any());
+        then(jpaToDomainMapper).should(never()).toNonBlDomain(any(), any());
     }
 
     @Test
@@ -193,13 +194,13 @@ class HouseBlPersistenceAdapterTest {
         HouseBlSea expected = HouseBlSea.create(Bound.EXP);
         given(houseBlRepository.findById(2L)).willReturn(Optional.of(jpa));
         given(houseBlSeaRepository.findByHouseBlHouseBlId(2L)).willReturn(Optional.empty());
-        given(houseBlMapper.toSeaDomain(eq(jpa), any())).willReturn(expected);
+        given(jpaToDomainMapper.toSeaDomain(eq(jpa), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(2L);
 
         assertThat(result).contains(expected);
-        then(houseBlMapper).should().toSeaDomain(eq(jpa), any());
-        then(houseBlMapper).should(never()).toAirDomain(any(), any());
+        then(jpaToDomainMapper).should().toSeaDomain(eq(jpa), any());
+        then(jpaToDomainMapper).should(never()).toAirDomain(any(), any());
     }
 
     @Test
@@ -211,14 +212,14 @@ class HouseBlPersistenceAdapterTest {
         HouseBlTruck expected = HouseBlTruck.create(Bound.EXP);
         given(houseBlRepository.findById(3L)).willReturn(Optional.of(jpa));
         given(houseBlTruckRepository.findByHouseBlHouseBlId(3L)).willReturn(Optional.empty());
-        given(houseBlMapper.toTruckDomain(eq(jpa), any())).willReturn(expected);
+        given(jpaToDomainMapper.toTruckDomain(eq(jpa), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(3L);
 
         assertThat(result).contains(expected);
-        then(houseBlMapper).should().toTruckDomain(eq(jpa), any());
-        then(houseBlMapper).should(never()).toAirDomain(any(), any());
-        then(houseBlMapper).should(never()).toSeaDomain(any(), any());
+        then(jpaToDomainMapper).should().toTruckDomain(eq(jpa), any());
+        then(jpaToDomainMapper).should(never()).toAirDomain(any(), any());
+        then(jpaToDomainMapper).should(never()).toSeaDomain(any(), any());
     }
 
     @Test
@@ -230,13 +231,13 @@ class HouseBlPersistenceAdapterTest {
         HouseBlNonBl expected = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         given(houseBlRepository.findById(4L)).willReturn(Optional.of(jpa));
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(4L)).willReturn(Optional.empty());
-        given(houseBlMapper.toNonBlDomain(eq(jpa), any())).willReturn(expected);
+        given(jpaToDomainMapper.toNonBlDomain(eq(jpa), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(4L);
 
         assertThat(result).contains(expected);
-        then(houseBlMapper).should().toNonBlDomain(eq(jpa), any());
-        then(houseBlMapper).should(never()).toAirDomain(any(), any());
+        then(jpaToDomainMapper).should().toNonBlDomain(eq(jpa), any());
+        then(jpaToDomainMapper).should(never()).toAirDomain(any(), any());
     }
 
     @Test
@@ -247,7 +248,7 @@ class HouseBlPersistenceAdapterTest {
         Optional<HouseBl> result = adapter.findHouseBlById(999L);
 
         assertThat(result).isEmpty();
-        then(houseBlMapper).shouldHaveNoInteractions();
+        then(jpaToDomainMapper).shouldHaveNoInteractions();
     }
 
     // ── findConsoledSeaSummariesByMasterBlId 위임 ──────────────────────────────────────────────
@@ -300,7 +301,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.TRUCK);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
+        given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
 
         adapter.saveHouseBl(truck);
 
