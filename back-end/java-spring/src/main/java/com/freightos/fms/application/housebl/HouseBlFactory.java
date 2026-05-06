@@ -248,14 +248,15 @@ public class HouseBlFactory {
 
     public HouseBlDetailResult toDetailResult(HouseBl entity) {
         HouseBlNonBl nonBl = entity instanceof HouseBlNonBl n ? n : null;
+        BlType seaBlType = entity instanceof HouseBlSea sea ? sea.getBlType() : null;
         return new HouseBlDetailResult(
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getHblNo(), BlNumber::value),
-                entity.getJobDiv(),
-                entity.getBound(),
-                entity.getShipmentType(),
-                entity instanceof HouseBlSea sea ? sea.getBlType() : null,
-                entity.getFreightTerm(),
+                entity.getJobDiv() != null ? entity.getJobDiv().name() : null,
+                entity.getBound() != null ? entity.getBound().name() : null,
+                entity.getShipmentType() != null ? entity.getShipmentType().name() : null,
+                seaBlType != null ? seaBlType.name() : null,
+                entity.getFreightTerm() != null ? entity.getFreightTerm().name() : null,
                 VoMapper.mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getNotifyCode(), CustomerCode::value),
@@ -266,7 +267,7 @@ public class HouseBlFactory {
                 VoMapper.mapOrNull(entity.getEtd(), BlDate::asString),
                 VoMapper.mapOrNull(entity.getEta(), BlDate::asString),
                 VoMapper.mapOrNull(entity.getPkgQty(), Quantity::count),
-                entity.getPkgUnit(),
+                entity.getPkgUnit() != null ? entity.getPkgUnit().name() : null,
                 VoMapper.mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
                 VoMapper.mapOrNull(entity.getActualCustomerCode(), CustomerCode::value),

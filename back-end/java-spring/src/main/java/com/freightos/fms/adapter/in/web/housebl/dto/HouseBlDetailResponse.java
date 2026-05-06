@@ -1,12 +1,6 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
-import com.freightos.fms.domain.common.enums.BlType;
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.ShipmentType;
-import com.freightos.fms.domain.common.enums.WeightUnit;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,11 +9,11 @@ import java.time.LocalDateTime;
 public record HouseBlDetailResponse(
         Long id,
         String hblNo,
-        JobDiv jobDiv,
-        Bound bound,
-        ShipmentType shipmentType,
-        BlType blType,
-        FreightTerm freightTerm,
+        String jobDiv,
+        String bound,
+        String shipmentType,
+        String blType,
+        String freightTerm,
         String shipperCode,
         String consigneeCode,
         String notifyCode,
@@ -30,7 +24,7 @@ public record HouseBlDetailResponse(
         String etd,
         String eta,
         Integer pkgQty,
-        WeightUnit pkgUnit,
+        String pkgUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         String actualCustomerCode,

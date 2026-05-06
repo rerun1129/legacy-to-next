@@ -2,10 +2,6 @@ package com.freightos.fms.adapter.in.web.housebl;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.ShipmentType;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +17,8 @@ class HouseBlAssemblerTest {
     @DisplayName("toCreateCommand: jobDiv=SEA, bound=EXP → Command의 jobDiv·bound 일치")
     void toCreateCommand_seaExp_returnsCommandWithCorrectJobDivAndBound() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
-                JobDiv.SEA, Bound.EXP, null,
-                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                "SEA", "EXP", null,
+                "HOUSE", "PREPAID",
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
@@ -44,8 +40,8 @@ class HouseBlAssemblerTest {
     @DisplayName("toCreateCommand: jobDiv=AIR, bound=IMP → Command의 jobDiv·bound 일치")
     void toCreateCommand_airImp_returnsCommandWithCorrectBound() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
-                JobDiv.AIR, Bound.IMP, null,
-                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                "AIR", "IMP", null,
+                "HOUSE", "PREPAID",
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
@@ -67,8 +63,8 @@ class HouseBlAssemblerTest {
     @DisplayName("toCreateCommand: jobDiv=TRUCK → Command의 jobDiv 일치")
     void toCreateCommand_truckJobDiv_returnsCommandWithCorrectJobDiv() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
-                JobDiv.TRUCK, Bound.EXP, null,
-                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                "TRUCK", "EXP", null,
+                "HOUSE", "PREPAID",
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
@@ -89,8 +85,8 @@ class HouseBlAssemblerTest {
     @DisplayName("toCreateCommand: jobDiv=NON_BL → Command의 jobDiv 일치")
     void toCreateCommand_nonBlJobDiv_returnsCommandWithCorrectJobDiv() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
-                JobDiv.NON_BL, Bound.EXP, null,
-                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                "NON_BL", "EXP", null,
+                "HOUSE", "PREPAID",
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,
@@ -111,8 +107,8 @@ class HouseBlAssemblerTest {
     @DisplayName("toCreateCommand: jobDiv=SEA, bound=IMP → Command의 bound IMP 확인")
     void toCreateCommand_seaImp_returnsCommandWithImpBound() {
         CreateHouseBlRequest request = new CreateHouseBlRequest(
-                JobDiv.SEA, Bound.IMP, null,
-                ShipmentType.HOUSE, FreightTerm.PREPAID,
+                "SEA", "IMP", null,
+                "HOUSE", "PREPAID",
                 null, null, null,
                 null, null, null, null,
                 null, null, null, null,

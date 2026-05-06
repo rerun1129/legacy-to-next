@@ -1,20 +1,15 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.WeightUnit;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.common.enums.ShipmentType;
 import java.math.BigDecimal;
 import java.util.List;
 
 // null 필드는 기존 값 유지 정책 (PATCH 의미론)
 public record UpdateHouseBlRequest(
-        JobDiv jobDiv,
-        Bound bound,
+        String jobDiv,
+        String bound,
         String hblNo,
-        ShipmentType shipmentType,
-        FreightTerm freightTerm,
+        String shipmentType,
+        String freightTerm,
         String shipperCode,
         String shipperAddress,
         String consigneeCode,
@@ -29,7 +24,7 @@ public record UpdateHouseBlRequest(
         String etd,
         String eta,
         Integer pkgQty,
-        WeightUnit pkgUnit,
+        String pkgUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         String actualCustomerCode,

@@ -81,6 +81,8 @@ class HouseBlControllerWebMvcTest {
     @Test
     @DisplayName("POST /api/house-bl/search: jobDiv 유효하지 않은 값 → 400")
     void searchHouseBls_invalidJobDiv_returns400() throws Exception {
+        given(houseBlAssembler.toSearchCommand(any())).willThrow(new IllegalArgumentException("No enum constant for INVALID"));
+
         mockMvc.perform(post("/api/house-bl/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"jobDiv\":\"INVALID\",\"bound\":\"EXP\",\"page\":0,\"size\":10}"))

@@ -378,8 +378,8 @@ class HouseBlRepositoryImplSliceTest {
         assertThat(result.getContent()).hasSize(3);
         assertThat(result.getTotalElements()).isEqualTo(3);
         result.getContent().forEach(s -> {
-            assertThat(s.jobDiv()).isEqualTo(JobDiv.SEA);
-            assertThat(s.bound()).isEqualTo(Bound.EXP);
+            assertThat(s.jobDiv()).isEqualTo("SEA");
+            assertThat(s.bound()).isEqualTo("EXP");
         });
     }
 

@@ -1,20 +1,15 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
-import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.WeightUnit;
-import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.common.enums.ShipmentType;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateHouseBlRequest(
-        @NotNull JobDiv jobDiv,
-        @NotNull Bound bound,
+        @NotNull String jobDiv,
+        @NotNull String bound,
         @Size(max = 35) String hblNo,
-        @NotNull ShipmentType shipmentType,
-        @NotNull FreightTerm freightTerm,
+        @NotNull String shipmentType,
+        @NotNull String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
         @Size(max = 20) String consigneeCode,
@@ -29,7 +24,7 @@ public record CreateHouseBlRequest(
         @Pattern(regexp = "\\d{8}") String etd,
         @Pattern(regexp = "\\d{8}") String eta,
         @Min(0) Integer pkgQty,
-        WeightUnit pkgUnit,
+        String pkgUnit,
         @DecimalMin("0") BigDecimal grossWeightKg,
         @DecimalMin("0") BigDecimal cbm,
         @Size(max = 20) String actualCustomerCode,

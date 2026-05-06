@@ -33,8 +33,8 @@ public class HouseBlAssembler {
 
     public SearchHouseBlCommand toSearchCommand(SearchHouseBlRequest req) {
         return new SearchHouseBlCommand(
-                req.jobDiv() != null ? req.jobDiv().name() : null,
-                req.bound() != null ? req.bound().name() : null,
+                req.jobDiv(),
+                req.bound(),
                 req.hblNo(), req.mblNo(),
                 req.shipperCode(), req.consigneeCode(),
                 req.polCode(), req.podCode(),
@@ -42,20 +42,20 @@ public class HouseBlAssembler {
                 req.vessel(), req.voyage(),
                 req.linerCode(), req.operatorCode(),
                 req.teamCode(), req.partyCode(), req.portCode(),
-                req.dateKind() != null ? req.dateKind().name() : null,
-                req.partyKind() != null ? req.partyKind().name() : null,
-                req.portKind() != null ? req.portKind().name() : null
+                req.dateKind(),
+                req.partyKind(),
+                req.portKind()
         );
     }
 
     /** CREATE 요청 DTO를 커맨드로 변환한다. VO 변환은 없으며 1:1 필드 복사만 수행한다. */
     public CreateHouseBlCommand toCreateCommand(CreateHouseBlRequest req) {
         return new CreateHouseBlCommand(
-                req.jobDiv() != null ? req.jobDiv().name() : null,
-                req.bound() != null ? req.bound().name() : null,
+                req.jobDiv(),
+                req.bound(),
                 req.hblNo(),
-                req.shipmentType() != null ? req.shipmentType().name() : null,
-                req.freightTerm() != null ? req.freightTerm().name() : null,
+                req.shipmentType(),
+                req.freightTerm(),
                 req.shipperCode(),
                 req.shipperAddress(),
                 req.consigneeCode(),
@@ -70,7 +70,7 @@ public class HouseBlAssembler {
                 req.etd(),
                 req.eta(),
                 req.pkgQty(),
-                req.pkgUnit() != null ? req.pkgUnit().name() : null,
+                req.pkgUnit(),
                 req.grossWeightKg(),
                 req.cbm(),
                 req.actualCustomerCode(),
@@ -108,11 +108,11 @@ public class HouseBlAssembler {
     /** UPDATE 요청 DTO를 커맨드로 변환한다. VO 변환은 없으며 1:1 필드 복사만 수행한다. */
     public UpdateHouseBlCommand toUpdateCommand(UpdateHouseBlRequest req) {
         return new UpdateHouseBlCommand(
-                req.jobDiv() != null ? req.jobDiv().name() : null,
-                req.bound() != null ? req.bound().name() : null,
+                req.jobDiv(),
+                req.bound(),
                 req.hblNo(),
-                req.shipmentType() != null ? req.shipmentType().name() : null,
-                req.freightTerm() != null ? req.freightTerm().name() : null,
+                req.shipmentType(),
+                req.freightTerm(),
                 req.shipperCode(),
                 req.shipperAddress(),
                 req.consigneeCode(),
@@ -127,7 +127,7 @@ public class HouseBlAssembler {
                 req.etd(),
                 req.eta(),
                 req.pkgQty(),
-                req.pkgUnit() != null ? req.pkgUnit().name() : null,
+                req.pkgUnit(),
                 req.grossWeightKg(),
                 req.cbm(),
                 req.actualCustomerCode(),
