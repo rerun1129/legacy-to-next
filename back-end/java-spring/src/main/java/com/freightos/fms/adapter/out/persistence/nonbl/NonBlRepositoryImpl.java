@@ -9,7 +9,7 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
-import com.freightos.fms.domain.nonbl.projection.NonBlSummary;
+import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.StringPath;

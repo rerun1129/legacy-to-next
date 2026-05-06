@@ -9,7 +9,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
-import com.freightos.fms.domain.nonbl.projection.NonBlSummary;
+import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.in.web.nonbl;
 
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
-import com.freightos.fms.domain.nonbl.projection.NonBlSummary;
+import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import org.springframework.stereotype.Component;
 
 @Component

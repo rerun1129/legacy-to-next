@@ -1,4 +1,4 @@
-package com.freightos.fms.domain.truckbl.projection;
+package com.freightos.fms.application.nonbl.projection;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -7,11 +7,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Truck B/L 리스트 조회 전용 projection.
+ * Non B/L 리스트 조회 전용 projection.
  * QueryDSL Projections.constructor 로 직접 채워지며,
  * 도메인 계층에만 의존하므로 JPA 어노테이션·Q-class 의존 없음.
+ * HouseBlSummary의 22 필드를 그대로 유지한다.
  */
-public record TruckBlSummary(
+public record NonBlSummary(
     Long id,
     String hblNo,
     JobDiv jobDiv,
@@ -22,12 +23,16 @@ public record TruckBlSummary(
     String eta,
     String shipperCode,
     String consigneeCode,
-    String notifyCode,
-    String docPartnerCode,
-    String truckerCode,
     Integer pkgQty,
     String pkgUnit,
+    LocalDateTime createdAt,
+    String notifyCode,
+    String settlePartnerCode,
+    String actualCustomerCode,
     BigDecimal grossWeightKg,
     BigDecimal cbm,
-    LocalDateTime createdAt
+    String vesselName,
+    String voyageNo,
+    String linerCode,
+    String linerName
 ) {}

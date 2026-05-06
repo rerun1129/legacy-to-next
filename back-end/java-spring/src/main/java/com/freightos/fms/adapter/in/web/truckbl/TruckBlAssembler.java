@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.in.web.truckbl;
 
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.truckbl.dto.TruckBlSummaryResponse;
-import com.freightos.fms.domain.truckbl.projection.TruckBlSummary;
+import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 import org.springframework.stereotype.Component;
 
 @Component

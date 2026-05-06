@@ -4,7 +4,7 @@ import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
-import com.freightos.fms.domain.nonbl.projection.NonBlSummary;
+import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

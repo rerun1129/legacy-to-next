@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.in.web.truckbl.dto;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.truckbl.projection.TruckBlSummary;
+import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

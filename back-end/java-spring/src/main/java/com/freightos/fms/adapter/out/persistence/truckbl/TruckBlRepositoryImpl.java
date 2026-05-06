@@ -9,7 +9,7 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.truckbl.TruckBlFilter;
-import com.freightos.fms.domain.truckbl.projection.TruckBlSummary;
+import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.StringPath;
