@@ -10,7 +10,7 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
-import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

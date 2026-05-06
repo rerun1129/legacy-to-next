@@ -13,7 +13,7 @@ import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.querydsl.core.types.dsl.StringPath;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
-import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;

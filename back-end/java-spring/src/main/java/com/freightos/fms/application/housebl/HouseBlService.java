@@ -11,7 +11,7 @@ import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
-import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

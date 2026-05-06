@@ -5,7 +5,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
-import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 
 import java.util.List;
 

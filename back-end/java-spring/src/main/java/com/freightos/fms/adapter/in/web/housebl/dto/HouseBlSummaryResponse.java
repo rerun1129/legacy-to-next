@@ -5,7 +5,7 @@ import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

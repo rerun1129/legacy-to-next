@@ -9,7 +9,7 @@ import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
-import com.freightos.fms.domain.housebl.projection.HouseBlSummary;
+import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import lombok.RequiredArgsConstructor;
