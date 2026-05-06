@@ -93,6 +93,10 @@ Adapter(out)에서 도메인 → 외부 형식(JPA Entity, Response DTO) 변환.
     - 비자명한 알고리즘 선택 근거
     - 의도된 fire-and-forget, 의도된 빈 catch (`// intentionally ignored: <이유>`)
 
+## CONV3. Import (백엔드 전용)
+
+- 코드 본문에서 FQCN(fully-qualified class name) inline 참조 금지. import 선언 후 단순명만 사용 (record 컴포넌트 타입, 메서드 시그니처, 파라미터 타입 모두 포함).
+
 
 # 정확성 규칙
 
@@ -143,6 +147,7 @@ JDBC `Connection`, `InputStream`, Reactor 구독은 반드시 닫거나 dispose 
 - `System.out.println` 대신 SLF4J 사용. 운영 로그에 디버그 흔적 커밋 금지.
 - 에러 로그는 stack trace + 식별자 + 컨텍스트 포함. MDC(Mapped Diagnostic Context) 트레이싱 활용.
 - 구조화 로그 사용 권장. string concat 보다 메타데이터 필드.
+- (백엔드) 로거는 Lombok `@Slf4j` 어노테이션으로 선언한다. `LoggerFactory.getLogger(클래스명.class)` 직접 선언 금지.
 
 
 # 프로젝트 누적 규칙
@@ -153,12 +158,19 @@ JDBC `Connection`, `InputStream`, Reactor 구독은 반드시 닫거나 dispose 
 
 - Controller는 응답 데이터의 매핑·변환을 직접 호출하지 않는다 (`.map(Dto::from)`, `Dto.from(domain)` 금지). 도메인 → DTO 변환은 별도 어셈블러/매퍼 컴포넌트에 위임하고, 컨트롤러는 어셈블러 메서드 한 번 호출로 끝낸다.
 - URL 경로에 버전을 포함하지 않는다 (`/api/v1/...` 금지). 버저닝이 필요하면 헤더로 처리한다.
+- UseCase의 `createXxx`는 `Long id`만 반환한다. 컨트롤러는 id로 `Location` URI를 구성하고, 응답 바디가 필요하면 별도 `findXxxById` 호출로 빌드한다. 도메인 객체를 컨트롤러로 반환·노출하지 않는다 (SRP: 생성·조회 분리).
+- Controller·Assembler에서 `var` 사용 금지. 명시 타입으로 선언하여 계층 위반 즉시 가시화한다.
+- 검색 엔드포인트는 `POST /search` + `@RequestBody`로 통일한다. 다중 필터·페이징을 GET query string으로 받는 패턴 지양.
+- Path variable 명명: 자기 도메인 키는 `id`, 교차 도메인 키는 `{도메인}Id` (예: `/by-house-bl/{houseBlId}`).
 
 ## P2. Adapter(out) 계층
 
 - Adapter는 도메인 타입 ↔ 인프라 타입 변환을 담당한다. 도메인 PageRequest → Spring Pageable 변환, 엔티티 매핑 등 인프라 특화 처리는 어댑터 책임이다.
 - 비즈니스 정책 결정(정렬 기준·방향, 필터 조건 등)은 애플리케이션 계층(서비스)이 도메인 개념으로 결정하고 포트에 전달한다. 어댑터는 그 결정을 인프라 타입(Spring Sort 등)으로 변환할 뿐이다.
 - 애플리케이션 계층은 JPA·Spring 등 인프라 세부사항을 알 필요가 없다.
+- 도메인↔JPA 매퍼는 방향별 클래스로 분리한다: `XxxDomainToJpaMapper` / `XxxJpaToDomainMapper`. 양방향 단일 클래스(`XxxMapper`) 금지.
+- QueryDSL Where절은 `BooleanExpression` 가변인자 + null-반환 헬퍼(`containsIgnoreCase`, `eqString` 등) 체이닝으로 작성한다. `BooleanBuilder` 누적 패턴 금지.
+- Repository는 `XxxRepository`(JpaRepository) + `XxxRepositoryCustom`(커스텀 인터페이스) + `XxxRepositoryImpl`(QueryDSL 구현) 3분할로 유지한다.
 
 ## P3. 명명
 
@@ -167,6 +179,7 @@ JDBC `Connection`, `InputStream`, Reactor 구독은 반드시 닫거나 dispose 
   - ✅ `getHouseBlById`, `getHouseBlsByJobDivAndBound`, `deleteHouseBlById`
 - 정렬 기준·방향은 메서드명에 포함하지 않는다(`OrderByCreatedAtDesc` 등 금지). 정렬은 `PageRequest` 등 파라미터로 전달한다.
 - 조회 메서드 접두어: `find`는 0..1 (없을 수 있음), `get`은 1..n (반드시 있거나 여러 개).
+- UseCase 인터페이스에 사용처 없는 `findOptional*` 임시 메서드를 두지 않는다. 단일 분기만 필요하면 `getXxx`(NotFound 예외)로 노출한다.
 
 ## P4. 가독성
 
@@ -190,3 +203,14 @@ JDBC `Connection`, `InputStream`, Reactor 구독은 반드시 닫거나 dispose 
 ## P7. 테스트
 
 - Mockito BDD 스타일에서 인터페이스 메서드명을 변경할 때 `given(port.method(` 패턴과 `then(port).should().method(` 패턴을 모두 교체한다. 한쪽만 바꾸면 컴파일 오류가 발생한다.
+
+## P8. Application 계층 위치
+
+- 검색·리스트 API 입력은 `Search{도메인}Command` record로 정의하여 `application/{도메인}/command/`에 둔다. 도메인 enum은 `name()` 문자열로 직렬화하여 Adapter→Command 경계에서 도메인 enum 의존을 차단한다.
+- Projection record는 `application/{도메인}/projection/`에 둔다. 도메인 레이어에 projection 디렉토리를 두지 않는다 (Projection은 조회 결과 표현이지 도메인 개념이 아님).
+- `EnumRegistry`, `EnumOption` 등 비도메인 보조 객체는 application 레이어에 둔다. 도메인 레이어는 비즈니스 엔티티/VO로만 구성한다.
+- Factory 클래스가 sub-entity 변환 로직을 다수 보유할 경우 `Xxx{Sub}Factory`로 분리하여 위임한다 (예: `HouseBlSubFactory`). ARCH2 500줄 한계 도달 전 예방적 분할.
+
+## P9. 예외 생성
+
+- 도메인 예외(`FmsException`)는 HTTP 상태별 정적 팩토리(`FmsException.conflict(...)`, `.notFound(...)` 등)로 생성한다. 생성자에 `HttpStatus.XXX` 직접 전달 금지.
