@@ -1,12 +1,14 @@
 package com.freightos.fms.domain.housebl;
 
+import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.DateKind;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 
 public record HouseBlFilter(
-    com.freightos.fms.domain.housebl.enums.JobDiv jobDiv,
-    com.freightos.fms.domain.common.enums.Bound bound,
+    JobDiv jobDiv,
+    Bound bound,
     String hblNo,
     String mblNo,
     String shipperCode,
@@ -28,8 +30,8 @@ public record HouseBlFilter(
 ) {
     // of() 파라미터 시그니처는 기존 그대로 유지 — 테스트 6곳 보호
     public static HouseBlFilter of(
-            com.freightos.fms.domain.housebl.enums.JobDiv jobDiv,
-            com.freightos.fms.domain.common.enums.Bound bound,
+            JobDiv jobDiv,
+            Bound bound,
             String hblNo, String mblNo,
             String shipperCode, String consigneeCode,
             String polCode, String podCode,

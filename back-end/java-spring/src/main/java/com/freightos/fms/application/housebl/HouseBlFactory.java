@@ -25,8 +25,6 @@ import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * Command → 도메인 Entity 변환 팩토리.
  * Adapter(in)에서 분리된 VO/Entity 생성 로직을 이 계층에 집중한다.
@@ -106,7 +104,6 @@ public class HouseBlFactory {
     // ── 공통 필드 record 변환 (UPDATE) ───────────────────────────────
 
     private HouseBl.HouseBlUpdateFields toUpdateFields(UpdateHouseBlCommand cmd) {
-        String deliveryCode = cmd.seaDetail() != null ? cmd.seaDetail().deliveryCode() : null;
         return new HouseBl.HouseBlUpdateFields(
                 cmd.hblNo()              != null ? BlNumber.of(cmd.hblNo())                   : null,
                 cmd.shipmentType()       != null ? ShipmentType.valueOf(cmd.shipmentType()) : null,

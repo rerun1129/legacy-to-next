@@ -1,7 +1,9 @@
 package com.freightos.fms.domain.masterbl;
 
+import com.freightos.fms.domain.common.enums.Bound;
+
 public record MasterBlFilter(
-    com.freightos.fms.domain.common.enums.Bound bound,
+    Bound bound,
     String mblNo,
     String shipperCode,
     String consigneeCode,
