@@ -11,12 +11,12 @@
   → (승인) 도메인별 순차 구현:
       · back-end 변경 있으면:
             echo "backend" > .claude/.coder_scope
-            → [Backend-coder] 구현
+            → [Backend-coder] 구현 (빌드·테스트 미수행, QA 담당)
             → rm -f .claude/.coder_scope
             → [메인] git add <변경파일> && git commit
       · front-end 변경 있으면:
             echo "frontend" > .claude/.coder_scope
-            → [Frontend-coder] 구현
+            → [Frontend-coder] 구현 (빌드·테스트 미수행, QA 담당)
             → rm -f .claude/.coder_scope
             → [메인] git add <변경파일> && git commit
       · 공유영역(schema/, docs/, .claude/ 등) → 메인 직접 처리 → git add + commit
