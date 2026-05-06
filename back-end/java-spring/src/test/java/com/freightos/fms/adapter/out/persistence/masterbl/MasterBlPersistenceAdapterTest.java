@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.SortDirection;
 import com.freightos.common.model.PageRequest;
@@ -207,24 +208,20 @@ class MasterBlPersistenceAdapterTest {
     // ── searchMasterBls ───────────────────────────────────────
 
     @Test
-    @DisplayName("searchMasterBls: repository.searchByFilter 결과를 도메인으로 변환하여 반환")
+    @DisplayName("searchMasterBls: repository.searchByFilter 결과를 그대로 반환 (projection 변환 없음)")
     void searchMasterBls_delegatesToCustomRepositoryAndMapsResult() {
         MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        MasterBlJpaEntity jpa = new MasterBlJpaEntity();
-        jpa.setJobDiv(MasterBlJobDiv.SEA);
-        MasterBlSea expected = MasterBlSea.create(Bound.EXP);
-        PagedResult<MasterBlJpaEntity> repoResult = PagedResult.of(List.of(jpa), 1L, 1, 0, 10);
+        MasterBlSummaryResult summary = new MasterBlSummaryResult(1L, "MBL-001", null, null, Bound.EXP, null, null, null, null, null, null, null, null);
+        PagedResult<MasterBlSummaryResult> repoResult = PagedResult.of(List.of(summary), 1L, 1, 0, 10);
 
         given(masterBlRepository.searchByFilter(filter, pageRequest)).willReturn(repoResult);
-        given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
-        given(masterBlMapper.toSeaDomain(eq(jpa), any())).willReturn(expected);
 
-        PagedResult<MasterBl> result = adapter.searchMasterBls(filter, pageRequest);
+        PagedResult<MasterBlSummaryResult> result = adapter.searchMasterBls(filter, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0)).isEqualTo(expected);
+        assertThat(result.getContent().get(0)).isEqualTo(summary);
         assertThat(result.getTotalElements()).isEqualTo(1L);
         then(masterBlRepository).should().searchByFilter(filter, pageRequest);
     }

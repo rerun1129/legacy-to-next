@@ -3,6 +3,7 @@ package com.freightos.fms.application.masterbl;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
@@ -165,12 +166,12 @@ class MasterBlServiceTest {
         SearchMasterBlCommand cmd = new SearchMasterBlCommand("EXP", "MBL-001", null, null, null, null, null, null);
         MasterBlFilter filter = new MasterBlFilter(Bound.EXP, "MBL-001", null, null, null, null, null, null);
         PageRequest pageRequest = PageRequest.of(0, 20);
-        MasterBl mockEntity = mock(MasterBl.class);
-        PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 1L, 1, 0, 20);
+        MasterBlSummaryResult summary = new MasterBlSummaryResult(1L, "MBL-001", null, null, Bound.EXP, null, null, null, null, null, null, null, null);
+        PagedResult<MasterBlSummaryResult> portResult = PagedResult.of(List.of(summary), 1L, 1, 0, 20);
         given(masterBlFactory.toFilter(cmd)).willReturn(filter);
         given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
 
-        PagedResult<MasterBl> result = masterBlService.searchMasterBls(cmd, pageRequest);
+        PagedResult<MasterBlSummaryResult> result = masterBlService.searchMasterBls(cmd, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         then(masterBlPort).should().searchMasterBls(filter, pageRequest);
@@ -182,12 +183,12 @@ class MasterBlServiceTest {
         SearchMasterBlCommand cmd = new SearchMasterBlCommand("IMP", null, "SHIP01", null, "KRPUS", null, null, null);
         MasterBlFilter filter = new MasterBlFilter(Bound.IMP, null, "SHIP01", null, "KRPUS", null, null, null);
         PageRequest pageRequest = PageRequest.of(2, 15);
-        MasterBl mockEntity = mock(MasterBl.class);
-        PagedResult<MasterBl> portResult = PagedResult.of(List.of(mockEntity), 50L, 4, 2, 15);
+        MasterBlSummaryResult summary = new MasterBlSummaryResult(2L, "MBL-002", null, null, Bound.IMP, null, null, null, null, null, null, null, null);
+        PagedResult<MasterBlSummaryResult> portResult = PagedResult.of(List.of(summary), 50L, 4, 2, 15);
         given(masterBlFactory.toFilter(cmd)).willReturn(filter);
         given(masterBlPort.searchMasterBls(filter, pageRequest)).willReturn(portResult);
 
-        PagedResult<MasterBl> result = masterBlService.searchMasterBls(cmd, pageRequest);
+        PagedResult<MasterBlSummaryResult> result = masterBlService.searchMasterBls(cmd, pageRequest);
 
         assertThat(result.getTotalElements()).isEqualTo(50L);
         assertThat(result.getTotalPages()).isEqualTo(4);

@@ -9,8 +9,8 @@ import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 public class MasterBlAssembler {
 
-    public PagedResult<MasterBlSummaryResponse> toSummaryPage(PagedResult<MasterBl> source) {
+    public PagedResult<MasterBlSummaryResponse> toSummaryPage(PagedResult<MasterBlSummaryResult> source) {
         return source.map(MasterBlSummaryResponse::from);
     }
 

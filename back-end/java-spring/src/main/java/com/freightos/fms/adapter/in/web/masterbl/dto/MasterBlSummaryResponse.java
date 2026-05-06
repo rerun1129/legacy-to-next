@@ -1,13 +1,10 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.vo.*;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
 import java.time.LocalDateTime;
-
-import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /** Master B/L 리스트 화면용 요약 DTO. */
 public record MasterBlSummaryResponse(
@@ -25,21 +22,22 @@ public record MasterBlSummaryResponse(
         String operatorCode,
         LocalDateTime createdAt
 ) {
-    public static MasterBlSummaryResponse from(MasterBl entity) {
+    /** QueryDSL projection 결과로부터 응답 DTO 생성. MasterBlSummaryResult 필드는 이미 raw 타입. */
+    public static MasterBlSummaryResponse from(MasterBlSummaryResult result) {
         return new MasterBlSummaryResponse(
-                entity.getId(),
-                mapOrNull(entity.getMblNo(), BlNumber::value),
-                mapOrNull(entity.getMasterRefNo(), BlNumber::value),
-                entity.getJobDiv(),
-                entity.getBound(),
-                mapOrNull(entity.getShipperCode(), CustomerCode::value),
-                mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
-                mapOrNull(entity.getPolCode(), PortCode::value),
-                mapOrNull(entity.getPodCode(), PortCode::value),
-                mapOrNull(entity.getEtd(), BlDate::asString),
-                mapOrNull(entity.getEta(), BlDate::asString),
-                mapOrNull(entity.getOperatorCode(), EmployeeCode::value),
-                entity.getCreatedAt()
+                result.id(),
+                result.mblNo(),
+                result.masterRefNo(),
+                result.jobDiv(),
+                result.bound(),
+                result.shipperCode(),
+                result.consigneeCode(),
+                result.polCode(),
+                result.podCode(),
+                result.etd(),
+                result.eta(),
+                result.operatorCode(),
+                result.createdAt()
         );
     }
 }

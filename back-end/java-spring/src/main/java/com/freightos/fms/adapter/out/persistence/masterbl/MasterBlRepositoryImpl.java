@@ -1,11 +1,12 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
-import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.QMasterBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public PagedResult<MasterBlJpaEntity> searchByFilter(MasterBlFilter filter, PageRequest pageRequest) {
+    public PagedResult<MasterBlSummaryResult> searchByFilter(MasterBlFilter filter, PageRequest pageRequest) {
         QMasterBlJpaEntity m = QMasterBlJpaEntity.masterBlJpaEntity;
 
         BooleanBuilder where = new BooleanBuilder();
@@ -48,8 +49,23 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
             where.and(m.etd.loe(filter.etdTo()));
         }
 
-        List<MasterBlJpaEntity> content = queryFactory
-            .selectFrom(m)
+        List<MasterBlSummaryResult> content = queryFactory
+            .select(Projections.constructor(MasterBlSummaryResult.class,
+                m.masterBlId,
+                m.mblNo,
+                m.masterRefNo,
+                m.jobDiv,
+                m.bound,
+                m.shipperCode,
+                m.consigneeCode,
+                m.polCode,
+                m.podCode,
+                m.etd,
+                m.eta,
+                m.operatorCode,
+                m.createdAt
+            ))
+            .from(m)
             .where(where)
             .orderBy(m.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())

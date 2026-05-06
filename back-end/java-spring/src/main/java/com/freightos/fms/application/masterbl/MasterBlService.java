@@ -6,6 +6,7 @@ import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.common.response.MessageCode;
 import org.springframework.http.HttpStatus;
 import com.freightos.common.model.PageRequest;
@@ -35,7 +36,7 @@ public class MasterBlService implements MasterBlUseCase {
     private final MasterBlFactory masterBlFactory;
 
     @Override
-    public PagedResult<MasterBl> searchMasterBls(SearchMasterBlCommand cmd, PageRequest pageRequest) {
+    public PagedResult<MasterBlSummaryResult> searchMasterBls(SearchMasterBlCommand cmd, PageRequest pageRequest) {
         return masterBlPort.searchMasterBls(masterBlFactory.toFilter(cmd), pageRequest);
     }
 

@@ -11,6 +11,7 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
@@ -54,10 +55,8 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     }
 
     @Override
-    public PagedResult<MasterBl> searchMasterBls(MasterBlFilter filter, PageRequest pageRequest) {
-        PagedResult<MasterBlJpaEntity> page = masterBlRepository.searchByFilter(filter, pageRequest);
-        List<MasterBl> content = page.getContent().stream().map(this::loadWithExt).toList();
-        return PagedResult.of(content, page.getTotalElements(), page.getTotalPages(), page.getPage(), page.getSize());
+    public PagedResult<MasterBlSummaryResult> searchMasterBls(MasterBlFilter filter, PageRequest pageRequest) {
+        return masterBlRepository.searchByFilter(filter, pageRequest);
     }
 
     @Override
