@@ -41,7 +41,6 @@
 }
 .grid__cell-input:focus {
   background: var(--accent-soft);
-  box-shadow: inset 0 0 0 2px var(--focus-ring);
 }
 .grid__cell-input[readonly],
 .grid__cell-input:disabled {
@@ -55,8 +54,7 @@
 }
 .grid__cell-input.is-required:focus {
   background: var(--required-soft);
-  box-shadow: inset 4px 0 0 var(--required-bar),
-              0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
+  box-shadow: inset 4px 0 0 var(--required-bar);
 }
 select.grid__cell-input { cursor: pointer; }
 td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); }
