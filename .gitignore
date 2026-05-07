@@ -17,6 +17,9 @@
 .claude/settings.local.json
 .claude/slack_notify.sh
 
+# Windows Bash 크래시 덤프
+*.stackdump
+
 # Gradle
 .gradle/
 build/
