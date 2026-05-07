@@ -136,12 +136,20 @@ const [selectedKey, setSelectedKey] = useState<string | null>(null);
 />
 ```
 
-### 셀 input
+### 셀 input (표준 컴포넌트 권장)
+
+> **중요**: 그리드 셀 input은 **표준 컴포넌트의 cell variant 사용 필수**. native `<input className="grid__cell-input">` 직접 사용 금지(autoComplete 등 default 속성 누락 위험). 셀 컴포넌트 내부에서 `autoComplete="off"`, focus 처리, required 표시 등 일관 처리됨.
 
 ```tsx
-<input className="grid__cell-input" {...register(`array.${i}.field`)} />
-// 또는 숫자형
-<input type="number" className="grid__cell-input is-num" {...register(...)} />
+// ✅ 권장: 표준 컴포넌트 cell variant
+<TextBox variant="cell" {...register(`array.${i}.field`)} />
+<NumberBox variant="cell" decimalPlaces={3} {...register(`array.${i}.amount`, { valueAsNumber: true })} />
+<DateBox variant="cell" /* Controller 사용 */ />
+<DropBox variant="cell" options={enumOptions} {...register(`array.${i}.kind`)} />
+
+// ⚠️ 부득이 native input 사용 시 (legacy 영역만)
+<input autoComplete="off" className="grid__cell-input" {...register(`array.${i}.field`)} />
+<input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(...)} />
 ```
 
 > **컬럼 리사이즈**: PlainGridList는 session-local로 자동 동작 (구현됨). 새로고침 시 초기화. localStorage 영속이 필요하면 `gridId` 부여하여 ManagedGridList 분기로 전환.
@@ -202,6 +210,18 @@ CodeBox는 `forwardRef`를 받고 codeProps를 spread하는 구조. `codeProps={
 ### 6.11 Coder가 plan 모드 진입 시 메인에 보고 의무
 
 서브 에이전트가 자체 plan mode에 진입하면 메인 에이전트는 즉시 사용자에게 알려야 함 (재호출 루프 금지). 메모리 규칙.
+
+### 6.12 그리드 셀 native input 직접 사용 금지
+
+`<input className="grid__cell-input">` 직접 사용 시 `autoComplete="off"`, focus 처리, required 표시 등을 매번 inline으로 챙겨야 함 → 누락 위험.
+
+**올바른 패턴**: 표준 컴포넌트 cell variant 사용
+- `<TextBox variant="cell" {...register(...)} />`
+- `<NumberBox variant="cell" decimalPlaces={n} {...register(..., { valueAsNumber: true })} />`
+- `<DateBox variant="cell" />` (Controller 사용)
+- `<DropBox variant="cell" options={...} {...register(...)} />`
+
+기존 native 사용처(legacy)는 점진 마이그레이션 대상. 새 Entry 작업 시 처음부터 표준 컴포넌트 사용.
 
 ---
 
@@ -264,6 +284,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 - DateBox 카탈로그 컴포넌트 (`shared/inputs/date-box.tsx`)
 - BoxBaseProps 표준 (`shared/inputs/_types.ts`)
+- **표준 입력 컴포넌트 default `autoComplete="off"`** (TextBox/NumberBox/CodeBox/DateBox + grid-cell-inputs.tsx의 TextCell/NumericCell/DateInputBase) — cell variant 사용 시 자동 적용. Native `grid__cell-input` 직접 사용 시 §6.12 참고
 - 그리드 셀 편집 모드 단일 outline 처리 (`grids.css`)
 - 그리드 외부 클릭 selection 자동 해제 (`use-grid-cell-selection.ts`)
 - 그리드 외부 클릭 행 highlight 해제 (`onClearRow` prop)
