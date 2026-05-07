@@ -7,6 +7,45 @@ import { GridRow } from "./grid-list-row";
 import { useGridCellSelection } from "@/lib/use-grid-cell-selection";
 import { useStableOptionalCallback } from "@/lib/use-stable-callback";
 
+function useColResize() {
+  const [colWidths, setColWidths] = useState<Record<string, number>>({});
+
+  const handleResizePointerDown = useCallback(
+    (
+      e: React.PointerEvent<HTMLSpanElement>,
+      colKey: string,
+      currentWidth: number,
+    ) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const startX = e.clientX;
+      const startWidth = currentWidth;
+      const target = e.currentTarget;
+      target.setPointerCapture(e.pointerId);
+
+      function onPointerMove(ev: PointerEvent) {
+        const delta = ev.clientX - startX;
+        const next = Math.max(40, startWidth + delta);
+        setColWidths((prev) => ({ ...prev, [colKey]: next }));
+      }
+
+      function onPointerUp() {
+        target.removeEventListener("pointermove", onPointerMove);
+        target.removeEventListener("pointerup", onPointerUp);
+        target.removeEventListener("pointercancel", onPointerUp);
+      }
+
+      target.addEventListener("pointermove", onPointerMove);
+      target.addEventListener("pointerup", onPointerUp);
+      target.addEventListener("pointercancel", onPointerUp);
+    },
+    [],
+  );
+
+  return { colWidths, handleResizePointerDown };
+}
+
 export function PlainGridList<T>({
   columns,
   data,
@@ -22,6 +61,7 @@ export function PlainGridList<T>({
   isLoading = false,
   skeletonRowCount = 12,
 }: Omit<GridListProps<T>, "gridId">) {
+  const { colWidths, handleResizePointerDown } = useColResize();
   const scrollRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const selectionOverlayRef = useRef<HTMLDivElement>(null);
@@ -69,10 +109,17 @@ export function PlainGridList<T>({
     }
   }, [data, rowKey, stableOnRowClick]);
 
+  // colWidths가 반영된 컬럼 정의. overlay 계산 시 실제 렌더 너비와 일치시킨다.
+  const resolvedColumns = columns.map((col) => {
+    const key = String(col.key);
+    const w = colWidths[key] ?? col.width ?? col.minWidth;
+    return { ...col, width: w };
+  });
+
   const { handleTableMouseDown } = useGridCellSelection({
     data,
     rowKey,
-    visibleColumns: columns,
+    visibleColumns: resolvedColumns,
     getTable: () => tableRef.current,
     overlayRef: selectionOverlayRef as RefObject<HTMLDivElement | null>,
     copiedOverlayRef: copiedOverlayRef as RefObject<HTMLDivElement | null>,
@@ -92,21 +139,30 @@ export function PlainGridList<T>({
     <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={{ ...style, overflowY: isLoading ? "hidden" : undefined }}>
       <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
         <colgroup>
-          {columns.map((col) => (
-            <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />
+          {resolvedColumns.map((col) => (
+            <col key={String(col.key)} style={{ width: col.width }} />
           ))}
         </colgroup>
         <thead>
           <tr>
-            {columns.map((col) => (
-              <th
-                key={String(col.key)}
-                style={{ width: col.width ?? col.minWidth, textAlign: col.align }}
-                className={col.isRequired ? "is-required" : undefined}
-              >
-                {col.label}
-              </th>
-            ))}
+            {resolvedColumns.map((col) => {
+              const key = String(col.key);
+              return (
+                <th
+                  key={key}
+                  style={{ width: col.width, textAlign: col.align }}
+                  className={col.isRequired ? "is-required" : undefined}
+                >
+                  {col.label}
+                  <span
+                    className="grid__resize-handle"
+                    onPointerDown={(e) =>
+                      handleResizePointerDown(e, key, col.width ?? 80)
+                    }
+                  />
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -119,7 +175,7 @@ export function PlainGridList<T>({
               },
               (_, i) => (
                 <tr key={`skel-${i}`}>
-                  {columns.map((col) => (
+                  {resolvedColumns.map((col) => (
                     <td key={String(col.key)}>
                       <div className="h-3 w-full rounded animate-pulse" style={{ backgroundColor: "var(--surface-3)" }} />
                     </td>
@@ -129,7 +185,7 @@ export function PlainGridList<T>({
             )
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="grid__empty">
+              <td colSpan={resolvedColumns.length} className="grid__empty">
                 {emptyMessage}
               </td>
             </tr>
@@ -137,7 +193,7 @@ export function PlainGridList<T>({
             <>
               {paddingTop > 0 && (
                 <tr>
-                  <td colSpan={columns.length} style={{ height: paddingTop, padding: 0 }} />
+                  <td colSpan={resolvedColumns.length} style={{ height: paddingTop, padding: 0 }} />
                 </tr>
               )}
               {virtualRows.map((virtualRow) => {
@@ -147,7 +203,7 @@ export function PlainGridList<T>({
                     key={String(virtualRow.key)}
                     row={data[ri]}
                     rowIndex={ri}
-                    columns={columns}
+                    columns={resolvedColumns}
                     rowKey={stableRowKey}
                     extraClassName={rowClassName?.(data[ri], ri) ?? undefined}
                     onRowClick={stableOnRowClick}
@@ -160,7 +216,7 @@ export function PlainGridList<T>({
               })}
               {paddingBottom > 0 && (
                 <tr>
-                  <td colSpan={columns.length} style={{ height: paddingBottom, padding: 0 }} />
+                  <td colSpan={resolvedColumns.length} style={{ height: paddingBottom, padding: 0 }} />
                 </tr>
               )}
             </>

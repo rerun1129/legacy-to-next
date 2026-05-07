@@ -59,15 +59,34 @@ export function applyOverlayPosition<T>(
   const maxCol = Math.max(aC, fC);
 
   let left = 0;
-  for (let i = 0; i < minCol; i++) {
-    left += cols[i].width ?? cols[i].minWidth ?? 80;
-  }
   let width = 0;
-  for (let i = minCol; i <= maxCol; i++) {
-    width += cols[i].width ?? cols[i].minWidth ?? 80;
-  }
 
   const table = getTable();
+
+  // td DOM 실측으로 left/width를 계산해 컬럼 리사이즈 후에도 overlay가 정확히 맞도록 한다.
+  const tbody = table?.querySelector("tbody");
+  const firstRow = tbody?.querySelector("tr");
+  if (firstRow) {
+    const minTdEl = firstRow.querySelector(
+      `td[data-col-key="${String(cols[minCol].key)}"]`,
+    ) as HTMLElement | null;
+    const maxTdEl = firstRow.querySelector(
+      `td[data-col-key="${String(cols[maxCol].key)}"]`,
+    ) as HTMLElement | null;
+    if (minTdEl && maxTdEl) {
+      left = minTdEl.offsetLeft;
+      width = maxTdEl.offsetLeft + maxTdEl.offsetWidth - minTdEl.offsetLeft;
+    } else {
+      // td가 없는 경우(가상 행 바깥) col def 합산으로 fallback
+      for (let i = 0; i < minCol; i++) left += cols[i].width ?? cols[i].minWidth ?? 80;
+      for (let i = minCol; i <= maxCol; i++) width += cols[i].width ?? cols[i].minWidth ?? 80;
+    }
+  } else {
+    // tbody/tr가 없는 빈 그리드 fallback
+    for (let i = 0; i < minCol; i++) left += cols[i].width ?? cols[i].minWidth ?? 80;
+    for (let i = minCol; i <= maxCol; i++) width += cols[i].width ?? cols[i].minWidth ?? 80;
+  }
+
   const thead = table?.querySelector("thead") as HTMLElement | null;
   // getBoundingClientRect으로 소수점 높이를 보존해 누적 오차를 방지한다.
   const theadH = thead?.getBoundingClientRect().height ?? 0;

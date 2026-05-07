@@ -106,6 +106,20 @@ export function useGridCellSelection<T>(params: {
     }
   }, []);
 
+  // 컬럼 리사이즈로 table 너비가 바뀔 때 overlay 좌표를 즉시 보정한다.
+  useEffect(() => {
+    const el = getTableRef.current();
+    if (!el) return;
+    const observer = new ResizeObserver(() => {
+      if (selectedRangeRef.current !== null) {
+        applyOverlay();
+        applyCopiedOverlay();
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [applyOverlay, applyCopiedOverlay]);
+
   // data/columns 변경 시 stale 정리 + 두 overlay 좌표 갱신 (resize/reorder 포함)
   useEffect(() => {
     const curData = dataRef.current;
