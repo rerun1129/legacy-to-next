@@ -1,12 +1,14 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Search } from "lucide-react";
+import { CodeBox, DropBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
 
 export function NonBLDocumentPanel() {
   const { register } = useFormContext<NonBlFormValues>();
+  const { options: salesClassOptions, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
     {
@@ -15,14 +17,12 @@ export function NonBLDocumentPanel() {
         <div className="li">
           <span className="li__label">Sales Class</span>
           <div className="li__input">
-            <select
+            <DropBox
+              variant="panel"
+              options={salesClassOptions}
+              placeholder={salesClassPlaceholder}
               {...register("salesClass")}
-              style={{ flex: 1, height: 22, padding: "0 4px", fontSize: 10, border: "1px solid var(--border)", borderRadius: 4, background: "var(--surface-0)", color: "var(--ink)" }}
-            >
-              <option value="">Select...</option>
-              <option value="DOM">DOM</option>
-              <option value="INT">INT</option>
-            </select>
+            />
           </div>
         </div>
       ),
@@ -30,40 +30,42 @@ export function NonBLDocumentPanel() {
     {
       key: "sales-man",
       render: () => (
-        <div className="li">
-          <span className="li__label">Sales Man</span>
-          <div className="li__input" style={{ gap: 4 }}>
-            <input {...register("salesManCode")} placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <Search size={12} style={{ flexShrink: 0, color: "var(--ink-muted)", cursor: "pointer" }} />
-            <input {...register("salesManName")} placeholder="Name" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
-          </div>
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="Sales Man"
+          codeProps={{ ...register("salesManCode") }}
+          nameProps={{ ...register("salesManName") }}
+          onLookup={() => {}}
+        />
       ),
     },
     {
       key: "operator",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Operator</span>
-          <div className="li__input" style={{ gap: 4 }}>
-            <input {...register("operatorCode")} placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <Search size={12} style={{ flexShrink: 0, color: "var(--ink-muted)", cursor: "pointer" }} />
-            <input {...register("operatorName")} placeholder="Name" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
-          </div>
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="Operator"
+          required
+          codeProps={{ ...register("operatorCode") }}
+          nameProps={{ ...register("operatorName") }}
+          onLookup={() => {}}
+        />
       ),
     },
     {
       key: "team",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Team</span>
-          <div className="li__input" style={{ gap: 4 }}>
-            <input {...register("teamCode")} placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
-            <Search size={12} style={{ flexShrink: 0, color: "var(--ink-muted)", cursor: "pointer" }} />
-            <input {...register("teamName")} placeholder="Name" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} />
-          </div>
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="Team"
+          required
+          codeProps={{ ...register("teamCode") }}
+          nameProps={{ ...register("teamName") }}
+          onLookup={() => {}}
+        />
       ),
     },
   ];

@@ -4,6 +4,8 @@ import { useState, useMemo }                     from "react";
 import { useFormContext, useFieldArray }          from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
+import { DropBox }                               from "@/components/shared/inputs";
+import { useEnumOptions }                        from "@/application/enums/use-enum";
 import type { NonBlFormValues }                  from "../../non-bl-schema";
 import { EMPTY_DIM_ROW }                         from "../../non-bl-schema";
 
@@ -12,6 +14,7 @@ interface DimRow { id: number; length: string; width: string; height: string; qt
 export function NonBLDimensionPanel() {
   const { control, register } = useFormContext<NonBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
+  const { options: volumeDivisorOptions } = useEnumOptions("VolumeDivisor");
 
   const cols = useMemo<GridColumn<DimRow>[]>(() => [
     { key: "_no",    label: "#",           width: 50, className: "row-num", render: (_, __, i) => i + 1 },
@@ -46,11 +49,10 @@ export function NonBLDimensionPanel() {
         <span className="panel__title">Dimension</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <select style={{ fontSize: "var(--fs-sm)", border: "1px solid var(--border)", borderRadius: 4, padding: "2px 6px", background: "var(--surface)" }}>
-            <option>CM / 6000</option>
-            <option>CM / 5000</option>
-            <option>IN / 366</option>
-          </select>
+          <DropBox
+            options={volumeDivisorOptions}
+            {...register("dimensionDivisor")}
+          />
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}><Plus size={12} /></button>
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>

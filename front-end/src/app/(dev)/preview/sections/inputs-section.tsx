@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { TextArea } from "@/components/shared/inputs/text-area";
 import { CodeBox } from "@/components/shared/inputs/code-box";
@@ -9,7 +9,7 @@ import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { RadioBox } from "@/components/shared/inputs/radio-box";
-import { TimeBox, DateRangeBox, LcnLabel } from "@/components/shared/inputs";
+import { TimeBox, DateRangeBox, DateBox, LcnLabel } from "@/components/shared/inputs";
 import type { BoxVariant } from "@/components/shared/inputs";
 
 type FormValues = {
@@ -29,6 +29,7 @@ type FormValues = {
   radioMode: string;
   time: string;
   timeCell: string;
+  date: string;
 };
 
 const UNIT_OPTIONS = [
@@ -58,7 +59,7 @@ export function InputsSection() {
   const [readOnly, setReadOnly] = useState(false);
 
   const [lcnLabelKind, setLcnLabelKind] = useState("ETD");
-  const { register, getValues } = useForm<FormValues>({
+  const { register, control, getValues } = useForm<FormValues>({
     defaultValues: {
       text: "sample text",
       area: "line 1\nline 2",
@@ -76,6 +77,7 @@ export function InputsSection() {
       radioMode: "A",
       time: "0930",
       timeCell: "",
+      date: "",
     },
   });
 
@@ -262,6 +264,39 @@ export function InputsSection() {
           ]}
           {...register("radioMode")}
         />
+      </div>
+
+      {/* DateBox */}
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>DateBox</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>register spread</div>
+            <DateBox
+              required={required}
+              readOnly={readOnly}
+              {...register("date")}
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: "#666", marginBottom: 2 }}>Controller 사용 예시</div>
+            <Controller
+              control={control}
+              name="date"
+              render={({ field }) => (
+                <DateBox
+                  required={required}
+                  readOnly={readOnly}
+                  ref={field.ref}
+                  name={field.name}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </div>
+        </div>
       </div>
 
       {/* DateRangeBox */}

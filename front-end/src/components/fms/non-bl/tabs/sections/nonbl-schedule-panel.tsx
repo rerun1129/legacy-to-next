@@ -2,8 +2,7 @@
 
 import { useMemo } from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import { Search } from "lucide-react";
-import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
@@ -15,13 +14,14 @@ export function NonBLSchedulePanel() {
     {
       key: "liner",
       render: () => (
-        <div className="li">
-          <span className="li__label">Liner</span>
-          <div className="li__input" style={{ gap: 4 }}>
-            <input placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register("linerCode")} />
-            <input placeholder="Liner Name" style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} {...register("linerName")} />
-          </div>
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="Liner"
+          codeProps={{ ...register("linerCode"), placeholder: "Code" }}
+          nameProps={{ ...register("linerName"), placeholder: "Liner" }}
+          onLookup={() => {}}
+        />
       ),
     },
     {
@@ -30,7 +30,7 @@ export function NonBLSchedulePanel() {
         <div className="li">
           <span className="li__label">Vessel</span>
           <div className="li__input">
-            <input placeholder="Vessel Name" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...register("vesselName")} />
+            <TextBox variant="panel" placeholder="Vessel Name" {...register("vesselName")} />
           </div>
         </div>
       ),
@@ -41,7 +41,7 @@ export function NonBLSchedulePanel() {
         <div className="li">
           <span className="li__label">Voy</span>
           <div className="li__input">
-            <input placeholder="Voyage No" style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...register("voyNo")} />
+            <TextBox variant="panel" placeholder="Voyage No" {...register("voyNo")} />
           </div>
         </div>
       ),
@@ -56,12 +56,13 @@ export function NonBLSchedulePanel() {
               control={control}
               name="etd"
               render={({ field }) => (
-                <PanelDateInput
+                <DateBox
                   required
+                  ref={field.ref}
+                  name={field.name}
                   value={field.value as string}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  ref={field.ref}
                 />
               )}
             />
@@ -79,12 +80,13 @@ export function NonBLSchedulePanel() {
               control={control}
               name="eta"
               render={({ field }) => (
-                <PanelDateInput
+                <DateBox
                   required
+                  ref={field.ref}
+                  name={field.name}
                   value={field.value as string}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  ref={field.ref}
                 />
               )}
             />
@@ -98,40 +100,42 @@ export function NonBLSchedulePanel() {
     {
       key: "pol",
       render: () => (
-        <div className="lcn" style={{ marginBottom: 4 }}>
-          <span className="lcn__label is-required">POL</span>
-          <div className="lcn__code" style={{ position: "relative" }}>
-            <input placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register("polCode")} />
-            <Search size={12} className="lcn__icon" />
-          </div>
-          <input className="lcn__name" placeholder="Port Name" {...register("polName")} />
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="POL"
+          required
+          codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("polName"), placeholder: "Port Name" }}
+          onLookup={() => {}}
+        />
       ),
     },
     {
       key: "pod",
       render: () => (
-        <div className="lcn" style={{ marginBottom: 4 }}>
-          <span className="lcn__label is-required">POD</span>
-          <div className="lcn__code" style={{ position: "relative" }}>
-            <input placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register("podCode")} />
-            <Search size={12} className="lcn__icon" />
-          </div>
-          <input className="lcn__name" placeholder="Port Name" {...register("podName")} />
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="POD"
+          required
+          codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("podName"), placeholder: "Port Name" }}
+          onLookup={() => {}}
+        />
       ),
     },
     {
       key: "final-dest",
       render: () => (
-        <div className="lcn" style={{ marginBottom: 4 }}>
-          <span className="lcn__label">Final Dest.</span>
-          <div className="lcn__code" style={{ position: "relative" }}>
-            <input placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register("finalDestCode")} />
-            <Search size={12} className="lcn__icon" />
-          </div>
-          <input className="lcn__name" placeholder="Port Name" {...register("finalDestName")} />
-        </div>
+        <CodeBox
+          variant="panel"
+          kind="lcn"
+          label="Final Dest."
+          codeProps={{ ...register("finalDestCode"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("finalDestName"), placeholder: "Port Name" }}
+          onLookup={() => {}}
+        />
       ),
     },
     {
@@ -144,11 +148,12 @@ export function NonBLSchedulePanel() {
               control={control}
               name="finalEta"
               render={({ field }) => (
-                <PanelDateInput
+                <DateBox
+                  ref={field.ref}
+                  name={field.name}
                   value={field.value as string}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  ref={field.ref}
                 />
               )}
             />

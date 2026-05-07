@@ -77,6 +77,9 @@ export const NON_BL_SCHEMA = z.object({
   teamCode:      z.string().optional(),
   teamName:      z.string().optional(),
 
+  // Dimension 단위 (form schema로 승격)
+  dimensionDivisor: z.string().optional(),
+
   // Remark
   remark: z.string().optional(),
 

@@ -9,6 +9,8 @@ import type { NonBlFormValues }                   from "./non-bl-schema";
 import { createEmptyNonBlFormValues }             from "./non-bl-defaults";
 import { useBlDraftSync }                         from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore }                        from "@/lib/use-bl-draft-store";
+import { TextBox, DropBox }                       from "@/components/shared/inputs";
+import { useEnumOptions }                         from "@/application/enums/use-enum";
 
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
@@ -22,6 +24,9 @@ export function NonBLEntry() {
   useBlDraftSync(methods, "non::new");
 
   const { register } = methods;
+
+  const { options: workDivOptions, placeholder: workDivPlaceholder } = useEnumOptions("WorkDivision");
+  const { options: boundOptions, placeholder: boundPlaceholder } = useEnumOptions("Bound");
 
   function handleResetEntry() {
     methods.reset(createEmptyNonBlFormValues());
@@ -59,37 +64,30 @@ export function NonBLEntry() {
         </div>
       </div>
 
+      {/* gridTemplateColumns는 툴바 레이아웃에 필수이므로 인라인 유지 */}
       <div className="toolbar" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
         <div className="field is-required">
           <div className="field__label is-required">Non B/L No</div>
           <div className="field__input">
-            <input {...register("nonBlNo")} placeholder="Auto on save" />
+            <TextBox variant="panel" placeholder="Auto on save" {...register("nonBlNo")} />
           </div>
         </div>
         <div className="field is-required">
           <div className="field__label is-required">Work Division</div>
           <div className="field__input">
-            <select
-              {...register("workDiv")}
-              style={{ all: "unset", flex: 1, minWidth: 0, fontSize: "var(--fs-base)", color: "var(--ink)", cursor: "pointer" }}
-            >
-              <option>Sea</option>
-              <option>Air</option>
-              <option>Warehouse</option>
-              <option>Trucking</option>
-            </select>
+            <DropBox variant="panel" options={workDivOptions} placeholder={workDivPlaceholder} {...register("workDiv")} />
           </div>
         </div>
         <div className="field">
           <div className="field__label">Bound</div>
           <div className="field__input">
-            <input {...register("bound")} placeholder="Bound" />
+            <DropBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} {...register("bound")} />
           </div>
         </div>
         <div className="field">
           <div className="field__label">Ref. No.</div>
           <div className="field__input">
-            <input {...register("refNo")} placeholder="Ref. No." />
+            <TextBox variant="panel" placeholder="Ref. No." {...register("refNo")} />
           </div>
         </div>
       </div>

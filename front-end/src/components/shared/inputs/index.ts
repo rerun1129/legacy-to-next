@@ -1,4 +1,4 @@
-export type { BoxVariant, BoxBaseProps, CodeBoxKind, LabelOption, DropBoxOption, CodeBoxProps, DropBoxProps, LinkBoxProps, RadioBoxOption, RadioBoxProps, TimeBoxProps, DateRangeBoxProps } from "./_types";
+export type { BoxVariant, BoxBaseProps, CodeBoxKind, LabelOption, DropBoxOption, CodeBoxProps, DropBoxProps, LinkBoxProps, RadioBoxOption, RadioBoxProps, TimeBoxProps, DateRangeBoxProps, DateBoxProps } from "./_types";
 export type { TextBoxProps } from "./text-box";
 export type { TextAreaProps } from "./text-area";
 export type { NumberBoxProps } from "./number-box";
@@ -12,4 +12,5 @@ export { LinkBox } from "./link-box";
 export { RadioBox } from "./radio-box";
 export { TimeBox } from "./time-box";
 export { DateRangeBox } from "./date-range-box";
+export { DateBox } from "./date-box";
 export { LcnLabel } from './lcn-label';

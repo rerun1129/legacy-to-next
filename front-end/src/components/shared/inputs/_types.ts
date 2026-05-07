@@ -73,3 +73,11 @@ export interface DateRangeBoxProps extends BoxBaseProps {
   labelValue?: string;
   onLabelChange?: (v: string) => void;
 }
+
+export type DateBoxProps = BoxBaseProps & {
+  value?: string;
+  defaultValue?: string;
+  name?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
+};
