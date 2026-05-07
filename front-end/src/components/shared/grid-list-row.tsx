@@ -8,24 +8,29 @@ export interface GridRowProps<T> {
   rowIndex: number;
   columns: GridColumn<T>[];
   rowKey: GridListProps<T>["rowKey"];
-  rowClassName: GridListProps<T>["rowClassName"];
+  /** 호출처에서 rowClassName(row, index)를 직접 계산해 전달한다. ref로 고정된 stableRowClassName 대신 이 값이 변하면 GridRow가 재렌더된다. */
+  extraClassName?: string;
   onRowClick: GridListProps<T>["onRowClick"];
   selectedRowKey: string | number | null | undefined;
   onSelectRow: ((row: T | null, index: number | null) => void) | undefined;
+  /** virtualizer measureElement 콜백. 실측 row 높이를 virtualizer에 전달한다. */
+  measureRef?: (el: HTMLTableRowElement | null) => void;
+  /** virtualizer의 row 인덱스. measureElement가 DOM 요소와 측정값을 연결하는 데 사용된다. */
+  dataIndex?: number;
 }
 
 function GridRowInner<T>(props: GridRowProps<T>) {
-  const { row, rowIndex, columns, rowKey, rowClassName, onRowClick, selectedRowKey, onSelectRow } = props;
+  const { row, rowIndex, columns, rowKey, extraClassName, onRowClick, selectedRowKey, onSelectRow, measureRef, dataIndex } = props;
 
   const key = rowKey
     ? rowKey(row, rowIndex)
     : ((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex;
-  const extraClass = rowClassName ? rowClassName(row, rowIndex) : undefined;
   const isSelected = selectedRowKey != null && key === selectedRowKey;
   const finalClassName =
-    [extraClass, isSelected ? "is-selected" : undefined].filter(Boolean).join(" ") || undefined;
+    [extraClassName, isSelected ? "is-selected" : undefined].filter(Boolean).join(" ") || undefined;
 
-  function handleClick() {
+  function handleMouseDown(e: React.MouseEvent<HTMLTableRowElement>) {
+    if (e.button !== 0) return;
     if (onRowClick) onRowClick(row, rowIndex);
     if (onSelectRow) {
       onSelectRow(isSelected ? null : row, isSelected ? null : rowIndex);
@@ -34,8 +39,10 @@ function GridRowInner<T>(props: GridRowProps<T>) {
 
   return (
     <tr
+      ref={measureRef}
+      data-index={dataIndex}
       className={finalClassName}
-      onClick={onRowClick || onSelectRow ? handleClick : undefined}
+      onMouseDown={onRowClick || onSelectRow ? handleMouseDown : undefined}
       style={onRowClick || onSelectRow ? { cursor: "pointer" } : undefined}
     >
       {columns.map((col) => {
