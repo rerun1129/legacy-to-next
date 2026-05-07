@@ -92,6 +92,8 @@ function renderSingleRow<T>(
         return (
           <td
             key={ck}
+            data-row-key={String(key)}
+            data-col-key={ck}
             style={{ width: col.width ?? col.minWidth, textAlign: col.align }}
             className={
               [col.className, isCellSelected ? "is-cell-selected" : undefined]
@@ -174,6 +176,30 @@ function ManagedGridList<T>({
     });
     if (!exists) setSelectedCell(null);
   }, [data, selectedCell]);
+
+  useEffect(() => {
+    function handleCopy(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'c') return;
+      const active = document.activeElement;
+      if (active && (
+        active.tagName === 'INPUT' ||
+        active.tagName === 'TEXTAREA' ||
+        (active as HTMLElement).isContentEditable
+      )) return;
+      if (window.getSelection()?.toString()) return;
+      if (!selectedCell) return;
+      const td = tableRef.current?.querySelector(
+        `td[data-row-key="${CSS.escape(String(selectedCell.rowKey))}"][data-col-key="${CSS.escape(selectedCell.colKey)}"]`
+      ) as HTMLTableCellElement | null;
+      if (!td) return;
+      const text = td.textContent ?? '';
+      e.preventDefault();
+      // 의도된 fire-and-forget: 클립보드 쓰기 실패는 UX에 영향이 없으므로 무시
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    window.addEventListener('keydown', handleCopy);
+    return () => window.removeEventListener('keydown', handleCopy);
+  }, [selectedCell]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -387,6 +413,31 @@ function PlainGridList<T>({
     });
     if (!exists) setSelectedCell(null);
   }, [data, selectedCell]);
+
+  useEffect(() => {
+    function handleCopy(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'c') return;
+      const active = document.activeElement;
+      if (active && (
+        active.tagName === 'INPUT' ||
+        active.tagName === 'TEXTAREA' ||
+        (active as HTMLElement).isContentEditable
+      )) return;
+      if (window.getSelection()?.toString()) return;
+      if (!selectedCell) return;
+      const table = scrollRef.current?.querySelector('table') as HTMLTableElement | null;
+      const td = table?.querySelector(
+        `td[data-row-key="${CSS.escape(String(selectedCell.rowKey))}"][data-col-key="${CSS.escape(selectedCell.colKey)}"]`
+      ) as HTMLTableCellElement | null;
+      if (!td) return;
+      const text = td.textContent ?? '';
+      e.preventDefault();
+      // 의도된 fire-and-forget: 클립보드 쓰기 실패는 UX에 영향이 없으므로 무시
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    window.addEventListener('keydown', handleCopy);
+    return () => window.removeEventListener('keydown', handleCopy);
+  }, [selectedCell]);
 
   const rowVirtualizer = useVirtualizer({
     count: data.length,
