@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   DndContext,
@@ -16,8 +16,10 @@ import {
 import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import { useColumnLayout } from "@/lib/use-column-layout";
 import { SortableTh } from "./grid-list-header";
-import { GridListProps, ROW_HEIGHT_PX, renderSingleRow } from "./grid-list";
+import { GridListProps, ROW_HEIGHT_PX } from "./grid-list";
+import { GridRow } from "./grid-list-row";
 import { useGridCellSelection } from "@/lib/use-grid-cell-selection";
+import { useStableOptionalCallback } from "@/lib/use-stable-callback";
 
 export function ManagedGridList<T>({
   gridId,
@@ -40,12 +42,24 @@ export function ManagedGridList<T>({
   const [isDragOutside, setIsDragOutside] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const selectionOverlayRef = useRef<HTMLDivElement>(null);
+  const copiedOverlayRef = useRef<HTMLDivElement>(null);
 
-  const { selectedCell, setSelectedCell } = useGridCellSelection({
+  const { handleTableMouseDown } = useGridCellSelection({
     data,
     rowKey,
+    visibleColumns,
     getTable: () => tableRef.current,
+    overlayRef: selectionOverlayRef as RefObject<HTMLDivElement | null>,
+    copiedOverlayRef: copiedOverlayRef as RefObject<HTMLDivElement | null>,
+    rowHeight: ROW_HEIGHT_PX,
   });
+
+  // 호출처 인라인 콜백을 안정적인 참조로 감싸 GridRow의 React.memo 비교를 통과시킨다.
+  const stableRowKey = useStableOptionalCallback(rowKey);
+  const stableRowClassName = useStableOptionalCallback(rowClassName);
+  const stableOnRowClick = useStableOptionalCallback(onRowClick);
+  const stableOnSelectRow = useStableOptionalCallback(onSelectRow);
 
   // list-wrap(부모)의 높이를 매 렌더마다 직접 읽는다.
   // ResizeObserver 콜백은 비동기라 초기 렌더에서 높이가 0으로 잡히는 문제가 있어 교체.
@@ -126,7 +140,7 @@ export function ManagedGridList<T>({
         onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
       >
-        <table ref={tableRef} className="grid--list">
+        <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
           <colgroup>
             {visibleColumns.map((col) => (
               <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />
@@ -177,21 +191,22 @@ export function ManagedGridList<T>({
                     <td colSpan={visibleColumns.length} style={{ height: paddingTop, padding: 0 }} />
                   </tr>
                 )}
-                {virtualRows.map((virtualRow) =>
-                  renderSingleRow(
-                    data[virtualRow.index],
-                    virtualRow.index,
-                    visibleColumns,
-                    rowKey,
-                    rowClassName,
-                    onRowClick,
-                    selectedRowKey,
-                    onSelectRow,
-                    selectedCell,
-                    setSelectedCell,
-                    virtualRow.key,
-                  )
-                )}
+                {virtualRows.map((virtualRow) => {
+                  const ri = virtualRow.index;
+                  return (
+                    <GridRow<T>
+                      key={String(virtualRow.key)}
+                      row={data[ri]}
+                      rowIndex={ri}
+                      columns={visibleColumns}
+                      rowKey={stableRowKey}
+                      rowClassName={stableRowClassName}
+                      onRowClick={stableOnRowClick}
+                      selectedRowKey={selectedRowKey}
+                      onSelectRow={stableOnSelectRow}
+                    />
+                  );
+                })}
                 {paddingBottom > 0 && (
                   <tr>
                     <td colSpan={visibleColumns.length} style={{ height: paddingBottom, padding: 0 }} />
@@ -201,6 +216,8 @@ export function ManagedGridList<T>({
             )}
           </tbody>
         </table>
+        <div ref={selectionOverlayRef} className="grid-selection-overlay" aria-hidden="true" />
+        <div ref={copiedOverlayRef} className="grid-copied-overlay" aria-hidden="true" />
         <DragOverlay>
           {activeCol ? (
             <div className={`grid__drag-overlay${isDragOutside ? " grid__drag-overlay--remove" : ""}`}>

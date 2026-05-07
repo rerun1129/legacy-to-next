@@ -202,13 +202,45 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   color: var(--ink-muted, #888);
 }
 
-/* 셀 단위 선택 강조 — 행 강조와 동시에 표시 가능 */
-.grid--list tbody td.is-cell-selected,
-.grid tbody td.is-cell-selected {
-  outline: 2px solid var(--accent, #2563eb);
-  outline-offset: -2px;
-  position: relative;
-  z-index: 1;
+/* tbody 드래그 중 텍스트 선택 방지 */
+.grid--list tbody,
+.grid tbody {
+  user-select: none;
 }
-/* 견본 그리드: 클릭 시 셀 outline 제거 */
-.grid--demo .grid--list tbody td.is-cell-selected { outline: none; }
+
+/* 셀 선택 overlay: React 재렌더링 없이 imperative하게 위치/크기를 갱신한다 */
+.grid-selection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  pointer-events: none;
+  background-color: rgba(37, 99, 235, 0.12);
+  outline: 2px solid var(--accent, #2563eb);
+  outline-offset: -1px;
+  z-index: 2;
+  /* GPU compositing layer로 분리하여 paint 비용 최소화 */
+  will-change: transform, width, height;
+  contain: layout style paint;
+}
+
+/* 복사 완료 pulse: 복사 직후 한 번만 발생하고 사라짐 */
+.grid-copied-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  pointer-events: none;
+  z-index: 3;
+  background-color: rgba(37, 99, 235, 0.28);
+  outline: 2px solid var(--accent, #2563eb);
+  outline-offset: -1px;
+  animation: grid-copy-pulse 0.55s ease-out forwards;
+  will-change: opacity;
+  contain: layout style paint;
+}
+@keyframes grid-copy-pulse {
+  0%   { opacity: 1; }
+  60%  { opacity: 0.4; }
+  100% { opacity: 0; }
+}

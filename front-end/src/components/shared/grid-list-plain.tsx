@@ -1,9 +1,11 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { GridListProps, ROW_HEIGHT_PX, renderSingleRow } from "./grid-list";
+import { GridListProps, ROW_HEIGHT_PX } from "./grid-list";
+import { GridRow } from "./grid-list-row";
 import { useGridCellSelection } from "@/lib/use-grid-cell-selection";
+import { useStableOptionalCallback } from "@/lib/use-stable-callback";
 
 export function PlainGridList<T>({
   columns,
@@ -20,12 +22,25 @@ export function PlainGridList<T>({
   skeletonRowCount = 12,
 }: Omit<GridListProps<T>, "gridId">) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const selectionOverlayRef = useRef<HTMLDivElement>(null);
+  const copiedOverlayRef = useRef<HTMLDivElement>(null);
 
-  const { selectedCell, setSelectedCell } = useGridCellSelection({
+  const { handleTableMouseDown } = useGridCellSelection({
     data,
     rowKey,
-    getTable: () => scrollRef.current?.querySelector("table") ?? null,
+    visibleColumns: columns,
+    getTable: () => tableRef.current,
+    overlayRef: selectionOverlayRef as RefObject<HTMLDivElement | null>,
+    copiedOverlayRef: copiedOverlayRef as RefObject<HTMLDivElement | null>,
+    rowHeight: ROW_HEIGHT_PX,
   });
+
+  // 호출처 인라인 콜백을 안정적인 참조로 감싸 GridRow의 React.memo 비교를 통과시킨다.
+  const stableRowKey = useStableOptionalCallback(rowKey);
+  const stableRowClassName = useStableOptionalCallback(rowClassName);
+  const stableOnRowClick = useStableOptionalCallback(onRowClick);
+  const stableOnSelectRow = useStableOptionalCallback(onSelectRow);
 
   // list-wrap(부모)의 높이를 매 렌더마다 직접 읽는다.
   // ResizeObserver 콜백은 비동기라 초기 렌더에서 높이가 0으로 잡히는 문제가 있어 교체.
@@ -50,7 +65,7 @@ export function PlainGridList<T>({
 
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={{ ...style, overflowY: isLoading ? "hidden" : undefined }}>
-      <table className="grid--list">
+      <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
         <colgroup>
           {columns.map((col) => (
             <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />
@@ -100,21 +115,22 @@ export function PlainGridList<T>({
                   <td colSpan={columns.length} style={{ height: paddingTop, padding: 0 }} />
                 </tr>
               )}
-              {virtualRows.map((virtualRow) =>
-                renderSingleRow(
-                  data[virtualRow.index],
-                  virtualRow.index,
-                  columns,
-                  rowKey,
-                  rowClassName,
-                  onRowClick,
-                  selectedRowKey,
-                  onSelectRow,
-                  selectedCell,
-                  setSelectedCell,
-                  virtualRow.key,
-                )
-              )}
+              {virtualRows.map((virtualRow) => {
+                const ri = virtualRow.index;
+                return (
+                  <GridRow<T>
+                    key={String(virtualRow.key)}
+                    row={data[ri]}
+                    rowIndex={ri}
+                    columns={columns}
+                    rowKey={stableRowKey}
+                    rowClassName={stableRowClassName}
+                    onRowClick={stableOnRowClick}
+                    selectedRowKey={selectedRowKey}
+                    onSelectRow={stableOnSelectRow}
+                  />
+                );
+              })}
               {paddingBottom > 0 && (
                 <tr>
                   <td colSpan={columns.length} style={{ height: paddingBottom, padding: 0 }} />
@@ -124,6 +140,8 @@ export function PlainGridList<T>({
           )}
         </tbody>
       </table>
+      <div ref={selectionOverlayRef} className="grid-selection-overlay" aria-hidden="true" />
+      <div ref={copiedOverlayRef} className="grid-copied-overlay" aria-hidden="true" />
     </div>
   );
 }
