@@ -214,3 +214,8 @@ JDBC `Connection`, `InputStream`, Reactor 구독은 반드시 닫거나 dispose 
 ## P9. 예외 생성
 
 - 도메인 예외(`FmsException`)는 HTTP 상태별 정적 팩토리(`FmsException.conflict(...)`, `.notFound(...)` 등)로 생성한다. 생성자에 `HttpStatus.XXX` 직접 전달 금지.
+
+## P10. Null-safe 처리
+
+- 메서드 첫 줄 null 조기 반환(`if (x == null) return null;`)은 허용한다. `Nullables.mapOrNull`로 감싸지 않는다.
+- 그 외 nullable 매핑(`x != null ? f(x) : null`)은 `Nullables.mapOrNull(x, fn)` 헬퍼를 사용한다 (`common/util/Nullables.java`).
