@@ -30,4 +30,3 @@ color: blue
 - 헥사고널 아키텍처 의존성 방향 위반 금지 (예: domain → adapter 직접 참조, application → adapter 직접 참조).
 - 신규 테스트 코드 작성은 자율적으로 가능. 단, **기존 테스트 파일의 수정·삭제는 메인을 통한 사용자 명시적 승인 후에만 가능**.
 - **빌드·테스트 명령 실행 금지.** 빌드·테스트는 QA 담당. 단, 사용자가 명시적으로 지시한 경우에만 예외.
-- **`.claude/.coder_scope` 센티넬**: 메인이 이 에이전트 호출 전 `echo "backend" > .claude/.coder_scope`를 실행하고 완료 후 `rm -f .claude/.coder_scope`로 삭제한다. PreToolUse 훅이 이 마커를 읽어 `back-end/` 외 경로 편집을 차단한다. 에이전트는 이 파일을 직접 생성·삭제하지 않는다.
