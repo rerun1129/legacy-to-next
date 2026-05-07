@@ -175,7 +175,7 @@
 .search-card.is-collapsed .search-card__collapse { position: relative; bottom: auto; left: auto; transform: none; }
 
 .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 22px; row-gap: 6px; align-items: center; }
-.search-card .lcn { display: grid; grid-template-columns: 92px minmax(110px, 0.85fr) minmax(0, 1.35fr); gap: 6px; padding: 0; align-items: center; }
+.search-card .lcn { display: grid; grid-template-columns: 112px minmax(110px, 0.85fr) minmax(0, 1.35fr); gap: 6px; padding: 0; align-items: center; }
 .search-card .lcn__label { text-align: left; padding-right: 0; font-size: var(--fs-xs); color: var(--ink-3); letter-spacing: 0.01em; }
 .search-card .lcn__select { grid-column: 2 / span 2; height: 22px; padding: 0 8px; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
 .lcn__daterange { grid-column: 2 / span 2; display: flex; align-items: center; gap: 4px; position: relative; min-width: 0; }
