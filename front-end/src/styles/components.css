@@ -23,7 +23,7 @@
   font-size: var(--fs-xs); font-weight: 600; color: var(--ink-2);
   text-transform: uppercase; letter-spacing: 0.06em;
 }
-.party-block__head > span:first-child { font-size: 11px; font-weight: 600; color: var(--ink); min-width: 68px; flex-shrink: 0; }
+.party-block__head > span:first-child { font-size: 11px; font-weight: 600; color: var(--ink); min-width: 110px; flex-shrink: 0; }
 .party-block__head > span.is-required { color: var(--required); }
 .party-block__head-actions { margin-left: auto; display: flex; gap: 4px; }
 .party-block__head-btn {

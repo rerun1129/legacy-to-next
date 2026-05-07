@@ -199,7 +199,7 @@
    LCN / LI (labeled code-name / labeled input)
    ========================================================= */
 .lcn { display: grid; grid-template-columns: 110px 120px minmax(0, 1fr); align-items: center; gap: 8px; padding: 2px 0; }
-.lcn__label { font-size: 12px; font-weight: 500; color: var(--ink); text-align: right; padding-right: 4px; white-space: nowrap; position: relative; }
+.lcn__label { font-size: 12px; font-weight: 500; color: var(--ink); text-align: right; padding-right: 8px; white-space: nowrap; position: relative; }
 /* lcn required: 라벨 빨간색 + 레드닷(::after) + 코드 입력 왼쪽 bar + 포커스 강조 */
 .lcn__label.is-required { color: var(--required); font-weight: 600; }
 .lcn__label.is-required::before { display: none !important; content: none !important; }
