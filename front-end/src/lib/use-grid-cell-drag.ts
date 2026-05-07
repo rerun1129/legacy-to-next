@@ -132,7 +132,7 @@ export function useGridCellDrag(params: {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     },
-    [applyOverlay, selectedRangeRef],
+    [applyOverlay, selectedRangeRef, onActiveRowChangeRef],
   );
 
   return { handleTableMouseDown };
