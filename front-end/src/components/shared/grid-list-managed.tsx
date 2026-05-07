@@ -96,6 +96,7 @@ export function ManagedGridList<T>({
     rowHeight: ROW_HEIGHT_PX,
     getRowOffset,
     onActiveRowChange,
+    onClearActiveRow: () => { stableOnSelectRow?.(null, null); },
   });
 
   const sensors = useSensors(

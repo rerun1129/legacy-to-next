@@ -25,10 +25,12 @@ export function useGridCellSelection<T>(params: {
   getRowOffset?: (index: number) => { start: number; size: number } | null;
   /** 드래그 중 focus 행이 바뀔 때마다 호출된다. 외부 selected 상태 갱신에 사용한다. */
   onActiveRowChange?: (rowKey: string) => void;
+  /** 그리드 외부 클릭 시 selection이 해제된 후 호출된다. 외부 행 highlight 해제에 사용한다. */
+  onClearActiveRow?: () => void;
 }): {
   handleTableMouseDown: (e: React.MouseEvent<HTMLElement>) => void;
 } {
-  const { data, rowKey, visibleColumns, getTable, overlayRef, copiedOverlayRef, rowHeight, getRowOffset, onActiveRowChange } =
+  const { data, rowKey, visibleColumns, getTable, overlayRef, copiedOverlayRef, rowHeight, getRowOffset, onActiveRowChange, onClearActiveRow } =
     params;
 
   const rowKeyRef = useRef(rowKey);
@@ -66,6 +68,10 @@ export function useGridCellSelection<T>(params: {
   const onActiveRowChangeRef = useRef<((rowKey: string) => void) | undefined>(onActiveRowChange);
   useLayoutEffect(() => {
     onActiveRowChangeRef.current = onActiveRowChange;
+  });
+  const onClearActiveRowRef = useRef<(() => void) | undefined>(onClearActiveRow);
+  useLayoutEffect(() => {
+    onClearActiveRowRef.current = onClearActiveRow;
   });
 
   const selectedRangeRef = useRef<CellRange | null>(null);
@@ -131,6 +137,22 @@ export function useGridCellSelection<T>(params: {
     applyOverlay();
     applyCopiedOverlay();
   }, [data, visibleColumns, applyOverlay, applyCopiedOverlay]);
+
+  // 그리드 테이블 영역 외부 클릭 시 selection 및 copied overlay를 초기화한다.
+  // 한 화면에 그리드가 여러 개일 때 다른 그리드 클릭으로 이 그리드의 selection이 해제되어야 한다.
+  useEffect(() => {
+    function handleOutsideClick(e: MouseEvent) {
+      const tableEl = getTableRef.current();
+      if (tableEl?.contains(e.target as Node)) return;
+      selectedRangeRef.current = null;
+      copiedRangeRef.current = null;
+      applyOverlay();
+      applyCopiedOverlay();
+      onClearActiveRowRef.current?.();
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [applyOverlay, applyCopiedOverlay]);
 
   useGridCellClipboard({
     selectedRangeRef,

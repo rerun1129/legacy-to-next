@@ -77,6 +77,7 @@ export function PlainGridList<T>({
     rowHeight: ROW_HEIGHT_PX,
     getRowOffset,
     onActiveRowChange,
+    onClearActiveRow: () => { stableOnSelectRow?.(null, null); },
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
