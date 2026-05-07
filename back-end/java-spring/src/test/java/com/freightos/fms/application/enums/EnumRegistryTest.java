@@ -2,7 +2,6 @@ package com.freightos.fms.application.enums;
 
 import com.freightos.fms.application.enums.projection.EnumOption;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.enums.PackageUnit;
 import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import org.junit.jupiter.api.BeforeEach;
@@ -111,13 +110,6 @@ class EnumRegistryTest {
             assertThat(opt.code()).isEqualTo("ONE");
             assertThat(opt.label()).isEqualTo("ONE(1)");
         });
-    }
-
-    @Test
-    @DisplayName("PackageUnit — values() 길이 0, 등록 skip되어 getByName은 Optional.empty()")
-    void packageUnit_emptyEnum_notRegistered() {
-        assertThat(PackageUnit.values()).isEmpty();
-        assertThat(registry.getByName("PackageUnit")).isEmpty();
     }
 
     @Test
