@@ -41,6 +41,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
 import com.freightos.fms.domain.masterbl.entity.MasterBlScheduleLeg;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
+import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
 
@@ -64,7 +65,7 @@ public class MasterBlFactory {
         entity.assignMblNo(BlNumber.of(cmd.mblNo()), BlNumber.of(cmd.masterRefNo()));
         entity.assignParties(CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()), CustomerCode.of(cmd.notifyCode()));
         entity.updateSchedule(PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()), BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
-        entity.updateFreightAndOperator(cmd.freightTerm() != null ? FreightTerm.valueOf(cmd.freightTerm()) : null, EmployeeCode.of(cmd.operatorCode()), null);
+        entity.updateFreightAndOperator(Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf), EmployeeCode.of(cmd.operatorCode()), null);
         entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), WeightUnit.fromCode(cmd.pkgUnit()), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         if (cmd.mainItemName() != null || cmd.hsCode() != null) entity.updateTradeInfo(cmd.mainItemName(), cmd.hsCode());
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
@@ -78,35 +79,35 @@ public class MasterBlFactory {
 
     public void applyToEntity(UpdateMasterBlCommand cmd, MasterBl entity) {
         entity.assignMblNo(
-                cmd.mblNo()       != null ? BlNumber.of(cmd.mblNo())       : entity.getMblNo(),
-                cmd.masterRefNo() != null ? BlNumber.of(cmd.masterRefNo()) : entity.getMasterRefNo()
+                Nullables.mapOrElse(cmd.mblNo(), BlNumber::of, entity::getMblNo),
+                Nullables.mapOrElse(cmd.masterRefNo(), BlNumber::of, entity::getMasterRefNo)
         );
         entity.assignParties(
-                cmd.shipperCode()   != null ? CustomerCode.of(cmd.shipperCode())   : entity.getShipperCode(),
-                cmd.consigneeCode() != null ? CustomerCode.of(cmd.consigneeCode()) : entity.getConsigneeCode(),
-                cmd.notifyCode()    != null ? CustomerCode.of(cmd.notifyCode())    : entity.getNotifyCode()
+                Nullables.mapOrElse(cmd.shipperCode(), CustomerCode::of, entity::getShipperCode),
+                Nullables.mapOrElse(cmd.consigneeCode(), CustomerCode::of, entity::getConsigneeCode),
+                Nullables.mapOrElse(cmd.notifyCode(), CustomerCode::of, entity::getNotifyCode)
         );
         entity.updateSchedule(
-                cmd.polCode() != null ? PortCode.of(cmd.polCode()) : entity.getPolCode(),
-                cmd.podCode() != null ? PortCode.of(cmd.podCode()) : entity.getPodCode(),
-                cmd.etd()     != null ? BlDate.of(cmd.etd())       : entity.getEtd(),
-                cmd.eta()     != null ? BlDate.of(cmd.eta())       : entity.getEta()
+                Nullables.mapOrElse(cmd.polCode(), PortCode::of, entity::getPolCode),
+                Nullables.mapOrElse(cmd.podCode(), PortCode::of, entity::getPodCode),
+                Nullables.mapOrElse(cmd.etd(), BlDate::of, entity::getEtd),
+                Nullables.mapOrElse(cmd.eta(), BlDate::of, entity::getEta)
         );
         entity.updateFreightAndOperator(
-                cmd.freightTerm()  != null ? FreightTerm.valueOf(cmd.freightTerm()) : entity.getFreightTerm(),
-                cmd.operatorCode() != null ? EmployeeCode.of(cmd.operatorCode())    : entity.getOperatorCode(),
+                Nullables.mapOrElse(cmd.freightTerm(), FreightTerm::valueOf, entity::getFreightTerm),
+                Nullables.mapOrElse(cmd.operatorCode(), EmployeeCode::of, entity::getOperatorCode),
                 entity.getTeamCode()
         );
         entity.updateCargoSummary(new CargoSummary(
-                cmd.pkgQty()        != null ? Quantity.of(cmd.pkgQty())           : entity.getPkgQty(),
-                cmd.pkgUnit()       != null ? WeightUnit.fromCode(cmd.pkgUnit())  : entity.getPkgUnit(),
-                cmd.grossWeightKg() != null ? Weight.of(cmd.grossWeightKg())      : entity.getGrossWeightKg(),
-                cmd.cbm()           != null ? Volume.of(cmd.cbm())                : entity.getCbm()
+                Nullables.mapOrElse(cmd.pkgQty(), Quantity::of, entity::getPkgQty),
+                Nullables.mapOrElse(cmd.pkgUnit(), WeightUnit::fromCode, entity::getPkgUnit),
+                Nullables.mapOrElse(cmd.grossWeightKg(), Weight::of, entity::getGrossWeightKg),
+                Nullables.mapOrElse(cmd.cbm(), Volume::of, entity::getCbm)
         ));
         if (cmd.mainItemName() != null || cmd.hsCode() != null) {
             entity.updateTradeInfo(
-                    cmd.mainItemName() != null ? cmd.mainItemName() : entity.getMainItemName(),
-                    cmd.hsCode()       != null ? cmd.hsCode()       : entity.getHsCode()
+                    Nullables.firstNonNull(cmd.mainItemName(), entity::getMainItemName),
+                    Nullables.firstNonNull(cmd.hsCode(),       entity::getHsCode)
             );
         }
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
@@ -119,7 +120,7 @@ public class MasterBlFactory {
 
     public MasterBlFilter toFilter(SearchMasterBlCommand cmd) {
         return new MasterBlFilter(
-                cmd.bound() != null ? Bound.valueOf(cmd.bound()) : null,
+                Nullables.mapOrNull(cmd.bound(), Bound::valueOf),
                 cmd.mblNo(),
                 cmd.shipperCode(),
                 cmd.consigneeCode(),
@@ -137,9 +138,9 @@ public class MasterBlFactory {
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getMblNo(), BlNumber::value),
                 VoMapper.mapOrNull(entity.getMasterRefNo(), BlNumber::value),
-                entity.getJobDiv() != null ? entity.getJobDiv().name() : null,
-                entity.getBound() != null ? entity.getBound().name() : null,
-                entity.getShipmentType() != null ? entity.getShipmentType().name() : null,
+                Nullables.mapOrNull(entity.getJobDiv(), MasterBlJobDiv::name),
+                Nullables.mapOrNull(entity.getBound(), Bound::name),
+                Nullables.mapOrNull(entity.getShipmentType(), e -> e.name()),
                 VoMapper.mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getNotifyCode(), CustomerCode::value),
@@ -147,11 +148,11 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(entity.getPodCode(), PortCode::value),
                 VoMapper.mapOrNull(entity.getEtd(), BlDate::asString),
                 VoMapper.mapOrNull(entity.getEta(), BlDate::asString),
-                entity.getFreightTerm() != null ? entity.getFreightTerm().name() : null,
+                Nullables.mapOrNull(entity.getFreightTerm(), FreightTerm::name),
                 VoMapper.mapOrNull(entity.getOperatorCode(), EmployeeCode::value),
                 VoMapper.mapOrNull(entity.getTeamCode(), TeamCode::value),
                 VoMapper.mapOrNull(entity.getPkgQty(), Quantity::count),
-                entity.getPkgUnit() != null ? entity.getPkgUnit().name() : null,
+                Nullables.mapOrNull(entity.getPkgUnit(), WeightUnit::name),
                 VoMapper.mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
                 entity.getCreatedAt(),
@@ -165,7 +166,7 @@ public class MasterBlFactory {
     private void applySeaCreate(MasterBl entity, CreateMasterBlCommand.SeaDetailCommand s) {
         if (!(entity instanceof MasterBlSea sea)) return;
         sea.updateSeaFields(
-                s.loadType() != null ? LoadType.valueOf(s.loadType()) : null,
+                Nullables.mapOrNull(s.loadType(), LoadType::valueOf),
                 LinerCode.of(s.linerCode()),
                 VesselVoyage.of(s.vesselCode(), s.vesselName(), s.voyageNo()),
                 BlDate.of(s.onboardDate()), BlNumber.of(s.lineBkgNo()), BlDate.of(s.issueDate())
@@ -176,12 +177,12 @@ public class MasterBlFactory {
     private void applySeaUpdate(MasterBl entity, UpdateMasterBlCommand.SeaDetailCommand s) {
         if (!(entity instanceof MasterBlSea sea)) return;
         sea.updateSeaFields(
-                s.loadType()    != null ? LoadType.valueOf(s.loadType())                                  : sea.getLoadType(),
-                s.linerCode()   != null ? LinerCode.of(s.linerCode())                                    : sea.getLinerCode(),
-                s.vesselName()  != null ? VesselVoyage.of(s.vesselCode(), s.vesselName(), s.voyageNo())  : sea.getVesselVoyage(),
-                s.onboardDate() != null ? BlDate.of(s.onboardDate())                                     : sea.getOnboardDate(),
-                s.lineBkgNo()   != null ? BlNumber.of(s.lineBkgNo())                                     : sea.getLineBkgNo(),
-                s.issueDate()   != null ? BlDate.of(s.issueDate())                                       : sea.getIssueDate()
+                Nullables.mapOrElse(s.loadType(),    LoadType::valueOf,                                        sea::getLoadType),
+                Nullables.mapOrElse(s.linerCode(),   LinerCode::of,                                            sea::getLinerCode),
+                Nullables.mapOrElse(s.vesselName(),  v -> VesselVoyage.of(s.vesselCode(), v, s.voyageNo()),    sea::getVesselVoyage),
+                Nullables.mapOrElse(s.onboardDate(), BlDate::of,                                               sea::getOnboardDate),
+                Nullables.mapOrElse(s.lineBkgNo(),   BlNumber::of,                                             sea::getLineBkgNo),
+                Nullables.mapOrElse(s.issueDate(),   BlDate::of,                                               sea::getIssueDate)
         );
         applySeaCommon(sea, s.vesselNationality(), s.weightUnit(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
     }
@@ -287,7 +288,7 @@ public class MasterBlFactory {
                 MasterBlAirCharge charge = MasterBlAirCharge.create(null);
                 charge.updateDetails(new MasterBlAirCharge.Details(
                         r.freightCode(), CurrencyCode.of(r.currencyCode()), Per.fromCode(r.per()),
-                        r.freightTerm() != null ? FreightTerm.valueOf(r.freightTerm()) : null,
+                        Nullables.mapOrNull(r.freightTerm(), FreightTerm::valueOf),
                         Weight.of(r.grossWt()), RateClass.fromCode(r.rateClass()), Weight.of(r.chargeWt()), r.rate()
                 ));
                 return charge;

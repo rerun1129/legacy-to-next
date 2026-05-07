@@ -16,6 +16,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
+import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -77,8 +78,8 @@ public class SeaMasterRepositoryImpl implements SeaMasterRepositoryCustom {
                 eqPort(m, filter),
                 containsIgnoreCase(sea.vesselName, filter.vesselName()),
                 containsIgnoreCase(sea.voyageNo, filter.voyageNo()),
-                filter.loadType() != null ? sea.loadType.eq(filter.loadType()) : null,
-                filter.shipmentType() != null ? m.shipmentType.eq(filter.shipmentType()) : null
+                Nullables.mapOrNull(filter.loadType(), t -> sea.loadType.eq(t)),
+                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t))
             )
             .orderBy(m.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -100,8 +101,8 @@ public class SeaMasterRepositoryImpl implements SeaMasterRepositoryCustom {
                 eqPort(m, filter),
                 containsIgnoreCase(sea.vesselName, filter.vesselName()),
                 containsIgnoreCase(sea.voyageNo, filter.voyageNo()),
-                filter.loadType() != null ? sea.loadType.eq(filter.loadType()) : null,
-                filter.shipmentType() != null ? m.shipmentType.eq(filter.shipmentType()) : null
+                Nullables.mapOrNull(filter.loadType(), t -> sea.loadType.eq(t)),
+                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t))
             )
             .fetchOne();
 
@@ -111,11 +112,11 @@ public class SeaMasterRepositoryImpl implements SeaMasterRepositoryCustom {
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+        return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }
 
     private static BooleanExpression eqString(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.eq(v) : null;
+        return Nullables.mapIfHasText(v, col::eq);
     }
 
     private static BooleanExpression dateBetween(QMasterBlJpaEntity m, SeaMasterFilter filter) {

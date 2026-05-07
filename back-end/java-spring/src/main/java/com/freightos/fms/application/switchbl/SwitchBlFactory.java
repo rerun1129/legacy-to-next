@@ -6,6 +6,7 @@ import com.freightos.fms.application.switchbl.projection.SwitchBlDetailResult;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.domain.switchbl.entity.SwitchBlDescription;
+import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
 
@@ -32,16 +33,10 @@ public class SwitchBlFactory {
 
     public void applyToEntity(UpdateSwitchBlCommand cmd, SwitchBl entity) {
         entity.updateDetails(
-                cmd.switchBlNo()    != null ? cmd.switchBlNo()    : entity.getSwitchBlNo(),
-                cmd.shipperCode()   != null
-                        ? CustomerCode.of(cmd.shipperCode(), cmd.shipperAddress())
-                        : entity.getShipperCode(),
-                cmd.consigneeCode() != null
-                        ? CustomerCode.of(cmd.consigneeCode(), cmd.consigneeAddress())
-                        : entity.getConsigneeCode(),
-                cmd.notifyCode()    != null
-                        ? CustomerCode.of(cmd.notifyCode(), cmd.notifyAddress())
-                        : entity.getNotifyCode()
+                Nullables.firstNonNull(cmd.switchBlNo(),  entity::getSwitchBlNo),
+                Nullables.mapOrElse(cmd.shipperCode(),   c -> CustomerCode.of(c, cmd.shipperAddress()),   entity::getShipperCode),
+                Nullables.mapOrElse(cmd.consigneeCode(), c -> CustomerCode.of(c, cmd.consigneeAddress()), entity::getConsigneeCode),
+                Nullables.mapOrElse(cmd.notifyCode(),    c -> CustomerCode.of(c, cmd.notifyAddress()),    entity::getNotifyCode)
         );
         if (cmd.description() != null) {
             entity.attachDescription(toDescriptionEntity(cmd.description()));
@@ -61,8 +56,8 @@ public class SwitchBlFactory {
                 VoMapper.mapOrNull(entity.getConsigneeCode(), CustomerCode::address),
                 VoMapper.mapOrNull(entity.getNotifyCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getNotifyCode(), CustomerCode::address),
-                desc != null ? desc.getMarks() : null,
-                desc != null ? desc.getNatureQuantity() : null
+                Nullables.mapOrNull(desc, SwitchBlDescription::getMarks),
+                Nullables.mapOrNull(desc, SwitchBlDescription::getNatureQuantity)
         );
     }
 

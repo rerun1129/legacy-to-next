@@ -9,6 +9,7 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.common.enums.ShipmentType;
+import com.freightos.common.util.Nullables;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -136,49 +137,49 @@ public abstract class HouseBl extends BaseEntity {
         if (fields.hblNo() != null) this.hblNo = fields.hblNo();
         if (fields.shipmentType() != null || fields.freightTerm() != null) {
             updateBlStatus(
-                    fields.shipmentType() != null ? fields.shipmentType() : this.shipmentType,
-                    fields.freightTerm()  != null ? fields.freightTerm()  : this.freightTerm);
+                    Nullables.firstNonNull(fields.shipmentType(), () -> this.shipmentType),
+                    Nullables.firstNonNull(fields.freightTerm(),  () -> this.freightTerm));
         }
         if (fields.shipperCode() != null || fields.consigneeCode() != null
                 || fields.notifyCode() != null || fields.docPartnerCode() != null) {
             assignParties(
-                    fields.shipperCode()    != null ? fields.shipperCode()    : this.shipperCode,
-                    fields.consigneeCode()  != null ? fields.consigneeCode()  : this.consigneeCode,
-                    fields.notifyCode()     != null ? fields.notifyCode()     : this.notifyCode,
-                    fields.docPartnerCode() != null ? fields.docPartnerCode() : this.docPartnerCode,
+                    Nullables.firstNonNull(fields.shipperCode(),    () -> this.shipperCode),
+                    Nullables.firstNonNull(fields.consigneeCode(),  () -> this.consigneeCode),
+                    Nullables.firstNonNull(fields.notifyCode(),     () -> this.notifyCode),
+                    Nullables.firstNonNull(fields.docPartnerCode(), () -> this.docPartnerCode),
                     this.deliveryCode);
         }
         if (fields.polCode() != null || fields.podCode() != null
                 || fields.etd() != null || fields.eta() != null) {
             updateSchedule(
-                    fields.polCode() != null ? fields.polCode() : this.polCode,
-                    fields.podCode() != null ? fields.podCode() : this.podCode,
-                    fields.etd()     != null ? fields.etd()     : this.etd,
-                    fields.eta()     != null ? fields.eta()     : this.eta);
+                    Nullables.firstNonNull(fields.polCode(), () -> this.polCode),
+                    Nullables.firstNonNull(fields.podCode(), () -> this.podCode),
+                    Nullables.firstNonNull(fields.etd(),     () -> this.etd),
+                    Nullables.firstNonNull(fields.eta(),     () -> this.eta));
         }
         if (fields.pkgQty() != null || fields.pkgUnit() != null
                 || fields.grossWeightKg() != null || fields.cbm() != null) {
             updateCargoSummary(new CargoSummary(
-                    fields.pkgQty()        != null ? fields.pkgQty()        : this.pkgQty,
-                    fields.pkgUnit()       != null ? fields.pkgUnit()       : this.pkgUnit,
-                    fields.grossWeightKg() != null ? fields.grossWeightKg() : this.grossWeightKg,
-                    fields.cbm()           != null ? fields.cbm()           : this.cbm));
+                    Nullables.firstNonNull(fields.pkgQty(),        () -> this.pkgQty),
+                    Nullables.firstNonNull(fields.pkgUnit(),       () -> this.pkgUnit),
+                    Nullables.firstNonNull(fields.grossWeightKg(), () -> this.grossWeightKg),
+                    Nullables.firstNonNull(fields.cbm(),           () -> this.cbm)));
         }
         if (fields.operatorCode() != null || fields.teamCode() != null || fields.salesManCode() != null) {
             assignOperator(
-                    fields.actualCustomerCode() != null ? fields.actualCustomerCode() : this.actualCustomerCode,
-                    fields.operatorCode()       != null ? fields.operatorCode()       : this.operatorCode,
-                    fields.teamCode()           != null ? fields.teamCode()           : this.teamCode,
-                    fields.salesManCode()       != null ? fields.salesManCode()       : this.salesManCode);
+                    Nullables.firstNonNull(fields.actualCustomerCode(), () -> this.actualCustomerCode),
+                    Nullables.firstNonNull(fields.operatorCode(),       () -> this.operatorCode),
+                    Nullables.firstNonNull(fields.teamCode(),           () -> this.teamCode),
+                    Nullables.firstNonNull(fields.salesManCode(),       () -> this.salesManCode));
         }
         if (fields.settlePartnerCode() != null) assignSettlePartner(fields.settlePartnerCode());
         if (fields.incoterms() != null || fields.salesClass() != null
                 || fields.mainItemName() != null || fields.hsCode() != null) {
             updateTradeInfo(
-                    fields.incoterms()    != null ? fields.incoterms()    : this.incoterms,
-                    fields.salesClass()   != null ? fields.salesClass()   : this.salesClass,
-                    fields.mainItemName() != null ? fields.mainItemName() : this.mainItemName,
-                    fields.hsCode()       != null ? fields.hsCode()       : this.hsCode);
+                    Nullables.firstNonNull(fields.incoterms(),    () -> this.incoterms),
+                    Nullables.firstNonNull(fields.salesClass(),   () -> this.salesClass),
+                    Nullables.firstNonNull(fields.mainItemName(), () -> this.mainItemName),
+                    Nullables.firstNonNull(fields.hsCode(),       () -> this.hsCode));
         }
         if (fields.masterBlId() != null) linkToMaster(fields.masterBlId());
     }

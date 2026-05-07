@@ -15,6 +15,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
+import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -71,7 +72,7 @@ public class AirMasterRepositoryImpl implements AirMasterRepositoryCustom {
                 eqParty(m, filter),
                 eqString(air.airlineCode, filter.airlineCode()),
                 eqPort(m, filter),
-                filter.shipmentType() != null ? m.shipmentType.eq(filter.shipmentType()) : null,
+                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t)),
                 eqString(m.teamCode, filter.teamCode())
             )
             .orderBy(m.createdAt.desc())
@@ -92,7 +93,7 @@ public class AirMasterRepositoryImpl implements AirMasterRepositoryCustom {
                 eqParty(m, filter),
                 eqString(air.airlineCode, filter.airlineCode()),
                 eqPort(m, filter),
-                filter.shipmentType() != null ? m.shipmentType.eq(filter.shipmentType()) : null,
+                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t)),
                 eqString(m.teamCode, filter.teamCode())
             )
             .fetchOne();
@@ -103,11 +104,11 @@ public class AirMasterRepositoryImpl implements AirMasterRepositoryCustom {
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+        return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }
 
     private static BooleanExpression eqString(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.eq(v) : null;
+        return Nullables.mapIfHasText(v, col::eq);
     }
 
     private static BooleanExpression dateBetween(QMasterBlJpaEntity m, AirMasterFilter filter) {

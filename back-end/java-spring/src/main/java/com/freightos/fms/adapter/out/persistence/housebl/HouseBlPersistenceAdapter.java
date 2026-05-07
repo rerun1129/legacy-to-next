@@ -12,6 +12,7 @@ import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -49,7 +50,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     public PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest) {
         Page<HouseBlJpaEntity> page = houseBlRepository.findBySchedule(jobDiv, bound, from, to,
                 org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
-                        pageRequest.getSortBy() != null ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy()) : Sort.unsorted()));
+                        Nullables.mapOrElse(pageRequest.getSortBy(), s -> Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), s), Sort::unsorted)));
         return toPagedResult(page);
     }
 
@@ -80,9 +81,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 // 컨테이너 동기화 (SEA 전용)
                 List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
                 savedJpa.syncContainers(jpaContainers);
-                HouseBlDescJpaEntity seaDescJpa = (sea.getDesc() != null)
-                        ? houseBlDocMapper.toDescJpa(sea.getDesc(), savedJpa)
-                        : null;
+                HouseBlDescJpaEntity seaDescJpa = Nullables.mapOrNull(sea.getDesc(), d -> houseBlDocMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(seaDescJpa);
                 houseBlSeaRepository.save(seaJpa);
             }
@@ -102,9 +101,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(c -> houseBlDocMapper.toAirChargeJpa(c, savedJpa))
                         .toList();
                 savedJpa.syncAirCharges(airCharges);
-                HouseBlDescJpaEntity airDescJpa = (air.getDesc() != null)
-                        ? houseBlDocMapper.toDescJpa(air.getDesc(), savedJpa)
-                        : null;
+                HouseBlDescJpaEntity airDescJpa = Nullables.mapOrNull(air.getDesc(), d -> houseBlDocMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(airDescJpa);
                 houseBlAirRepository.save(airJpa);
             }
@@ -132,9 +129,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(nonBlDims);
-                HouseBlDescJpaEntity nonBlDescJpa = (nonBl.getDesc() != null)
-                        ? houseBlDocMapper.toDescJpa(nonBl.getDesc(), savedJpa)
-                        : null;
+                HouseBlDescJpaEntity nonBlDescJpa = Nullables.mapOrNull(nonBl.getDesc(), d -> houseBlDocMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(nonBlDescJpa);
                 houseBlNonBlRepository.save(nonBlJpa);
             }

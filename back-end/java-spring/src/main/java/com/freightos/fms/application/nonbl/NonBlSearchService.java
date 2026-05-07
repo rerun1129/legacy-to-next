@@ -11,6 +11,7 @@ import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.application.nonbl.port.in.NonBlSearchUseCase;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class NonBlSearchService implements NonBlSearchUseCase {
     @Override
     public PagedResult<NonBlSummary> searchNonBls(SearchNonBlCommand cmd, PageRequest pageRequest) {
         NonBlFilter filter = NonBlFilter.of(
-                cmd.bound() != null ? Bound.valueOf(cmd.bound()) : null,
+                Nullables.mapOrNull(cmd.bound(), Bound::valueOf),
                 cmd.hblNo(),
                 cmd.etdFrom(), cmd.etdTo(),
                 cmd.linerCode(),
@@ -33,9 +34,9 @@ public class NonBlSearchService implements NonBlSearchUseCase {
                 cmd.vessel(), cmd.voyage(),
                 cmd.operatorCode(), cmd.teamCode()
         ).withKinds(
-                cmd.dateKind() != null ? DateKind.valueOf(cmd.dateKind()) : null,
-                cmd.partyKind() != null ? PartyKind.valueOf(cmd.partyKind()) : null,
-                cmd.portKind() != null ? PortKind.valueOf(cmd.portKind()) : null
+                Nullables.mapOrNull(cmd.dateKind(), DateKind::valueOf),
+                Nullables.mapOrNull(cmd.partyKind(), PartyKind::valueOf),
+                Nullables.mapOrNull(cmd.portKind(), PortKind::valueOf)
         );
         return nonBlSearchPort.searchNonBlSummaries(filter, pageRequest);
     }

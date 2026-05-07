@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.common.util.Nullables;
 import org.springframework.stereotype.Component;
 
 import static com.freightos.common.util.VoMapper.mapOrNull;
@@ -110,7 +111,7 @@ public class HouseBlDomainToJpaMapper {
     public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
         VesselVoyage vv = domain.getVesselVoyage();
         jpa.setVesselName(vv != null ? vv.vesselName() : "TRUCK");
-        jpa.setVoyageNo(vv != null ? vv.voyageNo() : null);
+        jpa.setVoyageNo(Nullables.mapOrNull(vv, VesselVoyage::voyageNo));
         jpa.setPickupDate(mapOrNull(domain.getPickupDate(), BlDate::asString));
         jpa.setPickupTm(domain.getPickupTm());
         jpa.setEtdTm(domain.getEtdTm());

@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -69,7 +70,7 @@ public class HouseBlJpaToDomainMapper {
     }
 
     public HouseBlNonBl toNonBlDomain(HouseBlJpaEntity jpa, HouseBlNonBlJpaEntity nonBlJpa) {
-        HouseBlNonBl domain = HouseBlNonBl.create(nonBlJpa != null ? nonBlJpa.getWorkDivision() : null, jpa.getBound());
+        HouseBlNonBl domain = HouseBlNonBl.create(Nullables.mapOrNull(nonBlJpa, HouseBlNonBlJpaEntity::getWorkDivision), jpa.getBound());
         copyBaseFields(jpa, domain);
         if (nonBlJpa != null) copyNonBlFields(nonBlJpa, domain);
         List<HouseBlContainer> containers = jpa.getContainers().stream()

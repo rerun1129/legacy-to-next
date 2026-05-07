@@ -12,6 +12,7 @@ import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +26,10 @@ public class AirMasterSearchService implements AirMasterSearchUseCase {
 
     @Override
     public PagedResult<AirMasterSummary> searchAirMasters(SearchAirMasterCommand cmd, PageRequest pageRequest) {
-        DateKind dateKind = cmd.dateKind() != null ? DateKind.valueOf(cmd.dateKind()) : null;
-        PartyKind partyKind = cmd.partyKind() != null ? PartyKind.valueOf(cmd.partyKind()) : null;
-        PortKind portKind = cmd.portKind() != null ? PortKind.valueOf(cmd.portKind()) : null;
-        ShipmentType shipmentType = cmd.shipmentType() != null ? ShipmentType.valueOf(cmd.shipmentType()) : null;
+        DateKind dateKind = Nullables.mapOrNull(cmd.dateKind(), DateKind::valueOf);
+        PartyKind partyKind = Nullables.mapOrNull(cmd.partyKind(), PartyKind::valueOf);
+        PortKind portKind = Nullables.mapOrNull(cmd.portKind(), PortKind::valueOf);
+        ShipmentType shipmentType = Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf);
 
         AirMasterFilter filter = AirMasterFilter.of(
                 Bound.valueOf(cmd.bound()),

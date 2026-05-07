@@ -17,6 +17,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
+import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -94,13 +95,13 @@ public class SeaHouseRepositoryImpl implements SeaHouseRepositoryCustom {
                 eqPort(h, filter),
                 containsIgnoreCase(sea.vesselName, filter.vesselName()),
                 containsIgnoreCase(sea.voyageNo, filter.voyageNo()),
-                filter.shipmentType() != null ? h.shipmentType.eq(filter.shipmentType()) : null,
+                Nullables.mapOrNull(filter.shipmentType(), t -> h.shipmentType.eq(t)),
                 eqString(h.teamCode, filter.teamCode()),
                 eqString(h.operatorCode, filter.operatorCode()),
-                filter.salesClass() != null ? h.salesClass.eq(filter.salesClass()) : null,
+                Nullables.mapOrNull(filter.salesClass(), t -> h.salesClass.eq(t)),
                 eqString(h.salesManCode, filter.salesManCode()),
-                filter.incoterms() != null ? h.incoterms.eq(filter.incoterms()) : null,
-                filter.loadType() != null ? sea.loadType.eq(filter.loadType()) : null
+                Nullables.mapOrNull(filter.incoterms(), t -> h.incoterms.eq(t)),
+                Nullables.mapOrNull(filter.loadType(), t -> sea.loadType.eq(t))
             )
             .orderBy(h.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -125,13 +126,13 @@ public class SeaHouseRepositoryImpl implements SeaHouseRepositoryCustom {
                 eqPort(h, filter),
                 containsIgnoreCase(sea.vesselName, filter.vesselName()),
                 containsIgnoreCase(sea.voyageNo, filter.voyageNo()),
-                filter.shipmentType() != null ? h.shipmentType.eq(filter.shipmentType()) : null,
+                Nullables.mapOrNull(filter.shipmentType(), t -> h.shipmentType.eq(t)),
                 eqString(h.teamCode, filter.teamCode()),
                 eqString(h.operatorCode, filter.operatorCode()),
-                filter.salesClass() != null ? h.salesClass.eq(filter.salesClass()) : null,
+                Nullables.mapOrNull(filter.salesClass(), t -> h.salesClass.eq(t)),
                 eqString(h.salesManCode, filter.salesManCode()),
-                filter.incoterms() != null ? h.incoterms.eq(filter.incoterms()) : null,
-                filter.loadType() != null ? sea.loadType.eq(filter.loadType()) : null
+                Nullables.mapOrNull(filter.incoterms(), t -> h.incoterms.eq(t)),
+                Nullables.mapOrNull(filter.loadType(), t -> sea.loadType.eq(t))
             )
             .fetchOne();
 
@@ -141,11 +142,11 @@ public class SeaHouseRepositoryImpl implements SeaHouseRepositoryCustom {
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+        return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }
 
     private static BooleanExpression eqString(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.eq(v) : null;
+        return Nullables.mapIfHasText(v, col::eq);
     }
 
     private static BooleanExpression dateBetween(QHouseBlJpaEntity h, SeaHouseFilter filter) {

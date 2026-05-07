@@ -11,6 +11,7 @@ import com.freightos.fms.domain.truckbl.TruckBlFilter;
 import com.freightos.fms.application.truckbl.port.in.TruckBlSearchUseCase;
 import com.freightos.fms.application.truckbl.port.out.TruckBlSearchPort;
 import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +26,16 @@ public class TruckBlSearchService implements TruckBlSearchUseCase {
     @Override
     public PagedResult<TruckBlSummary> searchTruckBls(SearchTruckBlCommand cmd, PageRequest pageRequest) {
         TruckBlFilter filter = TruckBlFilter.of(
-                cmd.bound() != null ? Bound.valueOf(cmd.bound()) : null,
+                Nullables.mapOrNull(cmd.bound(), Bound::valueOf),
                 cmd.truckBlNo(),
                 cmd.etdFrom(), cmd.etdTo(),
                 cmd.truckerCode(), cmd.docPartnerCode(),
                 cmd.partyCode(), cmd.portCode(),
                 cmd.operatorCode(), cmd.teamCode()
         ).withKinds(
-                cmd.dateKind() != null ? DateKind.valueOf(cmd.dateKind()) : null,
-                cmd.partyKind() != null ? PartyKind.valueOf(cmd.partyKind()) : null,
-                cmd.portKind() != null ? PortKind.valueOf(cmd.portKind()) : null
+                Nullables.mapOrNull(cmd.dateKind(), DateKind::valueOf),
+                Nullables.mapOrNull(cmd.partyKind(), PartyKind::valueOf),
+                Nullables.mapOrNull(cmd.portKind(), PortKind::valueOf)
         );
         return truckBlSearchPort.searchTruckBlSummaries(filter, pageRequest);
     }

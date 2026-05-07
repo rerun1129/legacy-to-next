@@ -23,6 +23,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBlScheduleLeg;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruckOrder;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.TruckType;
+import com.freightos.common.util.Nullables;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -78,14 +79,14 @@ class HouseBlSubFactory {
             HouseBlContainer container = HouseBlContainer.of(
                     entity, ContainerNumber.of(c.containerNo()),
                     ContainerType.fromCode(c.containerType()),
-                    c.lengthFeet() != null ? c.lengthFeet() : 20);
+                    Nullables.firstNonNull(c.lengthFeet(), () -> 20));
             container.updateDetails(new HouseBlContainer.Details(
                     SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
                     SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),
-                    Quantity.of(c.pkgQty()), c.pkgUnit() != null ? WeightUnit.fromCode(c.pkgUnit()) : null,
+                    Quantity.of(c.pkgQty()), Nullables.mapOrNull(c.pkgUnit(), WeightUnit::fromCode),
                     Weight.of(c.grossWeightKg()), Weight.of(c.netWeightKg()),
                     Volume.of(c.cbm()), Weight.of(c.vgmKg()), Boolean.TRUE.equals(c.soc()),
-                    c.seq() != null ? c.seq() : 1));
+                    Nullables.firstNonNull(c.seq(), () -> 1)));
             return container;
         }).toList());
     }
@@ -96,14 +97,14 @@ class HouseBlSubFactory {
             HouseBlContainer container = HouseBlContainer.of(
                     entity, ContainerNumber.of(c.containerNo()),
                     ContainerType.fromCode(c.containerType()),
-                    c.lengthFeet() != null ? c.lengthFeet() : 20);
+                    Nullables.firstNonNull(c.lengthFeet(), () -> 20));
             container.updateDetails(new HouseBlContainer.Details(
                     SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
                     SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),
-                    Quantity.of(c.pkgQty()), c.pkgUnit() != null ? WeightUnit.fromCode(c.pkgUnit()) : null,
+                    Quantity.of(c.pkgQty()), Nullables.mapOrNull(c.pkgUnit(), WeightUnit::fromCode),
                     Weight.of(c.grossWeightKg()), Weight.of(c.netWeightKg()),
                     Volume.of(c.cbm()), Weight.of(c.vgmKg()), Boolean.TRUE.equals(c.soc()),
-                    c.seq() != null ? c.seq() : 1));
+                    Nullables.firstNonNull(c.seq(), () -> 1)));
             return container;
         }).toList());
     }
@@ -166,7 +167,7 @@ class HouseBlSubFactory {
             HouseBlAirCharge charge = HouseBlAirCharge.create(null);
             charge.updateDetails(new HouseBlAirCharge.Details(
                     c.freightCode(), CurrencyCode.of(c.currencyCode()), Per.fromCode(c.per()),
-                    c.freightTerm() != null ? FreightTerm.valueOf(c.freightTerm()) : null,
+                    Nullables.mapOrNull(c.freightTerm(), FreightTerm::valueOf),
                     Weight.of(c.grossWeightKg()), RateClass.fromCode(c.rateClass()),
                     Weight.of(c.chargeWeightKg()), c.rate()));
             return charge;
@@ -179,7 +180,7 @@ class HouseBlSubFactory {
             HouseBlAirCharge charge = HouseBlAirCharge.create(null);
             charge.updateDetails(new HouseBlAirCharge.Details(
                     c.freightCode(), CurrencyCode.of(c.currencyCode()), Per.fromCode(c.per()),
-                    c.freightTerm() != null ? FreightTerm.valueOf(c.freightTerm()) : null,
+                    Nullables.mapOrNull(c.freightTerm(), FreightTerm::valueOf),
                     Weight.of(c.grossWeightKg()), RateClass.fromCode(c.rateClass()),
                     Weight.of(c.chargeWeightKg()), c.rate()));
             return charge;

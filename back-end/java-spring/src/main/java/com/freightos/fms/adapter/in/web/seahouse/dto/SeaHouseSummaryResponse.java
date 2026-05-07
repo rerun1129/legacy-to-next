@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.in.web.seahouse.dto;
 
 import com.freightos.fms.application.seahouse.projection.SeaHouseSummary;
+import com.freightos.common.util.Nullables;
 
 import java.math.BigDecimal;
 
@@ -41,9 +42,7 @@ public record SeaHouseSummaryResponse(
         BigDecimal teuQty
 ) {
     public static SeaHouseSummaryResponse from(SeaHouseSummary summary) {
-        BigDecimal teuQty = summary.lengthFeetSum() != null
-            ? BigDecimal.valueOf(summary.lengthFeetSum()).divide(BigDecimal.valueOf(20))
-            : null;
+        BigDecimal teuQty = Nullables.mapOrNull(summary.lengthFeetSum(), s -> BigDecimal.valueOf(s).divide(BigDecimal.valueOf(20)));
         return new SeaHouseSummaryResponse(
                 summary.id(),
                 summary.hblNo(),

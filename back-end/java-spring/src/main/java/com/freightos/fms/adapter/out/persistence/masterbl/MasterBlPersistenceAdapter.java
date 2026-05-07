@@ -18,6 +18,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -45,9 +46,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     public PagedResult<MasterBl> getMasterBlsByBound(Bound bound, PageRequest pageRequest) {
         Page<MasterBlJpaEntity> page = masterBlRepository.findAllByBound(bound,
                 org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize(),
-                        pageRequest.getSortBy() != null
-                                ? Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), pageRequest.getSortBy())
-                                : Sort.unsorted()));
+                        Nullables.mapOrElse(pageRequest.getSortBy(), s -> Sort.by(Sort.Direction.valueOf(pageRequest.getSortDirection().name()), s), Sort::unsorted)));
         return PagedResult.of(page.getContent().stream()
                 .map(this::loadWithExt)
                 .toList(), page.getTotalElements(), page.getTotalPages(),
@@ -101,9 +100,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .map(l -> masterBlMapper.toScheduleLegJpa(l, savedJpa))
                         .toList();
                 savedJpa.syncScheduleLegs(jpaLegs);
-                MasterBlDescJpaEntity airDescJpa = (air.getDesc() != null)
-                        ? masterBlMapper.toDescJpa(air.getDesc(), savedJpa)
-                        : null;
+                MasterBlDescJpaEntity airDescJpa = Nullables.mapOrNull(air.getDesc(), d -> masterBlMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(airDescJpa);
                 masterBlAirRepository.save(airJpa);
             }
@@ -113,9 +110,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .orElseGet(MasterBlSeaJpaEntity::new);
                 seaJpa.setMasterBl(savedJpa);
                 masterBlMapper.applySeaFields(sea, seaJpa);
-                MasterBlDescJpaEntity seaDescJpa = (sea.getDesc() != null)
-                        ? masterBlMapper.toDescJpa(sea.getDesc(), savedJpa)
-                        : null;
+                MasterBlDescJpaEntity seaDescJpa = Nullables.mapOrNull(sea.getDesc(), d -> masterBlMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(seaDescJpa);
                 masterBlSeaRepository.save(seaJpa);
             }

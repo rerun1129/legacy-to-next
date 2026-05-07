@@ -13,6 +13,7 @@ import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
+import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -57,7 +58,7 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
             // Truck B/L 전용 endpoint이므로 jobDiv=TRUCK 하드코딩
             .where(
                 h.jobDiv.eq(JobDiv.TRUCK),
-                filter.bound() != null ? h.bound.eq(filter.bound()) : null,
+                Nullables.mapOrNull(filter.bound(), t -> h.bound.eq(t)),
                 containsIgnoreCase(h.hblNo, filter.hblNo()),
                 containsIgnoreCase(truck.truckerCode, filter.truckerCode()),
                 containsIgnoreCase(h.docPartnerCode, filter.docPartnerCode()),
@@ -79,7 +80,7 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
             // Truck B/L 전용 endpoint이므로 jobDiv=TRUCK 하드코딩
             .where(
                 h.jobDiv.eq(JobDiv.TRUCK),
-                filter.bound() != null ? h.bound.eq(filter.bound()) : null,
+                Nullables.mapOrNull(filter.bound(), t -> h.bound.eq(t)),
                 containsIgnoreCase(h.hblNo, filter.hblNo()),
                 containsIgnoreCase(truck.truckerCode, filter.truckerCode()),
                 containsIgnoreCase(h.docPartnerCode, filter.docPartnerCode()),
@@ -97,11 +98,11 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+        return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }
 
     private static BooleanExpression eqString(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.eq(v) : null;
+        return Nullables.mapIfHasText(v, col::eq);
     }
 
     private static BooleanExpression dateBetween(

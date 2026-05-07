@@ -14,6 +14,7 @@ import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,12 +28,12 @@ public class AirHouseSearchService implements AirHouseSearchUseCase {
 
     @Override
     public PagedResult<AirHouseSummary> searchAirHouses(SearchAirHouseCommand cmd, PageRequest pageRequest) {
-        DateKind dateKind = cmd.dateKind() != null ? DateKind.valueOf(cmd.dateKind()) : null;
-        PartyKind partyKind = cmd.partyKind() != null ? PartyKind.valueOf(cmd.partyKind()) : null;
-        PortKind portKind = cmd.portKind() != null ? PortKind.valueOf(cmd.portKind()) : null;
-        ShipmentType shipmentType = cmd.shipmentType() != null ? ShipmentType.valueOf(cmd.shipmentType()) : null;
-        SalesClass salesClass = cmd.salesClass() != null ? SalesClass.valueOf(cmd.salesClass()) : null;
-        Incoterms incoterms = cmd.incoterms() != null ? Incoterms.valueOf(cmd.incoterms()) : null;
+        DateKind dateKind = Nullables.mapOrNull(cmd.dateKind(), DateKind::valueOf);
+        PartyKind partyKind = Nullables.mapOrNull(cmd.partyKind(), PartyKind::valueOf);
+        PortKind portKind = Nullables.mapOrNull(cmd.portKind(), PortKind::valueOf);
+        ShipmentType shipmentType = Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf);
+        SalesClass salesClass = Nullables.mapOrNull(cmd.salesClass(), SalesClass::valueOf);
+        Incoterms incoterms = Nullables.mapOrNull(cmd.incoterms(), Incoterms::valueOf);
 
         AirHouseFilter filter = AirHouseFilter.of(
                 Bound.valueOf(cmd.bound()),

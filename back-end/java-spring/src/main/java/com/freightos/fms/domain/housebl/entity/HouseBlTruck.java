@@ -5,6 +5,7 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
+import com.freightos.common.util.Nullables;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,7 +42,7 @@ public class HouseBlTruck extends HouseBl {
     }
 
     public String getVesselName() {
-        return vesselVoyage != null ? vesselVoyage.vesselName() : "TRUCK";
+        return Nullables.mapOrElse(vesselVoyage, VesselVoyage::vesselName, () -> "TRUCK");
     }
 
     public record TruckFields(
@@ -54,7 +55,7 @@ public class HouseBlTruck extends HouseBl {
 
     public void updateTruckFields(TruckFields f) {
         this.vesselVoyage   = VesselVoyage.of(null, "TRUCK",
-                f.vesselVoyage != null ? f.vesselVoyage.voyageNo() : null);
+                Nullables.mapOrNull(f.vesselVoyage, VesselVoyage::voyageNo));
         this.pickupDate     = f.pickupDate;
         this.pickupTm       = f.pickupTm;
         this.etdTm          = f.etdTm;

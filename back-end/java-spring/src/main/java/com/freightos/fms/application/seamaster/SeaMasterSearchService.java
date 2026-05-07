@@ -13,10 +13,10 @@ import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
+import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +27,11 @@ public class SeaMasterSearchService implements SeaMasterSearchUseCase {
 
     @Override
     public PagedResult<SeaMasterSummary> searchSeaMasters(SearchSeaMasterCommand cmd, PageRequest pageRequest) {
-        DateKind dateKind = cmd.dateKind() != null ? DateKind.valueOf(cmd.dateKind()) : null;
-        PartyKind partyKind = cmd.partyKind() != null ? PartyKind.valueOf(cmd.partyKind()) : null;
-        PortKind portKind = cmd.portKind() != null ? PortKind.valueOf(cmd.portKind()) : null;
-        ShipmentType shipmentType = cmd.shipmentType() != null ? ShipmentType.valueOf(cmd.shipmentType()) : null;
-        LoadType loadType = StringUtils.hasText(cmd.loadType()) ? LoadType.valueOf(cmd.loadType()) : null;
+        DateKind dateKind = Nullables.mapOrNull(cmd.dateKind(), DateKind::valueOf);
+        PartyKind partyKind = Nullables.mapOrNull(cmd.partyKind(), PartyKind::valueOf);
+        PortKind portKind = Nullables.mapOrNull(cmd.portKind(), PortKind::valueOf);
+        ShipmentType shipmentType = Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf);
+        LoadType loadType = Nullables.mapIfHasText(cmd.loadType(), LoadType::valueOf);
 
         SeaMasterFilter filter = SeaMasterFilter.of(
                 Bound.valueOf(cmd.bound()),

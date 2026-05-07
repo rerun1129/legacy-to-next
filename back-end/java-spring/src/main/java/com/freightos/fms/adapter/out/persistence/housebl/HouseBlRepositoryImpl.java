@@ -16,6 +16,7 @@ import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -63,7 +64,7 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
             .where(
                 h.jobDiv.eq(filter.jobDiv()),
-                filter.bound() != null ? h.bound.eq(filter.bound()) : null,
+                Nullables.mapOrNull(filter.bound(), t -> h.bound.eq(t)),
                 containsIgnoreCase(h.hblNo, filter.hblNo()),
                 containsIgnoreCase(h.mblNo, filter.mblNo()),
                 containsIgnoreCase(h.shipperCode, filter.shipperCode()),
@@ -90,7 +91,7 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .leftJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))
             .where(
                 h.jobDiv.eq(filter.jobDiv()),
-                filter.bound() != null ? h.bound.eq(filter.bound()) : null,
+                Nullables.mapOrNull(filter.bound(), t -> h.bound.eq(t)),
                 containsIgnoreCase(h.hblNo, filter.hblNo()),
                 containsIgnoreCase(h.mblNo, filter.mblNo()),
                 containsIgnoreCase(h.shipperCode, filter.shipperCode()),
@@ -169,11 +170,11 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+        return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }
 
     private static BooleanExpression eqString(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.eq(v) : null;
+        return Nullables.mapIfHasText(v, col::eq);
     }
 
     private static BooleanExpression dateBetween(

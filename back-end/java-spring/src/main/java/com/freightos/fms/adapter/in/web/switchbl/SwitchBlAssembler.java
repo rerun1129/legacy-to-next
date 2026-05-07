@@ -7,6 +7,7 @@ import com.freightos.fms.adapter.in.web.switchbl.dto.UpdateSwitchBlRequest;
 import com.freightos.fms.application.switchbl.command.CreateSwitchBlCommand;
 import com.freightos.fms.application.switchbl.command.UpdateSwitchBlCommand;
 import com.freightos.fms.application.switchbl.projection.SwitchBlDetailResult;
+import com.freightos.common.util.Nullables;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,9 +28,7 @@ public class SwitchBlAssembler {
                 req.consigneeAddress(),
                 req.notifyCode(),
                 req.notifyAddress(),
-                req.description() != null
-                        ? new CreateSwitchBlCommand.DescriptionCommand(req.description().marks(), req.description().natureQuantity())
-                        : null
+                Nullables.mapOrNull(req.description(), d -> new CreateSwitchBlCommand.DescriptionCommand(d.marks(), d.natureQuantity()))
         );
     }
 
@@ -42,9 +41,7 @@ public class SwitchBlAssembler {
                 req.consigneeAddress(),
                 req.notifyCode(),
                 req.notifyAddress(),
-                req.description() != null
-                        ? new UpdateSwitchBlCommand.DescriptionCommand(req.description().marks(), req.description().natureQuantity())
-                        : null
+                Nullables.mapOrNull(req.description(), d -> new UpdateSwitchBlCommand.DescriptionCommand(d.marks(), d.natureQuantity()))
         );
     }
 

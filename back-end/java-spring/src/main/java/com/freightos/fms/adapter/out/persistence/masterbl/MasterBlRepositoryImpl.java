@@ -8,10 +8,10 @@ import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
+import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -49,8 +49,8 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
                 containsIgnoreCase(m.consigneeCode, filter.consigneeCode()),
                 eqString(m.polCode, filter.polCode()),
                 eqString(m.podCode, filter.podCode()),
-                StringUtils.hasText(filter.etdFrom()) ? m.etd.goe(filter.etdFrom()) : null,
-                StringUtils.hasText(filter.etdTo())   ? m.etd.loe(filter.etdTo())   : null
+                Nullables.mapIfHasText(filter.etdFrom(), m.etd::goe),
+                Nullables.mapIfHasText(filter.etdTo(),   m.etd::loe)
             )
             .orderBy(m.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -67,8 +67,8 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
                 containsIgnoreCase(m.consigneeCode, filter.consigneeCode()),
                 eqString(m.polCode, filter.polCode()),
                 eqString(m.podCode, filter.podCode()),
-                StringUtils.hasText(filter.etdFrom()) ? m.etd.goe(filter.etdFrom()) : null,
-                StringUtils.hasText(filter.etdTo())   ? m.etd.loe(filter.etdTo())   : null
+                Nullables.mapIfHasText(filter.etdFrom(), m.etd::goe),
+                Nullables.mapIfHasText(filter.etdTo(),   m.etd::loe)
             )
             .fetchOne();
 
@@ -78,10 +78,10 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.containsIgnoreCase(v) : null;
+        return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }
 
     private static BooleanExpression eqString(StringPath col, String v) {
-        return StringUtils.hasText(v) ? col.eq(v) : null;
+        return Nullables.mapIfHasText(v, col::eq);
     }
 }
