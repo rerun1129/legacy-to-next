@@ -48,6 +48,8 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "ShipmentType", ShipmentType.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
+        register(map, "WorkDivision", WorkDivision.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "SortDirection", SortDirection.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "VolumeDivisor", VolumeDivisor.values(),
@@ -82,9 +84,6 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "masterbl.MasterBlJobDiv", MasterBlJobDiv.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
-        // PackageUnit은 values().length == 0이므로 register 내부에서 skip됨
-        register(map, "PackageUnit", PackageUnit.values(), EnumOption::fromName);
-
         return EnumRegistry.of(map);
     }
 
