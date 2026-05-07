@@ -89,6 +89,7 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
         <input
           ref={setRef}
           type="number"
+          autoComplete="off"
           step={resolvedStep}
           className={combined}
           style={{ textAlign: "right", ...style }}
@@ -108,6 +109,7 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
       <input
         ref={setRef}
         type="number"
+        autoComplete="off"
         step={resolvedStep}
         className={combined}
         style={{ textAlign: "right", ...style }}

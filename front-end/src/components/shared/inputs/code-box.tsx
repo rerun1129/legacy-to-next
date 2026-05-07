@@ -47,6 +47,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
               <div className="party-cn__code" style={{ position: "relative" }}>
                 <input
                   ref={ref}
+                  autoComplete="off"
                   className={mono ? "text-mono" : undefined}
                   readOnly={readOnly}
                   disabled={disabled}
@@ -64,6 +65,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
                 )}
               </div>
               <input
+                autoComplete="off"
                 className="party-cn__name"
                 readOnly={readOnly}
                 disabled={disabled}
@@ -95,6 +97,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
         <div className="lcn__code" style={{ position: "relative" }}>
           <input
             ref={ref}
+            autoComplete="off"
             className={mergedCodeCn}
             readOnly={readOnly}
             disabled={disabled}
@@ -112,6 +115,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
           )}
         </div>
         <input
+          autoComplete="off"
           className="lcn__name"
           readOnly={readOnly}
           disabled={disabled}

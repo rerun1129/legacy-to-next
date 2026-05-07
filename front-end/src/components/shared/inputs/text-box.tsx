@@ -19,6 +19,7 @@ export const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(
       return (
         <input
           ref={ref}
+          autoComplete="off"
           className={combined}
           style={style}
           readOnly={readOnly}
@@ -33,6 +34,7 @@ export const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(
     return (
       <input
         ref={ref}
+        autoComplete="off"
         className={combined}
         style={style}
         readOnly={readOnly}

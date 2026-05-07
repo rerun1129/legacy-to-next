@@ -39,7 +39,7 @@ function cellInputClass(className?: string) {
 }
 
 export const TextCell = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
-  function TextCell({ className, ...props }, ref) { return <input ref={ref} className={cellInputClass(className)} {...props} />; }
+  function TextCell({ className, ...props }, ref) { return <input ref={ref} autoComplete="off" className={cellInputClass(className)} {...props} />; }
 );
 
 type DateInputBaseProps = Omit<
@@ -141,6 +141,7 @@ const DateInputBase = forwardRef<HTMLInputElement, DateInputBaseProps>(function 
       <input
         {...inputProps}
         ref={bindInput}
+        autoComplete="off"
         className={inputClassName}
         style={computedStyle}
         value={focused ? raw : toDateMask(raw)}
@@ -186,7 +187,7 @@ export const NumericCell = forwardRef<HTMLInputElement, NumericCellProps>(
   function NumericCell({ defaultValue, className, step = "any", ...props }, ref) {
     const v = typeof defaultValue === "string" ? defaultValue.replace(/,/g, "") : defaultValue;
     return (
-      <input ref={ref} type="number" step={step} className={cellInputClass(className)} defaultValue={v} {...props} />
+      <input ref={ref} type="number" autoComplete="off" step={step} className={cellInputClass(className)} defaultValue={v} {...props} />
     );
   }
 );
