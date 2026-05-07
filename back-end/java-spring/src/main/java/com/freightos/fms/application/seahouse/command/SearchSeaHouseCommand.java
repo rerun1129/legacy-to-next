@@ -1,0 +1,30 @@
+package com.freightos.fms.application.seahouse.command;
+
+public record SearchSeaHouseCommand(
+    String bound,
+    String dateKind,
+    String dateFrom,
+    String dateTo,
+    String masterBlKind,
+    String masterBlValue,
+    String hblNo,
+    String partyKind,
+    String partyCode,
+    String actualCustomerCode,
+    String partnerKind,
+    String partnerCode,
+    String linerCode,
+    String portKind,
+    String portCode,
+    String shipmentType,
+    String teamCode,
+    String operatorCode,
+    String salesClass,
+    String salesManCode,
+    String incoterms,
+    String vesselName,
+    String voyageNo,
+    String loadType,
+    Integer page,
+    Integer size
+) {}
