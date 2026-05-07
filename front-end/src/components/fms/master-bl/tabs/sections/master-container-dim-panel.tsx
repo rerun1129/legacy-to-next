@@ -53,6 +53,7 @@ function AirDimsGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
               {(["lengthCm", "widthCm", "heightCm", "quantity", "cbm", "volumeWeightKg"] as const).map(k => (
                 <td key={k} className="is-num">
                   <input
+                    autoComplete="off"
                     type="number"
                     step="any"
                     className="grid__cell-input"

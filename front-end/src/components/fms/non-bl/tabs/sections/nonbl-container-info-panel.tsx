@@ -26,15 +26,15 @@ export function NonBLContainerInfoPanel() {
 
   const cols = useMemo<GridColumn<ContainerInfoRow>[]>(() => [
     { key: "_no",      width: 50, label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "cno",      width: 80, label: "Container No.", render: (_, __, i) => <input className="grid__cell-input" {...register(`containers.${i}.cno`)} /> },
-    { key: "contType", width: 80, label: "Cont.Type",   render: (_, __, i) => <input className="grid__cell-input" {...register(`containers.${i}.contType`)} /> },
-    { key: "sealNo1",  width: 80, label: "Seal No. 1",  render: (_, __, i) => <input className="grid__cell-input" {...register(`containers.${i}.sealNo1`)} /> },
-    { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <input className="grid__cell-input" {...register(`containers.${i}.sealNo2`)} /> },
-    { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <input className="grid__cell-input" {...register(`containers.${i}.sealNo3`)} /> },
-    { key: "pkg",      width: 80, label: "Package",     className: "is-num", render: (_, __, i) => <input type="number" className="grid__cell-input is-num" {...register(`containers.${i}.pkg`, { valueAsNumber: true })} /> },
-    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <input className="grid__cell-input" {...register(`containers.${i}.pkgUnit`)} /> },
-    { key: "grossWt",  width: 80, label: "Gross W/T",   className: "is-num", render: (_, __, i) => <input type="number" className="grid__cell-input is-num" {...register(`containers.${i}.grossWt`, { valueAsNumber: true })} /> },
-    { key: "cbm",      width: 80, label: "CBM",         className: "is-num", render: (_, __, i) => <input type="number" className="grid__cell-input is-num" {...register(`containers.${i}.cbm`, { valueAsNumber: true })} /> },
+    { key: "cno",      width: 80, label: "Container No.", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.cno`)} /> },
+    { key: "contType", width: 80, label: "Cont.Type",   render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.contType`)} /> },
+    { key: "sealNo1",  width: 80, label: "Seal No. 1",  render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.sealNo1`)} /> },
+    { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.sealNo2`)} /> },
+    { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.sealNo3`)} /> },
+    { key: "pkg",      width: 80, label: "Package",     className: "is-num", render: (_, __, i) => <input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(`containers.${i}.pkg`, { valueAsNumber: true })} /> },
+    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.pkgUnit`)} /> },
+    { key: "grossWt",  width: 80, label: "Gross W/T",   className: "is-num", render: (_, __, i) => <input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(`containers.${i}.grossWt`, { valueAsNumber: true })} /> },
+    { key: "cbm",      width: 80, label: "CBM",         className: "is-num", render: (_, __, i) => <input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(`containers.${i}.cbm`, { valueAsNumber: true })} /> },
   ], [register]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 

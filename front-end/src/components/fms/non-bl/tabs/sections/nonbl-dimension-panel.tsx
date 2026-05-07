@@ -18,12 +18,12 @@ export function NonBLDimensionPanel() {
 
   const cols = useMemo<GridColumn<DimRow>[]>(() => [
     { key: "_no",    label: "#",           width: 50, className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "length", label: "Length",     width: 80, className: "is-num", render: (_, __, i) => <input className="grid__cell-input is-num" {...register(`dimensions.${i}.length`)} /> },
-    { key: "width",  label: "Width",      width: 80, className: "is-num", render: (_, __, i) => <input className="grid__cell-input is-num" {...register(`dimensions.${i}.width`)} /> },
-    { key: "height", label: "Height",     width: 80, className: "is-num", render: (_, __, i) => <input className="grid__cell-input is-num" {...register(`dimensions.${i}.height`)} /> },
-    { key: "qty",    label: "Qty",        width: 80, className: "is-num", render: (_, __, i) => <input className="grid__cell-input is-num" {...register(`dimensions.${i}.qty`)} /> },
-    { key: "cbm",    label: "CBM",        width: 80, className: "is-num", render: (_, __, i) => <input className="grid__cell-input is-num" {...register(`dimensions.${i}.cbm`)} /> },
-    { key: "volWt",  label: "Volume Wt.", width: 80, className: "is-num", render: (_, __, i) => <input className="grid__cell-input is-num" {...register(`dimensions.${i}.volWt`)} /> },
+    { key: "length", label: "Length",     width: 80, className: "is-num", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input is-num" {...register(`dimensions.${i}.length`)} /> },
+    { key: "width",  label: "Width",      width: 80, className: "is-num", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input is-num" {...register(`dimensions.${i}.width`)} /> },
+    { key: "height", label: "Height",     width: 80, className: "is-num", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input is-num" {...register(`dimensions.${i}.height`)} /> },
+    { key: "qty",    label: "Qty",        width: 80, className: "is-num", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input is-num" {...register(`dimensions.${i}.qty`)} /> },
+    { key: "cbm",    label: "CBM",        width: 80, className: "is-num", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input is-num" {...register(`dimensions.${i}.cbm`)} /> },
+    { key: "volWt",  label: "Volume Wt.", width: 80, className: "is-num", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input is-num" {...register(`dimensions.${i}.volWt`)} /> },
   ], [register]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 

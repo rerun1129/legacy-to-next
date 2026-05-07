@@ -93,6 +93,7 @@ function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
                 {AIR_CHARGE_COLS.map(col => (
                   <td key={col.key} className={"numeric" in col && col.numeric ? "is-num" : ""}>
                     <input
+                      autoComplete="off"
                       type={"numeric" in col && col.numeric ? "number" : "text"}
                       step={"numeric" in col && col.numeric ? "any" : undefined}
                       className="grid__cell-input"

@@ -182,13 +182,13 @@ export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isE
                 {STUB_LEGS.map((r, i) => (
                   <tr key={r.id}>
                     <td className="row-num">{i + 1}</td>
-                    <td><input className="grid__cell-input" defaultValue={r.to} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.by} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.flight} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.onBoard} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.boardTime} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.arrival} /></td>
-                    <td><input className="grid__cell-input" defaultValue={r.arrTime} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.to} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.by} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.flight} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.onBoard} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.boardTime} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.arrival} /></td>
+                    <td><input autoComplete="off" className="grid__cell-input" defaultValue={r.arrTime} /></td>
                   </tr>
                 ))}
               </tbody>
