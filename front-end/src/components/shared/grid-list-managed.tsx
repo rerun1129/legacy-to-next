@@ -33,6 +33,7 @@ export function ManagedGridList<T>({
   emptyMessage = "No rows.",
   selectedRowKey,
   onSelectRow,
+  onClearRow,
   isLoading = false,
   skeletonRowCount = 12,
 }: GridListProps<T> & { gridId: string }) {
@@ -76,6 +77,7 @@ export function ManagedGridList<T>({
   const stableRowKey = useStableOptionalCallback(rowKey);
   const stableOnRowClick = useStableOptionalCallback(onRowClick);
   const stableOnSelectRow = useStableOptionalCallback(onSelectRow);
+  const stableOnClearRow = useStableOptionalCallback(onClearRow);
 
   // 드래그 중 focus 행이 변경될 때 onRowClick을 통해 외부 selected 상태를 갱신한다.
   const onActiveRowChange = useCallback((rk: string) => {
@@ -96,7 +98,7 @@ export function ManagedGridList<T>({
     rowHeight: ROW_HEIGHT_PX,
     getRowOffset,
     onActiveRowChange,
-    onClearActiveRow: () => { stableOnSelectRow?.(null, null); },
+    onClearActiveRow: () => { stableOnClearRow?.(); },
   });
 
   const sensors = useSensors(

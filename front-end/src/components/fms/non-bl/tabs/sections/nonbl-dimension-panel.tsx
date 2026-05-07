@@ -63,6 +63,7 @@ export function NonBLDimensionPanel() {
         rowKey={(r) => r.id}
         onRowClick={(row) => setSelectedKey(String(row.id))}
         rowClassName={(row) => String(row.id) === selectedKey ? "is-selected" : undefined}
+        onClearRow={() => setSelectedKey("")}
         style={{ flex: 1, minHeight: 0 }}
       />
     </div>

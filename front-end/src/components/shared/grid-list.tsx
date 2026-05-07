@@ -27,6 +27,7 @@ export interface GridListProps<T> {
   gridId?: string;
   selectedRowKey?: string | number | null;
   onSelectRow?: (row: T | null, index: number | null) => void;
+  onClearRow?: () => void;
   isLoading?: boolean;
   skeletonRowCount?: number;
 }
