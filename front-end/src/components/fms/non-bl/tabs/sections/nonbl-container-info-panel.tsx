@@ -4,6 +4,7 @@ import { useState, useMemo }                     from "react";
 import { useFormContext, useFieldArray }          from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
+import { TextBox, NumberBox }                    from "@/components/shared/inputs";
 import type { NonBlFormValues }                  from "../../non-bl-schema";
 import { EMPTY_CONTAINER_ROW }                   from "../../non-bl-schema";
 
@@ -26,18 +27,19 @@ export function NonBLContainerInfoPanel() {
 
   const cols = useMemo<GridColumn<ContainerInfoRow>[]>(() => [
     { key: "_no",      width: 50, label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "cno",      width: 80, label: "Container No.", render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.cno`)} /> },
-    { key: "contType", width: 80, label: "Cont.Type",   render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.contType`)} /> },
-    { key: "sealNo1",  width: 80, label: "Seal No. 1",  render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.sealNo1`)} /> },
-    { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.sealNo2`)} /> },
-    { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.sealNo3`)} /> },
-    { key: "pkg",      width: 80, label: "Package",     className: "is-num", render: (_, __, i) => <input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(`containers.${i}.pkg`, { valueAsNumber: true })} /> },
-    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`containers.${i}.pkgUnit`)} /> },
-    { key: "grossWt",  width: 80, label: "Gross W/T",   className: "is-num", render: (_, __, i) => <input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(`containers.${i}.grossWt`, { valueAsNumber: true })} /> },
-    { key: "cbm",      width: 80, label: "CBM",         className: "is-num", render: (_, __, i) => <input autoComplete="off" type="number" className="grid__cell-input is-num" {...register(`containers.${i}.cbm`, { valueAsNumber: true })} /> },
+    { key: "cno",      width: 80, label: "Container No.", render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.cno`)} /> },
+    { key: "contType", width: 80, label: "Cont.Type",   render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.contType`)} /> },
+    { key: "sealNo1",  width: 80, label: "Seal No. 1",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo1`)} /> },
+    { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo2`)} /> },
+    { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo3`)} /> },
+    { key: "pkg",      width: 80, label: "Package",     className: "is-num", render: (_, __, i) => <NumberBox variant="cell" decimalPlaces={0} {...register(`containers.${i}.pkg`, { valueAsNumber: true })} /> },
+    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.pkgUnit`)} /> },
+    { key: "grossWt",  width: 80, label: "Gross W/T",   className: "is-num", render: (_, __, i) => <NumberBox variant="cell" decimalPlaces={3} {...register(`containers.${i}.grossWt`, { valueAsNumber: true })} /> },
+    { key: "cbm",      width: 80, label: "CBM",         className: "is-num", render: (_, __, i) => <NumberBox variant="cell" decimalPlaces={3} {...register(`containers.${i}.cbm`, { valueAsNumber: true })} /> },
   ], [register]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
+  // id: z.number(), selectedKey: string state → 비교 시 명시 변환 필요 (가이드 §6.9)
   const selectedIdx = fields.findIndex(f => f.id === Number(selectedKey));
 
   function handleAdd() {
@@ -54,7 +56,7 @@ export function NonBLContainerInfoPanel() {
   }
 
   return (
-    <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className="panel panel--col">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Container Information</span>
