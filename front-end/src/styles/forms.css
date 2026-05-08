@@ -121,6 +121,7 @@
 }
 .field__input input::placeholder { color: var(--ink-muted); }
 .field__input select { appearance: auto; cursor: pointer; padding-right: 20px; }
+.field__input > .combo { flex: 1; min-width: 0; }
 .field__input:hover { border-bottom-color: var(--ink-3); }
 .field__input:focus-within { border-bottom-color: var(--focus-ring); box-shadow: 0 1px 0 0 var(--focus-ring); }
 /* ── 필수 입력 필드: 헤더(toolbar)와 바디 동일 스타일 ──────────────
@@ -251,13 +252,15 @@
 .li__label.is-required::before { display: none !important; content: none !important; }
 .li__input { position: relative; display: flex; align-items: center; }
 .li:has(.li__label.is-required) .li__input > input:first-child,
-.li:has(.li__label.is-required) .li__input > select:first-child {
+.li:has(.li__label.is-required) .li__input > select:first-child,
+.li:has(.li__label.is-required) .li__input > .combo:first-child > input {
   box-shadow: inset 3px 0 0 var(--required-bar);
   padding-left: 11px;
   border-color: color-mix(in srgb, var(--required-bar) 30%, var(--border));
 }
 .li:has(.li__label.is-required) .li__input > input:first-child:focus,
-.li:has(.li__label.is-required) .li__input > select:first-child:focus {
+.li:has(.li__label.is-required) .li__input > select:first-child:focus,
+.li:has(.li__label.is-required) .li__input > .combo:first-child > input:focus {
   box-shadow: inset 4px 0 0 var(--required-bar), 0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
   border-color: color-mix(in srgb, var(--required-bar) 55%, var(--border));
   background: var(--required-soft);
@@ -265,8 +268,10 @@
 }
 .li__input > input  { width: 100%; height: 22px; padding: 0 8px;     font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); }
 .li__input > select { width: 100%; height: 22px; padding: 0 26px 0 8px; font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); }
+.li__input > .combo { flex: 1; min-width: 0; }
 .li:not(:has(.li__label.is-required)) .li__input > input:focus,
-.li:not(:has(.li__label.is-required)) .li__input > select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.li:not(:has(.li__label.is-required)) .li__input > select:focus,
+.li:not(:has(.li__label.is-required)) .li__input > .combo > input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 
 .sched-list { display: flex; flex-direction: column; gap: 3px; }
 .sched-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -354,6 +359,36 @@
               0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
 }
 textarea.box-panel { height: auto; min-height: 22px; resize: vertical; }
+
+/* =========================================================
+   Combo (검색형 drop-box)
+   ========================================================= */
+.combo {
+  position: relative; display: flex; align-items: center;
+}
+.combo__caret {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; user-select: none;
+  color: var(--ink-3); font-size: 10px; line-height: 1;
+}
+.combo > .box-panel,
+.combo > .box-panel.is-required { padding-right: 22px; cursor: pointer; }
+.combo > .box-panel:focus { cursor: text; }
+.combo__list {
+  position: fixed; z-index: 9999;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px;
+  overflow-y: auto; max-height: 200px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  padding: 2px 0; list-style: none; margin: 0;
+}
+.combo__option {
+  padding: 4px 8px; font-size: 10px; color: var(--ink);
+  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.combo__option:hover,
+.combo__option.is-active { background: var(--accent-soft); color: var(--accent-ink); }
+.combo__option--empty { color: var(--ink-4); cursor: default; }
+.combo__option--empty:hover { background: transparent; color: var(--ink-4); }
 
 /* =========================================================
    Panel layout helpers (Entry 패널 공통)

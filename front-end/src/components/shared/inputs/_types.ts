@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 
 export type BoxVariant = "panel" | "cell";
 
@@ -34,7 +34,7 @@ export interface CodeBoxProps extends BoxBaseProps {
 }
 
 export interface DropBoxProps extends BoxBaseProps,
-  Omit<SelectHTMLAttributes<HTMLSelectElement>, "children" | "required" | "readOnly" | "disabled"> {
+  Omit<InputHTMLAttributes<HTMLInputElement>, "children" | "required" | "readOnly" | "disabled"> {
   options: DropBoxOption[];
   placeholder?: string;
 }

@@ -62,7 +62,10 @@
   position: relative;
   z-index: 1;
 }
-select.grid__cell-input { cursor: pointer; }
+.grid td .combo { width: 100%; height: 100%; }
+.combo > .grid__cell-input,
+.combo > .grid__cell-input.is-required { padding-right: 18px; cursor: pointer; }
+.combo > .grid__cell-input:focus { cursor: text; }
 td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

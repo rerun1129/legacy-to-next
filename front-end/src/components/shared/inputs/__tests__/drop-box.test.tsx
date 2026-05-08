@@ -1,7 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { useForm } from "react-hook-form";
-import { fireEvent } from "@testing-library/react";
 import { DropBox } from "../drop-box";
 import type { DropBoxOption } from "../_types";
 
@@ -31,30 +30,32 @@ function RhfDropWrapper() {
 }
 
 describe("DropBox", () => {
-  it("placeholder 명시 시 첫 번째 option이 value=''", () => {
+  it("placeholder 명시 시 input에 placeholder 속성이 설정됨", () => {
     render(<DropBox options={OPTIONS} placeholder="선택하세요" data-testid="sel" />);
-    const sel = screen.getByTestId("sel") as HTMLSelectElement;
-    expect(sel.options[0].value).toBe("");
+    const input = screen.getByTestId("sel") as HTMLInputElement;
+    expect(input.placeholder).toBe("선택하세요");
   });
 
-  it("placeholder 미명시 시 빈 option 없음", () => {
+  it("placeholder 미명시 시 input에 placeholder 없음", () => {
     render(<DropBox options={OPTIONS} data-testid="sel" />);
-    const sel = screen.getByTestId("sel") as HTMLSelectElement;
-    expect(sel.options[0].value).toBe("A");
+    const input = screen.getByTestId("sel") as HTMLInputElement;
+    expect(input.placeholder).toBe("");
   });
 
-  it("options 배열이 option 엘리먼트로 렌더", () => {
+  it("포커스 시 옵션 리스트가 렌더됨", () => {
     render(<DropBox options={OPTIONS} data-testid="sel" />);
-    const sel = screen.getByTestId("sel") as HTMLSelectElement;
-    expect(sel.options).toHaveLength(2);
-    expect(sel.options[0].label).toBe("Apple");
-    expect(sel.options[1].label).toBe("Banana");
+    const input = screen.getByTestId("sel");
+    fireEvent.focus(input);
+    expect(screen.queryByText("Apple")).toBeTruthy();
+    expect(screen.queryByText("Banana")).toBeTruthy();
   });
 
-  it("RHF 통합: register spread 후 선택 시 getValues에 반영", () => {
+  it("RHF 통합: 옵션 선택 시 getValues에 반영", () => {
     render(<RhfDropWrapper />);
-    const sel = screen.getByTestId("sel");
-    fireEvent.change(sel, { target: { value: "B" } });
+    const input = screen.getByTestId("sel");
+    fireEvent.focus(input);
+    const bananaOpt = screen.getByText("Banana");
+    fireEvent.mouseDown(bananaOpt);
     fireEvent.click(screen.getByTestId("get-btn"));
     expect(document.getElementById("rhf-output")?.textContent).toBe("B");
   });
