@@ -36,7 +36,7 @@ export function NonBLDocumentPanel() {
           label="Sales Man"
           codeProps={{ ...register("salesManCode") }}
           nameProps={{ ...register("salesManName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -50,7 +50,7 @@ export function NonBLDocumentPanel() {
           required
           codeProps={{ ...register("operatorCode") }}
           nameProps={{ ...register("operatorName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -64,19 +64,19 @@ export function NonBLDocumentPanel() {
           required
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
   ];
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Document</span>
       </div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 2 }}>
+      <div className="panel__body panel__body--scroll-flex2">
         <FieldItemGrid itemScope="nonbl-document-panel" items={DOCUMENT_ITEMS} />
       </div>
     </div>

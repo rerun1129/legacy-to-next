@@ -8,12 +8,12 @@ export function NonBLRemarkPanel() {
   const { control } = useFormContext<NonBlFormValues>();
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Remark</span>
       </div>
-      <div className="panel__body" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div className="panel__body panel__body--col">
         <Controller
           control={control}
           name="remark"

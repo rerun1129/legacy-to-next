@@ -20,7 +20,7 @@ export function NonBLPartyPanel() {
           required
           codeProps={{ ...register("actualCustomerCode") }}
           nameProps={{ ...register("actualCustomerName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -34,7 +34,7 @@ export function NonBLPartyPanel() {
           label="SHIPPER"
           codeProps={{ ...register("shipperCode") }}
           nameProps={{ ...register("shipperName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -48,7 +48,7 @@ export function NonBLPartyPanel() {
           label="CONSIGNEE"
           codeProps={{ ...register("consigneeCode") }}
           nameProps={{ ...register("consigneeName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -62,7 +62,7 @@ export function NonBLPartyPanel() {
           label="NOTIFY"
           codeProps={{ ...register("notifyCode") }}
           nameProps={{ ...register("notifyName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -76,19 +76,19 @@ export function NonBLPartyPanel() {
           label="SETTLE PARTNER"
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
   ];
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Party</span>
       </div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+      <div className="panel__body panel__body--scroll">
         <FieldWidgetList panelScope="nonbl-party-panel" fields={fields} />
       </div>
     </div>

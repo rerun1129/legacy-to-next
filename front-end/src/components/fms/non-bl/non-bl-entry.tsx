@@ -25,6 +25,9 @@ export function NonBLEntry() {
 
   const { register } = methods;
 
+  // status: 백엔드 관리 필드 — UI 노출 없이 form에만 등록
+  register("status");
+
   const { options: workDivOptions, placeholder: workDivPlaceholder } = useEnumOptions("WorkDivision");
   const { options: boundOptions, placeholder: boundPlaceholder } = useEnumOptions("Bound");
 

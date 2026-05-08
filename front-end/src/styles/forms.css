@@ -353,3 +353,40 @@
               0 0 0 2px color-mix(in srgb, var(--required-bar) 15%, transparent);
 }
 textarea.box-panel { height: auto; min-height: 22px; resize: vertical; }
+
+/* =========================================================
+   Panel layout helpers (Entry 패널 공통)
+   ========================================================= */
+.panel--col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.panel--col-flex {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel__body--col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel__body--scroll {
+  overflow: auto;
+  flex: 1;
+}
+
+.panel__body--scroll-flex2 {
+  overflow: auto;
+  flex: 2;
+}
+
+.li__input--tight {
+  gap: 4px;
+}

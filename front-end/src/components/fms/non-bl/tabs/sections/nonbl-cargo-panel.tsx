@@ -38,7 +38,7 @@ export function NonBLCargoPanel() {
       render: () => (
         <div className="li">
           <span className="li__label">Package</span>
-          <div className="li__input" style={{ gap: 4 }}>
+          <div className="li__input li__input--tight">
             <NumberBox
               variant="panel"
               decimalPlaces={0}
@@ -101,12 +101,12 @@ export function NonBLCargoPanel() {
   ];
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Cargo</span>
       </div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+      <div className="panel__body panel__body--scroll">
         <FieldItemGrid itemScope="nonbl-cargo-panel" items={CARGO_ITEMS} />
       </div>
     </div>

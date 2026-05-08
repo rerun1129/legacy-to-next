@@ -20,7 +20,7 @@ export function NonBLSchedulePanel() {
           label="Liner"
           codeProps={{ ...register("linerCode"), placeholder: "Code" }}
           nameProps={{ ...register("linerName"), placeholder: "Liner" }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -107,7 +107,7 @@ export function NonBLSchedulePanel() {
           required
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Port Name" }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -121,7 +121,7 @@ export function NonBLSchedulePanel() {
           required
           codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("podName"), placeholder: "Port Name" }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -134,7 +134,7 @@ export function NonBLSchedulePanel() {
           label="Final Dest."
           codeProps={{ ...register("finalDestCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("finalDestName"), placeholder: "Port Name" }}
-          onLookup={() => {}}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />
       ),
     },
@@ -177,12 +177,12 @@ export function NonBLSchedulePanel() {
   ];
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Schedule</span>
       </div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+      <div className="panel__body panel__body--scroll">
         <FieldWidgetList panelScope="nonbl-schedule-panel" fields={fields} />
       </div>
     </div>
