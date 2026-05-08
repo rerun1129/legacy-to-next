@@ -23,7 +23,16 @@ interface Props {
 export function NonBLEntry({ id }: Props = {}) {
   const [tab, setTab] = useState("main");
   const isEdit = Boolean(id);
-  const [hydrateAllowed, setHydrateAllowed] = useState(false);
+  // lazy initializer: 마운트 시 1회만 실행 — marker 있으면 제거 후 true 반환
+  const [hydrateAllowed] = useState<boolean>(() => {
+    if (typeof window === "undefined" || id == null) return false;
+    const key = `non-bl-entry:hot:${id}`;
+    if (sessionStorage.getItem(key)) {
+      sessionStorage.removeItem(key);
+      return true;
+    }
+    return false;
+  });
   const queryClient = useQueryClient();
   const router = useRouter();
   const detailLoadedRef = useRef<boolean>(false);
@@ -37,14 +46,10 @@ export function NonBLEntry({ id }: Props = {}) {
   // F5 새로고침 시 빈 폼 강제: marker 없으면 신규 모드 URL로 교체
   useEffect(() => {
     if (id == null) return;
-    const key = `non-bl-entry:hot:${id}`;
-    if (sessionStorage.getItem(key)) {
-      sessionStorage.removeItem(key);
-      setHydrateAllowed(true);
-    } else {
+    if (!hydrateAllowed) {
       router.replace("/fms/non-bl/entry");
     }
-  }, [id, router]);
+  }, [id, hydrateAllowed, router]);
 
   useBlDraftSync(methods, `non::${id ?? "new"}`);
 
