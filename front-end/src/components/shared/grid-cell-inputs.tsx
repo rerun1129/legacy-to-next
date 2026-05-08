@@ -5,7 +5,7 @@
  * SSOT 결정(2026-05): 그리드 셀은 표준 컴포넌트의 variant="cell"을 사용한다.
  *   - 텍스트:  <TextBox variant="cell" {...register(...)} />
  *   - 숫자:    <NumberBox variant="cell" decimalPlaces={n} {...register(...)} />
- *   - 드롭:    <ComboBox variant="cell" options={...} {...register(...)} />
+ *   - 드롭:    <Controller name="x" control={control} render={({ field }) => <ComboBox variant="cell" options={...} value={field.value} onChange={field.onChange} />} />
  *   - 날짜:    <DateBox variant="cell" /> (Controller)
  *
  * TextCell / NumericCell / DateCell 은 House-BL·Master-BL 레거시 호환용으로 유지되며

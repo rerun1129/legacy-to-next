@@ -22,6 +22,7 @@ export function FieldWidgetContainer({
           <span className="field-widget-container__label">{label}</span>
           {canHide && (
             <button
+              type="button"
               className="field-widget-container__close"
               title="숨기기"
               onMouseDown={e => e.stopPropagation()}

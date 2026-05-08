@@ -176,18 +176,19 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
               <div className="field-item-row-bar">
                 <div style={{ flex: 1 }} />
                 {isSingle && (
-                  <button className="field-item-row-btn" onMouseDown={e => e.stopPropagation()}
+                  <button type="button" className="field-item-row-btn" onMouseDown={e => e.stopPropagation()}
                     onClick={() => setSplitCol(fullScope, rowIdx, (splitCol % cols) + 1)}>
                     {splitCol === 1 ? "← 좌측" : splitCol === cols ? "→ 우측" : `${splitCol}번째`}
                   </button>
                 )}
-                <button className="field-item-row-btn field-item-row-btn--mode"
+                <button type="button" className="field-item-row-btn field-item-row-btn--mode"
                   onMouseDown={e => e.stopPropagation()}
                   onClick={() => setRowMode(fullScope, rowIdx, mode === "full" ? "split" : "full")}>
                   {mode === "full" ? "전체" : "분할"}
                 </button>
                 {shouldShowRowControls && (
                   <button
+                    type="button"
                     className={`field-item-row-btn field-item-row-btn--delete${!isEmpty ? " is-disabled" : ""}`}
                     onMouseDown={e => e.stopPropagation()}
                     onClick={() => isEmpty && deleteItemRow(fullScope, rowIdx)}
@@ -233,7 +234,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
                         <div className="field-item-handle" onMouseDown={ev => handleDragStart(ev, k)}>
                           <GripHorizontal size={9} />
                         </div>
-                        <button className="field-item-cell-close"
+                        <button type="button" className="field-item-cell-close"
                           onMouseDown={e => e.stopPropagation()}
                           onClick={() => hideField(fullScope, k)} title="숨기기">
                           <X size={8} />
@@ -251,7 +252,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
 
       {/* 행 추가 버튼 */}
       {editMode && shouldShowRowControls && (
-        <button className="field-item-add-row" onClick={() => addItemRow(fullScope)}>
+        <button type="button" className="field-item-add-row" onClick={() => addItemRow(fullScope)}>
           <Plus size={10} /> 행 추가
         </button>
       )}
@@ -260,7 +261,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
       {editMode && hiddenItems.length > 0 && (
         <div className="field-item-hidden-bar">
           {hiddenItems.map(item => (
-            <button key={item.key} className="field-widget-hidden-pill"
+            <button type="button" key={item.key} className="field-widget-hidden-pill"
               onClick={() => showField(fullScope, item.key)}>
               + {item.label ?? inferLabel(item.key)}
             </button>

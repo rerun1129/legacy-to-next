@@ -1,13 +1,13 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
 
 export function NonBLDocumentPanel() {
-  const { register } = useFormContext<NonBlFormValues>();
+  const { register, control } = useFormContext<NonBlFormValues>();
   const { options: salesClassOptions, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
@@ -17,11 +17,12 @@ export function NonBLDocumentPanel() {
         <div className="li">
           <span className="li__label">Sales Class</span>
           <div className="li__input">
-            <ComboBox
-              variant="panel"
-              options={salesClassOptions}
-              placeholder={salesClassPlaceholder}
-              {...register("salesClass")}
+            <Controller
+              name="salesClass"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={salesClassOptions} placeholder={salesClassPlaceholder} value={field.value} onChange={field.onChange} />
+              )}
             />
           </div>
         </div>

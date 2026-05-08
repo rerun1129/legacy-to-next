@@ -428,3 +428,7 @@ textarea.box-panel { height: auto; min-height: 22px; resize: vertical; }
 .li__input--tight {
   gap: 4px;
 }
+.li__input--tight > * {
+  flex: 1 1 0;
+  min-width: 0;
+}

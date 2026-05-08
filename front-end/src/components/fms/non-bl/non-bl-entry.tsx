@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef }                from "react";
-import { useForm, FormProvider }                       from "react-hook-form";
+import { useForm, FormProvider, Controller }            from "react-hook-form";
 import { useMutation, useQuery, useQueryClient }       from "@tanstack/react-query";
 import { useRouter }                                   from "next/navigation";
 import { Save, Trash2, Package, FilePlus, Search, Copy, RefreshCw } from "lucide-react";
@@ -35,7 +35,7 @@ export function NonBLEntry({ id }: Props = {}) {
 
   useBlDraftSync(methods, `non::${id ?? "new"}`);
 
-  const { register } = methods;
+  const { register, control } = methods;
 
   // status: 백엔드 관리 필드 — UI 노출 없이 form에만 등록
   register("status");
@@ -216,13 +216,25 @@ export function NonBLEntry({ id }: Props = {}) {
         <div className="field is-required">
           <div className="field__label is-required">Work Division</div>
           <div className="field__input">
-            <ComboBox variant="panel" options={workDivOptions} placeholder={workDivPlaceholder} {...register("workDiv")} />
+            <Controller
+              name="workDiv"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={workDivOptions} placeholder={workDivPlaceholder} value={field.value} onChange={field.onChange} />
+              )}
+            />
           </div>
         </div>
         <div className="field">
           <div className="field__label">Bound</div>
           <div className="field__input">
-            <ComboBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} {...register("bound")} />
+            <Controller
+              name="bound"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} value={field.value} onChange={field.onChange} />
+              )}
+            />
           </div>
         </div>
         <div className="field">

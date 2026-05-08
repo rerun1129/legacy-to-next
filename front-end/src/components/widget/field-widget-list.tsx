@@ -146,6 +146,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
         <div className="field-widget-hidden-bar">
           {hiddenDefs.map(def => (
             <button
+              type="button"
               key={def.key}
               className="field-widget-hidden-pill"
               onClick={() => showField(fullScope, def.key)}
@@ -154,6 +155,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
             </button>
           ))}
           <button
+            type="button"
             className="field-widget-hidden-pill field-widget-hidden-pill--reset"
             onClick={() => resetFieldLayout(fullScope, defaultOrder)}
           >

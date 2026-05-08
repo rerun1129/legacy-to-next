@@ -1,13 +1,13 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
 
 export function NonBLCargoPanel() {
-  const { register } = useFormContext<NonBlFormValues>();
+  const { register, control } = useFormContext<NonBlFormValues>();
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
 
   const CARGO_ITEMS: FieldItemDef[] = [
@@ -45,10 +45,12 @@ export function NonBLCargoPanel() {
               decimalPlaces={0}
               placeholder="0"
             />
-            <ComboBox
-              variant="panel"
-              options={weightUnitOptions}
-              {...register("cargoUnit")}
+            <Controller
+              name="cargoUnit"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} />
+              )}
             />
           </div>
         </div>

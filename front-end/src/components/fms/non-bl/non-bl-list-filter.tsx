@@ -36,13 +36,20 @@ export function NonBlListFilter({ form }: Props) {
           {/* Row 1 */}
           <div className="lcn">
             <span className="lcn__label">Bound</span>
-            <ComboBox
-              variant="panel"
-              options={boundOptionsWithAll}
-              disabled={boundLoading}
-              placeholder={boundPlaceholder}
-              style={{ gridColumn: "2 / span 2" }}
-              {...register("bound")}
+            <Controller
+              name="bound"
+              control={form.control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={boundOptionsWithAll}
+                  disabled={boundLoading}
+                  placeholder={boundPlaceholder}
+                  style={{ gridColumn: "2 / span 2" }}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
           </div>
 
