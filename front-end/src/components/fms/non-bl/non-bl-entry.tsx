@@ -54,6 +54,14 @@ export function NonBLEntry({ id }: Props = {}) {
 
   useBlDraftSync(methods, `non::${id ?? "new"}`);
 
+  // unmount 시 draft 제거 — 재진입(remount) 시 이전 값 복원 방지
+  useEffect(() => {
+    const draftKey = `non::${id ?? "new"}`;
+    return () => {
+      clearDraft(draftKey);
+    };
+  }, [clearDraft, id]);
+
   const { register, control } = methods;
 
   // status: 백엔드 관리 필드 — UI 노출 없이 form에만 등록
