@@ -168,6 +168,25 @@ export function useGridCellSelection<T>(params: {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [applyOverlay, applyCopiedOverlay]);
 
+  // Tab 포커스 이동 시 selection overlay를 포커스된 셀로 갱신한다.
+  useEffect(() => {
+    function handleFocusIn(e: FocusEvent) {
+      const td = (e.target as HTMLElement).closest?.("td[data-row-key][data-col-key]") as HTMLElement | null;
+      if (!td) return;
+      const tableEl = getTableRef.current();
+      if (!tableEl?.contains(td)) return;
+      const rowKey = td.dataset.rowKey;
+      const colKey = td.dataset.colKey;
+      if (!rowKey || !colKey) return;
+      const ref: CellRef = { rowKey, colKey };
+      selectedRangeRef.current = { anchor: ref, focus: ref };
+      applyOverlay();
+      onActiveRowChangeRef.current?.(rowKey);
+    }
+    document.addEventListener("focusin", handleFocusIn);
+    return () => document.removeEventListener("focusin", handleFocusIn);
+  }, [applyOverlay]);
+
   useGridCellClipboard({
     selectedRangeRef,
     copiedRangeRef,

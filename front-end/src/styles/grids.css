@@ -56,6 +56,12 @@
   background: var(--required-soft);
   box-shadow: inset 4px 0 0 var(--required-bar);
 }
+.grid tbody td:focus-within {
+  outline: 1.5px solid var(--focus-ring);
+  outline-offset: -1.5px;
+  position: relative;
+  z-index: 1;
+}
 select.grid__cell-input { cursor: pointer; }
 td.is-num .grid__cell-input { text-align: right; font-family: var(--font-mono); }
 input[type="number"]::-webkit-inner-spin-button,
