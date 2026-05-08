@@ -120,7 +120,7 @@
   font-size: 10px; color: var(--ink); line-height: 1.3;
 }
 .field__input input::placeholder { color: var(--ink-muted); }
-.field__input select { appearance: none; cursor: pointer; }
+.field__input select { appearance: auto; cursor: pointer; padding-right: 20px; }
 .field__input:hover { border-bottom-color: var(--ink-3); }
 .field__input:focus-within { border-bottom-color: var(--focus-ring); box-shadow: 0 1px 0 0 var(--focus-ring); }
 /* ── 필수 입력 필드: 헤더(toolbar)와 바디 동일 스타일 ──────────────
