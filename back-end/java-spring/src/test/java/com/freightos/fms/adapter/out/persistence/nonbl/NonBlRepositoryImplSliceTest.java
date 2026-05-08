@@ -1,14 +1,14 @@
 package com.freightos.fms.adapter.out.persistence.nonbl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlNonBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.common.config.QueryDslConfig;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

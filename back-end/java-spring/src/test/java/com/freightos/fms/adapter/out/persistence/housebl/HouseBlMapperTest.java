@@ -1,11 +1,13 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.housebl.entity.*;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
