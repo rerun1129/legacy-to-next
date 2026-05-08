@@ -1,9 +1,10 @@
-package com.freightos.fms.domain.housebl.entity;
+package com.freightos.fms.domain.nonbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.Rton;
 import com.freightos.fms.domain.common.vo.Weight;
+import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.nonbl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
-import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlNonBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.QHouseBlNonBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.enums.DateKind;

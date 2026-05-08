@@ -1,9 +1,11 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.common.util.Nullables;
 import org.springframework.stereotype.Component;

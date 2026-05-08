@@ -1,7 +1,8 @@
-package com.freightos.fms.adapter.out.persistence.housebl.entity;
+package com.freightos.fms.adapter.out.persistence.nonbl.entity;
 
 import com.freightos.common.persistence.BaseJpaEntity;
-import com.freightos.fms.domain.housebl.entity.HouseBlNonBl;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
