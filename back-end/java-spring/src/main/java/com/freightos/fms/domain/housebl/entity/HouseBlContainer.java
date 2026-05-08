@@ -1,7 +1,6 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.common.entity.BaseEntity;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import lombok.AccessLevel;
@@ -32,7 +31,8 @@ public class HouseBlContainer extends BaseEntity {
     private SealNumber sealNo5;
     private SealNumber sealNo6;
     private Quantity pkgQty;
-    private WeightUnit pkgUnit;
+    // pkg_unit은 포장 단위 VARCHAR(CTN·PLT·CN 등). CodeBox 연동 전까지 String으로 보관.
+    private String pkgUnit;
     private Weight grossWeightKg;
     private Weight netWeightKg;
     private Volume cbm;
@@ -54,7 +54,7 @@ public class HouseBlContainer extends BaseEntity {
 
     public static record Details(
             SealNumber sealNo1, SealNumber sealNo2, SealNumber sealNo3, SealNumber sealNo4,
-            SealNumber sealNo5, SealNumber sealNo6, Quantity pkgQty, WeightUnit pkgUnit,
+            SealNumber sealNo5, SealNumber sealNo6, Quantity pkgQty, String pkgUnit,
             Weight grossWeightKg, Weight netWeightKg, Volume cbm,
             Weight vgmKg, boolean isSoc, int seq) {}
 

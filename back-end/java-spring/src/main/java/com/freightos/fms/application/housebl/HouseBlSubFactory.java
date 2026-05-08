@@ -7,7 +7,6 @@ import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Per;
 import com.freightos.fms.domain.common.enums.RateClass;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.ContainerNumber;
 import com.freightos.fms.domain.common.vo.CurrencyCode;
 import com.freightos.fms.domain.common.vo.Quantity;
@@ -83,7 +82,7 @@ class HouseBlSubFactory {
             container.updateDetails(new HouseBlContainer.Details(
                     SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
                     SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),
-                    Quantity.of(c.pkgQty()), Nullables.mapOrNull(c.pkgUnit(), WeightUnit::fromCode),
+                    Quantity.of(c.pkgQty()), c.pkgUnit(),
                     Weight.of(c.grossWeightKg()), Weight.of(c.netWeightKg()),
                     Volume.of(c.cbm()), Weight.of(c.vgmKg()), Boolean.TRUE.equals(c.soc()),
                     Nullables.firstNonNull(c.seq(), () -> 1)));
@@ -101,7 +100,7 @@ class HouseBlSubFactory {
             container.updateDetails(new HouseBlContainer.Details(
                     SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
                     SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),
-                    Quantity.of(c.pkgQty()), Nullables.mapOrNull(c.pkgUnit(), WeightUnit::fromCode),
+                    Quantity.of(c.pkgQty()), c.pkgUnit(),
                     Weight.of(c.grossWeightKg()), Weight.of(c.netWeightKg()),
                     Volume.of(c.cbm()), Weight.of(c.vgmKg()), Boolean.TRUE.equals(c.soc()),
                     Nullables.firstNonNull(c.seq(), () -> 1)));
