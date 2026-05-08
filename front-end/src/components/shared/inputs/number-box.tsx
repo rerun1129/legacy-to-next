@@ -67,7 +67,13 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
     // 유효한 keystroke마다 lastValidRef를 갱신하고 외부 onChange를 전달
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       if (!e.target.validity.badInput) {
-        lastValidRef.current = e.target.value;
+        const val = e.target.value;
+        const isNumeric = decimalPlaces !== undefined
+          ? /^\d*\.?\d*$/.test(val)
+          : /^\d*$/.test(val);
+        if (isNumeric || val === "") {
+          lastValidRef.current = val;
+        }
       }
       onChange?.(e);
     };
@@ -77,6 +83,13 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
     const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
       // badInput(문자열 등 파싱 불가 값)이면 마지막 유효 값으로 복원 후 조기 반환
       if (e.target.validity.badInput) {
+        e.target.value = lastValidRef.current;
+        onBlur?.(e);
+        return;
+      }
+
+      // badInput=false이지만 숫자로 파싱 안 됨 (IME 한글 완성 입력 등)
+      if (e.target.value !== "" && isNaN(Number(e.target.value))) {
         e.target.value = lastValidRef.current;
         onBlur?.(e);
         return;
