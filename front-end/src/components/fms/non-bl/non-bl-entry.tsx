@@ -15,6 +15,7 @@ import { useBLDraftStore }                             from "@/lib/use-bl-draft-
 import { TextBox, ComboBox }                            from "@/components/shared/inputs";
 import { useEnumOptions }                              from "@/application/enums/use-enum";
 import { nonBlPort }                                   from "@/lib/ports";
+import { toast }                                       from "@/lib/toast-store";
 
 interface Props {
   id?: number;
@@ -160,10 +161,44 @@ export function NonBLEntry({ id }: Props = {}) {
     router.replace("/fms/non-bl/entry");
   }
 
-  function handleSearch() {
-    if (isEdit) {
+  async function handleSearch() {
+    const nonBlNo = methods.getValues("nonBlNo")?.trim();
+    if (!nonBlNo) {
+      toast.info("hbl_no를 입력하세요.");
+      return;
+    }
+
+    const result = await nonBlPort.list(
+      {
+        nonBlNo,
+        bound: "", dateFrom: "", dateTo: "", linerCode: "", linerName: "",
+        partyCode: "", partyName: "", portCode: "", portName: "",
+        vessel: "", voyage: "", operatorCode: "", operatorName: "",
+        teamCode: "", teamName: "", dateKind: "ETD",
+        partyKind: "SHIPPER", portKind: "POL",
+      },
+      1,
+      2,
+    );
+
+    if (result.totalElements === 0) {
+      toast.info("조회된 건이 없습니다.");
+      return;
+    }
+
+    if (result.totalElements > 1) {
+      toast.info("여러 건이 검색되었습니다. List에서 선택하세요.");
+      router.push("/fms/non-bl/list");
+      return;
+    }
+
+    const target = result.content[0];
+    if (target.id === id) {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
       detailLoadedRef.current = false;
+    } else {
+      sessionStorage.setItem(`non-bl-entry:hot:${target.id}`, "1");
+      router.replace(`/fms/non-bl/entry/${target.id}`);
     }
   }
 
@@ -198,7 +233,7 @@ export function NonBLEntry({ id }: Props = {}) {
           <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
             <FilePlus size={12} />New
           </button>
-          <button type="button" className="btn btn--sm btn--search" onClick={handleSearch} disabled={!isEdit}>
+          <button type="button" className="btn btn--sm btn--search" onClick={handleSearch}>
             <Search size={12} />Search
           </button>
           <button
