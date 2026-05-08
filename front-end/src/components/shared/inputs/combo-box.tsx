@@ -2,11 +2,11 @@
 
 import { forwardRef, useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import type { DropBoxProps, DropBoxOption } from "./_types";
+import type { ComboBoxProps, ComboBoxOption } from "./_types";
 import { panelClass, cellClass, labelClass } from "./_styles";
 
-export const DropBox = forwardRef<HTMLInputElement, DropBoxProps>(
-  function DropBox(props, ref) {
+export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
+  function ComboBox(props, ref) {
     const {
       variant = "panel",
       required,
@@ -85,7 +85,7 @@ export const DropBox = forwardRef<HTMLInputElement, DropBoxProps>(
       setQuery("");
     };
 
-    const selectOpt = (opt: DropBoxOption) => {
+    const selectOpt = (opt: ComboBoxOption) => {
       onChange?.({
         target: { value: opt.value, name: name ?? "" },
       } as React.ChangeEvent<HTMLInputElement>);

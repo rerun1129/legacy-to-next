@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { CodeBox, DropBox } from "@/components/shared/inputs";
+import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
@@ -17,7 +17,7 @@ export function NonBLDocumentPanel() {
         <div className="li">
           <span className="li__label">Sales Class</span>
           <div className="li__input">
-            <DropBox
+            <ComboBox
               variant="panel"
               options={salesClassOptions}
               placeholder={salesClassPlaceholder}

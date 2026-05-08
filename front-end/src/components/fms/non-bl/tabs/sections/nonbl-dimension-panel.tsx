@@ -4,7 +4,7 @@ import { useState, useMemo }                     from "react";
 import { useFormContext, useFieldArray }          from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
-import { DropBox, NumberBox }                    from "@/components/shared/inputs";
+import { ComboBox, NumberBox }                    from "@/components/shared/inputs";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
 import type { NonBlFormValues }                  from "../../non-bl-schema";
 import { EMPTY_DIM_ROW }                         from "../../non-bl-schema";
@@ -50,7 +50,7 @@ export function NonBLDimensionPanel() {
         <span className="panel__title">Dimension</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <DropBox
+          <ComboBox
             options={volumeDivisorOptions}
             {...register("dimensionDivisor")}
           />

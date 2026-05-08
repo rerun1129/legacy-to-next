@@ -15,7 +15,7 @@ export interface BoxBaseProps {
 
 export type CodeBoxKind = "lcn" | "party-cn";
 
-export interface DropBoxOption {
+export interface ComboBoxOption {
   value: string;
   label: string;
 }
@@ -33,9 +33,9 @@ export interface CodeBoxProps extends BoxBaseProps {
   onLabelChange?: (v: string) => void;
 }
 
-export interface DropBoxProps extends BoxBaseProps,
+export interface ComboBoxProps extends BoxBaseProps,
   Omit<InputHTMLAttributes<HTMLInputElement>, "children" | "required" | "readOnly" | "disabled"> {
-  options: DropBoxOption[];
+  options: ComboBoxOption[];
   placeholder?: string;
 }
 

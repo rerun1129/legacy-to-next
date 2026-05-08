@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { DropBox } from './drop-box'
+import { ComboBox } from './combo-box'
 
 export interface LcnLabelOption {
   value: string
@@ -23,14 +23,14 @@ export function LcnLabel({ children, options, value, onChange, required, name, o
     return <span className={`lcn__label${requiredClass}`}>{children}</span>
   }
 
-  // LcnLabel의 onChange는 (v: string) => void이고, DropBox의 onChange는
+  // LcnLabel의 onChange는 (v: string) => void이고, ComboBox의 onChange는
   // React.ChangeEvent<HTMLInputElement> — hidden input의 value를 읽어 위임
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value)
   }
 
-  const dropBox = (
-    <DropBox
+  const comboBox = (
+    <ComboBox
       variant="label"
       options={options}
       value={value ?? ''}
@@ -41,5 +41,5 @@ export function LcnLabel({ children, options, value, onChange, required, name, o
     />
   )
 
-  return <span className={`lcn__label${requiredClass}`}>{dropBox}</span>
+  return <span className={`lcn__label${requiredClass}`}>{comboBox}</span>
 }

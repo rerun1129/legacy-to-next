@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import type { DropBoxOption } from '@/components/shared/inputs/_types'
+import type { ComboBoxOption } from '@/components/shared/inputs/_types'
 import type { EnumName } from '@/domain/enums/types'
 import { enumPort } from './bindings'
 
@@ -29,7 +29,7 @@ export function useEnums(names: EnumName[]) {
 }
 
 export function useEnumOptions(name: EnumName): {
-  options: DropBoxOption[]
+  options: ComboBoxOption[]
   isLoading: boolean
   error: unknown
   placeholder: string | undefined

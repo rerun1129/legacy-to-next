@@ -363,7 +363,7 @@
 textarea.box-panel { height: auto; min-height: 22px; resize: vertical; }
 
 /* =========================================================
-   Combo (검색형 drop-box)
+   Combo (검색형 combo-box)
    ========================================================= */
 .combo {
   position: relative; display: flex; align-items: center;

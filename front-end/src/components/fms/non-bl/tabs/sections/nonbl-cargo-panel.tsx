@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { TextBox, NumberBox, DropBox } from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
@@ -45,7 +45,7 @@ export function NonBLCargoPanel() {
               decimalPlaces={0}
               placeholder="0"
             />
-            <DropBox
+            <ComboBox
               variant="panel"
               options={weightUnitOptions}
               {...register("cargoUnit")}

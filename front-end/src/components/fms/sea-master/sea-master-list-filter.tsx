@@ -3,7 +3,7 @@
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { CodeBox } from "@/components/shared/inputs/code-box";
-import { DropBox } from "@/components/shared/inputs/drop-box";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { LcnLabel } from "@/components/shared/inputs/lcn-label";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
@@ -170,7 +170,7 @@ export function SeaMasterListFilter({ form }: Props) {
               control={form.control}
               name="shipmentType"
               render={({ field }) => (
-                <DropBox
+                <ComboBox
                   variant="panel"
                   options={shipmentTypeOptionsWithAll}
                   disabled={shipmentTypeLoading}
@@ -192,7 +192,7 @@ export function SeaMasterListFilter({ form }: Props) {
               control={form.control}
               name="loadType"
               render={({ field }) => (
-                <DropBox
+                <ComboBox
                   variant="panel"
                   options={loadTypeOptionsWithAll}
                   disabled={loadTypeLoading}

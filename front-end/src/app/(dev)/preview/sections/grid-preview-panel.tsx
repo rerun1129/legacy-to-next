@@ -7,7 +7,7 @@ import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { NumberBox } from "@/components/shared/inputs/number-box";
 import { DateBox } from "@/components/shared/inputs/date-box";
-import { DropBox } from "@/components/shared/inputs/drop-box";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { TimeBox } from "@/components/shared/inputs";
@@ -114,7 +114,7 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
     {
       key: "type", label: "TYPE", width: 90,
       render: (_v, _r, i) => (
-        <DropBox variant="cell" options={TYPE_OPTIONS} required={required} readOnly={readOnly} {...register(`dimensions.${i}.type`)} />
+        <ComboBox variant="cell" options={TYPE_OPTIONS} required={required} readOnly={readOnly} {...register(`dimensions.${i}.type`)} />
       ),
     },
     {

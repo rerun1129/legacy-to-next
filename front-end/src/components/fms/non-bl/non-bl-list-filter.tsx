@@ -3,7 +3,7 @@
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { CodeBox } from "@/components/shared/inputs/code-box";
-import { DropBox } from "@/components/shared/inputs/drop-box";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
@@ -36,7 +36,7 @@ export function NonBlListFilter({ form }: Props) {
           {/* Row 1 */}
           <div className="lcn">
             <span className="lcn__label">Bound</span>
-            <DropBox
+            <ComboBox
               variant="panel"
               options={boundOptionsWithAll}
               disabled={boundLoading}

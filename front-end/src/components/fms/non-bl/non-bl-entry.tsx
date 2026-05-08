@@ -12,7 +12,7 @@ import { createEmptyNonBlFormValues }                  from "./non-bl-defaults";
 import { buildNonBlRequest }                           from "./non-bl-submit";
 import { useBlDraftSync }                              from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore }                             from "@/lib/use-bl-draft-store";
-import { TextBox, DropBox }                            from "@/components/shared/inputs";
+import { TextBox, ComboBox }                            from "@/components/shared/inputs";
 import { useEnumOptions }                              from "@/application/enums/use-enum";
 import { nonBlPort }                                   from "@/lib/ports";
 
@@ -216,13 +216,13 @@ export function NonBLEntry({ id }: Props = {}) {
         <div className="field is-required">
           <div className="field__label is-required">Work Division</div>
           <div className="field__input">
-            <DropBox variant="panel" options={workDivOptions} placeholder={workDivPlaceholder} {...register("workDiv")} />
+            <ComboBox variant="panel" options={workDivOptions} placeholder={workDivPlaceholder} {...register("workDiv")} />
           </div>
         </div>
         <div className="field">
           <div className="field__label">Bound</div>
           <div className="field__input">
-            <DropBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} {...register("bound")} />
+            <ComboBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} {...register("bound")} />
           </div>
         </div>
         <div className="field">

@@ -8,7 +8,7 @@ import { InputsToolbar } from "./inputs/_toolbar";
 import { TextSection } from "./inputs/text-section";
 import { CodeSection } from "./inputs/code-section";
 import { NumberSection } from "./inputs/number-section";
-import { DropSection } from "./inputs/drop-section";
+import { ComboSection } from "./inputs/combo-section";
 import { DateSection } from "./inputs/date-section";
 import { TimeSection } from "./inputs/time-section";
 import { LinkRadioSection } from "./inputs/link-radio-section";
@@ -40,7 +40,7 @@ export function InputsSection() {
       <TextSection {...sectionProps} />
       <CodeSection {...sectionProps} />
       <NumberSection {...sectionProps} />
-      <DropSection {...sectionProps} />
+      <ComboSection {...sectionProps} />
       <DateSection {...sectionProps} />
       <TimeSection {...sectionProps} />
       <LinkRadioSection {...sectionProps} />

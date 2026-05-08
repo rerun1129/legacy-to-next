@@ -1,19 +1,19 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { useForm } from "react-hook-form";
-import { DropBox } from "../drop-box";
-import type { DropBoxOption } from "../_types";
+import { ComboBox } from "../combo-box";
+import type { ComboBoxOption } from "../_types";
 
-const OPTIONS: DropBoxOption[] = [
+const OPTIONS: ComboBoxOption[] = [
   { value: "A", label: "Apple" },
   { value: "B", label: "Banana" },
 ];
 
-function RhfDropWrapper() {
+function RhfComboWrapper() {
   const { register, getValues } = useForm<{ field: string }>();
   return (
     <>
-      <DropBox {...register("field")} options={OPTIONS} data-testid="sel" />
+      <ComboBox {...register("field")} options={OPTIONS} data-testid="sel" />
       <button
         type="button"
         data-testid="get-btn"
@@ -29,21 +29,21 @@ function RhfDropWrapper() {
   );
 }
 
-describe("DropBox", () => {
+describe("ComboBox", () => {
   it("placeholder 명시 시 input에 placeholder 속성이 설정됨", () => {
-    render(<DropBox options={OPTIONS} placeholder="선택하세요" data-testid="sel" />);
+    render(<ComboBox options={OPTIONS} placeholder="선택하세요" data-testid="sel" />);
     const input = screen.getByTestId("sel") as HTMLInputElement;
     expect(input.placeholder).toBe("선택하세요");
   });
 
   it("placeholder 미명시 시 input에 placeholder 없음", () => {
-    render(<DropBox options={OPTIONS} data-testid="sel" />);
+    render(<ComboBox options={OPTIONS} data-testid="sel" />);
     const input = screen.getByTestId("sel") as HTMLInputElement;
     expect(input.placeholder).toBe("");
   });
 
   it("포커스 시 옵션 리스트가 렌더됨", () => {
-    render(<DropBox options={OPTIONS} data-testid="sel" />);
+    render(<ComboBox options={OPTIONS} data-testid="sel" />);
     const input = screen.getByTestId("sel");
     fireEvent.focus(input);
     expect(screen.queryByText("Apple")).toBeTruthy();
@@ -51,7 +51,7 @@ describe("DropBox", () => {
   });
 
   it("RHF 통합: 옵션 선택 시 getValues에 반영", () => {
-    render(<RhfDropWrapper />);
+    render(<RhfComboWrapper />);
     const input = screen.getByTestId("sel");
     fireEvent.focus(input);
     const bananaOpt = screen.getByText("Banana");
