@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { NonBlPort, NonBlPageResult } from '@/application/non-bl/ports';
-import type { NonBlRow, NonBlFilter } from '@/domain/non-bl';
+import type { NonBlRow, NonBlFilter, NonBlDetail, CreateNonBlRequest, UpdateNonBlRequest } from '@/domain/non-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
 
@@ -61,6 +61,91 @@ const NON_BL_ROW_SCHEMA = z.object({
   teamName: '',
 } satisfies NonBlRow));
 
+const NON_BL_CONTAINER_SCHEMA = z.object({
+  id: z.number().optional(),
+  seq: z.number().optional(),
+  containerNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  containerType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  lengthFeet: z.number().nullable().optional().transform((v) => v ?? undefined),
+  sealNo1: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo2: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo3: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo4: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo5: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo6: z.string().nullable().optional().transform((v) => v ?? undefined),
+  pkgQty: z.number().nullable().optional().transform((v) => v ?? undefined),
+  pkgUnit: z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  netWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  vgmKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  isSoc: z.boolean().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const NON_BL_DIM_SCHEMA = z.object({
+  id: z.number().optional(),
+  lengthCm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  widthCm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  heightCm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  quantity: z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const NON_BL_DESC_SCHEMA = z.object({
+  marks: z.string().nullable().optional().transform((v) => v ?? undefined),
+  hsCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  description: z.string().nullable().optional().transform((v) => v ?? undefined),
+  itemName: z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const NON_BL_DETAIL_SCHEMA = z.object({
+  id: z.number(),
+  hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  jobDiv: z.string(),
+  bound: z.string(),
+  shipmentType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  freightTerm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  shipperCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  consigneeCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  notifyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  docPartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  actualCustomerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  polCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  podCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  etd: z.string().nullable().optional().transform((v) => v ?? undefined),
+  eta: z.string().nullable().optional().transform((v) => v ?? undefined),
+  pkgQty: z.number().nullable().optional().transform((v) => v ?? undefined),
+  pkgUnit: z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  operatorCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  salesManCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  teamCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  mblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  masterRefNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  masterBlId: z.number().nullable().optional().transform((v) => v ?? undefined),
+  mainItemName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  hsCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  workDivision: z.string().nullable().optional().transform((v) => v ?? undefined),
+  originalBlRef: z.string().nullable().optional().transform((v) => v ?? undefined),
+  rton: z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWtKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  linerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  linerName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  voyageNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalDestCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalDestName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalEta: z.string().nullable().optional().transform((v) => v ?? undefined),
+  createdAt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  updatedAt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  containers: z.array(NON_BL_CONTAINER_SCHEMA).default([]),
+  dims: z.array(NON_BL_DIM_SCHEMA).default([]),
+  desc: NON_BL_DESC_SCHEMA.nullable().optional().transform((v) => v ?? undefined),
+});
+
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({
     content: z.array(schema),
@@ -72,6 +157,52 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
+
+/** FE CreateNonBlRequest → BE CreateHouseBlRequest 형식 변환. jobDiv는 항상 NON_BL 강제. */
+function toBeRequest(req: CreateNonBlRequest) {
+  return {
+    jobDiv: 'NON_BL',
+    hblNo: req.hblNo,
+    bound: req.bound,
+    workDivision: req.workDivision,
+    shipmentType: req.shipmentType,
+    freightTerm: req.freightTerm,
+    shipperCode: req.shipperCode,
+    consigneeCode: req.consigneeCode,
+    notifyCode: req.notifyCode,
+    docPartnerCode: req.docPartnerCode,
+    settlePartnerCode: req.settlePartnerCode,
+    actualCustomerCode: req.actualCustomerCode,
+    polCode: req.polCode,
+    podCode: req.podCode,
+    etd: req.etd,
+    eta: req.eta,
+    pkgQty: req.pkgQty,
+    pkgUnit: req.pkgUnit,
+    grossWeightKg: req.grossWeightKg,
+    cbm: req.cbm,
+    operatorCode: req.operatorCode,
+    salesManCode: req.salesManCode,
+    teamCode: req.teamCode,
+    mblNo: req.mblNo,
+    masterRefNo: req.masterRefNo,
+    masterBlId: req.masterBlId,
+    mainItemName: req.mainItemName,
+    hsCode: req.hsCode,
+    rton: req.rton,
+    volumeWtKg: req.volumeWtKg,
+    linerCode: req.linerCode,
+    linerName: req.linerName,
+    vesselName: req.vesselName,
+    voyageNo: req.voyageNo,
+    finalDestCode: req.finalDestCode,
+    finalDestName: req.finalDestName,
+    finalEta: req.finalEta,
+    containers: req.containers,
+    dims: req.dims,
+    desc: req.desc,
+  };
+}
 
 export const API_NON_BL_PORT: NonBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
@@ -100,5 +231,38 @@ export const API_NON_BL_PORT: NonBlPort = {
     if (!parsed.success) throw new ResponseParseError(`Invalid non-bl list response: ${parsed.error.message}`);
     const { content, totalPages, totalElements, page: p, size: s } = parsed.data.data;
     return { content, totalPages, totalElements, page: p + 1, size: s };
+  },
+
+  async getById(id: number): Promise<NonBlDetail> {
+    const json = await fetchJson(`${NON_BL_BASE}/${id}`);
+    const parsed = apiResponse(NON_BL_DETAIL_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid non-bl detail response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async create(req: CreateNonBlRequest): Promise<NonBlDetail> {
+    const json = await fetchJson(NON_BL_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(toBeRequest(req)),
+    });
+    const parsed = apiResponse(NON_BL_DETAIL_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid non-bl create response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async update(id: number, req: UpdateNonBlRequest): Promise<NonBlDetail> {
+    const json = await fetchJson(`${NON_BL_BASE}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(toBeRequest(req as CreateNonBlRequest)),
+    });
+    const parsed = apiResponse(NON_BL_DETAIL_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid non-bl update response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await fetchJson(`${NON_BL_BASE}/${id}`, { method: 'DELETE' });
   },
 };

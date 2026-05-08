@@ -1,4 +1,4 @@
-import type { NonBlRow, NonBlFilter } from '@/domain/non-bl';
+import type { NonBlRow, NonBlFilter, NonBlDetail, CreateNonBlRequest, UpdateNonBlRequest } from '@/domain/non-bl';
 
 export interface NonBlPageResult {
   content: NonBlRow[];
@@ -10,4 +10,8 @@ export interface NonBlPageResult {
 
 export interface NonBlPort {
   list(filter: NonBlFilter, page: number, size?: number): Promise<NonBlPageResult>;
+  getById(id: number): Promise<NonBlDetail>;
+  create(req: CreateNonBlRequest): Promise<NonBlDetail>;
+  update(id: number, req: UpdateNonBlRequest): Promise<NonBlDetail>;
+  delete(id: number): Promise<void>;
 }

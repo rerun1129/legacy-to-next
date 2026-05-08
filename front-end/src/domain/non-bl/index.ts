@@ -50,3 +50,176 @@ export interface NonBlFilter {
   partyKind?: 'SHIPPER' | 'CONSIGNEE' | 'NOTIFY' | 'SETTLE_PARTNER';
   portKind?: 'POL' | 'POD';
 }
+
+// ── 자식 View 타입 ─────────────────────────────────────────────
+
+export interface NonBlContainerView {
+  id?: number;
+  seq?: number;
+  containerNo?: string;
+  containerType?: string;
+  lengthFeet?: number;
+  sealNo1?: string;
+  sealNo2?: string;
+  sealNo3?: string;
+  sealNo4?: string;
+  sealNo5?: string;
+  sealNo6?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  netWeightKg?: number;
+  vgmKg?: number;
+  cbm?: number;
+  isSoc?: boolean;
+}
+
+export interface NonBlDimView {
+  id?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  quantity?: number;
+  cbm?: number;
+  volumeWeightKg?: number;
+}
+
+export interface NonBlDescView {
+  marks?: string;
+  hsCode?: string;
+  description?: string;
+  itemName?: string;
+}
+
+// ── 단건 조회 응답 타입 ────────────────────────────────────────
+
+export interface NonBlDetail {
+  id: number;
+  hblNo?: string;
+  jobDiv: string;
+  bound: string;
+  shipmentType?: string;
+  freightTerm?: string;
+  shipperCode?: string;
+  consigneeCode?: string;
+  notifyCode?: string;
+  docPartnerCode?: string;
+  settlePartnerCode?: string;
+  actualCustomerCode?: string;
+  polCode?: string;
+  podCode?: string;
+  etd?: string;
+  eta?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  cbm?: number;
+  operatorCode?: string;
+  salesManCode?: string;
+  teamCode?: string;
+  mblNo?: string;
+  masterRefNo?: string;
+  masterBlId?: number;
+  mainItemName?: string;
+  hsCode?: string;
+  workDivision?: string;
+  originalBlRef?: string;
+  rton?: number;
+  volumeWtKg?: number;
+  linerCode?: string;
+  linerName?: string;
+  vesselName?: string;
+  voyageNo?: string;
+  finalDestCode?: string;
+  finalDestName?: string;
+  finalEta?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  containers: NonBlContainerView[];
+  dims: NonBlDimView[];
+  desc?: NonBlDescView;
+}
+
+// ── 자식 Request 타입 ─────────────────────────────────────────
+
+export interface NonBlContainerRequest {
+  seq?: number;
+  containerNo?: string;
+  containerType?: string;
+  lengthFeet?: number;
+  sealNo1?: string;
+  sealNo2?: string;
+  sealNo3?: string;
+  sealNo4?: string;
+  sealNo5?: string;
+  sealNo6?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  netWeightKg?: number;
+  vgmKg?: number;
+  cbm?: number;
+  isSoc?: boolean;
+}
+
+export interface NonBlDimRequest {
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  quantity?: number;
+  cbm?: number;
+  volumeWeightKg?: number;
+}
+
+export interface NonBlDescRequest {
+  marks?: string;
+  hsCode?: string;
+  description?: string;
+  itemName?: string;
+}
+
+// ── Create / Update Request ────────────────────────────────────
+
+export interface CreateNonBlRequest {
+  hblNo?: string;
+  bound: string;
+  workDivision?: string;
+  shipmentType?: string;
+  freightTerm?: string;
+  shipperCode?: string;
+  consigneeCode?: string;
+  notifyCode?: string;
+  docPartnerCode?: string;
+  settlePartnerCode?: string;
+  actualCustomerCode?: string;
+  polCode?: string;
+  podCode?: string;
+  etd?: string;
+  eta?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  cbm?: number;
+  operatorCode?: string;
+  salesManCode?: string;
+  teamCode?: string;
+  mblNo?: string;
+  masterRefNo?: string;
+  masterBlId?: number;
+  mainItemName?: string;
+  hsCode?: string;
+  rton?: number;
+  volumeWtKg?: number;
+  linerCode?: string;
+  linerName?: string;
+  vesselName?: string;
+  voyageNo?: string;
+  finalDestCode?: string;
+  finalDestName?: string;
+  finalEta?: string;
+  containers?: NonBlContainerRequest[];
+  dims?: NonBlDimRequest[];
+  desc?: NonBlDescRequest;
+}
+
+export type UpdateNonBlRequest = Partial<CreateNonBlRequest>;
