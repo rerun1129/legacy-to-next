@@ -3,9 +3,9 @@ package com.freightos.fms.adapter.in.web.nonbl;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.common.response.ApiResponse;
-import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
-import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
+import com.freightos.fms.adapter.in.web.nonbl.dto.CreateNonBlRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlDetailResponse;
+import com.freightos.fms.adapter.in.web.nonbl.dto.UpdateNonBlRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.SearchNonBlRequest;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
@@ -51,7 +51,7 @@ public class NonBlController {
     @Operation(summary = "Non B/L 생성")
     @PostMapping
     public ResponseEntity<ApiResponse<NonBlDetailResponse>> createNonBl(
-            @Valid @RequestBody CreateHouseBlRequest req,
+            @Valid @RequestBody CreateNonBlRequest req,
             UriComponentsBuilder uriBuilder) {
         Long id = nonBlUseCase.createNonBl(nonBlAssembler.toCreateCommand(req));
         URI location = uriBuilder.path("/api/non-bl/{id}").buildAndExpand(id).toUri();
@@ -71,7 +71,7 @@ public class NonBlController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<NonBlDetailResponse>> updateNonBl(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateHouseBlRequest req) {
+            @Valid @RequestBody UpdateNonBlRequest req) {
         return ResponseEntity.ok(ApiResponse.of(
                 nonBlAssembler.toDetail(nonBlUseCase.updateNonBl(id, nonBlAssembler.toUpdateCommand(req)))));
     }
