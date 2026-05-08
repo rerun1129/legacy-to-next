@@ -20,10 +20,6 @@
       "Bash(cd * && back-end/java-spring/gradlew.bat *)"
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/statusline-command.sh'"
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -37,5 +33,15 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash 'C:/vive-coding/portfolio-legacy-to-next/legacy-to-next/.claude/statusline-command.sh'"
+  },
+  "enabledPlugins": {
+    "discord@claude-plugins-official": true
+  },
+  "env": {
+    "DISCORD_STATE_DIR": "C:\\vive-coding\\portfolio-legacy-to-next\\legacy-to-next\\.claude\\channels\\discord"
   }
 }
