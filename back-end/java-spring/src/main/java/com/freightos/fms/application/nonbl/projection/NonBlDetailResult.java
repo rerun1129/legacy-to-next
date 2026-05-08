@@ -160,7 +160,7 @@ public record NonBlDetailResult(
                     VoMapper.mapOrNull(c.getSealNo5(), SealNumber::value),
                     VoMapper.mapOrNull(c.getSealNo6(), SealNumber::value),
                     VoMapper.mapOrNull(c.getPkgQty(), Quantity::count),
-                    Nullables.mapOrNull(c.getPkgUnit(), Enum::name),
+                    c.getPkgUnit(),
                     VoMapper.mapOrNull(c.getGrossWeightKg(), Weight::kg),
                     VoMapper.mapOrNull(c.getNetWeightKg(), Weight::kg),
                     VoMapper.mapOrNull(c.getVgmKg(), Weight::kg),

@@ -179,7 +179,7 @@ public class HouseBlJpaToDomainMapper {
                 SealNumber.of(jpa.getSealNo1()), SealNumber.of(jpa.getSealNo2()),
                 SealNumber.of(jpa.getSealNo3()), SealNumber.of(jpa.getSealNo4()),
                 SealNumber.of(jpa.getSealNo5()), SealNumber.of(jpa.getSealNo6()),
-                Quantity.of(jpa.getPkgQty()), null, // weightUnit: container엔 별도 저장 없음
+                Quantity.of(jpa.getPkgQty()), jpa.getPkgUnit(),
                 Weight.of(jpa.getGrossWeightKg()), Weight.of(jpa.getNetWeightKg()),
                 Volume.of(jpa.getCbm()), Weight.of(jpa.getVgmKg()), jpa.isSoc(), jpa.getSeq()));
         return c;
