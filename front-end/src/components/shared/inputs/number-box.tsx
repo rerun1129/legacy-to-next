@@ -29,12 +29,22 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
       [ref]
     );
 
+    // blur 복원을 위해 마지막으로 유효했던 DOM 값 추적
+    const lastValidRef = useRef<string>("");
+
     // 마운트 시 RHF defaultValues가 비어 있으면 0.000 형태로 초기값 채움
     useEffect(() => {
       if (decimalPlaces !== undefined && innerRef.current && innerRef.current.value === "") {
         innerRef.current.value = (0).toFixed(decimalPlaces);
       }
     }, [decimalPlaces]);
+
+    // 마운트 완료 후 초기 DOM 값을 lastValidRef에 반영
+    useEffect(() => {
+      if (innerRef.current) {
+        lastValidRef.current = innerRef.current.value;
+      }
+    }, []);
 
     // +/- 항상 차단, decimalPlaces 없을 때 소수점 차단 — 브라우저 기본 number input이 허용하는 키를 제한
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -54,9 +64,24 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
       onPaste?.(e);
     };
 
+    // 유효한 keystroke마다 lastValidRef를 갱신하고 외부 onChange를 전달
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.validity.badInput) {
+        lastValidRef.current = e.target.value;
+      }
+      onChange?.(e);
+    };
+
     // blur 시: decimalPlaces 있으면 toFixed 포맷, 없으면 선행 0 제거(정수 정규화)
     // DOM 값이 변경된 경우에만 onChange 재호출로 RHF string 재동기화
     const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+      // badInput(문자열 등 파싱 불가 값)이면 마지막 유효 값으로 복원 후 조기 반환
+      if (e.target.validity.badInput) {
+        e.target.value = lastValidRef.current;
+        onBlur?.(e);
+        return;
+      }
+
       let formatted: string;
 
       if (decimalPlaces !== undefined) {
@@ -95,6 +120,7 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
           style={{ textAlign: "right", fontFamily: "var(--font-mono)", ...style }}
           readOnly={readOnly}
           disabled={disabled}
+          onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
@@ -115,6 +141,7 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
         style={{ textAlign: "right", fontFamily: "var(--font-mono)", ...style }}
         readOnly={readOnly}
         disabled={disabled}
+        onChange={handleChange}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
