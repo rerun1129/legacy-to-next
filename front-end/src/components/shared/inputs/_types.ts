@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from "react";
 
-export type BoxVariant = "panel" | "cell";
+export type BoxVariant = "panel" | "cell" | "label";
 
 export type LabelOption = { value: string; label: string };
 

@@ -228,9 +228,10 @@
 .lcn__name:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .lcn__select { height: 26px; padding: 0 8px; font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
 .lcn__select:focus { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 2px var(--focus-glow); }
-.lcn__label-select {
+/* label variant: lcn__label 자리에 위치하는 좁은 콤보박스 */
+.box-label {
   height: 22px;
-  padding: 0 8px;
+  padding: 0 22px 0 8px;
   font-size: 10px;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -238,12 +239,13 @@
   color: var(--ink);
   cursor: pointer;
   width: 100%;
-}
-.lcn__label-select:focus {
+  box-sizing: border-box;
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-soft);
 }
+.box-label:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.combo--label { width: fit-content; min-width: 60px; }
+.combo--label > .box-label { padding-right: 22px; cursor: pointer; }
+.combo--label > .box-label:focus { cursor: text; }
 
 .li { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: center; gap: 8px; padding: 2px 0; }
 .li__label { font-size: 12px; font-weight: 500; color: var(--ink); text-align: right; padding-right: 4px; white-space: nowrap; position: relative; }

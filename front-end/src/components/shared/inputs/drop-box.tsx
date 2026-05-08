@@ -3,7 +3,7 @@
 import { forwardRef, useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { DropBoxProps, DropBoxOption } from "./_types";
-import { panelClass, cellClass } from "./_styles";
+import { panelClass, cellClass, labelClass } from "./_styles";
 
 export const DropBox = forwardRef<HTMLInputElement, DropBoxProps>(
   function DropBox(props, ref) {
@@ -149,13 +149,21 @@ export const DropBox = forwardRef<HTMLInputElement, DropBoxProps>(
     const displayValue = open ? query : selectedLabel;
     const showPlaceholder = !open && !selectedLabel ? placeholder : undefined;
 
-    const base = variant === "cell" ? cellClass({ required }) : panelClass({ required });
+    const base =
+      variant === "cell"
+        ? cellClass({ required })
+        : variant === "label"
+          ? labelClass({ required })
+          : panelClass({ required });
     const combined = className ? `${base} ${className}` : base;
+
+    const comboModifier =
+      variant === "cell" ? " combo--cell" : variant === "label" ? " combo--label" : "";
 
     return (
       <div
         ref={wrapRef}
-        className={`combo${variant === "cell" ? " combo--cell" : ""}`}
+        className={`combo${comboModifier}`}
         style={style}
       >
         {/* Holds actual option value for RHF ref.current.value and form submit */}

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { DropBox } from './drop-box'
 
 export interface LcnLabelOption {
   value: string
@@ -12,7 +13,7 @@ interface LcnLabelProps {
   onChange?: (v: string) => void
   required?: boolean
   name?: string
-  onBlur?: React.FocusEventHandler<HTMLSelectElement>
+  onBlur?: React.FocusEventHandler<HTMLInputElement>
 }
 
 export function LcnLabel({ children, options, value, onChange, required, name, onBlur }: LcnLabelProps) {
@@ -22,23 +23,23 @@ export function LcnLabel({ children, options, value, onChange, required, name, o
     return <span className={`lcn__label${requiredClass}`}>{children}</span>
   }
 
-  const select = (
-    <select
-      className="lcn__label-select"
-      value={value ?? ''}
-      onChange={e => onChange?.(e.target.value)}
-      name={name}
-      onBlur={onBlur}
-    >
-      {options.map(opt => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
-      ))}
-    </select>
-  )
-
-  if (required) {
-    return <span className={`lcn__label${requiredClass}`}>{select}</span>
+  // LcnLabel의 onChange는 (v: string) => void이고, DropBox의 onChange는
+  // React.ChangeEvent<HTMLInputElement> — hidden input의 value를 읽어 위임
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange?.(e.target.value)
   }
 
-  return <span className="lcn__label">{select}</span>
+  const dropBox = (
+    <DropBox
+      variant="label"
+      options={options}
+      value={value ?? ''}
+      onChange={handleChange}
+      name={name}
+      onBlur={onBlur}
+      required={required}
+    />
+  )
+
+  return <span className={`lcn__label${requiredClass}`}>{dropBox}</span>
 }
