@@ -333,6 +333,41 @@ Entry 화면의 Search는 `port.list(filter, 1, 2)`로 0건/다건/단건 분기
 
 사례: 66a217c — Non B/L Entry 위젯 토글 버그 수정.
 
+### 6.21 Entry mutation 후 List 캐시 자동 invalidate 금지
+
+Entry(생성/수정/삭제) `onSuccess`에서 List queryKey를 **자동 invalidate하지 않는다**.
+
+업무 사용자가 List로 돌아왔을 때 직접 Search 버튼을 눌러 재조회하는 흐름이 의도된 동작. 자동 invalidate는 불필요한 백엔드 호출을 유발하고 사용자의 재조회 타이밍 제어를 빼앗는다.
+
+```ts
+// ❌ 금지
+onSuccess: () => {
+  qc.invalidateQueries({ queryKey: ['non-bl', 'list'] }); // 자동 재조회 금지
+}
+
+// ✅ 올바른 패턴 — detail invalidate만 (편집 재조회)
+onSuccess: () => {
+  qc.invalidateQueries({ queryKey: ['non-bl', 'detail', id] });
+}
+```
+
+### 6.22 Entry plan에 List filter 전용 필드 혼용 금지
+
+`partyKind`, `dateKind`, `portKind` 등 ComboBox 기반 필터 드롭다운은 **List filter 전용** 패턴이다. Entry 화면은 Party 5종 고정 라벨·단일 날짜·단일 포트로 구성되며 이런 kind 필드가 존재하지 않는다.
+
+Entry plan에 `DateKind/PartyKind/PortKind` enum 등록이나 관련 필드 처리를 포함하면 scope 오염.
+
+**올바른 패턴**: Entry 화면과 List filter는 서로 독립된 plan으로 분리.
+
+### 6.23 프로덕트 컴포넌트에 stub 데이터 금지
+
+하드코딩 defaultValue(`"COSCO2404195"`, `"한진무역(주)"` 등), 인라인 fixture 객체는 product 컴포넌트에 잔존해서는 안 된다.
+
+**올바른 패턴**:
+- 컴포넌트 내부 `DEFAULTS_*` 값, `defaultValue="실제값"` JSX prop → 모두 `""` 또는 제거
+- 시연·개발용 fixture는 `adapter/out/mock/*` 또는 테스트 파일로 이동
+- `NEXT_PUBLIC_USE_MOCK=true`일 때만 활성화되는 mock 어댑터는 허용 (dev/test 전용)
+
 ### 6.14 Container pkgUnit — 자유 텍스트 정책
 
 Container Info 그리드의 `pkgUnit` 컬럼은 비표준 단위(CTN/PCS/BAG 등) 가능성으로 **자유 텍스트 유지**. Cargo 패널의 `cargoUnit`(WeightUnit enum)과 다름. House-BL과 동일 정책.
