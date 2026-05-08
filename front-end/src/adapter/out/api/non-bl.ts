@@ -198,6 +198,8 @@ function toBeRequest(req: CreateNonBlRequest) {
     finalDestCode: req.finalDestCode,
     finalDestName: req.finalDestName,
     finalEta: req.finalEta,
+    salesClass: req.salesClass,
+    originalBlRef: req.originalBlRef,
     containers: req.containers,
     dims: req.dims,
     desc: req.desc,

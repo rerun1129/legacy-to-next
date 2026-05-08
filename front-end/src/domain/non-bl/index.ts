@@ -217,6 +217,8 @@ export interface CreateNonBlRequest {
   finalDestCode?: string;
   finalDestName?: string;
   finalEta?: string;
+  salesClass?: string;
+  originalBlRef?: string;
   containers?: NonBlContainerRequest[];
   dims?: NonBlDimRequest[];
   desc?: NonBlDescRequest;

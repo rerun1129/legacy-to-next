@@ -70,6 +70,8 @@ export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
     operatorCode:       toStr(values.operatorCode),
     salesManCode:       toStr(values.salesManCode),
     teamCode:           toStr(values.teamCode),
+    salesClass:         toStr(values.salesClass),
+    originalBlRef:      toStr(values.refNo),
     containers:         containers && containers.length > 0 ? containers : undefined,
     dims:               dims && dims.length > 0 ? dims : undefined,
   };
