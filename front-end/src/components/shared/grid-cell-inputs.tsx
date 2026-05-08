@@ -1,4 +1,16 @@
 "use client";
+/**
+ * @fileoverview 레거시 호환용 그리드 셀 입력 컴포넌트.
+ *
+ * SSOT 결정(2026-05): 그리드 셀은 표준 컴포넌트의 variant="cell"을 사용한다.
+ *   - 텍스트:  <TextBox variant="cell" {...register(...)} />
+ *   - 숫자:    <NumberBox variant="cell" decimalPlaces={n} {...register(...)} />
+ *   - 드롭:    <DropBox variant="cell" options={...} {...register(...)} />
+ *   - 날짜:    <DateBox variant="cell" /> (Controller)
+ *
+ * TextCell / NumericCell / DateCell 은 House-BL·Master-BL 레거시 호환용으로 유지되며
+ * 신규 코드에서는 사용하지 않는다.
+ */
 import { forwardRef, useEffect, useRef, useState } from "react";
 import type React from "react";
 import type { ChangeEvent, CSSProperties, FocusEvent, InputHTMLAttributes } from "react";
@@ -38,6 +50,7 @@ function cellInputClass(className?: string) {
   return className ? `grid__cell-input ${className}` : "grid__cell-input";
 }
 
+/** @deprecated 신규 코드에서는 <TextBox variant="cell"> 을 사용하세요. */
 export const TextCell = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   function TextCell({ className, ...props }, ref) { return <input ref={ref} autoComplete="off" className={cellInputClass(className)} {...props} />; }
 );
@@ -52,7 +65,7 @@ type DateInputBaseProps = Omit<
   getInputStyle?: (s: StyleState) => CSSProperties;
 };
 
-const DateInputBase = forwardRef<HTMLInputElement, DateInputBaseProps>(function DateInputBase({
+export const DateInputBase = forwardRef<HTMLInputElement, DateInputBaseProps>(function DateInputBase({
   defaultValue = "",
   value,
   inputClassName,
@@ -183,6 +196,7 @@ type NumericCellProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "de
   defaultValue?: string | number;
 };
 
+/** @deprecated 신규 코드에서는 <NumberBox variant="cell" decimalPlaces={n}> 을 사용하세요. */
 export const NumericCell = forwardRef<HTMLInputElement, NumericCellProps>(
   function NumericCell({ defaultValue, className, step = "any", ...props }, ref) {
     const v = typeof defaultValue === "string" ? defaultValue.replace(/,/g, "") : defaultValue;
@@ -202,6 +216,7 @@ type DateCellProps = {
   name?: string;
 };
 
+/** @deprecated 신규 코드에서는 <DateBox variant="cell"> 을 사용하세요. */
 export const DateCell = forwardRef<HTMLInputElement, DateCellProps>(
   function DateCell({ defaultValue, value, onChange, onBlur, required, readOnly, name }, ref) {
     return (

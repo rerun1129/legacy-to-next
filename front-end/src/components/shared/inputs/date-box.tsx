@@ -1,15 +1,37 @@
 "use client";
 
 import { forwardRef } from "react";
+import type { CSSProperties } from "react";
 import type { DateBoxProps } from "./_types";
-import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { DateInputBase, PanelDateInput } from "@/components/shared/grid-cell-inputs";
+
+const errorBg = "rgba(220,38,38,0.13)";
 
 export const DateBox = forwardRef<HTMLInputElement, DateBoxProps>(
   function DateBox(
-    // variant/className/style은 DateBox 공통 prop이지만 PanelDateInput은 이를 받지 않으므로 제외
-    { required, readOnly, disabled, value, defaultValue, name, onChange, onBlur },
+    { variant, required, readOnly, disabled, value, defaultValue, name, onChange, onBlur },
     ref
   ) {
+    if (variant === "cell") {
+      return (
+        <DateInputBase
+          ref={ref}
+          name={name}
+          required={required}
+          readOnly={readOnly}
+          disabled={disabled}
+          value={value}
+          defaultValue={defaultValue}
+          onChange={onChange}
+          onBlur={onBlur}
+          inputClassName={`grid__cell-input${required ? " is-required" : ""}`}
+          getInputStyle={({ error }: { focused: boolean; error: boolean }): CSSProperties => ({
+            paddingRight: 18,
+            backgroundColor: error ? errorBg : undefined,
+          })}
+        />
+      );
+    }
     return (
       <PanelDateInput
         ref={ref}
