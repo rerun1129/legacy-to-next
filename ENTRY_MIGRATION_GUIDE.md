@@ -8,7 +8,7 @@
 ## 1. 작업 흐름 요약
 
 1. 대상 Entry 화면의 모든 native `<input>`/`<select>`/로컬 wrapper 컴포넌트 식별
-2. 카탈로그 표준 컴포넌트(TextBox/NumberBox/CodeBox/DropBox/DateBox)로 1:1 매핑
+2. 카탈로그 표준 컴포넌트(TextBox/NumberBox/CodeBox/ComboBox/DateBox)로 1:1 매핑
 3. enum 드롭다운은 `useEnumOptions(name)` 훅으로 옵션 로딩
 4. form schema/defaults에 신규 필드(register 미연결되어 있던 것 포함) 보정
 5. 인라인 `style={{...}}` 일괄 제거 (카탈로그 컴포넌트가 토큰 디자인 책임)
@@ -27,8 +27,8 @@
 | `<input type="date">` / 직접 마스킹 | `DateBox` | RHF `Controller` 사용 (value/onChange/onBlur forwarding) |
 | 코드+이름 2-input (코드 lookup 아이콘) | `CodeBox kind="lcn"` | `codeProps={...register("Xcode")}`, `nameProps={...register("Xname")}`, `onLookup` |
 | Party 코드+이름 (라벨 우측 일렬) | `CodeBox kind="party-cn"` | 동일 prop, `kind="party-cn"` |
-| `<select>` (정적 옵션) | `DropBox` | `options=[{value,label}, …]` |
-| `<select>` (enum 기반) | `DropBox` + `useEnumOptions("EnumName")` | `options={enumOptions}`, `placeholder={enumPlaceholder}` |
+| `<select>` (정적 옵션) | `ComboBox` | `options=[{value,label}, …]`, RHF Controller 필수 |
+| `<select>` (enum 기반) | `ComboBox` + `useEnumOptions("EnumName")` | `options={enumOptions}`, `placeholder={enumPlaceholder}`, RHF Controller 필수 |
 
 위치: 모두 `front-end/src/components/shared/inputs/`
 
@@ -40,6 +40,7 @@
 
 - `panel`: 패널(섹션) 내부 입력 필드
 - `cell`: 그리드 셀 내부 입력 (`grid__cell-input`과 통합)
+- `label`: 라벨 자리에 ComboBox를 임베드 (LcnLabel 라벨 셀렉터에 적용, 2026-05-08)
 
 ---
 
@@ -76,6 +77,22 @@
     />
   )}
 />
+
+// ComboBox: 반드시 Controller 사용 — register spread 불가
+// register({...register("name")}) spread 시 값 미반영 버그 발생 (66a217c 사례)
+<Controller
+  name="workDiv"
+  control={control}
+  render={({ field }) => (
+    <ComboBox
+      variant="panel"
+      options={workDivOptions}
+      placeholder={workDivPlaceholder}
+      value={field.value}
+      onChange={field.onChange}
+    />
+  )}
+/>
 ```
 
 ### Schema/Defaults 동시 갱신 필수
@@ -86,6 +103,7 @@
 - `xxx-defaults.ts`: `dimensionDivisor: "CM/6000"` 같이 초기값 추가
 
 > **함정**: 한쪽만 갱신하면 register는 동작하지만 form 초기값/검증이 어긋나 저장 시 누락 발생.
+> **사례**: 2846fd7 — Non B/L FE submit 시 `salesClass`·`originalBlRef` 누락. schema/defaults 어느 한쪽에만 추가되어 있던 필드가 submit 페이로드에서 빠진 것이 원인.
 
 ---
 
@@ -153,7 +171,7 @@ const [selectedKey, setSelectedKey] = useState<string | null>(null);
 <NumberBox variant="cell" {...register(`dims.${i}.length`)} />
 
 <DateBox variant="cell" /* Controller 사용 */ />
-<DropBox variant="cell" options={enumOptions} {...register(`array.${i}.kind`)} />
+<ComboBox variant="cell" options={enumOptions} {...register(`array.${i}.kind`)} />
 
 // ⚠️ 부득이 native input 사용 시 (legacy 영역만)
 <input autoComplete="off" className="grid__cell-input" {...register(`array.${i}.field`)} />
@@ -184,7 +202,7 @@ const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
 ### 6.4 카탈로그 페이지 등록 필수 + 300줄 초과 분리 검토
 
-신규 표준 컴포넌트 추가 시 `front-end/src/app/(dev)/preview/sections/inputs/` 아래 해당 sub-section 파일에 추가. inputs-section.tsx는 49줄 오케스트레이터로 분리 완료(2026-05). 서브 섹션 파일 목록: `text-section.tsx` / `code-section.tsx` / `number-section.tsx` / `drop-section.tsx` / `date-section.tsx` / `time-section.tsx` / `link-radio-section.tsx`.
+신규 표준 컴포넌트 추가 시 `front-end/src/app/(dev)/preview/sections/inputs/` 아래 해당 sub-section 파일에 추가. inputs-section.tsx는 49줄 오케스트레이터로 분리 완료(2026-05). 서브 섹션 파일 목록: `text-section.tsx` / `code-section.tsx` / `number-section.tsx` / `combo-section.tsx` / `date-section.tsx` / `time-section.tsx` / `link-radio-section.tsx`.
 
 ### 6.5 useCallback / useEffect deps 배열 갱신
 
@@ -227,9 +245,9 @@ CodeBox는 `forwardRef`를 받고 codeProps를 spread하는 구조. `codeProps={
 - `<TextBox variant="cell" {...register(...)} />`
 - `<NumberBox variant="cell" decimalPlaces={n} {...register(..., { valueAsNumber: true })} />`
 - `<DateBox variant="cell" />` (Controller 사용 — DateBox에 cell variant 흡수됨, 2026-05)
-- `<DropBox variant="cell" options={...} {...register(...)} />`
+- `<ComboBox variant="cell" options={...} {...register(...)} />`
 
-> **SSOT 결정 (2026-05)**: `NumberBox/TextBox/DateBox/DropBox/TimeBox variant="cell"` 통일. `TextCell`/`NumericCell`/`DateCell`(`shared/grid-cell-inputs.tsx`)은 `@deprecated` — House-BL·Master-BL 레거시 호환 유지용. 신규 작업에서 사용 금지. 단계적 마이그레이션 후 제거 예정.
+> **SSOT 결정 (2026-05)**: `NumberBox/TextBox/DateBox/ComboBox/TimeBox variant="cell"` 통일. `TextCell`/`NumericCell`/`DateCell`(`shared/grid-cell-inputs.tsx`)은 `@deprecated` — House-BL·Master-BL 레거시 호환 유지용. 신규 작업에서 사용 금지. 단계적 마이그레이션 후 제거 예정.
 
 기존 native 사용처(legacy)는 점진 마이그레이션 대상. 새 Entry 작업 시 처음부터 표준 컴포넌트 사용.
 
@@ -241,6 +259,79 @@ UI에 노출하지 않는 필드라도 schema/defaults에 있으면 `register("f
 // non-bl-entry.tsx 예시
 register("status"); // 백엔드 관리 필드 — badge로만 시각화, form submit에 포함
 ```
+
+### 6.15 ComboBox는 register spread 금지 — Controller 필수
+
+`{...register("name")}` spread로 ComboBox에 직접 연결하면 onChange가 RHF에 연결되지 않아 **값이 form에 반영되지 않는 버그** 발생 (66a217c — Non B/L Entry/Cargo/Container/Document 전체 교체 사례).
+
+**올바른 패턴**: §3의 ComboBox Controller 예제 참고.
+
+### 6.16 Entry 화면 F5/Save/New 라우팅 — sessionStorage hot-marker 패턴
+
+Entry 화면이 `/entry/[id]` 라우트를 사용할 때 세 케이스를 sessionStorage 1회용 marker로 구분해야 함.
+
+- **F5/딥링크 진입**: marker 없음 → `router.replace("/entry")` → 빈 폼
+- **신규 저장 직후**: `onSuccess`에서 marker set → `router.replace(/entry/${saved.id})` → mount 시 marker 소비 + useQuery enabled → `getById` 재조회 → form 배치
+- **New 버튼**: `handleResetEntry`에서 `router.replace("/entry")` → id prop 사라짐 → isEdit=false
+
+사례: c918324 — Non B/L Entry 적용.
+
+### 6.17 useState lazy initializer로 set-state-in-effect 회피
+
+`useEffect` 안에서 `setState`를 동기 호출하면 `react-hooks/set-state-in-effect` lint error.
+sessionStorage marker처럼 마운트 시 1회 읽어야 하는 값은 **lazy initializer**로 처리.
+
+```ts
+// ❌ lint error
+const [flag, setFlag] = useState(false);
+useEffect(() => {
+  if (sessionStorage.getItem(key)) setFlag(true); // error
+}, []);
+
+// ✅ lazy initializer
+const [flag] = useState<boolean>(() => {
+  if (typeof window === "undefined") return false;
+  if (sessionStorage.getItem(key)) {
+    sessionStorage.removeItem(key);
+    return true;
+  }
+  return false;
+});
+```
+
+사례: ca66501 — `hydrateAllowed` 상태 초기화.
+
+### 6.18 useBlDraftSync 사용 시 unmount cleanup으로 clearDraft
+
+`useBlDraftSync`는 `form.watch()`로 변경마다 draft를 zustand에 저장하지만, **unmount 시 자동 clear하지 않음**. 메뉴 닫고 재진입 시 mount 복원 로직이 이전 값을 부활시킴.
+
+Entry 컴포넌트에 cleanup useEffect를 추가해야 함:
+
+```ts
+useEffect(() => {
+  const draftKey = `non::${id ?? "new"}`;
+  return () => { clearDraft(draftKey); };
+}, [clearDraft, id]);
+```
+
+사례: 4572a33 — Non B/L Entry nonBlNo 잔류 버그 수정.
+
+### 6.19 Entry Search 버튼 — port.list + hot-marker 재사용 패턴
+
+Entry 화면의 Search는 `port.list(filter, 1, 2)`로 0건/다건/단건 분기:
+- 빈 입력: toast.info
+- 0건: toast.info
+- 다건(>1): toast.info + List 화면 navigate
+- 1건(동일 id): detail invalidate만
+- 1건(다른 id): hot-marker 세팅 후 `router.replace(/entry/${id})` → §6.16 패턴 재사용
+
+사례: 0526e83 — Non B/L Entry Search 구현.
+
+### 6.20 위젯 편집 버튼 `type="button"` 명시
+
+`field-item-grid`, `field-widget-list`, `field-widget-container` 등 위젯 내부 편집/토글 버튼에 `type="button"`을 명시하지 않으면 form 내부에 있을 때 **의도치 않은 submit이 트리거**됨.
+
+사례: 66a217c — Non B/L Entry 위젯 토글 버그 수정.
 
 ### 6.14 Container pkgUnit — 자유 텍스트 정책
 
@@ -258,6 +349,8 @@ Container Info 그리드의 `pkgUnit` 컬럼은 비표준 단위(CTN/PCS/BAG 등
 - `front-end/src/styles/grids.css` — `.grid__cell-input`, `.grid-selection-overlay`, `.grid__resize-handle`
   - 셀 input focus 시 background만 (inset ring 제거됨)
   - is-required focus 시 inset 좌측 bar만 (외곽 ring 제거됨)
+- `front-end/src/styles/forms.css` — `.li__input--tight`
+  - 자식 요소 flex:1 분배 적용. NumberBox·ComboBox가 같은 row에 있을 때 겹침 해소 (66a217c)
 
 ---
 
@@ -274,7 +367,7 @@ npm --prefix front-end run build
 - 대상 Entry 화면 실 화면 회귀:
   - 모든 panel 필드 panel variant 표시 일관성
   - 날짜 캘린더 picker + yyyyMMdd 마스킹
-  - DropBox enum 로딩 (네트워크 탭 확인)
+  - ComboBox enum 로딩 (네트워크 탭 확인)
   - Party / LCN 코드 입력 → name 자동 채움 동작 (lookup 모달 wire 시)
   - NumberBox 소수점 포맷 (0/3)
   - 그리드: 셀 클릭 → overlay/행 강조 → 다른 그리드 클릭 → 해제 확인
@@ -308,7 +401,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - DateBox 카탈로그 컴포넌트 (`shared/inputs/date-box.tsx`) — **`variant="cell"` 지원 추가됨 (2026-05)**
 - BoxBaseProps 표준 (`shared/inputs/_types.ts`)
 - **표준 입력 컴포넌트 default `autoComplete="off"`** (TextBox/NumberBox/CodeBox/DateBox + grid-cell-inputs.tsx의 TextCell/NumericCell/DateInputBase) — cell variant 사용 시 자동 적용. Native `grid__cell-input` 직접 사용 시 §6.12 참고
-- **그리드 셀 SSOT 결정**: TextBox/NumberBox/DateBox/DropBox/TimeBox `variant="cell"`. TextCell/NumericCell/DateCell은 `@deprecated` (§6.12 참고)
+- **그리드 셀 SSOT 결정**: TextBox/NumberBox/DateBox/ComboBox/TimeBox `variant="cell"`. TextCell/NumericCell/DateCell은 `@deprecated` (§6.12 참고)
 - 그리드 셀 편집 모드 단일 outline 처리 (`grids.css`)
 - 그리드 외부 클릭 selection 자동 해제 (`use-grid-cell-selection.ts`)
 - 그리드 외부 클릭 행 highlight 해제 (`onClearRow` prop)
@@ -316,6 +409,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - selection overlay td DOM 실측 보정
 - 컬럼 리사이즈 후 overlay 자동 갱신 (ResizeObserver)
 - CodeBox lcn / party-cn 라벨 너비 통일
+- **ComboBox `variant="label"` 지원** — LcnLabel 라벨 셀렉터 위임 (2026-05-08, 00a9a16)
+- **BoxVariant 타입 확장** — "panel" / "cell" / "label" 3종 (2026-05-08, 3c78d06)
+- **ComboBox RHF Controller 패턴 SSOT** — register spread 금지, Controller 필수 (2026-05-08, 66a217c)
+- **Non B/L Entry hot-marker 라우팅 표준화** — F5 클리어 / 저장 직후 재조회 / New URL 리셋 / Search hot-marker 재사용 / unmount clearDraft (2026-05-09, c918324·0526e83·4572a33)
 
 ---
 
