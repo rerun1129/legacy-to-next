@@ -23,6 +23,7 @@ interface Props {
 export function NonBLEntry({ id }: Props = {}) {
   const [tab, setTab] = useState("main");
   const isEdit = Boolean(id);
+  const [hydrateAllowed, setHydrateAllowed] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
   const detailLoadedRef = useRef<boolean>(false);
@@ -32,6 +33,18 @@ export function NonBLEntry({ id }: Props = {}) {
   const methods = useForm<NonBlFormValues>({
     defaultValues: createEmptyNonBlFormValues(),
   });
+
+  // F5 새로고침 시 빈 폼 강제: marker 없으면 신규 모드 URL로 교체
+  useEffect(() => {
+    if (id == null) return;
+    const key = `non-bl-entry:hot:${id}`;
+    if (sessionStorage.getItem(key)) {
+      sessionStorage.removeItem(key);
+      setHydrateAllowed(true);
+    } else {
+      router.replace("/fms/non-bl/entry");
+    }
+  }, [id, router]);
 
   useBlDraftSync(methods, `non::${id ?? "new"}`);
 
@@ -46,7 +59,7 @@ export function NonBLEntry({ id }: Props = {}) {
   const { data: detail } = useQuery({
     queryKey: ["non-bl", "detail", id],
     queryFn: () => nonBlPort.getById(id!),
-    enabled: isEdit,
+    enabled: isEdit && hydrateAllowed,
   });
 
   useEffect(() => {
@@ -117,6 +130,7 @@ export function NonBLEntry({ id }: Props = {}) {
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
       if (!isEdit) {
+        sessionStorage.setItem(`non-bl-entry:hot:${saved.id}`, "1");
         router.replace(`/fms/non-bl/entry/${saved.id}`);
       } else {
         queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
@@ -138,6 +152,7 @@ export function NonBLEntry({ id }: Props = {}) {
     methods.reset(createEmptyNonBlFormValues());
     clearDraft(`non::${id ?? "new"}`);
     detailLoadedRef.current = false;
+    router.replace("/fms/non-bl/entry");
   }
 
   function handleSearch() {
