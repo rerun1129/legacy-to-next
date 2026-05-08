@@ -32,10 +32,10 @@ export function NonBLContainerInfoPanel() {
     { key: "sealNo1",  width: 80, label: "Seal No. 1",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo1`)} /> },
     { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo2`)} /> },
     { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo3`)} /> },
-    { key: "pkg",      width: 80, label: "Package",     render: (_, __, i) => <NumberBox variant="cell" decimalPlaces={0} {...register(`containers.${i}.pkg`, { valueAsNumber: true })} /> },
+    { key: "pkg",      width: 80, label: "Package",     render: (_, __, i) => <NumberBox name={`containers.${i}.pkg`} variant="cell" decimalPlaces={0} /> },
     { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.pkgUnit`)} /> },
-    { key: "grossWt",  width: 80, label: "Gross W/T",   render: (_, __, i) => <NumberBox variant="cell" decimalPlaces={3} {...register(`containers.${i}.grossWt`, { valueAsNumber: true })} /> },
-    { key: "cbm",      width: 80, label: "CBM",         render: (_, __, i) => <NumberBox variant="cell" decimalPlaces={3} {...register(`containers.${i}.cbm`, { valueAsNumber: true })} /> },
+    { key: "grossWt",  width: 80, label: "Gross W/T",   render: (_, __, i) => <NumberBox name={`containers.${i}.grossWt`} variant="cell" decimalPlaces={3} /> },
+    { key: "cbm",      width: 80, label: "CBM",         render: (_, __, i) => <NumberBox name={`containers.${i}.cbm`} variant="cell" decimalPlaces={3} /> },
   ], [register]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 

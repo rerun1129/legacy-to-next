@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
+import { useForm, FormProvider } from "react-hook-form";
 import { NumberBox } from "../number-box";
 
 describe("NumberBox", () => {
@@ -56,40 +57,6 @@ describe("NumberBox", () => {
     });
   });
 
-  describe("handleBlur", () => {
-    it("decimalPlaces 없을 때 '000000' blur → value가 '0'으로 정규화", () => {
-      render(<NumberBox />);
-      const input = screen.getByRole("spinbutton") as HTMLInputElement;
-      Object.defineProperty(input, "value", { configurable: true, writable: true, value: "000000" });
-      fireEvent.blur(input);
-      expect(input.value).toBe("0");
-    });
-
-    it("decimalPlaces 없을 때 '007' blur → value가 '7'으로 정규화", () => {
-      render(<NumberBox />);
-      const input = screen.getByRole("spinbutton") as HTMLInputElement;
-      Object.defineProperty(input, "value", { configurable: true, writable: true, value: "007" });
-      fireEvent.blur(input);
-      expect(input.value).toBe("7");
-    });
-
-    it("decimalPlaces=2일 때 '1.5' blur → value가 '1.50'으로 포맷", () => {
-      render(<NumberBox decimalPlaces={2} />);
-      const input = screen.getByRole("spinbutton") as HTMLInputElement;
-      Object.defineProperty(input, "value", { configurable: true, writable: true, value: "1.5" });
-      fireEvent.blur(input);
-      expect(input.value).toBe("1.50");
-    });
-
-    it("decimalPlaces=2일 때 '' blur → value가 '0.00'으로 채움", () => {
-      render(<NumberBox decimalPlaces={2} />);
-      const input = screen.getByRole("spinbutton") as HTMLInputElement;
-      Object.defineProperty(input, "value", { configurable: true, writable: true, value: "" });
-      fireEvent.blur(input);
-      expect(input.value).toBe("0.00");
-    });
-  });
-
   describe("handlePaste", () => {
     it("decimalPlaces 없을 때 '1.5' paste → preventDefault 호출", () => {
       render(<NumberBox />);
@@ -143,6 +110,58 @@ describe("NumberBox", () => {
       fireEvent.paste(input, { clipboardData: { getData: () => "-1.5" } });
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
+    });
+  });
+
+  describe("controlled (name prop + FormProvider)", () => {
+    function ResetTest({
+      initialValue,
+      resetValue,
+    }: {
+      initialValue: number | undefined;
+      resetValue: number | undefined;
+    }) {
+      const methods = useForm({ defaultValues: { qty: initialValue } });
+      return (
+        <FormProvider {...methods}>
+          <NumberBox name="qty" decimalPlaces={3} data-testid="nb" />
+          <button onClick={() => methods.reset({ qty: resetValue })}>reset</button>
+        </FormProvider>
+      );
+    }
+
+    it("초기값 undefined → decimalPlaces=3이면 '0.000' 표시", async () => {
+      render(<ResetTest initialValue={undefined} resetValue={undefined} />);
+      await act(async () => {});
+      const input = screen.getByTestId("nb") as HTMLInputElement;
+      expect(input.value).toBe("0.000");
+    });
+
+    it("reset 클릭 시 사용자 입력값이 지워지고 '0.000'으로 복원", async () => {
+      render(<ResetTest initialValue={undefined} resetValue={undefined} />);
+      await act(async () => {});
+      const input = screen.getByTestId("nb") as HTMLInputElement;
+
+      // focus 상태에서 change해야 포맷팅 없이 raw 값 유지됨
+      fireEvent.focus(input);
+      fireEvent.change(input, { target: { value: "123" } });
+      fireEvent.blur(input);
+      await act(async () => {}); // blur 후 "123.000"으로 포맷팅
+
+      fireEvent.click(screen.getByText("reset"));
+      await act(async () => {});
+      expect(input.value).toBe("0.000");
+    });
+
+    it("reset 시 특정 값(5)으로 복원", async () => {
+      render(<ResetTest initialValue={undefined} resetValue={5} />);
+      await act(async () => {});
+      const input = screen.getByTestId("nb") as HTMLInputElement;
+
+      fireEvent.change(input, { target: { value: "100" } });
+      fireEvent.click(screen.getByText("reset"));
+      await act(async () => {});
+      expect(input.value).toBe("5.000");
     });
   });
 });

@@ -40,10 +40,10 @@ export function NonBLCargoPanel() {
           <span className="li__label">Package</span>
           <div className="li__input li__input--tight">
             <NumberBox
+              name="cargoQty"
               variant="panel"
               decimalPlaces={0}
               placeholder="0"
-              {...register("cargoQty", { valueAsNumber: true })}
             />
             <DropBox
               variant="panel"
@@ -60,7 +60,7 @@ export function NonBLCargoPanel() {
         <div className="li">
           <span className="li__label">Gross W/T</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} {...register("grossWt", { valueAsNumber: true })} />
+            <NumberBox name="grossWt" variant="panel" decimalPlaces={3} />
           </div>
         </div>
       ),
@@ -71,7 +71,7 @@ export function NonBLCargoPanel() {
         <div className="li">
           <span className="li__label">Volume W/T</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} {...register("volWt", { valueAsNumber: true })} />
+            <NumberBox name="volWt" variant="panel" decimalPlaces={3} />
           </div>
         </div>
       ),
@@ -82,7 +82,7 @@ export function NonBLCargoPanel() {
         <div className="li">
           <span className="li__label">CBM</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} {...register("totalCbm", { valueAsNumber: true })} />
+            <NumberBox name="totalCbm" variant="panel" decimalPlaces={3} />
           </div>
         </div>
       ),
@@ -93,7 +93,7 @@ export function NonBLCargoPanel() {
         <div className="li">
           <span className="li__label">R/Ton</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} {...register("rton", { valueAsNumber: true })} />
+            <NumberBox name="rton" variant="panel" decimalPlaces={3} />
           </div>
         </div>
       ),

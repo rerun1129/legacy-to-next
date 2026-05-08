@@ -78,37 +78,37 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
     {
       key: "length", label: "Length", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.length`)} />
+        <NumberBox name={`dimensions.${i}.length`} variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} valueAsNumber={false} />
       ),
     },
     {
       key: "width", label: "Width", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.width`)} />
+        <NumberBox name={`dimensions.${i}.width`} variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} valueAsNumber={false} />
       ),
     },
     {
       key: "height", label: "Height", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.height`)} />
+        <NumberBox name={`dimensions.${i}.height`} variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} valueAsNumber={false} />
       ),
     },
     {
       key: "qty", label: "Qty", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.qty`)} />
+        <NumberBox name={`dimensions.${i}.qty`} variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} valueAsNumber={false} />
       ),
     },
     {
       key: "cbm", label: "CBM", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <NumberBox variant="cell" decimalPlaces={3} required={required} readOnly={readOnly} {...register(`dimensions.${i}.cbm`)} />
+        <NumberBox name={`dimensions.${i}.cbm`} variant="cell" decimalPlaces={3} required={required} readOnly={readOnly} valueAsNumber={false} />
       ),
     },
     {
       key: "volWt", label: "Volume Wt.", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <NumberBox variant="cell" decimalPlaces={3} required={required} readOnly={readOnly} {...register(`dimensions.${i}.volWt`)} />
+        <NumberBox name={`dimensions.${i}.volWt`} variant="cell" decimalPlaces={3} required={required} readOnly={readOnly} valueAsNumber={false} />
       ),
     },
     {
