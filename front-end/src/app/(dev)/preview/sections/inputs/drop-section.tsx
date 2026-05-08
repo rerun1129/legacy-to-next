@@ -1,6 +1,7 @@
 "use client";
 
 import { DropBox } from "@/components/shared/inputs/drop-box";
+import type { BoxVariant } from "@/components/shared/inputs/_types";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { SectionProps } from "./_shared";
 import { sectionStyle } from "./_shared";
@@ -22,7 +23,7 @@ function DropBoxEnumDemo({
   readOnly,
   disabled,
 }: {
-  variant: "panel" | "cell";
+  variant: BoxVariant;
   required: boolean;
   readOnly: boolean;
   disabled: boolean;
