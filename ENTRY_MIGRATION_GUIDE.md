@@ -143,7 +143,15 @@ const [selectedKey, setSelectedKey] = useState<string | null>(null);
 ```tsx
 // ✅ 권장: 표준 컴포넌트 cell variant
 <TextBox variant="cell" {...register(`array.${i}.field`)} />
-<NumberBox variant="cell" decimalPlaces={3} {...register(`array.${i}.amount`, { valueAsNumber: true })} />
+
+// NumberBox cell — decimalPlaces 기준:
+//   정수(pkg, qty 등) → decimalPlaces={0} + valueAsNumber:true (schema: z.number())
+<NumberBox variant="cell" decimalPlaces={0} {...register(`array.${i}.pkg`, { valueAsNumber: true })} />
+//   소수 3자리(grossWt, cbm 등) → decimalPlaces={3} + valueAsNumber:true
+<NumberBox variant="cell" decimalPlaces={3} {...register(`array.${i}.grossWt`, { valueAsNumber: true })} />
+//   schema가 string일 때 → decimalPlaces 생략 (blur normalize 없이 string 그대로)
+<NumberBox variant="cell" {...register(`dims.${i}.length`)} />
+
 <DateBox variant="cell" /* Controller 사용 */ />
 <DropBox variant="cell" options={enumOptions} {...register(`array.${i}.kind`)} />
 
@@ -176,7 +184,7 @@ const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
 ### 6.4 카탈로그 페이지 등록 필수 + 300줄 초과 분리 검토
 
-신규 표준 컴포넌트 추가 시 `front-end/src/app/(dev)/preview/sections/inputs-section.tsx`에 섹션 추가. CLAUDE.md 규칙: 300줄 초과 시 분리 검토. 현재 inputs-section.tsx는 355줄(분리 검토 대상).
+신규 표준 컴포넌트 추가 시 `front-end/src/app/(dev)/preview/sections/inputs/` 아래 해당 sub-section 파일에 추가. inputs-section.tsx는 49줄 오케스트레이터로 분리 완료(2026-05). 서브 섹션 파일 목록: `text-section.tsx` / `code-section.tsx` / `number-section.tsx` / `drop-section.tsx` / `date-section.tsx` / `time-section.tsx` / `link-radio-section.tsx`.
 
 ### 6.5 useCallback / useEffect deps 배열 갱신
 
@@ -218,10 +226,25 @@ CodeBox는 `forwardRef`를 받고 codeProps를 spread하는 구조. `codeProps={
 **올바른 패턴**: 표준 컴포넌트 cell variant 사용
 - `<TextBox variant="cell" {...register(...)} />`
 - `<NumberBox variant="cell" decimalPlaces={n} {...register(..., { valueAsNumber: true })} />`
-- `<DateBox variant="cell" />` (Controller 사용)
+- `<DateBox variant="cell" />` (Controller 사용 — DateBox에 cell variant 흡수됨, 2026-05)
 - `<DropBox variant="cell" options={...} {...register(...)} />`
 
+> **SSOT 결정 (2026-05)**: `NumberBox/TextBox/DateBox/DropBox/TimeBox variant="cell"` 통일. `TextCell`/`NumericCell`/`DateCell`(`shared/grid-cell-inputs.tsx`)은 `@deprecated` — House-BL·Master-BL 레거시 호환 유지용. 신규 작업에서 사용 금지. 단계적 마이그레이션 후 제거 예정.
+
 기존 native 사용처(legacy)는 점진 마이그레이션 대상. 새 Entry 작업 시 처음부터 표준 컴포넌트 사용.
+
+### 6.13 백엔드 관리 필드(status 등) hidden register
+
+UI에 노출하지 않는 필드라도 schema/defaults에 있으면 `register("fieldName")` 단순 호출로 RHF tracking 등록. hidden input에 연결하거나 spread 불필요.
+
+```tsx
+// non-bl-entry.tsx 예시
+register("status"); // 백엔드 관리 필드 — badge로만 시각화, form submit에 포함
+```
+
+### 6.14 Container pkgUnit — 자유 텍스트 정책
+
+Container Info 그리드의 `pkgUnit` 컬럼은 비표준 단위(CTN/PCS/BAG 등) 가능성으로 **자유 텍스트 유지**. Cargo 패널의 `cargoUnit`(WeightUnit enum)과 다름. House-BL과 동일 정책.
 
 ---
 
@@ -282,9 +305,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 다음은 이미 적용되어 있어 다른 Entry 마이그레이션 시 재구현 불필요:
 
-- DateBox 카탈로그 컴포넌트 (`shared/inputs/date-box.tsx`)
+- DateBox 카탈로그 컴포넌트 (`shared/inputs/date-box.tsx`) — **`variant="cell"` 지원 추가됨 (2026-05)**
 - BoxBaseProps 표준 (`shared/inputs/_types.ts`)
 - **표준 입력 컴포넌트 default `autoComplete="off"`** (TextBox/NumberBox/CodeBox/DateBox + grid-cell-inputs.tsx의 TextCell/NumericCell/DateInputBase) — cell variant 사용 시 자동 적용. Native `grid__cell-input` 직접 사용 시 §6.12 참고
+- **그리드 셀 SSOT 결정**: TextBox/NumberBox/DateBox/DropBox/TimeBox `variant="cell"`. TextCell/NumericCell/DateCell은 `@deprecated` (§6.12 참고)
 - 그리드 셀 편집 모드 단일 outline 처리 (`grids.css`)
 - 그리드 외부 클릭 selection 자동 해제 (`use-grid-cell-selection.ts`)
 - 그리드 외부 클릭 행 highlight 해제 (`onClearRow` prop)
