@@ -71,6 +71,22 @@ rm -f .claude/.coder_scope
 | Backend/Frontend-coder 작업 완료 후 | `git add <변경된 파일들>` → `git commit -m "feat: <작업 설명>"` |
 | QA FAIL 후 Backend/Frontend-coder 재작업 완료 시 | `git add <files>` → `git commit -m "fix: rework per QA failure"` |
 
+## Discord 진행 상황 알림
+
+Discord 채널이 연결된 경우, 메인 에이전트는 파이프라인 주요 단계마다 `mcp__plugin_discord_discord__reply` 도구로 요약을 전송한다.
+
+| 시점 | 전송 내용 |
+|------|-----------|
+| AskUserQuestion 호출 직전 | `🔔 선택지 입력 대기 중 — 터미널을 확인하세요` |
+| ExitPlanMode 호출 직전 | `🔔 플랜 완성 — 터미널에서 승인해 주세요` |
+| Coder 구현 완료 | `✅ [도메인] 구현 완료 — 변경 파일 N개, 주요 내용 1줄` |
+| QA PASS | `✅ QA 통과 — lint/build/test 모두 PASS` |
+| QA FAIL | `⚠️ QA FAIL — 블로커: [오류 요약], 재작업 중` |
+| 전체 작업 완료 | `🎉 작업 완료 — [작업명]` |
+
+- chat_id는 `.claude/channels/discord/access.json`의 `defaultChatId` 값을 사용. 세션 내 Discord 메시지 수신 여부와 무관하게 항상 전송.
+- `defaultChatId`가 없는 경우에만 생략.
+
 ## 공통 규칙
 
 - **300줄 초과: 분리 검토 / 500줄 초과: 강제 분리** — 두 경우 모두 사용자 보고.

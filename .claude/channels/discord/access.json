@@ -1,8 +1,14 @@
 {
+  "defaultChatId": "1502287971397926944",
   "dmPolicy": "pairing",
   "allowFrom": [
     "611920566219309067"
   ],
-  "groups": {},
+  "groups": {
+    "1502287971397926944": {
+      "requireMention": false,
+      "allowFrom": []
+    }
+  },
   "pending": {}
 }
