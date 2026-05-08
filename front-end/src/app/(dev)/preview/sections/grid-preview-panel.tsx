@@ -5,10 +5,11 @@ import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { TextBox } from "@/components/shared/inputs/text-box";
+import { NumberBox } from "@/components/shared/inputs/number-box";
+import { DateBox } from "@/components/shared/inputs/date-box";
 import { DropBox } from "@/components/shared/inputs/drop-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
-import { DateCell } from "@/components/shared/grid-cell-inputs";
 import { TimeBox } from "@/components/shared/inputs";
 
 interface DimPreviewRow {
@@ -59,13 +60,15 @@ export function createDimPreviewDefaults(): DimPreviewFormValues {
 
 interface GridPreviewPanelProps {
   isLoading?: boolean;
+  gridId?: string;
 }
 
-export function GridPreviewPanel({ isLoading = false }: GridPreviewPanelProps) {
+export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanelProps) {
   const { control, register } = useFormContext<DimPreviewFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly]   = useState(false);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const cols = useMemo<GridColumn<DimPreviewRow>[]>(() => [
     {
@@ -75,61 +78,37 @@ export function GridPreviewPanel({ isLoading = false }: GridPreviewPanelProps) {
     {
       key: "length", label: "Length", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input
-          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
-          readOnly={readOnly}
-          {...register(`dimensions.${i}.length`)}
-        />
+        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.length`)} />
       ),
     },
     {
       key: "width", label: "Width", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input
-          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
-          readOnly={readOnly}
-          {...register(`dimensions.${i}.width`)}
-        />
+        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.width`)} />
       ),
     },
     {
       key: "height", label: "Height", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input
-          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
-          readOnly={readOnly}
-          {...register(`dimensions.${i}.height`)}
-        />
+        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.height`)} />
       ),
     },
     {
       key: "qty", label: "Qty", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input
-          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
-          readOnly={readOnly}
-          {...register(`dimensions.${i}.qty`)}
-        />
+        <NumberBox variant="cell" decimalPlaces={0} required={required} readOnly={readOnly} {...register(`dimensions.${i}.qty`)} />
       ),
     },
     {
       key: "cbm", label: "CBM", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input
-          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
-          readOnly={readOnly}
-          {...register(`dimensions.${i}.cbm`)}
-        />
+        <NumberBox variant="cell" decimalPlaces={3} required={required} readOnly={readOnly} {...register(`dimensions.${i}.cbm`)} />
       ),
     },
     {
       key: "volWt", label: "Volume Wt.", width: 80, className: "is-num",
       render: (_v, _r, i) => (
-        <input
-          className={`grid__cell-input is-num${required ? " is-required" : ""}`}
-          readOnly={readOnly}
-          {...register(`dimensions.${i}.volWt`)}
-        />
+        <NumberBox variant="cell" decimalPlaces={3} required={required} readOnly={readOnly} {...register(`dimensions.${i}.volWt`)} />
       ),
     },
     {
@@ -140,7 +119,7 @@ export function GridPreviewPanel({ isLoading = false }: GridPreviewPanelProps) {
     },
     {
       key: "date", label: "DATE", width: 110,
-      render: (_v, _r, i) => <DateCell required={required} readOnly={readOnly} {...register(`dimensions.${i}.date`)} />,
+      render: (_v, _r, i) => <DateBox variant="cell" required={required} readOnly={readOnly} {...register(`dimensions.${i}.date`)} />,
     },
     {
       key: "time", label: "TIME", width: 90,
@@ -259,6 +238,10 @@ export function GridPreviewPanel({ isLoading = false }: GridPreviewPanelProps) {
         className="grid--demo"
         style={{ flex: 1, minHeight: 0 }}
         isLoading={isLoading}
+        gridId={gridId}
+        onRowClick={(row) => setSelectedKey(String(row.id))}
+        rowClassName={(row) => String(row.id) === selectedKey ? "is-selected" : undefined}
+        onClearRow={() => setSelectedKey("")}
       />
     </div>
   );
