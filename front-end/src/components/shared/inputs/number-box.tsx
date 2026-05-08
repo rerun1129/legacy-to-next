@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useRef, useCallback } from "react";
-import type { InputHTMLAttributes, FocusEvent, KeyboardEvent, ClipboardEvent, ChangeEvent } from "react";
+import type { InputHTMLAttributes, KeyboardEvent, ClipboardEvent, ChangeEvent } from "react";
 import type { BoxBaseProps } from "./_types";
 import { panelClass, cellClass } from "./_styles";
 
@@ -64,60 +64,23 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
       onPaste?.(e);
     };
 
-    // 유효한 keystroke마다 lastValidRef를 갱신하고 외부 onChange를 전달
+    // onChange 시점에 비숫자 입력을 즉시 차단 — badInput(라틴 알파벳 등) 또는 패턴 불일치(한글 IME 등)이면 DOM을 이전 유효 값으로 복원
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.validity.badInput) {
-        const val = e.target.value;
-        const isNumeric = decimalPlaces !== undefined
-          ? /^\d*\.?\d*$/.test(val)
-          : /^\d*$/.test(val);
-        if (isNumeric || val === "") {
-          lastValidRef.current = val;
-        }
+      const val = e.target.value;
+
+      const isNumeric = decimalPlaces !== undefined
+        ? /^\d*\.?\d*$/.test(val)
+        : /^\d*$/.test(val);
+
+      if (e.target.validity.badInput || (!isNumeric && val !== "")) {
+        // 화면에 표시되기 전에 DOM 복원 — RHF state 변화 없음
+        e.target.value = lastValidRef.current;
+        return;
       }
+
+      // 유효 입력: lastValidRef 갱신 후 RHF에 전달
+      lastValidRef.current = val;
       onChange?.(e);
-    };
-
-    // blur 시: decimalPlaces 있으면 toFixed 포맷, 없으면 선행 0 제거(정수 정규화)
-    // DOM 값이 변경된 경우에만 onChange 재호출로 RHF string 재동기화
-    const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
-      // badInput(문자열 등 파싱 불가 값)이면 마지막 유효 값으로 복원 후 조기 반환
-      if (e.target.validity.badInput) {
-        e.target.value = lastValidRef.current;
-        onBlur?.(e);
-        return;
-      }
-
-      // badInput=false이지만 숫자로 파싱 안 됨 (IME 한글 완성 입력 등)
-      if (e.target.value !== "" && isNaN(Number(e.target.value))) {
-        e.target.value = lastValidRef.current;
-        onBlur?.(e);
-        return;
-      }
-
-      let formatted: string;
-
-      if (decimalPlaces !== undefined) {
-        const parsed = parseFloat(e.target.value);
-        formatted =
-          isNaN(parsed) || e.target.value === ""
-            ? (0).toFixed(decimalPlaces)
-            : parsed.toFixed(decimalPlaces);
-      } else {
-        const parsed = parseInt(e.target.value, 10);
-        formatted = isNaN(parsed) ? "" : String(parsed);
-      }
-
-      if (formatted !== "" && e.target.value !== formatted) {
-        e.target.value = formatted;
-        if (onChange) {
-          onChange({ ...e, type: "change" } as unknown as ChangeEvent<HTMLInputElement>);
-        }
-      } else if (formatted !== "") {
-        e.target.value = formatted;
-      }
-
-      onBlur?.(e);
     };
 
     if (variant === "cell") {
@@ -134,7 +97,7 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
           readOnly={readOnly}
           disabled={disabled}
           onChange={handleChange}
-          onBlur={handleBlur}
+          onBlur={onBlur}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           {...rest}
@@ -155,7 +118,7 @@ export const NumberBox = forwardRef<HTMLInputElement, NumberBoxProps>(
         readOnly={readOnly}
         disabled={disabled}
         onChange={handleChange}
-        onBlur={handleBlur}
+        onBlur={onBlur}
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         {...rest}
