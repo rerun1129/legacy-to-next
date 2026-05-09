@@ -14,6 +14,8 @@ allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
 
 1. **도메인별 순차 구현**: 작업 지시(`$ARGUMENTS`) + 관련 파일 경로를 직접 전달. **Planner 호출하지 않음**.
 
+   > ⚠️ 아래 bash 명령의 경로는 **반드시 상대경로 그대로** 실행할 것. `C:\...` 절대경로로 변환 금지.
+
    - **back-end 변경 있으면**:
      ```bash
      echo "backend" > .claude/.coder_scope
