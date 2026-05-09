@@ -8,6 +8,7 @@ import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu
 import { Pagination } from "@/components/shared/pagination";
 import { truckBlPort } from "@/lib/ports";
 import { useTabs } from "@/lib/use-tabs";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { fmtDate } from "@/lib/grid-formatters";
 import type { TruckBlRow, TruckBlFilter } from "@/domain/truck-bl";
@@ -23,6 +24,7 @@ interface Props {
 export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll }: Props) {
   const router = useRouter();
   const addTab = useTabs((s) => s.addTab);
+  const setFocus = useEntryFocusStore((s) => s.setFocus);
   const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -45,9 +47,9 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
       render: (v, row) => (
         <div
           onDoubleClick={() => {
-            addTab("Truck B/L Entry", `/fms/truck-bl/entry/${row.id}`);
-            sessionStorage.setItem(`truck-bl-entry:hot:${row.id}`, "1");
-            router.push(`/fms/truck-bl/entry/${row.id}`);
+            setFocus(entryFocusKeys.truckBl, row.id);
+            addTab("Truck B/L Entry", "/fms/truck-bl/entry");
+            router.push("/fms/truck-bl/entry");
           }}
           style={{ cursor: "pointer" }}
         >

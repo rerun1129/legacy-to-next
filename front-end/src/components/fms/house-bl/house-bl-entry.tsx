@@ -19,6 +19,7 @@ import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import { buildHouseBlRequest } from "./house-bl-submit";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { useSearchBl } from "./use-search-bl";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 
 const TOOLBAR_FIELDS_SEA = [
   "Shipment Type", "Settle", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
@@ -90,14 +91,14 @@ const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "N
 
 interface Props {
   variant: BLVariantConfig;
-  id?: number;
 }
 
-export function HouseBLEntry({ variant, id }: Props) {
+export function HouseBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
+  const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.houseBl(variant.key)]);
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -113,6 +114,11 @@ export function HouseBLEntry({ variant, id }: Props) {
   useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
 
   const detailLoadedRef = useRef<boolean>(false);
+
+  // id 변경 시 form.reset 재트리거를 위해 ref 초기화
+  useEffect(() => {
+    detailLoadedRef.current = false;
+  }, [id]);
 
   const { data: detail } = useQuery({
     queryKey: ["house-bl", "detail", id],
@@ -144,9 +150,14 @@ export function HouseBLEntry({ variant, id }: Props) {
       const req = buildHouseBlRequest(data, variant);
       return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
     },
-    onSuccess: () => {
+    onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
-      router.push(`/fms/house-bl/${variant.key}/list`);
+      if (!isEdit) {
+        useEntryFocusStore.getState().setFocus(entryFocusKeys.houseBl(variant.key), saved.id);
+        detailLoadedRef.current = false;
+      } else {
+        router.push(`/fms/house-bl/${variant.key}/list`);
+      }
     },
   });
 
@@ -155,7 +166,7 @@ export function HouseBLEntry({ variant, id }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
       form.reset(createEmptyHouseBlFormValues());
-      router.replace(`/fms/house-bl/${variant.key}/entry`);
+      useEntryFocusStore.getState().clearFocus(entryFocusKeys.houseBl(variant.key));
     },
   });
 

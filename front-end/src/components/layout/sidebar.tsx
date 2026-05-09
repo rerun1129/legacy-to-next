@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { useEntryFocusStore, domainFromPath } from "@/lib/use-entry-focus-store";
 
 // ─── Types ──────────────────────────────────────────────────
 interface NavLeaf {
@@ -121,6 +122,8 @@ export function Sidebar() {
   const toggleSection = (group: string)   => setOpenSections((p) => ({ ...p, [group]:   !p[group]   }));
 
   function navigate(label: string, href: string) {
+    const domain = domainFromPath(href);
+    if (domain) useEntryFocusStore.getState().clearFocus(domain);
     addTab(label, href);
     router.push(href);
   }

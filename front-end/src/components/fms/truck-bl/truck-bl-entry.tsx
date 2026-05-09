@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef }                from "react";
 import { useForm, FormProvider }                       from "react-hook-form";
 import { useMutation, useQuery }                        from "@tanstack/react-query";
-import { useRouter }                                   from "next/navigation";
 import { Save, Trash2, Truck, FilePlus }               from "lucide-react";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }     from "./tabs/main-truck";
@@ -12,6 +11,7 @@ import { createEmptyTruckBlFormValues }                from "./truck-bl-defaults
 import { useBlDraftSync }                              from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore }                             from "@/lib/use-bl-draft-store";
 import { truckBlPort }                                 from "@/lib/ports";
+import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
 
 // label → RHF 필드 경로 매핑 (toolbar 5개)
 const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
@@ -22,24 +22,10 @@ const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
   "Status":       "truckStatus",
 };
 
-interface Props {
-  id?: number;
-}
-
-export function TruckBLEntry({ id }: Props = {}) {
+export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
+  const id = useEntryFocusStore((s) => s.focus.truckBl);
   const isEdit = Boolean(id);
-  // lazy initializer: 마운트 시 1회만 실행 — marker 있으면 제거 후 true 반환
-  const [hydrateAllowed] = useState<boolean>(() => {
-    if (typeof window === "undefined" || id == null) return false;
-    const key = `truck-bl-entry:hot:${id}`;
-    if (sessionStorage.getItem(key)) {
-      sessionStorage.removeItem(key);
-      return true;
-    }
-    return false;
-  });
-  const router = useRouter();
   const detailLoadedRef = useRef<boolean>(false);
 
   const clearDraft = useBLDraftStore(state => state.clearDraft);
@@ -48,13 +34,10 @@ export function TruckBLEntry({ id }: Props = {}) {
     defaultValues: createEmptyTruckBlFormValues(),
   });
 
-  // F5 새로고침 시 빈 폼 강제: marker 없으면 신규 모드 URL로 교체
+  // id 변경 시 form.reset 재트리거를 위해 ref 초기화
   useEffect(() => {
-    if (id == null) return;
-    if (!hydrateAllowed) {
-      router.replace("/fms/truck-bl/entry");
-    }
-  }, [id, hydrateAllowed, router]);
+    detailLoadedRef.current = false;
+  }, [id]);
 
   useBlDraftSync(form, "truck::" + (id ?? "new"));
 
@@ -69,7 +52,7 @@ export function TruckBLEntry({ id }: Props = {}) {
   const { data: detail } = useQuery({
     queryKey: ["truck-bl", "detail", id],
     queryFn: () => truckBlPort.getById(id!),
-    enabled: isEdit && hydrateAllowed,
+    enabled: isEdit,
   });
 
   useEffect(() => {
@@ -119,7 +102,7 @@ export function TruckBLEntry({ id }: Props = {}) {
     form.reset(createEmptyTruckBlFormValues());
     clearDraft("truck::" + (id ?? "new"));
     detailLoadedRef.current = false;
-    router.replace("/fms/truck-bl/entry");
+    useEntryFocusStore.getState().clearFocus("truckBl");
   }
 
   return (

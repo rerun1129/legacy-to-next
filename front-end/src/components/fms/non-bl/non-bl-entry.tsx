@@ -16,24 +16,12 @@ import { TextBox, ComboBox }                            from "@/components/share
 import { useEnumOptions }                              from "@/application/enums/use-enum";
 import { nonBlPort }                                   from "@/lib/ports";
 import { toast }                                       from "@/lib/toast-store";
+import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
 
-interface Props {
-  id?: number;
-}
-
-export function NonBLEntry({ id }: Props = {}) {
+export function NonBLEntry() {
   const [tab, setTab] = useState("main");
+  const id = useEntryFocusStore((s) => s.focus.nonBl);
   const isEdit = Boolean(id);
-  // lazy initializer: 마운트 시 1회만 실행 — marker 있으면 제거 후 true 반환
-  const [hydrateAllowed] = useState<boolean>(() => {
-    if (typeof window === "undefined" || id == null) return false;
-    const key = `non-bl-entry:hot:${id}`;
-    if (sessionStorage.getItem(key)) {
-      sessionStorage.removeItem(key);
-      return true;
-    }
-    return false;
-  });
   const queryClient = useQueryClient();
   const router = useRouter();
   const detailLoadedRef = useRef<boolean>(false);
@@ -44,13 +32,10 @@ export function NonBLEntry({ id }: Props = {}) {
     defaultValues: createEmptyNonBlFormValues(),
   });
 
-  // F5 새로고침 시 빈 폼 강제: marker 없으면 신규 모드 URL로 교체
+  // id 변경 시 form.reset 재트리거를 위해 ref 초기화
   useEffect(() => {
-    if (id == null) return;
-    if (!hydrateAllowed) {
-      router.replace("/fms/non-bl/entry");
-    }
-  }, [id, hydrateAllowed, router]);
+    detailLoadedRef.current = false;
+  }, [id]);
 
   useBlDraftSync(methods, `non::${id ?? "new"}`);
 
@@ -73,7 +58,7 @@ export function NonBLEntry({ id }: Props = {}) {
   const { data: detail } = useQuery({
     queryKey: ["non-bl", "detail", id],
     queryFn: () => nonBlPort.getById(id!),
-    enabled: isEdit && hydrateAllowed,
+    enabled: isEdit,
   });
 
   useEffect(() => {
@@ -144,8 +129,8 @@ export function NonBLEntry({ id }: Props = {}) {
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
       if (!isEdit) {
-        sessionStorage.setItem(`non-bl-entry:hot:${saved.id}`, "1");
-        router.replace(`/fms/non-bl/entry/${saved.id}`);
+        useEntryFocusStore.getState().setFocus("nonBl", saved.id);
+        detailLoadedRef.current = false;
       } else {
         queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
       }
@@ -158,7 +143,7 @@ export function NonBLEntry({ id }: Props = {}) {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
       methods.reset(createEmptyNonBlFormValues());
       clearDraft(`non::${id}`);
-      router.replace("/fms/non-bl/entry");
+      useEntryFocusStore.getState().clearFocus("nonBl");
     },
   });
 
@@ -166,7 +151,7 @@ export function NonBLEntry({ id }: Props = {}) {
     methods.reset(createEmptyNonBlFormValues());
     clearDraft(`non::${id ?? "new"}`);
     detailLoadedRef.current = false;
-    router.replace("/fms/non-bl/entry");
+    useEntryFocusStore.getState().clearFocus("nonBl");
   }
 
   async function handleSearch() {
@@ -205,8 +190,7 @@ export function NonBLEntry({ id }: Props = {}) {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
       detailLoadedRef.current = false;
     } else {
-      sessionStorage.setItem(`non-bl-entry:hot:${target.id}`, "1");
-      router.replace(`/fms/non-bl/entry/${target.id}`);
+      useEntryFocusStore.getState().setFocus("nonBl", target.id);
     }
   }
 

@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { houseBlPort } from "@/lib/ports";
-import { getBLVariant } from "@/lib/bl-variants";
+import { getBLVariant, getPageTitle } from "@/lib/bl-variants";
 import type { HouseBlRow, HouseBlFilter, Bound } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useTabs } from "@/lib/use-tabs";
 
 interface Props {
   variantKey: string;
@@ -18,6 +20,8 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
   const router  = useRouter();
   const variant = getBLVariant(variantKey);
   const [selected, setSelected] = useState<number | null>(null);
+  const setFocus = useEntryFocusStore((s) => s.setFocus);
+  const addTab = useTabs((s) => s.addTab);
 
   // variant.mode → jobDiv (SEA/AIR), variant.direction → bound (EXP/IMP)
   // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
@@ -31,7 +35,10 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
   if (error) return <div className="p-4 text-sm text-destructive">데이터를 불러올 수 없습니다.</div>;
 
   function handleHblDoubleClick(row: HouseBlRow) {
-    router.push(`/fms/house-bl/${variantKey}/entry?id=${row.id}`);
+    const path = `/fms/house-bl/${variantKey}/entry`;
+    setFocus(entryFocusKeys.houseBl(variantKey), row.id);
+    addTab(getPageTitle(variant, "House", "Entry"), path);
+    router.push(path);
   }
 
   const columns: GridColumn<HouseBlRow>[] = [
