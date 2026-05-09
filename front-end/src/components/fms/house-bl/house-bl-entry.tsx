@@ -20,6 +20,7 @@ import { buildHouseBlRequest } from "./house-bl-submit";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { useSearchBl } from "./use-search-bl";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { ScreenGuard } from "@/components/shared/screen-guard";
 
 const TOOLBAR_FIELDS_SEA = [
   "Shipment Type", "Settle", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
@@ -120,7 +121,7 @@ export function HouseBLEntry({ variant }: Props) {
     detailLoadedRef.current = false;
   }, [id]);
 
-  const { data: detail } = useQuery({
+  const { data: detail, isFetching: isDetailFetching } = useQuery({
     queryKey: ["house-bl", "detail", id],
     queryFn: () => houseBlPort.getById(id!),
     enabled: isEdit,
@@ -196,8 +197,12 @@ export function HouseBLEntry({ variant }: Props) {
 
   const canSwitchBl = isEdit && id != null && variant.key.startsWith('sea-');
 
+  const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
+  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+
   return (
     <>
+      <ScreenGuard visible={isLoading} message={loadingMessage} />
       <FormProvider {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
         <div className="page-head">

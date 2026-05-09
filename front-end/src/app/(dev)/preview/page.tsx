@@ -5,14 +5,16 @@ import { InputsSection } from "./sections/inputs-section";
 import { GridSection } from "./sections/grid-section";
 import { ButtonsSection } from "./sections/buttons-section";
 import { PaginationSection } from "./sections/pagination-section";
+import { ScreenGuardSection } from "./sections/screen-guard-section";
 
-type SectionId = "inputs" | "grid" | "buttons" | "pagination";
+type SectionId = "inputs" | "grid" | "buttons" | "pagination" | "screen-guard";
 
 const MENU: { id: SectionId; label: string }[] = [
   { id: "inputs", label: "Inputs" },
   { id: "grid", label: "Grid" },
   { id: "buttons", label: "Buttons" },
   { id: "pagination", label: "Pagination" },
+  { id: "screen-guard", label: "ScreenGuard" },
 ];
 
 export default function PreviewPage() {
@@ -51,10 +53,11 @@ export default function PreviewPage() {
 
       {/* 컨텐츠 */}
       <main style={{ flex: 1, overflow: "auto" }}>
-        {active === "inputs" && <InputsSection />}
-        {active === "grid" && <GridSection />}
-        {active === "buttons" && <ButtonsSection />}
-        {active === "pagination" && <PaginationSection />}
+        {active === "inputs"       && <InputsSection />}
+        {active === "grid"         && <GridSection />}
+        {active === "buttons"      && <ButtonsSection />}
+        {active === "pagination"   && <PaginationSection />}
+        {active === "screen-guard" && <ScreenGuardSection />}
       </main>
     </div>
   );

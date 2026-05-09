@@ -12,6 +12,7 @@ import { useBlDraftSync }                              from "@/lib/use-bl-draft-
 import { useBLDraftStore }                             from "@/lib/use-bl-draft-store";
 import { truckBlPort }                                 from "@/lib/ports";
 import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
+import { ScreenGuard }                                 from "@/components/shared/screen-guard";
 
 // label → RHF 필드 경로 매핑 (toolbar 5개)
 const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
@@ -49,7 +50,7 @@ export function TruckBLEntry() {
     };
   }, [clearDraft, id]);
 
-  const { data: detail } = useQuery({
+  const { data: detail, isFetching: isDetailFetching } = useQuery({
     queryKey: ["truck-bl", "detail", id],
     queryFn: () => truckBlPort.getById(id!),
     enabled: isEdit,
@@ -105,9 +106,13 @@ export function TruckBLEntry() {
     useEntryFocusStore.getState().clearFocus("truckBl");
   }
 
+  const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
+  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+
   return (
     <FormProvider {...form}>
     <>
+      <ScreenGuard visible={isLoading} message={loadingMessage} />
       {/* Page header — NO Print button per PRD §S-06 */}
       <div className="page-head">
         <div className="page-head__title">

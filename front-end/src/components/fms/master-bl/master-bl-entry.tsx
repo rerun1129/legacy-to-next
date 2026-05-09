@@ -16,6 +16,7 @@ import { masterBlPort } from "@/lib/ports";
 import type { CreateMasterBlRequest, UpdateMasterBlRequest, ConsolidatedHouseBlSummary } from "@/domain/master-bl";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
+import { ScreenGuard }   from "@/components/shared/screen-guard";
 
 interface Props {
   variantKey: string;
@@ -46,7 +47,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     setTab(key);
   }
 
-  const { data: detail } = useQuery({
+  const { data: detail, isFetching: isDetailFetching } = useQuery({
     queryKey: ["master-bl", "detail", id],
     queryFn: () => masterBlPort.getById(id!),
     enabled: isEdit,
@@ -211,8 +212,12 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const bottomActionsLeft  = variant.bottomActions.filter(a => ["Profit/Loss", "House B/L Load"].includes(a));
   const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
 
+  const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
+  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+
   return (
     <FormProvider {...form}>
+    <ScreenGuard visible={isLoading} message={loadingMessage} />
     <form ref={formRef} onSubmit={form.handleSubmit(handleSave)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       {/* Page header — NOTE: No Print button per PRD §S-04 */}
       <div className="page-head">

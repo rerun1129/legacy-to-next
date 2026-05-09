@@ -17,6 +17,7 @@ import { useEnumOptions }                              from "@/application/enums
 import { nonBlPort }                                   from "@/lib/ports";
 import { toast }                                       from "@/lib/toast-store";
 import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
+import { ScreenGuard }                                 from "@/components/shared/screen-guard";
 
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
@@ -55,7 +56,7 @@ export function NonBLEntry() {
   const { options: workDivOptions, placeholder: workDivPlaceholder } = useEnumOptions("WorkDivision");
   const { options: boundOptions, placeholder: boundPlaceholder } = useEnumOptions("Bound");
 
-  const { data: detail } = useQuery({
+  const { data: detail, isFetching: isDetailFetching } = useQuery({
     queryKey: ["non-bl", "detail", id],
     queryFn: () => nonBlPort.getById(id!),
     enabled: isEdit,
@@ -214,8 +215,12 @@ export function NonBLEntry() {
     mutation.mutate(data);
   }
 
+  const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
+  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+
   return (
     <FormProvider {...methods}>
+    <ScreenGuard visible={isLoading} message={loadingMessage} />
     <form
       onSubmit={methods.handleSubmit(handleSubmit)}
       onKeyDown={(e) => {

@@ -10,3 +10,25 @@
 @import "../styles/dashboard.css";
 @import "../styles/widgets.css";
 @import "../styles/modal.css";
+
+/* =========================================================
+   Tailwind v4 custom keyframes & animations (ScreenGuard)
+   ========================================================= */
+@theme {
+  --animate-wave-bar: waveBar 1s ease-in-out infinite;
+
+  @keyframes waveBar {
+    0%, 100% { transform: scaleY(0.35); }
+    50%       { transform: scaleY(1); }
+  }
+}
+
+/* ScreenGuard bar — prefers-reduced-motion: 애니메이션 정지, 정적 높이 표시 */
+@media (prefers-reduced-motion: reduce) {
+  .screen-guard__bar {
+    animation: none !important;
+    transform: none !important;
+    height: var(--static-h, 60%) !important;
+    align-self: center;
+  }
+}
