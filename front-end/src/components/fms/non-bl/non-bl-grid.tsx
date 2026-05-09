@@ -7,6 +7,7 @@ import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { nonBlPort } from "@/lib/ports";
+import { useTabs } from "@/lib/use-tabs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { fmtDate } from "@/lib/grid-formatters";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
@@ -21,6 +22,7 @@ interface Props {
 
 export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll }: Props) {
   const router = useRouter();
+  const addTab = useTabs((s) => s.addTab);
   const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -43,6 +45,7 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
       render: (v, row) => (
         <div
           onDoubleClick={() => {
+            addTab("Non B/L Entry", `/fms/non-bl/entry/${row.id}`);
             sessionStorage.setItem(`non-bl-entry:hot:${row.id}`, "1");
             router.push(`/fms/non-bl/entry/${row.id}`);
           }}

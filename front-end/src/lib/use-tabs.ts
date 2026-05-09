@@ -119,6 +119,6 @@ export const useTabs = create<TabStore>((set, get) => ({
     if (!pathname || pathname === "/" || pathname === "/dashboard") return;
     const { tabs } = get();
     if (tabs.some((t) => t.id === pathname)) return;
-    set({ tabs: [{ id: pathname, label: inferLabelFromPath(pathname), href: pathname }] });
+    set({ tabs: [...tabs, { id: pathname, label: inferLabelFromPath(pathname), href: pathname }] });
   },
 }));
