@@ -35,7 +35,7 @@ allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
 - **즉시 처리 가능** → Refactorer에 Edit 위임
 - **메인 개입 필요** (NAME-1 / PRES-1 / MSG-1) → 게이트 진행
 
-단일 파일 또는 동일 디렉토리 묶음이면 `isolation` 미지정. 대상 파일이 5개 이상이고 디렉토리가 명확히 분리된 경우만 `isolation: "worktree"` 병렬 호출 후 `pipeline.md`의 머지 절차 재사용 (충돌 시 Mediator 호출).
+서브 에이전트 호출 시 `isolation` 옵션은 사용하지 않는다. 모든 에이전트는 메인 작업 디렉토리에서 직접 작업한다.
 
 ## 의미적 결정 게이트 (메인 — Refactorer 보고 기반)
 
