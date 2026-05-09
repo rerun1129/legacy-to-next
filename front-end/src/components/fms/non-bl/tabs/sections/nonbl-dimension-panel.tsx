@@ -22,8 +22,8 @@ export function NonBLDimensionPanel() {
     { key: "width",  label: "Width",      width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.width`} variant="cell" valueAsNumber={false} /> },
     { key: "height", label: "Height",     width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.height`} variant="cell" valueAsNumber={false} /> },
     { key: "qty",    label: "Qty",        width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.qty`} variant="cell" valueAsNumber={false} /> },
-    { key: "cbm",    label: "CBM",        width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.cbm`} variant="cell" valueAsNumber={false} /> },
-    { key: "volWt",  label: "Volume Wt.", width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.volWt`} variant="cell" valueAsNumber={false} /> },
+    { key: "cbm",    label: "CBM",        width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.cbm`} variant="cell" valueAsNumber={false} decimalPlaces={3} /> },
+    { key: "volWt",  label: "Volume Wt.", width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.volWt`} variant="cell" valueAsNumber={false} decimalPlaces={3} /> },
   ], []);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
