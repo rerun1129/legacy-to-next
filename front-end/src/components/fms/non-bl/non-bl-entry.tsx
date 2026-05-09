@@ -225,6 +225,12 @@ export function NonBLEntry({ id }: Props = {}) {
     <FormProvider {...methods}>
     <form
       onSubmit={methods.handleSubmit(handleSubmit)}
+      onKeyDown={(e) => {
+        // textarea 줄바꿈은 보존, 그 외 Enter는 implicit form submission 차단
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+          e.preventDefault();
+        }
+      }}
       style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
     >
       <div className="page-head">
@@ -245,9 +251,10 @@ export function NonBLEntry({ id }: Props = {}) {
             <Search size={12} />Search
           </button>
           <button
-            type="submit"
+            type="button"
             className="btn btn--sm btn--transaction"
             disabled={mutation.isPending}
+            onClick={methods.handleSubmit(handleSubmit)}
           >
             <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
           </button>
