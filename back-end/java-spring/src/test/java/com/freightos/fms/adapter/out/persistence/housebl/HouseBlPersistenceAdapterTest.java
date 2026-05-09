@@ -403,4 +403,42 @@ class HouseBlPersistenceAdapterTest {
         assertThat(result).isEqualTo(3L);
         then(houseBlRepository).should().countByMasterBlId(42L);
     }
+
+    // ── saveHouseBl(NON_BL) — merge 메서드 호출 검증 ──────────────────
+
+    @Test
+    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims→mergeDesc 순서 후 nonBlRepository.save 호출")
+    void saveNonBlHouseBl_callsMergeInOrder() {
+        HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
+        savedJpa.setJobDiv(JobDiv.NON_BL);
+        given(houseBlRepository.save(any())).willReturn(savedJpa);
+        given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
+
+        adapter.saveHouseBl(nonBl);
+
+        InOrder order = inOrder(savedJpa, houseBlNonBlRepository);
+        order.verify(savedJpa).mergeContainers(any());
+        order.verify(savedJpa).mergeDims(any());
+        order.verify(savedJpa).mergeDesc(any());
+        order.verify(houseBlNonBlRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("saveHouseBl(NON_BL): SEA 전용 syncScheduleLegs/syncAirCharges는 호출하지 않는다")
+    void saveNonBlHouseBl_doesNotInvokeSeaOnlySync() {
+        HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
+        savedJpa.setJobDiv(JobDiv.NON_BL);
+        given(houseBlRepository.save(any())).willReturn(savedJpa);
+        given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
+
+        adapter.saveHouseBl(nonBl);
+
+        then(savedJpa).should(never()).syncScheduleLegs(any());
+        then(savedJpa).should(never()).syncAirCharges(any());
+        then(savedJpa).should(never()).syncTruckOrders(any());
+    }
 }

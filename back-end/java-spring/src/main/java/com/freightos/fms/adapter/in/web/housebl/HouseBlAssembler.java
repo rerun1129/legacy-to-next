@@ -231,19 +231,22 @@ public class HouseBlAssembler {
 
     private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateHouseBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new UpdateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        // Sea/Air/Truck UPDATE는 sync 방식이므로 id null 허용
+        return new UpdateHouseBlCommand.DescCommand(null, r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
     }
 
     private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<UpdateHouseBlRequest.DimRequest> reqs) {
         if (reqs == null) return null;
+        // Sea/Air/Truck UPDATE는 sync 방식이므로 id null 허용
         return reqs.stream().map(r -> new UpdateHouseBlCommand.DimCommand(
-                r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+                null, r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
     }
 
     private List<UpdateHouseBlCommand.ContainerCommand> toContainerCommandsU(List<UpdateHouseBlRequest.ContainerRequest> reqs) {
         if (reqs == null) return null;
+        // Sea/Air/Truck UPDATE는 sync 방식이므로 id null 허용
         return reqs.stream().map(r -> new UpdateHouseBlCommand.ContainerCommand(
-                r.containerNo(), r.containerType(), r.lengthFeet(),
+                null, r.containerNo(), r.containerType(), r.lengthFeet(),
                 r.sealNo1(), r.sealNo2(), r.sealNo3(), r.sealNo4(), r.sealNo5(), r.sealNo6(),
                 r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.netWeightKg(), r.cbm(),
                 r.vgmKg(), r.soc(), r.seq())).toList();

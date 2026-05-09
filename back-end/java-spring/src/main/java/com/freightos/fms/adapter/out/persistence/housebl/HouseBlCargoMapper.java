@@ -66,6 +66,7 @@ public class HouseBlCargoMapper {
 
     public HouseBlDimJpaEntity toDimJpa(HouseBlDim d, HouseBlJpaEntity houseBl) {
         HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
+        if (d.getId() != null) jpa.setHouseBlDimId(d.getId());
         applyDimFields(d, jpa, houseBl);
         return jpa;
     }

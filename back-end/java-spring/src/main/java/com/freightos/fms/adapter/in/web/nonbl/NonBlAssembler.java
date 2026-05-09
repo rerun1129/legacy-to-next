@@ -228,21 +228,21 @@ public class NonBlAssembler {
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
     }
 
-    private UpdateHouseBlCommand.DescCommand toDescCommandU(CreateHouseBlRequest.DescRequest r) {
+    private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateNonBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new UpdateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new UpdateHouseBlCommand.DescCommand(r.id(), r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
     }
 
-    private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<CreateHouseBlRequest.DimRequest> reqs) {
+    private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<UpdateNonBlRequest.DimRequest> reqs) {
         if (reqs == null) return null;
         return reqs.stream().map(r -> new UpdateHouseBlCommand.DimCommand(
-                r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+                r.id(), r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
     }
 
-    private List<UpdateHouseBlCommand.ContainerCommand> toContainerCommandsU(List<CreateHouseBlRequest.ContainerRequest> reqs) {
+    private List<UpdateHouseBlCommand.ContainerCommand> toContainerCommandsU(List<UpdateNonBlRequest.ContainerRequest> reqs) {
         if (reqs == null) return null;
         return reqs.stream().map(r -> new UpdateHouseBlCommand.ContainerCommand(
-                r.containerNo(), r.containerType(), r.lengthFeet(),
+                r.id(), r.containerNo(), r.containerType(), r.lengthFeet(),
                 r.sealNo1(), r.sealNo2(), r.sealNo3(), r.sealNo4(), r.sealNo5(), r.sealNo6(),
                 r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.netWeightKg(), r.cbm(),
                 r.vgmKg(), r.soc(), r.seq())).toList();

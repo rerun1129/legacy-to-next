@@ -47,6 +47,7 @@ class HouseBlSubFactory {
     void applyDescUpdate(HouseBl entity, UpdateHouseBlCommand.DescCommand r) {
         if (r == null) return;
         HouseBlDesc desc = HouseBlDesc.create(null);
+        if (r.id() != null) desc.assignIdentity(r.id(), null, null, null, null);
         desc.updateContent(r.marks(), r.description(),
                 DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()), r.remark());
         entity.initDesc(desc);
@@ -64,10 +65,11 @@ class HouseBlSubFactory {
 
     void applyDimsUpdate(HouseBl entity, List<UpdateHouseBlCommand.DimCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return;
-        entity.initDims(cmds.stream()
-                .map(c -> HouseBlDim.create(null,
-                        c.lengthCm(), c.widthCm(), c.heightCm(), c.quantity(), c.cbm(), c.volumeWeightKg()))
-                .toList());
+        entity.initDims(cmds.stream().map(c -> {
+            HouseBlDim dim = HouseBlDim.create(null, c.lengthCm(), c.widthCm(), c.heightCm(), c.quantity(), c.cbm(), c.volumeWeightKg());
+            if (c.id() != null) dim.assignIdentity(c.id(), null, null, null, null);
+            return dim;
+        }).toList());
     }
 
     // ── Containers ───────────────────────────────────────────────────
@@ -97,6 +99,7 @@ class HouseBlSubFactory {
                     entity, ContainerNumber.of(c.containerNo()),
                     ContainerType.fromCode(c.containerType()),
                     Nullables.firstNonNull(c.lengthFeet(), () -> 20));
+            if (c.id() != null) container.assignIdentity(c.id(), null, null, null, null);
             container.updateDetails(new HouseBlContainer.Details(
                     SealNumber.of(c.sealNo1()), SealNumber.of(c.sealNo2()), SealNumber.of(c.sealNo3()),
                     SealNumber.of(c.sealNo4()), SealNumber.of(c.sealNo5()), SealNumber.of(c.sealNo6()),

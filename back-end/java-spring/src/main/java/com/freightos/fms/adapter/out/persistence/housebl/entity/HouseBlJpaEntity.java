@@ -14,7 +14,9 @@ import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JPA ORM 엔티티 — House B/L 공통 본체.
@@ -207,11 +209,16 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setMasterRefNo(String masterRefNo) { this.masterRefNo = masterRefNo; }
 
     // orphanRemoval=true 컬렉션 동기화: 참조를 교체하지 않고 clear+addAll로 관리
+
+    /** @deprecated NonBl에는 mergeContainers 사용. Sea/Air/Truck은 현행 유지. */
+    @Deprecated
     public void syncContainers(List<HouseBlContainerJpaEntity> newContainers) {
         this.containers.clear();
         this.containers.addAll(newContainers);
     }
 
+    /** @deprecated NonBl에는 mergeDims 사용. Air/Truck은 현행 유지. */
+    @Deprecated
     public void syncDims(List<HouseBlDimJpaEntity> newDims) {
         this.dims.clear();
         this.dims.addAll(newDims);
@@ -232,8 +239,109 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
         this.airCharges.addAll(newCharges);
     }
 
+    /** @deprecated NonBl에는 mergeDesc 사용. Sea/Air는 현행 유지. */
+    @Deprecated
     public void replaceDesc(HouseBlDescJpaEntity newDesc) {
         if (this.desc != null) this.desc.setHouseBl(null);
         this.desc = newDesc;
+    }
+
+    /**
+     * NonBl 컨테이너 merge-by-id.
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeContainers(List<HouseBlContainerJpaEntity> incoming) {
+        Map<Long, HouseBlContainerJpaEntity> existingById = new HashMap<>();
+        for (HouseBlContainerJpaEntity e : this.containers) {
+            if (e.getHouseBlContainerId() != null) existingById.put(e.getHouseBlContainerId(), e);
+        }
+        List<HouseBlContainerJpaEntity> merged = new ArrayList<>();
+        for (HouseBlContainerJpaEntity inc : incoming) {
+            if (inc.getHouseBlContainerId() != null && existingById.containsKey(inc.getHouseBlContainerId())) {
+                HouseBlContainerJpaEntity existing = existingById.get(inc.getHouseBlContainerId());
+                copyContainerFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.containers.clear();
+        this.containers.addAll(merged);
+    }
+
+    /**
+     * NonBl DIM merge-by-id.
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeDims(List<HouseBlDimJpaEntity> incoming) {
+        Map<Long, HouseBlDimJpaEntity> existingById = new HashMap<>();
+        for (HouseBlDimJpaEntity e : this.dims) {
+            if (e.getHouseBlDimId() != null) existingById.put(e.getHouseBlDimId(), e);
+        }
+        List<HouseBlDimJpaEntity> merged = new ArrayList<>();
+        for (HouseBlDimJpaEntity inc : incoming) {
+            if (inc.getHouseBlDimId() != null && existingById.containsKey(inc.getHouseBlDimId())) {
+                HouseBlDimJpaEntity existing = existingById.get(inc.getHouseBlDimId());
+                copyDimFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.dims.clear();
+        this.dims.addAll(merged);
+    }
+
+    /**
+     * NonBl DESC merge (1:1).
+     * 기존 desc가 존재하면 필드를 현장 복사(UPDATE), 없으면 신규 설정(INSERT).
+     * orphanRemoval이 desc=null 교체 시 자동 DELETE를 처리한다.
+     */
+    public void mergeDesc(HouseBlDescJpaEntity incoming) {
+        if (incoming == null) {
+            if (this.desc != null) this.desc.setHouseBl(null);
+            this.desc = null;
+            return;
+        }
+        if (this.desc != null) {
+            this.desc.setMarks(incoming.getMarks());
+            this.desc.setDescription(incoming.getDescription());
+            this.desc.setDescClause1(incoming.getDescClause1());
+            this.desc.setDescClause2(incoming.getDescClause2());
+            this.desc.setRemark(incoming.getRemark());
+        } else {
+            this.desc = incoming;
+        }
+    }
+
+    private void copyContainerFields(HouseBlContainerJpaEntity src, HouseBlContainerJpaEntity dst) {
+        dst.setContainerNo(src.getContainerNo());
+        dst.setContainerType(src.getContainerType());
+        dst.setLengthFeet(src.getLengthFeet());
+        dst.setSealNo1(src.getSealNo1());
+        dst.setSealNo2(src.getSealNo2());
+        dst.setSealNo3(src.getSealNo3());
+        dst.setSealNo4(src.getSealNo4());
+        dst.setSealNo5(src.getSealNo5());
+        dst.setSealNo6(src.getSealNo6());
+        dst.setPkgQty(src.getPkgQty());
+        dst.setPkgUnit(src.getPkgUnit());
+        dst.setGrossWeightKg(src.getGrossWeightKg());
+        dst.setNetWeightKg(src.getNetWeightKg());
+        dst.setCbm(src.getCbm());
+        dst.setVgmKg(src.getVgmKg());
+        dst.setIsSoc(src.isSoc());
+        dst.setSeq(src.getSeq());
+    }
+
+    private void copyDimFields(HouseBlDimJpaEntity src, HouseBlDimJpaEntity dst) {
+        dst.setLengthCm(src.getLengthCm());
+        dst.setWidthCm(src.getWidthCm());
+        dst.setHeightCm(src.getHeightCm());
+        dst.setQuantity(src.getQuantity());
+        dst.setCbm(src.getCbm());
+        dst.setVolumeWeightKg(src.getVolumeWeightKg());
     }
 }

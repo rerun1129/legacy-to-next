@@ -43,6 +43,7 @@ public class HouseBlDocMapper {
 
     public HouseBlDescJpaEntity toDescJpa(HouseBlDesc d, HouseBlJpaEntity houseBl) {
         HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
+        if (d.getId() != null) jpa.setHouseBlDescId(d.getId());
         applyDescFields(d, jpa, houseBl);
         return jpa;
     }

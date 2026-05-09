@@ -43,6 +43,7 @@ public class HouseBlDescJpaEntity extends BaseJpaEntity {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
+    public void setHouseBlDescId(Long v) { this.houseBlDescId = v; }
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setMarks(String v) { this.marks = v; }
     public void setDescription(String v) { this.description = v; }

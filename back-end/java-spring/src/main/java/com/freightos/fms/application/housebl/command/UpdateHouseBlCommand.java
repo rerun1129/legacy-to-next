@@ -95,6 +95,7 @@ public record UpdateHouseBlCommand(
     ) {}
 
     public record DescCommand(
+            Long id,
             String marks,
             String description,
             String descClause1,
@@ -103,6 +104,7 @@ public record UpdateHouseBlCommand(
     ) {}
 
     public record DimCommand(
+            Long id,
             BigDecimal lengthCm,
             BigDecimal widthCm,
             BigDecimal heightCm,
@@ -112,6 +114,7 @@ public record UpdateHouseBlCommand(
     ) {}
 
     public record ContainerCommand(
+            Long id,
             String containerNo,
             String containerType,
             Integer lengthFeet,

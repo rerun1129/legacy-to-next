@@ -127,13 +127,13 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 nonBlJpa.setHouseBl(savedJpa);
                 domainToJpaMapper.applyNonBlFields(nonBl, nonBlJpa);
                 List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
-                savedJpa.syncContainers(jpaContainers);
+                savedJpa.mergeContainers(jpaContainers);
                 List<HouseBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
-                savedJpa.syncDims(nonBlDims);
+                savedJpa.mergeDims(nonBlDims);
                 HouseBlDescJpaEntity nonBlDescJpa = Nullables.mapOrNull(nonBl.getDesc(), d -> houseBlDocMapper.toDescJpa(d, savedJpa));
-                savedJpa.replaceDesc(nonBlDescJpa);
+                savedJpa.mergeDesc(nonBlDescJpa);
                 houseBlNonBlRepository.save(nonBlJpa);
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
