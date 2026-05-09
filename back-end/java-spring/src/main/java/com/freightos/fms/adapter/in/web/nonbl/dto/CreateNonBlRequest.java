@@ -1,14 +1,17 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateNonBlRequest(
         String jobDiv,
         String bound,
-        String hblNo,
-        String workDivision,
+        @NotBlank @Size(max = 35) String hblNo,
+        @NotBlank String workDivision,
         String originalBlRef,
         String salesClass,
         String mblNo,
@@ -23,17 +26,17 @@ public record CreateNonBlRequest(
         String docPartnerCode,
         String docPartnerAddress,
         String settlePartnerCode,
-        String polCode,
-        String podCode,
-        String etd,
-        String eta,
+        @NotBlank @Size(max = 5) String polCode,
+        @NotBlank @Size(max = 5) String podCode,
+        @NotBlank @Pattern(regexp = "\\d{8}") String etd,
+        @NotBlank @Pattern(regexp = "\\d{8}") String eta,
         Integer pkgQty,
         String pkgUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
-        String actualCustomerCode,
-        String operatorCode,
-        String teamCode,
+        @NotBlank @Size(max = 20) String actualCustomerCode,
+        @NotBlank @Size(max = 20) String operatorCode,
+        @NotBlank @Size(max = 20) String teamCode,
         String salesManCode,
         String incoterms,
         String mainItemName,

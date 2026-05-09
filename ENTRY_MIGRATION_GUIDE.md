@@ -400,17 +400,17 @@ Container Info 그리드의 `pkgUnit` 컬럼은 비표준 단위(CTN/PCS/BAG 등
 
 사례: faad158 — Non B/L Entry 적용.
 
-### 6.25 NonBl Request DTO — UI required 아닌 필드 검증 어노테이션 제거 정책
+### 6.25 NonBl Request DTO — UI required 기준 검증 어노테이션 관리 정책
 
-Non B/L Entry 화면에서 UI 별표(`is-required`)로 표시하지 않은 필드는 백엔드 `CreateNonBlRequest`에 `@NotNull`/`@Size`/`@Pattern`/`@Min`/`@DecimalMin` 어노테이션을 두지 않는다.
+**백엔드 validation SSOT 원칙**: 검증 책임은 백엔드(Request DTO 어노테이션)에 일원화. FE zodResolver/HTML5 required와 공존 금지(관리 포인트 분산 방지).
 
-- **UI required 9개** (`nonBlNo`, `workDiv`, `actualCustomer`, `etd`, `eta`, `pol`, `pod`, `operator`, `team`): 현재 백엔드도 DB nullable이며 검증 어노테이션 없음.
+- **UI required 9개** (`hblNo`, `workDivision`, `polCode`, `podCode`, `etd`, `eta`, `actualCustomerCode`, `operatorCode`, `teamCode`): `@NotBlank` + 형식 어노테이션(`@Size`/`@Pattern`) **유지**. 검증 실패 시 `MethodArgumentNotValidException` → `GlobalExceptionHandler` → ProblemDetail → 프론트 `toast.error` 자동.
 - **그 외 모든 필드**: 어노테이션 제거, null 그대로 통과. VO compact constructor 검증(BlDate yyyyMMdd 포맷, Weight ≥ 0 등)은 데이터 형식 무결성이므로 유지.
 - DDL NOT NULL 컬럼(`house_bl.bound`, `container_no`, `length_feet` 등)은 별도 마이그레이션으로 nullable로 전환 예정(2/2).
 
-> **다른 Entry 적용 시**: 각 Entry Request DTO도 동일 정책으로 검증 어노테이션 제거 후 해당 Entry의 UI required 기준을 SSOT로 삼는다.
+> **다른 Entry 적용 시**: 각 Entry Request DTO도 동일 정책 — 해당 Entry의 UI required 필드는 어노테이션 유지, 그 외만 제거.
 
-사례: 0aafb4d — Non B/L Entry `CreateNonBlRequest` 적용.
+사례: 0aafb4d — `CreateNonBlRequest` UI required까지 함께 제거한 over-correction. 후속 plan에서 9개 복원.
 
 ---
 
@@ -489,7 +489,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **ComboBox RHF Controller 패턴 SSOT** — register spread 금지, Controller 필수 (2026-05-08, 66a217c)
 - **Non B/L Entry hot-marker 라우팅 표준화** — F5 클리어 / 저장 직후 재조회 / New URL 리셋 / Search hot-marker 재사용 / unmount clearDraft (2026-05-09, c918324·0526e83·4572a33)
 - **Entry form Enter 키 implicit submission 차단** — `form onKeyDown` 가드(TEXTAREA 제외) + Save 버튼 `type="button"·onClick` 이중 방어 (2026-05-09, faad158)
-- **CreateNonBlRequest validation 어노테이션 전부 제거** — UI required 아닌 필드는 `@NotNull`/`@Size`/`@Pattern`/`@Min`/`@DecimalMin` 없이 null 그대로 통과. VO 검증 유지. (2026-05-09, 0aafb4d)
+- **CreateNonBlRequest validation 어노테이션 UI required 외 제거** — UI required 아닌 필드는 어노테이션 없이 null 통과. VO 검증 유지. ⚠️ 0aafb4d는 UI required 9개도 함께 제거한 over-correction. (2026-05-09, 0aafb4d)
+- **CreateNonBlRequest UI required 9개 어노테이션 복원** — §6.25 정책 교정. `hblNo`/`workDivision`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`에 `@NotBlank`+형식 어노테이션 재부착. (2026-05-09)
 
 ---
 
