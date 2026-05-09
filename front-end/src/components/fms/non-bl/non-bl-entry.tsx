@@ -59,6 +59,9 @@ export function NonBLEntry() {
     queryKey: ["non-bl", "detail", id],
     queryFn: () => nonBlPort.getById(id!),
     enabled: isEdit,
+    // refetch 결과가 직전 cache 와 deep equal 이어도 새 reference 를 발급해
+    // useEffect(detail) 의 form.reset 가 항상 트리거되도록 강제
+    structuralSharing: false,
   });
 
   useEffect(() => {
@@ -137,6 +140,8 @@ export function NonBLEntry() {
         detailLoadedRef.current = false;
       } else {
         queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
+        // refetch 된 detail 로 form.reset 재발동
+        detailLoadedRef.current = false;
       }
     },
   });
