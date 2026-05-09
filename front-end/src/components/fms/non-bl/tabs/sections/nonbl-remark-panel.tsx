@@ -19,7 +19,7 @@ export function NonBLRemarkPanel() {
           name="remark"
           render={({ field }) => (
             <LineNumberTextarea
-              value={field.value as string}
+              value={field.value ?? ""}
               onChange={field.onChange}
               onBlur={field.onBlur}
               name={field.name}

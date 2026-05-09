@@ -92,13 +92,6 @@ const NON_BL_DIM_SCHEMA = z.object({
   volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
 });
 
-const NON_BL_DESC_SCHEMA = z.object({
-  marks: z.string().nullable().optional().transform((v) => v ?? undefined),
-  hsCode: z.string().nullable().optional().transform((v) => v ?? undefined),
-  description: z.string().nullable().optional().transform((v) => v ?? undefined),
-  itemName: z.string().nullable().optional().transform((v) => v ?? undefined),
-});
-
 const NON_BL_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -143,9 +136,9 @@ const NON_BL_DETAIL_SCHEMA = z.object({
   salesClass: z.string().nullable().optional(),
   createdAt: z.string().nullable().optional().transform((v) => v ?? undefined),
   updatedAt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  remark: z.string().nullable().optional().transform((v) => v ?? undefined),
   containers: z.array(NON_BL_CONTAINER_SCHEMA).default([]),
   dims: z.array(NON_BL_DIM_SCHEMA).default([]),
-  desc: NON_BL_DESC_SCHEMA.nullable().optional().transform((v) => v ?? undefined),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
