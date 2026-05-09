@@ -20,8 +20,21 @@ public class PrettySqlFormatter implements MessageFormattingStrategy {
             return "";
         }
         LAST.set(new LastEmission(connectionId, sql, ts));
+        String caller = findCaller();
         return FORMATTER.format(sql) + System.lineSeparator()
-             + "  [" + elapsed + " ms]";
+             + "  [" + elapsed + " ms]"
+             + (caller.isEmpty() ? "" : System.lineSeparator() + "  called from: " + caller);
+    }
+
+    private static String findCaller() {
+        for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+            String cls = e.getClassName();
+            if (cls.startsWith("com.freightos.fms") && !cls.contains("PrettySqlFormatter")) {
+                return cls + "." + e.getMethodName()
+                     + "(" + e.getFileName() + ":" + e.getLineNumber() + ")";
+            }
+        }
+        return "";
     }
 
     private record LastEmission(int connectionId, String sql, long timestamp) {}
