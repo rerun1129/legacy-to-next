@@ -13,6 +13,7 @@ public record CreateNonBlRequest(
         @NotBlank @Size(max = 35) String hblNo,
         @NotBlank String workDivision,
         String originalBlRef,
+        String volumeDivisor,
         String salesClass,
         String mblNo,
         String masterRefNo,

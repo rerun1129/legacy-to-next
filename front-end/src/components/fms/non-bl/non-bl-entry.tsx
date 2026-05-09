@@ -97,6 +97,9 @@ export function NonBLEntry() {
       operatorCode:       detail.operatorCode ?? "",
       salesManCode:       detail.salesManCode ?? "",
       teamCode:           detail.teamCode ?? "",
+      salesClass:         detail.salesClass ?? undefined,
+      // BE 응답 volumeDivisor → form 필드 dimensionDivisor
+      dimensionDivisor:   detail.volumeDivisor ?? "CM6000",
       containers: detail.containers.map((c, idx) => ({
         id:       idx,
         cno:      c.containerNo ?? "",

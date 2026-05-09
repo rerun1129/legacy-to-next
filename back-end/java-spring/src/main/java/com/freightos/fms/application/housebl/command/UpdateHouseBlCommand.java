@@ -46,6 +46,7 @@ public record UpdateHouseBlCommand(
         // Non B/L 전용 필드
         String workDivision,
         String originalBlRef,
+        String volumeDivisor,
         String linerCode,
         String linerName,
         String vesselName,

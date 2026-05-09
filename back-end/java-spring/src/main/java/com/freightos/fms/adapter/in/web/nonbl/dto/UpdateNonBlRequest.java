@@ -11,6 +11,7 @@ public record UpdateNonBlRequest(
         String hblNo,
         String workDivision,
         String originalBlRef,
+        String volumeDivisor,
         String salesClass,
         String mblNo,
         String masterRefNo,

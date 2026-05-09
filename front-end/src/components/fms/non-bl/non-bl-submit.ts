@@ -71,6 +71,8 @@ export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
     salesManCode:       toStr(values.salesManCode),
     teamCode:           toStr(values.teamCode),
     salesClass:         toStr(values.salesClass),
+    // form 필드명 dimensionDivisor → BE Request 키 volumeDivisor
+    volumeDivisor:      values.dimensionDivisor ?? undefined,
     originalBlRef:      toStr(values.refNo),
     containers:         containers && containers.length > 0 ? containers : undefined,
     dims:               dims && dims.length > 0 ? dims : undefined,

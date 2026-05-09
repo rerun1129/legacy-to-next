@@ -27,7 +27,7 @@ export function createEmptyNonBlFormValues(): NonBlFormValues {
     salesManCode: "", salesManName: "",
     operatorCode: "", operatorName: "",
     teamCode:     "", teamName:     "",
-    dimensionDivisor: "CM/6000",
+    dimensionDivisor: "CM6000",
     remark:        "",
     freightSelling: [],
     freightBuying:  [],

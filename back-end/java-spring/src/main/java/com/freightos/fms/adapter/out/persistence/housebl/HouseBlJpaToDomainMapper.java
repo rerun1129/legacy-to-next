@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
@@ -104,7 +105,7 @@ public class HouseBlJpaToDomainMapper {
                 CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()),
                 CustomerCode.of(jpa.getDocPartnerCode(), jpa.getDocPartnerAddress()),
                 null);
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), null, // weightUnit: sea/air 확장 테이블에서 별도 로드
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), Nullables.mapOrNull(jpa.getPkgUnit(), WeightUnit::fromCode),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());
@@ -168,6 +169,7 @@ public class HouseBlJpaToDomainMapper {
         domain.updateScheduleFields(
                 jpa.getLinerCode(), jpa.getLinerName(), jpa.getVesselName(), jpa.getVoyageNo(),
                 jpa.getFinalDestCode(), jpa.getFinalDestName(), jpa.getFinalEta());
+        domain.assignVolumeDivisor(jpa.getVolumeDivisor());
     }
 
     private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo }                     from "react";
-import { useFormContext, useFieldArray }          from "react-hook-form";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
 import { ComboBox, NumberBox }                    from "@/components/shared/inputs";
@@ -12,9 +12,9 @@ import { EMPTY_DIM_ROW }                         from "../../non-bl-schema";
 interface DimRow { id: number; length: string; width: string; height: string; qty: string; cbm: string; volWt: string; }
 
 export function NonBLDimensionPanel() {
-  const { control, register } = useFormContext<NonBlFormValues>();
+  const { control } = useFormContext<NonBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
-  const { options: volumeDivisorOptions } = useEnumOptions("VolumeDivisor");
+  const { options: volumeDivisorOptions, placeholder: volumeDivisorPlaceholder } = useEnumOptions("VolumeDivisor");
 
   const cols = useMemo<GridColumn<DimRow>[]>(() => [
     { key: "_no",    label: "#",           width: 50, className: "row-num", render: (_, __, i) => i + 1 },
@@ -50,9 +50,18 @@ export function NonBLDimensionPanel() {
         <span className="panel__title">Dimension</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <ComboBox
-            options={volumeDivisorOptions}
-            {...register("dimensionDivisor")}
+          <Controller
+            name="dimensionDivisor"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={volumeDivisorOptions}
+                placeholder={volumeDivisorPlaceholder}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
           />
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}><Plus size={12} /></button>
           <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>

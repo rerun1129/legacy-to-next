@@ -17,6 +17,7 @@ import com.freightos.fms.domain.common.vo.TeamCode;
 import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.entity.HouseBlContainer;
+import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
 import com.freightos.fms.domain.housebl.entity.HouseBlDim;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
@@ -55,6 +56,7 @@ public record NonBlDetailResult(
         String finalDestCode,
         String finalDestName,
         String finalEta,
+        String volumeDivisor,
         String originalBlRef,
         BigDecimal rton,
         BigDecimal volumeWtKg,
@@ -65,6 +67,7 @@ public record NonBlDetailResult(
         String operatorCode,
         String salesManCode,
         String teamCode,
+        String salesClass,
         String mblNo,
         String masterRefNo,
         Long masterBlId,
@@ -103,6 +106,7 @@ public record NonBlDetailResult(
                 nonBl.getFinalDestCode(),
                 nonBl.getFinalDestName(),
                 nonBl.getFinalEta(),
+                Nullables.mapOrNull(nonBl.getVolumeDivisor(), Enum::name),
                 VoMapper.mapOrNull(nonBl.getOriginalBlRef(), BlNumber::value),
                 VoMapper.mapOrNull(nonBl.getRton(), Rton::ton),
                 VoMapper.mapOrNull(nonBl.getVolumeWtKg(), Weight::kg),
@@ -113,6 +117,7 @@ public record NonBlDetailResult(
                 VoMapper.mapOrNull(nonBl.getOperatorCode(), EmployeeCode::value),
                 VoMapper.mapOrNull(nonBl.getSalesManCode(), EmployeeCode::value),
                 VoMapper.mapOrNull(nonBl.getTeamCode(), TeamCode::value),
+                Nullables.mapOrNull(nonBl.getSalesClass(), Enum::name),
                 VoMapper.mapOrNull(nonBl.getMblNo(), MblNo::value),
                 nonBl.getMasterRefNo(),
                 nonBl.getMasterBlId(),
@@ -151,7 +156,7 @@ public record NonBlDetailResult(
                     c.getId(),
                     c.getSeq(),
                     VoMapper.mapOrNull(c.getContainerNo(), ContainerNumber::value),
-                    Nullables.mapOrNull(c.getContainerType(), Enum::name),
+                    Nullables.mapOrNull(c.getContainerType(), ContainerType::getCode),
                     c.getLengthFeet(),
                     VoMapper.mapOrNull(c.getSealNo1(), SealNumber::value),
                     VoMapper.mapOrNull(c.getSealNo2(), SealNumber::value),

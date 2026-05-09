@@ -133,6 +133,8 @@ export interface NonBlDetail {
   finalDestCode?: string;
   finalDestName?: string;
   finalEta?: string;
+  volumeDivisor?: string | null;
+  salesClass?: string | null;
   createdAt?: string;
   updatedAt?: string;
   containers: NonBlContainerView[];
@@ -218,6 +220,7 @@ export interface CreateNonBlRequest {
   finalDestName?: string;
   finalEta?: string;
   salesClass?: string;
+  volumeDivisor?: string;
   originalBlRef?: string;
   containers?: NonBlContainerRequest[];
   dims?: NonBlDimRequest[];

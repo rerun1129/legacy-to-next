@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.nonbl.entity;
 
 import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -62,6 +63,10 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @Column(name = "final_eta", length = 8)
     private String finalEta;
 
+    @Column(name = "volume_divisor", length = 10)
+    @Enumerated(EnumType.STRING)
+    private VolumeDivisor volumeDivisor;
+
     public void setHouseBl(HouseBlJpaEntity v)                   { this.houseBl = v; }
     public void setWorkDivision(HouseBlNonBl.WorkDivision v)     { this.workDivision = v; }
     public void setOriginalBlRef(String v)                        { this.originalBlRef = v; }
@@ -74,4 +79,5 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     public void setFinalDestCode(String v)                        { this.finalDestCode = v; }
     public void setFinalDestName(String v)                        { this.finalDestName = v; }
     public void setFinalEta(String v)                             { this.finalEta = v; }
+    public void setVolumeDivisor(VolumeDivisor v)                  { this.volumeDivisor = v; }
 }

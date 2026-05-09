@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.nonbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.Rton;
 import com.freightos.fms.domain.common.vo.Weight;
@@ -28,6 +29,7 @@ public class HouseBlNonBl extends HouseBl {
     private BlNumber originalBlRef;
     private Rton rton;
     private Weight volumeWtKg;
+    private VolumeDivisor volumeDivisor;
 
     // Schedule 확장 필드 (Non B/L 전용)
     private String linerCode;
@@ -45,6 +47,10 @@ public class HouseBlNonBl extends HouseBl {
 
     public static HouseBlNonBl create(WorkDivision workDivision, Bound bound) {
         return new HouseBlNonBl(workDivision, bound);
+    }
+
+    public void assignVolumeDivisor(VolumeDivisor volumeDivisor) {
+        this.volumeDivisor = volumeDivisor;
     }
 
     public void updateNonBlFields(BlNumber originalBlRef, Rton rton, Weight volumeWtKg) {

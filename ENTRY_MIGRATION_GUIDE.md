@@ -528,6 +528,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **CreateNonBlRequest validation 어노테이션 UI required 외 제거** — UI required 아닌 필드는 어노테이션 없이 null 통과. VO 검증 유지. ⚠️ 0aafb4d는 UI required 9개도 함께 제거한 over-correction. (2026-05-09, 0aafb4d)
 - **CreateNonBlRequest UI required 9개 어노테이션 복원** — §6.25 정책 교정. `hblNo`/`workDivision`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`에 `@NotBlank`+형식 어노테이션 재부착. (2026-05-09)
 - **List 더블클릭 → Entry 단건 조회 모드 진입 (§6.26)** — Non B/L List·Truck B/L List 더블클릭 시 hot-marker SET 후 path-param push. Truck B/L 백엔드 `GET /api/truck-bl/{id}` 신규 추가(`TruckBlUseCase`, `TruckBlService`, `TruckBlFactory`, `TruckBlDetailResult`, `TruckBlDetailResponse`). Truck Entry edit-mode 결선(id prop, hydrateAllowed, useQuery, form.reset, F5-redirect, clearDraft). (2026-05-09)
+- **Non B/L Entry body 콤보박스 4종 + Ref.No 저장 누락 보정 (2026-05-09)** — `volumeDivisor` Non B/L 한정 도입(`HouseBlNonBl`), `salesClass`·`pkgUnit`·`containerType` projection 복원, `mblNo`/`masterRefNo` `assignMasterReference` 호출 보강, `dimensionDivisor` FE Controller 전환. §12.1에 항공 공통화 검토 메모 추가.
 
 ---
 
@@ -538,3 +539,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **새 enum 등록** 시 §4 목록 갱신
 - **CSS 토큰 변경** 시 §7 갱신
 - **새 패턴 확립** 시 해당 섹션에 예시 추가
+
+---
+
+## 12. 후속 결정 대기 사항
+
+항공·그 외 Entry 마이그레이션 시 검토할 결정 사항.
+
+### 12.1 VolumeDivisor 도메인 위치 — 항공 Entry 마이그레이션 시 공통화 검토
+
+현재 `volumeDivisor`(부피 환산 divisor)는 Non B/L 전용 확장 필드(`HouseBlNonBl`)로 도입되어 있다.
+항공 Entry(Air House / Air Master) 마이그레이션 시 동일 개념이 필요해지면 다음 선택지를 검토:
+
+- `HouseBl` 공통 필드로 이전 — SEA/AIR/Master 모드도 새 컬럼 존재 (nullable로 회귀 안전)
+- 각 확장(`HouseBlNonBl`, `HouseBlAirHouse` 등)에 별도 보유 — 일관성 떨어짐, 이전 비용 발생
+
+> **결정 시점**: 항공 Entry 마이그레이션 plan 수립 단계.

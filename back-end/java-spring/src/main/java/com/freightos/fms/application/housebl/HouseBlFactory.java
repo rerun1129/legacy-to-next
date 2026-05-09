@@ -15,6 +15,7 @@ import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
@@ -69,6 +70,7 @@ public class HouseBlFactory {
 
     public void applyToEntity(UpdateHouseBlCommand cmd, HouseBl entity) {
         entity.update(toUpdateFields(cmd));
+        entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
         applySeaUpdate(entity, cmd.seaDetail());
         applyNonBlUpdate(entity, cmd);
         applySubUpdate(entity, cmd);
@@ -101,6 +103,7 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(cmd.salesClass(), SalesClass::fromCode),
                 cmd.mainItemName(), cmd.hsCode());
         if (cmd.masterBlId() != null) entity.linkToMaster(cmd.masterBlId());
+        entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
     }
 
     // ── 공통 필드 record 변환 (UPDATE) ───────────────────────────────
@@ -195,6 +198,7 @@ public class HouseBlFactory {
         nonBl.updateNonBlFields(BlNumber.of(cmd.originalBlRef()), Rton.of(cmd.rton()), Weight.of(cmd.volumeWeightKg()));
         nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
                 cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
+        nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
     }
 
     private void applyNonBlUpdate(HouseBl entity, UpdateHouseBlCommand cmd) {
@@ -202,6 +206,7 @@ public class HouseBlFactory {
         nonBl.updateNonBlFields(BlNumber.of(cmd.originalBlRef()), Rton.of(cmd.rton()), Weight.of(cmd.volumeWeightKg()));
         nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
                 cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
+        nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
     }
 
     // ── Sub 엔티티 일괄 적용 (CREATE) ────────────────────────────────
