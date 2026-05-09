@@ -148,8 +148,8 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(NON_BL) ───────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): syncContainers→syncDims→replaceDesc 순서 후 nonBlRepository.save 호출")
-    void saveNonBlHouseBl_syncsContainersDimsDescThenSavesNonBlExt() {
+    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims→mergeDesc 순서 후 nonBlRepository.save 호출")
+    void saveNonBlHouseBl_mergesContainersDimsDescThenSavesNonBlExt() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.NON_BL);
@@ -160,9 +160,9 @@ class HouseBlPersistenceAdapterTest {
         adapter.saveHouseBl(nonBl);
 
         InOrder order = inOrder(savedJpa, houseBlNonBlRepository);
-        order.verify(savedJpa).syncContainers(any());
-        order.verify(savedJpa).syncDims(any());
-        order.verify(savedJpa).replaceDesc(any());
+        order.verify(savedJpa).mergeContainers(any());
+        order.verify(savedJpa).mergeDims(any());
+        order.verify(savedJpa).mergeDesc(any());
         order.verify(houseBlNonBlRepository).save(any());
     }
 
