@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { listFilterStore } from "./use-list-filter-store";
+import { useEntryFocusStore, domainFromPath } from "./use-entry-focus-store";
 
 export interface Tab {
   id: string;
@@ -71,6 +72,8 @@ export const useTabs = create<TabStore>((set, get) => ({
     const next = tabs.filter((t) => t.id !== id);
     set({ tabs: next });
     listFilterStore.getState().clearFilter(id);
+    const dom = domainFromPath(id);
+    if (dom) useEntryFocusStore.getState().clearFocus(dom);
     // navigate to: previous tab, or next tab, or dashboard fallback
     const target = next[Math.max(0, idx - 1)];
     return target?.href ?? "/dashboard";
@@ -95,7 +98,11 @@ export const useTabs = create<TabStore>((set, get) => ({
     const { tabs } = get();
     const target = tabs.find(t => t.id === id);
     if (!target) return;
-    tabs.filter(t => t.id !== id).forEach(t => listFilterStore.getState().clearFilter(t.id));
+    tabs.filter(t => t.id !== id).forEach(t => {
+      listFilterStore.getState().clearFilter(t.id);
+      const dom = domainFromPath(t.id);
+      if (dom) useEntryFocusStore.getState().clearFocus(dom);
+    });
     set({ tabs: [target] });
   },
 
@@ -103,7 +110,11 @@ export const useTabs = create<TabStore>((set, get) => ({
     const { tabs } = get();
     const idx = tabs.findIndex(t => t.id === id);
     if (idx === -1) return;
-    tabs.slice(idx + 1).forEach(t => listFilterStore.getState().clearFilter(t.id));
+    tabs.slice(idx + 1).forEach(t => {
+      listFilterStore.getState().clearFilter(t.id);
+      const dom = domainFromPath(t.id);
+      if (dom) useEntryFocusStore.getState().clearFocus(dom);
+    });
     set({ tabs: tabs.slice(0, idx + 1) });
   },
 
@@ -111,7 +122,11 @@ export const useTabs = create<TabStore>((set, get) => ({
     const { tabs } = get();
     const idx = tabs.findIndex(t => t.id === id);
     if (idx === -1) return;
-    tabs.slice(0, idx).forEach(t => listFilterStore.getState().clearFilter(t.id));
+    tabs.slice(0, idx).forEach(t => {
+      listFilterStore.getState().clearFilter(t.id);
+      const dom = domainFromPath(t.id);
+      if (dom) useEntryFocusStore.getState().clearFocus(dom);
+    });
     set({ tabs: tabs.slice(idx) });
   },
 
