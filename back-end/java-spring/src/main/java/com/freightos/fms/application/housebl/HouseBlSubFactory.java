@@ -20,6 +20,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
 import com.freightos.fms.domain.housebl.entity.HouseBlDim;
 import com.freightos.fms.domain.housebl.entity.HouseBlScheduleLeg;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruckOrder;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.TruckType;
 import com.freightos.common.util.Nullables;
@@ -37,6 +38,8 @@ class HouseBlSubFactory {
     // ── Desc ─────────────────────────────────────────────────────────
 
     void applyDesc(HouseBl entity, CreateHouseBlCommand.DescCommand r) {
+        // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 관리됨
+        if (entity instanceof HouseBlNonBl) return;
         if (r == null) return;
         HouseBlDesc desc = HouseBlDesc.create(null);
         desc.updateContent(r.marks(), r.description(),
@@ -45,6 +48,8 @@ class HouseBlSubFactory {
     }
 
     void applyDescUpdate(HouseBl entity, UpdateHouseBlCommand.DescCommand r) {
+        // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 관리됨
+        if (entity instanceof HouseBlNonBl) return;
         if (r == null) return;
         HouseBlDesc desc = HouseBlDesc.create(null);
         if (r.id() != null) desc.assignIdentity(r.id(), null, null, null, null);

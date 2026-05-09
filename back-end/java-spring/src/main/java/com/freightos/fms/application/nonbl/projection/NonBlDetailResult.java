@@ -18,7 +18,6 @@ import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.entity.HouseBlContainer;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
-import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
 import com.freightos.fms.domain.housebl.entity.HouseBlDim;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 
@@ -75,9 +74,9 @@ public record NonBlDetailResult(
         String hsCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
+        String remark,
         List<NonBlContainerView> containers,
-        List<NonBlDimView> dims,
-        NonBlDescView desc
+        List<NonBlDimView> dims
 ) {
 
     public static NonBlDetailResult from(HouseBlNonBl nonBl) {
@@ -125,9 +124,9 @@ public record NonBlDetailResult(
                 nonBl.getHsCode(),
                 nonBl.getCreatedAt(),
                 nonBl.getUpdatedAt(),
+                nonBl.getRemark(),
                 nonBl.getContainers() == null ? List.of() : nonBl.getContainers().stream().map(NonBlContainerView::from).toList(),
-                nonBl.getDims() == null ? List.of() : nonBl.getDims().stream().map(NonBlDimView::from).toList(),
-                nonBl.getDesc() == null ? null : NonBlDescView.from(nonBl.getDesc())
+                nonBl.getDims() == null ? List.of() : nonBl.getDims().stream().map(NonBlDimView::from).toList()
         );
     }
 
@@ -197,17 +196,4 @@ public record NonBlDetailResult(
         }
     }
 
-    public record NonBlDescView(
-            String marks,
-            String description,
-            String remark
-    ) {
-        public static NonBlDescView from(HouseBlDesc desc) {
-            return new NonBlDescView(
-                    desc.getMarks(),
-                    desc.getDescription(),
-                    desc.getRemark()
-            );
-        }
-    }
 }

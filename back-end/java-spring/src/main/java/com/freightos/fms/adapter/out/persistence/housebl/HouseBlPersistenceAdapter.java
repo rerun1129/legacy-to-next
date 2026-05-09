@@ -132,8 +132,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.mergeDims(nonBlDims);
-                HouseBlDescJpaEntity nonBlDescJpa = Nullables.mapOrNull(nonBl.getDesc(), d -> houseBlDocMapper.toDescJpa(d, savedJpa));
-                savedJpa.mergeDesc(nonBlDescJpa);
+                // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 저장됨
                 houseBlNonBlRepository.save(nonBlJpa);
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());

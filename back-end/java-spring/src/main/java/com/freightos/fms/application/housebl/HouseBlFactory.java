@@ -199,6 +199,7 @@ public class HouseBlFactory {
         nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
                 cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
         nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
+        nonBl.updateRemark(cmd.remark());
     }
 
     private void applyNonBlUpdate(HouseBl entity, UpdateHouseBlCommand cmd) {
@@ -207,6 +208,7 @@ public class HouseBlFactory {
         nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
                 cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
         nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
+        nonBl.updateRemark(cmd.remark());
     }
 
     // ── Sub 엔티티 일괄 적용 (CREATE) ────────────────────────────────

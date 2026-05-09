@@ -56,6 +56,7 @@ public record UpdateHouseBlCommand(
         String finalEta,
         BigDecimal volumeWeightKg,
         BigDecimal rton,
+        String remark,
 
         // SEA 확장 필드
         SeaDetailCommand seaDetail,

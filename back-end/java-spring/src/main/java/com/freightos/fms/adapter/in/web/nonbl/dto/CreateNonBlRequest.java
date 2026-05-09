@@ -52,11 +52,12 @@ public record CreateNonBlRequest(
         BigDecimal volumeWeightKg,
         BigDecimal rton,
 
+        String remark,
+
         // SEA 확장 필드
         CreateHouseBlRequest.SeaDetailRequest seaDetail,
 
         // Sub 엔티티
-        CreateHouseBlRequest.DescRequest desc,
         List<CreateHouseBlRequest.DimRequest> dims,
         List<CreateHouseBlRequest.ContainerRequest> containers,
         List<CreateHouseBlRequest.ScheduleLegRequest> scheduleLegs,

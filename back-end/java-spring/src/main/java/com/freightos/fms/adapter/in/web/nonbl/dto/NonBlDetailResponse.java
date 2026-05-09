@@ -54,9 +54,9 @@ public record NonBlDetailResponse(
         String hsCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
+        String remark,
         List<ContainerView> containers,
-        List<DimView> dims,
-        DescView desc
+        List<DimView> dims
 ) {
 
     public record ContainerView(
@@ -88,12 +88,6 @@ public record NonBlDetailResponse(
             Integer quantity,
             BigDecimal cbm,
             BigDecimal volumeWeightKg
-    ) {}
-
-    public record DescView(
-            String marks,
-            String description,
-            String remark
     ) {}
 
     public static NonBlDetailResponse from(NonBlDetailResult result) {
@@ -141,9 +135,9 @@ public record NonBlDetailResponse(
                 result.hsCode(),
                 result.createdAt(),
                 result.updatedAt(),
+                result.remark(),
                 toContainerViews(result.containers()),
-                toDimViews(result.dims()),
-                toDescView(result.desc())
+                toDimViews(result.dims())
         );
     }
 
@@ -160,10 +154,5 @@ public record NonBlDetailResponse(
         return src.stream().map(d -> new DimView(
                 d.id(), d.lengthCm(), d.widthCm(), d.heightCm(),
                 d.quantity(), d.cbm(), d.volumeWeightKg())).toList();
-    }
-
-    private static DescView toDescView(NonBlDetailResult.NonBlDescView src) {
-        if (src == null) return null;
-        return new DescView(src.marks(), src.description(), src.remark());
     }
 }

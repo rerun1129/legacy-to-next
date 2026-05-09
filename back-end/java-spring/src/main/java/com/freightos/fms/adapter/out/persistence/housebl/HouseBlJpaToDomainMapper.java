@@ -84,9 +84,8 @@ public class HouseBlJpaToDomainMapper {
                 .map(cargoMapper::toDimDomain)
                 .collect(Collectors.toList());
         domain.initDims(dims);
-        if (jpa.getDesc() != null) {
-            domain.initDesc(docMapper.toDescDomain(jpa.getDesc()));
-        }
+        // NON_BL은 desc를 사용하지 않음 — house_bl_non_bl.remark 컬럼으로 이전됨
+        if (nonBlJpa != null) domain.updateRemark(nonBlJpa.getRemark());
         return domain;
     }
 

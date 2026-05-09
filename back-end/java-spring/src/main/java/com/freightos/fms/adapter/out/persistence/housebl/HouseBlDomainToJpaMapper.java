@@ -138,5 +138,6 @@ public class HouseBlDomainToJpaMapper {
         jpa.setFinalDestName(domain.getFinalDestName());
         jpa.setFinalEta(domain.getFinalEta());
         jpa.setVolumeDivisor(domain.getVolumeDivisor());
+        jpa.setRemark(domain.getRemark());
     }
 }

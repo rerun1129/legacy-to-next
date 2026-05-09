@@ -6,7 +6,6 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
-import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class NonBlService implements NonBlUseCase {
 
     private final HouseBlUseCase houseBlUseCase;
-    private final HouseBlPort houseBlPort;
     private final NonBlSearchPort nonBlSearchPort;
 
     @Override
@@ -60,9 +58,7 @@ public class NonBlService implements NonBlUseCase {
     }
 
     private HouseBlNonBl findNonBlDomainById(Long id) {
-        return houseBlPort.findHouseBlById(id)
-                .filter(e -> e instanceof HouseBlNonBl)
-                .map(e -> (HouseBlNonBl) e)
+        return nonBlSearchPort.findNonBlById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND));
     }
 }

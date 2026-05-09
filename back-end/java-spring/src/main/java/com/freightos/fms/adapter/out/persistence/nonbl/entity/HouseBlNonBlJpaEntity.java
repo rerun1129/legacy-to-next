@@ -67,6 +67,9 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private VolumeDivisor volumeDivisor;
 
+    @Column(name = "remark", columnDefinition = "TEXT")
+    private String remark;
+
     public void setHouseBl(HouseBlJpaEntity v)                   { this.houseBl = v; }
     public void setWorkDivision(HouseBlNonBl.WorkDivision v)     { this.workDivision = v; }
     public void setOriginalBlRef(String v)                        { this.originalBlRef = v; }
@@ -80,4 +83,5 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     public void setFinalDestName(String v)                        { this.finalDestName = v; }
     public void setFinalEta(String v)                             { this.finalEta = v; }
     public void setVolumeDivisor(VolumeDivisor v)                  { this.volumeDivisor = v; }
+    public void setRemark(String v)                               { this.remark = v; }
 }

@@ -94,8 +94,9 @@ public class NonBlAssembler {
                 req.finalEta(),
                 req.volumeWeightKg(),
                 req.rton(),
+                req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
-                toDescCommand(req.desc()),
+                null,
                 toDimCommands(req.dims()),
                 toContainerCommands(req.containers()),
                 toScheduleLegCommands(req.scheduleLegs()),
@@ -151,8 +152,9 @@ public class NonBlAssembler {
                 req.finalEta(),
                 req.volumeWeightKg(),
                 req.rton(),
+                req.remark(),
                 toSeaDetailCommandU(req.seaDetail()),
-                toDescCommandU(req.desc()),
+                null,
                 toDimCommandsU(req.dims()),
                 toContainerCommandsU(req.containers()),
                 toScheduleLegCommandsU(req.scheduleLegs()),
@@ -171,11 +173,6 @@ public class NonBlAssembler {
                 s.issuePlace(), s.doDate(), s.payableAt(), s.triangle(), s.serviceTerm(),
                 s.vesselCode2(), s.vesselNationality(), s.weightUnit(), s.rton(),
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
-    }
-
-    private CreateHouseBlCommand.DescCommand toDescCommand(CreateHouseBlRequest.DescRequest r) {
-        if (r == null) return null;
-        return new CreateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
     }
 
     private List<CreateHouseBlCommand.DimCommand> toDimCommands(List<CreateHouseBlRequest.DimRequest> reqs) {
@@ -226,11 +223,6 @@ public class NonBlAssembler {
                 s.issuePlace(), s.doDate(), s.payableAt(), s.triangle(), s.serviceTerm(),
                 s.vesselNationality(), s.weightUnit(), s.rton(),
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
-    }
-
-    private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateNonBlRequest.DescRequest r) {
-        if (r == null) return null;
-        return new UpdateHouseBlCommand.DescCommand(r.id(), r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
     }
 
     private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<UpdateNonBlRequest.DimRequest> reqs) {

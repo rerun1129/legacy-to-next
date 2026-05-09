@@ -148,9 +148,10 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(NON_BL) ───────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims→mergeDesc 순서 후 nonBlRepository.save 호출")
-    void saveNonBlHouseBl_mergesContainersDimsDescThenSavesNonBlExt() {
+    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims 후 nonBlRepository.save 호출, mergeDesc는 미호출")
+    void saveNonBlHouseBl_mergesContainersDimsThenSavesNonBlExt_withoutDesc() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        nonBl.updateRemark("REMARK_TEXT");
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.NON_BL);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
@@ -162,8 +163,10 @@ class HouseBlPersistenceAdapterTest {
         InOrder order = inOrder(savedJpa, houseBlNonBlRepository);
         order.verify(savedJpa).mergeContainers(any());
         order.verify(savedJpa).mergeDims(any());
-        order.verify(savedJpa).mergeDesc(any());
+        // NON_BL은 desc를 사용하지 않음 — mergeDesc/replaceDesc 미호출, remark는 nonBlJpa에 저장됨
         order.verify(houseBlNonBlRepository).save(any());
+        then(savedJpa).should(never()).mergeDesc(any());
+        then(savedJpa).should(never()).replaceDesc(any());
     }
 
     // ── findHouseBlById: JobDiv 분기 검증 ─────────────────────────────

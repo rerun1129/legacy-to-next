@@ -128,24 +128,28 @@ class HouseBlMapperModeTest {
     // ── NON_BL ───────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toNonBlDomain: containers/dims/desc 포함, scheduleLegs 빈 컬렉션")
-    void toNonBlDomain_includesContainersDimsDesc_excludesLicensesAndLegs() {
+    @DisplayName("toNonBlDomain: containers/dims 포함, desc는 null(house_bl_non_bl.remark 컬럼으로 이전됨), scheduleLegs 빈 컬렉션")
+    void toNonBlDomain_includesContainersDims_descIsNull() {
         HouseBlJpaEntity jpa = nonBlJpa(8L);
         jpa.syncContainers(List.of(containerJpa(jpa)));
         jpa.syncDims(List.of(dimJpa(jpa)));
-        jpa.replaceDesc(descJpa(jpa));
 
-        HouseBlNonBl domain = mapper.toNonBlDomain(jpa, null);
+        HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
+        nonBlJpa.setRemark("TEST_REMARK");
+
+        HouseBlNonBl domain = mapper.toNonBlDomain(jpa, nonBlJpa);
 
         assertThat(domain.getContainers()).hasSize(1);
         assertThat(domain.getDims()).hasSize(1);
-        assertThat(domain.getDesc()).isNotNull();
+        // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 관리됨
+        assertThat(domain.getDesc()).isNull();
+        assertThat(domain.getRemark()).isEqualTo("TEST_REMARK");
         assertThat(domain.getScheduleLegs()).isEmpty();
     }
 
     @Test
-    @DisplayName("toNonBlDomain: 자식 컬렉션 없으면 빈 리스트, desc null")
-    void toNonBlDomain_emptyChildren_returnsEmptyCollectionsAndNullDesc() {
+    @DisplayName("toNonBlDomain: 자식 컬렉션 없으면 빈 리스트, desc null, remark null")
+    void toNonBlDomain_emptyChildren_returnsEmptyCollectionsAndNullDescAndNullRemark() {
         HouseBlJpaEntity jpa = nonBlJpa(9L);
 
         HouseBlNonBl domain = mapper.toNonBlDomain(jpa, null);
@@ -153,6 +157,7 @@ class HouseBlMapperModeTest {
         assertThat(domain.getContainers()).isEmpty();
         assertThat(domain.getDims()).isEmpty();
         assertThat(domain.getDesc()).isNull();
+        assertThat(domain.getRemark()).isNull();
     }
 
     // ── 픽스처 헬퍼 ─────────────────────────────────────────────────

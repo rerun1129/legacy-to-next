@@ -1,6 +1,9 @@
 package com.freightos.fms.adapter.out.persistence.nonbl;
 
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlJpaToDomainMapper;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.QHouseBlNonBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
@@ -9,6 +12,7 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -20,12 +24,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class NonBlRepositoryImpl implements NonBlRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final HouseBlNonBlRepository houseBlNonBlRepository;
+    private final HouseBlJpaToDomainMapper jpaToDomainMapper;
 
     @Override
     public PagedResult<NonBlSummary> searchNonBlSummaries(NonBlFilter filter, PageRequest pageRequest) {
@@ -134,6 +141,24 @@ public class NonBlRepositoryImpl implements NonBlRepositoryCustom {
             case SETTLE_PARTNER -> h.settlePartnerCode;
         };
         return col.eq(code);
+    }
+
+    @Override
+    public Optional<HouseBlNonBl> findNonBlById(Long id) {
+        // house_bl_desc JOIN 없이 house_bl × house_bl_non_bl만 조인하여 조회
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        QHouseBlNonBlJpaEntity nonBlQ = QHouseBlNonBlJpaEntity.houseBlNonBlJpaEntity;
+
+        HouseBlJpaEntity houseBlJpa = queryFactory
+                .selectFrom(h)
+                .innerJoin(nonBlQ).on(nonBlQ.houseBl.houseBlId.eq(h.houseBlId))
+                .where(h.houseBlId.eq(id).and(h.jobDiv.eq(JobDiv.NON_BL)))
+                .fetchOne();
+
+        if (houseBlJpa == null) return Optional.empty();
+
+        HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(id).orElse(null);
+        return Optional.of(jpaToDomainMapper.toNonBlDomain(houseBlJpa, nonBlJpa));
     }
 
     private static BooleanExpression eqPort(

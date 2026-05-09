@@ -40,6 +40,8 @@ public class HouseBlNonBl extends HouseBl {
     private String finalDestName;
     private String finalEta;   // 형식: "yyyyMMdd"
 
+    private String remark;
+
     protected HouseBlNonBl(WorkDivision workDivision, Bound bound) {
         super(JobDiv.NON_BL, bound);
         this.workDivision = workDivision;
@@ -57,6 +59,10 @@ public class HouseBlNonBl extends HouseBl {
         this.originalBlRef = originalBlRef;
         this.rton          = rton;
         this.volumeWtKg    = volumeWtKg;
+    }
+
+    public void updateRemark(String remark) {
+        this.remark = remark;
     }
 
     public void updateScheduleFields(String linerCode, String linerName, String vesselName,

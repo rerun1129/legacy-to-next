@@ -487,4 +487,34 @@ class HouseBlMapperTest {
         assertThat(domain.getRton().ton()).isEqualByComparingTo(BigDecimal.valueOf(12.5));
         assertThat(domain.getVolumeWtKg().kg()).isEqualByComparingTo(BigDecimal.valueOf(100.0));
     }
+
+    @Test
+    @DisplayName("applyNonBlFields: remark가 domain→JPA로 매핑된다")
+    void applyNonBlFields_remarkIsMappedToJpa() {
+        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        domain.updateRemark("REMARK_TEXT");
+        HouseBlNonBlJpaEntity jpa = new HouseBlNonBlJpaEntity();
+
+        domainToJpaMapper.applyNonBlFields(domain, jpa);
+
+        assertThat(jpa.getRemark()).isEqualTo("REMARK_TEXT");
+    }
+
+    @Test
+    @DisplayName("toNonBlDomain: remark가 JPA→domain으로 복원된다")
+    void toNonBlDomain_remarkIsRestoredFromJpa() {
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setJobDiv(JobDiv.NON_BL);
+        parentJpa.setBound(Bound.EXP);
+
+        HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
+        nonBlJpa.setWorkDivision(HouseBlNonBl.WorkDivision.SEA);
+        nonBlJpa.setRemark("REMARK_TEXT");
+
+        HouseBlNonBl domain = jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa);
+
+        assertThat(domain.getRemark()).isEqualTo("REMARK_TEXT");
+        // NON_BL은 desc를 사용하지 않음
+        assertThat(domain.getDesc()).isNull();
+    }
 }

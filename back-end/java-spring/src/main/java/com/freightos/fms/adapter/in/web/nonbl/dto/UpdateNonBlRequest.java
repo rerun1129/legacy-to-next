@@ -50,27 +50,18 @@ public record UpdateNonBlRequest(
         BigDecimal volumeWeightKg,
         BigDecimal rton,
 
+        String remark,
+
         // SEA 확장 필드
         CreateHouseBlRequest.SeaDetailRequest seaDetail,
 
         // Sub 엔티티 — NonBl UPDATE 전용 (id 포함하여 merge-by-id 지원)
-        DescRequest desc,
         List<DimRequest> dims,
         List<ContainerRequest> containers,
         List<CreateHouseBlRequest.ScheduleLegRequest> scheduleLegs,
         List<CreateHouseBlRequest.TruckOrderRequest> truckOrders,
         List<CreateHouseBlRequest.AirChargeRequest> airCharges
 ) {
-
-    /** NonBl UPDATE 전용 — 기존 행 식별을 위한 id 포함. */
-    public record DescRequest(
-            Long id,
-            String marks,
-            String description,
-            String descClause1,
-            String descClause2,
-            String remark
-    ) {}
 
     /** NonBl UPDATE 전용 — 기존 행 식별을 위한 id 포함. */
     public record DimRequest(
