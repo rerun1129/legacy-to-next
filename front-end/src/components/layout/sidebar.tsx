@@ -82,7 +82,7 @@ const NAV_MODULES: NavModule[] = [
 
 // ─── Helpers ────────────────────────────────────────────────
 function leafActive(pathname: string, leaf: NavLeaf) {
-  return pathname === leaf.href;
+  return pathname === leaf.href || pathname.startsWith(leaf.href + "/");
 }
 
 function sectionActive(pathname: string, s: NavSection) {
