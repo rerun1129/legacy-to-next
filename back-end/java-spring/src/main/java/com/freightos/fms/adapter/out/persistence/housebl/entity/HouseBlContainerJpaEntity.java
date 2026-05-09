@@ -27,7 +27,7 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
     private Long houseBlId;
 
-    @Column(name = "container_no", nullable = false, length = 20)
+    @Column(name = "container_no", length = 20)
     private String containerNo;
 
     @Column(name = "container_type", length = 10)
