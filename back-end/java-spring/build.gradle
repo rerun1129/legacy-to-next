@@ -34,6 +34,7 @@ dependencies {
     // ── Persistence ────────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly    'org.postgresql:postgresql'
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0'
 
     // ── Schema migration (Flyway) ──────────────────────────────────
     // application.yml: spring.flyway.enabled=false (로컬 개발 시 off)

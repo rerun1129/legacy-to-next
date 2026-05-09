@@ -3,11 +3,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none   # 엔티티→스키마 자동 생성 필요 시 create-drop 으로 변경
-    show-sql: true
+    show-sql: false
   flyway:
     enabled: false     # 스키마 확정 후 true
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
 
 logging:
   level:
     com.freightos.fms: DEBUG
-    org.hibernate.SQL: DEBUG
+    p6spy: INFO
