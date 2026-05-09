@@ -145,6 +145,7 @@ export interface NonBlDetail {
 // ── 자식 Request 타입 ─────────────────────────────────────────
 
 export interface NonBlContainerRequest {
+  id?: number;
   seq?: number;
   containerNo?: string;
   containerType?: string;
@@ -165,6 +166,7 @@ export interface NonBlContainerRequest {
 }
 
 export interface NonBlDimRequest {
+  id?: number;
   lengthCm?: number;
   widthCm?: number;
   heightCm?: number;

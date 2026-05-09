@@ -101,7 +101,7 @@ export function NonBLEntry() {
       // BE 응답 volumeDivisor → form 필드 dimensionDivisor
       dimensionDivisor:   detail.volumeDivisor ?? "CM6000",
       containers: detail.containers.map((c, idx) => ({
-        id:       idx,
+        id:       c.id ?? idx,
         cno:      c.containerNo ?? "",
         contType: c.containerType ?? "",
         sealNo1:  c.sealNo1 ?? "",
@@ -113,7 +113,7 @@ export function NonBLEntry() {
         cbm:      c.cbm,
       })),
       dimensions: detail.dims.map((d, idx) => ({
-        id:     idx,
+        id:     d.id ?? idx,
         length: d.lengthCm != null ? String(d.lengthCm) : "",
         width:  d.widthCm  != null ? String(d.widthCm)  : "",
         height: d.heightCm != null ? String(d.heightCm) : "",

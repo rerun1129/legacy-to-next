@@ -19,6 +19,7 @@ function toStr(v: string | undefined): string | undefined {
 /** NonBlFormValues를 CreateNonBlRequest로 변환한다. */
 export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
   const containers = values.containers?.map((c) => ({
+    id:            c.id,
     containerNo:   toStr(c.cno),
     containerType: toStr(c.contType),
     sealNo1:       toStr(c.sealNo1),
@@ -31,6 +32,7 @@ export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
   }));
 
   const dims = values.dimensions?.map((d) => ({
+    id:             d.id,
     lengthCm:       toNum(d.length),
     widthCm:        toNum(d.width),
     heightCm:       toNum(d.height),
