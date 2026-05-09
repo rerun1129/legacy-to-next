@@ -40,9 +40,12 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
       key: "nonBlNo",
       label: "Non B/L No",
       minWidth: 150,
-      render: (v) => (
+      render: (v, row) => (
         <div
-          onDoubleClick={() => router.push("/fms/non-bl/entry")}
+          onDoubleClick={() => {
+            sessionStorage.setItem(`non-bl-entry:hot:${row.id}`, "1");
+            router.push(`/fms/non-bl/entry/${row.id}`);
+          }}
           style={{ cursor: "pointer" }}
         >
           {String(v ?? "")}

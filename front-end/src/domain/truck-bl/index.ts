@@ -23,6 +23,45 @@ export interface TruckBlRow {
   teamName: string;
 }
 
+export interface TruckBlDetail {
+  id: number;
+  hblNo?: string;
+  jobDiv: string;
+  bound: string;
+  shipmentType?: string;
+  freightTerm?: string;
+  shipperCode?: string;
+  consigneeCode?: string;
+  notifyCode?: string;
+  settlePartnerCode?: string;
+  polCode?: string;
+  podCode?: string;
+  deliveryCode?: string;
+  etd?: string;
+  eta?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  cbm?: number;
+  actualCustomerCode?: string;
+  operatorCode?: string;
+  teamCode?: string;
+  salesManCode?: string;
+  incoterms?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  truckerCode?: string;
+  truckerPic?: string;
+  chargeWeightKg?: number;
+  pickupDate?: string;
+  pickupTm?: string;
+  etdTm?: string;
+  etaTm?: string;
+  loadType?: string;
+  serviceTerm?: string;
+  voyageNo?: string;
+}
+
 export interface TruckBlFilter {
   bound: string;
   dateFrom: string;

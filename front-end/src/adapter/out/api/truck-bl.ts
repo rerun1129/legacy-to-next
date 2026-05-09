@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { TruckBlPort, TruckBlPageResult } from '@/application/truck-bl/ports';
-import type { TruckBlRow, TruckBlFilter } from '@/domain/truck-bl';
+import type { TruckBlRow, TruckBlFilter, TruckBlDetail } from '@/domain/truck-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
 
@@ -65,6 +65,45 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
+const TRUCK_BL_DETAIL_SCHEMA = z.object({
+  id: z.number(),
+  hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  jobDiv: z.string(),
+  bound: z.string(),
+  shipmentType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  freightTerm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  shipperCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  consigneeCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  notifyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  polCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  podCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  deliveryCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  etd: z.string().nullable().optional().transform((v) => v ?? undefined),
+  eta: z.string().nullable().optional().transform((v) => v ?? undefined),
+  pkgQty: z.number().nullable().optional().transform((v) => v ?? undefined),
+  pkgUnit: z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  actualCustomerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  operatorCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  teamCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  salesManCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  incoterms: z.string().nullable().optional().transform((v) => v ?? undefined),
+  createdAt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  updatedAt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  truckerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  truckerPic: z.string().nullable().optional().transform((v) => v ?? undefined),
+  chargeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  pickupDate: z.string().nullable().optional().transform((v) => v ?? undefined),
+  pickupTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  etdTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  etaTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  loadType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  serviceTerm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  voyageNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
 export const API_TRUCK_BL_PORT: TruckBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
   async list(filter: TruckBlFilter, page: number, size = 50): Promise<TruckBlPageResult> {
@@ -91,5 +130,12 @@ export const API_TRUCK_BL_PORT: TruckBlPort = {
     if (!parsed.success) throw new ResponseParseError(`Invalid truck-bl list response: ${parsed.error.message}`);
     const { content, totalPages, totalElements, page: p, size: s } = parsed.data.data;
     return { content, totalPages, totalElements, page: p + 1, size: s };
+  },
+
+  async getById(id: number): Promise<TruckBlDetail> {
+    const json = await fetchJson(`${TRUCK_BL_BASE}/${id}`);
+    const parsed = apiResponse(TRUCK_BL_DETAIL_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid truck-bl detail response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
 };

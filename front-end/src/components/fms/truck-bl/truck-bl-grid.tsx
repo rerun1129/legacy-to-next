@@ -40,9 +40,12 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
       key: "truckBlNo",
       label: "Truck B/L No",
       minWidth: 150,
-      render: (v) => (
+      render: (v, row) => (
         <div
-          onDoubleClick={() => router.push("/fms/truck-bl/entry")}
+          onDoubleClick={() => {
+            sessionStorage.setItem(`truck-bl-entry:hot:${row.id}`, "1");
+            router.push(`/fms/truck-bl/entry/${row.id}`);
+          }}
           style={{ cursor: "pointer" }}
         >
           {String(v ?? "")}

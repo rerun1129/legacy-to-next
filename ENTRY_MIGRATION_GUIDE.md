@@ -412,6 +412,42 @@ Container Info 그리드의 `pkgUnit` 컬럼은 비표준 단위(CTN/PCS/BAG 등
 
 사례: 0aafb4d — `CreateNonBlRequest` UI required까지 함께 제거한 over-correction. 후속 plan에서 9개 복원.
 
+### 6.26 List 더블클릭 → Entry 진입 패턴 (PK 단건 조회 모드)
+
+List 행을 더블클릭하면 **PK를 URL로 전달**하고 Entry가 마운트 직후 `useQuery`로 단건 조회한다. List는 데이터를 prefetch/전달하지 않는다.
+
+#### 허용 패턴 A — Path-param + hot-marker (Non B/L, Truck B/L · 정규 패턴)
+
+```tsx
+// Grid의 BL-No 셀 onDoubleClick
+onDoubleClick={() => {
+  sessionStorage.setItem(`${prefix}-entry:hot:${row.id}`, "1");
+  router.push(`/fms/${prefix}/entry/${row.id}`);
+}}
+```
+
+Entry 마운트 시:
+- 마커 있으면 제거 후 `hydrateAllowed = true` → `useQuery` 발화 → `form.reset`
+- 마커 없으면 (F5/deeplink) `router.replace("/fms/${prefix}/entry")` → 빈 폼
+
+#### 허용 패턴 B — Query-param (Master B/L, House B/L · 부분 마이그레이션 상태)
+
+```tsx
+// Grid의 BL-No 셀 onDoubleClick
+onDoubleClick={() => router.push(`/fms/.../entry?id=${row.id}`)}
+```
+
+Entry가 `searchParams.id`를 읽어 `useQuery` 발화. F5-clear 없음. 후속 마이그레이션에서 패턴 A로 전환 예정.
+
+#### 안티패턴 (버그) ❌
+
+```tsx
+// PK 없이 push → 신규 저장 모드로 진입
+onDoubleClick={() => router.push("/fms/non-bl/entry")}
+```
+
+> **적용 현황** (2026-05-09): Non B/L ✅ 패턴 A, Truck B/L ✅ 패턴 A, Master B/L ✅ 패턴 B, House B/L ✅ 패턴 B.
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
@@ -491,6 +527,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **Entry form Enter 키 implicit submission 차단** — `form onKeyDown` 가드(TEXTAREA 제외) + Save 버튼 `type="button"·onClick` 이중 방어 (2026-05-09, faad158)
 - **CreateNonBlRequest validation 어노테이션 UI required 외 제거** — UI required 아닌 필드는 어노테이션 없이 null 통과. VO 검증 유지. ⚠️ 0aafb4d는 UI required 9개도 함께 제거한 over-correction. (2026-05-09, 0aafb4d)
 - **CreateNonBlRequest UI required 9개 어노테이션 복원** — §6.25 정책 교정. `hblNo`/`workDivision`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`에 `@NotBlank`+형식 어노테이션 재부착. (2026-05-09)
+- **List 더블클릭 → Entry 단건 조회 모드 진입 (§6.26)** — Non B/L List·Truck B/L List 더블클릭 시 hot-marker SET 후 path-param push. Truck B/L 백엔드 `GET /api/truck-bl/{id}` 신규 추가(`TruckBlUseCase`, `TruckBlService`, `TruckBlFactory`, `TruckBlDetailResult`, `TruckBlDetailResponse`). Truck Entry edit-mode 결선(id prop, hydrateAllowed, useQuery, form.reset, F5-redirect, clearDraft). (2026-05-09)
 
 ---
 

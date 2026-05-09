@@ -1,4 +1,4 @@
-import type { TruckBlRow, TruckBlFilter } from '@/domain/truck-bl';
+import type { TruckBlRow, TruckBlFilter, TruckBlDetail } from '@/domain/truck-bl';
 
 export interface TruckBlPageResult {
   content: TruckBlRow[];
@@ -10,4 +10,5 @@ export interface TruckBlPageResult {
 
 export interface TruckBlPort {
   list(filter: TruckBlFilter, page: number, size?: number): Promise<TruckBlPageResult>;
+  getById(id: number): Promise<TruckBlDetail>;
 }
