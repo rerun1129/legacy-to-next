@@ -448,34 +448,57 @@ onDoubleClick={() => router.push("/fms/non-bl/entry")}
 
 > **적용 현황** (2026-05-09): Non B/L ✅ 패턴 A, Truck B/L ✅ 패턴 A, Master B/L ✅ 패턴 B, House B/L ✅ 패턴 B.
 
-### 6.27 SQL UPDATE 로그가 2번 출력될 때 — p6spy 카테고리 이중 hook 의심
+### 6.27 Entry 화면 비동기 처리 시 ScreenGuard 풀 오버레이 적용
 
-p6spy 로그에 같은 UPDATE SQL이 두 번 출력되어 마치 SQL이 두 번 emit된 것처럼 보일 수 있다. **진짜 SQL emit은 1회**일 가능성이 매우 높다. ORM 측 가설(dirty cycle 재진입, AuditingEntityListener, `@MappedSuperclass`, 양방향 매핑 등)에 빠지기 전에 **반드시 진짜 SQL emit 횟수부터 측정**할 것.
+Entry 화면에서 단건 조회·저장·삭제 mutation 진행 중에는 표준 공통 컴포넌트 `<ScreenGuard />`(`@/components/shared/screen-guard`)로 화면 전체를 잠그고 로딩 인디케이터를 표시한다.
 
-**원인**:
-- Hibernate `batch_size > 1` + `order_updates: true` 환경에서 UPDATE는 batch 모드로 실행
-- p6spy가 `addBatch()`와 `executeBatch()` 두 시점에 hook → 같은 SQL 두 번 logging
-- INSERT는 `GenerationType.IDENTITY` 사용 시 batch 처리 불가(ID가 INSERT 시점에서야 결정) → statement 카테고리 1회만 logging → 정상
-- 즉 **UPDATE만 이중 출력, INSERT는 정상**이면 거의 확실히 이 케이스
+```tsx
+import { ScreenGuard } from "@/components/shared/screen-guard";
 
-**진단 방법**: `application-local.yml`에 다음 추가 후 재실행:
-```yaml
-spring:
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        generate_statistics: true
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.stat: DEBUG
+const isLoading =
+  isDetailFetching || mutation.isPending || deleteMutation.isPending;
+const loadingMessage = deleteMutation.isPending
+  ? "삭제 중..."
+  : mutation.isPending
+    ? "저장 중..."
+    : "조회 중...";
+
+return (
+  <>
+    {/* form ... */}
+    <ScreenGuard visible={isLoading} message={loadingMessage} />
+  </>
+);
 ```
-Hibernate `show_sql` 출력 + `Session Metrics` 의 `flushing a total of N entities` 와 p6spy 출력 횟수 비교. p6spy가 2배면 logging 이중 출력 확정.
 
-**해결**: `PrettySqlFormatter` 에 ThreadLocal 기반 dedup (같은 connectionId의 같은 SQL이 짧은 시간 안에 또 들어오면 두 번째 skip). `spy.properties` 의 `excludecategories` 에서 `batch` 만 제외하면 UPDATE 가 아예 안 보이므로 그쪽으로는 가지 말 것.
+- **트리거**: react-query의 `isFetching`(useQuery)·`isPending`(useMutation)을 그대로 활용. 신규 `useState` 로딩 변수 만들지 말 것.
+- **props**: `visible?(기본 true)`, `size?("sm"|"md"|"lg", 기본 "md")`, `count?(3~7, 기본 5)`, `color?(막대 기본 #38BDF8)`, `message?(기본 "조회 중...")`. 텍스트 색은 `#F1F5F9`로 고정 (가독성 정책).
+- **접근성**: `role="status"` + `aria-label={message ?? "Loading"}`, `prefers-reduced-motion: reduce` 시 막대 정적 표시(`@/app/globals.css`의 미디어 쿼리 분기).
+- **dev 카탈로그**: `/preview` → "ScreenGuard" 섹션에서 size/count/color/message/reduced-motion variants 시연.
 
-사례: 05df425 — p6spy 카테고리 이중 출력 dedup 적용. (이전에 시도한 dirty cycle / Auditing / `@MappedSuperclass` / 양방향 매핑 가설들 전부 무효였음. 진단 없이 ORM 측 fix 들어가서 13개 commit이 헛수고가 된 사례.)
+> **List 화면은 적용 금지** — List는 GridList의 스켈레톤 로딩을 사용하며 ScreenGuard와 동작이 충돌. `ScreenGuard` import는 Entry 컴포넌트에만 허용.
+
+사례: (2026-05-10) Non B/L · Truck B/L · House B/L · Master B/L Entry 4개 적용.
+
+### 6.28 자식 collection UPDATE — row id를 PUT 페이로드에 포함 필수
+
+Entry 폼이 자식 collection(예: Dimension·Container·Desc 등)을 가질 때, FE에서 PUT 페이로드의 각 row에 **DB id(row.id)를 그대로 포함**해야 한다. id가 빠지면 백엔드 매퍼가 신규 row로 인식해 UPDATE 분기가 발사되지 않고, 의도와 달리 INSERT/누락이 발생한다.
+
+```ts
+// ❌ 함정 — id 탈락
+const payload = {
+  dimensions: form.dimensions.map((d) => ({ length: d.length, /* ... */ })),
+};
+
+// ✅ id 포함
+const payload = {
+  dimensions: form.dimensions.map((d) => ({ id: d.id, length: d.length, /* ... */ })),
+};
+```
+
+> **백엔드 어댑터/Service `merge*`도 함께 검증** — 자식 row id 매칭으로 UPDATE 분기되는 경로. 어댑터 테스트는 `merge*` 메서드 호출 검증으로 작성 (사례: 0e55a28).
+
+사례: 67aa1d4 + 2eefab1 — Non B/L Entry 자식(dim/container/desc) UPDATE 누락 → FE id 포함 + 어댑터 fix.
 
 ---
 
@@ -491,6 +514,9 @@ Hibernate `show_sql` 출력 + `Session Metrics` 의 `flushing a total of N entit
   - is-required focus 시 inset 좌측 bar만 (외곽 ring 제거됨)
 - `front-end/src/styles/forms.css` — `.li__input--tight`
   - 자식 요소 flex:1 분배 적용. NumberBox·ComboBox가 같은 row에 있을 때 겹침 해소 (66a217c)
+- `front-end/src/app/globals.css` — Tailwind v4 `@theme` 블록 + `--animate-wave-bar` + `@keyframes waveBar`
+  - ScreenGuard 막대 wave 애니메이션 (1s ease-in-out, scaleY 0.35 ↔ 1, 막대당 0.12s delay)
+  - `@media (prefers-reduced-motion: reduce)` 분기에서 `animation: none` + `--static-h` 변수 기반 정적 높이 표시 (§6.27)
 
 ---
 
@@ -558,8 +584,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **CreateNonBlRequest UI required 9개 어노테이션 복원** — §6.25 정책 교정. `hblNo`/`workDivision`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`에 `@NotBlank`+형식 어노테이션 재부착. (2026-05-09)
 - **List 더블클릭 → Entry 단건 조회 모드 진입 (§6.26)** — Non B/L List·Truck B/L List 더블클릭 시 hot-marker SET 후 path-param push. Truck B/L 백엔드 `GET /api/truck-bl/{id}` 신규 추가(`TruckBlUseCase`, `TruckBlService`, `TruckBlFactory`, `TruckBlDetailResult`, `TruckBlDetailResponse`). Truck Entry edit-mode 결선(id prop, hydrateAllowed, useQuery, form.reset, F5-redirect, clearDraft). (2026-05-09)
 - **Non B/L Entry body 콤보박스 4종 + Ref.No 저장 누락 보정 (2026-05-09)** — `volumeDivisor` Non B/L 한정 도입(`HouseBlNonBl`), `salesClass`·`pkgUnit`·`containerType` projection 복원, `mblNo`/`masterRefNo` `assignMasterReference` 호출 보강, `dimensionDivisor` FE Controller 전환. §12.1에 항공 공통화 검토 메모 추가.
-- **p6spy UPDATE 이중 출력 dedup 해결 (§6.27)** — Hibernate batch 모드 + IDENTITY ID 조합에서 UPDATE만 batch 카테고리에서 두 번 logging되는 현상. `PrettySqlFormatter` ThreadLocal dedup 으로 해결. 이전 13개 commit (Strategy A: Hibernate 네이티브 timestamp / Strategy B: AuditingEntityListener 제거 + Mapper 직접 set / Strategy C: 양방향 매핑 / `@MappedSuperclass` bisect / `updateNonBl` 트랜잭션 분리 등)은 모두 무효 시도였고 `0e55a28` 으로 hard reset 후 p6spy logging 만 수정으로 종결. (2026-05-09, 05df425·0a885c4)
 - **Non B/L 단건 조회 desc LEFT JOIN 제거 + remark 필드 이전 (2026-05-10, f632ee9)** — `HouseBlJpaEntity.desc` `@OneToOne mappedBy` 의 EAGER 한계로 `findById` 시 `house_bl_desc` LEFT JOIN이 자동 발사되던 현상. NON_BL 화면이 desc(marks/description/descClause1/descClause2) 미사용 사실 확인 후, NON_BL 단건 조회를 `NonBlSearchPort.findNonBlById` QueryDSL projection 으로 분리하고 `house_bl_desc` JOIN 차단. NON_BL 의 `remark` 필드는 `house_bl_desc.remark` 대신 `house_bl_non_bl.remark` 로 이전 (DDL `V_add_house_bl_non_bl_remark.sql` 신설). 응답·요청 DTO(`NonBlDetailResponse`/`CreateNonBlRequest`/`UpdateNonBlRequest`)에서 desc 객체 제거하고 본체에 `remark` 평탄화. SEA/AIR/TRUCK 무영향(`HouseBlSubFactory.applyDesc` 에 `instanceof HouseBlNonBl` 가드 추가). FE 도메인 타입·`buildNonBlRequest`·Entry `methods.reset`·`adapter/out/api/non-bl.ts` 매핑 동기화.
+- **Non B/L Entry remark 바인딩 후속 fix (2026-05-10, 16753a4·93f7e68)** — f632ee9 후 zod schema에 `remark` 누락 + Entry 화면 `methods.reset` 매핑 미정합으로 저장 후 조회 시 remark 미표시. zod schema에 `remark` 추가 + desc 잔재 제거 + 화면 설정 값 정합 보정.
+- **Non B/L Entry 자식 collection UPDATE 쿼리 누락 fix (2026-05-09, 67aa1d4·2eefab1·0e55a28)** — Dimension·Container·Desc 자식 row의 PUT 페이로드에 DB id가 빠져 백엔드 매퍼가 신규로 인식 → UPDATE 미발사. FE 자식 행에 `id` 포함 + 백엔드 어댑터 매퍼 보정 + 어댑터 테스트를 `merge*` 메서드 호출 검증으로 갱신. (§6.28 SSOT 함정으로 등재)
+- **Entry 화면 house_bl_id URL 노출 제거 (2026-05-09, 1482b65)** — Entry path-param에 내부 PK(`house_bl_id`)가 노출되던 동작을 `hbl_no` 기반 식별로 통일. List 더블클릭 → Entry 진입(§6.26) 패턴과 정합.
+- **Entry 라우팅·사이드바·탭 stable 동작 fix (2026-05-09, d084934·14250d7·b393795)** — (1) 사이드바 메뉴 이동 시 Entry store 유지·탭 닫기 시 store clear, (2) List 더블클릭 Entry 이동 시 List 탭이 소멸하던 버그, (3) 동일 케이스에서 사이드바 섹션이 닫히던 버그 모두 수정. §6.26 보강.
+- **§6.25 SSOT DDL 정합 후속 (2026-05-09, dd3f3b2·3510adc)** — Non B/L Entry 저장 시 백엔드 검증 SSOT 처리 + `house_bl_container.container_no` JPA `nullable=false` 제거 (DDL 마이그레이션과 정합).
+- **ScreenGuard 공통 컴포넌트 도입 + Entry 4개 적용 (2026-05-10)** — 비동기 처리 중 화면 잠금 + bar wave 인디케이터 표준화. `@/components/shared/screen-guard` 신규, Tailwind v4 `globals.css` `@theme` 블록에 `waveBar` keyframes/animation 추가, `/preview` 카탈로그에 ScreenGuard 섹션 등록. Non B/L · Truck B/L · House B/L · Master B/L Entry 4개에 `<ScreenGuard visible={isLoading} message={loadingMessage} />` 패턴으로 일괄 적용. **List 화면 적용 금지** (스켈레톤 로딩 사용). 막대 색 `#38BDF8`, 텍스트 색 `#F1F5F9` 가독성 fix. (§6.27 SSOT)
 
 ---
 
