@@ -84,13 +84,6 @@ export interface NonBlDimView {
   volumeWeightKg?: number;
 }
 
-export interface NonBlDescView {
-  marks?: string;
-  hsCode?: string;
-  description?: string;
-  itemName?: string;
-}
-
 // ── 단건 조회 응답 타입 ────────────────────────────────────────
 
 export interface NonBlDetail {
@@ -137,9 +130,9 @@ export interface NonBlDetail {
   salesClass?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  remark?: string;
   containers: NonBlContainerView[];
   dims: NonBlDimView[];
-  desc?: NonBlDescView;
 }
 
 // ── 자식 Request 타입 ─────────────────────────────────────────
@@ -173,13 +166,6 @@ export interface NonBlDimRequest {
   quantity?: number;
   cbm?: number;
   volumeWeightKg?: number;
-}
-
-export interface NonBlDescRequest {
-  marks?: string;
-  hsCode?: string;
-  description?: string;
-  itemName?: string;
 }
 
 // ── Create / Update Request ────────────────────────────────────
@@ -224,9 +210,9 @@ export interface CreateNonBlRequest {
   salesClass?: string;
   volumeDivisor?: string;
   originalBlRef?: string;
+  remark?: string;
   containers?: NonBlContainerRequest[];
   dims?: NonBlDimRequest[];
-  desc?: NonBlDescRequest;
 }
 
 export type UpdateNonBlRequest = Partial<CreateNonBlRequest>;

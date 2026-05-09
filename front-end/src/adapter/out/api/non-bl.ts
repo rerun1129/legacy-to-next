@@ -205,7 +205,7 @@ function toBeRequest(req: CreateNonBlRequest) {
     originalBlRef: req.originalBlRef,
     containers: req.containers,
     dims: req.dims,
-    desc: req.desc,
+    remark: req.remark,
   };
 }
 

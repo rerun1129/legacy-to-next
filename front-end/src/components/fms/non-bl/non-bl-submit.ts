@@ -76,6 +76,7 @@ export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
     // form 필드명 dimensionDivisor → BE Request 키 volumeDivisor
     volumeDivisor:      values.dimensionDivisor ?? undefined,
     originalBlRef:      toStr(values.refNo),
+    remark:             toStr(values.remark),
     containers:         containers && containers.length > 0 ? containers : undefined,
     dims:               dims && dims.length > 0 ? dims : undefined,
   };
