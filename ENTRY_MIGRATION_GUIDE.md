@@ -448,6 +448,35 @@ onDoubleClick={() => router.push("/fms/non-bl/entry")}
 
 > **적용 현황** (2026-05-09): Non B/L ✅ 패턴 A, Truck B/L ✅ 패턴 A, Master B/L ✅ 패턴 B, House B/L ✅ 패턴 B.
 
+### 6.27 SQL UPDATE 로그가 2번 출력될 때 — p6spy 카테고리 이중 hook 의심
+
+p6spy 로그에 같은 UPDATE SQL이 두 번 출력되어 마치 SQL이 두 번 emit된 것처럼 보일 수 있다. **진짜 SQL emit은 1회**일 가능성이 매우 높다. ORM 측 가설(dirty cycle 재진입, AuditingEntityListener, `@MappedSuperclass`, 양방향 매핑 등)에 빠지기 전에 **반드시 진짜 SQL emit 횟수부터 측정**할 것.
+
+**원인**:
+- Hibernate `batch_size > 1` + `order_updates: true` 환경에서 UPDATE는 batch 모드로 실행
+- p6spy가 `addBatch()`와 `executeBatch()` 두 시점에 hook → 같은 SQL 두 번 logging
+- INSERT는 `GenerationType.IDENTITY` 사용 시 batch 처리 불가(ID가 INSERT 시점에서야 결정) → statement 카테고리 1회만 logging → 정상
+- 즉 **UPDATE만 이중 출력, INSERT는 정상**이면 거의 확실히 이 케이스
+
+**진단 방법**: `application-local.yml`에 다음 추가 후 재실행:
+```yaml
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        generate_statistics: true
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.stat: DEBUG
+```
+Hibernate `show_sql` 출력 + `Session Metrics` 의 `flushing a total of N entities` 와 p6spy 출력 횟수 비교. p6spy가 2배면 logging 이중 출력 확정.
+
+**해결**: `PrettySqlFormatter` 에 ThreadLocal 기반 dedup (같은 connectionId의 같은 SQL이 짧은 시간 안에 또 들어오면 두 번째 skip). `spy.properties` 의 `excludecategories` 에서 `batch` 만 제외하면 UPDATE 가 아예 안 보이므로 그쪽으로는 가지 말 것.
+
+사례: 05df425 — p6spy 카테고리 이중 출력 dedup 적용. (이전에 시도한 dirty cycle / Auditing / `@MappedSuperclass` / 양방향 매핑 가설들 전부 무효였음. 진단 없이 ORM 측 fix 들어가서 13개 commit이 헛수고가 된 사례.)
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
@@ -529,6 +558,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **CreateNonBlRequest UI required 9개 어노테이션 복원** — §6.25 정책 교정. `hblNo`/`workDivision`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`에 `@NotBlank`+형식 어노테이션 재부착. (2026-05-09)
 - **List 더블클릭 → Entry 단건 조회 모드 진입 (§6.26)** — Non B/L List·Truck B/L List 더블클릭 시 hot-marker SET 후 path-param push. Truck B/L 백엔드 `GET /api/truck-bl/{id}` 신규 추가(`TruckBlUseCase`, `TruckBlService`, `TruckBlFactory`, `TruckBlDetailResult`, `TruckBlDetailResponse`). Truck Entry edit-mode 결선(id prop, hydrateAllowed, useQuery, form.reset, F5-redirect, clearDraft). (2026-05-09)
 - **Non B/L Entry body 콤보박스 4종 + Ref.No 저장 누락 보정 (2026-05-09)** — `volumeDivisor` Non B/L 한정 도입(`HouseBlNonBl`), `salesClass`·`pkgUnit`·`containerType` projection 복원, `mblNo`/`masterRefNo` `assignMasterReference` 호출 보강, `dimensionDivisor` FE Controller 전환. §12.1에 항공 공통화 검토 메모 추가.
+- **p6spy UPDATE 이중 출력 dedup 해결 (§6.27)** — Hibernate batch 모드 + IDENTITY ID 조합에서 UPDATE만 batch 카테고리에서 두 번 logging되는 현상. `PrettySqlFormatter` ThreadLocal dedup 으로 해결. 이전 13개 commit (Strategy A: Hibernate 네이티브 timestamp / Strategy B: AuditingEntityListener 제거 + Mapper 직접 set / Strategy C: 양방향 매핑 / `@MappedSuperclass` bisect / `updateNonBl` 트랜잭션 분리 등)은 모두 무효 시도였고 `0e55a28` 으로 hard reset 후 p6spy logging 만 수정으로 종결. (2026-05-09, 05df425·0a885c4)
 
 ---
 
