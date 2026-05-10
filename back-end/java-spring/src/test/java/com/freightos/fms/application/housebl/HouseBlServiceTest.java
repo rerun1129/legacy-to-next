@@ -1,6 +1,7 @@
 package com.freightos.fms.application.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
@@ -201,5 +202,33 @@ class HouseBlServiceTest {
         assertThat(result).isEqualTo(mockResult);
         then(houseBlPort).should().saveHouseBl(mockEntity);
         then(houseBlFactory).should().toDetailResult(mockEntity);
+    }
+
+    // ── changeHblNo ──────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("changeHblNo - findHouseBlById → domain.changeHblNo → port.saveHouseBl 순서로 호출된다")
+    void changeHblNo_callsDomainAndPort() {
+        Long id = 1L;
+        ChangeHouseBlNoCommand command = new ChangeHouseBlNoCommand("NEW-001");
+        HouseBl mockEntity = mock(HouseBl.class);
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
+
+        houseBlService.changeHblNo(id, command);
+
+        then(houseBlPort).should().findHouseBlById(id);
+        then(houseBlPort).should().saveHouseBl(mockEntity);
+    }
+
+    @Test
+    @DisplayName("changeHblNo - 없는 ID 조회 시 ResourceNotFoundException 발생")
+    void changeHblNo_whenNotFound_throwsResourceNotFoundException() {
+        Long id = 999L;
+        ChangeHouseBlNoCommand command = new ChangeHouseBlNoCommand("NEW-001");
+        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> houseBlService.changeHblNo(id, command))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

@@ -4,10 +4,12 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
@@ -57,6 +59,15 @@ public class HouseBlService implements HouseBlUseCase {
     public void deleteHouseBlById(Long id) {
         houseBlPort.deleteHouseBl(findEntityById(id));
         log.info("Deleted HouseBl id={}", id);
+    }
+
+    @Override
+    @Transactional
+    public void changeHblNo(Long id, ChangeHouseBlNoCommand command) {
+        HouseBl existing = findEntityById(id);
+        existing.changeHblNo(BlNumber.of(command.hblNo()));
+        houseBlPort.saveHouseBl(existing);
+        log.info("Changed HouseBl hblNo: id={}", id);
     }
 
     private HouseBl findEntityById(Long id) {

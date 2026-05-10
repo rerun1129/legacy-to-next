@@ -2,6 +2,7 @@ package com.freightos.fms.application.nonbl.port.in;
 
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
@@ -14,4 +15,5 @@ public interface NonBlUseCase {
     Long createNonBl(CreateHouseBlCommand command);
     NonBlDetailResult updateNonBl(Long id, UpdateHouseBlCommand command);
     void deleteNonBlById(Long id);
+    void changeNonBlHblNo(Long id, ChangeHouseBlNoCommand command);
 }

@@ -3,11 +3,13 @@ package com.freightos.fms.adapter.in.web.nonbl;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.common.response.ApiResponse;
+import com.freightos.fms.adapter.in.web.nonbl.dto.ChangeNonBlHblNoRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.CreateNonBlRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlDetailResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.UpdateNonBlRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.SearchNonBlRequest;
+import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.common.response.MessageCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,6 +76,15 @@ public class NonBlController {
             @Valid @RequestBody UpdateNonBlRequest req) {
         return ResponseEntity.ok(ApiResponse.of(
                 nonBlAssembler.toDetail(nonBlUseCase.updateNonBl(id, nonBlAssembler.toUpdateCommand(req)))));
+    }
+
+    @Operation(summary = "Non B/L 번호 변경 (전용 엔드포인트)")
+    @PutMapping("/{id}/hbl-no")
+    public ResponseEntity<ApiResponse<Void>> changeHblNo(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangeNonBlHblNoRequest req) {
+        nonBlUseCase.changeNonBlHblNo(id, new ChangeHouseBlNoCommand(req.hblNo()));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.NON_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Non B/L 삭제")

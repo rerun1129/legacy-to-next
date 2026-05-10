@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * hbl_no update 차단 회귀 보호 테스트.
@@ -64,5 +65,33 @@ class HouseBlTest {
 
         assertThat(sea.getHblNo()).isNotNull();
         assertThat(sea.getHblNo().value()).isEqualTo(original);
+    }
+
+    // ── changeHblNo ──────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("changeHblNo() 호출 후 hblNo가 새 값으로 교체된다")
+    void changeHblNo_changesHblNo() {
+        HouseBlSea sea = seaWithHblNo("OLD");
+
+        sea.changeHblNo(BlNumber.of("NEW"));
+
+        assertThat(sea.getHblNo().value()).isEqualTo("NEW");
+    }
+
+    @Test
+    @DisplayName("changeHblNo()에 null 전달 시 NullPointerException 발생")
+    void changeHblNo_rejectsNull() {
+        HouseBlSea sea = seaWithHblNo("ORIG");
+
+        assertThatThrownBy(() -> sea.changeHblNo(null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("BlNumber.of()에 빈 문자열 전달 시 IllegalArgumentException 발생")
+    void changeHblNo_rejectsBlank() {
+        assertThatThrownBy(() -> new BlNumber(""))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

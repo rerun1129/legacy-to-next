@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * E-08 House B/L 공통 본체.
@@ -189,6 +190,16 @@ public abstract class HouseBl extends BaseEntity {
 
     public void assignHblNo(BlNumber hblNo) {
         this.hblNo = hblNo;
+    }
+
+    /**
+     * 사용자 명시적 번호 변경 액션 전용.
+     * assignHblNo는 CREATE 시 최초 부여 의미이며, 이 메서드는 이미 존재하는 번호를 교체한다.
+     * 일반 update 경로(UpdateHouseBlCommand)와 완전히 분리된 전용 경로에서만 호출된다.
+     */
+    public void changeHblNo(BlNumber newHblNo) {
+        Objects.requireNonNull(newHblNo, "newHblNo must not be null");
+        this.hblNo = newHblNo;
     }
 
     public void updateSchedule(PortCode polCode, PortCode podCode, BlDate etd, BlDate eta) {
