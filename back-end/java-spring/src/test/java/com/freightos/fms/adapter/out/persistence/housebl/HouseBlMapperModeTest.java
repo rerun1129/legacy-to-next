@@ -35,8 +35,8 @@ class HouseBlMapperModeTest {
         // scheduleLegs는 HouseBlAirJpaEntity 소유 — airJpa에 sync
         HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
         airJpa.syncScheduleLegs(List.of(legJpa()));
-        // desc는 3번째 인자로 명시 전달 — 부모 매핑 없음
-        HouseBlDescJpaEntity desc = descJpa(jpa);
+        // desc는 3번째 인자로 명시 전달 — airJpa 연결
+        HouseBlAirDescJpaEntity desc = airDescJpa(airJpa);
 
         HouseBlAir domain = mapper.toAirDomain(jpa, airJpa, desc);
 
@@ -81,10 +81,11 @@ class HouseBlMapperModeTest {
     void toSeaDomain_includesContainersLicensesDesc_excludesDimsAndLegs() {
         HouseBlJpaEntity jpa = seaJpa(4L);
         jpa.syncContainers(List.of(containerJpa(jpa), containerJpa(jpa)));
-        // desc는 3번째 인자로 명시 전달 — 부모 매핑 없음
-        HouseBlDescJpaEntity desc = descJpa(jpa);
+        // desc는 3번째 인자로 명시 전달 — seaJpa 연결
+        HouseBlSeaJpaEntity seaJpa = new HouseBlSeaJpaEntity();
+        HouseBlSeaDescJpaEntity desc = seaDescJpa(seaJpa);
 
-        HouseBlSea domain = mapper.toSeaDomain(jpa, null, desc);
+        HouseBlSea domain = mapper.toSeaDomain(jpa, seaJpa, desc);
 
         assertThat(domain.getContainers()).hasSize(2);
         assertThat(domain.getDesc()).isNotNull();
@@ -110,7 +111,7 @@ class HouseBlMapperModeTest {
         HouseBlJpaEntity jpa = truckJpa(6L);
         jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
 
-        HouseBlTruck domain = mapper.toTruckDomain(jpa, null);
+        HouseBlTruck domain = mapper.toTruckDomain(jpa, null, null);
 
         assertThat(domain.getDims()).hasSize(2);
         assertThat(domain.getTruckOrders()).isEmpty();
@@ -123,7 +124,7 @@ class HouseBlMapperModeTest {
     void toTruckDomain_noDims_returnsEmptyDimList() {
         HouseBlJpaEntity jpa = truckJpa(7L);
 
-        HouseBlTruck domain = mapper.toTruckDomain(jpa, null);
+        HouseBlTruck domain = mapper.toTruckDomain(jpa, null, null);
 
         assertThat(domain.getDims()).isEmpty();
     }
@@ -136,9 +137,21 @@ class HouseBlMapperModeTest {
         HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
         truckJpa.syncTruckOrders(List.of(order));
 
-        HouseBlTruck domain = mapper.toTruckDomain(jpa, truckJpa);
+        HouseBlTruck domain = mapper.toTruckDomain(jpa, truckJpa, null);
 
         assertThat(domain.getTruckOrders()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("toTruckDomain: descJpa 있으면 도메인 desc가 포함된다")
+    void toTruckDomain_descJpaPresent_includesDescInDomain() {
+        HouseBlJpaEntity jpa = truckJpa(11L);
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
+        HouseBlTruckDescJpaEntity descJpa = truckDescJpa(truckJpa);
+
+        HouseBlTruck domain = mapper.toTruckDomain(jpa, truckJpa, descJpa);
+
+        assertThat(domain.getDesc()).isNotNull();
     }
 
     // ── NON_BL ───────────────────────────────────────────────────────
@@ -223,9 +236,15 @@ class HouseBlMapperModeTest {
         return jpa;
     }
 
-    private HouseBlDescJpaEntity descJpa(HouseBlJpaEntity parent) {
-        HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
-        jpa.setHouseBl(parent);
+    private HouseBlSeaDescJpaEntity seaDescJpa(HouseBlSeaJpaEntity seaExt) {
+        HouseBlSeaDescJpaEntity jpa = new HouseBlSeaDescJpaEntity();
+        jpa.setSea(seaExt);
+        return jpa;
+    }
+
+    private HouseBlAirDescJpaEntity airDescJpa(HouseBlAirJpaEntity airExt) {
+        HouseBlAirDescJpaEntity jpa = new HouseBlAirDescJpaEntity();
+        jpa.setAir(airExt);
         return jpa;
     }
 
@@ -237,6 +256,12 @@ class HouseBlMapperModeTest {
     private HouseBlTruckOrderJpaEntity truckOrderJpa() {
         HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
         jpa.setTruckNo("TRUCK-01");
+        return jpa;
+    }
+
+    private HouseBlTruckDescJpaEntity truckDescJpa(HouseBlTruckJpaEntity truckExt) {
+        HouseBlTruckDescJpaEntity jpa = new HouseBlTruckDescJpaEntity();
+        jpa.setTruck(truckExt);
         return jpa;
     }
 }

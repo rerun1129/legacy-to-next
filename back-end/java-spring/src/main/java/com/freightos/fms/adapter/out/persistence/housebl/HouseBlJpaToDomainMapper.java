@@ -20,7 +20,7 @@ public class HouseBlJpaToDomainMapper {
     private final HouseBlCargoMapper cargoMapper;
     private final HouseBlDocMapper docMapper;
 
-    public HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa, HouseBlDescJpaEntity descJpa) {
+    public HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa, HouseBlSeaDescJpaEntity descJpa) {
         HouseBlSea domain = HouseBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
@@ -30,12 +30,12 @@ public class HouseBlJpaToDomainMapper {
                 .collect(Collectors.toList());
         domain.initContainers(containers);
         if (descJpa != null) {
-            domain.initDesc(docMapper.toDescDomain(descJpa));
+            domain.initDesc(docMapper.toSeaDescDomain(descJpa));
         }
         return domain;
     }
 
-    public HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa, HouseBlDescJpaEntity descJpa) {
+    public HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa, HouseBlAirDescJpaEntity descJpa) {
         HouseBlAir domain = HouseBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
@@ -53,12 +53,12 @@ public class HouseBlJpaToDomainMapper {
                 : List.of();
         domain.initAirCharges(airCharges);
         if (descJpa != null) {
-            domain.initDesc(docMapper.toDescDomain(descJpa));
+            domain.initDesc(docMapper.toAirDescDomain(descJpa));
         }
         return domain;
     }
 
-    public HouseBlTruck toTruckDomain(HouseBlJpaEntity jpa, HouseBlTruckJpaEntity truckJpa) {
+    public HouseBlTruck toTruckDomain(HouseBlJpaEntity jpa, HouseBlTruckJpaEntity truckJpa, HouseBlTruckDescJpaEntity descJpa) {
         HouseBlTruck domain = HouseBlTruck.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (truckJpa != null) copyTruckFields(truckJpa, domain);
@@ -70,6 +70,9 @@ public class HouseBlJpaToDomainMapper {
                 ? truckJpa.getTruckOrders().stream().map(docMapper::toTruckOrderDomain).collect(Collectors.toList())
                 : List.of();
         domain.initTruckOrders(truckOrders);
+        if (descJpa != null) {
+            domain.initDesc(docMapper.toTruckDescDomain(descJpa));
+        }
         return domain;
     }
 

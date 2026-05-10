@@ -1,12 +1,15 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlContainerJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlScheduleLegJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaDescJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckOrderJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -92,7 +95,13 @@ class HouseBlMappingIntegrationTest {
     private HouseBlTruckRepository houseBlTruckRepository;
 
     @Autowired
-    private HouseBlDescRepository houseBlDescRepository;
+    private HouseBlSeaDescRepository houseBlSeaDescRepository;
+
+    @Autowired
+    private HouseBlAirDescRepository houseBlAirDescRepository;
+
+    @Autowired
+    private HouseBlTruckDescRepository houseBlTruckDescRepository;
 
     @BeforeEach
     void resetInspector() {
@@ -138,11 +147,31 @@ class HouseBlMappingIntegrationTest {
         return a;
     }
 
-    private HouseBlDescJpaEntity desc(HouseBlJpaEntity parent, String marks) {
-        HouseBlDescJpaEntity d = new HouseBlDescJpaEntity();
-        d.setHouseBl(parent);
+    private HouseBlSeaDescJpaEntity seaDesc(HouseBlSeaJpaEntity seaExt, String marks) {
+        HouseBlSeaDescJpaEntity d = new HouseBlSeaDescJpaEntity();
+        d.setSea(seaExt);
         d.setMarks(marks);
         return d;
+    }
+
+    private HouseBlAirDescJpaEntity airDesc(HouseBlAirJpaEntity airExt, String marks) {
+        HouseBlAirDescJpaEntity d = new HouseBlAirDescJpaEntity();
+        d.setAir(airExt);
+        d.setMarks(marks);
+        return d;
+    }
+
+    private HouseBlTruckDescJpaEntity truckDesc(HouseBlTruckJpaEntity truckExt, String marks) {
+        HouseBlTruckDescJpaEntity d = new HouseBlTruckDescJpaEntity();
+        d.setTruck(truckExt);
+        d.setMarks(marks);
+        return d;
+    }
+
+    private HouseBlSeaJpaEntity newSeaExt(HouseBlJpaEntity parent) {
+        HouseBlSeaJpaEntity seaJpa = new HouseBlSeaJpaEntity();
+        seaJpa.setHouseBl(parent);
+        return seaJpa;
     }
 
     private long countChildren(String table, Long parentId) {
@@ -424,35 +453,77 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("descReplace: 기존 desc 삭제 후 새 desc 저장 → 기존 descId로 조회 시 null, 새 desc marks 일치")
-    void replaceDesc_orphanDescIsDeletedFromDb() {
+    @DisplayName("seaDescReplace: SEA ext로 기존 seaDesc 삭제 후 새 seaDesc 저장 → 기존 descId로 조회 시 null, 새 desc marks 일치")
+    void replaceSeaDesc_orphanDescIsDeletedFromDb() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         em.persist(parent);
         em.flush();
 
-        // 초기 desc 저장 (자식 owning side persist)
-        HouseBlDescJpaEntity oldDesc = desc(parent, "OLD MARKS");
+        // seaExt 영속화 (house_bl_sea_id PK 확보)
+        HouseBlSeaJpaEntity seaExt = newSeaExt(parent);
+        em.persist(seaExt);
+        em.flush();
+
+        // 초기 seaDesc 저장
+        HouseBlSeaDescJpaEntity oldDesc = seaDesc(seaExt, "OLD MARKS");
         em.persist(oldDesc);
         em.flush();
         em.clear();
 
-        Long oldDescId = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId())
-                .orElseThrow().getHouseBlDescId();
+        Long oldDescId = houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaExt.getHouseBlSeaId())
+                .orElseThrow().getHouseBlSeaDescId();
 
-        // 1단계: 기존 desc DELETE (어댑터 saveOrDeleteDesc의 null-desc 경로 흉내)
-        houseBlDescRepository.deleteByHouseBl_HouseBlId(parent.getHouseBlId());
+        // 1단계: 기존 desc DELETE
+        houseBlSeaDescRepository.deleteBySea_HouseBlSeaId(seaExt.getHouseBlSeaId());
         em.flush();
 
-        // 2단계: 새 desc INSERT (어댑터 saveOrDeleteDesc의 신규 save 경로 흉내)
-        HouseBlJpaEntity parentRef = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        HouseBlDescJpaEntity newDesc = desc(parentRef, "NEW MARKS");
+        // 2단계: 새 desc INSERT
+        HouseBlSeaJpaEntity seaRef = em.find(HouseBlSeaJpaEntity.class, seaExt.getHouseBlSeaId());
+        HouseBlSeaDescJpaEntity newDesc = seaDesc(seaRef, "NEW MARKS");
         em.persist(newDesc);
         em.flush();
         em.clear();
 
-        assertThat(em.find(HouseBlDescJpaEntity.class, oldDescId)).isNull();
-        HouseBlDescJpaEntity reloaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId()).orElseThrow();
+        assertThat(em.find(HouseBlSeaDescJpaEntity.class, oldDescId)).isNull();
+        HouseBlSeaDescJpaEntity reloaded = houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaExt.getHouseBlSeaId()).orElseThrow();
         assertThat(reloaded.getMarks()).isEqualTo("NEW MARKS");
+    }
+
+    @Test
+    @DisplayName("airDescReplace: AIR ext로 기존 airDesc 삭제 후 새 airDesc 저장 → 기존 descId로 조회 시 null, 새 desc marks 일치")
+    void replaceAirDesc_orphanDescIsDeletedFromDb() {
+        HouseBlJpaEntity parent = newParent(JobDiv.AIR);
+        em.persist(parent);
+        em.flush();
+
+        // airExt 영속화 (house_bl_air_id PK 확보)
+        HouseBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
+
+        // 초기 airDesc 저장
+        HouseBlAirDescJpaEntity oldDesc = airDesc(airExt, "OLD AIR MARKS");
+        em.persist(oldDesc);
+        em.flush();
+        em.clear();
+
+        Long oldDescId = houseBlAirDescRepository.findByAir_HouseBlAirId(airExt.getHouseBlAirId())
+                .orElseThrow().getHouseBlAirDescId();
+
+        // 1단계: 기존 desc DELETE
+        houseBlAirDescRepository.deleteByAir_HouseBlAirId(airExt.getHouseBlAirId());
+        em.flush();
+
+        // 2단계: 새 desc INSERT
+        HouseBlAirJpaEntity airRef = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
+        HouseBlAirDescJpaEntity newDesc = airDesc(airRef, "NEW AIR MARKS");
+        em.persist(newDesc);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(HouseBlAirDescJpaEntity.class, oldDescId)).isNull();
+        HouseBlAirDescJpaEntity reloaded = houseBlAirDescRepository.findByAir_HouseBlAirId(airExt.getHouseBlAirId()).orElseThrow();
+        assertThat(reloaded.getMarks()).isEqualTo("NEW AIR MARKS");
     }
 
     @Test
@@ -566,111 +637,224 @@ class HouseBlMappingIntegrationTest {
     // ── StatementInspector 기반 desc fetch 회귀 테스트 ─────────────────
 
     @Test
-    @DisplayName("nonBlFind_doesNotEmitHouseBlDescSelect: NON_BL 조회 시 house_bl_desc 테이블 참조 SQL 0건")
-        void nonBlFind_doesNotEmitHouseBlDescSelect() {
-            HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
-            em.persist(parent);
-            em.flush();
-            em.clear();
-            InspectorConfig.INSPECTOR.reset();
+    @DisplayName("nonBlFind_doesNotEmitSeaAirDescSelect: NON_BL 조회 시 house_bl_sea_desc/house_bl_air_desc 테이블 참조 SQL 0건")
+    void nonBlFind_doesNotEmitSeaAirDescSelect() {
+        HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
+        em.persist(parent);
+        em.flush();
+        em.clear();
+        InspectorConfig.INSPECTOR.reset();
 
-            // NON_BL은 findById만 호출하므로 desc JOIN 없음
-            houseBlRepository.findById(parent.getHouseBlId());
+        houseBlRepository.findById(parent.getHouseBlId());
 
-            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isZero();
-        }
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_sea_desc")).isZero();
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_air_desc")).isZero();
+    }
 
-        @Test
-        @DisplayName("truckFind_doesNotEmitHouseBlDescSelect: TRUCK 조회 시 house_bl_desc 테이블 참조 SQL 0건")
-        void truckFind_doesNotEmitHouseBlDescSelect() {
-            HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
-            em.persist(parent);
-            em.flush();
-            em.clear();
-            InspectorConfig.INSPECTOR.reset();
+    @Test
+    @DisplayName("truckFind_doesNotEmitSeaAirDescSelect: TRUCK 조회 시 house_bl_sea_desc/house_bl_air_desc 테이블 참조 SQL 0건")
+    void truckFind_doesNotEmitSeaAirDescSelect() {
+        HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+        em.persist(parent);
+        em.flush();
+        em.clear();
+        InspectorConfig.INSPECTOR.reset();
 
-            houseBlRepository.findById(parent.getHouseBlId());
+        houseBlRepository.findById(parent.getHouseBlId());
 
-            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isZero();
-        }
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_sea_desc")).isZero();
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_air_desc")).isZero();
+    }
 
-        @Test
-        @DisplayName("seaFind_emitsHouseBlDescSelect: SEA houseBlDescRepository 조회 시 house_bl_desc SELECT 발생, marks 일치")
-        void seaFind_emitsHouseBlDescJoin() {
-            HouseBlJpaEntity parent = newParent(JobDiv.SEA);
-            em.persist(parent);
-            em.flush();
+    @Test
+    @DisplayName("seaFind_emitsHouseBlSeaDescSelect: SEA seaDescRepository 조회 시 house_bl_sea_desc SELECT 발생, marks 일치")
+    void seaFind_emitsHouseBlSeaDescSelect() {
+        HouseBlJpaEntity parent = newParent(JobDiv.SEA);
+        em.persist(parent);
+        em.flush();
 
-            // 자식 owning side만 persist — 부모 매핑 없음
-            HouseBlDescJpaEntity seaDesc = desc(parent, "MARKS-X");
-            em.persist(seaDesc);
-            em.flush();
-            em.clear();
-            InspectorConfig.INSPECTOR.reset();
+        HouseBlSeaJpaEntity seaExt = newSeaExt(parent);
+        em.persist(seaExt);
+        em.flush();
 
-            Optional<HouseBlDescJpaEntity> loaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId());
+        HouseBlSeaDescJpaEntity seaDescJpa = seaDesc(seaExt, "MARKS-X");
+        em.persist(seaDescJpa);
+        em.flush();
+        em.clear();
+        InspectorConfig.INSPECTOR.reset();
 
-            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isGreaterThanOrEqualTo(1);
-            assertThat(loaded).isPresent();
-            assertThat(loaded.get().getMarks()).isEqualTo("MARKS-X");
-        }
+        Optional<HouseBlSeaDescJpaEntity> loaded = houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaExt.getHouseBlSeaId());
 
-        @Test
-        @DisplayName("airFind_emitsHouseBlDescSelect: AIR houseBlDescRepository 조회 시 house_bl_desc SELECT 발생, marks 일치")
-        void airFind_emitsHouseBlDescJoin() {
-            HouseBlJpaEntity parent = newParent(JobDiv.AIR);
-            em.persist(parent);
-            em.flush();
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_sea_desc")).isGreaterThanOrEqualTo(1);
+        assertThat(loaded).isPresent();
+        assertThat(loaded.get().getMarks()).isEqualTo("MARKS-X");
+    }
 
-            // 자식 owning side만 persist — 부모 매핑 없음
-            HouseBlDescJpaEntity airDesc = desc(parent, "AIR-MARKS");
-            em.persist(airDesc);
-            em.flush();
-            em.clear();
-            InspectorConfig.INSPECTOR.reset();
+    @Test
+    @DisplayName("airFind_emitsHouseBlAirDescSelect: AIR airDescRepository 조회 시 house_bl_air_desc SELECT 발생, marks 일치")
+    void airFind_emitsHouseBlAirDescSelect() {
+        HouseBlJpaEntity parent = newParent(JobDiv.AIR);
+        em.persist(parent);
+        em.flush();
 
-            Optional<HouseBlDescJpaEntity> loaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId());
+        HouseBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
 
-            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isGreaterThanOrEqualTo(1);
-            assertThat(loaded).isPresent();
-            assertThat(loaded.get().getMarks()).isEqualTo("AIR-MARKS");
-        }
+        HouseBlAirDescJpaEntity airDescJpa = airDesc(airExt, "AIR-MARKS");
+        em.persist(airDescJpa);
+        em.flush();
+        em.clear();
+        InspectorConfig.INSPECTOR.reset();
 
-        @Test
-        @DisplayName("seaSave_persistsDesc: SEA parent + desc persist 후 house_bl_desc row 1건, marks 일치")
-        void seaSave_cascadesDesc() {
-            HouseBlJpaEntity parent = newParent(JobDiv.SEA);
-            em.persist(parent);
-            em.flush();
+        Optional<HouseBlAirDescJpaEntity> loaded = houseBlAirDescRepository.findByAir_HouseBlAirId(airExt.getHouseBlAirId());
 
-            // 자식 owning side만 persist — 부모 매핑 없음
-            HouseBlDescJpaEntity seaDesc = desc(parent, "CASCADE-MARKS");
-            em.persist(seaDesc);
-            em.flush();
-            em.clear();
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_air_desc")).isGreaterThanOrEqualTo(1);
+        assertThat(loaded).isPresent();
+        assertThat(loaded.get().getMarks()).isEqualTo("AIR-MARKS");
+    }
 
-            Long count = em.createQuery(
-                    "SELECT COUNT(d) FROM HouseBlDescJpaEntity d WHERE d.houseBl.houseBlId = :id", Long.class)
-                    .setParameter("id", parent.getHouseBlId())
-                    .getSingleResult();
-            assertThat(count).isEqualTo(1);
+    @Test
+    @DisplayName("seaSave_persistsSeaDesc: SEA seaExt + seaDesc persist 후 house_bl_sea_desc row 1건, marks 일치")
+    void seaSave_persistsSeaDesc() {
+        HouseBlJpaEntity parent = newParent(JobDiv.SEA);
+        em.persist(parent);
+        em.flush();
 
-            HouseBlDescJpaEntity reloaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId()).orElseThrow();
-            assertThat(reloaded.getMarks()).isEqualTo("CASCADE-MARKS");
-        }
+        HouseBlSeaJpaEntity seaExt = newSeaExt(parent);
+        em.persist(seaExt);
+        em.flush();
 
-        @Test
-        @DisplayName("nonBlSave_doesNotInsertHouseBlDesc: NON_BL parent 저장 후 house_bl_desc row 0건")
-        void nonBlSave_doesNotInsertHouseBlDesc() {
-            HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
-            em.persist(parent);
-            em.flush();
-            em.clear();
+        HouseBlSeaDescJpaEntity seaDescJpa = seaDesc(seaExt, "CASCADE-MARKS");
+        em.persist(seaDescJpa);
+        em.flush();
+        em.clear();
 
-            Long count = em.createQuery(
-                    "SELECT COUNT(d) FROM HouseBlDescJpaEntity d WHERE d.houseBl.houseBlId = :id", Long.class)
-                    .setParameter("id", parent.getHouseBlId())
-                    .getSingleResult();
-            assertThat(count).isZero();
-        }
+        Long count = em.createQuery(
+                "SELECT COUNT(d) FROM HouseBlSeaDescJpaEntity d WHERE d.sea.houseBlSeaId = :id", Long.class)
+                .setParameter("id", seaExt.getHouseBlSeaId())
+                .getSingleResult();
+        assertThat(count).isEqualTo(1);
+
+        HouseBlSeaDescJpaEntity reloaded = houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaExt.getHouseBlSeaId()).orElseThrow();
+        assertThat(reloaded.getMarks()).isEqualTo("CASCADE-MARKS");
+    }
+
+    @Test
+    @DisplayName("nonBlSave_doesNotInsertSeaOrAirDesc: NON_BL parent 저장 후 sea_desc/air_desc row 0건")
+    void nonBlSave_doesNotInsertSeaOrAirDesc() {
+        HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
+        em.persist(parent);
+        em.flush();
+        em.clear();
+
+        long seaDescCount = em.createQuery(
+                "SELECT COUNT(d) FROM HouseBlSeaDescJpaEntity d", Long.class)
+                .getSingleResult();
+        long airDescCount = em.createQuery(
+                "SELECT COUNT(d) FROM HouseBlAirDescJpaEntity d", Long.class)
+                .getSingleResult();
+        assertThat(seaDescCount).isZero();
+        assertThat(airDescCount).isZero();
+    }
+
+    @Test
+    @DisplayName("truckDescSave: TRUCK truckExt + truckDesc persist 후 house_bl_truck_desc row 1건, marks 일치")
+    void truckDescSave_persistsTruckDesc() {
+        HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+        em.persist(parent);
+        em.flush();
+
+        HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
+        em.persist(truckExt);
+        em.flush();
+
+        HouseBlTruckDescJpaEntity truckDescJpa = truckDesc(truckExt, "TRUCK-CASCADE-MARKS");
+        em.persist(truckDescJpa);
+        em.flush();
+        em.clear();
+
+        Long count = em.createQuery(
+                "SELECT COUNT(d) FROM HouseBlTruckDescJpaEntity d WHERE d.truck.houseBlTruckId = :id", Long.class)
+                .setParameter("id", truckExt.getHouseBlTruckId())
+                .getSingleResult();
+        assertThat(count).isEqualTo(1);
+
+        HouseBlTruckDescJpaEntity reloaded = houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckExt.getHouseBlTruckId()).orElseThrow();
+        assertThat(reloaded.getMarks()).isEqualTo("TRUCK-CASCADE-MARKS");
+    }
+
+    @Test
+    @DisplayName("truckDescFind: truckDescRepository 조회 시 house_bl_truck_desc SELECT 발생, marks 일치")
+    void truckDescFind_emitsHouseBlTruckDescSelect() {
+        HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+        em.persist(parent);
+        em.flush();
+
+        HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
+        em.persist(truckExt);
+        em.flush();
+
+        HouseBlTruckDescJpaEntity truckDescJpa = truckDesc(truckExt, "TRUCK-MARKS-X");
+        em.persist(truckDescJpa);
+        em.flush();
+        em.clear();
+        InspectorConfig.INSPECTOR.reset();
+
+        Optional<HouseBlTruckDescJpaEntity> loaded = houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckExt.getHouseBlTruckId());
+
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_truck_desc")).isGreaterThanOrEqualTo(1);
+        assertThat(loaded).isPresent();
+        assertThat(loaded.get().getMarks()).isEqualTo("TRUCK-MARKS-X");
+    }
+
+    @Test
+    @DisplayName("truckDescReplace: TRUCK ext로 기존 truckDesc 삭제 후 새 truckDesc 저장 → 기존 descId로 조회 시 null, 새 desc marks 일치")
+    void replaceTruckDesc_orphanDescIsDeletedFromDb() {
+        HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+        em.persist(parent);
+        em.flush();
+
+        HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
+        em.persist(truckExt);
+        em.flush();
+
+        HouseBlTruckDescJpaEntity oldDesc = truckDesc(truckExt, "OLD TRUCK MARKS");
+        em.persist(oldDesc);
+        em.flush();
+        em.clear();
+
+        Long oldDescId = houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckExt.getHouseBlTruckId())
+                .orElseThrow().getHouseBlTruckDescId();
+
+        // 1단계: 기존 desc DELETE
+        houseBlTruckDescRepository.deleteByTruck_HouseBlTruckId(truckExt.getHouseBlTruckId());
+        em.flush();
+
+        // 2단계: 새 desc INSERT
+        HouseBlTruckJpaEntity truckRef = em.find(HouseBlTruckJpaEntity.class, truckExt.getHouseBlTruckId());
+        HouseBlTruckDescJpaEntity newDesc = truckDesc(truckRef, "NEW TRUCK MARKS");
+        em.persist(newDesc);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(HouseBlTruckDescJpaEntity.class, oldDescId)).isNull();
+        HouseBlTruckDescJpaEntity reloaded = houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckExt.getHouseBlTruckId()).orElseThrow();
+        assertThat(reloaded.getMarks()).isEqualTo("NEW TRUCK MARKS");
+    }
+
+    @Test
+    @DisplayName("truckSave_doesNotEmitSeaAirDescSelect: TRUCK 저장 후 조회 시 house_bl_sea_desc/house_bl_air_desc 테이블 참조 SQL 0건")
+    void truckFind_doesNotEmitSeaAirDescSelect_withTruckDesc() {
+        HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+        em.persist(parent);
+        em.flush();
+        em.clear();
+        InspectorConfig.INSPECTOR.reset();
+
+        houseBlRepository.findById(parent.getHouseBlId());
+
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_sea_desc")).isZero();
+        assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_air_desc")).isZero();
+    }
 }

@@ -43,7 +43,9 @@ class HouseBlPersistenceAdapterTest {
     @Mock private HouseBlAirRepository houseBlAirRepository;
     @Mock private HouseBlTruckRepository houseBlTruckRepository;
     @Mock private HouseBlNonBlRepository houseBlNonBlRepository;
-    @Mock private HouseBlDescRepository houseBlDescRepository;
+    @Mock private HouseBlSeaDescRepository houseBlSeaDescRepository;
+    @Mock private HouseBlAirDescRepository houseBlAirDescRepository;
+    @Mock private HouseBlTruckDescRepository houseBlTruckDescRepository;
     @Mock private HouseBlJpaToDomainMapper jpaToDomainMapper;
     @Mock private HouseBlDomainToJpaMapper domainToJpaMapper;
     @Mock private HouseBlCargoMapper houseBlCargoMapper;
@@ -55,7 +57,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(AIR) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(AIR): syncDims→airRepository.save→savedAirJpa.syncScheduleLegs→savedAirJpa.syncAirCharges 순서, descRepository 조회")
+    @DisplayName("saveHouseBl(AIR): syncDims→airRepository.save→savedAirJpa.syncScheduleLegs→savedAirJpa.syncAirCharges 순서, airDescRepository 조회")
     void saveAirHouseBl_callsSyncInOrderThenSavesAirExt() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -65,7 +67,7 @@ class HouseBlPersistenceAdapterTest {
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
         // airRepository.save가 savedAirJpa를 반환해야 syncScheduleLegs/syncAirCharges 호출 가능
         given(houseBlAirRepository.save(any())).willReturn(savedAirJpa);
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlAirDescRepository.findByAir_HouseBlAirId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
 
         adapter.saveHouseBl(air);
@@ -86,7 +88,7 @@ class HouseBlPersistenceAdapterTest {
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
         given(houseBlAirRepository.save(any())).willReturn(spy(new HouseBlAirJpaEntity()));
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlAirDescRepository.findByAir_HouseBlAirId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
 
         adapter.saveHouseBl(air);
@@ -99,14 +101,16 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(SEA) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(SEA): syncContainers→houseBlDescRepository 조회 순서 후 seaRepository.save 호출")
-    void saveSeaHouseBl_syncsContainersLicensesDescThenSavesSeaExt() {
+    @DisplayName("saveHouseBl(SEA): syncContainers→seaRepository.save→seaDescRepository 조회 순서")
+    void saveSeaHouseBl_syncsContainersDescThenSavesSeaExt() {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.SEA);
+        HouseBlSeaJpaEntity savedSeaJpa = spy(new HouseBlSeaJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlSeaRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlSeaRepository.save(any())).willReturn(savedSeaJpa);
+        given(houseBlSeaDescRepository.findBySea_HouseBlSeaId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toSeaDomain(eq(savedJpa), any(), any())).willReturn(sea);
 
         adapter.saveHouseBl(sea);
@@ -122,9 +126,11 @@ class HouseBlPersistenceAdapterTest {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.SEA);
+        HouseBlSeaJpaEntity savedSeaJpa = spy(new HouseBlSeaJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlSeaRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlSeaRepository.save(any())).willReturn(savedSeaJpa);
+        given(houseBlSeaDescRepository.findBySea_HouseBlSeaId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toSeaDomain(eq(savedJpa), any(), any())).willReturn(sea);
 
         adapter.saveHouseBl(sea);
@@ -137,7 +143,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) ────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/houseBlDescRepository는 없다. truckRepository.save → savedTruckJpa.syncTruckOrders 순서")
+    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/seaDescRepository/airDescRepository는 없다. truckRepository.save → savedTruckJpa.syncTruckOrders → truckDescRepository 조회 순서")
     void saveTruckHouseBl_syncsDimsOnly_skipsLegsLicensesDesc() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -146,23 +152,26 @@ class HouseBlPersistenceAdapterTest {
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
         given(houseBlTruckRepository.save(any())).willReturn(savedTruckJpa);
-        given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
+        given(houseBlTruckDescRepository.findByTruck_HouseBlTruckId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any(), any())).willReturn(truck);
 
         adapter.saveHouseBl(truck);
 
         then(savedJpa).should().syncDims(any());
         then(savedJpa).should(never()).syncContainers(any());
-        // TRUCK은 desc 미사용 — houseBlDescRepository 완전 미호출
-        then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
-        // truckRepository.save 반환값(savedTruckJpa)에 syncTruckOrders 호출
+        // SEA/AIR desc repository는 TRUCK 처리 시 미호출
+        then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
+        then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
+        // truckRepository.save 반환값(savedTruckJpa)에 syncTruckOrders 호출 후 truckDescRepository 조회
         then(houseBlTruckRepository).should().save(any());
         then(savedTruckJpa).should().syncTruckOrders(any());
+        then(houseBlTruckDescRepository).should().findByTruck_HouseBlTruckId(any());
     }
 
     // ── saveHouseBl(NON_BL) ───────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims 후 nonBlRepository.save 호출, mergeDesc는 미호출")
+    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims 후 nonBlRepository.save 호출, desc 관련 repository는 미호출")
     void saveNonBlHouseBl_mergesContainersDimsThenSavesNonBlExt_withoutDesc() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         nonBl.updateRemark("REMARK_TEXT");
@@ -176,9 +185,11 @@ class HouseBlPersistenceAdapterTest {
         InOrder order = inOrder(savedJpa, houseBlNonBlRepository);
         order.verify(savedJpa).mergeContainers(any());
         order.verify(savedJpa).mergeDims(any());
-        // NON_BL은 desc를 사용하지 않음 — houseBlDescRepository 완전 미호출, remark는 nonBlJpa에 저장됨
+        // NON_BL은 desc를 사용하지 않음 — seaDescRepository/airDescRepository/truckDescRepository 완전 미호출, remark는 nonBlJpa에 저장됨
         order.verify(houseBlNonBlRepository).save(any());
-        then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
+        then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
+        then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
+        then(houseBlTruckDescRepository).shouldHaveNoInteractions();
     }
 
     // ── findHouseBlById: JobDiv 분기 검증 ─────────────────────────────
@@ -192,7 +203,6 @@ class HouseBlPersistenceAdapterTest {
         HouseBlAir expected = HouseBlAir.create(Bound.EXP);
         given(houseBlRepository.findById(1L)).willReturn(Optional.of(jpa));
         given(houseBlAirRepository.findByHouseBlHouseBlId(1L)).willReturn(Optional.empty());
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(1L)).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(jpa), any(), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(1L);
@@ -200,7 +210,7 @@ class HouseBlPersistenceAdapterTest {
         assertThat(result).contains(expected);
         then(jpaToDomainMapper).should().toAirDomain(eq(jpa), any(), any());
         then(jpaToDomainMapper).should(never()).toSeaDomain(any(), any(), any());
-        then(jpaToDomainMapper).should(never()).toTruckDomain(any(), any());
+        then(jpaToDomainMapper).should(never()).toTruckDomain(any(), any(), any());
         then(jpaToDomainMapper).should(never()).toNonBlDomain(any(), any());
     }
 
@@ -213,7 +223,6 @@ class HouseBlPersistenceAdapterTest {
         HouseBlSea expected = HouseBlSea.create(Bound.EXP);
         given(houseBlRepository.findById(2L)).willReturn(Optional.of(jpa));
         given(houseBlSeaRepository.findByHouseBlHouseBlId(2L)).willReturn(Optional.empty());
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(2L)).willReturn(Optional.empty());
         given(jpaToDomainMapper.toSeaDomain(eq(jpa), any(), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(2L);
@@ -224,7 +233,7 @@ class HouseBlPersistenceAdapterTest {
     }
 
     @Test
-    @DisplayName("findHouseBlById(TRUCK): jobDiv=TRUCK → mapper.toTruckDomain 호출, houseBlDescRepository 미호출")
+    @DisplayName("findHouseBlById(TRUCK): jobDiv=TRUCK → mapper.toTruckDomain 호출, truckDescRepository 조회, seaDescRepository/airDescRepository 미호출")
     void findById_truckJob_invokesToTruckDomain() {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
         jpa.setJobDiv(JobDiv.TRUCK);
@@ -232,19 +241,20 @@ class HouseBlPersistenceAdapterTest {
         HouseBlTruck expected = HouseBlTruck.create(Bound.EXP);
         given(houseBlRepository.findById(3L)).willReturn(Optional.of(jpa));
         given(houseBlTruckRepository.findByHouseBlHouseBlId(3L)).willReturn(Optional.empty());
-        given(jpaToDomainMapper.toTruckDomain(eq(jpa), any())).willReturn(expected);
+        given(jpaToDomainMapper.toTruckDomain(eq(jpa), any(), any())).willReturn(expected);
 
         Optional<HouseBl> result = adapter.findHouseBlById(3L);
 
         assertThat(result).contains(expected);
-        then(jpaToDomainMapper).should().toTruckDomain(eq(jpa), any());
+        then(jpaToDomainMapper).should().toTruckDomain(eq(jpa), any(), any());
         then(jpaToDomainMapper).should(never()).toAirDomain(any(), any(), any());
         then(jpaToDomainMapper).should(never()).toSeaDomain(any(), any(), any());
-        then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
+        then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
+        then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
     }
 
     @Test
-    @DisplayName("findHouseBlById(NON_BL): jobDiv=NON_BL → mapper.toNonBlDomain 호출, houseBlDescRepository 미호출")
+    @DisplayName("findHouseBlById(NON_BL): jobDiv=NON_BL → mapper.toNonBlDomain 호출, seaDescRepository/airDescRepository 미호출")
     void findById_nonBlJob_invokesToNonBlDomain() {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
         jpa.setJobDiv(JobDiv.NON_BL);
@@ -259,7 +269,8 @@ class HouseBlPersistenceAdapterTest {
         assertThat(result).contains(expected);
         then(jpaToDomainMapper).should().toNonBlDomain(eq(jpa), any());
         then(jpaToDomainMapper).should(never()).toAirDomain(any(), any(), any());
-        then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
+        then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
+        then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
     }
 
     @Test
@@ -316,7 +327,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) — syncTruckOrders 호출 검증 ────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): savedJpa.syncDims 후 truckRepository.save → savedTruckJpa.syncTruckOrders 순서. SEA 전용 syncContainers는 미호출")
+    @DisplayName("saveHouseBl(TRUCK): savedJpa.syncDims 후 truckRepository.save → savedTruckJpa.syncTruckOrders → saveOrDeleteTruckDesc(desc null이면 truckDescRepository.findBy 호출) 순서. SEA 전용 syncContainers는 미호출")
     void saveHouseBl_truck_callsSyncTruckOrders() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -325,7 +336,8 @@ class HouseBlPersistenceAdapterTest {
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
         given(houseBlTruckRepository.save(any())).willReturn(savedTruckJpa);
-        given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
+        given(houseBlTruckDescRepository.findByTruck_HouseBlTruckId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any(), any())).willReturn(truck);
 
         adapter.saveHouseBl(truck);
 
@@ -340,42 +352,46 @@ class HouseBlPersistenceAdapterTest {
     // ── deleteHouseBl — 타입별 분기 검증 ────────────────────────────────
 
     @Test
-    @DisplayName("deleteHouseBl(SEA): seaRepository.deleteByHouseBl_HouseBlId → descRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서")
-    void deleteHouseBl_sea_deletesSeaExtAndDescThenBase() {
+    @DisplayName("deleteHouseBl(SEA): seaRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서. house_bl_sea_desc는 ON DELETE CASCADE로 DB 자동 정리")
+    void deleteHouseBl_sea_deletesSeaExtThenBase_descCascadedByDb() {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
         sea.assignIdentity(50L, null, null, null, null);
 
         adapter.deleteHouseBl(sea);
 
-        InOrder order = inOrder(houseBlSeaRepository, houseBlDescRepository, houseBlRepository);
+        InOrder order = inOrder(houseBlSeaRepository, houseBlRepository);
         order.verify(houseBlSeaRepository).deleteByHouseBl_HouseBlId(50L);
-        order.verify(houseBlDescRepository).deleteByHouseBl_HouseBlId(50L);
         order.verify(houseBlRepository).deleteById(50L);
         then(houseBlAirRepository).shouldHaveNoInteractions();
         then(houseBlTruckRepository).shouldHaveNoInteractions();
         then(houseBlNonBlRepository).shouldHaveNoInteractions();
+        // seaDesc는 ON DELETE CASCADE — 명시 삭제 불필요
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("deleteHouseBl(AIR): airRepository.deleteByHouseBl_HouseBlId → descRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서")
-    void deleteHouseBl_air_deletesAirExtAndDescThenBase() {
+    @DisplayName("deleteHouseBl(AIR): airRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서. house_bl_air_desc는 ON DELETE CASCADE로 DB 자동 정리")
+    void deleteHouseBl_air_deletesAirExtThenBase_descCascadedByDb() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         air.assignIdentity(51L, null, null, null, null);
 
         adapter.deleteHouseBl(air);
 
-        InOrder order = inOrder(houseBlAirRepository, houseBlDescRepository, houseBlRepository);
+        InOrder order = inOrder(houseBlAirRepository, houseBlRepository);
         order.verify(houseBlAirRepository).deleteByHouseBl_HouseBlId(51L);
-        order.verify(houseBlDescRepository).deleteByHouseBl_HouseBlId(51L);
         order.verify(houseBlRepository).deleteById(51L);
         then(houseBlSeaRepository).shouldHaveNoInteractions();
         then(houseBlTruckRepository).shouldHaveNoInteractions();
         then(houseBlNonBlRepository).shouldHaveNoInteractions();
+        // airDesc는 ON DELETE CASCADE — 명시 삭제 불필요
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("deleteHouseBl(TRUCK): truckRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서, descRepository 미호출")
-    void deleteHouseBl_truck_deletesTruckExtThenBase_withoutDesc() {
+    @DisplayName("deleteHouseBl(TRUCK): truckRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서. house_bl_truck_desc는 ON DELETE CASCADE로 DB 자동 정리 — truckDescRepository 명시 호출 불필요")
+    void deleteHouseBl_truck_deletesTruckExtThenBase_descCascadedByDb() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         truck.assignIdentity(52L, null, null, null, null);
 
@@ -387,11 +403,14 @@ class HouseBlPersistenceAdapterTest {
         then(houseBlSeaRepository).shouldHaveNoInteractions();
         then(houseBlAirRepository).shouldHaveNoInteractions();
         then(houseBlNonBlRepository).shouldHaveNoInteractions();
-        then(houseBlDescRepository).shouldHaveNoInteractions();
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
+        // truckDesc는 ON DELETE CASCADE — 명시 삭제 불필요
+        then(houseBlTruckDescRepository).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("deleteHouseBl(NON_BL): nonBlRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서, descRepository 미호출")
+    @DisplayName("deleteHouseBl(NON_BL): nonBlRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서, seaDescRepository/airDescRepository/truckDescRepository 미호출")
     void deleteHouseBl_nonBl_deletesNonBlExtThenBase_withoutDesc() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         nonBl.assignIdentity(53L, null, null, null, null);
@@ -404,7 +423,9 @@ class HouseBlPersistenceAdapterTest {
         then(houseBlSeaRepository).shouldHaveNoInteractions();
         then(houseBlAirRepository).shouldHaveNoInteractions();
         then(houseBlTruckRepository).shouldHaveNoInteractions();
-        then(houseBlDescRepository).shouldHaveNoInteractions();
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
+        then(houseBlTruckDescRepository).shouldHaveNoInteractions();
     }
 
     // ── findHouseBlsBySchedule — sortBy null ──────────────────────────
@@ -490,48 +511,54 @@ class HouseBlPersistenceAdapterTest {
         order.verify(savedJpa).mergeContainers(any());
         order.verify(savedJpa).mergeDims(any());
         order.verify(houseBlNonBlRepository).save(any());
+        // NON_BL은 desc 미사용 — sea/air/truck desc repository 호출 없음
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
+        then(houseBlTruckDescRepository).shouldHaveNoInteractions();
     }
 
-    // ── findHouseBlById: houseBlDescRepository 호출 여부 분기 검증 ──────────
+    // ── findHouseBlById: sea/airDescRepository 호출 여부 분기 검증 ───────────
 
     @Test
-    @DisplayName("findHouseBlById(SEA): houseBlDescRepository.findByHouseBl_HouseBlId 호출(desc 명시 조회)")
-    void findHouseBlById_seaJob_callsDescRepository() {
+    @DisplayName("findHouseBlById(SEA): seaRepository로 seaExt 조회 후 seaDescRepository로 desc 조회")
+    void findHouseBlById_seaJob_callsSeaDescRepository() {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
         jpa.setJobDiv(JobDiv.SEA);
         jpa.setHouseBlId(10L);
+        HouseBlSeaJpaEntity seaJpa = new HouseBlSeaJpaEntity();
         HouseBlSea expected = HouseBlSea.create(Bound.EXP);
         given(houseBlRepository.findById(10L)).willReturn(Optional.of(jpa));
-        given(houseBlSeaRepository.findByHouseBlHouseBlId(10L)).willReturn(Optional.empty());
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(10L)).willReturn(Optional.empty());
+        given(houseBlSeaRepository.findByHouseBlHouseBlId(10L)).willReturn(Optional.of(seaJpa));
+        given(houseBlSeaDescRepository.findBySea_HouseBlSeaId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toSeaDomain(eq(jpa), any(), any())).willReturn(expected);
 
         adapter.findHouseBlById(10L);
 
         then(houseBlRepository).should().findById(10L);
-        then(houseBlDescRepository).should().findByHouseBl_HouseBlId(10L);
+        then(houseBlSeaDescRepository).should().findBySea_HouseBlSeaId(any());
     }
 
     @Test
-    @DisplayName("findHouseBlById(AIR): houseBlDescRepository.findByHouseBl_HouseBlId 호출(desc 명시 조회)")
-    void findHouseBlById_airJob_callsDescRepository() {
+    @DisplayName("findHouseBlById(AIR): airRepository로 airExt 조회 후 airDescRepository로 desc 조회")
+    void findHouseBlById_airJob_callsAirDescRepository() {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
         jpa.setJobDiv(JobDiv.AIR);
         jpa.setHouseBlId(11L);
+        HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
         HouseBlAir expected = HouseBlAir.create(Bound.EXP);
         given(houseBlRepository.findById(11L)).willReturn(Optional.of(jpa));
-        given(houseBlAirRepository.findByHouseBlHouseBlId(11L)).willReturn(Optional.empty());
-        given(houseBlDescRepository.findByHouseBl_HouseBlId(11L)).willReturn(Optional.empty());
+        given(houseBlAirRepository.findByHouseBlHouseBlId(11L)).willReturn(Optional.of(airJpa));
+        given(houseBlAirDescRepository.findByAir_HouseBlAirId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(jpa), any(), any())).willReturn(expected);
 
         adapter.findHouseBlById(11L);
 
         then(houseBlRepository).should().findById(11L);
-        then(houseBlDescRepository).should().findByHouseBl_HouseBlId(11L);
+        then(houseBlAirDescRepository).should().findByAir_HouseBlAirId(any());
     }
 
     @Test
-    @DisplayName("findHouseBlById(NON_BL): houseBlDescRepository 미호출 — desc 불필요 분기")
+    @DisplayName("findHouseBlById(NON_BL): seaDescRepository/airDescRepository 미호출 — desc 불필요 분기")
     void findHouseBlById_nonBlJob_doesNotCallDescRepository() {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
         jpa.setJobDiv(JobDiv.NON_BL);
@@ -544,28 +571,33 @@ class HouseBlPersistenceAdapterTest {
         adapter.findHouseBlById(12L);
 
         then(houseBlRepository).should().findById(12L);
-        then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
+        then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
+        then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
     }
 
     @Test
-    @DisplayName("findHouseBlById(TRUCK): houseBlDescRepository 미호출 — desc 불필요 분기")
-    void findHouseBlById_truckJob_doesNotCallDescRepository() {
+    @DisplayName("findHouseBlById(TRUCK): truckDescRepository 조회, seaDescRepository/airDescRepository 미호출")
+    void findHouseBlById_truckJob_callsTruckDescRepository_doesNotCallSeaAirDescRepository() {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
         jpa.setJobDiv(JobDiv.TRUCK);
         jpa.setHouseBlId(13L);
         HouseBlTruck expected = HouseBlTruck.create(Bound.EXP);
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
         given(houseBlRepository.findById(13L)).willReturn(Optional.of(jpa));
-        given(houseBlTruckRepository.findByHouseBlHouseBlId(13L)).willReturn(Optional.empty());
-        given(jpaToDomainMapper.toTruckDomain(eq(jpa), any())).willReturn(expected);
+        given(houseBlTruckRepository.findByHouseBlHouseBlId(13L)).willReturn(Optional.of(truckJpa));
+        given(houseBlTruckDescRepository.findByTruck_HouseBlTruckId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toTruckDomain(eq(jpa), any(), any())).willReturn(expected);
 
         adapter.findHouseBlById(13L);
 
         then(houseBlRepository).should().findById(13L);
-        then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
+        then(houseBlTruckDescRepository).should().findByTruck_HouseBlTruckId(any());
+        then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
+        then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
     }
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): NON_BL 전용 sync만 호출 — airRepository/syncTruckOrders는 미호출")
+    @DisplayName("saveHouseBl(NON_BL): NON_BL 전용 sync만 호출 — airRepository/syncTruckOrders/seaDescRepository/airDescRepository는 미호출")
     void saveNonBlHouseBl_doesNotInvokeSeaOnlySync() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -579,5 +611,8 @@ class HouseBlPersistenceAdapterTest {
         // truckOrders는 HouseBlTruckJpaEntity 소유 — NON_BL에서는 truckRepository 미호출로 검증
         then(houseBlAirRepository).should(never()).save(any());
         then(houseBlTruckRepository).should(never()).save(any());
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
+        then(houseBlTruckDescRepository).shouldHaveNoInteractions();
     }
 }

@@ -6,7 +6,6 @@ import com.freightos.fms.domain.housebl.entity.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.freightos.common.util.VoMapper.mapOrNull;
@@ -17,23 +16,19 @@ import static com.freightos.common.util.VoMapper.mapOrNull;
 @Component
 public class HouseBlDocMapper {
 
-    // ── E-13 DESC ─────────────────────────────────────────────────────
+    // ── E-13 DESC (SEA) ───────────────────────────────────────────────
 
-    public HouseBlDesc toDescDomain(HouseBlDescJpaEntity jpa) {
-        HouseBlDesc domain = HouseBlDesc.create(jpa.getHouseBl().getHouseBlId());
-        domain.assignIdentity(jpa.getHouseBlDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+    public HouseBlDesc toSeaDescDomain(HouseBlSeaDescJpaEntity jpa) {
+        HouseBlDesc domain = HouseBlDesc.create(jpa.getSea().getHouseBlSeaId());
+        domain.assignIdentity(jpa.getHouseBlSeaDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
                 jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
         return domain;
     }
 
-    public Optional<HouseBlDesc> toDescDomain(Optional<HouseBlDescJpaEntity> jpa) {
-        return jpa.map(this::toDescDomain);
-    }
-
-    public void applyDescFields(HouseBlDesc domain, HouseBlDescJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setHouseBl(houseBlJpa);
+    public void applySeaDescFields(HouseBlDesc domain, HouseBlSeaDescJpaEntity jpa, HouseBlSeaJpaEntity seaJpa) {
+        jpa.setSea(seaJpa);
         jpa.setMarks(domain.getMarks());
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
@@ -41,11 +36,44 @@ public class HouseBlDocMapper {
         jpa.setRemark(domain.getRemark());
     }
 
-    public HouseBlDescJpaEntity toDescJpa(HouseBlDesc d, HouseBlJpaEntity houseBl) {
-        HouseBlDescJpaEntity jpa = new HouseBlDescJpaEntity();
-        if (d.getId() != null) jpa.setHouseBlDescId(d.getId());
-        applyDescFields(d, jpa, houseBl);
-        return jpa;
+    // ── E-13 DESC (AIR) ───────────────────────────────────────────────
+
+    public HouseBlDesc toAirDescDomain(HouseBlAirDescJpaEntity jpa) {
+        HouseBlDesc domain = HouseBlDesc.create(jpa.getAir().getHouseBlAirId());
+        domain.assignIdentity(jpa.getHouseBlAirDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        domain.updateContent(jpa.getMarks(), jpa.getDescription(),
+                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+        return domain;
+    }
+
+    public void applyAirDescFields(HouseBlDesc domain, HouseBlAirDescJpaEntity jpa, HouseBlAirJpaEntity airJpa) {
+        jpa.setAir(airJpa);
+        jpa.setMarks(domain.getMarks());
+        jpa.setDescription(domain.getDescription());
+        jpa.setDescClause1(domain.getDescClause1());
+        jpa.setDescClause2(domain.getDescClause2());
+        jpa.setRemark(domain.getRemark());
+    }
+
+    // ── E-13 DESC (TRUCK) ────────────────────────────────────────────
+
+    public HouseBlDesc toTruckDescDomain(HouseBlTruckDescJpaEntity jpa) {
+        HouseBlDesc domain = HouseBlDesc.create(jpa.getTruck().getHouseBlTruckId());
+        domain.assignIdentity(jpa.getHouseBlTruckDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        domain.updateContent(jpa.getMarks(), jpa.getDescription(),
+                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+        return domain;
+    }
+
+    public void applyTruckDescFields(HouseBlDesc domain, HouseBlTruckDescJpaEntity jpa, HouseBlTruckJpaEntity truckJpa) {
+        jpa.setTruck(truckJpa);
+        jpa.setMarks(domain.getMarks());
+        jpa.setDescription(domain.getDescription());
+        jpa.setDescClause1(domain.getDescClause1());
+        jpa.setDescClause2(domain.getDescClause2());
+        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-19 SCHEDULE LEG ─────────────────────────────────────────────

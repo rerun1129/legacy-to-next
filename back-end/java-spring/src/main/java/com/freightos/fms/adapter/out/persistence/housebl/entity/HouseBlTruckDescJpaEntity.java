@@ -8,23 +8,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * JPA ORM 엔티티 — House B/L 화물 표시 및 품목 설명 (E-13).
- * HouseBlJpaEntity 와 @OneToOne(FK: house_bl_id) 관계.
+ * JPA ORM 엔티티 — House B/L 트럭(TRUCK) 화물 표시 및 품목 설명.
+ * HouseBlTruckJpaEntity 와 @OneToOne(FK: house_bl_truck_id) 관계.
+ * ON DELETE CASCADE — truckExt 삭제 시 DB가 자동 정리.
  */
 @Entity
-@Table(schema = "fms", name = "house_bl_desc")
+@Table(schema = "fms", name = "house_bl_truck_desc")
 @Getter
 @NoArgsConstructor
-public class HouseBlDescJpaEntity extends BaseJpaEntity {
+public class HouseBlTruckDescJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "house_bl_desc_id", updatable = false, nullable = false)
-    private Long houseBlDescId;
+    @Column(name = "house_bl_truck_desc_id", updatable = false, nullable = false)
+    private Long houseBlTruckDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
-    private HouseBlJpaEntity houseBl;
+    @JoinColumn(name = "house_bl_truck_id", nullable = false, unique = true)
+    private HouseBlTruckJpaEntity truck;
 
     @Column(name = "marks", columnDefinition = "TEXT")
     private String marks;
@@ -43,8 +44,8 @@ public class HouseBlDescJpaEntity extends BaseJpaEntity {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
-    public void setHouseBlDescId(Long v) { this.houseBlDescId = v; }
-    public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
+    public void setHouseBlTruckDescId(Long v) { this.houseBlTruckDescId = v; }
+    public void setTruck(HouseBlTruckJpaEntity v) { this.truck = v; }
     public void setMarks(String v) { this.marks = v; }
     public void setDescription(String v) { this.description = v; }
     public void setDescClause1(DescClause1 v) { this.descClause1 = v; }
