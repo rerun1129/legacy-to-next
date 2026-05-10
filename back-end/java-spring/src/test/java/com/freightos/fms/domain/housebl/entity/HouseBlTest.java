@@ -30,7 +30,8 @@ class HouseBlTest {
                 null, null, null, null, null, null,
                 null, null, null, null, null, null,
                 null, null, null, null, null, null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null,
+                null
         );
     }
 
@@ -58,7 +59,7 @@ class HouseBlTest {
                 PortCode.of("KRPUS"), null, null, null,
                 null, null, null, null, null, null,
                 null, null, null, null, null, null,
-                null, null
+                null, null, null
         );
 
         sea.update(fields);
