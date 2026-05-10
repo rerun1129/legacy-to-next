@@ -128,7 +128,7 @@ public class HouseBlDocMapper {
     // ── E-21 AIR CHARGE ──────────────────────────────────────────────
 
     public HouseBlAirCharge toAirChargeDomain(HouseBlAirChargeJpaEntity jpa) {
-        HouseBlAirCharge c = HouseBlAirCharge.create(jpa.getHouseBlId());
+        HouseBlAirCharge c = HouseBlAirCharge.create(jpa.getHouseBlAirId());
         c.assignIdentity(jpa.getHouseBlAirChargeId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new HouseBlAirCharge.Details(
@@ -143,7 +143,8 @@ public class HouseBlDocMapper {
         return jpaList.stream().map(this::toAirChargeDomain).collect(Collectors.toList());
     }
 
-    public void applyAirChargeFields(HouseBlAirCharge domain, HouseBlAirChargeJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
+    /** FK(house_bl_air_id)는 HouseBlAirJpaEntity.syncAirCharges(@JoinColumn)이 설정 — airJpa 인자 불필요 */
+    public void applyAirChargeFields(HouseBlAirCharge domain, HouseBlAirChargeJpaEntity jpa) {
         jpa.setFreightCode(domain.getFreightCode());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
         jpa.setPer(domain.getPer());
@@ -154,9 +155,10 @@ public class HouseBlDocMapper {
         jpa.setRate(domain.getRate());
     }
 
-    public HouseBlAirChargeJpaEntity toAirChargeJpa(HouseBlAirCharge c, HouseBlJpaEntity houseBl) {
+    /** FK(house_bl_air_id)는 HouseBlAirJpaEntity.syncAirCharges(@JoinColumn)이 설정 — airJpa 인자 불필요 */
+    public HouseBlAirChargeJpaEntity toAirChargeJpa(HouseBlAirCharge c) {
         HouseBlAirChargeJpaEntity jpa = new HouseBlAirChargeJpaEntity();
-        applyAirChargeFields(c, jpa, houseBl);
+        applyAirChargeFields(c, jpa);
         return jpa;
     }
 }

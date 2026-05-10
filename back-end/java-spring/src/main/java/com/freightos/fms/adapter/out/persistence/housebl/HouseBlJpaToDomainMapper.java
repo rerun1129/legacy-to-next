@@ -43,14 +43,14 @@ public class HouseBlJpaToDomainMapper {
                 .map(cargoMapper::toDimDomain)
                 .collect(Collectors.toList());
         domain.initDims(dims);
-        // scheduleLegs는 HouseBlAirJpaEntity 소유 (house_bl_air_id FK)
+        // scheduleLegs/airCharges는 HouseBlAirJpaEntity 소유 (house_bl_air_id FK)
         List<HouseBlScheduleLeg> scheduleLegs = airJpa != null
                 ? airJpa.getScheduleLegs().stream().map(docMapper::toScheduleLegDomain).collect(Collectors.toList())
                 : List.of();
         domain.initScheduleLegs(scheduleLegs);
-        List<HouseBlAirCharge> airCharges = jpa.getAirCharges().stream()
-                .map(docMapper::toAirChargeDomain)
-                .collect(Collectors.toList());
+        List<HouseBlAirCharge> airCharges = airJpa != null
+                ? airJpa.getAirCharges().stream().map(docMapper::toAirChargeDomain).collect(Collectors.toList())
+                : List.of();
         domain.initAirCharges(airCharges);
         if (descJpa != null) {
             domain.initDesc(docMapper.toDescDomain(descJpa));

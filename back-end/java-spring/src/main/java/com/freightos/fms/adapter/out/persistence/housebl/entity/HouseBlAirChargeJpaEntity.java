@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 
 /**
  * JPA ORM 엔티티 — House B/L Air Charge 그리드 행.
- * AIR 모드 전용 1:N 자식. per는 Per.getCode() 문자열로 저장.
+ * AIR 모드 전용 1:N 자식. 부모 FK가 house_bl_id → house_bl_air_id로 재배치됨.
  */
 @Entity
 @Table(schema = "fms", name = "house_bl_air_charge")
@@ -25,8 +25,8 @@ public class HouseBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "house_bl_air_charge_id", updatable = false, nullable = false)
     private Long houseBlAirChargeId;
 
-    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
-    private Long houseBlId;
+    @Column(name = "house_bl_air_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlAirId;
 
     @Column(name = "freight_code", length = 20)
     private String freightCode;
@@ -55,7 +55,6 @@ public class HouseBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "rate", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal rate;
 
-    public void setHouseBlId(Long v)                  { this.houseBlId     = v; }
     public void setFreightCode(String v)              { this.freightCode   = v; }
     public void setCurrencyCode(String v)             { this.currencyCode  = v; }
     public void setPer(Per v)                         { this.per           = v; }

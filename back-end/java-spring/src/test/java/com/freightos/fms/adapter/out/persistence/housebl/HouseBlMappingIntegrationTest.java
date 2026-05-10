@@ -156,6 +156,14 @@ class HouseBlMappingIntegrationTest {
                 .getSingleResult();
     }
 
+    /** airCharges는 house_bl_air_id FK로 소유 — airJpa id 기준으로 집계 */
+    private long countAirCharges(Long airId) {
+        return em.createQuery(
+                        "SELECT COUNT(c) FROM HouseBlAirChargeJpaEntity c WHERE c.houseBlAirId = :aid", Long.class)
+                .setParameter("aid", airId)
+                .getSingleResult();
+    }
+
     private HouseBlAirJpaEntity newAirExt(HouseBlJpaEntity parent) {
         HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
         airJpa.setHouseBl(parent);
@@ -181,7 +189,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getContainers()).hasSize(2);
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getTruckOrders()).isEmpty();
-        assertThat(loaded.getAirCharges()).isEmpty();
     }
 
     @Test
@@ -189,15 +196,15 @@ class HouseBlMappingIntegrationTest {
     void airMode_fullRoundTrip_correctCollections() {
         HouseBlJpaEntity parent = newParent(JobDiv.AIR);
         parent.syncDims(List.of(dim()));
-        parent.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(parent);
         em.flush();
 
-        // scheduleLegs는 HouseBlAirJpaEntity 소유 — airExt 영속화 후 sync
+        // scheduleLegs/airCharges는 HouseBlAirJpaEntity 소유 — airExt 영속화 후 sync
         HouseBlAirJpaEntity airExt = newAirExt(parent);
         em.persist(airExt);
         em.flush();
         airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.flush();
         em.clear();
 
@@ -208,7 +215,7 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getTruckOrders()).isEmpty();
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loadedAir.getScheduleLegs()).hasSize(1);
-        assertThat(loaded.getAirCharges()).hasSize(1);
+        assertThat(loadedAir.getAirCharges()).hasSize(1);
     }
 
     @Test
@@ -227,7 +234,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getTruckOrders()).hasSize(1);
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getContainers()).isEmpty();
-        assertThat(loaded.getAirCharges()).isEmpty();
     }
 
     @Test
@@ -245,7 +251,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getContainers()).isEmpty();
         assertThat(loaded.getTruckOrders()).isEmpty();
-        assertThat(loaded.getAirCharges()).isEmpty();
     }
 
     @Test
@@ -263,7 +268,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded.getContainers()).isNotNull().isEmpty();
         assertThat(loaded.getDims()).isNotNull().isEmpty();
         assertThat(loaded.getTruckOrders()).isNotNull().isEmpty();
-        assertThat(loaded.getAirCharges()).isNotNull().isEmpty();
     }
 
     @Test
@@ -351,28 +355,28 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("부모 delete → Container/Dim/TruckOrder/AirCharge 자식 row count 모두 0 (cascade)")
+    @DisplayName("부모 delete → Container/Dim/TruckOrder 자식 row count 모두 0 (cascade). airCharges/scheduleLegs는 airExt 삭제 시 정리")
     void parentDelete_cascadeDeleteAllChildren() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         parent.syncContainers(List.of(container("CONT-DEL")));
         parent.syncDims(List.of(dim()));
         parent.syncTruckOrders(List.of(truckOrder("TRUCK-DEL")));
-        parent.syncAirCharges(List.of(airCharge("FUEL-DEL")));
         em.persist(parent);
         em.flush();
 
-        // scheduleLegs는 AIR ext 소유 — ON DELETE CASCADE로 airExt 삭제 시 자동 정리
+        // scheduleLegs/airCharges는 AIR ext 소유 — airExt 삭제 시 cascade로 자동 정리
         HouseBlAirJpaEntity airExt = newAirExt(parent);
         em.persist(airExt);
         em.flush();
         airExt.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
+        airExt.syncAirCharges(List.of(airCharge("FUEL-DEL")));
         em.flush();
         em.clear();
 
         Long parentId = parent.getHouseBlId();
         Long airId = airExt.getHouseBlAirId();
         HouseBlJpaEntity toDelete = em.find(HouseBlJpaEntity.class, parentId);
-        // airExt도 먼저 제거 (house_bl FK 참조 해제)
+        // airExt도 먼저 제거 (house_bl FK 참조 해제 + scheduleLegs/airCharges cascade 삭제)
         HouseBlAirJpaEntity airToDelete = em.find(HouseBlAirJpaEntity.class, airId);
         em.remove(airToDelete);
         em.flush();
@@ -385,7 +389,7 @@ class HouseBlMappingIntegrationTest {
         assertThat(countChildren("HouseBlDimJpaEntity", parentId)).isZero();
         assertThat(countScheduleLegs(airId)).isZero();
         assertThat(countChildren("HouseBlTruckOrderJpaEntity", parentId)).isZero();
-        assertThat(countChildren("HouseBlAirChargeJpaEntity", parentId)).isZero();
+        assertThat(countAirCharges(airId)).isZero();
     }
 
     @Test
@@ -491,29 +495,34 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("syncAirCharges: 1건 저장 후 다른 1건으로 교체 → DB count==1, 기존 ID 없음")
+    @DisplayName("HouseBlAirJpaEntity.syncAirCharges: 1건 저장 후 다른 1건으로 교체 → DB count==1, 기존 ID 없음")
     void syncAirCharges_replaceOne_orphanRemovedAndNewInserted() {
         HouseBlJpaEntity parent = newParent(JobDiv.AIR);
-        parent.syncAirCharges(List.of(airCharge("FUEL")));
-
         em.persist(parent);
+        em.flush();
+
+        // airCharges는 HouseBlAirJpaEntity 소유 — airExt 영속화 후 sync
+        HouseBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
+        airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.flush();
         em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        List<Long> oldIds = loaded.getAirCharges().stream()
+        HouseBlAirJpaEntity loadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
+        List<Long> oldIds = loadedAir.getAirCharges().stream()
                 .map(HouseBlAirChargeJpaEntity::getHouseBlAirChargeId)
                 .toList();
 
-        loaded.syncAirCharges(List.of(airCharge("AWC")));
+        loadedAir.syncAirCharges(List.of(airCharge("AWC")));
         em.flush();
         em.clear();
 
-        long count = countChildren("HouseBlAirChargeJpaEntity", parent.getHouseBlId());
+        long count = countAirCharges(airExt.getHouseBlAirId());
         assertThat(count).isEqualTo(1);
 
-        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        List<Long> newIds = reloaded.getAirCharges().stream()
+        HouseBlAirJpaEntity reloadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
+        List<Long> newIds = reloadedAir.getAirCharges().stream()
                 .map(HouseBlAirChargeJpaEntity::getHouseBlAirChargeId)
                 .toList();
         assertThat(newIds).doesNotContainAnyElementsOf(oldIds);

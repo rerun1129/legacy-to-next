@@ -104,6 +104,12 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_air_id", nullable = false, updatable = false)
     private List<HouseBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
 
+    // AIR 전용 운임 항목. house_bl_air_id FK로 소유.
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_air_id", nullable = false, updatable = false)
+    private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
@@ -128,5 +134,10 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void syncScheduleLegs(List<HouseBlScheduleLegJpaEntity> newLegs) {
         this.scheduleLegs.clear();
         this.scheduleLegs.addAll(newLegs);
+    }
+
+    public void syncAirCharges(List<HouseBlAirChargeJpaEntity> newCharges) {
+        this.airCharges.clear();
+        this.airCharges.addAll(newCharges);
     }
 }

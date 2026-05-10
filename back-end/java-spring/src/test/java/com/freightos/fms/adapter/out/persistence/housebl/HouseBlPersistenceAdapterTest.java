@@ -55,7 +55,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(AIR) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(AIR): syncDims→airRepository.save→savedAirJpa.syncScheduleLegs 순서, descRepository 조회")
+    @DisplayName("saveHouseBl(AIR): syncDims→airRepository.save→savedAirJpa.syncScheduleLegs→savedAirJpa.syncAirCharges 순서, descRepository 조회")
     void saveAirHouseBl_callsSyncInOrderThenSavesAirExt() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -63,7 +63,7 @@ class HouseBlPersistenceAdapterTest {
         HouseBlAirJpaEntity savedAirJpa = spy(new HouseBlAirJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        // airRepository.save가 savedAirJpa를 반환해야 syncScheduleLegs 호출 가능
+        // airRepository.save가 savedAirJpa를 반환해야 syncScheduleLegs/syncAirCharges 호출 가능
         given(houseBlAirRepository.save(any())).willReturn(savedAirJpa);
         given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
@@ -74,6 +74,7 @@ class HouseBlPersistenceAdapterTest {
         order.verify(savedJpa).syncDims(any());
         order.verify(houseBlAirRepository).save(any());
         order.verify(savedAirJpa).syncScheduleLegs(any());
+        order.verify(savedAirJpa).syncAirCharges(any());
     }
 
     @Test
@@ -556,7 +557,7 @@ class HouseBlPersistenceAdapterTest {
     }
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): NON_BL 전용 sync만 호출 — syncAirCharges/syncTruckOrders는 미호출")
+    @DisplayName("saveHouseBl(NON_BL): NON_BL 전용 sync만 호출 — airRepository/syncTruckOrders는 미호출")
     void saveNonBlHouseBl_doesNotInvokeSeaOnlySync() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -566,7 +567,8 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(nonBl);
 
-        then(savedJpa).should(never()).syncAirCharges(any());
+        // airCharges는 HouseBlAirJpaEntity 소유 — NON_BL에서는 airRepository 미호출로 검증
+        then(houseBlAirRepository).should(never()).save(any());
         then(savedJpa).should(never()).syncTruckOrders(any());
     }
 }
