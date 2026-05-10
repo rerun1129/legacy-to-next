@@ -52,11 +52,11 @@ export const PAGE_BUNDLES: PageBundle[] = [
       },
       {
         id: "change-bl-no",
-        label: "Change BL No",
+        label: "Change B/L No",
         icon: RefreshCw,
         initialVariant: "transaction",
         type: "button",
-        confirmMessage: "Change BL No 버튼이 클릭되었습니다.",
+        confirmMessage: "Change B/L No 버튼이 클릭되었습니다.",
       },
       {
         id: "save",
@@ -149,7 +149,7 @@ export const PAGE_BUNDLES: PageBundle[] = [
       { id: "save", label: "Save", icon: Save, initialVariant: "transaction", type: "submit", confirmMessage: "Save 버튼이 클릭되었습니다." },
       { id: "delete", label: "Delete", icon: Trash2, initialVariant: "danger", type: "button", confirmMessage: "Delete 버튼이 클릭되었습니다." },
       { id: "copy", label: "Copy", icon: Copy, initialVariant: "normal", type: "button", confirmMessage: "Copy 버튼이 클릭되었습니다." },
-      { id: "change-bl-no", label: "Change BL No", icon: RefreshCw, initialVariant: "transaction", type: "button", confirmMessage: "Change BL No 버튼이 클릭되었습니다." },
+      { id: "change-bl-no", label: "Change B/L No", icon: RefreshCw, initialVariant: "transaction", type: "button", confirmMessage: "Change B/L No 버튼이 클릭되었습니다." },
     ],
   },
   {

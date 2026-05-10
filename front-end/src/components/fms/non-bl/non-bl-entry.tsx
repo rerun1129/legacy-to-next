@@ -282,7 +282,7 @@ export function NonBLEntry() {
               setIsChangeBlNoModalOpen(true);
             }}
           >
-            <RefreshCw size={12} />Change BL No
+            <RefreshCw size={12} />Change B/L No
           </button>
         </div>
       </div>

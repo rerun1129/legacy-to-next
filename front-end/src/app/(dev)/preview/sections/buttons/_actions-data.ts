@@ -64,10 +64,10 @@ export const ACTION_SPECIMENS: ActionSpecimen[] = [
   },
   {
     id: "change-bl",
-    label: "Change BL No",
+    label: "Change B/L No",
     icon: RefreshCw,
     defaultVariant: "transaction",
-    confirmMessage: "Change BL No 버튼이 클릭되었습니다.",
+    confirmMessage: "Change B/L No 버튼이 클릭되었습니다.",
   },
   {
     id: "export",
