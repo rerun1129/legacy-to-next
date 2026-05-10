@@ -66,9 +66,9 @@ public class HouseBlJpaToDomainMapper {
                 .map(cargoMapper::toDimDomain)
                 .collect(Collectors.toList());
         domain.initDims(dims);
-        List<HouseBlTruckOrder> truckOrders = jpa.getTruckOrders().stream()
-                .map(docMapper::toTruckOrderDomain)
-                .collect(Collectors.toList());
+        List<HouseBlTruckOrder> truckOrders = truckJpa != null
+                ? truckJpa.getTruckOrders().stream().map(docMapper::toTruckOrderDomain).collect(Collectors.toList())
+                : List.of();
         domain.initTruckOrders(truckOrders);
         return domain;
     }

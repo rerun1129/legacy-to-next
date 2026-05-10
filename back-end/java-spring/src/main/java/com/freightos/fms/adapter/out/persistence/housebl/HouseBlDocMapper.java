@@ -85,7 +85,7 @@ public class HouseBlDocMapper {
     // ── E-20 TRUCK ORDER ──────────────────────────────────────────────
 
     public HouseBlTruckOrder toTruckOrderDomain(HouseBlTruckOrderJpaEntity jpa) {
-        HouseBlTruckOrder o = HouseBlTruckOrder.create(jpa.getHouseBlId());
+        HouseBlTruckOrder o = HouseBlTruckOrder.create(jpa.getHouseBlTruckId());
         o.assignIdentity(jpa.getHouseBlTruckOrderId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         o.updateDetails(new HouseBlTruckOrder.Details(
@@ -102,7 +102,8 @@ public class HouseBlDocMapper {
         return jpaList.stream().map(this::toTruckOrderDomain).collect(Collectors.toList());
     }
 
-    public void applyTruckOrderFields(HouseBlTruckOrder domain, HouseBlTruckOrderJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
+    /** FK(house_bl_truck_id)는 HouseBlTruckJpaEntity.syncTruckOrders(@JoinColumn)이 설정 — truckJpa 인자 불필요 */
+    public void applyTruckOrderFields(HouseBlTruckOrder domain, HouseBlTruckOrderJpaEntity jpa) {
         jpa.setTruckOrderNo(domain.getTruckOrderNo());
         jpa.setPkgQty(domain.getPkgQty());
         jpa.setPkgUnit(domain.getPkgUnit());
@@ -119,9 +120,10 @@ public class HouseBlDocMapper {
         jpa.setSealNo3(mapOrNull(domain.getSealNo3(), SealNumber::value));
     }
 
-    public HouseBlTruckOrderJpaEntity toTruckOrderJpa(HouseBlTruckOrder o, HouseBlJpaEntity houseBl) {
+    /** FK(house_bl_truck_id)는 HouseBlTruckJpaEntity.syncTruckOrders(@JoinColumn)이 설정 — truckJpa 인자 불필요 */
+    public HouseBlTruckOrderJpaEntity toTruckOrderJpa(HouseBlTruckOrder o) {
         HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
-        applyTruckOrderFields(o, jpa, houseBl);
+        applyTruckOrderFields(o, jpa);
         return jpa;
     }
 

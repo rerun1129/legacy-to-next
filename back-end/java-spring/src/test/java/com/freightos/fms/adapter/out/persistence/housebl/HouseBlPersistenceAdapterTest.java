@@ -137,13 +137,15 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) ────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/houseBlDescRepository는 없다")
+    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/houseBlDescRepository는 없다. truckRepository.save → savedTruckJpa.syncTruckOrders 순서")
     void saveTruckHouseBl_syncsDimsOnly_skipsLegsLicensesDesc() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.TRUCK);
+        HouseBlTruckJpaEntity savedTruckJpa = spy(new HouseBlTruckJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlTruckRepository.save(any())).willReturn(savedTruckJpa);
         given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
 
         adapter.saveHouseBl(truck);
@@ -152,7 +154,9 @@ class HouseBlPersistenceAdapterTest {
         then(savedJpa).should(never()).syncContainers(any());
         // TRUCK은 desc 미사용 — houseBlDescRepository 완전 미호출
         then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
+        // truckRepository.save 반환값(savedTruckJpa)에 syncTruckOrders 호출
         then(houseBlTruckRepository).should().save(any());
+        then(savedTruckJpa).should().syncTruckOrders(any());
     }
 
     // ── saveHouseBl(NON_BL) ───────────────────────────────────────────
@@ -312,19 +316,23 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) — syncTruckOrders 호출 검증 ────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims→syncTruckOrders 호출, SEA 전용 syncContainers는 미호출")
+    @DisplayName("saveHouseBl(TRUCK): savedJpa.syncDims 후 truckRepository.save → savedTruckJpa.syncTruckOrders 순서. SEA 전용 syncContainers는 미호출")
     void saveHouseBl_truck_callsSyncTruckOrders() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.TRUCK);
+        HouseBlTruckJpaEntity savedTruckJpa = spy(new HouseBlTruckJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlTruckRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlTruckRepository.save(any())).willReturn(savedTruckJpa);
         given(jpaToDomainMapper.toTruckDomain(eq(savedJpa), any())).willReturn(truck);
 
         adapter.saveHouseBl(truck);
 
-        then(savedJpa).should().syncDims(any());
-        then(savedJpa).should().syncTruckOrders(any());
+        InOrder order = inOrder(savedJpa, houseBlTruckRepository, savedTruckJpa);
+        order.verify(savedJpa).syncDims(any());
+        order.verify(houseBlTruckRepository).save(any());
+        order.verify(savedTruckJpa).syncTruckOrders(any());
         // SEA 전용 sync는 호출하지 않음
         then(savedJpa).should(never()).syncContainers(any());
     }
@@ -568,7 +576,8 @@ class HouseBlPersistenceAdapterTest {
         adapter.saveHouseBl(nonBl);
 
         // airCharges는 HouseBlAirJpaEntity 소유 — NON_BL에서는 airRepository 미호출로 검증
+        // truckOrders는 HouseBlTruckJpaEntity 소유 — NON_BL에서는 truckRepository 미호출로 검증
         then(houseBlAirRepository).should(never()).save(any());
-        then(savedJpa).should(never()).syncTruckOrders(any());
+        then(houseBlTruckRepository).should(never()).save(any());
     }
 }

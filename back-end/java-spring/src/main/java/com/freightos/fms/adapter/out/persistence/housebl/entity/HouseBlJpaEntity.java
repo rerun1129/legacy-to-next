@@ -151,12 +151,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
 
-    // TRUCK에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
-    private List<HouseBlTruckOrderJpaEntity> truckOrders = new ArrayList<>();
-
     public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
     public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
@@ -206,11 +200,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void syncDims(List<HouseBlDimJpaEntity> newDims) {
         this.dims.clear();
         this.dims.addAll(newDims);
-    }
-
-    public void syncTruckOrders(List<HouseBlTruckOrderJpaEntity> newOrders) {
-        this.truckOrders.clear();
-        this.truckOrders.addAll(newOrders);
     }
 
     /**

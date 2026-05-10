@@ -6,8 +6,11 @@ import com.freightos.fms.domain.common.enums.ServiceTerm;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JPA ORM 엔티티 — House B/L 트럭 확장.
@@ -64,6 +67,12 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private ServiceTerm serviceTerm;
 
+    // TRUCK 전용 오더 그리드. house_bl_truck_id FK로 소유.
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_truck_id", nullable = false, updatable = false)
+    private List<HouseBlTruckOrderJpaEntity> truckOrders = new ArrayList<>();
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setVesselName(String v) { this.vesselName = v; }
     public void setVoyageNo(String v) { this.voyageNo = v; }
@@ -76,4 +85,9 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
+
+    public void syncTruckOrders(List<HouseBlTruckOrderJpaEntity> newOrders) {
+        this.truckOrders.clear();
+        this.truckOrders.addAll(newOrders);
+    }
 }

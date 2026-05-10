@@ -7,6 +7,7 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDescJpaEn
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlScheduleLegJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckOrderJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
@@ -86,6 +87,9 @@ class HouseBlMappingIntegrationTest {
 
     @Autowired
     private HouseBlAirRepository houseBlAirRepository;
+
+    @Autowired
+    private HouseBlTruckRepository houseBlTruckRepository;
 
     @Autowired
     private HouseBlDescRepository houseBlDescRepository;
@@ -170,6 +174,20 @@ class HouseBlMappingIntegrationTest {
         return airJpa;
     }
 
+    private HouseBlTruckJpaEntity newTruckExt(HouseBlJpaEntity parent) {
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
+        truckJpa.setHouseBl(parent);
+        return truckJpa;
+    }
+
+    /** truckOrders는 house_bl_truck_id FK로 소유 — truckExt id 기준으로 집계 */
+    private long countTruckOrders(Long truckId) {
+        return em.createQuery(
+                        "SELECT COUNT(o) FROM HouseBlTruckOrderJpaEntity o WHERE o.houseBlTruckId = :tid", Long.class)
+                .setParameter("tid", truckId)
+                .getSingleResult();
+    }
+
     // ── 테스트 ──────────────────────────────────────────────────────────
 
     @Test
@@ -188,7 +206,6 @@ class HouseBlMappingIntegrationTest {
         assertThat(loaded).isNotNull();
         assertThat(loaded.getContainers()).hasSize(2);
         assertThat(loaded.getDims()).hasSize(1);
-        assertThat(loaded.getTruckOrders()).isEmpty();
     }
 
     @Test
@@ -212,26 +229,31 @@ class HouseBlMappingIntegrationTest {
         HouseBlAirJpaEntity loadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
 
         assertThat(loaded.getContainers()).isEmpty();
-        assertThat(loaded.getTruckOrders()).isEmpty();
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loadedAir.getScheduleLegs()).hasSize(1);
         assertThat(loadedAir.getAirCharges()).hasSize(1);
     }
 
     @Test
-    @DisplayName("Truck 모드 save→load: truckOrders/dims만 채움")
+    @DisplayName("Truck 모드 save→load: truckExt에 truckOrders 1건, parent에 dims 1건")
     void truckMode_roundTrip_truckOrdersAndDimsOnly() {
         HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
-        parent.syncTruckOrders(List.of(truckOrder("TRUCK-1")));
         parent.syncDims(List.of(dim()));
-
         em.persist(parent);
+        em.flush();
+
+        // truckOrders는 HouseBlTruckJpaEntity 소유 — truckExt 영속화 후 sync
+        HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
+        em.persist(truckExt);
+        em.flush();
+        truckExt.syncTruckOrders(List.of(truckOrder("TRUCK-1")));
         em.flush();
         em.clear();
 
         HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        HouseBlTruckJpaEntity loadedTruck = em.find(HouseBlTruckJpaEntity.class, truckExt.getHouseBlTruckId());
 
-        assertThat(loaded.getTruckOrders()).hasSize(1);
+        assertThat(loadedTruck.getTruckOrders()).hasSize(1);
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getContainers()).isEmpty();
     }
@@ -250,7 +272,6 @@ class HouseBlMappingIntegrationTest {
 
         assertThat(loaded.getDims()).hasSize(1);
         assertThat(loaded.getContainers()).isEmpty();
-        assertThat(loaded.getTruckOrders()).isEmpty();
     }
 
     @Test
@@ -267,7 +288,6 @@ class HouseBlMappingIntegrationTest {
 
         assertThat(loaded.getContainers()).isNotNull().isEmpty();
         assertThat(loaded.getDims()).isNotNull().isEmpty();
-        assertThat(loaded.getTruckOrders()).isNotNull().isEmpty();
     }
 
     @Test
@@ -355,16 +375,22 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("부모 delete → Container/Dim/TruckOrder 자식 row count 모두 0 (cascade). airCharges/scheduleLegs는 airExt 삭제 시 정리")
+    @DisplayName("부모 delete → Container/Dim 자식 row count 0 (cascade). truckOrders는 truckExt 삭제 시 cascade 정리. airCharges/scheduleLegs는 airExt 삭제 시 정리")
     void parentDelete_cascadeDeleteAllChildren() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         parent.syncContainers(List.of(container("CONT-DEL")));
         parent.syncDims(List.of(dim()));
-        parent.syncTruckOrders(List.of(truckOrder("TRUCK-DEL")));
         em.persist(parent);
         em.flush();
 
-        // scheduleLegs/airCharges는 AIR ext 소유 — airExt 삭제 시 cascade로 자동 정리
+        // truckOrders는 truckExt 소유 — truckExt 삭제 시 cascade로 자동 정리
+        HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
+        em.persist(truckExt);
+        em.flush();
+        truckExt.syncTruckOrders(List.of(truckOrder("TRUCK-DEL")));
+        em.flush();
+
+        // scheduleLegs/airCharges는 airExt 소유 — airExt 삭제 시 cascade로 자동 정리
         HouseBlAirJpaEntity airExt = newAirExt(parent);
         em.persist(airExt);
         em.flush();
@@ -374,9 +400,14 @@ class HouseBlMappingIntegrationTest {
         em.clear();
 
         Long parentId = parent.getHouseBlId();
+        Long truckId = truckExt.getHouseBlTruckId();
         Long airId = airExt.getHouseBlAirId();
         HouseBlJpaEntity toDelete = em.find(HouseBlJpaEntity.class, parentId);
-        // airExt도 먼저 제거 (house_bl FK 참조 해제 + scheduleLegs/airCharges cascade 삭제)
+        // truckExt 먼저 제거 (house_bl FK 참조 해제 + truckOrders cascade 삭제)
+        HouseBlTruckJpaEntity truckToDelete = em.find(HouseBlTruckJpaEntity.class, truckId);
+        em.remove(truckToDelete);
+        em.flush();
+        // airExt도 제거 (house_bl FK 참조 해제 + scheduleLegs/airCharges cascade 삭제)
         HouseBlAirJpaEntity airToDelete = em.find(HouseBlAirJpaEntity.class, airId);
         em.remove(airToDelete);
         em.flush();
@@ -387,8 +418,8 @@ class HouseBlMappingIntegrationTest {
         assertThat(em.find(HouseBlJpaEntity.class, parentId)).isNull();
         assertThat(countChildren("HouseBlContainerJpaEntity", parentId)).isZero();
         assertThat(countChildren("HouseBlDimJpaEntity", parentId)).isZero();
+        assertThat(countTruckOrders(truckId)).isZero();
         assertThat(countScheduleLegs(airId)).isZero();
-        assertThat(countChildren("HouseBlTruckOrderJpaEntity", parentId)).isZero();
         assertThat(countAirCharges(airId)).isZero();
     }
 
@@ -476,22 +507,26 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("syncTruckOrders: 1건 저장 후 empty 전달 → flush → DB count==0")
+    @DisplayName("HouseBlTruckJpaEntity.syncTruckOrders: 1건 저장 후 empty 전달 → flush → DB count==0")
     void syncTruckOrders_emptyList_allDeletedFromDb() {
         HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
-        parent.syncTruckOrders(List.of(truckOrder("TRUCK-01")));
-
         em.persist(parent);
         em.flush();
-        em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        loaded.syncTruckOrders(List.of());
+        // truckOrders는 HouseBlTruckJpaEntity 소유 — truckExt 영속화 후 sync
+        HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
+        em.persist(truckExt);
+        em.flush();
+        truckExt.syncTruckOrders(List.of(truckOrder("TRUCK-01")));
         em.flush();
         em.clear();
 
-        long count = countChildren("HouseBlTruckOrderJpaEntity", parent.getHouseBlId());
-        assertThat(count).isZero();
+        HouseBlTruckJpaEntity loadedTruck = em.find(HouseBlTruckJpaEntity.class, truckExt.getHouseBlTruckId());
+        loadedTruck.syncTruckOrders(List.of());
+        em.flush();
+        em.clear();
+
+        assertThat(countTruckOrders(truckExt.getHouseBlTruckId())).isZero();
     }
 
     @Test

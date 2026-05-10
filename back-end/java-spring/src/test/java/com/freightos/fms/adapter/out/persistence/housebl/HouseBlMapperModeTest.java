@@ -105,7 +105,7 @@ class HouseBlMapperModeTest {
     // ── TRUCK ─────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toTruckDomain: dims만 포함, containers 빈 컬렉션, desc null")
+    @DisplayName("toTruckDomain: dims만 포함, containers 빈 컬렉션, desc null. truckJpa null이면 truckOrders 빈 리스트")
     void toTruckDomain_includesDimsOnly_excludesContainersLegsLicensesAndDesc() {
         HouseBlJpaEntity jpa = truckJpa(6L);
         jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
@@ -113,6 +113,7 @@ class HouseBlMapperModeTest {
         HouseBlTruck domain = mapper.toTruckDomain(jpa, null);
 
         assertThat(domain.getDims()).hasSize(2);
+        assertThat(domain.getTruckOrders()).isEmpty();
         assertThat(domain.getContainers()).isEmpty();
         assertThat(domain.getDesc()).isNull();
     }
@@ -125,6 +126,19 @@ class HouseBlMapperModeTest {
         HouseBlTruck domain = mapper.toTruckDomain(jpa, null);
 
         assertThat(domain.getDims()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toTruckDomain: truckJpa에 truckOrders 있으면 도메인에 포함된다")
+    void toTruckDomain_truckJpaHasTruckOrders_includesThemInDomain() {
+        HouseBlJpaEntity jpa = truckJpa(10L);
+        HouseBlTruckOrderJpaEntity order = truckOrderJpa();
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
+        truckJpa.syncTruckOrders(List.of(order));
+
+        HouseBlTruck domain = mapper.toTruckDomain(jpa, truckJpa);
+
+        assertThat(domain.getTruckOrders()).hasSize(1);
     }
 
     // ── NON_BL ───────────────────────────────────────────────────────
@@ -218,5 +232,11 @@ class HouseBlMapperModeTest {
     private HouseBlContainerJpaEntity containerJpa(HouseBlJpaEntity parent) {
         // ContainerNumber는 AAAA1234567 형식(ISO 6346) 요구
         return HouseBlContainerJpaEntity.of("ABCD1234567", null, 20);
+    }
+
+    private HouseBlTruckOrderJpaEntity truckOrderJpa() {
+        HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
+        jpa.setTruckNo("TRUCK-01");
+        return jpa;
     }
 }
