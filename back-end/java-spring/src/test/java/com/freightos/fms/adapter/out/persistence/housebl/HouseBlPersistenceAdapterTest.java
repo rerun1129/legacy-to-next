@@ -57,7 +57,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(AIR) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(AIR): syncDims→airRepository.save→savedAirJpa.syncScheduleLegs→savedAirJpa.syncAirCharges 순서, airDescRepository 조회")
+    @DisplayName("saveHouseBl(AIR): airRepository.save→savedAirJpa.syncDims→savedAirJpa.syncScheduleLegs→savedAirJpa.syncAirCharges 순서, airDescRepository 조회")
     void saveAirHouseBl_callsSyncInOrderThenSavesAirExt() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -65,16 +65,16 @@ class HouseBlPersistenceAdapterTest {
         HouseBlAirJpaEntity savedAirJpa = spy(new HouseBlAirJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        // airRepository.save가 savedAirJpa를 반환해야 syncScheduleLegs/syncAirCharges 호출 가능
+        // airRepository.save가 savedAirJpa를 반환해야 syncDims/syncScheduleLegs/syncAirCharges 호출 가능
         given(houseBlAirRepository.save(any())).willReturn(savedAirJpa);
         given(houseBlAirDescRepository.findByAir_HouseBlAirId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
 
         adapter.saveHouseBl(air);
 
-        InOrder order = inOrder(savedJpa, houseBlAirRepository, savedAirJpa);
-        order.verify(savedJpa).syncDims(any());
+        InOrder order = inOrder(houseBlAirRepository, savedAirJpa);
         order.verify(houseBlAirRepository).save(any());
+        order.verify(savedAirJpa).syncDims(any());
         order.verify(savedAirJpa).syncScheduleLegs(any());
         order.verify(savedAirJpa).syncAirCharges(any());
     }
@@ -156,14 +156,14 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(sea);
 
-        // 부모 JpaEntity에는 syncContainers가 없으므로 호출되지 않아야 함
-        then(savedJpa).should(never()).syncDims(any()); // sea는 dims 미사용
+        // SEA는 dims를 사용하지 않으므로 savedSeaJpa에 syncDims 미호출
+        then(savedSeaJpa).should(never()).syncDims(any());
     }
 
     // ── saveHouseBl(TRUCK) ────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 seaDescRepository/airDescRepository는 없다. truckRepository.save → savedTruckJpa.syncTruckOrders → truckDescRepository 조회 순서")
+    @DisplayName("saveHouseBl(TRUCK): truckRepository.save → savedTruckJpa.syncDims → savedTruckJpa.syncTruckOrders → truckDescRepository 조회 순서, SEA/AIR desc repository는 미호출")
     void saveTruckHouseBl_syncsDimsOnly_skipsLegsLicensesDesc() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -177,12 +177,12 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(truck);
 
-        then(savedJpa).should().syncDims(any());
         // SEA/AIR desc repository는 TRUCK 처리 시 미호출
         then(houseBlSeaDescRepository).should(never()).findBySea_HouseBlSeaId(any());
         then(houseBlAirDescRepository).should(never()).findByAir_HouseBlAirId(any());
-        // truckRepository.save 반환값(savedTruckJpa)에 syncTruckOrders 호출 후 truckDescRepository 조회
+        // truckRepository.save 반환값(savedTruckJpa)에 syncDims + syncTruckOrders 호출 후 truckDescRepository 조회
         then(houseBlTruckRepository).should().save(any());
+        then(savedTruckJpa).should().syncDims(any());
         then(savedTruckJpa).should().syncTruckOrders(any());
         then(houseBlTruckDescRepository).should().findByTruck_HouseBlTruckId(any());
     }
@@ -190,13 +190,13 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(NON_BL) ───────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): nonBlJpa.mergeContainers → savedJpa.mergeDims → nonBlRepository.save 순서, desc 관련 repository는 미호출")
+    @DisplayName("saveHouseBl(NON_BL): nonBlJpa.mergeContainers → nonBlJpa.mergeDims → nonBlRepository.save 순서, desc 관련 repository는 미호출")
     void saveNonBlHouseBl_mergesContainersDimsThenSavesNonBlExt_withoutDesc() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         nonBl.updateRemark("REMARK_TEXT");
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.NON_BL);
-        // findByHouseBlHouseBlId가 spy 객체를 반환하면 mergeContainers verify 가능
+        // findByHouseBlHouseBlId가 spy 객체를 반환하면 mergeContainers/mergeDims verify 가능
         HouseBlNonBlJpaEntity existingNonBlJpa = spy(new HouseBlNonBlJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.of(existingNonBlJpa));
@@ -204,9 +204,9 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(nonBl);
 
-        InOrder order = inOrder(existingNonBlJpa, savedJpa, houseBlNonBlRepository);
+        InOrder order = inOrder(existingNonBlJpa, houseBlNonBlRepository);
         order.verify(existingNonBlJpa).mergeContainers(any());
-        order.verify(savedJpa).mergeDims(any());
+        order.verify(existingNonBlJpa).mergeDims(any());
         // NON_BL은 desc를 사용하지 않음
         order.verify(houseBlNonBlRepository).save(any());
         then(houseBlSeaDescRepository).shouldHaveNoInteractions();
@@ -349,7 +349,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) — syncTruckOrders 호출 검증 ────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): savedJpa.syncDims 후 truckRepository.save → savedTruckJpa.syncTruckOrders → saveOrDeleteTruckDesc(desc null이면 truckDescRepository.findBy 호출) 순서")
+    @DisplayName("saveHouseBl(TRUCK): truckRepository.save → savedTruckJpa.syncDims → savedTruckJpa.syncTruckOrders → saveOrDeleteTruckDesc(desc null이면 truckDescRepository.findBy 호출) 순서")
     void saveHouseBl_truck_callsSyncTruckOrders() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -363,9 +363,9 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(truck);
 
-        InOrder order = inOrder(savedJpa, houseBlTruckRepository, savedTruckJpa);
-        order.verify(savedJpa).syncDims(any());
+        InOrder order = inOrder(houseBlTruckRepository, savedTruckJpa);
         order.verify(houseBlTruckRepository).save(any());
+        order.verify(savedTruckJpa).syncDims(any());
         order.verify(savedTruckJpa).syncTruckOrders(any());
     }
 
@@ -514,7 +514,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(NON_BL) — merge 메서드 호출 순서 검증 ─────────────
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): nonBlJpa.mergeContainers→savedJpa.mergeDims 순서 후 nonBlRepository.save 호출 (NON_BL은 desc 미사용)")
+    @DisplayName("saveHouseBl(NON_BL): nonBlJpa.mergeContainers→nonBlJpa.mergeDims 순서 후 nonBlRepository.save 호출 (NON_BL은 desc 미사용)")
     void saveNonBlHouseBl_callsMergeInOrder() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -526,9 +526,9 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(nonBl);
 
-        InOrder order = inOrder(existingNonBlJpa, savedJpa, houseBlNonBlRepository);
+        InOrder order = inOrder(existingNonBlJpa, houseBlNonBlRepository);
         order.verify(existingNonBlJpa).mergeContainers(any());
-        order.verify(savedJpa).mergeDims(any());
+        order.verify(existingNonBlJpa).mergeDims(any());
         order.verify(houseBlNonBlRepository).save(any());
         then(houseBlSeaDescRepository).shouldHaveNoInteractions();
         then(houseBlAirDescRepository).shouldHaveNoInteractions();

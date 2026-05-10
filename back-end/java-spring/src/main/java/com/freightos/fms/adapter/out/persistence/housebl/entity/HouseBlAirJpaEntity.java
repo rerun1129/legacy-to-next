@@ -98,6 +98,13 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private CargoType cargoType;
 
+    // AIR 전용 치수 명세. house_bl_air_id FK로 소유.
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_air_id", nullable = false, updatable = false)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    private List<HouseBlAirDimJpaEntity> dims = new ArrayList<>();
+
     // AIR 전용 스케줄 구간. house_bl_air_id FK로 소유.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -130,6 +137,13 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setOriginOfGoods(String v) { this.originOfGoods = v; }
     public void setCargoType(CargoType v) { this.cargoType = v; }
+
+    public List<HouseBlAirDimJpaEntity> getDims() { return dims; }
+
+    public void syncDims(List<HouseBlAirDimJpaEntity> newDims) {
+        this.dims.clear();
+        this.dims.addAll(newDims);
+    }
 
     public void syncScheduleLegs(List<HouseBlScheduleLegJpaEntity> newLegs) {
         this.scheduleLegs.clear();

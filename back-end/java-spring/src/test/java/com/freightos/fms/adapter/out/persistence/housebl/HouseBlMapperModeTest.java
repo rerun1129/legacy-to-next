@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -33,8 +34,8 @@ class HouseBlMapperModeTest {
     @DisplayName("toAirDomain: dim 2개/scheduleLeg 1개/desc 있으면 모두 도메인에 포함, containers는 빈 컬렉션")
     void toAirDomain_includesDimsScheduleLegsLicensesDesc() {
         HouseBlJpaEntity jpa = airJpa(1L);
-        jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
         HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
+        airJpa.syncDims(List.of(airDimJpa(), airDimJpa()));
         airJpa.syncScheduleLegs(List.of(legJpa()));
         HouseBlAirDescJpaEntity desc = airDescJpa(airJpa);
 
@@ -62,13 +63,14 @@ class HouseBlMapperModeTest {
     @DisplayName("toAirDomain: dim 삽입 순서가 도메인 리스트 순서와 동일하게 유지된다")
     void toAirDomain_preservesDimOrder() {
         HouseBlJpaEntity jpa = airJpa(3L);
-        HouseBlDimJpaEntity dim1 = dimJpa(jpa);
+        HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
+        HouseBlAirDimJpaEntity dim1 = airDimJpa();
         dim1.setLengthCm(BigDecimal.valueOf(10));
-        HouseBlDimJpaEntity dim2 = dimJpa(jpa);
+        HouseBlAirDimJpaEntity dim2 = airDimJpa();
         dim2.setLengthCm(BigDecimal.valueOf(20));
-        jpa.syncDims(List.of(dim1, dim2));
+        airJpa.syncDims(List.of(dim1, dim2));
 
-        HouseBlAir domain = mapper.toAirDomain(jpa, null, null);
+        HouseBlAir domain = mapper.toAirDomain(jpa, airJpa, null);
 
         assertThat(domain.getDims().get(0).getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(10));
         assertThat(domain.getDims().get(1).getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(20));
@@ -106,12 +108,13 @@ class HouseBlMapperModeTest {
     // ── TRUCK ─────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toTruckDomain: dims만 포함, containers 빈 컬렉션, desc null. truckJpa null이면 truckOrders 빈 리스트")
+    @DisplayName("toTruckDomain: truckJpa에 dims 2개 포함, containers 빈 컬렉션, desc null. truckOrders 빈 리스트")
     void toTruckDomain_includesDimsOnly_excludesContainersLegsLicensesAndDesc() {
         HouseBlJpaEntity jpa = truckJpa(6L);
-        jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
+        truckJpa.syncDims(List.of(truckDimJpa(), truckDimJpa()));
 
-        HouseBlTruck domain = mapper.toTruckDomain(jpa, null, null);
+        HouseBlTruck domain = mapper.toTruckDomain(jpa, truckJpa, null);
 
         assertThat(domain.getDims()).hasSize(2);
         assertThat(domain.getTruckOrders()).isEmpty();
@@ -160,12 +163,12 @@ class HouseBlMapperModeTest {
     @DisplayName("toNonBlDomain: nonBlJpa.containers/dims 포함, desc는 null(house_bl_non_bl.remark 컬럼으로 이전됨)")
     void toNonBlDomain_includesContainersDims_descIsNull() {
         HouseBlJpaEntity jpa = nonBlJpa(8L);
-        jpa.syncDims(List.of(dimJpa(jpa)));
 
         HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
         nonBlJpa.setWorkDivision(HouseBlNonBl.WorkDivision.SEA);
-        // NON_BL 컨테이너는 nonBlJpa 소유
+        // NON_BL 컨테이너/dim은 nonBlJpa 소유
         nonBlJpa.mergeContainers(List.of(nonBlContainerJpa()));
+        nonBlJpa.mergeDims(List.of(nonBlDimJpa()));
         nonBlJpa.setRemark("TEST_REMARK");
 
         HouseBlNonBl domain = mapper.toNonBlDomain(jpa, nonBlJpa);
@@ -223,10 +226,16 @@ class HouseBlMapperModeTest {
         return jpa;
     }
 
-    private HouseBlDimJpaEntity dimJpa(HouseBlJpaEntity parent) {
-        HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
-        jpa.setHouseBlId(parent.getHouseBlId());
-        return jpa;
+    private HouseBlAirDimJpaEntity airDimJpa() {
+        return new HouseBlAirDimJpaEntity();
+    }
+
+    private HouseBlTruckDimJpaEntity truckDimJpa() {
+        return new HouseBlTruckDimJpaEntity();
+    }
+
+    private HouseBlNonBlDimJpaEntity nonBlDimJpa() {
+        return new HouseBlNonBlDimJpaEntity();
     }
 
     private HouseBlScheduleLegJpaEntity legJpa() {

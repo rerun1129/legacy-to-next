@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,14 +64,14 @@ class HouseBlJpaEntityTest {
         assertThat(entity.getContainers()).isEmpty();
     }
 
-    // ── HouseBlJpaEntity.syncDims ─────────────────────────────────────
+    // ── HouseBlAirJpaEntity.syncDims ─────────────────────────────────
 
     @Test
-    @DisplayName("syncDims: 기존 리스트 참조를 유지하면서 내용을 교체한다")
-    void syncDims_preservesListIdentity() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        List<HouseBlDimJpaEntity> originalRef = entity.getDims();
-        HouseBlDimJpaEntity dim = new HouseBlDimJpaEntity();
+    @DisplayName("HouseBlAirJpaEntity.syncDims: 기존 리스트 참조를 유지하면서 내용을 교체한다 (orphanRemoval 지원)")
+    void airSyncDims_preservesListIdentity() {
+        HouseBlAirJpaEntity entity = new HouseBlAirJpaEntity();
+        List<HouseBlAirDimJpaEntity> originalRef = entity.getDims();
+        HouseBlAirDimJpaEntity dim = new HouseBlAirDimJpaEntity();
 
         entity.syncDims(List.of(dim));
 
@@ -79,13 +80,65 @@ class HouseBlJpaEntityTest {
     }
 
     @Test
-    @DisplayName("syncDims: 빈 리스트로 sync하면 기존 dim들이 모두 제거된다")
-    void syncDims_emptyInput_clearsExistingCollection() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        HouseBlDimJpaEntity dim = new HouseBlDimJpaEntity();
+    @DisplayName("HouseBlAirJpaEntity.syncDims: 빈 리스트로 sync하면 기존 dim들이 모두 제거된다")
+    void airSyncDims_emptyInput_clearsExistingCollection() {
+        HouseBlAirJpaEntity entity = new HouseBlAirJpaEntity();
+        HouseBlAirDimJpaEntity dim = new HouseBlAirDimJpaEntity();
         entity.syncDims(List.of(dim));
 
         entity.syncDims(List.of());
+
+        assertThat(entity.getDims()).isEmpty();
+    }
+
+    // ── HouseBlTruckJpaEntity.syncDims ────────────────────────────────
+
+    @Test
+    @DisplayName("HouseBlTruckJpaEntity.syncDims: 기존 리스트 참조를 유지하면서 내용을 교체한다 (orphanRemoval 지원)")
+    void truckSyncDims_preservesListIdentity() {
+        HouseBlTruckJpaEntity entity = new HouseBlTruckJpaEntity();
+        List<HouseBlTruckDimJpaEntity> originalRef = entity.getDims();
+        HouseBlTruckDimJpaEntity dim = new HouseBlTruckDimJpaEntity();
+
+        entity.syncDims(List.of(dim));
+
+        assertThat(entity.getDims()).isSameAs(originalRef);
+        assertThat(entity.getDims()).containsExactly(dim);
+    }
+
+    @Test
+    @DisplayName("HouseBlTruckJpaEntity.syncDims: 빈 리스트로 sync하면 기존 dim들이 모두 제거된다")
+    void truckSyncDims_emptyInput_clearsExistingCollection() {
+        HouseBlTruckJpaEntity entity = new HouseBlTruckJpaEntity();
+        HouseBlTruckDimJpaEntity dim = new HouseBlTruckDimJpaEntity();
+        entity.syncDims(List.of(dim));
+
+        entity.syncDims(List.of());
+
+        assertThat(entity.getDims()).isEmpty();
+    }
+
+    // ── HouseBlNonBlJpaEntity.mergeDims ──────────────────────────────
+
+    @Test
+    @DisplayName("HouseBlNonBlJpaEntity.mergeDims: id 없는 incoming은 신규 추가된다")
+    void nonBlMergeDims_newIncoming_isAdded() {
+        HouseBlNonBlJpaEntity entity = new HouseBlNonBlJpaEntity();
+        HouseBlNonBlDimJpaEntity newDim = new HouseBlNonBlDimJpaEntity();
+
+        entity.mergeDims(List.of(newDim));
+
+        assertThat(entity.getDims()).containsExactly(newDim);
+    }
+
+    @Test
+    @DisplayName("HouseBlNonBlJpaEntity.mergeDims: 빈 리스트로 merge하면 기존 dim들이 모두 제거된다")
+    void nonBlMergeDims_emptyInput_clearsExistingItems() {
+        HouseBlNonBlJpaEntity entity = new HouseBlNonBlJpaEntity();
+        HouseBlNonBlDimJpaEntity dim = new HouseBlNonBlDimJpaEntity();
+        entity.mergeDims(List.of(dim));
+
+        entity.mergeDims(List.of());
 
         assertThat(entity.getDims()).isEmpty();
     }

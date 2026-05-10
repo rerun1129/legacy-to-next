@@ -39,9 +39,9 @@ public class HouseBlJpaToDomainMapper {
         HouseBlAir domain = HouseBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
-        List<HouseBlDim> dims = jpa.getDims().stream()
-                .map(cargoMapper::toDimDomain)
-                .collect(Collectors.toList());
+        List<HouseBlDim> dims = airJpa != null
+                ? airJpa.getDims().stream().map(cargoMapper::toAirDimDomain).collect(Collectors.toList())
+                : List.of();
         domain.initDims(dims);
         // scheduleLegs/airCharges는 HouseBlAirJpaEntity 소유 (house_bl_air_id FK)
         List<HouseBlScheduleLeg> scheduleLegs = airJpa != null
@@ -62,9 +62,9 @@ public class HouseBlJpaToDomainMapper {
         HouseBlTruck domain = HouseBlTruck.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (truckJpa != null) copyTruckFields(truckJpa, domain);
-        List<HouseBlDim> dims = jpa.getDims().stream()
-                .map(cargoMapper::toDimDomain)
-                .collect(Collectors.toList());
+        List<HouseBlDim> dims = truckJpa != null
+                ? truckJpa.getDims().stream().map(cargoMapper::toTruckDimDomain).collect(Collectors.toList())
+                : List.of();
         domain.initDims(dims);
         List<HouseBlTruckOrder> truckOrders = truckJpa != null
                 ? truckJpa.getTruckOrders().stream().map(docMapper::toTruckOrderDomain).collect(Collectors.toList())
@@ -85,9 +85,9 @@ public class HouseBlJpaToDomainMapper {
                 ? nonBlJpa.getContainers().stream().map(c -> cargoMapper.toNonBlContainerDomain(c, domain)).collect(Collectors.toList())
                 : List.of();
         domain.initContainers(containers);
-        List<HouseBlDim> dims = jpa.getDims().stream()
-                .map(cargoMapper::toDimDomain)
-                .collect(Collectors.toList());
+        List<HouseBlDim> dims = nonBlJpa != null
+                ? nonBlJpa.getDims().stream().map(cargoMapper::toNonBlDimDomain).collect(Collectors.toList())
+                : List.of();
         domain.initDims(dims);
         // NON_BL은 desc를 사용하지 않음 — house_bl_non_bl.remark 컬럼으로 이전됨
         if (nonBlJpa != null) domain.updateRemark(nonBlJpa.getRemark());

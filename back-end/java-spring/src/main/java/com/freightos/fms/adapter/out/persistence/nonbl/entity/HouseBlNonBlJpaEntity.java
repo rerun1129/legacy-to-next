@@ -84,6 +84,13 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<HouseBlNonBlContainerJpaEntity> containers = new ArrayList<>();
 
+    // NON_BL 전용 치수 명세 — house_bl_nonbl_dim.house_bl_non_bl_id FK 소유
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_non_bl_id", nullable = false, updatable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<HouseBlNonBlDimJpaEntity> dims = new ArrayList<>();
+
     public void setHouseBl(HouseBlJpaEntity v)                   { this.houseBl = v; }
     public void setWorkDivision(HouseBlNonBl.WorkDivision v)     { this.workDivision = v; }
     public void setOriginalBlRef(String v)                        { this.originalBlRef = v; }
@@ -124,6 +131,41 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     }
 
     public List<HouseBlNonBlContainerJpaEntity> getContainers() { return containers; }
+
+    public List<HouseBlNonBlDimJpaEntity> getDims() { return dims; }
+
+    /**
+     * NON_BL DIM merge-by-id.
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeDims(List<HouseBlNonBlDimJpaEntity> incoming) {
+        Map<Long, HouseBlNonBlDimJpaEntity> existingById = new HashMap<>();
+        for (HouseBlNonBlDimJpaEntity e : this.dims) {
+            if (e.getHouseBlNonBlDimId() != null) existingById.put(e.getHouseBlNonBlDimId(), e);
+        }
+        List<HouseBlNonBlDimJpaEntity> merged = new ArrayList<>();
+        for (HouseBlNonBlDimJpaEntity inc : incoming) {
+            if (inc.getHouseBlNonBlDimId() != null && existingById.containsKey(inc.getHouseBlNonBlDimId())) {
+                HouseBlNonBlDimJpaEntity existing = existingById.get(inc.getHouseBlNonBlDimId());
+                copyDimFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.dims.clear();
+        this.dims.addAll(merged);
+    }
+
+    private void copyDimFields(HouseBlNonBlDimJpaEntity src, HouseBlNonBlDimJpaEntity dst) {
+        dst.setLengthCm(src.getLengthCm());
+        dst.setWidthCm(src.getWidthCm());
+        dst.setHeightCm(src.getHeightCm());
+        dst.setQuantity(src.getQuantity());
+        dst.setCbm(src.getCbm());
+        dst.setVolumeWeightKg(src.getVolumeWeightKg());
+    }
 
     private void copyContainerFields(HouseBlNonBlContainerJpaEntity src, HouseBlNonBlContainerJpaEntity dst) {
         dst.setContainerNo(src.getContainerNo());

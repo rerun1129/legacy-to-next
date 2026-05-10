@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
@@ -198,10 +199,9 @@ class HouseBlMapperTest {
     // ── E-12 DIM ────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toDimDomain: 모든 치수 필드가 도메인으로 복사된다")
-    void toDimDomain_mapsAllFields() {
-        HouseBlDimJpaEntity dimJpa = new HouseBlDimJpaEntity();
-        dimJpa.setHouseBlId(1L);
+    @DisplayName("toAirDimDomain: 모든 치수 필드가 도메인으로 복사된다")
+    void toAirDimDomain_mapsAllFields() {
+        HouseBlAirDimJpaEntity dimJpa = new HouseBlAirDimJpaEntity();
         dimJpa.setLengthCm(BigDecimal.valueOf(50.0));
         dimJpa.setWidthCm(BigDecimal.valueOf(40.0));
         dimJpa.setHeightCm(BigDecimal.valueOf(30.0));
@@ -209,9 +209,8 @@ class HouseBlMapperTest {
         dimJpa.setCbm(BigDecimal.valueOf(0.06));
         dimJpa.setVolumeWeightKg(BigDecimal.valueOf(10.0));
 
-        HouseBlDim domain = cargoMapper.toDimDomain(dimJpa);
+        HouseBlDim domain = cargoMapper.toAirDimDomain(dimJpa);
 
-        assertThat(domain.getHouseBlId()).isEqualTo(1L);
         assertThat(domain.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(50.0));
         assertThat(domain.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(40.0));
         assertThat(domain.getHeightCm()).isEqualByComparingTo(BigDecimal.valueOf(30.0));
@@ -221,17 +220,13 @@ class HouseBlMapperTest {
     }
 
     @Test
-    @DisplayName("applyDimFields: 도메인 → JPA 모든 치수 필드가 세팅된다")
-    void applyDimFields_setsAllFieldsToJpa() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
+    @DisplayName("toAirDimJpa: 도메인 → AIR DIM JPA 모든 치수 필드가 세팅된다")
+    void toAirDimJpa_setsAllFieldsToJpa() {
         HouseBlDim domain = HouseBlDim.create(1L,
                 BigDecimal.valueOf(50.0), BigDecimal.valueOf(40.0), BigDecimal.valueOf(30.0),
                 2, BigDecimal.valueOf(0.06), BigDecimal.valueOf(10.0));
-        HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
 
-        cargoMapper.applyDimFields(domain, jpa, houseBlJpa);
+        HouseBlAirDimJpaEntity jpa = cargoMapper.toAirDimJpa(domain);
 
         assertThat(jpa.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(50.0));
         assertThat(jpa.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(40.0));
@@ -242,16 +237,41 @@ class HouseBlMapperTest {
     }
 
     @Test
-    @DisplayName("toDimDomainList: 2개 JPA 엔티티 → 크기 2인 도메인 리스트 반환")
-    void toDimDomainList_returnsCorrectSize() {
-        HouseBlDimJpaEntity dim1 = new HouseBlDimJpaEntity();
-        dim1.setHouseBlId(1L);
-        HouseBlDimJpaEntity dim2 = new HouseBlDimJpaEntity();
-        dim2.setHouseBlId(1L);
+    @DisplayName("toNonBlDimDomain: 모든 치수 필드가 도메인으로 복사된다")
+    void toNonBlDimDomain_mapsAllFields() {
+        HouseBlNonBlDimJpaEntity dimJpa = new HouseBlNonBlDimJpaEntity();
+        dimJpa.setLengthCm(BigDecimal.valueOf(60.0));
+        dimJpa.setWidthCm(BigDecimal.valueOf(50.0));
+        dimJpa.setHeightCm(BigDecimal.valueOf(40.0));
+        dimJpa.setQuantity(3);
+        dimJpa.setCbm(BigDecimal.valueOf(0.12));
+        dimJpa.setVolumeWeightKg(BigDecimal.valueOf(20.0));
 
-        List<HouseBlDim> result = cargoMapper.toDimDomainList(List.of(dim1, dim2));
+        HouseBlDim domain = cargoMapper.toNonBlDimDomain(dimJpa);
 
-        assertThat(result).hasSize(2);
+        assertThat(domain.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(60.0));
+        assertThat(domain.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(50.0));
+        assertThat(domain.getHeightCm()).isEqualByComparingTo(BigDecimal.valueOf(40.0));
+        assertThat(domain.getQuantity()).isEqualTo(3);
+        assertThat(domain.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.12));
+        assertThat(domain.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(20.0));
+    }
+
+    @Test
+    @DisplayName("toNonBlDimJpa: 도메인 → NON_BL DIM JPA 모든 치수 필드가 세팅된다")
+    void toNonBlDimJpa_setsAllFieldsToJpa() {
+        HouseBlDim domain = HouseBlDim.create(1L,
+                BigDecimal.valueOf(60.0), BigDecimal.valueOf(50.0), BigDecimal.valueOf(40.0),
+                3, BigDecimal.valueOf(0.12), BigDecimal.valueOf(20.0));
+
+        HouseBlNonBlDimJpaEntity jpa = cargoMapper.toNonBlDimJpa(domain);
+
+        assertThat(jpa.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(60.0));
+        assertThat(jpa.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(50.0));
+        assertThat(jpa.getHeightCm()).isEqualByComparingTo(BigDecimal.valueOf(40.0));
+        assertThat(jpa.getQuantity()).isEqualTo(3);
+        assertThat(jpa.getCbm()).isEqualByComparingTo(BigDecimal.valueOf(0.12));
+        assertThat(jpa.getVolumeWeightKg()).isEqualByComparingTo(BigDecimal.valueOf(20.0));
     }
 
     // ── E-13 DESC (SEA) ─────────────────────────────────────────────

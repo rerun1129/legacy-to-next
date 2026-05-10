@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
@@ -68,33 +69,69 @@ public class HouseBlCargoMapper {
 
     // ── E-12 DIM ──────────────────────────────────────────────────────
 
-    public HouseBlDim toDimDomain(HouseBlDimJpaEntity jpa) {
+    public HouseBlDim toAirDimDomain(HouseBlAirDimJpaEntity jpa) {
         HouseBlDim domain = HouseBlDim.create(
-                jpa.getHouseBlId(),
+                jpa.getHouseBlAirId(),
                 jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
                 jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
-        domain.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+        domain.assignIdentity(jpa.getHouseBlAirDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         return domain;
     }
 
-    public List<HouseBlDim> toDimDomainList(List<HouseBlDimJpaEntity> jpaList) {
-        return jpaList.stream().map(this::toDimDomain).collect(Collectors.toList());
+    public HouseBlDim toTruckDimDomain(HouseBlTruckDimJpaEntity jpa) {
+        HouseBlDim domain = HouseBlDim.create(
+                jpa.getHouseBlTruckId(),
+                jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
+                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
+        domain.assignIdentity(jpa.getHouseBlTruckDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return domain;
     }
 
-    public void applyDimFields(HouseBlDim domain, HouseBlDimJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
-        jpa.setLengthCm(domain.getLengthCm());
-        jpa.setWidthCm(domain.getWidthCm());
-        jpa.setHeightCm(domain.getHeightCm());
-        jpa.setQuantity(domain.getQuantity());
-        jpa.setCbm(domain.getCbm());
-        jpa.setVolumeWeightKg(domain.getVolumeWeightKg());
+    public HouseBlDim toNonBlDimDomain(HouseBlNonBlDimJpaEntity jpa) {
+        HouseBlDim domain = HouseBlDim.create(
+                jpa.getHouseBlNonBlId(),
+                jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
+                jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
+        domain.assignIdentity(jpa.getHouseBlNonBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        return domain;
     }
 
-    public HouseBlDimJpaEntity toDimJpa(HouseBlDim d, HouseBlJpaEntity houseBl) {
-        HouseBlDimJpaEntity jpa = new HouseBlDimJpaEntity();
-        if (d.getId() != null) jpa.setHouseBlDimId(d.getId());
-        applyDimFields(d, jpa, houseBl);
+    public HouseBlAirDimJpaEntity toAirDimJpa(HouseBlDim d) {
+        HouseBlAirDimJpaEntity jpa = new HouseBlAirDimJpaEntity();
+        if (d.getId() != null) jpa.setHouseBlAirDimId(d.getId());
+        jpa.setLengthCm(d.getLengthCm());
+        jpa.setWidthCm(d.getWidthCm());
+        jpa.setHeightCm(d.getHeightCm());
+        jpa.setQuantity(d.getQuantity());
+        jpa.setCbm(d.getCbm());
+        jpa.setVolumeWeightKg(d.getVolumeWeightKg());
+        return jpa;
+    }
+
+    public HouseBlTruckDimJpaEntity toTruckDimJpa(HouseBlDim d) {
+        HouseBlTruckDimJpaEntity jpa = new HouseBlTruckDimJpaEntity();
+        if (d.getId() != null) jpa.setHouseBlTruckDimId(d.getId());
+        jpa.setLengthCm(d.getLengthCm());
+        jpa.setWidthCm(d.getWidthCm());
+        jpa.setHeightCm(d.getHeightCm());
+        jpa.setQuantity(d.getQuantity());
+        jpa.setCbm(d.getCbm());
+        jpa.setVolumeWeightKg(d.getVolumeWeightKg());
+        return jpa;
+    }
+
+    public HouseBlNonBlDimJpaEntity toNonBlDimJpa(HouseBlDim d) {
+        HouseBlNonBlDimJpaEntity jpa = new HouseBlNonBlDimJpaEntity();
+        if (d.getId() != null) jpa.setHouseBlNonBlDimId(d.getId());
+        jpa.setLengthCm(d.getLengthCm());
+        jpa.setWidthCm(d.getWidthCm());
+        jpa.setHeightCm(d.getHeightCm());
+        jpa.setQuantity(d.getQuantity());
+        jpa.setCbm(d.getCbm());
+        jpa.setVolumeWeightKg(d.getVolumeWeightKg());
         return jpa;
     }
 

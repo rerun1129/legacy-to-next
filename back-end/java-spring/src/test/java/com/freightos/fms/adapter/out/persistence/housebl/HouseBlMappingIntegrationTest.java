@@ -3,8 +3,10 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirChargeJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirJpaEntity;
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlDimJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckDimJpaEntity;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlScheduleLegJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaContainerJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaDescJpaEntity;
@@ -142,8 +144,20 @@ class HouseBlMappingIntegrationTest {
         return c;
     }
 
-    private HouseBlDimJpaEntity dim() {
-        HouseBlDimJpaEntity d = new HouseBlDimJpaEntity();
+    private HouseBlAirDimJpaEntity airDim() {
+        HouseBlAirDimJpaEntity d = new HouseBlAirDimJpaEntity();
+        d.setQuantity(1);
+        return d;
+    }
+
+    private HouseBlTruckDimJpaEntity truckDim() {
+        HouseBlTruckDimJpaEntity d = new HouseBlTruckDimJpaEntity();
+        d.setQuantity(1);
+        return d;
+    }
+
+    private HouseBlNonBlDimJpaEntity nonBlDim() {
+        HouseBlNonBlDimJpaEntity d = new HouseBlNonBlDimJpaEntity();
         d.setQuantity(1);
         return d;
     }
@@ -202,10 +216,24 @@ class HouseBlMappingIntegrationTest {
         return nonBlJpa;
     }
 
-    private long countDims(Long parentId) {
+    private long countAirDims(Long airExtId) {
         return em.createQuery(
-                        "SELECT COUNT(c) FROM HouseBlDimJpaEntity c WHERE c.houseBlId = :pid", Long.class)
-                .setParameter("pid", parentId)
+                        "SELECT COUNT(d) FROM HouseBlAirDimJpaEntity d WHERE d.houseBlAirId = :aid", Long.class)
+                .setParameter("aid", airExtId)
+                .getSingleResult();
+    }
+
+    private long countTruckDims(Long truckExtId) {
+        return em.createQuery(
+                        "SELECT COUNT(d) FROM HouseBlTruckDimJpaEntity d WHERE d.houseBlTruckId = :tid", Long.class)
+                .setParameter("tid", truckExtId)
+                .getSingleResult();
+    }
+
+    private long countNonBlDims(Long nonBlExtId) {
+        return em.createQuery(
+                        "SELECT COUNT(d) FROM HouseBlNonBlDimJpaEntity d WHERE d.houseBlNonBlId = :nid", Long.class)
+                .setParameter("nid", nonBlExtId)
                 .getSingleResult();
     }
 
@@ -264,10 +292,9 @@ class HouseBlMappingIntegrationTest {
     // ── 테스트 ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Sea 모드 save→load: seaExt에 containers 2건 + parent에 dims 1건 라운드트립")
+    @DisplayName("Sea 모드 save→load: seaExt에 containers 2건 라운드트립 (SEA는 dim 미사용)")
     void seaMode_fullRoundTrip_allChildrenRestored() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
@@ -284,82 +311,78 @@ class HouseBlMappingIntegrationTest {
 
         assertThat(loaded).isNotNull();
         assertThat(loadedSea.getContainers()).hasSize(2);
-        assertThat(loaded.getDims()).hasSize(1);
     }
 
     @Test
-    @DisplayName("Air 모드 save→load: dims/scheduleLegs/airCharges 채움, seaExt 컨테이너는 빈 목록")
+    @DisplayName("Air 모드 save→load: airExt에 dims 1건/scheduleLegs 1건/airCharges 1건 라운드트립")
     void airMode_fullRoundTrip_correctCollections() {
         HouseBlJpaEntity parent = newParent(JobDiv.AIR);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
-        // scheduleLegs/airCharges는 HouseBlAirJpaEntity 소유 — airExt 영속화 후 sync
+        // dims/scheduleLegs/airCharges는 HouseBlAirJpaEntity 소유 — airExt 영속화 후 sync
         HouseBlAirJpaEntity airExt = newAirExt(parent);
         em.persist(airExt);
         em.flush();
+        airExt.syncDims(List.of(airDim()));
         airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
         airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.flush();
         em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
         HouseBlAirJpaEntity loadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
 
-        assertThat(loaded.getDims()).hasSize(1);
+        assertThat(loadedAir.getDims()).hasSize(1);
         assertThat(loadedAir.getScheduleLegs()).hasSize(1);
         assertThat(loadedAir.getAirCharges()).hasSize(1);
     }
 
     @Test
-    @DisplayName("Truck 모드 save→load: truckExt에 truckOrders 1건, parent에 dims 1건")
+    @DisplayName("Truck 모드 save→load: truckExt에 dims 1건 + truckOrders 1건 라운드트립")
     void truckMode_roundTrip_truckOrdersAndDimsOnly() {
         HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
-        // truckOrders는 HouseBlTruckJpaEntity 소유 — truckExt 영속화 후 sync
+        // dims/truckOrders는 HouseBlTruckJpaEntity 소유 — truckExt 영속화 후 sync
         HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
         em.persist(truckExt);
         em.flush();
+        truckExt.syncDims(List.of(truckDim()));
         truckExt.syncTruckOrders(List.of(truckOrder("TRUCK-1")));
         em.flush();
         em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
         HouseBlTruckJpaEntity loadedTruck = em.find(HouseBlTruckJpaEntity.class, truckExt.getHouseBlTruckId());
 
+        assertThat(loadedTruck.getDims()).hasSize(1);
         assertThat(loadedTruck.getTruckOrders()).hasSize(1);
-        assertThat(loaded.getDims()).hasSize(1);
     }
 
     @Test
-    @DisplayName("NonBl 모드 save→load: nonBlExt에 containers 1건 + parent에 dims 1건 라운드트립")
+    @DisplayName("NonBl 모드 save→load: nonBlExt에 containers 1건 + dims 1건 라운드트립")
     void nonBlMode_roundTrip_containersAndDims() {
         HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
-        // NON_BL 컨테이너는 nonBlExt 소유 — nonBlExt 영속화 후 merge
+        // NON_BL 컨테이너/dim은 nonBlExt 소유 — nonBlExt 영속화 후 merge
         HouseBlNonBlJpaEntity nonBlExt = newNonBlExt(parent);
         em.persist(nonBlExt);
         em.flush();
         nonBlExt.mergeContainers(List.of(nonBlContainer("CONT-NON-BL")));
+        nonBlExt.mergeDims(List.of(nonBlDim()));
         em.flush();
         em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
         HouseBlNonBlJpaEntity loadedNonBl = em.find(HouseBlNonBlJpaEntity.class, nonBlExt.getHouseBlNonBlId());
 
         assertThat(loadedNonBl.getContainers()).hasSize(1);
-        assertThat(loaded.getDims()).hasSize(1);
+        assertThat(loadedNonBl.getDims()).hasSize(1);
     }
 
     @Test
-    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, seaExt getContainers()는 빈 List 반환")
+    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, seaExt getContainers()는 빈 List 반환, airExt/truckExt getDims()는 빈 List 반환")
     void emptyCollections_noPeNpeAndEmptyListReturned() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         em.persist(parent);
@@ -368,13 +391,17 @@ class HouseBlMappingIntegrationTest {
         HouseBlSeaJpaEntity seaExt = newSeaExt(parent);
         em.persist(seaExt);
         em.flush();
+
+        HouseBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
         em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
         HouseBlSeaJpaEntity loadedSea = em.find(HouseBlSeaJpaEntity.class, seaExt.getHouseBlSeaId());
+        HouseBlAirJpaEntity loadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
 
-        assertThat(loaded.getDims()).isNotNull().isEmpty();
         assertThat(loadedSea.getContainers()).isNotNull().isEmpty();
+        assertThat(loadedAir.getDims()).isNotNull().isEmpty();
     }
 
     @Test
@@ -511,10 +538,9 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("seaExt 삭제 → SEA container CASCADE 삭제 확인. truckExt/airExt도 각자 자식 cascade 정리")
+    @DisplayName("seaExt 삭제 → SEA container CASCADE 삭제 확인. truckExt/airExt도 각자 자식(dim 포함) cascade 정리")
     void parentDelete_cascadeDeleteAllChildren() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
@@ -525,17 +551,19 @@ class HouseBlMappingIntegrationTest {
         seaExt.syncContainers(List.of(seaContainer("CONT-DEL")));
         em.flush();
 
-        // truckOrders는 truckExt 소유
+        // dims/truckOrders는 truckExt 소유
         HouseBlTruckJpaEntity truckExt = newTruckExt(parent);
         em.persist(truckExt);
         em.flush();
+        truckExt.syncDims(List.of(truckDim()));
         truckExt.syncTruckOrders(List.of(truckOrder("TRUCK-DEL")));
         em.flush();
 
-        // scheduleLegs/airCharges는 airExt 소유
+        // dims/scheduleLegs/airCharges는 airExt 소유
         HouseBlAirJpaEntity airExt = newAirExt(parent);
         em.persist(airExt);
         em.flush();
+        airExt.syncDims(List.of(airDim()));
         airExt.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
         airExt.syncAirCharges(List.of(airCharge("FUEL-DEL")));
         em.flush();
@@ -550,11 +578,11 @@ class HouseBlMappingIntegrationTest {
         HouseBlSeaJpaEntity seaToDelete = em.find(HouseBlSeaJpaEntity.class, seaId);
         em.remove(seaToDelete);
         em.flush();
-        // truckExt 제거 — truckOrders cascade 삭제
+        // truckExt 제거 — truckDim/truckOrders cascade 삭제
         HouseBlTruckJpaEntity truckToDelete = em.find(HouseBlTruckJpaEntity.class, truckId);
         em.remove(truckToDelete);
         em.flush();
-        // airExt 제거 — scheduleLegs/airCharges cascade 삭제
+        // airExt 제거 — airDim/scheduleLegs/airCharges cascade 삭제
         HouseBlAirJpaEntity airToDelete = em.find(HouseBlAirJpaEntity.class, airId);
         em.remove(airToDelete);
         em.flush();
@@ -565,8 +593,9 @@ class HouseBlMappingIntegrationTest {
 
         assertThat(em.find(HouseBlJpaEntity.class, parentId)).isNull();
         assertThat(countSeaContainers(seaId)).isZero();
-        assertThat(countDims(parentId)).isZero();
+        assertThat(countTruckDims(truckId)).isZero();
         assertThat(countTruckOrders(truckId)).isZero();
+        assertThat(countAirDims(airId)).isZero();
         assertThat(countScheduleLegs(airId)).isZero();
         assertThat(countAirCharges(airId)).isZero();
     }
@@ -642,30 +671,35 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("syncDims: 2건 저장 후 3건으로 교체 → flush → DB count==3, 기존 ID 없음")
+    @DisplayName("airExt.syncDims: 2건 저장 후 3건으로 교체 → flush → DB count==3, 기존 ID 없음")
     void syncDims_replace_orphanRemovedAndNewRowsInserted() {
         HouseBlJpaEntity parent = newParent(JobDiv.AIR);
-        parent.syncDims(List.of(dim(), dim()));
-
         em.persist(parent);
         em.flush();
-        em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        List<Long> oldIds = loaded.getDims().stream()
-                .map(HouseBlDimJpaEntity::getHouseBlDimId)
-                .toList();
-
-        loaded.syncDims(List.of(dim(), dim(), dim()));
+        // airExt 영속화 후 dim sync
+        HouseBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
+        airExt.syncDims(List.of(airDim(), airDim()));
         em.flush();
         em.clear();
 
-        long count = countDims(parent.getHouseBlId());
+        HouseBlAirJpaEntity loadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
+        List<Long> oldIds = loadedAir.getDims().stream()
+                .map(HouseBlAirDimJpaEntity::getHouseBlAirDimId)
+                .toList();
+
+        loadedAir.syncDims(List.of(airDim(), airDim(), airDim()));
+        em.flush();
+        em.clear();
+
+        long count = countAirDims(airExt.getHouseBlAirId());
         assertThat(count).isEqualTo(3);
 
-        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        List<Long> newIds = reloaded.getDims().stream()
-                .map(HouseBlDimJpaEntity::getHouseBlDimId)
+        HouseBlAirJpaEntity reloadedAir = em.find(HouseBlAirJpaEntity.class, airExt.getHouseBlAirId());
+        List<Long> newIds = reloadedAir.getDims().stream()
+                .map(HouseBlAirDimJpaEntity::getHouseBlAirDimId)
                 .toList();
         assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
     }

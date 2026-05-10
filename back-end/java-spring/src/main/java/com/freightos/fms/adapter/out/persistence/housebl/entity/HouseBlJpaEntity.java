@@ -10,13 +10,8 @@ import com.freightos.fms.domain.common.enums.ShipmentType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * JPA ORM 엔티티 — House B/L 공통 본체.
@@ -139,12 +134,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_ref_no", length = 50)
     private String masterRefNo;
 
-    // AIR/NON_BL/TRUCK에서 채워짐, SEA는 빈 컬렉션이 정상
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
-    private List<HouseBlDimJpaEntity> dims = new ArrayList<>();
-
     public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
     public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
@@ -180,43 +169,4 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setMblNo(String mblNo) { this.mblNo = mblNo; }
     public void setMasterRefNo(String masterRefNo) { this.masterRefNo = masterRefNo; }
 
-    // orphanRemoval=true 컬렉션 동기화: 참조를 교체하지 않고 clear+addAll로 관리
-
-    public void syncDims(List<HouseBlDimJpaEntity> newDims) {
-        this.dims.clear();
-        this.dims.addAll(newDims);
-    }
-
-    /**
-     * NON_BL DIM merge-by-id.
-     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
-     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
-     */
-    public void mergeDims(List<HouseBlDimJpaEntity> incoming) {
-        Map<Long, HouseBlDimJpaEntity> existingById = new HashMap<>();
-        for (HouseBlDimJpaEntity e : this.dims) {
-            if (e.getHouseBlDimId() != null) existingById.put(e.getHouseBlDimId(), e);
-        }
-        List<HouseBlDimJpaEntity> merged = new ArrayList<>();
-        for (HouseBlDimJpaEntity inc : incoming) {
-            if (inc.getHouseBlDimId() != null && existingById.containsKey(inc.getHouseBlDimId())) {
-                HouseBlDimJpaEntity existing = existingById.get(inc.getHouseBlDimId());
-                copyDimFields(inc, existing);
-                merged.add(existing);
-            } else {
-                merged.add(inc);
-            }
-        }
-        this.dims.clear();
-        this.dims.addAll(merged);
-    }
-
-    private void copyDimFields(HouseBlDimJpaEntity src, HouseBlDimJpaEntity dst) {
-        dst.setLengthCm(src.getLengthCm());
-        dst.setWidthCm(src.getWidthCm());
-        dst.setHeightCm(src.getHeightCm());
-        dst.setQuantity(src.getQuantity());
-        dst.setCbm(src.getCbm());
-        dst.setVolumeWeightKg(src.getVolumeWeightKg());
-    }
 }

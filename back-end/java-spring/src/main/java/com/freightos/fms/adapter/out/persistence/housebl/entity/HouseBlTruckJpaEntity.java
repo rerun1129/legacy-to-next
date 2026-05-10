@@ -67,6 +67,13 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private ServiceTerm serviceTerm;
 
+    // TRUCK 전용 치수 명세. house_bl_truck_id FK로 소유.
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_truck_id", nullable = false, updatable = false)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    private List<HouseBlTruckDimJpaEntity> dims = new ArrayList<>();
+
     // TRUCK 전용 오더 그리드. house_bl_truck_id FK로 소유.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -85,6 +92,13 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
+
+    public List<HouseBlTruckDimJpaEntity> getDims() { return dims; }
+
+    public void syncDims(List<HouseBlTruckDimJpaEntity> newDims) {
+        this.dims.clear();
+        this.dims.addAll(newDims);
+    }
 
     public void syncTruckOrders(List<HouseBlTruckOrderJpaEntity> newOrders) {
         this.truckOrders.clear();

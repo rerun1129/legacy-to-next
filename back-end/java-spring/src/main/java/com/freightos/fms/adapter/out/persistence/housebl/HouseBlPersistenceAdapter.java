@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlRepository;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.BlNumber;
@@ -99,12 +100,12 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlAirJpaEntity::new);
                 airJpa.setHouseBl(savedJpa);
                 domainToJpaMapper.applyAirFields(air, airJpa);
-                List<HouseBlDimJpaEntity> airDims = air.getDims().stream()
-                        .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
-                        .toList();
-                savedJpa.syncDims(airDims);
-                // airJpa를 먼저 영속화하여 house_bl_air_id PK 확보 후 scheduleLegs/airCharges 동기화
+                // airJpa를 먼저 영속화하여 house_bl_air_id PK 확보 후 dims/scheduleLegs/airCharges 동기화
                 HouseBlAirJpaEntity savedAirJpa = houseBlAirRepository.save(airJpa);
+                List<HouseBlAirDimJpaEntity> airDims = air.getDims().stream()
+                        .map(houseBlCargoMapper::toAirDimJpa)
+                        .toList();
+                savedAirJpa.syncDims(airDims);
                 List<HouseBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
                         .map(houseBlDocMapper::toScheduleLegJpa)
                         .toList();
@@ -119,12 +120,12 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlTruckJpaEntity::new);
                 truckJpa.setHouseBl(savedJpa);
                 domainToJpaMapper.applyTruckFields(truck, truckJpa);
-                List<HouseBlDimJpaEntity> truckDims = truck.getDims().stream()
-                        .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
-                        .toList();
-                savedJpa.syncDims(truckDims);
-                // truckJpa를 먼저 영속화하여 house_bl_truck_id PK 확보 후 truckOrders 동기화
+                // truckJpa를 먼저 영속화하여 house_bl_truck_id PK 확보 후 dims/truckOrders 동기화
                 HouseBlTruckJpaEntity savedTruckJpa = houseBlTruckRepository.save(truckJpa);
+                List<HouseBlTruckDimJpaEntity> truckDims = truck.getDims().stream()
+                        .map(houseBlCargoMapper::toTruckDimJpa)
+                        .toList();
+                savedTruckJpa.syncDims(truckDims);
                 List<HouseBlTruckOrderJpaEntity> truckOrders = truck.getTruckOrders().stream()
                         .map(houseBlDocMapper::toTruckOrderJpa)
                         .toList();
@@ -140,10 +141,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(houseBlCargoMapper::toNonBlContainerJpa)
                         .toList();
                 nonBlJpa.mergeContainers(nonBlContainers);
-                List<HouseBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
-                        .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
+                // NON_BL dim merge — nonBlJpa 소유 (house_bl_nonbl_dim)
+                List<HouseBlNonBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
+                        .map(houseBlCargoMapper::toNonBlDimJpa)
                         .toList();
-                savedJpa.mergeDims(nonBlDims);
+                nonBlJpa.mergeDims(nonBlDims);
                 // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 저장됨
                 houseBlNonBlRepository.save(nonBlJpa);
                 // in-memory 도메인에 JPA save 결과(parent id, 감사 필드, 자식 PK)를 역방향 sync.
@@ -151,7 +153,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 nonBl.assignIdentity(savedJpa.getHouseBlId(), savedJpa.getCreatedAt(), savedJpa.getUpdatedAt(),
                         savedJpa.getCreatedBy(), savedJpa.getUpdatedBy());
                 syncChildIds(nonBl.getContainers(), nonBlJpa.getContainers());
-                syncDimIds(nonBl.getDims(), savedJpa.getDims());
+                syncDimIds(nonBl.getDims(), nonBlJpa.getDims());
                 return nonBl;
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
@@ -311,13 +313,13 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
      * NON_BL DIM 도메인 자식에 JPA save 후 생성된 PK를 역방향 sync.
      * mergeDims의 결과 순서(incoming 순) = 도메인 자식 순서이므로 인덱스 1:1 매핑이 안전하다.
      */
-    private void syncDimIds(List<HouseBlDim> domainDims, List<HouseBlDimJpaEntity> jpaDims) {
+    private void syncDimIds(List<HouseBlDim> domainDims, List<HouseBlNonBlDimJpaEntity> jpaDims) {
         int size = Math.min(domainDims.size(), jpaDims.size());
         for (int i = 0; i < size; i++) {
-            HouseBlDimJpaEntity jpa = jpaDims.get(i);
+            HouseBlNonBlDimJpaEntity jpa = jpaDims.get(i);
             HouseBlDim domainDim = domainDims.get(i);
-            if (domainDim.getId() == null && jpa.getHouseBlDimId() != null) {
-                domainDim.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+            if (domainDim.getId() == null && jpa.getHouseBlNonBlDimId() != null) {
+                domainDim.assignIdentity(jpa.getHouseBlNonBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                         jpa.getCreatedBy(), jpa.getUpdatedBy());
             }
         }
