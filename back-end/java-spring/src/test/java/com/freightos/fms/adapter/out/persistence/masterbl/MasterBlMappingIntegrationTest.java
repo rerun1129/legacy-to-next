@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Master B/L 단방향 @OneToMany 매핑의 CRUD·라운드트립·orphanRemoval·cascade 동작을 검증한다.
+ * scheduleLegs는 Step 1.4에서 MasterBlJpaEntity → MasterBlAirJpaEntity 소유로 재배치됨.
  * @DataJpaTest 슬라이스 + H2 in-memory(application-test.yml).
  */
 @DataJpaTest
@@ -41,6 +43,12 @@ class MasterBlMappingIntegrationTest {
         p.setJobDiv(jobDiv);
         p.setBound(Bound.EXP);
         return p;
+    }
+
+    private MasterBlAirJpaEntity newAirExt(MasterBlJpaEntity parent) {
+        MasterBlAirJpaEntity a = new MasterBlAirJpaEntity();
+        a.setMasterBl(parent);
+        return a;
     }
 
     private MasterBlDimJpaEntity dim() {
@@ -70,21 +78,34 @@ class MasterBlMappingIntegrationTest {
         return d;
     }
 
-    private long countChildren(String table, Long parentId) {
+    private long countScheduleLegs(Long masterBlAirId) {
         return em.createQuery(
-                        "SELECT COUNT(c) FROM " + table + " c WHERE c.masterBlId = :pid", Long.class)
-                .setParameter("pid", parentId)
+                        "SELECT COUNT(c) FROM MasterBlScheduleLegJpaEntity c WHERE c.masterBlAirId = :pid", Long.class)
+                .setParameter("pid", masterBlAirId)
+                .getSingleResult();
+    }
+
+    private long countDims(Long masterBlId) {
+        return em.createQuery(
+                        "SELECT COUNT(c) FROM MasterBlDimJpaEntity c WHERE c.masterBlId = :pid", Long.class)
+                .setParameter("pid", masterBlId)
+                .getSingleResult();
+    }
+
+    private long countAirCharges(Long masterBlId) {
+        return em.createQuery(
+                        "SELECT COUNT(c) FROM MasterBlAirChargeJpaEntity c WHERE c.masterBlId = :pid", Long.class)
+                .setParameter("pid", masterBlId)
                 .getSingleResult();
     }
 
     // ── 테스트 ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Sea 모드 save→load: dims/scheduleLegs 채움 라운드트립")
-    void seaMode_fullRoundTrip_dimsAndScheduleLegsRestored() {
+    @DisplayName("Sea 모드 save→load: dims 채움 라운드트립 (scheduleLegs는 AIR 전용)")
+    void seaMode_fullRoundTrip_dimsRestored() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
         parent.syncDims(List.of(dim()));
-        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
 
         em.persist(parent);
         em.flush();
@@ -94,31 +115,38 @@ class MasterBlMappingIntegrationTest {
 
         assertThat(loaded).isNotNull();
         assertThat(loaded.getDims()).hasSize(1);
-        assertThat(loaded.getScheduleLegs()).hasSize(1);
         assertThat(loaded.getAirCharges()).isEmpty();
     }
 
     @Test
-    @DisplayName("Air 모드 save→load: dims/scheduleLegs/airCharges 채움 라운드트립")
+    @DisplayName("Air 모드 save→load: dims/airCharges 채움 + airExt 통해 scheduleLegs 라운드트립")
     void airMode_fullRoundTrip_allCollectionsRestored() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         parent.syncDims(List.of(dim()));
-        parent.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
         parent.syncAirCharges(List.of(airCharge("FUEL")));
-
         em.persist(parent);
+        em.flush();
+
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
+        em.persist(airExt);
         em.flush();
         em.clear();
 
         MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
 
         assertThat(loaded.getDims()).hasSize(1);
-        assertThat(loaded.getScheduleLegs()).hasSize(1);
         assertThat(loaded.getAirCharges()).hasSize(1);
+        assertThat(loadedAir.getScheduleLegs()).hasSize(1);
     }
 
     @Test
-    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, 모든 컬렉션이 빈 List 반환")
+    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, dims/airCharges 빈 List 반환")
     void emptyCollections_noPeNpeAndEmptyListReturned() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
 
@@ -129,7 +157,6 @@ class MasterBlMappingIntegrationTest {
         MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
 
         assertThat(loaded.getDims()).isNotNull().isEmpty();
-        assertThat(loaded.getScheduleLegs()).isNotNull().isEmpty();
         assertThat(loaded.getAirCharges()).isNotNull().isEmpty();
     }
 
@@ -146,7 +173,6 @@ class MasterBlMappingIntegrationTest {
         em.clear();
 
         MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        // 첫 번째 dim을 업데이트 — ID로 구분
         Long firstDimId = loaded.getDims().get(0).getMasterBlDimId();
         loaded.getDims().get(0).setQuantity(99);
 
@@ -194,30 +220,41 @@ class MasterBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("syncScheduleLegs: 기존 1건 → 신규 2건 교체. orphanRemoval 동작 확인")
+    @DisplayName("AIR ext syncScheduleLegs: 기존 1건 → 신규 2건 교체. orphanRemoval 동작 확인")
     void syncScheduleLegs_replaceOneWithTwo_orphanRemovedAndNewRowsInserted() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
-
         em.persist(parent);
         em.flush();
-        em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        List<Long> oldIds = loaded.getScheduleLegs().stream()
-                .map(MasterBlScheduleLegJpaEntity::getMasterBlScheduleLegId)
-                .toList();
-
-        loaded.syncScheduleLegs(List.of(scheduleLeg("KRPUS"), scheduleLeg("JPOSA")));
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        em.persist(airExt);
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        List<Long> newIds = reloaded.getScheduleLegs().stream()
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        List<Long> oldIds = loadedAir.getScheduleLegs().stream()
                 .map(MasterBlScheduleLegJpaEntity::getMasterBlScheduleLegId)
                 .toList();
 
-        assertThat(reloaded.getScheduleLegs()).hasSize(2);
+        loadedAir.syncScheduleLegs(List.of(scheduleLeg("KRPUS"), scheduleLeg("JPOSA")));
+        em.flush();
+        em.clear();
+
+        MasterBlAirJpaEntity reloadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        List<Long> newIds = reloadedAir.getScheduleLegs().stream()
+                .map(MasterBlScheduleLegJpaEntity::getMasterBlScheduleLegId)
+                .toList();
+
+        assertThat(reloadedAir.getScheduleLegs()).hasSize(2);
         assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
     }
 
@@ -236,16 +273,45 @@ class MasterBlMappingIntegrationTest {
         em.flush();
         em.clear();
 
-        long rowCount = countChildren("MasterBlAirChargeJpaEntity", parent.getMasterBlId());
-        assertThat(rowCount).isZero();
+        assertThat(countAirCharges(parent.getMasterBlId())).isZero();
     }
 
     @Test
-    @DisplayName("부모 delete → dims/scheduleLegs/airCharges 자식 row count 모두 0 (cascade)")
-    void parentDelete_cascadeDeleteAllChildren() {
+    @DisplayName("AIR ext delete → scheduleLegs 자식 row count 0 (cascade). dims/airCharges는 parent cascade")
+    void airExtDelete_cascadeDeleteScheduleLegs() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         parent.syncDims(List.of(dim()));
-        parent.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        parent.syncAirCharges(List.of(airCharge("FUEL")));
+        em.persist(parent);
+        em.flush();
+
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        em.persist(airExt);
+        em.flush();
+        em.clear();
+
+        Long parentId = parent.getMasterBlId();
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parentId)
+                .getSingleResult();
+        Long airExtId = loadedAir.getMasterBlAirId();
+
+        em.remove(loadedAir);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlAirJpaEntity.class, airExtId)).isNull();
+        assertThat(countScheduleLegs(airExtId)).isZero();
+    }
+
+    @Test
+    @DisplayName("부모 delete → dims/airCharges 자식 row count 모두 0 (cascade)")
+    void parentDelete_cascadeDeleteDimsAndAirCharges() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        parent.syncDims(List.of(dim()));
         parent.syncAirCharges(List.of(airCharge("FUEL")));
 
         em.persist(parent);
@@ -259,9 +325,8 @@ class MasterBlMappingIntegrationTest {
         em.clear();
 
         assertThat(em.find(MasterBlJpaEntity.class, parentId)).isNull();
-        assertThat(countChildren("MasterBlDimJpaEntity", parentId)).isZero();
-        assertThat(countChildren("MasterBlScheduleLegJpaEntity", parentId)).isZero();
-        assertThat(countChildren("MasterBlAirChargeJpaEntity", parentId)).isZero();
+        assertThat(countDims(parentId)).isZero();
+        assertThat(countAirCharges(parentId)).isZero();
     }
 
     @Test

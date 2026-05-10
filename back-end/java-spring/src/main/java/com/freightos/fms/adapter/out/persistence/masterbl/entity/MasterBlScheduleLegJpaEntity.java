@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * JPA ORM 엔티티 — Master B/L Schedule Leg (구간 일정).
- * MasterBlJpaEntity 와 @ManyToOne(FK: master_bl_id) 관계.
+ * MasterBlAirJpaEntity 와 @OneToMany(FK: master_bl_air_id) 관계.
+ * FK가 master_bl_id → master_bl_air_id 로 재배치됨.
  */
 @Entity
 @Table(schema = "fms", name = "master_bl_schedule_leg")
@@ -20,8 +21,8 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_schedule_leg_id", updatable = false, nullable = false)
     private Long masterBlScheduleLegId;
 
-    @Column(name = "master_bl_id", nullable = false, insertable = false, updatable = false)
-    private Long masterBlId;
+    @Column(name = "master_bl_air_id", nullable = false, insertable = false, updatable = false)
+    private Long masterBlAirId;
 
     @Column(name = "to_code", nullable = false, length = 10)
     private String toCode;
@@ -44,7 +45,6 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "arrival_tm", length = 4)
     private String arrivalTm;
 
-    public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setToCode(String v) { this.toCode = v; }
     public void setByCarrier(String v) { this.byCarrier = v; }
     public void setFlightNo(String v) { this.flightNo = v; }

@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
@@ -47,7 +48,7 @@ class MasterBlPersistenceAdapterTest {
     // ── saveMasterBl(SEA) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(SEA): replaceDesc 호출, syncDims/syncScheduleLegs/syncAirCharges 미호출")
+    @DisplayName("saveMasterBl(SEA): replaceDesc 호출, syncDims/syncAirCharges 미호출")
     void saveMasterBl_sea_callsSyncMethodsInOrder() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         MasterBlJpaEntity savedJpa = spy(new MasterBlJpaEntity());
@@ -60,7 +61,6 @@ class MasterBlPersistenceAdapterTest {
 
         then(savedJpa).should().replaceDesc(any());
         then(savedJpa).should(never()).syncDims(any());
-        then(savedJpa).should(never()).syncScheduleLegs(any());
         then(savedJpa).should(never()).syncAirCharges(any());
         then(masterBlSeaRepository).should().save(any());
     }
@@ -68,23 +68,25 @@ class MasterBlPersistenceAdapterTest {
     // ── saveMasterBl(AIR) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(AIR): syncAirCharges→syncDims→syncScheduleLegs→replaceDesc 순서 후 airRepository.save 호출")
+    @DisplayName("saveMasterBl(AIR): syncAirCharges→syncDims→replaceDesc→airRepository.save→savedAirJpa.syncScheduleLegs 순서")
     void saveMasterBl_air_callsSyncMethodsInOrder() {
         MasterBlAir air = MasterBlAir.create(Bound.EXP);
         MasterBlJpaEntity savedJpa = spy(new MasterBlJpaEntity());
         savedJpa.setJobDiv(MasterBlJobDiv.AIR);
+        MasterBlAirJpaEntity savedAirJpa = spy(new MasterBlAirJpaEntity());
         given(masterBlRepository.save(any())).willReturn(savedJpa);
         given(masterBlAirRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
+        given(masterBlAirRepository.save(any())).willReturn(savedAirJpa);
         given(masterBlMapper.toAirDomain(eq(savedJpa), any())).willReturn(air);
 
         adapter.saveMasterBl(air);
 
-        org.mockito.InOrder order = inOrder(savedJpa, masterBlAirRepository);
+        org.mockito.InOrder order = inOrder(savedJpa, masterBlAirRepository, savedAirJpa);
         order.verify(savedJpa).syncAirCharges(any());
         order.verify(savedJpa).syncDims(any());
-        order.verify(savedJpa).syncScheduleLegs(any());
         order.verify(savedJpa).replaceDesc(any());
         order.verify(masterBlAirRepository).save(any());
+        order.verify(savedAirJpa).syncScheduleLegs(any());
     }
 
     // ── saveMasterBl — 기존 ID 없을 때 예외 ─────────────────────────

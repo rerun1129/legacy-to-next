@@ -119,12 +119,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
     private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
 
-    // AIR에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
-    private List<MasterBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
-
     // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -166,11 +160,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void syncDims(List<MasterBlDimJpaEntity> v) {
         this.dims.clear();
         if (v != null) this.dims.addAll(v);
-    }
-
-    public void syncScheduleLegs(List<MasterBlScheduleLegJpaEntity> v) {
-        this.scheduleLegs.clear();
-        if (v != null) this.scheduleLegs.addAll(v);
     }
 
     public void replaceDesc(MasterBlDescJpaEntity newDesc) {

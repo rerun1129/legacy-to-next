@@ -55,7 +55,8 @@ public class MasterBlMapper {
                 .collect(Collectors.toList());
         domain.initAirCharges(airCharges);
         domain.initDims(toDimDomainList(jpa.getDims()));
-        domain.initScheduleLegs(toScheduleLegDomainList(jpa.getScheduleLegs()));
+        List<MasterBlScheduleLegJpaEntity> legJpaList = airJpa != null ? airJpa.getScheduleLegs() : List.of();
+        domain.initScheduleLegs(toScheduleLegDomainList(legJpaList));
         if (jpa.getDesc() != null) {
             domain.initDesc(toDescDomain(jpa.getDesc()));
         }
@@ -231,7 +232,7 @@ public class MasterBlMapper {
 
     public MasterBlScheduleLeg toScheduleLegDomain(MasterBlScheduleLegJpaEntity jpa) {
         MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(
-                jpa.getMasterBlId(),
+                jpa.getMasterBlAirId(),
                 jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt());
         domain.assignIdentity(jpa.getMasterBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
@@ -245,8 +246,8 @@ public class MasterBlMapper {
         return jpaList.stream().map(this::toScheduleLegDomain).collect(Collectors.toList());
     }
 
-    public void applyScheduleLegFields(MasterBlScheduleLeg domain, MasterBlScheduleLegJpaEntity jpa,
-                                       MasterBlJpaEntity masterBlJpa) {
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncScheduleLegs(@JoinColumn)이 설정 — airJpa 인자 불필요 */
+    public void applyScheduleLegFields(MasterBlScheduleLeg domain, MasterBlScheduleLegJpaEntity jpa) {
         jpa.setToCode(domain.getToCode());
         jpa.setByCarrier(domain.getByCarrier());
         jpa.setFlightNo(domain.getFlightNo());
@@ -262,9 +263,10 @@ public class MasterBlMapper {
         return jpa;
     }
 
-    public MasterBlScheduleLegJpaEntity toScheduleLegJpa(MasterBlScheduleLeg domain, MasterBlJpaEntity masterBl) {
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncScheduleLegs(@JoinColumn)이 설정 — airJpa 인자 불필요 */
+    public MasterBlScheduleLegJpaEntity toScheduleLegJpa(MasterBlScheduleLeg domain) {
         MasterBlScheduleLegJpaEntity jpa = new MasterBlScheduleLegJpaEntity();
-        applyScheduleLegFields(domain, jpa, masterBl);
+        applyScheduleLegFields(domain, jpa);
         return jpa;
     }
 

@@ -309,7 +309,6 @@ class MasterBlMapperTest {
     @DisplayName("toScheduleLegDomain: JPA → 도메인 전체 필드가 복사된다")
     void toScheduleLegDomain_mapsAllFields() {
         MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
-        legJpa.setMasterBlId(3L);
         legJpa.setToCode("NRT");
         legJpa.setByCarrier("KE");
         legJpa.setFlightNo("KE101");
@@ -332,14 +331,11 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("applyScheduleLegFields: 도메인 → JPA 전체 필드가 세팅된다")
     void applyScheduleLegFields_setsAllFieldsToJpa() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(3L);
-
         MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311");
         domain.updateDetails("NRT", "KE", "KE101", "20240310", "1430", "20240311", "0615");
         MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
 
-        mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa);
+        mapper.applyScheduleLegFields(domain, legJpa);
 
         assertThat(legJpa.getToCode()).isEqualTo("NRT");
         assertThat(legJpa.getByCarrier()).isEqualTo("KE");
@@ -354,19 +350,16 @@ class MasterBlMapperTest {
     @DisplayName("toScheduleLegDomainList: JPA 엔티티 3개 리스트 → 도메인 리스트로 변환된다")
     void toScheduleLegDomainList_convertsMultipleLegs() {
         MasterBlScheduleLegJpaEntity leg1 = new MasterBlScheduleLegJpaEntity();
-        leg1.setMasterBlId(3L);
         leg1.setToCode("HKG");
         leg1.setOnBoardDt("20240310");
         leg1.setArrivalDt("20240310");
 
         MasterBlScheduleLegJpaEntity leg2 = new MasterBlScheduleLegJpaEntity();
-        leg2.setMasterBlId(3L);
         leg2.setToCode("NRT");
         leg2.setOnBoardDt("20240311");
         leg2.setArrivalDt("20240311");
 
         MasterBlScheduleLegJpaEntity leg3 = new MasterBlScheduleLegJpaEntity();
-        leg3.setMasterBlId(3L);
         leg3.setToCode("LAX");
         leg3.setOnBoardDt("20240312");
         leg3.setArrivalDt("20240312");
@@ -379,14 +372,11 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("applyScheduleLegFields: byCarrier와 flightNo가 null이어도 NPE 없이 동작한다")
     void applyScheduleLegFields_nullCarrierAndFlight_doesNotThrow() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(3L);
-
         MasterBlScheduleLeg domain = MasterBlScheduleLeg.create(3L, "NRT", "20240310", "20240311");
         domain.updateDetails("NRT", null, null, "20240310", "1430", "20240311", "0615");
         MasterBlScheduleLegJpaEntity legJpa = new MasterBlScheduleLegJpaEntity();
 
-        assertThatCode(() -> mapper.applyScheduleLegFields(domain, legJpa, masterBlJpa))
+        assertThatCode(() -> mapper.applyScheduleLegFields(domain, legJpa))
                 .doesNotThrowAnyException();
     }
 

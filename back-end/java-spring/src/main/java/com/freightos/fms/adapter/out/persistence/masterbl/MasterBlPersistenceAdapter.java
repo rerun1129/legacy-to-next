@@ -96,13 +96,14 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .map(d -> masterBlMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(jpaDims);
-                List<MasterBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
-                        .map(l -> masterBlMapper.toScheduleLegJpa(l, savedJpa))
-                        .toList();
-                savedJpa.syncScheduleLegs(jpaLegs);
                 MasterBlDescJpaEntity airDescJpa = Nullables.mapOrNull(air.getDesc(), d -> masterBlMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(airDescJpa);
-                masterBlAirRepository.save(airJpa);
+                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 scheduleLegs 동기화
+                MasterBlAirJpaEntity savedAirJpa = masterBlAirRepository.save(airJpa);
+                List<MasterBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
+                        .map(masterBlMapper::toScheduleLegJpa)
+                        .toList();
+                savedAirJpa.syncScheduleLegs(jpaLegs);
             }
             case MasterBlSea sea -> {
                 MasterBlSeaJpaEntity seaJpa = masterBlSeaRepository
@@ -136,8 +137,11 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
         return switch (jobDiv) {
             case SEA -> masterBlMapper.toSeaDomain(jpa,
                     masterBlSeaRepository.findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null));
-            case AIR -> masterBlMapper.toAirDomain(jpa,
-                    masterBlAirRepository.findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null));
+            case AIR -> {
+                MasterBlAirJpaEntity airJpa = masterBlAirRepository
+                        .findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null);
+                yield masterBlMapper.toAirDomain(jpa, airJpa);
+            }
         };
     }
 }
