@@ -133,7 +133,8 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(cmd.salesClass(), SalesClass::fromCode),
                 cmd.mainItemName(),
                 cmd.hsCode(),
-                cmd.masterBlId()
+                cmd.masterBlId(),
+                Nullables.mapOrNull(cmd.bound(), Bound::valueOf)
         );
     }
 
@@ -203,6 +204,7 @@ public class HouseBlFactory {
 
     private void applyNonBlUpdate(HouseBl entity, UpdateHouseBlCommand cmd) {
         if (!(entity instanceof HouseBlNonBl nonBl)) return;
+        if (cmd.workDivision() != null) nonBl.updateWorkDivision(WorkDivision.valueOf(cmd.workDivision()));
         nonBl.updateNonBlFields(BlNumber.of(cmd.originalBlRef()), Rton.of(cmd.rton()), Weight.of(cmd.volumeWeightKg()));
         nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
                 cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());

@@ -126,7 +126,8 @@ public abstract class HouseBl extends BaseEntity {
             SalesClass salesClass,
             String mainItemName,
             String hsCode,
-            Long masterBlId
+            Long masterBlId,
+            Bound bound
     ) {}
 
     /**
@@ -181,6 +182,7 @@ public abstract class HouseBl extends BaseEntity {
                     Nullables.firstNonNull(fields.hsCode(),       () -> this.hsCode));
         }
         if (fields.masterBlId() != null) linkToMaster(fields.masterBlId());
+        if (fields.bound() != null) this.bound = fields.bound();
     }
 
     protected HouseBl(JobDiv jobDiv, Bound bound) {

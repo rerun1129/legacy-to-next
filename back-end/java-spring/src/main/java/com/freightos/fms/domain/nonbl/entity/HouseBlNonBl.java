@@ -55,6 +55,10 @@ public class HouseBlNonBl extends HouseBl {
         this.volumeDivisor = volumeDivisor;
     }
 
+    public void updateWorkDivision(WorkDivision workDivision) {
+        this.workDivision = workDivision;
+    }
+
     public void updateNonBlFields(BlNumber originalBlRef, Rton rton, Weight volumeWtKg) {
         this.originalBlRef = originalBlRef;
         this.rton          = rton;
