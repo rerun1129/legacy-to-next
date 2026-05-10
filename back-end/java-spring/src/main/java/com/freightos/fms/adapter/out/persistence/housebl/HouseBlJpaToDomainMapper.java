@@ -24,10 +24,10 @@ public class HouseBlJpaToDomainMapper {
         HouseBlSea domain = HouseBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
-        // @BatchSize(50)으로 리스트 조회 시 batch fetch
-        List<HouseBlContainer> containers = jpa.getContainers().stream()
-                .map(c -> toContainerDomain(c, domain))
-                .collect(Collectors.toList());
+        // SEA 컨테이너는 seaJpa 소유 — @BatchSize(50)으로 batch fetch
+        List<HouseBlContainer> containers = seaJpa != null
+                ? seaJpa.getContainers().stream().map(c -> cargoMapper.toSeaContainerDomain(c, domain)).collect(Collectors.toList())
+                : List.of();
         domain.initContainers(containers);
         if (descJpa != null) {
             domain.initDesc(docMapper.toSeaDescDomain(descJpa));
@@ -80,9 +80,10 @@ public class HouseBlJpaToDomainMapper {
         HouseBlNonBl domain = HouseBlNonBl.create(Nullables.mapOrNull(nonBlJpa, HouseBlNonBlJpaEntity::getWorkDivision), jpa.getBound());
         copyBaseFields(jpa, domain);
         if (nonBlJpa != null) copyNonBlFields(nonBlJpa, domain);
-        List<HouseBlContainer> containers = jpa.getContainers().stream()
-                .map(c -> toContainerDomain(c, domain))
-                .collect(Collectors.toList());
+        // NON_BL 컨테이너는 nonBlJpa 소유 — @BatchSize(50)으로 batch fetch
+        List<HouseBlContainer> containers = nonBlJpa != null
+                ? nonBlJpa.getContainers().stream().map(c -> cargoMapper.toNonBlContainerDomain(c, domain)).collect(Collectors.toList())
+                : List.of();
         domain.initContainers(containers);
         List<HouseBlDim> dims = jpa.getDims().stream()
                 .map(cargoMapper::toDimDomain)
@@ -173,20 +174,5 @@ public class HouseBlJpaToDomainMapper {
                 jpa.getLinerCode(), jpa.getLinerName(), jpa.getVesselName(), jpa.getVoyageNo(),
                 jpa.getFinalDestCode(), jpa.getFinalDestName(), jpa.getFinalEta());
         domain.assignVolumeDivisor(jpa.getVolumeDivisor());
-    }
-
-    private HouseBlContainer toContainerDomain(HouseBlContainerJpaEntity jpa, HouseBl parent) {
-        HouseBlContainer c = HouseBlContainer.of(parent, ContainerNumber.of(jpa.getContainerNo()),
-                jpa.getContainerType(), jpa.getLengthFeet());
-        c.assignIdentity(jpa.getHouseBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
-                jpa.getCreatedBy(), jpa.getUpdatedBy());
-        c.updateDetails(new HouseBlContainer.Details(
-                SealNumber.of(jpa.getSealNo1()), SealNumber.of(jpa.getSealNo2()),
-                SealNumber.of(jpa.getSealNo3()), SealNumber.of(jpa.getSealNo4()),
-                SealNumber.of(jpa.getSealNo5()), SealNumber.of(jpa.getSealNo6()),
-                Quantity.of(jpa.getPkgQty()), jpa.getPkgUnit(),
-                Weight.of(jpa.getGrossWeightKg()), Weight.of(jpa.getNetWeightKg()),
-                Volume.of(jpa.getCbm()), Weight.of(jpa.getVgmKg()), jpa.isSoc(), jpa.getSeq()));
-        return c;
     }
 }

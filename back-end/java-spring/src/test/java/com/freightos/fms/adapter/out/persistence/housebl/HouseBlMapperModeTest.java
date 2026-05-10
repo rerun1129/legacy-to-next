@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.entity.*;
@@ -15,8 +16,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 오늘(2026-04-30) 리팩토링 커밋에서 dims/scheduleLegs/licenses/desc가
- * HouseBl 본체로 승격된 후 모드별 toDomain의 통합 매핑을 검증한다.
+ * 모드별 toDomain 통합 매핑을 검증한다.
+ * SEA 컨테이너는 HouseBlSeaJpaEntity 소유 (house_bl_sea_container).
+ * NON_BL 컨테이너는 HouseBlNonBlJpaEntity 소유 (house_bl_nonbl_container).
  * 자식 필드 단위 매핑은 HouseBlMapperTest에서 별도 검증.
  */
 class HouseBlMapperModeTest {
@@ -32,10 +34,8 @@ class HouseBlMapperModeTest {
     void toAirDomain_includesDimsScheduleLegsLicensesDesc() {
         HouseBlJpaEntity jpa = airJpa(1L);
         jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
-        // scheduleLegs는 HouseBlAirJpaEntity 소유 — airJpa에 sync
         HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
         airJpa.syncScheduleLegs(List.of(legJpa()));
-        // desc는 3번째 인자로 명시 전달 — airJpa 연결
         HouseBlAirDescJpaEntity desc = airDescJpa(airJpa);
 
         HouseBlAir domain = mapper.toAirDomain(jpa, airJpa, desc);
@@ -77,12 +77,12 @@ class HouseBlMapperModeTest {
     // ── SEA ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toSeaDomain: containers/desc 포함, dims는 빈 컬렉션")
+    @DisplayName("toSeaDomain: seaJpa.containers/desc 포함, dims는 빈 컬렉션")
     void toSeaDomain_includesContainersLicensesDesc_excludesDimsAndLegs() {
         HouseBlJpaEntity jpa = seaJpa(4L);
-        jpa.syncContainers(List.of(containerJpa(jpa), containerJpa(jpa)));
-        // desc는 3번째 인자로 명시 전달 — seaJpa 연결
         HouseBlSeaJpaEntity seaJpa = new HouseBlSeaJpaEntity();
+        // SEA 컨테이너는 seaJpa 소유
+        seaJpa.syncContainers(List.of(seaContainerJpa(), seaContainerJpa()));
         HouseBlSeaDescJpaEntity desc = seaDescJpa(seaJpa);
 
         HouseBlSea domain = mapper.toSeaDomain(jpa, seaJpa, desc);
@@ -93,7 +93,7 @@ class HouseBlMapperModeTest {
     }
 
     @Test
-    @DisplayName("toSeaDomain: 자식 컬렉션 없으면 빈 리스트, desc null")
+    @DisplayName("toSeaDomain: seaJpa null이면 containers 빈 리스트, desc null")
     void toSeaDomain_emptyChildren_returnsEmptyCollectionsAndNullDesc() {
         HouseBlJpaEntity jpa = seaJpa(5L);
 
@@ -157,20 +157,21 @@ class HouseBlMapperModeTest {
     // ── NON_BL ───────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toNonBlDomain: containers/dims 포함, desc는 null(house_bl_non_bl.remark 컬럼으로 이전됨)")
+    @DisplayName("toNonBlDomain: nonBlJpa.containers/dims 포함, desc는 null(house_bl_non_bl.remark 컬럼으로 이전됨)")
     void toNonBlDomain_includesContainersDims_descIsNull() {
         HouseBlJpaEntity jpa = nonBlJpa(8L);
-        jpa.syncContainers(List.of(containerJpa(jpa)));
         jpa.syncDims(List.of(dimJpa(jpa)));
 
         HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
+        nonBlJpa.setWorkDivision(HouseBlNonBl.WorkDivision.SEA);
+        // NON_BL 컨테이너는 nonBlJpa 소유
+        nonBlJpa.mergeContainers(List.of(nonBlContainerJpa()));
         nonBlJpa.setRemark("TEST_REMARK");
 
         HouseBlNonBl domain = mapper.toNonBlDomain(jpa, nonBlJpa);
 
         assertThat(domain.getContainers()).hasSize(1);
         assertThat(domain.getDims()).hasSize(1);
-        // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 관리됨
         assertThat(domain.getDesc()).isNull();
         assertThat(domain.getRemark()).isEqualTo("TEST_REMARK");
     }
@@ -248,9 +249,20 @@ class HouseBlMapperModeTest {
         return jpa;
     }
 
-    private HouseBlContainerJpaEntity containerJpa(HouseBlJpaEntity parent) {
-        // ContainerNumber는 AAAA1234567 형식(ISO 6346) 요구
-        return HouseBlContainerJpaEntity.of("ABCD1234567", null, 20);
+    /** SEA 컨테이너 픽스처 — HouseBlSeaContainerJpaEntity */
+    private HouseBlSeaContainerJpaEntity seaContainerJpa() {
+        HouseBlSeaContainerJpaEntity jpa = new HouseBlSeaContainerJpaEntity();
+        jpa.setContainerNo("ABCD1234567");
+        jpa.setLengthFeet(20);
+        return jpa;
+    }
+
+    /** NON_BL 컨테이너 픽스처 — HouseBlNonBlContainerJpaEntity */
+    private HouseBlNonBlContainerJpaEntity nonBlContainerJpa() {
+        HouseBlNonBlContainerJpaEntity jpa = new HouseBlNonBlContainerJpaEntity();
+        jpa.setContainerNo("ABCD1234567");
+        jpa.setLengthFeet(20);
+        return jpa;
     }
 
     private HouseBlTruckOrderJpaEntity truckOrderJpa() {

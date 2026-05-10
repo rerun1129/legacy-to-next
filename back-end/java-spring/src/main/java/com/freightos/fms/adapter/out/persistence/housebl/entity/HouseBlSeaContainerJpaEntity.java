@@ -10,22 +10,23 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * JPA ORM 엔티티 — House B/L Container.
- * PRD §2.2: TEU = length_feet / 20
+ * JPA ORM 엔티티 — House B/L SEA 전용 Container.
+ * house_bl_sea_container 테이블 (FK: house_bl_sea_id).
+ * SEA 모드에서 @OneToMany syncContainers 패턴으로 관리된다.
  */
 @Entity
-@Table(schema = "fms", name = "house_bl_container")
+@Table(schema = "fms", name = "house_bl_sea_container")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class HouseBlContainerJpaEntity extends BaseJpaEntity {
+public class HouseBlSeaContainerJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "house_bl_container_id", updatable = false, nullable = false)
-    private Long houseBlContainerId;
+    @Column(name = "house_bl_sea_container_id", updatable = false, nullable = false)
+    private Long houseBlSeaContainerId;
 
-    @Column(name = "house_bl_id", nullable = false, insertable = false, updatable = false)
-    private Long houseBlId;
+    @Column(name = "house_bl_sea_id", nullable = false, insertable = false, updatable = false)
+    private Long houseBlSeaId;
 
     @Column(name = "container_no", length = 20)
     private String containerNo;
@@ -79,16 +80,7 @@ public class HouseBlContainerJpaEntity extends BaseJpaEntity {
     @Column(name = "seq", nullable = false)
     private int seq = 1;
 
-    public static HouseBlContainerJpaEntity of(String containerNo,
-                                               ContainerType containerType, int lengthFeet) {
-        HouseBlContainerJpaEntity c = new HouseBlContainerJpaEntity();
-        c.containerNo   = containerNo;
-        c.containerType = containerType;
-        c.lengthFeet    = lengthFeet;
-        return c;
-    }
-
-    public void setHouseBlContainerId(Long v) { this.houseBlContainerId = v; }
+    public void setHouseBlSeaContainerId(Long v) { this.houseBlSeaContainerId = v; }
     public void setContainerNo(String v) { this.containerNo = v; }
     public void setContainerType(ContainerType v) { this.containerType = v; }
     public void setLengthFeet(Integer v) { this.lengthFeet = v; }

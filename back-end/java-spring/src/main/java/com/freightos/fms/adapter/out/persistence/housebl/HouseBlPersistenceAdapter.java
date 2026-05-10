@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlRepository;
+import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.BlNumber;
@@ -85,11 +86,13 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlSeaJpaEntity::new);
                 seaJpa.setHouseBl(savedJpa);
                 domainToJpaMapper.applySeaFields(sea, seaJpa);
-                // 컨테이너 동기화 (SEA 전용)
-                List<HouseBlContainerJpaEntity> jpaContainers = sea.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
-                savedJpa.syncContainers(jpaContainers);
-                // seaExt를 먼저 영속화하여 house_bl_sea_id PK 확보 후 desc 저장
+                // seaExt를 먼저 영속화하여 house_bl_sea_id PK 확보 후 컨테이너·desc 저장
                 HouseBlSeaJpaEntity savedSeaJpa = houseBlSeaRepository.save(seaJpa);
+                // SEA 컨테이너 동기화 — seaJpa 소유 (house_bl_sea_container)
+                List<HouseBlSeaContainerJpaEntity> seaContainers = sea.getContainers().stream()
+                        .map(houseBlCargoMapper::toSeaContainerJpa)
+                        .toList();
+                savedSeaJpa.syncContainers(seaContainers);
                 saveOrDeleteSeaDesc(sea.getDesc(), savedSeaJpa);
             }
             case HouseBlAir air -> {
@@ -132,8 +135,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlNonBlJpaEntity::new);
                 nonBlJpa.setHouseBl(savedJpa);
                 domainToJpaMapper.applyNonBlFields(nonBl, nonBlJpa);
-                List<HouseBlContainerJpaEntity> jpaContainers = nonBl.getContainers().stream().map(c -> houseBlCargoMapper.toContainerJpa(c, savedJpa)).toList();
-                savedJpa.mergeContainers(jpaContainers);
+                // NON_BL 컨테이너 merge — nonBlJpa 소유 (house_bl_nonbl_container)
+                List<HouseBlNonBlContainerJpaEntity> nonBlContainers = nonBl.getContainers().stream()
+                        .map(houseBlCargoMapper::toNonBlContainerJpa)
+                        .toList();
+                nonBlJpa.mergeContainers(nonBlContainers);
                 List<HouseBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
@@ -144,7 +150,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 // loadWithExt 제거로 응답용 SELECT 제거 — 직렬 저장 순서와 동일하므로 인덱스 매핑 안전.
                 nonBl.assignIdentity(savedJpa.getHouseBlId(), savedJpa.getCreatedAt(), savedJpa.getUpdatedAt(),
                         savedJpa.getCreatedBy(), savedJpa.getUpdatedBy());
-                syncChildIds(nonBl.getContainers(), savedJpa.getContainers());
+                syncChildIds(nonBl.getContainers(), nonBlJpa.getContainers());
                 syncDimIds(nonBl.getDims(), savedJpa.getDims());
                 return nonBl;
             }
@@ -160,7 +166,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         Long id = houseBl.getId();
         switch (houseBl) {
             case HouseBlSea ignored -> {
-                // house_bl_sea_desc는 house_bl_sea_id FK ON DELETE CASCADE — seaExt 삭제 시 DB 자동 정리
+                // house_bl_sea_desc와 house_bl_sea_container는 house_bl_sea_id FK ON DELETE CASCADE — seaExt 삭제 시 DB 자동 정리
                 houseBlSeaRepository.deleteByHouseBl_HouseBlId(id);
             }
             case HouseBlAir ignored -> {
@@ -171,7 +177,10 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 // house_bl_truck_desc는 house_bl_truck_id FK ON DELETE CASCADE — truckExt 삭제 시 DB 자동 정리
                 houseBlTruckRepository.deleteByHouseBl_HouseBlId(id);
             }
-            case HouseBlNonBl ignored -> houseBlNonBlRepository.deleteByHouseBl_HouseBlId(id);
+            case HouseBlNonBl ignored -> {
+                // house_bl_nonbl_container는 house_bl_non_bl_id FK ON DELETE CASCADE — nonBlExt 삭제 시 DB 자동 정리
+                houseBlNonBlRepository.deleteByHouseBl_HouseBlId(id);
+            }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + houseBl.getClass().getSimpleName());
         }
         houseBlRepository.deleteById(id);
@@ -216,7 +225,7 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         : null;
                 yield jpaToDomainMapper.toAirDomain(jpa, airJpa, airDescJpa);
             }
-            case TRUCK  -> {
+            case TRUCK -> {
                 HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(id).orElse(null);
                 HouseBlTruckDescJpaEntity truckDescJpa = truckJpa != null
                         ? houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckJpa.getHouseBlTruckId()).orElse(null)
@@ -286,13 +295,13 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
      * mergeContainers의 결과 순서(incoming 순) = 도메인 자식 순서이므로 인덱스 1:1 매핑이 안전하다.
      * 기존에 id가 있던 자식은 동일 id가 유지되므로 중복 할당 무해.
      */
-    private void syncChildIds(List<HouseBlContainer> domainContainers, List<HouseBlContainerJpaEntity> jpaContainers) {
+    private void syncChildIds(List<HouseBlContainer> domainContainers, List<HouseBlNonBlContainerJpaEntity> jpaContainers) {
         int size = Math.min(domainContainers.size(), jpaContainers.size());
         for (int i = 0; i < size; i++) {
-            HouseBlContainerJpaEntity jpa = jpaContainers.get(i);
-            HouseBlContainer domain = domainContainers.get(i);
-            if (domain.getId() == null && jpa.getHouseBlContainerId() != null) {
-                domain.assignIdentity(jpa.getHouseBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+            HouseBlNonBlContainerJpaEntity jpa = jpaContainers.get(i);
+            HouseBlContainer domainContainer = domainContainers.get(i);
+            if (domainContainer.getId() == null && jpa.getHouseBlNonBlContainerId() != null) {
+                domainContainer.assignIdentity(jpa.getHouseBlNonBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                         jpa.getCreatedBy(), jpa.getUpdatedBy());
             }
         }
@@ -306,9 +315,9 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         int size = Math.min(domainDims.size(), jpaDims.size());
         for (int i = 0; i < size; i++) {
             HouseBlDimJpaEntity jpa = jpaDims.get(i);
-            HouseBlDim domain = domainDims.get(i);
-            if (domain.getId() == null && jpa.getHouseBlDimId() != null) {
-                domain.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+            HouseBlDim domainDim = domainDims.get(i);
+            if (domainDim.getId() == null && jpa.getHouseBlDimId() != null) {
+                domainDim.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                         jpa.getCreatedBy(), jpa.getUpdatedBy());
             }
         }

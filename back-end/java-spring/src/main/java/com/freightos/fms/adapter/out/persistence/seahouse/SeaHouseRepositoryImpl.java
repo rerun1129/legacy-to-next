@@ -2,7 +2,7 @@ package com.freightos.fms.adapter.out.persistence.seahouse;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaJpaEntity; // Q-class: 첫 compileJava 후 생성됨
-import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlContainerJpaEntity; // Q-class: 첫 compileJava 후 생성됨
+import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaContainerJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.seahouse.SeaHouseFilter;
@@ -35,7 +35,8 @@ public class SeaHouseRepositoryImpl implements SeaHouseRepositoryCustom {
     public PagedResult<SeaHouseSummary> searchSeaHouseSummaries(SeaHouseFilter filter, PageRequest pageRequest) {
         QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
         QHouseBlSeaJpaEntity sea = QHouseBlSeaJpaEntity.houseBlSeaJpaEntity;
-        QHouseBlContainerJpaEntity c = QHouseBlContainerJpaEntity.houseBlContainerJpaEntity;
+        // SEA 컨테이너는 house_bl_sea_container 테이블, house_bl_sea_id FK 소유
+        QHouseBlSeaContainerJpaEntity c = QHouseBlSeaContainerJpaEntity.houseBlSeaContainerJpaEntity;
 
         List<SeaHouseSummary> content = queryFactory
             .select(Projections.constructor(SeaHouseSummary.class,
@@ -71,13 +72,13 @@ public class SeaHouseRepositoryImpl implements SeaHouseRepositoryCustom {
                 sea.voyageNo,
                 JPAExpressions.select(c.count())
                     .from(c)
-                    .where(c.houseBlId.eq(h.houseBlId), c.lengthFeet.eq(20)),
+                    .where(c.houseBlSeaId.eq(sea.houseBlSeaId), c.lengthFeet.eq(20)),
                 JPAExpressions.select(c.count())
                     .from(c)
-                    .where(c.houseBlId.eq(h.houseBlId), c.lengthFeet.eq(40)),
+                    .where(c.houseBlSeaId.eq(sea.houseBlSeaId), c.lengthFeet.eq(40)),
                 JPAExpressions.select(c.lengthFeet.sum().castToNum(Long.class))
                     .from(c)
-                    .where(c.houseBlId.eq(h.houseBlId))
+                    .where(c.houseBlSeaId.eq(sea.houseBlSeaId))
             ))
             .from(h)
             .leftJoin(sea).on(sea.houseBl.houseBlId.eq(h.houseBlId))

@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.seahouse;
 
-import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlContainerJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaContainerJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlSeaJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
@@ -71,12 +71,18 @@ class SeaHouseRepositoryImplSliceTest {
         sea.setHouseBl(house);
         sea.setLinerCode(linerCode);
         em.persist(sea);
+        em.flush(); // house_bl_sea_id PK 확보 후 컨테이너 sync
 
-        // 컨테이너 집계(cntr20Qty, cntr40Qty, teuQty) 검증용 fixture: 20ft 1개, 40ft 1개
-        house.syncContainers(java.util.List.of(
-            HouseBlContainerJpaEntity.of("CONT0001", ContainerType.T20GP, 20),
-            HouseBlContainerJpaEntity.of("CONT0002", ContainerType.F40GP, 40)
-        ));
+        // SEA 컨테이너는 seaExt 소유 — house_bl_sea_container (house_bl_sea_id FK)
+        HouseBlSeaContainerJpaEntity c1 = new HouseBlSeaContainerJpaEntity();
+        c1.setContainerNo("CONT0001");
+        c1.setContainerType(ContainerType.T20GP);
+        c1.setLengthFeet(20);
+        HouseBlSeaContainerJpaEntity c2 = new HouseBlSeaContainerJpaEntity();
+        c2.setContainerNo("CONT0002");
+        c2.setContainerType(ContainerType.F40GP);
+        c2.setLengthFeet(40);
+        sea.syncContainers(java.util.List.of(c1, c2));
 
         return house;
     }

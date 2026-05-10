@@ -7,8 +7,15 @@ import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * JPA ORM 엔티티 — House B/L Non-B/L 확장.
@@ -70,6 +77,13 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
+    // NON_BL 전용 컨테이너 컬렉션 — house_bl_nonbl_container.house_bl_non_bl_id FK 소유
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_non_bl_id", nullable = false, updatable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<HouseBlNonBlContainerJpaEntity> containers = new ArrayList<>();
+
     public void setHouseBl(HouseBlJpaEntity v)                   { this.houseBl = v; }
     public void setWorkDivision(HouseBlNonBl.WorkDivision v)     { this.workDivision = v; }
     public void setOriginalBlRef(String v)                        { this.originalBlRef = v; }
@@ -84,4 +98,50 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     public void setFinalEta(String v)                             { this.finalEta = v; }
     public void setVolumeDivisor(VolumeDivisor v)                  { this.volumeDivisor = v; }
     public void setRemark(String v)                               { this.remark = v; }
+
+    /**
+     * NON_BL 컨테이너 merge-by-id.
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeContainers(List<HouseBlNonBlContainerJpaEntity> incoming) {
+        Map<Long, HouseBlNonBlContainerJpaEntity> existingById = new HashMap<>();
+        for (HouseBlNonBlContainerJpaEntity e : this.containers) {
+            if (e.getHouseBlNonBlContainerId() != null) existingById.put(e.getHouseBlNonBlContainerId(), e);
+        }
+        List<HouseBlNonBlContainerJpaEntity> merged = new ArrayList<>();
+        for (HouseBlNonBlContainerJpaEntity inc : incoming) {
+            if (inc.getHouseBlNonBlContainerId() != null && existingById.containsKey(inc.getHouseBlNonBlContainerId())) {
+                HouseBlNonBlContainerJpaEntity existing = existingById.get(inc.getHouseBlNonBlContainerId());
+                copyContainerFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.containers.clear();
+        this.containers.addAll(merged);
+    }
+
+    public List<HouseBlNonBlContainerJpaEntity> getContainers() { return containers; }
+
+    private void copyContainerFields(HouseBlNonBlContainerJpaEntity src, HouseBlNonBlContainerJpaEntity dst) {
+        dst.setContainerNo(src.getContainerNo());
+        dst.setContainerType(src.getContainerType());
+        dst.setLengthFeet(src.getLengthFeet());
+        dst.setSealNo1(src.getSealNo1());
+        dst.setSealNo2(src.getSealNo2());
+        dst.setSealNo3(src.getSealNo3());
+        dst.setSealNo4(src.getSealNo4());
+        dst.setSealNo5(src.getSealNo5());
+        dst.setSealNo6(src.getSealNo6());
+        dst.setPkgQty(src.getPkgQty());
+        dst.setPkgUnit(src.getPkgUnit());
+        dst.setGrossWeightKg(src.getGrossWeightKg());
+        dst.setNetWeightKg(src.getNetWeightKg());
+        dst.setCbm(src.getCbm());
+        dst.setVgmKg(src.getVgmKg());
+        dst.setIsSoc(src.isSoc());
+        dst.setSeq(src.getSeq());
+    }
 }

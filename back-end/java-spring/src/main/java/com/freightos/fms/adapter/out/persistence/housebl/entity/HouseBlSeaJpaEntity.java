@@ -8,8 +8,13 @@ import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * JPA ORM 엔티티 — House B/L 해상 확장.
@@ -101,6 +106,13 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "delivery_code", length = 10)
     private String deliveryCode;
 
+    // SEA 전용 컨테이너 컬렉션 — house_bl_sea_container.house_bl_sea_id FK 소유
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_sea_id", nullable = false, updatable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<HouseBlSeaContainerJpaEntity> containers = new ArrayList<>();
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
@@ -124,4 +136,12 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setNoOfContainerOrPackages(String v) { this.noOfContainerOrPackages = v; }
     public void setBlType(BlType v) { this.blType = v; }
     public void setDeliveryCode(String v) { this.deliveryCode = v; }
+
+    /** SEA 컨테이너 동기화: 기존 컬렉션 참조를 유지하면서 내용 교체 (orphanRemoval 지원). */
+    public void syncContainers(List<HouseBlSeaContainerJpaEntity> newContainers) {
+        this.containers.clear();
+        this.containers.addAll(newContainers);
+    }
+
+    public List<HouseBlSeaContainerJpaEntity> getContainers() { return containers; }
 }

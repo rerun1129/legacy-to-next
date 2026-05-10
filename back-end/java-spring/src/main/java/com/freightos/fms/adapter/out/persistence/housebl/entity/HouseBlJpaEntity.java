@@ -139,12 +139,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "master_ref_no", length = 50)
     private String masterRefNo;
 
-    // SEA/NON_BL에서 채워짐, AIR/TRUCK은 LAZY이므로 미사용 모드 영향 없음
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
-    private List<HouseBlContainerJpaEntity> containers = new ArrayList<>();
-
     // AIR/NON_BL/TRUCK에서 채워짐, SEA는 빈 컬렉션이 정상
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -188,46 +182,13 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
 
     // orphanRemoval=true 컬렉션 동기화: 참조를 교체하지 않고 clear+addAll로 관리
 
-    /** @deprecated NonBl에는 mergeContainers 사용. Sea/Air/Truck은 현행 유지. */
-    @Deprecated
-    public void syncContainers(List<HouseBlContainerJpaEntity> newContainers) {
-        this.containers.clear();
-        this.containers.addAll(newContainers);
-    }
-
-    /** @deprecated NonBl에는 mergeDims 사용. Air/Truck은 현행 유지. */
-    @Deprecated
     public void syncDims(List<HouseBlDimJpaEntity> newDims) {
         this.dims.clear();
         this.dims.addAll(newDims);
     }
 
     /**
-     * NonBl 컨테이너 merge-by-id.
-     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
-     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
-     */
-    public void mergeContainers(List<HouseBlContainerJpaEntity> incoming) {
-        Map<Long, HouseBlContainerJpaEntity> existingById = new HashMap<>();
-        for (HouseBlContainerJpaEntity e : this.containers) {
-            if (e.getHouseBlContainerId() != null) existingById.put(e.getHouseBlContainerId(), e);
-        }
-        List<HouseBlContainerJpaEntity> merged = new ArrayList<>();
-        for (HouseBlContainerJpaEntity inc : incoming) {
-            if (inc.getHouseBlContainerId() != null && existingById.containsKey(inc.getHouseBlContainerId())) {
-                HouseBlContainerJpaEntity existing = existingById.get(inc.getHouseBlContainerId());
-                copyContainerFields(inc, existing);
-                merged.add(existing);
-            } else {
-                merged.add(inc);
-            }
-        }
-        this.containers.clear();
-        this.containers.addAll(merged);
-    }
-
-    /**
-     * NonBl DIM merge-by-id.
+     * NON_BL DIM merge-by-id.
      * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
      * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
      */
@@ -248,26 +209,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
         }
         this.dims.clear();
         this.dims.addAll(merged);
-    }
-
-    private void copyContainerFields(HouseBlContainerJpaEntity src, HouseBlContainerJpaEntity dst) {
-        dst.setContainerNo(src.getContainerNo());
-        dst.setContainerType(src.getContainerType());
-        dst.setLengthFeet(src.getLengthFeet());
-        dst.setSealNo1(src.getSealNo1());
-        dst.setSealNo2(src.getSealNo2());
-        dst.setSealNo3(src.getSealNo3());
-        dst.setSealNo4(src.getSealNo4());
-        dst.setSealNo5(src.getSealNo5());
-        dst.setSealNo6(src.getSealNo6());
-        dst.setPkgQty(src.getPkgQty());
-        dst.setPkgUnit(src.getPkgUnit());
-        dst.setGrossWeightKg(src.getGrossWeightKg());
-        dst.setNetWeightKg(src.getNetWeightKg());
-        dst.setCbm(src.getCbm());
-        dst.setVgmKg(src.getVgmKg());
-        dst.setIsSoc(src.isSoc());
-        dst.setSeq(src.getSeq());
     }
 
     private void copyDimFields(HouseBlDimJpaEntity src, HouseBlDimJpaEntity dst) {
