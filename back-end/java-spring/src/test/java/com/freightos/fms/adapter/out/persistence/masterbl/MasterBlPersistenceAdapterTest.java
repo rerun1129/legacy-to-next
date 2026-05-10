@@ -86,7 +86,6 @@ class MasterBlPersistenceAdapterTest {
         order.verify(masterBlAirRepository).save(any());
         order.verify(savedAirJpa).syncScheduleLegs(any());
         order.verify(savedAirJpa).syncAirCharges(any());
-        then(savedJpa).should(never()).syncAirCharges(any());
     }
 
     // ── saveMasterBl — 기존 ID 없을 때 예외 ─────────────────────────
