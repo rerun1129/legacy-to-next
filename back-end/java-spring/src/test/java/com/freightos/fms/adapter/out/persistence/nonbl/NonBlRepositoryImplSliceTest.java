@@ -1,5 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.nonbl;
 
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlCargoMapper;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDocMapper;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlJpaToDomainMapper;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.common.config.QueryDslConfig;
@@ -28,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({QueryDslConfig.class, NonBlRepositoryImpl.class})
+@Import({QueryDslConfig.class, NonBlRepositoryImpl.class, HouseBlJpaToDomainMapper.class, HouseBlCargoMapper.class, HouseBlDocMapper.class})
 class NonBlRepositoryImplSliceTest {
 
     @Autowired

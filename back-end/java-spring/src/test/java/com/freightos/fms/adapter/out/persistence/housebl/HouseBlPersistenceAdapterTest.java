@@ -410,7 +410,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(NON_BL) — merge 메서드 호출 검증 ──────────────────
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims→mergeDesc 순서 후 nonBlRepository.save 호출")
+    @DisplayName("saveHouseBl(NON_BL): mergeContainers→mergeDims 순서 후 nonBlRepository.save 호출 (NON_BL은 desc 미사용)")
     void saveNonBlHouseBl_callsMergeInOrder() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -424,7 +424,6 @@ class HouseBlPersistenceAdapterTest {
         InOrder order = inOrder(savedJpa, houseBlNonBlRepository);
         order.verify(savedJpa).mergeContainers(any());
         order.verify(savedJpa).mergeDims(any());
-        order.verify(savedJpa).mergeDesc(any());
         order.verify(houseBlNonBlRepository).save(any());
     }
 

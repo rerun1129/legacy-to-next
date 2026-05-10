@@ -9,7 +9,7 @@ import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
 import type { NonBlFormValues }                        from "./non-bl-schema";
 import { createEmptyNonBlFormValues }                  from "./non-bl-defaults";
-import { buildNonBlRequest }                           from "./non-bl-submit";
+import { buildNonBlRequest, buildNonBlUpdateRequest }   from "./non-bl-submit";
 import { useBlDraftSync }                              from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore }                             from "@/lib/use-bl-draft-store";
 import { TextBox, ComboBox }                            from "@/components/shared/inputs";
@@ -131,8 +131,9 @@ export function NonBLEntry() {
 
   const mutation = useMutation({
     mutationFn: (data: NonBlFormValues) => {
-      const req = buildNonBlRequest(data);
-      return isEdit ? nonBlPort.update(id!, req) : nonBlPort.create(req);
+      return isEdit
+        ? nonBlPort.update(id!, buildNonBlUpdateRequest(data))
+        : nonBlPort.create(buildNonBlRequest(data));
     },
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });

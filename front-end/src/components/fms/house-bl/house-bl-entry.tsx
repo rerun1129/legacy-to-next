@@ -16,7 +16,7 @@ import { FreightTab }  from "./tabs/freight-tab";
 import { houseBlPort } from "@/lib/ports";
 import type { HouseBlFormValues } from "./house-bl-schema";
 import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
-import { buildHouseBlRequest } from "./house-bl-submit";
+import { buildHouseBlRequest, buildHouseBlUpdateRequest } from "./house-bl-submit";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { useSearchBl } from "./use-search-bl";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
@@ -148,8 +148,9 @@ export function HouseBLEntry({ variant }: Props) {
 
   const mutation = useMutation({
     mutationFn: (data: HouseBlFormValues) => {
-      const req = buildHouseBlRequest(data, variant);
-      return isEdit ? houseBlPort.update(id!, req) : houseBlPort.create(req);
+      return isEdit
+        ? houseBlPort.update(id!, buildHouseBlUpdateRequest(data, variant))
+        : houseBlPort.create(buildHouseBlRequest(data, variant));
     },
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });

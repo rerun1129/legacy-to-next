@@ -109,7 +109,6 @@ public class NonBlAssembler {
         return new UpdateHouseBlCommand(
                 "NON_BL",
                 req.bound(),
-                req.hblNo(),
                 null,
                 null,
                 req.shipperCode(),

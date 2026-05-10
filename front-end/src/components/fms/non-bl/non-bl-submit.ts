@@ -1,4 +1,4 @@
-import type { CreateNonBlRequest } from '@/domain/non-bl';
+import type { CreateNonBlRequest, UpdateNonBlRequest } from '@/domain/non-bl';
 import type { NonBlFormValues } from './non-bl-schema';
 
 /** 문자열 → number 변환. 빈 문자열이면 undefined 반환. */
@@ -42,7 +42,7 @@ export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
   }));
 
   return {
-    hblNo:              toStr(values.nonBlNo),
+    hblNo: toStr(values.nonBlNo),
     bound:              values.bound ?? '',
     workDivision:       toStr(values.workDiv),
     shipperCode:        toStr(values.shipperCode),
@@ -80,4 +80,10 @@ export function buildNonBlRequest(values: NonBlFormValues): CreateNonBlRequest {
     containers:         containers && containers.length > 0 ? containers : undefined,
     dims:               dims && dims.length > 0 ? dims : undefined,
   };
+}
+
+/** update 시 사용하는 페이로드 빌더 — hblNo는 식별 키이므로 payload에서 제외 */
+export function buildNonBlUpdateRequest(values: NonBlFormValues): UpdateNonBlRequest {
+  const { hblNo: _hblNo, ...rest } = buildNonBlRequest(values);
+  return rest;
 }

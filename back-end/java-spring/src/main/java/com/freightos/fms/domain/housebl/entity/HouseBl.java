@@ -102,7 +102,6 @@ public abstract class HouseBl extends BaseEntity {
      * null 필드는 기존값을 유지한다 (PATCH 의미론).
      */
     public record HouseBlUpdateFields(
-            BlNumber hblNo,
             ShipmentType shipmentType,
             FreightTerm freightTerm,
             CustomerCode shipperCode,
@@ -134,7 +133,6 @@ public abstract class HouseBl extends BaseEntity {
      * null 필드는 기존값을 유지한다.
      */
     public void update(HouseBlUpdateFields fields) {
-        if (fields.hblNo() != null) this.hblNo = fields.hblNo();
         if (fields.shipmentType() != null || fields.freightTerm() != null) {
             updateBlStatus(
                     Nullables.firstNonNull(fields.shipmentType(), () -> this.shipmentType),

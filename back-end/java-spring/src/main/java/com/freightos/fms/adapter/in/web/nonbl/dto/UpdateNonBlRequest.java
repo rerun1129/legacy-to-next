@@ -8,7 +8,6 @@ import java.util.List;
 public record UpdateNonBlRequest(
         String jobDiv,
         String bound,
-        String hblNo,
         String workDivision,
         String originalBlRef,
         String volumeDivisor,

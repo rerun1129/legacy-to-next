@@ -1,5 +1,5 @@
 import type { BLVariantConfig } from '@/lib/bl-variants';
-import type { CreateHouseBlRequest } from '@/domain/house-bl';
+import type { CreateHouseBlRequest, UpdateHouseBlRequest } from '@/domain/house-bl';
 import type { HouseBlFormValues } from './house-bl-schema';
 
 /** 문자열 → number 변환. 빈 문자열이면 undefined 반환. */
@@ -26,7 +26,7 @@ export function buildHouseBlRequest(
   const base: CreateHouseBlRequest = {
     jobDiv,
     bound,
-    hblNo:            toStr(values.hbl),
+    hblNo: toStr(values.hbl),
     shipmentType:     (values.sType as 'HOUSE' | 'DIRECT') || 'HOUSE',
     freightTerm:      (values.settle as 'PREPAID' | 'COLLECT') || 'PREPAID',
     shipperCode:      toStr(values.shipperCode),
@@ -182,4 +182,13 @@ export function buildHouseBlRequest(
   }
 
   return base;
+}
+
+/** update 시 사용하는 페이로드 빌더 — hblNo는 식별 키이므로 payload에서 제외 */
+export function buildHouseBlUpdateRequest(
+  values: HouseBlFormValues,
+  variant: BLVariantConfig,
+): UpdateHouseBlRequest {
+  const { hblNo: _hblNo, ...rest } = buildHouseBlRequest(values, variant);
+  return rest;
 }

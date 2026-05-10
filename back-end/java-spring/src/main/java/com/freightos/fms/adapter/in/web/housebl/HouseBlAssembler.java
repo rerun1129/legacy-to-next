@@ -112,7 +112,6 @@ public class HouseBlAssembler {
         return new UpdateHouseBlCommand(
                 req.jobDiv(),
                 req.bound(),
-                req.hblNo(),
                 req.shipmentType(),
                 req.freightTerm(),
                 req.shipperCode(),

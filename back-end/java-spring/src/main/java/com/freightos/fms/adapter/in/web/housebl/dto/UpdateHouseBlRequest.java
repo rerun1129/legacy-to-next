@@ -7,7 +7,6 @@ import java.util.List;
 public record UpdateHouseBlRequest(
         String jobDiv,
         String bound,
-        String hblNo,
         String shipmentType,
         String freightTerm,
         String shipperCode,

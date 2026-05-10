@@ -110,7 +110,6 @@ public class HouseBlFactory {
 
     private HouseBl.HouseBlUpdateFields toUpdateFields(UpdateHouseBlCommand cmd) {
         return new HouseBl.HouseBlUpdateFields(
-                Nullables.mapOrNull(cmd.hblNo(), BlNumber::of),
                 Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf),
                 Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf),
                 Nullables.mapOrNull(cmd.shipperCode(), CustomerCode::of),
