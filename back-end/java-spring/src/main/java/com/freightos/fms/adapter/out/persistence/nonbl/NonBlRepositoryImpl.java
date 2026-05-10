@@ -14,6 +14,7 @@ import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.nonbl.NonBlFilter;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
@@ -31,7 +32,6 @@ import java.util.Optional;
 public class NonBlRepositoryImpl implements NonBlRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-    private final HouseBlNonBlRepository houseBlNonBlRepository;
     private final HouseBlJpaToDomainMapper jpaToDomainMapper;
 
     @Override
@@ -145,19 +145,20 @@ public class NonBlRepositoryImpl implements NonBlRepositoryCustom {
 
     @Override
     public Optional<HouseBlNonBl> findNonBlById(Long id) {
-        // house_bl_desc JOIN 없이 house_bl × house_bl_non_bl만 조인하여 조회
+        // house_bl × house_bl_non_bl 1 SELECT — Tuple 다중 selection으로 양쪽 엔티티 동시 로드
         QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
         QHouseBlNonBlJpaEntity nonBlQ = QHouseBlNonBlJpaEntity.houseBlNonBlJpaEntity;
 
-        HouseBlJpaEntity houseBlJpa = queryFactory
-                .selectFrom(h)
+        Tuple row = queryFactory
+                .select(h, nonBlQ)
+                .from(h)
                 .innerJoin(nonBlQ).on(nonBlQ.houseBl.houseBlId.eq(h.houseBlId))
                 .where(h.houseBlId.eq(id).and(h.jobDiv.eq(JobDiv.NON_BL)))
                 .fetchOne();
 
-        if (houseBlJpa == null) return Optional.empty();
-
-        HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(id).orElse(null);
+        if (row == null) return Optional.empty();
+        HouseBlJpaEntity houseBlJpa = row.get(h);
+        HouseBlNonBlJpaEntity nonBlJpa = row.get(nonBlQ);
         return Optional.of(jpaToDomainMapper.toNonBlDomain(houseBlJpa, nonBlJpa));
     }
 
