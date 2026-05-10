@@ -162,6 +162,18 @@ public class NonBlRepositoryImpl implements NonBlRepositoryCustom {
         return Optional.of(jpaToDomainMapper.toNonBlDomain(houseBlJpa, nonBlJpa));
     }
 
+    @Override
+    public List<Long> findNonBlKeysByHblNoExact(String hblNo) {
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        return queryFactory
+                .select(h.houseBlId)
+                .from(h)
+                .where(h.jobDiv.eq(JobDiv.NON_BL).and(h.hblNo.eq(hblNo)))
+                .orderBy(h.createdAt.desc())
+                .limit(2)
+                .fetch();
+    }
+
     private static BooleanExpression eqPort(
             QHouseBlJpaEntity h, String code, PortKind kind) {
         if (!StringUtils.hasText(code)) return null;

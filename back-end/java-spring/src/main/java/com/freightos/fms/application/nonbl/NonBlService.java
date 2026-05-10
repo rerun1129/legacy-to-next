@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -69,6 +71,11 @@ public class NonBlService implements NonBlUseCase {
         if (newHblNo == null) throw new IllegalArgumentException("hblNo must not be null or blank");
         long affected = houseBlPort.updateHblNoById(id, newHblNo, JobDiv.NON_BL);
         if (affected == 0) throw new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND);
+    }
+
+    @Override
+    public List<Long> findNonBlKeysByHblNoExact(String hblNo) {
+        return nonBlSearchPort.findNonBlKeysByHblNoExact(hblNo);
     }
 
     private HouseBlNonBl findNonBlDomainById(Long id) {

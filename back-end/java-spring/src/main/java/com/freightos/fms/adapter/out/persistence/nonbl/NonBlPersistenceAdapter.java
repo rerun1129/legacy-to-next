@@ -9,6 +9,7 @@ import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -25,5 +26,10 @@ public class NonBlPersistenceAdapter implements NonBlSearchPort {
     @Override
     public Optional<HouseBlNonBl> findNonBlById(Long id) {
         return nonBlRepositoryCustom.findNonBlById(id);
+    }
+
+    @Override
+    public List<Long> findNonBlKeysByHblNoExact(String hblNo) {
+        return nonBlRepositoryCustom.findNonBlKeysByHblNoExact(hblNo);
     }
 }

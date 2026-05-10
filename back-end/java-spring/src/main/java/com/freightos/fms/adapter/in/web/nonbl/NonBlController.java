@@ -5,6 +5,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.ChangeNonBlHblNoRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.CreateNonBlRequest;
+import com.freightos.fms.adapter.in.web.nonbl.dto.FindNonBlByHblNoRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlDetailResponse;
 import com.freightos.fms.adapter.in.web.nonbl.dto.UpdateNonBlRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.NonBlSummaryResponse;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @Tag(name = "Non B/L", description = "Non B/L 관리")
 @RestController
@@ -48,6 +50,14 @@ public class NonBlController {
                 nonBlUseCase.searchNonBls(
                         nonBlAssembler.toSearchCommand(req),
                         PageRequest.of(req.page(), req.size())))));
+    }
+
+    @Operation(summary = "Non B/L hblNo EXACT 매칭으로 house_bl_id PK 목록 조회 (최대 2건)")
+    @PostMapping("/find-by-hbl-no")
+    public ResponseEntity<ApiResponse<List<Long>>> findNonBlsByHblNoExact(
+            @Valid @RequestBody FindNonBlByHblNoRequest req) {
+        return ResponseEntity.ok(ApiResponse.of(
+                nonBlUseCase.findNonBlKeysByHblNoExact(req.hblNo())));
     }
 
     @Operation(summary = "Non B/L 생성")

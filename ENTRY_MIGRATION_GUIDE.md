@@ -316,16 +316,18 @@ useEffect(() => {
 
 사례: 4572a33 — Non B/L Entry nonBlNo 잔류 버그 수정.
 
-### 6.19 Entry Search 버튼 — port.list + hot-marker 재사용 패턴
+### 6.19 Entry Search 버튼 — EXACT 단건 PK 조회 endpoint + hot-marker 패턴
 
-Entry 화면의 Search는 `port.list(filter, 1, 2)`로 0건/다건/단건 분기:
+Entry 화면의 Search는 **EXACT 매칭 PK 조회 전용 endpoint**(예: `POST /api/non-bl/find-by-hbl-no`, 응답 `data: number[]`)로 0건/다건/단건 분기:
 - 빈 입력: toast.info
 - 0건: toast.info
-- 다건(>1): toast.info + List 화면 navigate
+- 다건(>1, hbl_no는 UNIQUE 제약 없음으로 우연 중복 가능): toast.info + List 화면 navigate
 - 1건(동일 id): detail invalidate만
-- 1건(다른 id): hot-marker 세팅 후 `router.replace(/entry/${id})` → §6.16 패턴 재사용
+- 1건(다른 id): hot-marker 세팅 후 setFocus → §6.16 패턴 재사용
 
-사례: 0526e83 — Non B/L Entry Search 구현.
+> 이전 패턴(`port.list(filter, 1, 2)` LIKE+COUNT 재사용) 폐기. Entry Search는 PK만 fetch하고 Detail 로드는 useQuery `getById`(기존 `findNonBlById`)가 담당. SQL 2회(SELECT+COUNT) → 1회(SELECT pk only)로 단축, JOIN/Projection 매핑 제거.
+
+사례: 0526e83(초기 LIKE+COUNT 구현) → 2026-05-10(EXACT PK 분리, `findNonBlKeysByHblNoExact`).
 
 ### 6.20 위젯 편집 버튼 `type="button"` 명시
 
@@ -596,6 +598,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **HouseBl desc cascade 분리 — Repository 명시 save/delete 전환 (2026-05-10, 701b5e2)** — §587(NON_BL 한정)을 SEA/AIR까지 확장. `HouseBlJpaEntity`의 `@OneToOne(cascade=ALL, orphanRemoval=true) desc` 매핑과 `mergeDesc`/`replaceDesc` 메서드 제거. `HouseBlDescRepository` 신설(`findByHouseBl_HouseBlId`/`deleteByHouseBl_HouseBlId`). `HouseBlPersistenceAdapter`는 SEA/AIR 단건 조회 시 desc 1회 별도 SELECT, NON_BL/TRUCK은 desc 미사용이므로 조회 생략. 저장 경로는 `saveOrDeleteDesc(domainDesc, parentJpa)` private 메서드로 통일 — 도메인 desc=null이면 row 삭제, 있으면 기존 row UPDATE 또는 신규 INSERT. 삭제 경로는 FK ON DELETE CASCADE 미설정으로 `deleteByHouseBl_HouseBlId` 명시 호출. `HouseBlJpaToDomainMapper.toSeaDomain/toAirDomain` 시그니처에 `HouseBlDescJpaEntity descJpa` 인자 추가.
 - **Change B/L No 흐름 QueryDSL 부분 UPDATE 단축 + form stale fix (2026-05-10, 86d4406·d7eb0b9)** — §595 후속. (BE) `HouseBlPort.updateHblNoById` 신설, `HouseBlRepositoryImpl`에 QueryDSL `update().set(hblNo).where(houseBlId=:id AND jobDiv=:div).execute()` 첫 도입. `HouseBlService.changeHblNo`·`NonBlService.changeNonBlHblNo` 본문을 도메인 hydrate→full save에서 port 직접 호출로 교체. jobDiv 검증을 UPDATE WHERE 절에 포함하고 affected=0이면 `ResourceNotFoundException`. bulk UPDATE 1차 캐시 stale 방지 위해 `EntityManager.flush()/clear()` 호출. NON_BL Change BL No 기준 SELECT 7회 → 0회, UPDATE 1회. (FE) `ChangeBlNoModal`에 `onChanged?: () => void` 콜백 prop 추가, `NonBlEntry`에서 `onChanged`로 `detailLoadedRef.current=false` 트리거 → invalidate 후 refetch된 detail이 `form.reset`에 반영. list 캐시 자동 invalidate 라인 제거(§6.21 준수).
 - **Non B/L Entry update 누락 필드 후속 fix (2026-05-10, a71bb0d·55b53e5)** — §588 후속. (a71bb0d) `updateNonBl` 경로에 `bound`/`workDivision`이 빠져 변경이 사라지던 현상 — `HouseBlUpdateFields` record + `HouseBl.update()`에 bound PATCH 분기 추가, `HouseBlNonBl.updateWorkDivision()` 신설, `HouseBlFactory.toUpdateFields()` bound 매핑 + `applyNonBlUpdate()` workDivision 갱신 호출 보강. (55b53e5) FE Non B/L Entry `form.reset`에 `refNo: detail.originalBlRef` 매핑 추가(저장 후 화면 미반영 수정). `toBeRequest`의 cargo `volumeWtKg` JSON 키를 BE 명세 `volumeWeightKg`로 정합(BE Jackson 역직렬화 누락 → DB null 덮어쓰기 현상 해소).
+- **Non B/L Entry Search EXACT PK 조회 endpoint 분리 (2026-05-10)** — Entry Search가 List용 `searchNonBlSummaries`(LIKE+COUNT, JOIN+22 projection)를 재사용하던 흐름을 폐기하고 `POST /api/non-bl/find-by-hbl-no` 신설. UseCase/Port/Repository에 `findNonBlKeysByHblNoExact(String): List<Long>` 추가, JOIN/projection/COUNT 모두 제거하고 `select house_bl_id where job_div='NON_BL' and hbl_no=? order by created_at desc limit 2`만 발사. FE `nonBlPort.findByHblNo` 어댑터 추가, Entry `handleSearch`의 30개 dummy filter 객체 제거. Detail 로드는 기존 useQuery `getById` 흐름이 그대로 담당. SQL 2회 → 1회. (§6.19 갱신)
 
 ---
 

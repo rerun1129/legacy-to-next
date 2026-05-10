@@ -175,36 +175,25 @@ export function NonBLEntry() {
       return;
     }
 
-    const result = await nonBlPort.list(
-      {
-        nonBlNo,
-        bound: "", dateFrom: "", dateTo: "", linerCode: "", linerName: "",
-        partyCode: "", partyName: "", portCode: "", portName: "",
-        vessel: "", voyage: "", operatorCode: "", operatorName: "",
-        teamCode: "", teamName: "", dateKind: "ETD",
-        partyKind: "SHIPPER", portKind: "POL",
-      },
-      1,
-      2,
-    );
+    const ids = await nonBlPort.findByHblNo(nonBlNo);
 
-    if (result.totalElements === 0) {
+    if (ids.length === 0) {
       toast.info("조회된 건이 없습니다.");
       return;
     }
 
-    if (result.totalElements > 1) {
+    if (ids.length > 1) {
       toast.info("여러 건이 검색되었습니다. List에서 선택하세요.");
       router.push("/fms/non-bl/list");
       return;
     }
 
-    const target = result.content[0];
-    if (target.id === id) {
+    const targetId = ids[0];
+    if (targetId === id) {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
       detailLoadedRef.current = false;
     } else {
-      useEntryFocusStore.getState().setFocus("nonBl", target.id);
+      useEntryFocusStore.getState().setFocus("nonBl", targetId);
     }
   }
 

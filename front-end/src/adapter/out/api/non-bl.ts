@@ -271,4 +271,17 @@ export const API_NON_BL_PORT: NonBlPort = {
       body: JSON.stringify({ hblNo }),
     });
   },
+
+  async findByHblNo(hblNo: string): Promise<number[]> {
+    const json = await fetchJson(`${NON_BL_BASE}/find-by-hbl-no`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hblNo }),
+    });
+    const parsed = apiResponse(z.array(z.number())).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid non-bl find-by-hbl-no response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
+  },
 };
