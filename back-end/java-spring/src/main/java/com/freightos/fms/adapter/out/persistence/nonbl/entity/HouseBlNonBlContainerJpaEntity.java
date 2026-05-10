@@ -3,7 +3,6 @@ package com.freightos.fms.adapter.out.persistence.nonbl.entity;
 import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +16,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(schema = "fms", name = "house_bl_nonbl_container")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class HouseBlNonBlContainerJpaEntity extends BaseJpaEntity {
 
     @Id
