@@ -18,9 +18,11 @@ import { nonBlPort }                                   from "@/lib/ports";
 import { toast }                                       from "@/lib/toast-store";
 import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
 import { ScreenGuard }                                 from "@/components/shared/screen-guard";
+import { ChangeBlNoModal }                             from "./change-bl-no-modal";
 
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
+  const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const id = useEntryFocusStore((s) => s.focus.nonBl);
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
@@ -268,7 +270,17 @@ export function NonBLEntry() {
           <button type="button" className="btn btn--sm">
             <Copy size={12} />Copy
           </button>
-          <button type="button" className="btn btn--sm btn--transaction">
+          <button
+            type="button"
+            className="btn btn--sm btn--transaction"
+            onClick={() => {
+              if (!isEdit || !id) {
+                toast.info("먼저 Non B/L을 조회해주세요.");
+                return;
+              }
+              setIsChangeBlNoModalOpen(true);
+            }}
+          >
             <RefreshCw size={12} />Change BL No
           </button>
         </div>
@@ -332,6 +344,14 @@ export function NonBLEntry() {
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MainNonBL    active={tab === "main"}    /></div>
       <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab   active={tab === "freight"} /></div>
     </form>
+    {isEdit && id && (
+      <ChangeBlNoModal
+        houseBlId={id}
+        currentHblNo={detail?.hblNo}
+        isOpen={isChangeBlNoModalOpen}
+        onClose={() => setIsChangeBlNoModalOpen(false)}
+      />
+    )}
     </FormProvider>
   );
 }

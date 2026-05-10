@@ -263,4 +263,12 @@ export const API_NON_BL_PORT: NonBlPort = {
   async delete(id: number): Promise<void> {
     await fetchJson(`${NON_BL_BASE}/${id}`, { method: 'DELETE' });
   },
+
+  async changeHblNo(id: number, hblNo: string): Promise<void> {
+    await fetchJson(`${NON_BL_BASE}/${id}/hbl-no`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hblNo }),
+    });
+  },
 };

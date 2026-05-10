@@ -14,4 +14,5 @@ export interface NonBlPort {
   create(req: CreateNonBlRequest): Promise<NonBlDetail>;
   update(id: number, req: UpdateNonBlRequest): Promise<NonBlDetail>;
   delete(id: number): Promise<void>;
+  changeHblNo(id: number, hblNo: string): Promise<void>;
 }
