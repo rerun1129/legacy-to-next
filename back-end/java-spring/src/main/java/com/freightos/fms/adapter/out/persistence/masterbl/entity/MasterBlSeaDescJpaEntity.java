@@ -6,13 +6,9 @@ import com.freightos.fms.domain.common.enums.DescClause2;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 /**
  * JPA ORM 엔티티 — Master B/L 해상(SEA) 화물 표시 및 품목 설명.
  * MasterBlSeaJpaEntity 와 @OneToOne(FK: master_bl_sea_id) 관계.
- * ON DELETE CASCADE — seaExt 삭제 시 DB가 자동 정리.
  */
 @Entity
 @Table(schema = "fms", name = "master_bl_sea_desc")
@@ -27,7 +23,6 @@ public class MasterBlSeaDescJpaEntity extends BaseJpaEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "master_bl_sea_id", nullable = false, unique = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private MasterBlSeaJpaEntity sea;
 
     @Column(name = "marks", columnDefinition = "TEXT")

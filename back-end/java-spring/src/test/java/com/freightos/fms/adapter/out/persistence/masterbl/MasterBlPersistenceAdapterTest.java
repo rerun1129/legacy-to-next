@@ -5,6 +5,7 @@ import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaE
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -15,7 +16,6 @@ import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
-import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +45,9 @@ class MasterBlPersistenceAdapterTest {
     @Mock private MasterBlAirRepository masterBlAirRepository;
     @Mock private MasterBlSeaDescRepository masterBlSeaDescRepository;
     @Mock private MasterBlAirDescRepository masterBlAirDescRepository;
+    @Mock private MasterBlDimRepository masterBlDimRepository;
+    @Mock private MasterBlScheduleLegRepository masterBlScheduleLegRepository;
+    @Mock private MasterBlAirChargeRepository masterBlAirChargeRepository;
     @Mock private MasterBlMapper masterBlMapper;
 
     @InjectMocks
@@ -193,22 +196,39 @@ class MasterBlPersistenceAdapterTest {
         then(masterBlRepository).should().existsByMblNo("MBL-001");
     }
 
-    // ── deleteMasterBl 위임 ───────────────────────────────────────────
+    // ── deleteByIdAndJobDiv 위임 ──────────────────────────────────────
 
     @Test
-    @DisplayName("deleteMasterBl: sea/air ext 삭제 후 masterBlRepository.deleteById 호출 (desc는 CASCADE 정리)")
-    void deleteMasterBl_delegatesToRepository() {
-        MasterBlSea sea = MasterBlSea.create(Bound.EXP);
-        sea.assignIdentity(10L, null, null, null, null);
-        given(masterBlSeaRepository.findByMasterBlMasterBlId(10L)).willReturn(Optional.empty());
-        given(masterBlAirRepository.findByMasterBlMasterBlId(10L)).willReturn(Optional.empty());
+    @DisplayName("deleteByIdAndJobDiv(SEA): seaDesc→seaExt→부모 순서 명시 DELETE, airRepository 미호출")
+    void deleteByIdAndJobDiv_sea_deletesDescExtParent() {
+        adapter.deleteByIdAndJobDiv(10L, MasterBlJobDiv.SEA);
 
-        adapter.deleteMasterBl(sea);
+        org.mockito.InOrder order = inOrder(masterBlSeaDescRepository, masterBlSeaRepository, masterBlRepository);
+        order.verify(masterBlSeaDescRepository).deleteByParentMasterBlId(10L);
+        order.verify(masterBlSeaRepository).deleteByMasterBl_MasterBlId(10L);
+        order.verify(masterBlRepository).deleteByIdBulk(10L);
+        then(masterBlAirRepository).shouldHaveNoInteractions();
+        then(masterBlDimRepository).shouldHaveNoInteractions();
+        then(masterBlScheduleLegRepository).shouldHaveNoInteractions();
+        then(masterBlAirChargeRepository).shouldHaveNoInteractions();
+        then(masterBlAirDescRepository).shouldHaveNoInteractions();
+    }
 
-        org.mockito.InOrder order = inOrder(masterBlSeaRepository, masterBlAirRepository, masterBlRepository);
-        order.verify(masterBlSeaRepository).findByMasterBlMasterBlId(10L);
-        order.verify(masterBlAirRepository).findByMasterBlMasterBlId(10L);
-        order.verify(masterBlRepository).deleteById(10L);
+    @Test
+    @DisplayName("deleteByIdAndJobDiv(AIR): dim→scheduleLeg→airCharge→airDesc→airExt→부모 순서 명시 DELETE, seaRepository 미호출")
+    void deleteByIdAndJobDiv_air_deletesChildrenExtParent() {
+        adapter.deleteByIdAndJobDiv(11L, MasterBlJobDiv.AIR);
+
+        org.mockito.InOrder order = inOrder(masterBlDimRepository, masterBlScheduleLegRepository,
+                masterBlAirChargeRepository, masterBlAirDescRepository, masterBlAirRepository, masterBlRepository);
+        order.verify(masterBlDimRepository).deleteByParentMasterBlId(11L);
+        order.verify(masterBlScheduleLegRepository).deleteByParentMasterBlId(11L);
+        order.verify(masterBlAirChargeRepository).deleteByParentMasterBlId(11L);
+        order.verify(masterBlAirDescRepository).deleteByParentMasterBlId(11L);
+        order.verify(masterBlAirRepository).deleteByMasterBl_MasterBlId(11L);
+        order.verify(masterBlRepository).deleteByIdBulk(11L);
+        then(masterBlSeaRepository).shouldHaveNoInteractions();
+        then(masterBlSeaDescRepository).shouldHaveNoInteractions();
     }
 
     // ── searchMasterBls ───────────────────────────────────────

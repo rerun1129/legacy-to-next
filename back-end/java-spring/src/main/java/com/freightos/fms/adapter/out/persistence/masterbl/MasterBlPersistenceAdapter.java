@@ -1,7 +1,7 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
-import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
@@ -39,6 +39,9 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     private final MasterBlAirRepository masterBlAirRepository;
     private final MasterBlSeaDescRepository masterBlSeaDescRepository;
     private final MasterBlAirDescRepository masterBlAirDescRepository;
+    private final MasterBlDimRepository masterBlDimRepository;
+    private final MasterBlScheduleLegRepository masterBlScheduleLegRepository;
+    private final MasterBlAirChargeRepository masterBlAirChargeRepository;
     private final MasterBlMapper masterBlMapper;
 
     @Override
@@ -70,6 +73,11 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     @Override
     public boolean existsByMblNo(String mblNo) {
         return masterBlRepository.existsByMblNo(mblNo);
+    }
+
+    @Override
+    public Optional<MasterBlJobDiv> findJobDivById(Long id) {
+        return masterBlRepository.findJobDivById(id);
     }
 
     @Override
@@ -127,12 +135,21 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
 
     @Override
     @Transactional
-    public void deleteMasterBl(MasterBl masterBl) {
-        Long id = masterBl.getId();
-        // sea_desc/air_desc는 ext FK ON DELETE CASCADE — ext 삭제 시 DB가 자동 정리
-        masterBlSeaRepository.findByMasterBlMasterBlId(id).ifPresent(masterBlSeaRepository::delete);
-        masterBlAirRepository.findByMasterBlMasterBlId(id).ifPresent(masterBlAirRepository::delete);
-        masterBlRepository.deleteById(id);
+    public void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv) {
+        switch (jobDiv) {
+            case SEA -> {
+                masterBlSeaDescRepository.deleteByParentMasterBlId(id);
+                masterBlSeaRepository.deleteByMasterBl_MasterBlId(id);
+            }
+            case AIR -> {
+                masterBlDimRepository.deleteByParentMasterBlId(id);
+                masterBlScheduleLegRepository.deleteByParentMasterBlId(id);
+                masterBlAirChargeRepository.deleteByParentMasterBlId(id);
+                masterBlAirDescRepository.deleteByParentMasterBlId(id);
+                masterBlAirRepository.deleteByMasterBl_MasterBlId(id);
+            }
+        }
+        masterBlRepository.deleteByIdBulk(id);
     }
 
     private MasterBl loadWithExt(MasterBlJpaEntity jpa) {

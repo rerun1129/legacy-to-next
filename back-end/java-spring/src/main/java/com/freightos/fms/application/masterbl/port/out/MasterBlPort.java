@@ -6,6 +6,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
 import java.util.Optional;
 
@@ -16,5 +17,6 @@ public interface MasterBlPort {
     Optional<MasterBl> findMasterBlByMblNo(String mblNo);
     boolean existsByMblNo(String mblNo);
     MasterBl saveMasterBl(MasterBl domain);
-    void deleteMasterBl(MasterBl masterBl);
+    Optional<MasterBlJobDiv> findJobDivById(Long id);
+    void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv);
 }

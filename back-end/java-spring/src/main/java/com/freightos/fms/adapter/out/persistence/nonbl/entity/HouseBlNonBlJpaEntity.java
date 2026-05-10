@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -81,14 +79,12 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     @JoinColumn(name = "house_bl_non_bl_id", nullable = false, updatable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<HouseBlNonBlContainerJpaEntity> containers = new ArrayList<>();
 
     // NON_BL 전용 치수 명세 — house_bl_nonbl_dim.house_bl_non_bl_id FK 소유
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     @JoinColumn(name = "house_bl_non_bl_id", nullable = false, updatable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<HouseBlNonBlDimJpaEntity> dims = new ArrayList<>();
 
     public void setHouseBl(HouseBlJpaEntity v)                   { this.houseBl = v; }

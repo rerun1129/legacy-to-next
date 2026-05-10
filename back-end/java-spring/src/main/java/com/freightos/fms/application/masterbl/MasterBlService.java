@@ -15,6 +15,7 @@ import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +70,9 @@ public class MasterBlService implements MasterBlUseCase {
     @Override
     @Transactional
     public void deleteMasterBlById(Long id) {
-        masterBlPort.deleteMasterBl(findEntityById(id));
+        MasterBlJobDiv jobDiv = masterBlPort.findJobDivById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
+        masterBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted MasterBl id={}", id);
     }
 

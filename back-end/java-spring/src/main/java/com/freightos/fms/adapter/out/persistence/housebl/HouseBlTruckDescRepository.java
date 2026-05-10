@@ -18,4 +18,10 @@ public interface HouseBlTruckDescRepository extends JpaRepository<HouseBlTruckDe
     @Modifying(flushAutomatically = true)
     @Query("delete from HouseBlTruckDescJpaEntity x where x.truck.houseBlTruckId = :id")
     void deleteByTruck_HouseBlTruckId(@Param("id") Long id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from HouseBlTruckDescJpaEntity x " +
+           "where x.truck.houseBlTruckId in (" +
+           "  select t.houseBlTruckId from HouseBlTruckJpaEntity t where t.houseBl.houseBlId = :parentId)")
+    void deleteByParentHouseBlId(@Param("parentId") Long parentId);
 }

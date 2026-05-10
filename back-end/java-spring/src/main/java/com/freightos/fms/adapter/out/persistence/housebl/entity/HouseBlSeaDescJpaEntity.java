@@ -6,13 +6,9 @@ import com.freightos.fms.domain.common.enums.DescClause2;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 /**
  * JPA ORM 엔티티 — House B/L 해상(SEA) 화물 표시 및 품목 설명.
  * HouseBlSeaJpaEntity 와 @OneToOne(FK: house_bl_sea_id) 관계.
- * ON DELETE CASCADE — seaExt 삭제 시 DB가 자동 정리.
  */
 @Entity
 @Table(schema = "fms", name = "house_bl_sea_desc")
@@ -27,7 +23,6 @@ public class HouseBlSeaDescJpaEntity extends BaseJpaEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_sea_id", nullable = false, unique = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private HouseBlSeaJpaEntity sea;
 
     @Column(name = "marks", columnDefinition = "TEXT")

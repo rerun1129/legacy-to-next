@@ -102,7 +102,6 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     @JoinColumn(name = "house_bl_air_id", nullable = false, updatable = false)
-    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private List<HouseBlAirDimJpaEntity> dims = new ArrayList<>();
 
     // AIR 전용 스케줄 구간. house_bl_air_id FK로 소유.

@@ -1,6 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlContainerRepository;
+import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlDimRepository;
 import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlRepository;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.common.exception.ResourceNotFoundException;
@@ -46,6 +48,14 @@ class HouseBlPersistenceAdapterTest {
     @Mock private HouseBlSeaDescRepository houseBlSeaDescRepository;
     @Mock private HouseBlAirDescRepository houseBlAirDescRepository;
     @Mock private HouseBlTruckDescRepository houseBlTruckDescRepository;
+    @Mock private HouseBlSeaContainerRepository houseBlSeaContainerRepository;
+    @Mock private HouseBlNonBlContainerRepository houseBlNonBlContainerRepository;
+    @Mock private HouseBlAirDimRepository houseBlAirDimRepository;
+    @Mock private HouseBlTruckDimRepository houseBlTruckDimRepository;
+    @Mock private HouseBlNonBlDimRepository houseBlNonBlDimRepository;
+    @Mock private HouseBlScheduleLegRepository houseBlScheduleLegRepository;
+    @Mock private HouseBlAirChargeRepository houseBlAirChargeRepository;
+    @Mock private HouseBlTruckOrderRepository houseBlTruckOrderRepository;
     @Mock private HouseBlJpaToDomainMapper jpaToDomainMapper;
     @Mock private HouseBlDomainToJpaMapper domainToJpaMapper;
     @Mock private HouseBlCargoMapper houseBlCargoMapper;
@@ -366,74 +376,75 @@ class HouseBlPersistenceAdapterTest {
         order.verify(savedTruckJpa).syncTruckOrders(any());
     }
 
-    // ── deleteHouseBl — 타입별 분기 검증 ────────────────────────────────
+    // ── deleteByIdAndJobDiv — jobDiv별 분기 검증 ─────────────────────────
 
     @Test
-    @DisplayName("deleteHouseBl(SEA): seaRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서. house_bl_sea_desc/container는 ON DELETE CASCADE로 DB 자동 정리")
-    void deleteHouseBl_sea_deletesSeaExtThenBase_descAndContainerCascadedByDb() {
-        HouseBlSea sea = HouseBlSea.create(Bound.EXP);
-        sea.assignIdentity(50L, null, null, null, null);
+    @DisplayName("deleteByIdAndJobDiv(SEA): seaContainer→seaDesc→seaExt→부모 순서로 명시 DELETE, air/truck/nonBl Repository 미호출")
+    void deleteByIdAndJobDiv_sea_deletesChildrenThenExtThenParent() {
+        adapter.deleteByIdAndJobDiv(50L, JobDiv.SEA);
 
-        adapter.deleteHouseBl(sea);
-
-        InOrder order = inOrder(houseBlSeaRepository, houseBlRepository);
+        InOrder order = inOrder(houseBlSeaContainerRepository, houseBlSeaDescRepository, houseBlSeaRepository, houseBlRepository);
+        order.verify(houseBlSeaContainerRepository).deleteByParentHouseBlId(50L);
+        order.verify(houseBlSeaDescRepository).deleteByParentHouseBlId(50L);
         order.verify(houseBlSeaRepository).deleteByHouseBl_HouseBlId(50L);
-        order.verify(houseBlRepository).deleteById(50L);
+        order.verify(houseBlRepository).deleteByIdBulk(50L);
         then(houseBlAirRepository).shouldHaveNoInteractions();
         then(houseBlTruckRepository).shouldHaveNoInteractions();
         then(houseBlNonBlRepository).shouldHaveNoInteractions();
-        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
-        then(houseBlAirDescRepository).shouldHaveNoInteractions();
-    }
-
-    @Test
-    @DisplayName("deleteHouseBl(AIR): airRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서. house_bl_air_desc는 ON DELETE CASCADE로 DB 자동 정리")
-    void deleteHouseBl_air_deletesAirExtThenBase_descCascadedByDb() {
-        HouseBlAir air = HouseBlAir.create(Bound.EXP);
-        air.assignIdentity(51L, null, null, null, null);
-
-        adapter.deleteHouseBl(air);
-
-        InOrder order = inOrder(houseBlAirRepository, houseBlRepository);
-        order.verify(houseBlAirRepository).deleteByHouseBl_HouseBlId(51L);
-        order.verify(houseBlRepository).deleteById(51L);
-        then(houseBlSeaRepository).shouldHaveNoInteractions();
-        then(houseBlTruckRepository).shouldHaveNoInteractions();
-        then(houseBlNonBlRepository).shouldHaveNoInteractions();
-        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
-        then(houseBlAirDescRepository).shouldHaveNoInteractions();
-    }
-
-    @Test
-    @DisplayName("deleteHouseBl(TRUCK): truckRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서. house_bl_truck_desc는 ON DELETE CASCADE로 DB 자동 정리")
-    void deleteHouseBl_truck_deletesTruckExtThenBase_descCascadedByDb() {
-        HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
-        truck.assignIdentity(52L, null, null, null, null);
-
-        adapter.deleteHouseBl(truck);
-
-        InOrder order = inOrder(houseBlTruckRepository, houseBlRepository);
-        order.verify(houseBlTruckRepository).deleteByHouseBl_HouseBlId(52L);
-        order.verify(houseBlRepository).deleteById(52L);
-        then(houseBlSeaRepository).shouldHaveNoInteractions();
-        then(houseBlAirRepository).shouldHaveNoInteractions();
-        then(houseBlNonBlRepository).shouldHaveNoInteractions();
-        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
         then(houseBlAirDescRepository).shouldHaveNoInteractions();
         then(houseBlTruckDescRepository).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("deleteHouseBl(NON_BL): nonBlRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서, seaDescRepository/airDescRepository/truckDescRepository 미호출. house_bl_nonbl_container는 ON DELETE CASCADE")
-    void deleteHouseBl_nonBl_deletesNonBlExtThenBase_withoutDesc() {
-        HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
-        nonBl.assignIdentity(53L, null, null, null, null);
+    @DisplayName("deleteByIdAndJobDiv(AIR): airDim→scheduleLeg→airCharge→airDesc→airExt→부모 순서, sea/truck/nonBl Repository 미호출")
+    void deleteByIdAndJobDiv_air_deletesChildrenThenExtThenParent() {
+        adapter.deleteByIdAndJobDiv(51L, JobDiv.AIR);
 
-        adapter.deleteHouseBl(nonBl);
+        InOrder order = inOrder(houseBlAirDimRepository, houseBlScheduleLegRepository, houseBlAirChargeRepository,
+                houseBlAirDescRepository, houseBlAirRepository, houseBlRepository);
+        order.verify(houseBlAirDimRepository).deleteByParentHouseBlId(51L);
+        order.verify(houseBlScheduleLegRepository).deleteByParentHouseBlId(51L);
+        order.verify(houseBlAirChargeRepository).deleteByParentHouseBlId(51L);
+        order.verify(houseBlAirDescRepository).deleteByParentHouseBlId(51L);
+        order.verify(houseBlAirRepository).deleteByHouseBl_HouseBlId(51L);
+        order.verify(houseBlRepository).deleteByIdBulk(51L);
+        then(houseBlSeaRepository).shouldHaveNoInteractions();
+        then(houseBlTruckRepository).shouldHaveNoInteractions();
+        then(houseBlNonBlRepository).shouldHaveNoInteractions();
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlTruckDescRepository).shouldHaveNoInteractions();
+    }
 
-        InOrder order = inOrder(houseBlNonBlRepository, houseBlRepository);
+    @Test
+    @DisplayName("deleteByIdAndJobDiv(TRUCK): truckDim→truckOrder→truckDesc→truckExt→부모 순서, sea/air/nonBl Repository 미호출")
+    void deleteByIdAndJobDiv_truck_deletesChildrenThenExtThenParent() {
+        adapter.deleteByIdAndJobDiv(52L, JobDiv.TRUCK);
+
+        InOrder order = inOrder(houseBlTruckDimRepository, houseBlTruckOrderRepository,
+                houseBlTruckDescRepository, houseBlTruckRepository, houseBlRepository);
+        order.verify(houseBlTruckDimRepository).deleteByParentHouseBlId(52L);
+        order.verify(houseBlTruckOrderRepository).deleteByParentHouseBlId(52L);
+        order.verify(houseBlTruckDescRepository).deleteByParentHouseBlId(52L);
+        order.verify(houseBlTruckRepository).deleteByHouseBl_HouseBlId(52L);
+        order.verify(houseBlRepository).deleteByIdBulk(52L);
+        then(houseBlSeaRepository).shouldHaveNoInteractions();
+        then(houseBlAirRepository).shouldHaveNoInteractions();
+        then(houseBlNonBlRepository).shouldHaveNoInteractions();
+        then(houseBlSeaDescRepository).shouldHaveNoInteractions();
+        then(houseBlAirDescRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("deleteByIdAndJobDiv(NON_BL): nonBlContainer→nonBlDim→nonBlExt→부모 순서, desc Repository 미호출")
+    void deleteByIdAndJobDiv_nonBl_deletesChildrenThenExtThenParent() {
+        adapter.deleteByIdAndJobDiv(53L, JobDiv.NON_BL);
+
+        InOrder order = inOrder(houseBlNonBlContainerRepository, houseBlNonBlDimRepository,
+                houseBlNonBlRepository, houseBlRepository);
+        order.verify(houseBlNonBlContainerRepository).deleteByParentHouseBlId(53L);
+        order.verify(houseBlNonBlDimRepository).deleteByParentHouseBlId(53L);
         order.verify(houseBlNonBlRepository).deleteByHouseBl_HouseBlId(53L);
-        order.verify(houseBlRepository).deleteById(53L);
+        order.verify(houseBlRepository).deleteByIdBulk(53L);
         then(houseBlSeaRepository).shouldHaveNoInteractions();
         then(houseBlAirRepository).shouldHaveNoInteractions();
         then(houseBlTruckRepository).shouldHaveNoInteractions();

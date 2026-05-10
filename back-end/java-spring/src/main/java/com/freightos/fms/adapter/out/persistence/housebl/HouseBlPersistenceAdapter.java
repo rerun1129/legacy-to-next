@@ -1,6 +1,8 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
+import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlContainerRepository;
+import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlDimRepository;
 import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlRepository;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
@@ -11,8 +13,8 @@ import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.*;
-import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
@@ -40,6 +42,14 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     private final HouseBlSeaDescRepository houseBlSeaDescRepository;
     private final HouseBlAirDescRepository houseBlAirDescRepository;
     private final HouseBlTruckDescRepository houseBlTruckDescRepository;
+    private final HouseBlSeaContainerRepository houseBlSeaContainerRepository;
+    private final HouseBlNonBlContainerRepository houseBlNonBlContainerRepository;
+    private final HouseBlAirDimRepository houseBlAirDimRepository;
+    private final HouseBlTruckDimRepository houseBlTruckDimRepository;
+    private final HouseBlNonBlDimRepository houseBlNonBlDimRepository;
+    private final HouseBlScheduleLegRepository houseBlScheduleLegRepository;
+    private final HouseBlAirChargeRepository houseBlAirChargeRepository;
+    private final HouseBlTruckOrderRepository houseBlTruckOrderRepository;
     private final HouseBlJpaToDomainMapper jpaToDomainMapper;
     private final HouseBlDomainToJpaMapper domainToJpaMapper;
     private final HouseBlCargoMapper houseBlCargoMapper;
@@ -66,6 +76,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     @Override
     public long countHouseBlsByMasterBlId(Long masterBlId) {
         return houseBlRepository.countByMasterBlId(masterBlId);
+    }
+
+    @Override
+    public Optional<JobDiv> findJobDivById(Long id) {
+        return houseBlRepository.findJobDivById(id);
     }
 
     @Override
@@ -164,28 +179,33 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
 
     @Override
     @Transactional
-    public void deleteHouseBl(HouseBl houseBl) {
-        Long id = houseBl.getId();
-        switch (houseBl) {
-            case HouseBlSea ignored -> {
-                // house_bl_sea_desc와 house_bl_sea_container는 house_bl_sea_id FK ON DELETE CASCADE — seaExt 삭제 시 DB 자동 정리
+    public void deleteByIdAndJobDiv(Long id, JobDiv jobDiv) {
+        switch (jobDiv) {
+            case SEA -> {
+                houseBlSeaContainerRepository.deleteByParentHouseBlId(id);
+                houseBlSeaDescRepository.deleteByParentHouseBlId(id);
                 houseBlSeaRepository.deleteByHouseBl_HouseBlId(id);
             }
-            case HouseBlAir ignored -> {
-                // house_bl_air_desc는 house_bl_air_id FK ON DELETE CASCADE — airExt 삭제 시 DB 자동 정리
+            case AIR -> {
+                houseBlAirDimRepository.deleteByParentHouseBlId(id);
+                houseBlScheduleLegRepository.deleteByParentHouseBlId(id);
+                houseBlAirChargeRepository.deleteByParentHouseBlId(id);
+                houseBlAirDescRepository.deleteByParentHouseBlId(id);
                 houseBlAirRepository.deleteByHouseBl_HouseBlId(id);
             }
-            case HouseBlTruck ignored -> {
-                // house_bl_truck_desc는 house_bl_truck_id FK ON DELETE CASCADE — truckExt 삭제 시 DB 자동 정리
+            case TRUCK -> {
+                houseBlTruckDimRepository.deleteByParentHouseBlId(id);
+                houseBlTruckOrderRepository.deleteByParentHouseBlId(id);
+                houseBlTruckDescRepository.deleteByParentHouseBlId(id);
                 houseBlTruckRepository.deleteByHouseBl_HouseBlId(id);
             }
-            case HouseBlNonBl ignored -> {
-                // house_bl_nonbl_container는 house_bl_non_bl_id FK ON DELETE CASCADE — nonBlExt 삭제 시 DB 자동 정리
+            case NON_BL -> {
+                houseBlNonBlContainerRepository.deleteByParentHouseBlId(id);
+                houseBlNonBlDimRepository.deleteByParentHouseBlId(id);
                 houseBlNonBlRepository.deleteByHouseBl_HouseBlId(id);
             }
-            default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + houseBl.getClass().getSimpleName());
         }
-        houseBlRepository.deleteById(id);
+        houseBlRepository.deleteByIdBulk(id);
     }
 
     @Override

@@ -1,7 +1,14 @@
 -- =============================================================================
--- FMS DDL — JPA 엔티티 SSOT 기반 최종 통합본
+-- FMS DDL — JPA 엔티티 SSOT 기반 통합본 (ER 재구조화 Phase 1~4 반영)
 -- 생성 기준: JPA 엔티티 (back-end/java-spring/…/persistence/**)
 -- 컨벤션: rules/DDL_RULES.md
+--
+-- ER 재구조화 결과 (2026-05-11):
+-- - 모든 1:N/1:1 자식이 의미상 속한 ext의 PK FK로 매달림
+-- - 부모(house_bl/master_bl)에는 cascade 컬렉션 매핑 0개
+-- - 자식 정리는 어댑터의 명시적 bulk DELETE로 처리 (DDL_RULES §5: DB CASCADE 금지)
+-- - 단독 자식: 테이블명 유지 + FK만 ext PK로 (예: house_bl_schedule_leg.house_bl_air_id)
+-- - 공유 자식: 테이블 자체를 ext별 분리 (예: house_bl_sea_desc/air_desc/truck_desc)
 -- =============================================================================
 
 CREATE SCHEMA IF NOT EXISTS fms;
@@ -146,33 +153,56 @@ COMMENT ON COLUMN master_bl_air.signature                IS '발행인 서명';
 COMMENT ON COLUMN master_bl_air.volume_divisor           IS '항공 Dimension 그리드 단위 선택자 (CM/6000, INCH/366 등)';
 
 -- =============================================================================
--- E-06 Master B/L 설명 (1:1)
+-- E-06a Master B/L SEA 설명 (1:1, ER 재구조화 Phase 2)
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS master_bl_desc (
-    master_bl_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    master_bl_id       BIGINT       NOT NULL UNIQUE REFERENCES master_bl(master_bl_id),
-    marks              TEXT,
-    description        TEXT,
-    desc_clause_1      VARCHAR(50),
-    desc_clause_2      VARCHAR(50),
-    remark             TEXT,
-    created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    created_by         VARCHAR(50),
-    updated_by         VARCHAR(50)
+CREATE TABLE IF NOT EXISTS master_bl_sea_desc (
+    master_bl_sea_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    master_bl_sea_id       BIGINT       NOT NULL UNIQUE
+        REFERENCES master_bl_sea(master_bl_sea_id),
+    marks                  TEXT,
+    description            TEXT,
+    desc_clause_1          VARCHAR(50),
+    desc_clause_2          VARCHAR(50),
+    remark                 TEXT,
+    created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by             VARCHAR(50),
+    updated_by             VARCHAR(50)
 );
 
-COMMENT ON COLUMN master_bl_desc.master_bl_id  IS 'Master B/L 참조 FK (1:1 UNIQUE)';
-COMMENT ON COLUMN master_bl_desc.desc_clause_1 IS '부지약관 구문 1 (해상 수출 전용)';
-COMMENT ON COLUMN master_bl_desc.desc_clause_2 IS '부지약관 구문 2 (해상 수출 전용)';
-COMMENT ON COLUMN master_bl_desc.remark        IS '비고';
+COMMENT ON COLUMN master_bl_sea_desc.master_bl_sea_id IS 'Master B/L SEA ext 참조 FK (1:1)';
+COMMENT ON COLUMN master_bl_sea_desc.desc_clause_1    IS '부지약관 구문 1 (해상 수출 전용)';
+COMMENT ON COLUMN master_bl_sea_desc.desc_clause_2    IS '부지약관 구문 2 (해상 수출 전용)';
+COMMENT ON COLUMN master_bl_sea_desc.remark           IS '비고';
 
 -- =============================================================================
--- E-05 Master B/L 치수 (1:N)
+-- E-06b Master B/L AIR 설명 (1:1, ER 재구조화 Phase 2)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS master_bl_air_desc (
+    master_bl_air_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    master_bl_air_id       BIGINT       NOT NULL UNIQUE
+        REFERENCES master_bl_air(master_bl_air_id),
+    marks                  TEXT,
+    description            TEXT,
+    desc_clause_1          VARCHAR(50),
+    desc_clause_2          VARCHAR(50),
+    remark                 TEXT,
+    created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by             VARCHAR(50),
+    updated_by             VARCHAR(50)
+);
+
+COMMENT ON COLUMN master_bl_air_desc.master_bl_air_id IS 'Master B/L AIR ext 참조 FK (1:1)';
+COMMENT ON COLUMN master_bl_air_desc.remark           IS '비고';
+
+-- =============================================================================
+-- E-05 Master B/L 치수 (1:N, ER 재구조화 Phase 4 — AIR 단독)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS master_bl_dim (
     master_bl_dim_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    master_bl_id      BIGINT       NOT NULL REFERENCES master_bl(master_bl_id),
+    master_bl_air_id  BIGINT       NOT NULL
+        REFERENCES master_bl_air(master_bl_air_id),
     length_cm         NUMERIC(10,2),
     width_cm          NUMERIC(10,2),
     height_cm         NUMERIC(10,2),
@@ -185,7 +215,7 @@ CREATE TABLE IF NOT EXISTS master_bl_dim (
     updated_by        VARCHAR(50)
 );
 
-COMMENT ON COLUMN master_bl_dim.master_bl_id     IS 'Master B/L 참조 FK';
+COMMENT ON COLUMN master_bl_dim.master_bl_air_id IS 'Master B/L AIR ext 참조 FK';
 COMMENT ON COLUMN master_bl_dim.length_cm        IS '길이(cm)';
 COMMENT ON COLUMN master_bl_dim.width_cm         IS '너비(cm)';
 COMMENT ON COLUMN master_bl_dim.height_cm        IS '높이(cm)';
@@ -193,14 +223,15 @@ COMMENT ON COLUMN master_bl_dim.quantity         IS '수량';
 COMMENT ON COLUMN master_bl_dim.cbm              IS '용적(CBM)';
 COMMENT ON COLUMN master_bl_dim.volume_weight_kg IS '부피 환산 중량(kg)';
 
-CREATE INDEX IF NOT EXISTS idx_master_bl_dim_master_bl_id ON master_bl_dim(master_bl_id);
+CREATE INDEX IF NOT EXISTS idx_master_bl_dim_air_id ON master_bl_dim(master_bl_air_id);
 
 -- =============================================================================
--- E-07 Master B/L Schedule Leg (항공 전용, 1:N)
+-- E-07 Master B/L Schedule Leg (항공 전용, 1:N, ER 재구조화 Phase 1)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS master_bl_schedule_leg (
     master_bl_schedule_leg_id  BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    master_bl_id               BIGINT      NOT NULL REFERENCES master_bl(master_bl_id),
+    master_bl_air_id           BIGINT      NOT NULL
+        REFERENCES master_bl_air(master_bl_air_id),
     to_code                    VARCHAR(10) NOT NULL,
     by_carrier                 VARCHAR(20),
     flight_no                  VARCHAR(20),
@@ -214,23 +245,24 @@ CREATE TABLE IF NOT EXISTS master_bl_schedule_leg (
     updated_by                 VARCHAR(50)
 );
 
-COMMENT ON COLUMN master_bl_schedule_leg.master_bl_id  IS 'Master B/L 참조 FK';
-COMMENT ON COLUMN master_bl_schedule_leg.to_code       IS '도착지 공항 코드 (*To, 필수)';
-COMMENT ON COLUMN master_bl_schedule_leg.by_carrier    IS '운송 캐리어 코드';
-COMMENT ON COLUMN master_bl_schedule_leg.flight_no     IS '항공편명';
-COMMENT ON COLUMN master_bl_schedule_leg.on_board_dt   IS '본선적재일 YYYYMMDD (필수)';
-COMMENT ON COLUMN master_bl_schedule_leg.on_board_tm   IS '본선적재 시각 HHMM';
-COMMENT ON COLUMN master_bl_schedule_leg.arrival_dt    IS '도착일 YYYYMMDD (필수)';
-COMMENT ON COLUMN master_bl_schedule_leg.arrival_tm    IS '도착 시각 HHMM';
+COMMENT ON COLUMN master_bl_schedule_leg.master_bl_air_id IS 'Master B/L AIR ext 참조 FK';
+COMMENT ON COLUMN master_bl_schedule_leg.to_code          IS '도착지 공항 코드 (*To, 필수)';
+COMMENT ON COLUMN master_bl_schedule_leg.by_carrier       IS '운송 캐리어 코드';
+COMMENT ON COLUMN master_bl_schedule_leg.flight_no        IS '항공편명';
+COMMENT ON COLUMN master_bl_schedule_leg.on_board_dt      IS '본선적재일 YYYYMMDD (필수)';
+COMMENT ON COLUMN master_bl_schedule_leg.on_board_tm      IS '본선적재 시각 HHMM';
+COMMENT ON COLUMN master_bl_schedule_leg.arrival_dt       IS '도착일 YYYYMMDD (필수)';
+COMMENT ON COLUMN master_bl_schedule_leg.arrival_tm       IS '도착 시각 HHMM';
 
-CREATE INDEX IF NOT EXISTS idx_master_bl_schedule_leg_master_bl_id ON master_bl_schedule_leg(master_bl_id);
+CREATE INDEX IF NOT EXISTS idx_master_bl_schedule_leg_air_id ON master_bl_schedule_leg(master_bl_air_id);
 
 -- =============================================================================
--- E-08a Master B/L Air Charge (항공 전용, 1:N)
+-- E-08a Master B/L Air Charge (항공 전용, 1:N, ER 재구조화 Phase 1)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS master_bl_air_charge (
     master_bl_air_charge_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    master_bl_id             BIGINT       NOT NULL REFERENCES master_bl(master_bl_id),
+    master_bl_air_id         BIGINT       NOT NULL
+        REFERENCES master_bl_air(master_bl_air_id),
     freight_code             VARCHAR(20),
     currency_code            VARCHAR(5),
     per                      VARCHAR(10),
@@ -245,7 +277,9 @@ CREATE TABLE IF NOT EXISTS master_bl_air_charge (
     updated_by               VARCHAR(50)
 );
 
-CREATE INDEX IF NOT EXISTS idx_master_bl_air_charge_master_bl_id ON master_bl_air_charge(master_bl_id);
+COMMENT ON COLUMN master_bl_air_charge.master_bl_air_id IS 'Master B/L AIR ext 참조 FK';
+
+CREATE INDEX IF NOT EXISTS idx_master_bl_air_charge_air_id ON master_bl_air_charge(master_bl_air_id);
 
 -- =============================================================================
 -- E-08 House B/L 공통 본체
@@ -447,7 +481,7 @@ COMMENT ON COLUMN house_bl_truck.trucker_pic       IS '트럭 업체 담당자�
 COMMENT ON COLUMN house_bl_truck.charge_weight_kg  IS '운임 적용 중량(kg)';
 
 -- =============================================================================
--- E-24 House B/L Non-B/L 확장
+-- E-24 House B/L Non-B/L 확장 (Schedule 필드 + remark + volume_divisor 통합)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_non_bl (
     house_bl_non_bl_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -456,6 +490,15 @@ CREATE TABLE IF NOT EXISTS house_bl_non_bl (
     original_bl_ref     VARCHAR(50),
     rton                NUMERIC(10,3),
     volume_wt_kg        NUMERIC(12,3),
+    liner_code          VARCHAR(10),
+    liner_name          VARCHAR(100),
+    vessel_name         VARCHAR(100),
+    voyage_no           VARCHAR(20),
+    final_dest_code     VARCHAR(5),
+    final_dest_name     VARCHAR(100),
+    final_eta           VARCHAR(8),
+    volume_divisor      VARCHAR(10),
+    remark              TEXT,
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by          VARCHAR(50),
@@ -465,110 +508,225 @@ CREATE TABLE IF NOT EXISTS house_bl_non_bl (
 COMMENT ON COLUMN house_bl_non_bl.house_bl_id      IS 'House B/L 참조 FK';
 COMMENT ON COLUMN house_bl_non_bl.work_division    IS '업무구분: SEA | AIR | WAREHOUSE | TRUCKING';
 COMMENT ON COLUMN house_bl_non_bl.original_bl_ref  IS '원 B/L 참조번호';
+COMMENT ON COLUMN house_bl_non_bl.volume_divisor   IS 'Dimension 그리드 단위 선택자 (CM/6000, INCH/366 등)';
+COMMENT ON COLUMN house_bl_non_bl.remark           IS '비고 (NON_BL 전용 — desc 미사용)';
 
 -- =============================================================================
--- E-13 House B/L 설명 (1:1)
+-- E-13a House B/L SEA 설명 (1:1, ER 재구조화 Phase 2)
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS house_bl_desc (
-    house_bl_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id       BIGINT       NOT NULL UNIQUE REFERENCES house_bl(house_bl_id),
-    marks             TEXT,
-    description       TEXT,
-    desc_clause_1     VARCHAR(50),
-    desc_clause_2     VARCHAR(50),
-    remark            TEXT,
-    created_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    created_by        VARCHAR(50),
-    updated_by        VARCHAR(50)
+CREATE TABLE IF NOT EXISTS house_bl_sea_desc (
+    house_bl_sea_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_sea_id       BIGINT       NOT NULL UNIQUE
+        REFERENCES house_bl_sea(house_bl_sea_id),
+    marks                 TEXT,
+    description           TEXT,
+    desc_clause_1         VARCHAR(50),
+    desc_clause_2         VARCHAR(50),
+    remark                TEXT,
+    created_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by            VARCHAR(50),
+    updated_by            VARCHAR(50)
 );
 
-COMMENT ON COLUMN house_bl_desc.house_bl_id   IS 'House B/L 참조 FK (1:1 UNIQUE)';
-COMMENT ON COLUMN house_bl_desc.desc_clause_1 IS '부지약관 구문 1 (해상 수출 전용)';
-COMMENT ON COLUMN house_bl_desc.desc_clause_2 IS '부지약관 구문 2 (해상 수출 전용)';
-COMMENT ON COLUMN house_bl_desc.remark        IS '비고';
+COMMENT ON COLUMN house_bl_sea_desc.house_bl_sea_id IS 'House B/L SEA ext 참조 FK (1:1)';
+COMMENT ON COLUMN house_bl_sea_desc.desc_clause_1   IS '부지약관 구문 1 (해상 수출 전용)';
+COMMENT ON COLUMN house_bl_sea_desc.desc_clause_2   IS '부지약관 구문 2 (해상 수출 전용)';
+COMMENT ON COLUMN house_bl_sea_desc.remark          IS '비고';
 
 -- =============================================================================
--- E-12 House B/L 치수 (1:N)
+-- E-13b House B/L AIR 설명 (1:1, ER 재구조화 Phase 2)
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS house_bl_dim (
-    house_bl_dim_id   BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id       BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
-    length_cm         NUMERIC(10,2),
-    width_cm          NUMERIC(10,2),
-    height_cm         NUMERIC(10,2),
-    quantity          INT,
-    cbm               NUMERIC(10,3),
-    volume_weight_kg  NUMERIC(12,3),
-    created_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    created_by        VARCHAR(50),
-    updated_by        VARCHAR(50)
+CREATE TABLE IF NOT EXISTS house_bl_air_desc (
+    house_bl_air_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_air_id       BIGINT       NOT NULL UNIQUE
+        REFERENCES house_bl_air(house_bl_air_id),
+    marks                 TEXT,
+    description           TEXT,
+    desc_clause_1         VARCHAR(50),
+    desc_clause_2         VARCHAR(50),
+    remark                TEXT,
+    created_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by            VARCHAR(50),
+    updated_by            VARCHAR(50)
 );
 
-COMMENT ON COLUMN house_bl_dim.house_bl_id       IS 'House B/L 참조 FK';
-COMMENT ON COLUMN house_bl_dim.length_cm         IS '길이(cm)';
-COMMENT ON COLUMN house_bl_dim.width_cm          IS '너비(cm)';
-COMMENT ON COLUMN house_bl_dim.height_cm         IS '높이(cm)';
-COMMENT ON COLUMN house_bl_dim.quantity          IS '수량';
-COMMENT ON COLUMN house_bl_dim.cbm               IS '용적(CBM)';
-COMMENT ON COLUMN house_bl_dim.volume_weight_kg  IS '부피 환산 중량(kg)';
-
-CREATE INDEX IF NOT EXISTS idx_house_bl_dim_house_bl_id ON house_bl_dim(house_bl_id);
+COMMENT ON COLUMN house_bl_air_desc.house_bl_air_id IS 'House B/L AIR ext 참조 FK (1:1)';
+COMMENT ON COLUMN house_bl_air_desc.remark          IS '비고';
 
 -- =============================================================================
--- E-14 House B/L Container (1:N)
--- PRD §2.2: TEU = length_feet / 20
+-- E-13c House B/L TRUCK 설명 (1:1, ER 재구조화 Phase 2)
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS house_bl_container (
-    house_bl_container_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id            BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
-    container_no           VARCHAR(20)  NOT NULL,
-    container_type         VARCHAR(10),
-    length_feet            INT          NOT NULL,
-    seal_no_1              VARCHAR(30),
-    seal_no_2              VARCHAR(30),
-    seal_no_3              VARCHAR(30),
-    seal_no_4              VARCHAR(30),
-    seal_no_5              VARCHAR(30),
-    seal_no_6              VARCHAR(30),
-    pkg_qty                INT,
-    pkg_unit               VARCHAR(10),
-    gross_weight_kg        NUMERIC(12,3),
-    net_weight_kg          NUMERIC(12,3),
+CREATE TABLE IF NOT EXISTS house_bl_truck_desc (
+    house_bl_truck_desc_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_truck_id       BIGINT       NOT NULL UNIQUE
+        REFERENCES house_bl_truck(house_bl_truck_id),
+    marks                   TEXT,
+    description             TEXT,
+    desc_clause_1           VARCHAR(50),
+    desc_clause_2           VARCHAR(50),
+    remark                  TEXT,
+    created_at              TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at              TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by              VARCHAR(50),
+    updated_by              VARCHAR(50)
+);
+
+COMMENT ON COLUMN house_bl_truck_desc.house_bl_truck_id IS 'House B/L TRUCK ext 참조 FK (1:1)';
+COMMENT ON COLUMN house_bl_truck_desc.remark            IS '비고';
+
+-- =============================================================================
+-- E-12a House B/L AIR 치수 (1:N, ER 재구조화 Phase 4)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS house_bl_air_dim (
+    house_bl_air_dim_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_air_id      BIGINT       NOT NULL
+        REFERENCES house_bl_air(house_bl_air_id),
+    length_cm            NUMERIC(10,2),
+    width_cm             NUMERIC(10,2),
+    height_cm            NUMERIC(10,2),
+    quantity             INT,
+    cbm                  NUMERIC(10,3),
+    volume_weight_kg     NUMERIC(12,3),
+    created_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by           VARCHAR(50),
+    updated_by           VARCHAR(50)
+);
+
+COMMENT ON COLUMN house_bl_air_dim.house_bl_air_id IS 'House B/L AIR ext 참조 FK (1:N)';
+
+CREATE INDEX IF NOT EXISTS idx_house_bl_air_dim_air_id ON house_bl_air_dim(house_bl_air_id);
+
+-- =============================================================================
+-- E-12b House B/L TRUCK 치수 (1:N, ER 재구조화 Phase 4)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS house_bl_truck_dim (
+    house_bl_truck_dim_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_truck_id      BIGINT       NOT NULL
+        REFERENCES house_bl_truck(house_bl_truck_id),
+    length_cm              NUMERIC(10,2),
+    width_cm               NUMERIC(10,2),
+    height_cm              NUMERIC(10,2),
+    quantity               INT,
     cbm                    NUMERIC(10,3),
-    vgm_kg                 NUMERIC(12,3),
-    soc                    BOOLEAN      NOT NULL DEFAULT FALSE,
-    seq                    INT          NOT NULL DEFAULT 1,
+    volume_weight_kg       NUMERIC(12,3),
     created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by             VARCHAR(50),
     updated_by             VARCHAR(50)
 );
 
-COMMENT ON COLUMN house_bl_container.house_bl_id      IS 'House B/L 참조 FK';
-COMMENT ON COLUMN house_bl_container.container_no     IS '컨테이너 번호';
-COMMENT ON COLUMN house_bl_container.container_type   IS '컨테이너 규격: 20GP | 40GP | 40HQ | RF | OT 등';
-COMMENT ON COLUMN house_bl_container.length_feet      IS '컨테이너 길이(피트). TEU = length_feet / 20';
-COMMENT ON COLUMN house_bl_container.seal_no_1        IS '봉인번호 1';
-COMMENT ON COLUMN house_bl_container.seal_no_2        IS '봉인번호 2';
-COMMENT ON COLUMN house_bl_container.pkg_qty          IS '포장 수량';
-COMMENT ON COLUMN house_bl_container.pkg_unit         IS '포장 단위';
-COMMENT ON COLUMN house_bl_container.gross_weight_kg  IS '총 중량(kg)';
-COMMENT ON COLUMN house_bl_container.net_weight_kg    IS '순 중량(kg)';
-COMMENT ON COLUMN house_bl_container.cbm              IS '용적(CBM)';
-COMMENT ON COLUMN house_bl_container.vgm_kg           IS 'VGM 검증총중량(kg)';
-COMMENT ON COLUMN house_bl_container.soc              IS 'Shipper Owned Container 여부';
-COMMENT ON COLUMN house_bl_container.seq              IS '컨테이너 정렬 순번';
+COMMENT ON COLUMN house_bl_truck_dim.house_bl_truck_id IS 'House B/L TRUCK ext 참조 FK (1:N)';
 
-CREATE INDEX IF NOT EXISTS idx_hbl_container_house_bl_id ON house_bl_container(house_bl_id);
+CREATE INDEX IF NOT EXISTS idx_house_bl_truck_dim_truck_id ON house_bl_truck_dim(house_bl_truck_id);
 
 -- =============================================================================
--- E-19 House B/L Schedule Leg (항공 전용, 1:N)
+-- E-12c House B/L NON_BL 치수 (1:N, ER 재구조화 Phase 4)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS house_bl_nonbl_dim (
+    house_bl_nonbl_dim_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_non_bl_id     BIGINT       NOT NULL
+        REFERENCES house_bl_non_bl(house_bl_non_bl_id),
+    length_cm              NUMERIC(10,2),
+    width_cm               NUMERIC(10,2),
+    height_cm              NUMERIC(10,2),
+    quantity               INT,
+    cbm                    NUMERIC(10,3),
+    volume_weight_kg       NUMERIC(12,3),
+    created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by             VARCHAR(50),
+    updated_by             VARCHAR(50)
+);
+
+COMMENT ON COLUMN house_bl_nonbl_dim.house_bl_non_bl_id IS 'House B/L NON_BL ext 참조 FK (1:N)';
+
+CREATE INDEX IF NOT EXISTS idx_house_bl_nonbl_dim_nonbl_id ON house_bl_nonbl_dim(house_bl_non_bl_id);
+
+-- =============================================================================
+-- E-14a House B/L SEA Container (1:N, ER 재구조화 Phase 3)
+-- PRD §2.2: TEU = length_feet / 20
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS house_bl_sea_container (
+    house_bl_sea_container_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_sea_id            BIGINT       NOT NULL
+        REFERENCES house_bl_sea(house_bl_sea_id),
+    container_no               VARCHAR(20),
+    container_type             VARCHAR(10),
+    length_feet                INT          NOT NULL,
+    seal_no_1                  VARCHAR(30),
+    seal_no_2                  VARCHAR(30),
+    seal_no_3                  VARCHAR(30),
+    seal_no_4                  VARCHAR(30),
+    seal_no_5                  VARCHAR(30),
+    seal_no_6                  VARCHAR(30),
+    pkg_qty                    INT,
+    pkg_unit                   VARCHAR(10),
+    gross_weight_kg            NUMERIC(12,3),
+    net_weight_kg              NUMERIC(12,3),
+    cbm                        NUMERIC(10,3),
+    vgm_kg                     NUMERIC(12,3),
+    soc                        BOOLEAN      NOT NULL DEFAULT FALSE,
+    seq                        INT          NOT NULL DEFAULT 1,
+    created_at                 TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at                 TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by                 VARCHAR(50),
+    updated_by                 VARCHAR(50)
+);
+
+COMMENT ON COLUMN house_bl_sea_container.house_bl_sea_id   IS 'House B/L SEA ext 참조 FK (1:N)';
+COMMENT ON COLUMN house_bl_sea_container.container_no      IS '컨테이너 번호';
+COMMENT ON COLUMN house_bl_sea_container.container_type    IS '컨테이너 규격: 20GP | 40GP | 40HQ | RF | OT 등';
+COMMENT ON COLUMN house_bl_sea_container.length_feet       IS '컨테이너 길이(피트). TEU = length_feet / 20';
+COMMENT ON COLUMN house_bl_sea_container.vgm_kg            IS 'VGM 검증총중량(kg)';
+COMMENT ON COLUMN house_bl_sea_container.soc               IS 'Shipper Owned Container 여부';
+COMMENT ON COLUMN house_bl_sea_container.seq               IS '컨테이너 정렬 순번';
+
+CREATE INDEX IF NOT EXISTS idx_house_bl_sea_container_sea_id ON house_bl_sea_container(house_bl_sea_id);
+
+-- =============================================================================
+-- E-14b House B/L NON_BL Container (1:N, ER 재구조화 Phase 3)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS house_bl_nonbl_container (
+    house_bl_nonbl_container_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    house_bl_non_bl_id           BIGINT       NOT NULL
+        REFERENCES house_bl_non_bl(house_bl_non_bl_id),
+    container_no                 VARCHAR(20),
+    container_type               VARCHAR(10),
+    length_feet                  INT          NOT NULL,
+    seal_no_1                    VARCHAR(30),
+    seal_no_2                    VARCHAR(30),
+    seal_no_3                    VARCHAR(30),
+    seal_no_4                    VARCHAR(30),
+    seal_no_5                    VARCHAR(30),
+    seal_no_6                    VARCHAR(30),
+    pkg_qty                      INT,
+    pkg_unit                     VARCHAR(10),
+    gross_weight_kg              NUMERIC(12,3),
+    net_weight_kg                NUMERIC(12,3),
+    cbm                          NUMERIC(10,3),
+    vgm_kg                       NUMERIC(12,3),
+    soc                          BOOLEAN      NOT NULL DEFAULT FALSE,
+    seq                          INT          NOT NULL DEFAULT 1,
+    created_at                   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at                   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    created_by                   VARCHAR(50),
+    updated_by                   VARCHAR(50)
+);
+
+COMMENT ON COLUMN house_bl_nonbl_container.house_bl_non_bl_id IS 'House B/L NON_BL ext 참조 FK (1:N)';
+
+CREATE INDEX IF NOT EXISTS idx_house_bl_nonbl_container_nonbl_id ON house_bl_nonbl_container(house_bl_non_bl_id);
+
+-- =============================================================================
+-- E-19 House B/L Schedule Leg (항공 전용, 1:N, ER 재구조화 Phase 1)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_schedule_leg (
     house_bl_schedule_leg_id  BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id               BIGINT      NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_air_id           BIGINT      NOT NULL
+        REFERENCES house_bl_air(house_bl_air_id),
     to_code                   VARCHAR(10) NOT NULL,
     by_carrier                VARCHAR(20),
     flight_no                 VARCHAR(20),
@@ -582,23 +740,24 @@ CREATE TABLE IF NOT EXISTS house_bl_schedule_leg (
     updated_by                VARCHAR(50)
 );
 
-COMMENT ON COLUMN house_bl_schedule_leg.house_bl_id  IS 'House B/L 참조 FK';
-COMMENT ON COLUMN house_bl_schedule_leg.to_code      IS '도착지 공항 코드 (*To, 필수)';
-COMMENT ON COLUMN house_bl_schedule_leg.by_carrier   IS '운송 캐리어 코드';
-COMMENT ON COLUMN house_bl_schedule_leg.flight_no    IS '항공편명';
-COMMENT ON COLUMN house_bl_schedule_leg.on_board_dt  IS '본선적재일 YYYYMMDD (필수)';
-COMMENT ON COLUMN house_bl_schedule_leg.on_board_tm  IS '본선적재 시각 HHMM';
-COMMENT ON COLUMN house_bl_schedule_leg.arrival_dt   IS '도착일 YYYYMMDD (필수)';
-COMMENT ON COLUMN house_bl_schedule_leg.arrival_tm   IS '도착 시각 HHMM';
+COMMENT ON COLUMN house_bl_schedule_leg.house_bl_air_id IS 'House B/L AIR ext 참조 FK';
+COMMENT ON COLUMN house_bl_schedule_leg.to_code         IS '도착지 공항 코드 (*To, 필수)';
+COMMENT ON COLUMN house_bl_schedule_leg.by_carrier      IS '운송 캐리어 코드';
+COMMENT ON COLUMN house_bl_schedule_leg.flight_no       IS '항공편명';
+COMMENT ON COLUMN house_bl_schedule_leg.on_board_dt     IS '본선적재일 YYYYMMDD (필수)';
+COMMENT ON COLUMN house_bl_schedule_leg.on_board_tm     IS '본선적재 시각 HHMM';
+COMMENT ON COLUMN house_bl_schedule_leg.arrival_dt      IS '도착일 YYYYMMDD (필수)';
+COMMENT ON COLUMN house_bl_schedule_leg.arrival_tm      IS '도착 시각 HHMM';
 
-CREATE INDEX IF NOT EXISTS idx_house_bl_schedule_leg_house_bl_id ON house_bl_schedule_leg(house_bl_id);
+CREATE INDEX IF NOT EXISTS idx_house_bl_schedule_leg_air_id ON house_bl_schedule_leg(house_bl_air_id);
 
 -- =============================================================================
--- E-18 House B/L Truck Order (트럭 전용, 1:N)
+-- E-18 House B/L Truck Order (트럭 전용, 1:N, ER 재구조화 Phase 1)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_truck_order (
     house_bl_truck_order_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id              BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_truck_id        BIGINT       NOT NULL
+        REFERENCES house_bl_truck(house_bl_truck_id),
     truck_order_no           VARCHAR(30),
     pkg_qty                  INT,
     pkg_unit                 VARCHAR(10),
@@ -619,14 +778,17 @@ CREATE TABLE IF NOT EXISTS house_bl_truck_order (
     updated_by               VARCHAR(50)
 );
 
-CREATE INDEX IF NOT EXISTS idx_house_bl_truck_order_house_bl_id ON house_bl_truck_order(house_bl_id);
+COMMENT ON COLUMN house_bl_truck_order.house_bl_truck_id IS 'House B/L TRUCK ext 참조 FK';
+
+CREATE INDEX IF NOT EXISTS idx_house_bl_truck_order_truck_id ON house_bl_truck_order(house_bl_truck_id);
 
 -- =============================================================================
--- E-19a House B/L Air Charge (항공 전용, 1:N)
+-- E-19a House B/L Air Charge (항공 전용, 1:N, ER 재구조화 Phase 1)
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS house_bl_air_charge (
     house_bl_air_charge_id  BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    house_bl_id             BIGINT       NOT NULL REFERENCES house_bl(house_bl_id),
+    house_bl_air_id         BIGINT       NOT NULL
+        REFERENCES house_bl_air(house_bl_air_id),
     freight_code            VARCHAR(20),
     currency_code           VARCHAR(5),
     per                     VARCHAR(10),
@@ -641,7 +803,9 @@ CREATE TABLE IF NOT EXISTS house_bl_air_charge (
     updated_by              VARCHAR(50)
 );
 
-CREATE INDEX IF NOT EXISTS idx_house_bl_air_charge_house_bl_id ON house_bl_air_charge(house_bl_id);
+COMMENT ON COLUMN house_bl_air_charge.house_bl_air_id IS 'House B/L AIR ext 참조 FK';
+
+CREATE INDEX IF NOT EXISTS idx_house_bl_air_charge_air_id ON house_bl_air_charge(house_bl_air_id);
 
 -- =============================================================================
 -- E-21 Switch B/L (1:1 per house_bl, 재Switch 불가)

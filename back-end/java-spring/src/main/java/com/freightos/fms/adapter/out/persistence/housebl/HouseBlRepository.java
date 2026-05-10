@@ -6,6 +6,7 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,4 +38,12 @@ public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, Long>
 
     /** Master B/L 연결 건수 조회 */
     long countByMasterBlId(Long masterBlId);
+
+    /** jobDiv만 가벼운 projection — delete 흐름에서 SELECT 1회(도메인 전체 로드 X) */
+    @Query("select h.jobDiv from HouseBlJpaEntity h where h.houseBlId = :id")
+    Optional<JobDiv> findJobDivById(@Param("id") Long id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from HouseBlJpaEntity h where h.houseBlId = :id")
+    void deleteByIdBulk(@Param("id") Long id);
 }

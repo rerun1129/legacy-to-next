@@ -14,6 +14,7 @@ import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -77,16 +78,16 @@ class MasterBlServiceTest {
     }
 
     @Test
-    @DisplayName("delete - 존재하는 ID 삭제 시 port.delete 호출")
+    @DisplayName("deleteMasterBlById - jobDiv projection 후 port.deleteByIdAndJobDiv 호출")
     void delete_existingId_callsPortDelete() {
         Long id = 1L;
-        MasterBl mockEntity = mock(MasterBl.class);
-        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(mockEntity));
+        given(masterBlPort.findJobDivById(id)).willReturn(Optional.of(MasterBlJobDiv.SEA));
 
         masterBlService.deleteMasterBlById(id);
 
-        then(masterBlPort).should().findMasterBlById(id);
-        then(masterBlPort).should().deleteMasterBl(mockEntity);
+        then(masterBlPort).should().findJobDivById(id);
+        then(masterBlPort).should().deleteByIdAndJobDiv(id, MasterBlJobDiv.SEA);
+        then(masterBlPort).should(never()).findMasterBlById(any());
     }
 
     // ── findMasterBlById (Sea/Air 분기) ───────────────────────────────
@@ -147,15 +148,15 @@ class MasterBlServiceTest {
     }
 
     @Test
-    @DisplayName("deleteMasterBlById - 없는 ID 조회 시 ResourceNotFoundException throw, port.delete 미호출")
+    @DisplayName("deleteMasterBlById - jobDiv projection empty 시 ResourceNotFoundException, deleteByIdAndJobDiv 미호출")
     void deleteMasterBlById_whenNotFound_throwsAndDoesNotDelete() {
         Long id = 999L;
-        given(masterBlPort.findMasterBlById(id)).willReturn(Optional.empty());
+        given(masterBlPort.findJobDivById(id)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> masterBlService.deleteMasterBlById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        then(masterBlPort).should(never()).deleteMasterBl(any());
+        then(masterBlPort).should(never()).deleteByIdAndJobDiv(any(), any());
     }
 
     // ── searchMasterBls ───────────────────────────────────────────────

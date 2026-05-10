@@ -71,7 +71,6 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     @JoinColumn(name = "house_bl_truck_id", nullable = false, updatable = false)
-    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private List<HouseBlTruckDimJpaEntity> dims = new ArrayList<>();
 
     // TRUCK 전용 오더 그리드. house_bl_truck_id FK로 소유.

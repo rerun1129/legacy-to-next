@@ -18,4 +18,10 @@ public interface HouseBlSeaDescRepository extends JpaRepository<HouseBlSeaDescJp
     @Modifying(flushAutomatically = true)
     @Query("delete from HouseBlSeaDescJpaEntity x where x.sea.houseBlSeaId = :id")
     void deleteBySea_HouseBlSeaId(@Param("id") Long id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from HouseBlSeaDescJpaEntity x " +
+           "where x.sea.houseBlSeaId in (" +
+           "  select s.houseBlSeaId from HouseBlSeaJpaEntity s where s.houseBl.houseBlId = :parentId)")
+    void deleteByParentHouseBlId(@Param("parentId") Long parentId);
 }

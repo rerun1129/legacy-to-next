@@ -20,6 +20,7 @@ import com.freightos.common.config.QueryDslConfig;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,6 +39,12 @@ class MasterBlMappingIntegrationTest {
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private MasterBlSeaDescRepository masterBlSeaDescRepository;
+
+    @Autowired
+    private MasterBlAirDescRepository masterBlAirDescRepository;
 
     // ── 픽스처 헬퍼 ──────────────────────────────────────────────────────
 
@@ -472,8 +479,8 @@ class MasterBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("SEA ext delete → sea_desc CASCADE 자동 정리 (ON DELETE CASCADE)")
-    void seaExtDelete_cascadeDeletesSeaDesc() {
+    @DisplayName("SEA ext delete — seaDesc를 명시 삭제 후 seaExt 삭제 (DDL_RULES §5 준수: DB CASCADE 금지)")
+    void seaExtDelete_explicitDescDeleteThenExtDelete() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
         em.persist(parent);
         em.flush();
@@ -483,14 +490,16 @@ class MasterBlMappingIntegrationTest {
         em.flush();
         Long seaExtId = seaExt.getMasterBlSeaId();
 
-        MasterBlSeaDescJpaEntity desc = seaDesc(seaExt, "CASCADE TEST");
+        MasterBlSeaDescJpaEntity desc = seaDesc(seaExt, "EXPLICIT DELETE TEST");
         em.persist(desc);
         em.flush();
         em.clear();
 
         assertThat(countSeaDescs(seaExtId)).isEqualTo(1L);
 
-        // seaExt 삭제 — ON DELETE CASCADE로 desc도 DB에서 정리됨
+        // 애플리케이션 레벨에서 명시 삭제: desc → ext 순서
+        masterBlSeaDescRepository.deleteBySea_MasterBlSeaId(seaExtId);
+        em.flush();
         MasterBlSeaJpaEntity loadedSea = em.find(MasterBlSeaJpaEntity.class, seaExtId);
         em.remove(loadedSea);
         em.flush();
@@ -536,8 +545,8 @@ class MasterBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("AIR ext delete → air_desc CASCADE 자동 정리 (ON DELETE CASCADE)")
-    void airExtDelete_cascadeDeletesAirDesc() {
+    @DisplayName("AIR ext delete — airDesc를 명시 삭제 후 airExt 삭제 (DDL_RULES §5 준수: DB CASCADE 금지)")
+    void airExtDelete_explicitDescDeleteThenExtDelete() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         em.persist(parent);
         em.flush();
@@ -547,14 +556,16 @@ class MasterBlMappingIntegrationTest {
         em.flush();
         Long airExtId = airExt.getMasterBlAirId();
 
-        MasterBlAirDescJpaEntity desc = airDesc(airExt, "AIR CASCADE TEST");
+        MasterBlAirDescJpaEntity desc = airDesc(airExt, "AIR EXPLICIT DELETE TEST");
         em.persist(desc);
         em.flush();
         em.clear();
 
         assertThat(countAirDescs(airExtId)).isEqualTo(1L);
 
-        // airExt 삭제 — ON DELETE CASCADE로 desc도 DB에서 정리됨
+        // 애플리케이션 레벨에서 명시 삭제: desc → ext 순서 (dims/scheduleLegs/airCharges는 ORM cascade로 정리)
+        masterBlAirDescRepository.deleteByAir_MasterBlAirId(airExtId);
+        em.flush();
         MasterBlAirJpaEntity loadedAir = em.find(MasterBlAirJpaEntity.class, airExtId);
         em.remove(loadedAir);
         em.flush();

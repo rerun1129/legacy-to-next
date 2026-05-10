@@ -18,4 +18,10 @@ public interface MasterBlSeaDescRepository extends JpaRepository<MasterBlSeaDesc
     @Modifying(flushAutomatically = true)
     @Query("delete from MasterBlSeaDescJpaEntity x where x.sea.masterBlSeaId = :id")
     void deleteBySea_MasterBlSeaId(@Param("id") Long id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from MasterBlSeaDescJpaEntity x " +
+           "where x.sea.masterBlSeaId in (" +
+           "  select s.masterBlSeaId from MasterBlSeaJpaEntity s where s.masterBl.masterBlId = :parentId)")
+    void deleteByParentMasterBlId(@Param("parentId") Long parentId);
 }

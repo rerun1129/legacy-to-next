@@ -13,8 +13,6 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * JPA ORM 엔티티 — House B/L 해상 확장.
@@ -110,7 +108,6 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     @JoinColumn(name = "house_bl_sea_id", nullable = false, updatable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<HouseBlSeaContainerJpaEntity> containers = new ArrayList<>();
 
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }

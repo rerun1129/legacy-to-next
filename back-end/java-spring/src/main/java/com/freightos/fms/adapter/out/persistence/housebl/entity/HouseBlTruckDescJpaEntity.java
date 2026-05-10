@@ -6,13 +6,9 @@ import com.freightos.fms.domain.common.enums.DescClause2;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 /**
  * JPA ORM 엔티티 — House B/L 트럭(TRUCK) 화물 표시 및 품목 설명.
  * HouseBlTruckJpaEntity 와 @OneToOne(FK: house_bl_truck_id) 관계.
- * ON DELETE CASCADE — truckExt 삭제 시 DB가 자동 정리.
  */
 @Entity
 @Table(schema = "fms", name = "house_bl_truck_desc")
@@ -27,7 +23,6 @@ public class HouseBlTruckDescJpaEntity extends BaseJpaEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "house_bl_truck_id", nullable = false, unique = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private HouseBlTruckJpaEntity truck;
 
     @Column(name = "marks", columnDefinition = "TEXT")

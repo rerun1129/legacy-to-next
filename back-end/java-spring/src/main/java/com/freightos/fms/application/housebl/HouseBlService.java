@@ -11,6 +11,7 @@ import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
@@ -57,7 +58,9 @@ public class HouseBlService implements HouseBlUseCase {
     @Override
     @Transactional
     public void deleteHouseBlById(Long id) {
-        houseBlPort.deleteHouseBl(findEntityById(id));
+        JobDiv jobDiv = houseBlPort.findJobDivById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
+        houseBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted HouseBl id={}", id);
     }
 

@@ -73,16 +73,16 @@ class HouseBlServiceTest {
     }
 
     @Test
-    @DisplayName("deleteHouseBlById - 존재하는 ID 삭제 시 port.delete 호출")
+    @DisplayName("deleteHouseBlById - jobDiv projection 후 port.deleteByIdAndJobDiv 호출")
     void deleteHouseBlById_existingId_callsPortDelete() {
         Long id = 1L;
-        HouseBl mockEntity = mock(HouseBl.class);
-        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
+        given(houseBlPort.findJobDivById(id)).willReturn(Optional.of(JobDiv.SEA));
 
         houseBlService.deleteHouseBlById(id);
 
-        then(houseBlPort).should().findHouseBlById(id);
-        then(houseBlPort).should().deleteHouseBl(mockEntity);
+        then(houseBlPort).should().findJobDivById(id);
+        then(houseBlPort).should().deleteByIdAndJobDiv(id, JobDiv.SEA);
+        then(houseBlPort).should(never()).findHouseBlById(any());
     }
 
     @Test
@@ -104,15 +104,15 @@ class HouseBlServiceTest {
     }
 
     @Test
-    @DisplayName("deleteHouseBlById - 없는 ID 조회 시 ResourceNotFoundException throw, port.delete 미호출")
+    @DisplayName("deleteHouseBlById - jobDiv projection empty 시 ResourceNotFoundException, deleteByIdAndJobDiv 미호출")
     void deleteHouseBlById_whenNotFound_throwsAndDoesNotDelete() {
         Long id = 999L;
-        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.empty());
+        given(houseBlPort.findJobDivById(id)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> houseBlService.deleteHouseBlById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        then(houseBlPort).should(never()).deleteHouseBl(any());
+        then(houseBlPort).should(never()).deleteByIdAndJobDiv(any(), any());
     }
 
     @Test

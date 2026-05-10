@@ -99,7 +99,6 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
     @JoinColumn(name = "master_bl_air_id", nullable = false, updatable = false)
-    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
 
     // AIR 전용 스케줄 구간. master_bl_air_id FK로 소유.

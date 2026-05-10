@@ -20,7 +20,8 @@ public interface HouseBlPort {
     PagedResult<HouseBl> findHouseBlsBySchedule(JobDiv jobDiv, Bound bound, String from, String to, PageRequest pageRequest);
     long countHouseBlsByMasterBlId(Long masterBlId);
     HouseBl saveHouseBl(HouseBl houseBl);
-    void deleteHouseBl(HouseBl houseBl);
+    Optional<JobDiv> findJobDivById(Long id);
+    void deleteByIdAndJobDiv(Long id, JobDiv jobDiv);
     List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId);
     List<ConsoledHouseBlAirSummary> findConsoledAirSummariesByMasterBlId(Long masterBlId);
     /**

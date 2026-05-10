@@ -18,4 +18,10 @@ public interface MasterBlAirDescRepository extends JpaRepository<MasterBlAirDesc
     @Modifying(flushAutomatically = true)
     @Query("delete from MasterBlAirDescJpaEntity x where x.air.masterBlAirId = :id")
     void deleteByAir_MasterBlAirId(@Param("id") Long id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from MasterBlAirDescJpaEntity x " +
+           "where x.air.masterBlAirId in (" +
+           "  select a.masterBlAirId from MasterBlAirJpaEntity a where a.masterBl.masterBlId = :parentId)")
+    void deleteByParentMasterBlId(@Param("parentId") Long parentId);
 }

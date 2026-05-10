@@ -66,7 +66,8 @@ public class NonBlService implements NonBlUseCase {
     @Override
     @Transactional
     public void deleteNonBlById(Long id) {
-        houseBlUseCase.deleteHouseBlById(id);
+        // NON_BL은 jobDiv가 고정이므로 projection 없이 직접 호출 (SELECT 0회 추가)
+        houseBlPort.deleteByIdAndJobDiv(id, JobDiv.NON_BL);
         log.info("Deleted NonBl id={}", id);
     }
 
