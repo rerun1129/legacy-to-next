@@ -135,7 +135,6 @@ class MasterBlPersistenceAdapterTest {
         Page<MasterBlJpaEntity> page = new PageImpl<>(List.of(jpa));
         given(masterBlRepository.findAllByBound(eq(Bound.EXP), any(Pageable.class))).willReturn(page);
         given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
-        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.empty());
         given(masterBlMapper.toSeaDomain(eq(jpa), any(), any())).willReturn(MasterBlSea.create(Bound.EXP));
 
         adapter.getMasterBlsByBound(Bound.EXP, pageRequest);
@@ -172,7 +171,6 @@ class MasterBlPersistenceAdapterTest {
         MasterBlSea expected = MasterBlSea.create(Bound.EXP);
         given(masterBlRepository.findByMblNo("MBL-001")).willReturn(Optional.of(jpa));
         given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
-        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.empty());
         given(masterBlMapper.toSeaDomain(eq(jpa), any(), any())).willReturn(expected);
 
         Optional<MasterBl> result = adapter.findMasterBlByMblNo("MBL-001");
