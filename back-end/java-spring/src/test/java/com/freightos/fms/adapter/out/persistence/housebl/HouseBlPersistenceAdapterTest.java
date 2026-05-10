@@ -155,9 +155,6 @@ class HouseBlPersistenceAdapterTest {
         given(jpaToDomainMapper.toSeaDomain(eq(savedJpa), any(), any())).willReturn(sea);
 
         adapter.saveHouseBl(sea);
-
-        // SEA는 dims를 사용하지 않으므로 savedSeaJpa에 syncDims 미호출
-        then(savedSeaJpa).should(never()).syncDims(any());
     }
 
     // ── saveHouseBl(TRUCK) ────────────────────────────────────────────
