@@ -351,6 +351,7 @@ export function NonBLEntry() {
         currentHblNo={detail?.hblNo}
         isOpen={isChangeBlNoModalOpen}
         onClose={() => setIsChangeBlNoModalOpen(false)}
+        onChanged={() => { detailLoadedRef.current = false; }}
       />
     )}
     </FormProvider>

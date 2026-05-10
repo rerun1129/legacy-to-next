@@ -12,11 +12,12 @@ interface ChangeBlNoModalProps {
   currentHblNo: string | null | undefined;
   isOpen: boolean;
   onClose: () => void;
+  onChanged?: () => void;
 }
 
 interface FormValues { newHblNo: string; }
 
-export function ChangeBlNoModal({ houseBlId, currentHblNo, isOpen, onClose }: ChangeBlNoModalProps) {
+export function ChangeBlNoModal({ houseBlId, currentHblNo, isOpen, onClose, onChanged }: ChangeBlNoModalProps) {
   const queryClient = useQueryClient();
   // BE SSOT — zodResolver/required/pattern 사용 금지
   const form = useForm<FormValues>({ defaultValues: { newHblNo: "" } });
@@ -30,7 +31,8 @@ export function ChangeBlNoModal({ houseBlId, currentHblNo, isOpen, onClose }: Ch
     onSuccess: () => {
       toast.success("B/L No가 변경되었습니다.");
       queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", houseBlId] });
-      queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
+      // list 자동 invalidate 금지 — Entry mutation 후 사용자가 Search로 직접 재조회
+      onChanged?.();
       onClose();
     },
     onError: (e: Error) => toast.error(`변경 실패: ${e.message}`),
