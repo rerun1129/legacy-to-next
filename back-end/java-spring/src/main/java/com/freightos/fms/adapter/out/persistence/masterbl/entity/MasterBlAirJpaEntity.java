@@ -95,6 +95,13 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private VolumeDivisor volumeDivisor;
 
+    // AIR 단독 치수 명세. master_bl_air_id FK로 소유 (Step 4.2 — 부모 FK 이전).
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "master_bl_air_id", nullable = false, updatable = false)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
+    private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
+
     // AIR 전용 스케줄 구간. master_bl_air_id FK로 소유.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -127,6 +134,11 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setHandlingInfoCode(HandlingInfoCode v) { this.handlingInfoCode = v; }
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
+
+    public void syncDims(List<MasterBlDimJpaEntity> newDims) {
+        this.dims.clear();
+        this.dims.addAll(newDims);
+    }
 
     public void syncScheduleLegs(List<MasterBlScheduleLegJpaEntity> newLegs) {
         this.scheduleLegs.clear();

@@ -45,7 +45,7 @@ public class MasterBlMapper {
         return domain;
     }
 
-    /** FK가 master_bl_air_id로 이전된 이후 airCharges는 airJpa에서 전달받는다 (Step 1.5). */
+    /** FK가 master_bl_air_id로 이전된 이후 airCharges/dims는 airJpa에서 가져온다 (Step 1.5/Step 4.2). */
     public MasterBlAir toAirDomain(MasterBlJpaEntity jpa, MasterBlAirJpaEntity airJpa,
                                    List<MasterBlAirChargeJpaEntity> airChargeJpaList,
                                    MasterBlAirDescJpaEntity airDescJpa) {
@@ -56,7 +56,8 @@ public class MasterBlMapper {
                 .map(this::toAirChargeDomain)
                 .collect(Collectors.toList());
         domain.initAirCharges(airCharges);
-        domain.initDims(toDimDomainList(jpa.getDims()));
+        List<MasterBlDimJpaEntity> dimJpaList = airJpa != null ? airJpa.getDims() : List.of();
+        domain.initDims(toDimDomainList(dimJpaList));
         List<MasterBlScheduleLegJpaEntity> legJpaList = airJpa != null ? airJpa.getScheduleLegs() : List.of();
         domain.initScheduleLegs(toScheduleLegDomainList(legJpaList));
         if (airDescJpa != null) domain.initDesc(toAirDescDomain(airDescJpa));
@@ -183,7 +184,7 @@ public class MasterBlMapper {
 
     public MasterBlDim toDimDomain(MasterBlDimJpaEntity jpa) {
         MasterBlDim domain = MasterBlDim.create(
-                jpa.getMasterBlId(),
+                jpa.getMasterBlAirId(),
                 jpa.getLengthCm(), jpa.getWidthCm(), jpa.getHeightCm(),
                 jpa.getQuantity(), jpa.getCbm(), jpa.getVolumeWeightKg());
         domain.assignIdentity(jpa.getMasterBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
@@ -195,7 +196,8 @@ public class MasterBlMapper {
         return jpaList.stream().map(this::toDimDomain).collect(Collectors.toList());
     }
 
-    public void applyDimFields(MasterBlDim domain, MasterBlDimJpaEntity jpa, MasterBlJpaEntity masterBlJpa) {
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncDims(@JoinColumn)이 설정 — parent 인자 불필요 */
+    public void applyDimFields(MasterBlDim domain, MasterBlDimJpaEntity jpa) {
         jpa.setLengthCm(domain.getLengthCm());
         jpa.setWidthCm(domain.getWidthCm());
         jpa.setHeightCm(domain.getHeightCm());
@@ -271,9 +273,10 @@ public class MasterBlMapper {
         jpa.setArrivalTm(domain.getArrivalTm());
     }
 
-    public MasterBlDimJpaEntity toDimJpa(MasterBlDim domain, MasterBlJpaEntity masterBl) {
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncDims(@JoinColumn)이 설정 — parent 인자 불필요 */
+    public MasterBlDimJpaEntity toDimJpa(MasterBlDim domain) {
         MasterBlDimJpaEntity jpa = new MasterBlDimJpaEntity();
-        applyDimFields(domain, jpa, masterBl);
+        applyDimFields(domain, jpa);
         return jpa;
     }
 

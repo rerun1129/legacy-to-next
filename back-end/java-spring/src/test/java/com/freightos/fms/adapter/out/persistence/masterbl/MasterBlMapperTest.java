@@ -184,7 +184,7 @@ class MasterBlMapperTest {
     @DisplayName("toDimDomain: JPA → 도메인 전체 필드가 복사된다")
     void toDimDomain_mapsAllFields() {
         MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
-        dimJpa.setMasterBlId(1L);
+        dimJpa.setMasterBlAirId(1L);
         dimJpa.setLengthCm(BigDecimal.valueOf(100.5));
         dimJpa.setWidthCm(BigDecimal.valueOf(80.0));
         dimJpa.setHeightCm(BigDecimal.valueOf(60.0));
@@ -205,15 +205,12 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("applyDimFields: 도메인 → JPA 전체 필드가 세팅된다")
     void applyDimFields_setsAllFieldsToJpa() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(1L);
-
         MasterBlDim domain = MasterBlDim.create(1L,
                 BigDecimal.valueOf(100.5), BigDecimal.valueOf(80.0), BigDecimal.valueOf(60.0),
                 3, BigDecimal.valueOf(0.485), BigDecimal.valueOf(80.8));
         MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
 
-        mapper.applyDimFields(domain, dimJpa, masterBlJpa);
+        mapper.applyDimFields(domain, dimJpa);
 
         assertThat(dimJpa.getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(100.5));
         assertThat(dimJpa.getWidthCm()).isEqualByComparingTo(BigDecimal.valueOf(80.0));
@@ -227,10 +224,10 @@ class MasterBlMapperTest {
     @DisplayName("toDimDomainList: JPA 엔티티 리스트 → 도메인 리스트로 변환된다")
     void toDimDomainList_convertsMultipleEntities() {
         MasterBlDimJpaEntity dim1 = new MasterBlDimJpaEntity();
-        dim1.setMasterBlId(1L);
+        dim1.setMasterBlAirId(1L);
 
         MasterBlDimJpaEntity dim2 = new MasterBlDimJpaEntity();
-        dim2.setMasterBlId(1L);
+        dim2.setMasterBlAirId(1L);
 
         List<MasterBlDim> result = mapper.toDimDomainList(List.of(dim1, dim2));
 
@@ -240,13 +237,10 @@ class MasterBlMapperTest {
     @Test
     @DisplayName("applyDimFields: null 허용 필드가 null이어도 NPE 없이 동작한다")
     void applyDimFields_nullValues_doesNotThrow() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(1L);
-
         MasterBlDim domain = MasterBlDim.create(1L, null, null, null, null, null, null);
         MasterBlDimJpaEntity dimJpa = new MasterBlDimJpaEntity();
 
-        assertThatCode(() -> mapper.applyDimFields(domain, dimJpa, masterBlJpa))
+        assertThatCode(() -> mapper.applyDimFields(domain, dimJpa))
                 .doesNotThrowAnyException();
     }
 

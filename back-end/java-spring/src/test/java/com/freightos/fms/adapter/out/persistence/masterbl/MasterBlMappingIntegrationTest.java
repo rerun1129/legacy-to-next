@@ -101,10 +101,10 @@ class MasterBlMappingIntegrationTest {
                 .getSingleResult();
     }
 
-    private long countDims(Long masterBlId) {
+    private long countDims(Long masterBlAirId) {
         return em.createQuery(
-                        "SELECT COUNT(c) FROM MasterBlDimJpaEntity c WHERE c.masterBlId = :pid", Long.class)
-                .setParameter("pid", masterBlId)
+                        "SELECT COUNT(c) FROM MasterBlDimJpaEntity c WHERE c.masterBlAirId = :pid", Long.class)
+                .setParameter("pid", masterBlAirId)
                 .getSingleResult();
     }
 
@@ -132,10 +132,9 @@ class MasterBlMappingIntegrationTest {
     // ── 테스트 ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Sea 모드 save→load: dims 채움 라운드트립 (scheduleLegs/airCharges는 AIR 전용)")
-    void seaMode_fullRoundTrip_dimsRestored() {
+    @DisplayName("Sea 모드 save→load: SEA는 dims 미사용. parent 저장 후 조회 시 정상 로드 확인")
+    void seaMode_fullRoundTrip_parentSavedAndLoaded() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
-        parent.syncDims(List.of(dim()));
 
         em.persist(parent);
         em.flush();
@@ -144,74 +143,89 @@ class MasterBlMappingIntegrationTest {
         MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
 
         assertThat(loaded).isNotNull();
-        assertThat(loaded.getDims()).hasSize(1);
+        assertThat(loaded.getJobDiv()).isEqualTo(MasterBlJobDiv.SEA);
     }
 
     @Test
-    @DisplayName("Air 모드 save→load: dims 채움 + airExt 통해 scheduleLegs/airCharges 라운드트립")
+    @DisplayName("Air 모드 save→load: airExt 통해 dims/scheduleLegs/airCharges 라운드트립")
     void airMode_fullRoundTrip_allCollectionsRestored() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncDims(List.of(dim()));
         airExt.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
         airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(airExt);
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
         MasterBlAirJpaEntity loadedAir = em.createQuery(
                         "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
                         MasterBlAirJpaEntity.class)
                 .setParameter("id", parent.getMasterBlId())
                 .getSingleResult();
 
-        assertThat(loaded.getDims()).hasSize(1);
+        assertThat(loadedAir.getDims()).hasSize(1);
         assertThat(loadedAir.getScheduleLegs()).hasSize(1);
         assertThat(loadedAir.getAirCharges()).hasSize(1);
     }
 
     @Test
-    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, dims 빈 List 반환")
+    @DisplayName("AIR airExt 빈 컬렉션 저장/조회: NPE 없음, dims 빈 List 반환")
     void emptyCollections_noPeNpeAndEmptyListReturned() {
-        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
-
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         em.persist(parent);
+        em.flush();
+
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
 
-        assertThat(loaded.getDims()).isNotNull().isEmpty();
+        assertThat(loadedAir.getDims()).isNotNull().isEmpty();
     }
 
     @Test
-    @DisplayName("자식 일부 필드 수정: dims[0].setQuantity → flush → 재조회 시 변경 반영")
+    @DisplayName("자식 일부 필드 수정: airExt.dims[0].setQuantity → flush → 재조회 시 변경 반영")
     void partialChildUpdate_dimQuantity_persisted() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        MasterBlDimJpaEntity firstDim = dim();
-        MasterBlDimJpaEntity secondDim = dim();
-        parent.syncDims(List.of(firstDim, secondDim));
-
         em.persist(parent);
         em.flush();
+
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncDims(List.of(dim(), dim()));
+        em.persist(airExt);
+        em.flush();
         em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        Long firstDimId = loaded.getDims().get(0).getMasterBlDimId();
-        loaded.getDims().get(0).setQuantity(99);
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        Long firstDimId = loadedAir.getDims().get(0).getMasterBlDimId();
+        loadedAir.getDims().get(0).setQuantity(99);
 
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        MasterBlDimJpaEntity updatedDim = reloaded.getDims().stream()
+        MasterBlAirJpaEntity reloadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        MasterBlDimJpaEntity updatedDim = reloadedAir.getDims().stream()
                 .filter(d -> d.getMasterBlDimId().equals(firstDimId))
                 .findFirst().orElseThrow();
-        MasterBlDimJpaEntity otherDim = reloaded.getDims().stream()
+        MasterBlDimJpaEntity otherDim = reloadedAir.getDims().stream()
                 .filter(d -> !d.getMasterBlDimId().equals(firstDimId))
                 .findFirst().orElseThrow();
 
@@ -220,30 +234,41 @@ class MasterBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("syncDims: 기존 2건 → 신규 3건 교체. flush 후 자식 row count == 3, 기존 ID 모두 사라짐")
+    @DisplayName("syncDims(airExt): 기존 2건 → 신규 3건 교체. flush 후 자식 row count == 3, 기존 ID 모두 사라짐")
     void syncDims_replaceTwoWithThree_orphanRemovedAndNewRowsInserted() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        parent.syncDims(List.of(dim(), dim()));
-
         em.persist(parent);
         em.flush();
-        em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        List<Long> oldIds = loaded.getDims().stream()
-                .map(MasterBlDimJpaEntity::getMasterBlDimId)
-                .toList();
-
-        loaded.syncDims(List.of(dim(), dim(), dim()));
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncDims(List.of(dim(), dim()));
+        em.persist(airExt);
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        List<Long> newIds = reloaded.getDims().stream()
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        List<Long> oldIds = loadedAir.getDims().stream()
                 .map(MasterBlDimJpaEntity::getMasterBlDimId)
                 .toList();
 
-        assertThat(reloaded.getDims()).hasSize(3);
+        loadedAir.syncDims(List.of(dim(), dim(), dim()));
+        em.flush();
+        em.clear();
+
+        MasterBlAirJpaEntity reloadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        List<Long> newIds = reloadedAir.getDims().stream()
+                .map(MasterBlDimJpaEntity::getMasterBlDimId)
+                .toList();
+
+        assertThat(reloadedAir.getDims()).hasSize(3);
         assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
     }
 
@@ -314,14 +339,14 @@ class MasterBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("AIR ext delete → scheduleLegs/airCharges 자식 row count 모두 0 (cascade)")
+    @DisplayName("AIR ext delete → dims/scheduleLegs/airCharges 자식 row count 모두 0 (cascade)")
     void airExtDelete_cascadeDeleteScheduleLegsAndAirCharges() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        parent.syncDims(List.of(dim()));
         em.persist(parent);
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncDims(List.of(dim()));
         airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
         airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(airExt);
@@ -341,28 +366,37 @@ class MasterBlMappingIntegrationTest {
         em.clear();
 
         assertThat(em.find(MasterBlAirJpaEntity.class, airExtId)).isNull();
+        assertThat(countDims(airExtId)).isZero();
         assertThat(countScheduleLegs(airExtId)).isZero();
         assertThat(countAirCharges(airExtId)).isZero();
     }
 
     @Test
-    @DisplayName("부모 delete → dims 자식 row count 0 (cascade). airCharges는 airExt cascade로 정리")
-    void parentDelete_cascadeDeleteDims() {
+    @DisplayName("AIR airExt delete → dims 자식 row count 0 (ON DELETE CASCADE). airExt 삭제 시 dims 정리")
+    void airExtDelete_cascadeDeleteDims() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        parent.syncDims(List.of(dim()));
-
         em.persist(parent);
         em.flush();
-        em.clear();
 
-        Long parentId = parent.getMasterBlId();
-        MasterBlJpaEntity toDelete = em.find(MasterBlJpaEntity.class, parentId);
-        em.remove(toDelete);
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncDims(List.of(dim()));
+        em.persist(airExt);
         em.flush();
         em.clear();
 
-        assertThat(em.find(MasterBlJpaEntity.class, parentId)).isNull();
-        assertThat(countDims(parentId)).isZero();
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        Long airExtId = loadedAir.getMasterBlAirId();
+
+        em.remove(loadedAir);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlAirJpaEntity.class, airExtId)).isNull();
+        assertThat(countDims(airExtId)).isZero();
     }
 
     // ── SEA desc 저장·교체·cascade 테스트 ────────────────────────────────

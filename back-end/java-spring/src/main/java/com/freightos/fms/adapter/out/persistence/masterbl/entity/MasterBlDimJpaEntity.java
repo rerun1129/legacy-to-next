@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * JPA ORM 엔티티 — Master B/L Dim (치수).
- * MasterBlJpaEntity 와 @ManyToOne(FK: master_bl_id) 관계.
+ * MasterBlAirJpaEntity 와 @OneToMany(FK: master_bl_air_id) 관계 — AIR 단독 사용.
  */
 @Entity
 @Table(schema = "fms", name = "master_bl_dim")
@@ -22,8 +22,8 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "master_bl_dim_id", updatable = false, nullable = false)
     private Long masterBlDimId;
 
-    @Column(name = "master_bl_id", nullable = false, insertable = false, updatable = false)
-    private Long masterBlId;
+    @Column(name = "master_bl_air_id", nullable = false, insertable = false, updatable = false)
+    private Long masterBlAirId;
 
     @Column(name = "length_cm", columnDefinition = "NUMERIC(10,2)")
     private BigDecimal lengthCm;
@@ -43,7 +43,7 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal volumeWeightKg;
 
-    public void setMasterBlId(Long v) { this.masterBlId = v; }
+    public void setMasterBlAirId(Long v) { this.masterBlAirId = v; }
     public void setLengthCm(BigDecimal v) { this.lengthCm = v; }
     public void setWidthCm(BigDecimal v) { this.widthCm = v; }
     public void setHeightCm(BigDecimal v) { this.heightCm = v; }

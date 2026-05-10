@@ -92,12 +92,12 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .orElseGet(MasterBlAirJpaEntity::new);
                 airJpa.setMasterBl(savedJpa);
                 masterBlMapper.applyAirFields(air, airJpa);
-                List<MasterBlDimJpaEntity> jpaDims = air.getDims().stream()
-                        .map(d -> masterBlMapper.toDimJpa(d, savedJpa))
-                        .toList();
-                savedJpa.syncDims(jpaDims);
-                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 scheduleLegs/airCharges/desc 저장
+                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 dims/scheduleLegs/airCharges/desc 저장
                 MasterBlAirJpaEntity savedAirJpa = masterBlAirRepository.save(airJpa);
+                List<MasterBlDimJpaEntity> jpaDims = air.getDims().stream()
+                        .map(masterBlMapper::toDimJpa)
+                        .toList();
+                savedAirJpa.syncDims(jpaDims);
                 List<MasterBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
                         .map(masterBlMapper::toScheduleLegJpa)
                         .toList();

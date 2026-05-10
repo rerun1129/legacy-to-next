@@ -76,7 +76,7 @@ class MasterBlPersistenceAdapterTest {
     // ── saveMasterBl(AIR) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(AIR): airRepository.save→syncScheduleLegs→syncAirCharges→saveOrDeleteAirDesc 순서")
+    @DisplayName("saveMasterBl(AIR): airRepository.save→syncDims→syncScheduleLegs→syncAirCharges→saveOrDeleteAirDesc 순서")
     void saveMasterBl_air_callsSyncMethodsInOrder() {
         MasterBlAir air = MasterBlAir.create(Bound.EXP);
         MasterBlJpaEntity savedJpa = spy(new MasterBlJpaEntity());
@@ -92,6 +92,7 @@ class MasterBlPersistenceAdapterTest {
 
         org.mockito.InOrder order = inOrder(masterBlAirRepository, savedAirJpa, masterBlAirDescRepository);
         order.verify(masterBlAirRepository).save(any());
+        order.verify(savedAirJpa).syncDims(any());
         order.verify(savedAirJpa).syncScheduleLegs(any());
         order.verify(savedAirJpa).syncAirCharges(any());
         order.verify(masterBlAirDescRepository).findByAir_MasterBlAirId(any());

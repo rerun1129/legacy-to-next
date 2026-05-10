@@ -8,11 +8,7 @@ import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
-
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * JPA ORM 엔티티 — Master B/L 공통 본체.
@@ -109,12 +105,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "settle_partner_code", length = 20)
     private String settlePartnerCode;
 
-    // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
-    private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
-
     public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setMblNo(String v) { this.mblNo = v; }
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
@@ -142,8 +132,4 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setMainItemName(String v) { this.mainItemName = v; }
     public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }
 
-    public void syncDims(List<MasterBlDimJpaEntity> v) {
-        this.dims.clear();
-        if (v != null) this.dims.addAll(v);
-    }
 }
