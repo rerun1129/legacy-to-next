@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 class HouseBlJpaEntityTest {
 
@@ -79,43 +78,4 @@ class HouseBlJpaEntityTest {
         assertThat(entity.getScheduleLegs()).containsExactly(leg1, leg2);
     }
 
-    // ── replaceDesc ─────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("replaceDesc: 기존 desc가 있으면 기존 desc의 houseBl back-ref를 null로 만든다")
-    void replaceDesc_existingDesc_nullsOldBackRef() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        HouseBlDescJpaEntity oldDesc = new HouseBlDescJpaEntity();
-        oldDesc.setHouseBl(entity);
-        entity.replaceDesc(oldDesc);
-
-        HouseBlDescJpaEntity newDesc = new HouseBlDescJpaEntity();
-        entity.replaceDesc(newDesc);
-
-        assertThat(oldDesc.getHouseBl()).isNull();
-        assertThat(entity.getDesc()).isEqualTo(newDesc);
-    }
-
-    @Test
-    @DisplayName("replaceDesc: null 입력 시 기존 desc의 back-ref를 null로 만들고 desc도 null 처리")
-    void replaceDesc_nullInput_clearsExistingDesc() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        HouseBlDescJpaEntity existingDesc = new HouseBlDescJpaEntity();
-        existingDesc.setHouseBl(entity);
-        entity.replaceDesc(existingDesc);
-
-        entity.replaceDesc(null);
-
-        assertThat(existingDesc.getHouseBl()).isNull();
-        assertThat(entity.getDesc()).isNull();
-    }
-
-    @Test
-    @DisplayName("replaceDesc: 기존 desc가 없을 때 null 입력해도 예외 없이 처리된다")
-    void replaceDesc_noExistingDesc_nullInput_noException() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-
-        assertThatCode(() -> entity.replaceDesc(null)).doesNotThrowAnyException();
-        assertThat(entity.getDesc()).isNull();
-    }
 }

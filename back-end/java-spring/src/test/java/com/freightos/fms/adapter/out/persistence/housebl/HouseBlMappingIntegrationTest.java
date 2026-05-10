@@ -11,30 +11,85 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import org.hibernate.resource.jdbc.spi.StatementInspector;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.freightos.common.config.QueryDslConfig;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * House B/L 단방향 @OneToMany 매핑의 CRUD·라운드트립·orphanRemoval·cascade 동작을 검증한다.
  * @DataJpaTest 슬라이스 + H2 in-memory(application-test.yml).
+ *
+ * StatementInspector 기반 SQL 캡처 회귀 테스트가 포함된다.
+ * SqlCapturingInspector 빈을 @TestConfiguration으로 Hibernate에 주입한다.
  */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(QueryDslConfig.class)
+@Import({QueryDslConfig.class, HouseBlMappingIntegrationTest.InspectorConfig.class})
+@Transactional
 class HouseBlMappingIntegrationTest {
+
+    /**
+     * 실행된 SQL을 캡처하는 StatementInspector 구현체.
+     * HibernatePropertiesCustomizer로 Hibernate에 등록한다.
+     */
+    static class SqlCapturingInspector implements StatementInspector {
+        private final List<String> capturedSql = new ArrayList<>();
+
+        @Override
+        public String inspect(String sql) {
+            capturedSql.add(sql);
+            return sql;
+        }
+
+        List<String> getCapturedSql() { return capturedSql; }
+        void reset() { capturedSql.clear(); }
+
+        long countContaining(String keyword) {
+            String lower = keyword.toLowerCase();
+            return capturedSql.stream().filter(s -> s.toLowerCase().contains(lower)).count();
+        }
+    }
+
+    /** StatementInspector를 Hibernate에 주입하는 @TestConfiguration */
+    @org.springframework.boot.test.context.TestConfiguration
+    static class InspectorConfig {
+        static final SqlCapturingInspector INSPECTOR = new SqlCapturingInspector();
+
+        @Bean
+        HibernatePropertiesCustomizer hibernatePropertiesCustomizer() {
+            return props -> props.put("hibernate.session_factory.statement_inspector", INSPECTOR);
+        }
+    }
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private HouseBlRepository houseBlRepository;
+
+    @Autowired
+    private HouseBlDescRepository houseBlDescRepository;
+
+    @BeforeEach
+    void resetInspector() {
+        InspectorConfig.INSPECTOR.reset();
+    }
 
     // ── 픽스처 헬퍼 ──────────────────────────────────────────────────────
 
@@ -304,35 +359,35 @@ class HouseBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("replaceDesc: 기존 desc 교체 후 flush → 기존 descId로 조회 시 null (orphanRemoval)")
+    @DisplayName("descReplace: 기존 desc 삭제 후 새 desc 저장 → 기존 descId로 조회 시 null, 새 desc marks 일치")
     void replaceDesc_orphanDescIsDeletedFromDb() {
         HouseBlJpaEntity parent = newParent(JobDiv.SEA);
         em.persist(parent);
         em.flush();
 
+        // 초기 desc 저장 (자식 owning side persist)
         HouseBlDescJpaEntity oldDesc = desc(parent, "OLD MARKS");
         em.persist(oldDesc);
-        parent.replaceDesc(oldDesc);
         em.flush();
         em.clear();
 
-        HouseBlJpaEntity loaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        Long oldDescId = loaded.getDesc().getHouseBlDescId();
+        Long oldDescId = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId())
+                .orElseThrow().getHouseBlDescId();
 
-        // 1단계: null로 교체 → Hibernate가 DELETE를 먼저 실행하도록 보장
-        // (INSERT→DELETE 순 flush로 인한 unique constraint 위반 방지)
-        loaded.replaceDesc(null);
+        // 1단계: 기존 desc DELETE (어댑터 saveOrDeleteDesc의 null-desc 경로 흉내)
+        houseBlDescRepository.deleteByHouseBl_HouseBlId(parent.getHouseBlId());
         em.flush();
 
-        // 2단계: 새 desc 설정 → cascade=ALL에 의해 INSERT
-        HouseBlDescJpaEntity newDesc = desc(loaded, "NEW MARKS");
-        loaded.replaceDesc(newDesc);
+        // 2단계: 새 desc INSERT (어댑터 saveOrDeleteDesc의 신규 save 경로 흉내)
+        HouseBlJpaEntity parentRef = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
+        HouseBlDescJpaEntity newDesc = desc(parentRef, "NEW MARKS");
+        em.persist(newDesc);
         em.flush();
         em.clear();
 
         assertThat(em.find(HouseBlDescJpaEntity.class, oldDescId)).isNull();
-        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, parent.getHouseBlId());
-        assertThat(reloaded.getDesc().getMarks()).isEqualTo("NEW MARKS");
+        HouseBlDescJpaEntity reloaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId()).orElseThrow();
+        assertThat(reloaded.getMarks()).isEqualTo("NEW MARKS");
     }
 
     @Test
@@ -430,4 +485,115 @@ class HouseBlMappingIntegrationTest {
                 .toList();
         assertThat(newIds).doesNotContainAnyElementsOf(oldIds);
     }
+
+    // ── StatementInspector 기반 desc fetch 회귀 테스트 ─────────────────
+
+    @Test
+    @DisplayName("nonBlFind_doesNotEmitHouseBlDescSelect: NON_BL 조회 시 house_bl_desc 테이블 참조 SQL 0건")
+        void nonBlFind_doesNotEmitHouseBlDescSelect() {
+            HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
+            em.persist(parent);
+            em.flush();
+            em.clear();
+            InspectorConfig.INSPECTOR.reset();
+
+            // NON_BL은 findById만 호출하므로 desc JOIN 없음
+            houseBlRepository.findById(parent.getHouseBlId());
+
+            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isZero();
+        }
+
+        @Test
+        @DisplayName("truckFind_doesNotEmitHouseBlDescSelect: TRUCK 조회 시 house_bl_desc 테이블 참조 SQL 0건")
+        void truckFind_doesNotEmitHouseBlDescSelect() {
+            HouseBlJpaEntity parent = newParent(JobDiv.TRUCK);
+            em.persist(parent);
+            em.flush();
+            em.clear();
+            InspectorConfig.INSPECTOR.reset();
+
+            houseBlRepository.findById(parent.getHouseBlId());
+
+            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isZero();
+        }
+
+        @Test
+        @DisplayName("seaFind_emitsHouseBlDescSelect: SEA houseBlDescRepository 조회 시 house_bl_desc SELECT 발생, marks 일치")
+        void seaFind_emitsHouseBlDescJoin() {
+            HouseBlJpaEntity parent = newParent(JobDiv.SEA);
+            em.persist(parent);
+            em.flush();
+
+            // 자식 owning side만 persist — 부모 매핑 없음
+            HouseBlDescJpaEntity seaDesc = desc(parent, "MARKS-X");
+            em.persist(seaDesc);
+            em.flush();
+            em.clear();
+            InspectorConfig.INSPECTOR.reset();
+
+            Optional<HouseBlDescJpaEntity> loaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId());
+
+            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isGreaterThanOrEqualTo(1);
+            assertThat(loaded).isPresent();
+            assertThat(loaded.get().getMarks()).isEqualTo("MARKS-X");
+        }
+
+        @Test
+        @DisplayName("airFind_emitsHouseBlDescSelect: AIR houseBlDescRepository 조회 시 house_bl_desc SELECT 발생, marks 일치")
+        void airFind_emitsHouseBlDescJoin() {
+            HouseBlJpaEntity parent = newParent(JobDiv.AIR);
+            em.persist(parent);
+            em.flush();
+
+            // 자식 owning side만 persist — 부모 매핑 없음
+            HouseBlDescJpaEntity airDesc = desc(parent, "AIR-MARKS");
+            em.persist(airDesc);
+            em.flush();
+            em.clear();
+            InspectorConfig.INSPECTOR.reset();
+
+            Optional<HouseBlDescJpaEntity> loaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId());
+
+            assertThat(InspectorConfig.INSPECTOR.countContaining("house_bl_desc")).isGreaterThanOrEqualTo(1);
+            assertThat(loaded).isPresent();
+            assertThat(loaded.get().getMarks()).isEqualTo("AIR-MARKS");
+        }
+
+        @Test
+        @DisplayName("seaSave_persistsDesc: SEA parent + desc persist 후 house_bl_desc row 1건, marks 일치")
+        void seaSave_cascadesDesc() {
+            HouseBlJpaEntity parent = newParent(JobDiv.SEA);
+            em.persist(parent);
+            em.flush();
+
+            // 자식 owning side만 persist — 부모 매핑 없음
+            HouseBlDescJpaEntity seaDesc = desc(parent, "CASCADE-MARKS");
+            em.persist(seaDesc);
+            em.flush();
+            em.clear();
+
+            Long count = em.createQuery(
+                    "SELECT COUNT(d) FROM HouseBlDescJpaEntity d WHERE d.houseBl.houseBlId = :id", Long.class)
+                    .setParameter("id", parent.getHouseBlId())
+                    .getSingleResult();
+            assertThat(count).isEqualTo(1);
+
+            HouseBlDescJpaEntity reloaded = houseBlDescRepository.findByHouseBl_HouseBlId(parent.getHouseBlId()).orElseThrow();
+            assertThat(reloaded.getMarks()).isEqualTo("CASCADE-MARKS");
+        }
+
+        @Test
+        @DisplayName("nonBlSave_doesNotInsertHouseBlDesc: NON_BL parent 저장 후 house_bl_desc row 0건")
+        void nonBlSave_doesNotInsertHouseBlDesc() {
+            HouseBlJpaEntity parent = newParent(JobDiv.NON_BL);
+            em.persist(parent);
+            em.flush();
+            em.clear();
+
+            Long count = em.createQuery(
+                    "SELECT COUNT(d) FROM HouseBlDescJpaEntity d WHERE d.houseBl.houseBlId = :id", Long.class)
+                    .setParameter("id", parent.getHouseBlId())
+                    .getSingleResult();
+            assertThat(count).isZero();
+        }
 }

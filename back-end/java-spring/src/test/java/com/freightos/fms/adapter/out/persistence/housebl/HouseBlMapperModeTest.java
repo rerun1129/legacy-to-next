@@ -33,9 +33,10 @@ class HouseBlMapperModeTest {
         HouseBlJpaEntity jpa = airJpa(1L);
         jpa.syncDims(List.of(dimJpa(jpa), dimJpa(jpa)));
         jpa.syncScheduleLegs(List.of(legJpa(jpa)));
-        jpa.replaceDesc(descJpa(jpa));
+        // desc는 3번째 인자로 명시 전달 — 부모 매핑 없음
+        HouseBlDescJpaEntity desc = descJpa(jpa);
 
-        HouseBlAir domain = mapper.toAirDomain(jpa, null);
+        HouseBlAir domain = mapper.toAirDomain(jpa, null, desc);
 
         assertThat(domain.getDims()).hasSize(2);
         assertThat(domain.getScheduleLegs()).hasSize(1);
@@ -48,7 +49,7 @@ class HouseBlMapperModeTest {
     void toAirDomain_emptyChildCollections_returnsEmptyListsAndNullDesc() {
         HouseBlJpaEntity jpa = airJpa(2L);
 
-        HouseBlAir domain = mapper.toAirDomain(jpa, null);
+        HouseBlAir domain = mapper.toAirDomain(jpa, null, null);
 
         assertThat(domain.getDims()).isEmpty();
         assertThat(domain.getScheduleLegs()).isEmpty();
@@ -65,7 +66,7 @@ class HouseBlMapperModeTest {
         dim2.setLengthCm(BigDecimal.valueOf(20));
         jpa.syncDims(List.of(dim1, dim2));
 
-        HouseBlAir domain = mapper.toAirDomain(jpa, null);
+        HouseBlAir domain = mapper.toAirDomain(jpa, null, null);
 
         assertThat(domain.getDims().get(0).getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(10));
         assertThat(domain.getDims().get(1).getLengthCm()).isEqualByComparingTo(BigDecimal.valueOf(20));
@@ -78,9 +79,10 @@ class HouseBlMapperModeTest {
     void toSeaDomain_includesContainersLicensesDesc_excludesDimsAndLegs() {
         HouseBlJpaEntity jpa = seaJpa(4L);
         jpa.syncContainers(List.of(containerJpa(jpa), containerJpa(jpa)));
-        jpa.replaceDesc(descJpa(jpa));
+        // desc는 3번째 인자로 명시 전달 — 부모 매핑 없음
+        HouseBlDescJpaEntity desc = descJpa(jpa);
 
-        HouseBlSea domain = mapper.toSeaDomain(jpa, null);
+        HouseBlSea domain = mapper.toSeaDomain(jpa, null, desc);
 
         assertThat(domain.getContainers()).hasSize(2);
         assertThat(domain.getDesc()).isNotNull();
@@ -93,7 +95,7 @@ class HouseBlMapperModeTest {
     void toSeaDomain_emptyChildren_returnsEmptyCollectionsAndNullDesc() {
         HouseBlJpaEntity jpa = seaJpa(5L);
 
-        HouseBlSea domain = mapper.toSeaDomain(jpa, null);
+        HouseBlSea domain = mapper.toSeaDomain(jpa, null, null);
 
         assertThat(domain.getContainers()).isEmpty();
         assertThat(domain.getDesc()).isNull();

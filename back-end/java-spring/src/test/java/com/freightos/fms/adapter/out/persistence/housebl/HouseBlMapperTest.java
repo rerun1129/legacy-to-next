@@ -128,7 +128,7 @@ class HouseBlMapperTest {
         parentJpa.setConsigneeCode("CONSIGNEE01");
         parentJpa.setPkgQty(10);
         parentJpa.setGrossWeightKg(BigDecimal.valueOf(250.0));
-        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, null);
+        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, null, null);
 
         assertThat(domain).isInstanceOf(HouseBlAir.class);
         assertThat(domain.getShipperCode().value()).isEqualTo("SHIPPER01");
@@ -148,7 +148,7 @@ class HouseBlMapperTest {
         parentJpa.setPkgQty(5);
         parentJpa.setCbm(BigDecimal.valueOf(30.0));
 
-        HouseBlSea domain = jpaToDomainMapper.toSeaDomain(parentJpa, null);
+        HouseBlSea domain = jpaToDomainMapper.toSeaDomain(parentJpa, null, null);
 
         assertThat(domain).isInstanceOf(HouseBlSea.class);
         assertThat(domain.getHblNo().value()).isEqualTo("HBL-SEA-001");
@@ -191,7 +191,7 @@ class HouseBlMapperTest {
         parentJpa.setBound(Bound.EXP);
         parentJpa.setHouseBlId(42L);
 
-        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, null);
+        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, null, null);
 
         assertThat(domain.getId()).isEqualTo(42L);
     }

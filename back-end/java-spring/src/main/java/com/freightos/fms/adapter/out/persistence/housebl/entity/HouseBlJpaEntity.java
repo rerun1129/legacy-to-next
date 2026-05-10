@@ -169,10 +169,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "house_bl_id", nullable = false, updatable = false)
     private List<HouseBlAirChargeJpaEntity> airCharges = new ArrayList<>();
 
-    // AIR/SEA/NON_BL에서 채워짐, TRUCK은 null이 정상
-    @OneToOne(mappedBy = "houseBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    private HouseBlDescJpaEntity desc;
-
     public void setHouseBlId(Long v) { this.houseBlId = v; }
     public void setBound(Bound bound) { this.bound = bound; }
     public void setJobDiv(JobDiv jobDiv) { this.jobDiv = jobDiv; }
@@ -239,13 +235,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
         this.airCharges.addAll(newCharges);
     }
 
-    /** @deprecated NonBl에는 mergeDesc 사용. Sea/Air는 현행 유지. */
-    @Deprecated
-    public void replaceDesc(HouseBlDescJpaEntity newDesc) {
-        if (this.desc != null) this.desc.setHouseBl(null);
-        this.desc = newDesc;
-    }
-
     /**
      * NonBl 컨테이너 merge-by-id.
      * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
@@ -292,28 +281,6 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
         }
         this.dims.clear();
         this.dims.addAll(merged);
-    }
-
-    /**
-     * NonBl DESC merge (1:1).
-     * 기존 desc가 존재하면 필드를 현장 복사(UPDATE), 없으면 신규 설정(INSERT).
-     * orphanRemoval이 desc=null 교체 시 자동 DELETE를 처리한다.
-     */
-    public void mergeDesc(HouseBlDescJpaEntity incoming) {
-        if (incoming == null) {
-            if (this.desc != null) this.desc.setHouseBl(null);
-            this.desc = null;
-            return;
-        }
-        if (this.desc != null) {
-            this.desc.setMarks(incoming.getMarks());
-            this.desc.setDescription(incoming.getDescription());
-            this.desc.setDescClause1(incoming.getDescClause1());
-            this.desc.setDescClause2(incoming.getDescClause2());
-            this.desc.setRemark(incoming.getRemark());
-        } else {
-            this.desc = incoming;
-        }
     }
 
     private void copyContainerFields(HouseBlContainerJpaEntity src, HouseBlContainerJpaEntity dst) {

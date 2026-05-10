@@ -20,7 +20,7 @@ public class HouseBlJpaToDomainMapper {
     private final HouseBlCargoMapper cargoMapper;
     private final HouseBlDocMapper docMapper;
 
-    public HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa) {
+    public HouseBlSea toSeaDomain(HouseBlJpaEntity jpa, HouseBlSeaJpaEntity seaJpa, HouseBlDescJpaEntity descJpa) {
         HouseBlSea domain = HouseBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
@@ -29,13 +29,13 @@ public class HouseBlJpaToDomainMapper {
                 .map(c -> toContainerDomain(c, domain))
                 .collect(Collectors.toList());
         domain.initContainers(containers);
-        if (jpa.getDesc() != null) {
-            domain.initDesc(docMapper.toDescDomain(jpa.getDesc()));
+        if (descJpa != null) {
+            domain.initDesc(docMapper.toDescDomain(descJpa));
         }
         return domain;
     }
 
-    public HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa) {
+    public HouseBlAir toAirDomain(HouseBlJpaEntity jpa, HouseBlAirJpaEntity airJpa, HouseBlDescJpaEntity descJpa) {
         HouseBlAir domain = HouseBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
@@ -51,8 +51,8 @@ public class HouseBlJpaToDomainMapper {
                 .map(docMapper::toAirChargeDomain)
                 .collect(Collectors.toList());
         domain.initAirCharges(airCharges);
-        if (jpa.getDesc() != null) {
-            domain.initDesc(docMapper.toDescDomain(jpa.getDesc()));
+        if (descJpa != null) {
+            domain.initDesc(docMapper.toDescDomain(descJpa));
         }
         return domain;
     }
