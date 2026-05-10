@@ -1,11 +1,12 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
-import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -15,6 +16,7 @@ import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
+import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
@@ -35,6 +37,8 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     private final MasterBlRepository masterBlRepository;
     private final MasterBlSeaRepository masterBlSeaRepository;
     private final MasterBlAirRepository masterBlAirRepository;
+    private final MasterBlSeaDescRepository masterBlSeaDescRepository;
+    private final MasterBlAirDescRepository masterBlAirDescRepository;
     private final MasterBlMapper masterBlMapper;
 
     @Override
@@ -92,9 +96,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .map(d -> masterBlMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(jpaDims);
-                MasterBlDescJpaEntity airDescJpa = Nullables.mapOrNull(air.getDesc(), d -> masterBlMapper.toDescJpa(d, savedJpa));
-                savedJpa.replaceDesc(airDescJpa);
-                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 scheduleLegs/airCharges 동기화
+                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 scheduleLegs/airCharges/desc 저장
                 MasterBlAirJpaEntity savedAirJpa = masterBlAirRepository.save(airJpa);
                 List<MasterBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
                         .map(masterBlMapper::toScheduleLegJpa)
@@ -104,6 +106,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .map(masterBlMapper::toAirChargeJpa)
                         .toList();
                 savedAirJpa.syncAirCharges(jpaCharges);
+                saveOrDeleteAirDesc(air.getDesc(), savedAirJpa);
             }
             case MasterBlSea sea -> {
                 MasterBlSeaJpaEntity seaJpa = masterBlSeaRepository
@@ -111,9 +114,9 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .orElseGet(MasterBlSeaJpaEntity::new);
                 seaJpa.setMasterBl(savedJpa);
                 masterBlMapper.applySeaFields(sea, seaJpa);
-                MasterBlDescJpaEntity seaDescJpa = Nullables.mapOrNull(sea.getDesc(), d -> masterBlMapper.toDescJpa(d, savedJpa));
-                savedJpa.replaceDesc(seaDescJpa);
-                masterBlSeaRepository.save(seaJpa);
+                // seaJpa를 먼저 영속화하여 master_bl_sea_id PK 확보 후 desc 저장
+                MasterBlSeaJpaEntity savedSeaJpa = masterBlSeaRepository.save(seaJpa);
+                saveOrDeleteSeaDesc(sea.getDesc(), savedSeaJpa);
             }
             default -> throw new IllegalArgumentException(
                     "Unsupported MasterBl type: " + domain.getClass().getSimpleName());
@@ -126,6 +129,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     @Transactional
     public void deleteMasterBl(MasterBl masterBl) {
         Long id = masterBl.getId();
+        // sea_desc/air_desc는 ext FK ON DELETE CASCADE — ext 삭제 시 DB가 자동 정리
         masterBlSeaRepository.findByMasterBlMasterBlId(id).ifPresent(masterBlSeaRepository::delete);
         masterBlAirRepository.findByMasterBlMasterBlId(id).ifPresent(masterBlAirRepository::delete);
         masterBlRepository.deleteById(id);
@@ -135,13 +139,57 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
         MasterBlJobDiv jobDiv = jpa.getJobDiv();
         if (jobDiv == null) throw new IllegalArgumentException("jobDiv is null for masterBlId: " + jpa.getMasterBlId());
         return switch (jobDiv) {
-            case SEA -> masterBlMapper.toSeaDomain(jpa,
-                    masterBlSeaRepository.findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null));
+            case SEA -> {
+                MasterBlSeaJpaEntity seaJpa = masterBlSeaRepository.findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null);
+                MasterBlSeaDescJpaEntity seaDescJpa = seaJpa != null
+                        ? masterBlSeaDescRepository.findBySea_MasterBlSeaId(seaJpa.getMasterBlSeaId()).orElse(null)
+                        : null;
+                yield masterBlMapper.toSeaDomain(jpa, seaJpa, seaDescJpa);
+            }
             case AIR -> {
                 MasterBlAirJpaEntity airJpa = masterBlAirRepository
                         .findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null);
-                yield masterBlMapper.toAirDomain(jpa, airJpa, airJpa != null ? airJpa.getAirCharges() : List.of());
+                MasterBlAirDescJpaEntity airDescJpa = airJpa != null
+                        ? masterBlAirDescRepository.findByAir_MasterBlAirId(airJpa.getMasterBlAirId()).orElse(null)
+                        : null;
+                yield masterBlMapper.toAirDomain(jpa, airJpa, airJpa != null ? airJpa.getAirCharges() : List.of(), airDescJpa);
             }
         };
+    }
+
+    /**
+     * SEA desc 저장·삭제 처리. seaExt PK 확보 후 호출해야 한다.
+     * 도메인 desc가 있으면 기존 row를 조회해 필드를 덮어쓰거나(UPDATE) 신규 insert한다.
+     * 도메인 desc가 null이면 기존 row를 삭제한다(orphanRemoval 흉내).
+     */
+    private void saveOrDeleteSeaDesc(MasterBlDesc domainDesc, MasterBlSeaJpaEntity savedSeaJpa) {
+        Long seaId = savedSeaJpa.getMasterBlSeaId();
+        if (domainDesc == null) {
+            masterBlSeaDescRepository.findBySea_MasterBlSeaId(seaId)
+                    .ifPresent(masterBlSeaDescRepository::delete);
+            return;
+        }
+        MasterBlSeaDescJpaEntity descJpa = masterBlSeaDescRepository.findBySea_MasterBlSeaId(seaId)
+                .orElseGet(MasterBlSeaDescJpaEntity::new);
+        masterBlMapper.applySeaDescFields(domainDesc, descJpa, savedSeaJpa);
+        masterBlSeaDescRepository.save(descJpa);
+    }
+
+    /**
+     * AIR desc 저장·삭제 처리. airExt PK 확보 후 호출해야 한다.
+     * 도메인 desc가 있으면 기존 row를 조회해 필드를 덮어쓰거나(UPDATE) 신규 insert한다.
+     * 도메인 desc가 null이면 기존 row를 삭제한다(orphanRemoval 흉내).
+     */
+    private void saveOrDeleteAirDesc(MasterBlDesc domainDesc, MasterBlAirJpaEntity savedAirJpa) {
+        Long airId = savedAirJpa.getMasterBlAirId();
+        if (domainDesc == null) {
+            masterBlAirDescRepository.findByAir_MasterBlAirId(airId)
+                    .ifPresent(masterBlAirDescRepository::delete);
+            return;
+        }
+        MasterBlAirDescJpaEntity descJpa = masterBlAirDescRepository.findByAir_MasterBlAirId(airId)
+                .orElseGet(MasterBlAirDescJpaEntity::new);
+        masterBlMapper.applyAirDescFields(domainDesc, descJpa, savedAirJpa);
+        masterBlAirDescRepository.save(descJpa);
     }
 }

@@ -1,11 +1,12 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
-import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
@@ -21,7 +22,6 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.freightos.common.util.VoMapper.mapOrNull;
@@ -36,19 +36,19 @@ public class MasterBlMapper {
 
     // ── JpaEntity → Domain ─────────────────────────────────────────
 
-    public MasterBlSea toSeaDomain(MasterBlJpaEntity jpa, MasterBlSeaJpaEntity seaJpa) {
+    public MasterBlSea toSeaDomain(MasterBlJpaEntity jpa, MasterBlSeaJpaEntity seaJpa,
+                                    MasterBlSeaDescJpaEntity seaDescJpa) {
         MasterBlSea domain = MasterBlSea.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (seaJpa != null) copySeaFields(seaJpa, domain);
-        if (jpa.getDesc() != null) {
-            domain.initDesc(toDescDomain(jpa.getDesc()));
-        }
+        if (seaDescJpa != null) domain.initDesc(toSeaDescDomain(seaDescJpa));
         return domain;
     }
 
     /** FK가 master_bl_air_id로 이전된 이후 airCharges는 airJpa에서 전달받는다 (Step 1.5). */
     public MasterBlAir toAirDomain(MasterBlJpaEntity jpa, MasterBlAirJpaEntity airJpa,
-                                   List<MasterBlAirChargeJpaEntity> airChargeJpaList) {
+                                   List<MasterBlAirChargeJpaEntity> airChargeJpaList,
+                                   MasterBlAirDescJpaEntity airDescJpa) {
         MasterBlAir domain = MasterBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
@@ -59,9 +59,7 @@ public class MasterBlMapper {
         domain.initDims(toDimDomainList(jpa.getDims()));
         List<MasterBlScheduleLegJpaEntity> legJpaList = airJpa != null ? airJpa.getScheduleLegs() : List.of();
         domain.initScheduleLegs(toScheduleLegDomainList(legJpaList));
-        if (jpa.getDesc() != null) {
-            domain.initDesc(toDescDomain(jpa.getDesc()));
-        }
+        if (airDescJpa != null) domain.initDesc(toAirDescDomain(airDescJpa));
         return domain;
     }
 
@@ -208,21 +206,35 @@ public class MasterBlMapper {
 
     // ── E-06 DESC ─────────────────────────────────────────────────────
 
-    public MasterBlDesc toDescDomain(MasterBlDescJpaEntity jpa) {
-        MasterBlDesc domain = MasterBlDesc.create(jpa.getMasterBl().getMasterBlId());
-        domain.assignIdentity(jpa.getMasterBlDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+    public MasterBlDesc toSeaDescDomain(MasterBlSeaDescJpaEntity jpa) {
+        MasterBlDesc domain = MasterBlDesc.create(jpa.getSea().getMasterBlSeaId());
+        domain.assignIdentity(jpa.getMasterBlSeaDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
                 jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
         return domain;
     }
 
-    public Optional<MasterBlDesc> toDescDomain(Optional<MasterBlDescJpaEntity> jpa) {
-        return jpa.map(this::toDescDomain);
+    public MasterBlDesc toAirDescDomain(MasterBlAirDescJpaEntity jpa) {
+        MasterBlDesc domain = MasterBlDesc.create(jpa.getAir().getMasterBlAirId());
+        domain.assignIdentity(jpa.getMasterBlAirDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                jpa.getCreatedBy(), jpa.getUpdatedBy());
+        domain.updateContent(jpa.getMarks(), jpa.getDescription(),
+                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+        return domain;
     }
 
-    public void applyDescFields(MasterBlDesc domain, MasterBlDescJpaEntity jpa, MasterBlJpaEntity masterBlJpa) {
-        jpa.setMasterBl(masterBlJpa);
+    public void applySeaDescFields(MasterBlDesc domain, MasterBlSeaDescJpaEntity jpa, MasterBlSeaJpaEntity seaJpa) {
+        jpa.setSea(seaJpa);
+        jpa.setMarks(domain.getMarks());
+        jpa.setDescription(domain.getDescription());
+        jpa.setDescClause1(domain.getDescClause1());
+        jpa.setDescClause2(domain.getDescClause2());
+        jpa.setRemark(domain.getRemark());
+    }
+
+    public void applyAirDescFields(MasterBlDesc domain, MasterBlAirDescJpaEntity jpa, MasterBlAirJpaEntity airJpa) {
+        jpa.setAir(airJpa);
         jpa.setMarks(domain.getMarks());
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
@@ -309,9 +321,15 @@ public class MasterBlMapper {
         return jpa;
     }
 
-    public MasterBlDescJpaEntity toDescJpa(MasterBlDesc d, MasterBlJpaEntity masterBl) {
-        MasterBlDescJpaEntity jpa = new MasterBlDescJpaEntity();
-        applyDescFields(d, jpa, masterBl);
+    public MasterBlSeaDescJpaEntity toSeaDescJpa(MasterBlDesc d, MasterBlSeaJpaEntity seaJpa) {
+        MasterBlSeaDescJpaEntity jpa = new MasterBlSeaDescJpaEntity();
+        applySeaDescFields(d, jpa, seaJpa);
+        return jpa;
+    }
+
+    public MasterBlAirDescJpaEntity toAirDescJpa(MasterBlDesc d, MasterBlAirJpaEntity airJpa) {
+        MasterBlAirDescJpaEntity jpa = new MasterBlAirDescJpaEntity();
+        applyAirDescFields(d, jpa, airJpa);
         return jpa;
     }
 }

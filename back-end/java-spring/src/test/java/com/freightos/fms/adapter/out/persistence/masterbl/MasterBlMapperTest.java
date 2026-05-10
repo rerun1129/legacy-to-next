@@ -1,10 +1,11 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
-import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -117,7 +117,7 @@ class MasterBlMapperTest {
         airJpa.setHandlingInfoText("ATTACHED : COMM INV & P/LIST");
         airJpa.setOtherTerm(FreightTerm.COLLECT);
 
-        MasterBlAir domain = mapper.toAirDomain(parentJpa, airJpa, List.of());
+        MasterBlAir domain = mapper.toAirDomain(parentJpa, airJpa, List.of(), null);
 
         assertThat(domain.getOtherTerm()).isEqualTo(FreightTerm.COLLECT);
         assertThat(domain.getHandlingInformation()).isNotNull();
@@ -142,7 +142,7 @@ class MasterBlMapperTest {
         parentJpa.setCbm(BigDecimal.valueOf(25.0));
         parentJpa.setFreightTerm(FreightTerm.PREPAID);
 
-        MasterBlSea domain = mapper.toSeaDomain(parentJpa, null);
+        MasterBlSea domain = mapper.toSeaDomain(parentJpa, null, null);
 
         assertThat(domain).isInstanceOf(MasterBlSea.class);
         assertThat(domain.getMblNo().value()).isEqualTo("MBLNO-SEA-001");
@@ -167,9 +167,8 @@ class MasterBlMapperTest {
         parentJpa.setPkgQty(5);
         parentJpa.setGrossWeightKg(BigDecimal.valueOf(120.0));
         parentJpa.setCbm(BigDecimal.valueOf(2.5));
-        // airExt null — seaExt/airExt 는 @OneToOne lazy, 직접 조립 불가
 
-        MasterBlAir domain = mapper.toAirDomain(parentJpa, null, List.of());
+        MasterBlAir domain = mapper.toAirDomain(parentJpa, null, List.of(), null);
 
         assertThat(domain).isInstanceOf(MasterBlAir.class);
         assertThat(domain.getMblNo().value()).isEqualTo("MAWB-001");
@@ -251,56 +250,130 @@ class MasterBlMapperTest {
                 .doesNotThrowAnyException();
     }
 
-    // ── E-06 DESC ────────────────────────────────────────────────────────
+    // ── E-06 DESC (SEA) ──────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toDescDomain: JPA → 도메인 텍스트 필드 전체가 복사된다")
-    void toDescDomain_mapsAllTextFields() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(2L);
+    @DisplayName("toSeaDescDomain: JPA → 도메인 텍스트 필드 전체가 복사된다")
+    void toSeaDescDomain_mapsAllTextFields() {
+        MasterBlSeaJpaEntity seaJpa = new MasterBlSeaJpaEntity();
+        seaJpa.setMasterBlSeaId(10L);
 
-        MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
-        descJpa.setMasterBl(masterBlJpa);
-        descJpa.setMarks("MARKS");
-        descJpa.setDescription("DESCRIPTION");
+        MasterBlSeaDescJpaEntity descJpa = new MasterBlSeaDescJpaEntity();
+        descJpa.setSea(seaJpa);
+        descJpa.setMarks("SEA MARKS");
+        descJpa.setDescription("SEA DESCRIPTION");
         descJpa.setDescClause1(DescClause1.A);
         descJpa.setDescClause2(DescClause2.A);
-        descJpa.setRemark("REMARK");
+        descJpa.setRemark("SEA REMARK");
 
-        MasterBlDesc domain = mapper.toDescDomain(descJpa);
+        MasterBlDesc domain = mapper.toSeaDescDomain(descJpa);
 
-        assertThat(domain.getMarks()).isEqualTo("MARKS");
-        assertThat(domain.getDescription()).isEqualTo("DESCRIPTION");
+        assertThat(domain.getMarks()).isEqualTo("SEA MARKS");
+        assertThat(domain.getDescription()).isEqualTo("SEA DESCRIPTION");
         assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(domain.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(domain.getRemark()).isEqualTo("REMARK");
+        assertThat(domain.getRemark()).isEqualTo("SEA REMARK");
     }
 
     @Test
-    @DisplayName("applyDescFields: 도메인 → JPA 텍스트 필드 전체가 세팅된다")
-    void applyDescFields_setsAllTextFieldsToJpa() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(2L);
+    @DisplayName("applySeaDescFields: 도메인 → SEA desc JPA 텍스트 필드 전체가 세팅된다")
+    void applySeaDescFields_setsAllTextFieldsToJpa() {
+        MasterBlSeaJpaEntity seaJpa = new MasterBlSeaJpaEntity();
+        seaJpa.setMasterBlSeaId(10L);
 
-        MasterBlDesc domain = MasterBlDesc.create(2L);
+        MasterBlDesc domain = MasterBlDesc.create(10L);
         domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A, "REMARK");
-        MasterBlDescJpaEntity descJpa = new MasterBlDescJpaEntity();
+        MasterBlSeaDescJpaEntity descJpa = new MasterBlSeaDescJpaEntity();
 
-        mapper.applyDescFields(domain, descJpa, masterBlJpa);
+        mapper.applySeaDescFields(domain, descJpa, seaJpa);
 
         assertThat(descJpa.getMarks()).isEqualTo("MARKS");
         assertThat(descJpa.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(descJpa.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(descJpa.getRemark()).isEqualTo("REMARK");
-        assertThat(descJpa.getMasterBl()).isSameAs(masterBlJpa);
+        assertThat(descJpa.getSea()).isSameAs(seaJpa);
     }
 
     @Test
-    @DisplayName("toDescDomain(Optional.empty): 빈 Optional을 넘기면 빈 Optional이 반환된다")
-    void toDescDomain_optionalEmpty_returnsEmpty() {
-        Optional<MasterBlDesc> result = mapper.toDescDomain(Optional.empty());
+    @DisplayName("toSeaDescJpa: 도메인과 seaJpa를 받아 필드가 채워진 새 JpaEntity를 반환한다")
+    void toSeaDescJpa_returnsNewJpaWithFieldsAndSeaRef() {
+        MasterBlSeaJpaEntity seaJpa = new MasterBlSeaJpaEntity();
+        seaJpa.setMasterBlSeaId(10L);
 
-        assertThat(result).isEmpty();
+        MasterBlDesc domain = MasterBlDesc.create(10L);
+        domain.updateContent("MARKS", "DESC", DescClause1.A, DescClause2.A, "REMARK");
+
+        MasterBlSeaDescJpaEntity result = mapper.toSeaDescJpa(domain, seaJpa);
+
+        assertThat(result.getSea()).isSameAs(seaJpa);
+        assertThat(result.getMarks()).isEqualTo("MARKS");
+        assertThat(result.getDescription()).isEqualTo("DESC");
+        assertThat(result.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
+        assertThat(result.getRemark()).isEqualTo("REMARK");
+    }
+
+    // ── E-06 DESC (AIR) ──────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toAirDescDomain: JPA → 도메인 텍스트 필드 전체가 복사된다")
+    void toAirDescDomain_mapsAllTextFields() {
+        MasterBlAirJpaEntity airJpa = new MasterBlAirJpaEntity();
+        airJpa.setMasterBlAirId(20L);
+
+        MasterBlAirDescJpaEntity descJpa = new MasterBlAirDescJpaEntity();
+        descJpa.setAir(airJpa);
+        descJpa.setMarks("AIR MARKS");
+        descJpa.setDescription("AIR DESCRIPTION");
+        descJpa.setDescClause1(DescClause1.A);
+        descJpa.setDescClause2(DescClause2.A);
+        descJpa.setRemark("AIR REMARK");
+
+        MasterBlDesc domain = mapper.toAirDescDomain(descJpa);
+
+        assertThat(domain.getMarks()).isEqualTo("AIR MARKS");
+        assertThat(domain.getDescription()).isEqualTo("AIR DESCRIPTION");
+        assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(domain.getDescClause2()).isEqualTo(DescClause2.A);
+        assertThat(domain.getRemark()).isEqualTo("AIR REMARK");
+    }
+
+    @Test
+    @DisplayName("applyAirDescFields: 도메인 → AIR desc JPA 텍스트 필드 전체가 세팅된다")
+    void applyAirDescFields_setsAllTextFieldsToJpa() {
+        MasterBlAirJpaEntity airJpa = new MasterBlAirJpaEntity();
+        airJpa.setMasterBlAirId(20L);
+
+        MasterBlDesc domain = MasterBlDesc.create(20L);
+        domain.updateContent("AIR MARKS", "AIR DESC", DescClause1.A, DescClause2.A, "AIR REMARK");
+        MasterBlAirDescJpaEntity descJpa = new MasterBlAirDescJpaEntity();
+
+        mapper.applyAirDescFields(domain, descJpa, airJpa);
+
+        assertThat(descJpa.getMarks()).isEqualTo("AIR MARKS");
+        assertThat(descJpa.getDescription()).isEqualTo("AIR DESC");
+        assertThat(descJpa.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(descJpa.getRemark()).isEqualTo("AIR REMARK");
+        assertThat(descJpa.getAir()).isSameAs(airJpa);
+    }
+
+    @Test
+    @DisplayName("toAirDescJpa: 도메인과 airJpa를 받아 필드가 채워진 새 JpaEntity를 반환한다")
+    void toAirDescJpa_returnsNewJpaWithFieldsAndAirRef() {
+        MasterBlAirJpaEntity airJpa = new MasterBlAirJpaEntity();
+        airJpa.setMasterBlAirId(20L);
+
+        MasterBlDesc domain = MasterBlDesc.create(20L);
+        domain.updateContent("AIR MARKS", "AIR DESC", DescClause1.A, DescClause2.A, "AIR REMARK");
+
+        MasterBlAirDescJpaEntity result = mapper.toAirDescJpa(domain, airJpa);
+
+        assertThat(result.getAir()).isSameAs(airJpa);
+        assertThat(result.getMarks()).isEqualTo("AIR MARKS");
+        assertThat(result.getDescription()).isEqualTo("AIR DESC");
+        assertThat(result.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
+        assertThat(result.getRemark()).isEqualTo("AIR REMARK");
     }
 
     // ── E-07 SCHEDULE LEG ────────────────────────────────────────────────
@@ -378,27 +451,6 @@ class MasterBlMapperTest {
 
         assertThatCode(() -> mapper.applyScheduleLegFields(domain, legJpa))
                 .doesNotThrowAnyException();
-    }
-
-    // ── E-06 DESC toDescJpa ──────────────────────────────────────────────
-
-    @Test
-    @DisplayName("toDescJpa: 도메인과 부모 JPA를 받아 필드가 채워진 새 JpaEntity를 반환한다")
-    void toDescJpa_returnsNewJpaWithFieldsAndParent() {
-        MasterBlJpaEntity masterBlJpa = new MasterBlJpaEntity();
-        masterBlJpa.setMasterBlId(1L);
-
-        MasterBlDesc domain = MasterBlDesc.create(1L);
-        domain.updateContent("MARKS", "DESC", DescClause1.A, DescClause2.A, "REMARK");
-
-        MasterBlDescJpaEntity result = mapper.toDescJpa(domain, masterBlJpa);
-
-        assertThat(result.getMasterBl()).isSameAs(masterBlJpa);
-        assertThat(result.getMarks()).isEqualTo("MARKS");
-        assertThat(result.getDescription()).isEqualTo("DESC");
-        assertThat(result.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(result.getRemark()).isEqualTo("REMARK");
     }
 
     // ── applyAirFields handlingInformation null 분기 ─────────────────

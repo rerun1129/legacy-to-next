@@ -1,7 +1,10 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaDescJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -40,6 +43,8 @@ class MasterBlPersistenceAdapterTest {
     @Mock private MasterBlRepository masterBlRepository;
     @Mock private MasterBlSeaRepository masterBlSeaRepository;
     @Mock private MasterBlAirRepository masterBlAirRepository;
+    @Mock private MasterBlSeaDescRepository masterBlSeaDescRepository;
+    @Mock private MasterBlAirDescRepository masterBlAirDescRepository;
     @Mock private MasterBlMapper masterBlMapper;
 
     @InjectMocks
@@ -48,26 +53,30 @@ class MasterBlPersistenceAdapterTest {
     // ── saveMasterBl(SEA) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(SEA): replaceDesc 호출, syncDims 미호출")
-    void saveMasterBl_sea_callsSyncMethodsInOrder() {
+    @DisplayName("saveMasterBl(SEA): seaRepository.save 후 saveOrDeleteSeaDesc 호출 순서 보장")
+    void saveMasterBl_sea_savesSeaExtThenDesc() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
-        MasterBlJpaEntity savedJpa = spy(new MasterBlJpaEntity());
+        MasterBlJpaEntity savedJpa = new MasterBlJpaEntity();
         savedJpa.setJobDiv(MasterBlJobDiv.SEA);
+        MasterBlSeaJpaEntity savedSeaJpa = new MasterBlSeaJpaEntity();
         given(masterBlRepository.save(any())).willReturn(savedJpa);
         given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
-        given(masterBlMapper.toSeaDomain(eq(savedJpa), any())).willReturn(sea);
+        given(masterBlSeaRepository.save(any())).willReturn(savedSeaJpa);
+        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.empty());
+        given(masterBlMapper.toSeaDomain(eq(savedJpa), any(), any())).willReturn(sea);
 
         adapter.saveMasterBl(sea);
 
-        then(savedJpa).should().replaceDesc(any());
-        then(savedJpa).should(never()).syncDims(any());
-        then(masterBlSeaRepository).should().save(any());
+        org.mockito.InOrder order = inOrder(masterBlSeaRepository, masterBlSeaDescRepository);
+        order.verify(masterBlSeaRepository).save(any());
+        // desc가 null이면 findBySea 호출 후 삭제 시도 — null desc 케이스에서는 delete 경로
+        order.verify(masterBlSeaDescRepository).findBySea_MasterBlSeaId(any());
     }
 
     // ── saveMasterBl(AIR) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(AIR): syncDims→replaceDesc→airRepository.save→savedAirJpa.syncScheduleLegs→savedAirJpa.syncAirCharges 순서")
+    @DisplayName("saveMasterBl(AIR): airRepository.save→syncScheduleLegs→syncAirCharges→saveOrDeleteAirDesc 순서")
     void saveMasterBl_air_callsSyncMethodsInOrder() {
         MasterBlAir air = MasterBlAir.create(Bound.EXP);
         MasterBlJpaEntity savedJpa = spy(new MasterBlJpaEntity());
@@ -76,16 +85,16 @@ class MasterBlPersistenceAdapterTest {
         given(masterBlRepository.save(any())).willReturn(savedJpa);
         given(masterBlAirRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
         given(masterBlAirRepository.save(any())).willReturn(savedAirJpa);
-        given(masterBlMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
+        given(masterBlAirDescRepository.findByAir_MasterBlAirId(any())).willReturn(Optional.empty());
+        given(masterBlMapper.toAirDomain(eq(savedJpa), any(), any(), any())).willReturn(air);
 
         adapter.saveMasterBl(air);
 
-        org.mockito.InOrder order = inOrder(savedJpa, masterBlAirRepository, savedAirJpa);
-        order.verify(savedJpa).syncDims(any());
-        order.verify(savedJpa).replaceDesc(any());
+        org.mockito.InOrder order = inOrder(masterBlAirRepository, savedAirJpa, masterBlAirDescRepository);
         order.verify(masterBlAirRepository).save(any());
         order.verify(savedAirJpa).syncScheduleLegs(any());
         order.verify(savedAirJpa).syncAirCharges(any());
+        order.verify(masterBlAirDescRepository).findByAir_MasterBlAirId(any());
     }
 
     // ── saveMasterBl — 기존 ID 없을 때 예외 ─────────────────────────
@@ -100,11 +109,6 @@ class MasterBlPersistenceAdapterTest {
         assertThatThrownBy(() -> adapter.saveMasterBl(sea))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
-
-    // ── saveMasterBl — 지원하지 않는 타입 ───────────────────────────
-    // switch 분기가 instanceof 패턴(MasterBlAir / MasterBlSea)으로 구성되고
-    // MasterBl이 non-sealed abstract class라 Mockito mock 생성 시 MockitoException 발생.
-    // 실질적으로 허용된 모든 구체 타입이 분기에서 처리되므로 default 도달이 불가하여 테스트 제거.
 
     // ── loadWithExt(jobDiv == null) → IAE ────────────────────────────
 
@@ -131,7 +135,8 @@ class MasterBlPersistenceAdapterTest {
         Page<MasterBlJpaEntity> page = new PageImpl<>(List.of(jpa));
         given(masterBlRepository.findAllByBound(eq(Bound.EXP), any(Pageable.class))).willReturn(page);
         given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
-        given(masterBlMapper.toSeaDomain(eq(jpa), any())).willReturn(MasterBlSea.create(Bound.EXP));
+        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.empty());
+        given(masterBlMapper.toSeaDomain(eq(jpa), any(), any())).willReturn(MasterBlSea.create(Bound.EXP));
 
         adapter.getMasterBlsByBound(Bound.EXP, pageRequest);
 
@@ -167,7 +172,8 @@ class MasterBlPersistenceAdapterTest {
         MasterBlSea expected = MasterBlSea.create(Bound.EXP);
         given(masterBlRepository.findByMblNo("MBL-001")).willReturn(Optional.of(jpa));
         given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
-        given(masterBlMapper.toSeaDomain(eq(jpa), any())).willReturn(expected);
+        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.empty());
+        given(masterBlMapper.toSeaDomain(eq(jpa), any(), any())).willReturn(expected);
 
         Optional<MasterBl> result = adapter.findMasterBlByMblNo("MBL-001");
 
@@ -191,7 +197,7 @@ class MasterBlPersistenceAdapterTest {
     // ── deleteMasterBl 위임 ───────────────────────────────────────────
 
     @Test
-    @DisplayName("deleteMasterBl: sea/air ext 삭제 후 masterBlRepository.deleteById 호출")
+    @DisplayName("deleteMasterBl: sea/air ext 삭제 후 masterBlRepository.deleteById 호출 (desc는 CASCADE 정리)")
     void deleteMasterBl_delegatesToRepository() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         sea.assignIdentity(10L, null, null, null, null);
@@ -225,5 +231,49 @@ class MasterBlPersistenceAdapterTest {
         assertThat(result.getContent().get(0)).isEqualTo(summary);
         assertThat(result.getTotalElements()).isEqualTo(1L);
         then(masterBlRepository).should().searchByFilter(filter, pageRequest);
+    }
+
+    // ── loadWithExt SEA desc 로드 ────────────────────────────────────
+
+    @Test
+    @DisplayName("loadWithExt(SEA): seaJpa가 있으면 seaDescRepository에서 desc 조회")
+    void loadWithExt_sea_loadsDescFromSeaDescRepository() {
+        MasterBlJpaEntity jpa = new MasterBlJpaEntity();
+        jpa.setJobDiv(MasterBlJobDiv.SEA);
+        MasterBlSeaJpaEntity seaJpa = new MasterBlSeaJpaEntity();
+        MasterBlSeaDescJpaEntity seaDescJpa = new MasterBlSeaDescJpaEntity();
+        MasterBlSea expected = MasterBlSea.create(Bound.EXP);
+
+        given(masterBlRepository.findById(1L)).willReturn(Optional.of(jpa));
+        given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.of(seaJpa));
+        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.of(seaDescJpa));
+        given(masterBlMapper.toSeaDomain(eq(jpa), eq(seaJpa), eq(seaDescJpa))).willReturn(expected);
+
+        Optional<MasterBl> result = adapter.findMasterBlById(1L);
+
+        assertThat(result).contains(expected);
+        then(masterBlSeaDescRepository).should().findBySea_MasterBlSeaId(any());
+    }
+
+    // ── loadWithExt AIR desc 로드 ────────────────────────────────────
+
+    @Test
+    @DisplayName("loadWithExt(AIR): airJpa가 있으면 airDescRepository에서 desc 조회")
+    void loadWithExt_air_loadsDescFromAirDescRepository() {
+        MasterBlJpaEntity jpa = new MasterBlJpaEntity();
+        jpa.setJobDiv(MasterBlJobDiv.AIR);
+        MasterBlAirJpaEntity airJpa = new MasterBlAirJpaEntity();
+        MasterBlAirDescJpaEntity airDescJpa = new MasterBlAirDescJpaEntity();
+        MasterBlAir expected = MasterBlAir.create(Bound.EXP);
+
+        given(masterBlRepository.findById(1L)).willReturn(Optional.of(jpa));
+        given(masterBlAirRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.of(airJpa));
+        given(masterBlAirDescRepository.findByAir_MasterBlAirId(any())).willReturn(Optional.of(airDescJpa));
+        given(masterBlMapper.toAirDomain(eq(jpa), eq(airJpa), any(), eq(airDescJpa))).willReturn(expected);
+
+        Optional<MasterBl> result = adapter.findMasterBlById(1L);
+
+        assertThat(result).contains(expected);
+        then(masterBlAirDescRepository).should().findByAir_MasterBlAirId(any());
     }
 }

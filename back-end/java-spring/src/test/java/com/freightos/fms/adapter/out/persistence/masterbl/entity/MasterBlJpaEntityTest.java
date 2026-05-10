@@ -1,50 +1,56 @@
 package com.freightos.fms.adapter.out.persistence.masterbl.entity;
 
+import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+/**
+ * MasterBlJpaEntity 단위 테스트.
+ * Step 2.2: desc 필드·replaceDesc 메서드 제거 — syncDims 동작으로 교체.
+ */
 class MasterBlJpaEntityTest {
 
-    // ── replaceDesc ─────────────────────────────────────────────────
+    // ── syncDims ─────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("replaceDesc: 기존 desc가 있으면 기존 desc의 masterBl back-ref를 null로 만든다")
-    void replaceDesc_existingDesc_nullsOldBackRef() {
+    @DisplayName("syncDims: null 입력해도 예외 없이 처리된다")
+    void syncDims_nullInput_noException() {
         MasterBlJpaEntity entity = new MasterBlJpaEntity();
-        MasterBlDescJpaEntity oldDesc = new MasterBlDescJpaEntity();
-        oldDesc.setMasterBl(entity);
-        entity.replaceDesc(oldDesc);
+        entity.setJobDiv(MasterBlJobDiv.SEA);
+        entity.setBound(Bound.EXP);
 
-        MasterBlDescJpaEntity newDesc = new MasterBlDescJpaEntity();
-        entity.replaceDesc(newDesc);
-
-        assertThat(oldDesc.getMasterBl()).isNull();
-        assertThat(entity.getDesc()).isEqualTo(newDesc);
+        assertThatCode(() -> entity.syncDims(null)).doesNotThrowAnyException();
+        assertThat(entity.getDims()).isEmpty();
     }
 
     @Test
-    @DisplayName("replaceDesc: null 입력 시 기존 desc의 back-ref를 null로 만들고 desc도 null 처리")
-    void replaceDesc_nullInput_clearsExistingDesc() {
+    @DisplayName("syncDims: 빈 리스트 입력 시 dims가 비워진다")
+    void syncDims_emptyList_clearsDims() {
         MasterBlJpaEntity entity = new MasterBlJpaEntity();
-        MasterBlDescJpaEntity existingDesc = new MasterBlDescJpaEntity();
-        existingDesc.setMasterBl(entity);
-        entity.replaceDesc(existingDesc);
+        MasterBlDimJpaEntity dim = new MasterBlDimJpaEntity();
+        entity.syncDims(List.of(dim));
 
-        entity.replaceDesc(null);
+        entity.syncDims(List.of());
 
-        assertThat(existingDesc.getMasterBl()).isNull();
-        assertThat(entity.getDesc()).isNull();
+        assertThat(entity.getDims()).isEmpty();
     }
 
     @Test
-    @DisplayName("replaceDesc: 기존 desc가 없을 때 null 입력해도 예외 없이 처리된다")
-    void replaceDesc_noExistingDesc_nullInput_noException() {
+    @DisplayName("syncDims: 기존 dims 교체 후 새 dims 리스트 반영")
+    void syncDims_replaceExisting_newListReflected() {
         MasterBlJpaEntity entity = new MasterBlJpaEntity();
+        MasterBlDimJpaEntity dim1 = new MasterBlDimJpaEntity();
+        MasterBlDimJpaEntity dim2 = new MasterBlDimJpaEntity();
+        entity.syncDims(List.of(dim1));
 
-        assertThatCode(() -> entity.replaceDesc(null)).doesNotThrowAnyException();
-        assertThat(entity.getDesc()).isNull();
+        entity.syncDims(List.of(dim1, dim2));
+
+        assertThat(entity.getDims()).hasSize(2);
     }
 }

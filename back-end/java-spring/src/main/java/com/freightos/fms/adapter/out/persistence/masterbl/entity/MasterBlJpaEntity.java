@@ -109,10 +109,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "settle_partner_code", length = 20)
     private String settlePartnerCode;
 
-    // SEA/AIR 모두 채워질 수 있음, null 허용
-    @OneToOne(mappedBy = "masterBl", cascade = CascadeType.ALL, orphanRemoval = true)
-    private MasterBlDescJpaEntity desc;
-
     // AIR/NON_BL 등에서 채워짐, 다른 모드는 빈 컬렉션이 정상
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -149,10 +145,5 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void syncDims(List<MasterBlDimJpaEntity> v) {
         this.dims.clear();
         if (v != null) this.dims.addAll(v);
-    }
-
-    public void replaceDesc(MasterBlDescJpaEntity newDesc) {
-        if (this.desc != null) this.desc.setMasterBl(null);
-        this.desc = newDesc;
     }
 }

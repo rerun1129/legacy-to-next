@@ -1,11 +1,13 @@
 package com.freightos.fms.adapter.out.persistence.masterbl;
 
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlAirJpaEntity;
-import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlScheduleLegJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaDescJpaEntity;
+import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Master B/L 단방향 @OneToMany 매핑의 CRUD·라운드트립·orphanRemoval·cascade 동작을 검증한다.
  * scheduleLegs는 Step 1.4에서 MasterBlJpaEntity → MasterBlAirJpaEntity 소유로 재배치됨.
+ * desc는 Step 2.2에서 master_bl_sea_desc / master_bl_air_desc 독립 테이블로 분리됨.
  * @DataJpaTest 슬라이스 + H2 in-memory(application-test.yml).
  */
 @DataJpaTest
@@ -43,6 +46,12 @@ class MasterBlMappingIntegrationTest {
         p.setJobDiv(jobDiv);
         p.setBound(Bound.EXP);
         return p;
+    }
+
+    private MasterBlSeaJpaEntity newSeaExt(MasterBlJpaEntity parent) {
+        MasterBlSeaJpaEntity s = new MasterBlSeaJpaEntity();
+        s.setMasterBl(parent);
+        return s;
     }
 
     private MasterBlAirJpaEntity newAirExt(MasterBlJpaEntity parent) {
@@ -71,9 +80,16 @@ class MasterBlMappingIntegrationTest {
         return a;
     }
 
-    private MasterBlDescJpaEntity desc(MasterBlJpaEntity parent, String marks) {
-        MasterBlDescJpaEntity d = new MasterBlDescJpaEntity();
-        d.setMasterBl(parent);
+    private MasterBlSeaDescJpaEntity seaDesc(MasterBlSeaJpaEntity seaExt, String marks) {
+        MasterBlSeaDescJpaEntity d = new MasterBlSeaDescJpaEntity();
+        d.setSea(seaExt);
+        d.setMarks(marks);
+        return d;
+    }
+
+    private MasterBlAirDescJpaEntity airDesc(MasterBlAirJpaEntity airExt, String marks) {
+        MasterBlAirDescJpaEntity d = new MasterBlAirDescJpaEntity();
+        d.setAir(airExt);
         d.setMarks(marks);
         return d;
     }
@@ -96,6 +112,20 @@ class MasterBlMappingIntegrationTest {
         return em.createQuery(
                         "SELECT COUNT(c) FROM MasterBlAirChargeJpaEntity c WHERE c.masterBlAirId = :pid", Long.class)
                 .setParameter("pid", masterBlAirId)
+                .getSingleResult();
+    }
+
+    private long countSeaDescs(Long masterBlSeaId) {
+        return em.createQuery(
+                        "SELECT COUNT(d) FROM MasterBlSeaDescJpaEntity d WHERE d.sea.masterBlSeaId = :sid", Long.class)
+                .setParameter("sid", masterBlSeaId)
+                .getSingleResult();
+    }
+
+    private long countAirDescs(Long masterBlAirId) {
+        return em.createQuery(
+                        "SELECT COUNT(d) FROM MasterBlAirDescJpaEntity d WHERE d.air.masterBlAirId = :aid", Long.class)
+                .setParameter("aid", masterBlAirId)
                 .getSingleResult();
     }
 
@@ -335,62 +365,168 @@ class MasterBlMappingIntegrationTest {
         assertThat(countDims(parentId)).isZero();
     }
 
+    // ── SEA desc 저장·교체·cascade 테스트 ────────────────────────────────
+
     @Test
-    @DisplayName("replaceDesc: 기존 desc 교체 후 flush → 기존 descId로 조회 시 null (orphanRemoval)")
-    void replaceDesc_orphanDescIsDeletedFromDb() {
+    @DisplayName("SEA desc round-trip: marks/description/descClause1/descClause2/remark 저장 후 재조회 시 모든 필드 유지")
+    void seaDesc_roundTrip_allFieldsPreserved() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
         em.persist(parent);
         em.flush();
 
-        MasterBlDescJpaEntity oldDesc = desc(parent, "OLD MARKS");
-        em.persist(oldDesc);
-        parent.replaceDesc(oldDesc);
+        MasterBlSeaJpaEntity seaExt = newSeaExt(parent);
+        em.persist(seaExt);
+        em.flush();
+
+        MasterBlSeaDescJpaEntity descEntity = seaDesc(seaExt, "SEA ROUND-TRIP MARKS");
+        descEntity.setDescription("SEA ROUND-TRIP DESCRIPTION");
+        descEntity.setDescClause1(DescClause1.A);
+        descEntity.setDescClause2(DescClause2.A);
+        descEntity.setRemark("SEA ROUND-TRIP REMARK");
+        em.persist(descEntity);
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        Long oldDescId = loaded.getDesc().getMasterBlDescId();
+        MasterBlSeaDescJpaEntity loadedDesc = em.createQuery(
+                        "SELECT d FROM MasterBlSeaDescJpaEntity d WHERE d.sea.masterBlSeaId = :sid",
+                        MasterBlSeaDescJpaEntity.class)
+                .setParameter("sid", seaExt.getMasterBlSeaId())
+                .getSingleResult();
 
-        // 1단계: null로 교체 → Hibernate가 DELETE를 먼저 실행하도록 보장
-        // (INSERT→DELETE 순 flush로 인한 unique constraint 위반 방지)
-        loaded.replaceDesc(null);
-        em.flush();
-
-        // 2단계: 새 desc 설정 → cascade=ALL에 의해 INSERT
-        MasterBlDescJpaEntity newDesc = desc(loaded, "NEW MARKS");
-        loaded.replaceDesc(newDesc);
-        em.flush();
-        em.clear();
-
-        assertThat(em.find(MasterBlDescJpaEntity.class, oldDescId)).isNull();
-        MasterBlJpaEntity reloaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        assertThat(reloaded.getDesc().getMarks()).isEqualTo("NEW MARKS");
+        assertThat(loadedDesc.getMarks()).isEqualTo("SEA ROUND-TRIP MARKS");
+        assertThat(loadedDesc.getDescription()).isEqualTo("SEA ROUND-TRIP DESCRIPTION");
+        assertThat(loadedDesc.getDescClause1()).isEqualTo(DescClause1.A);
+        assertThat(loadedDesc.getDescClause2()).isEqualTo(DescClause2.A);
+        assertThat(loadedDesc.getRemark()).isEqualTo("SEA ROUND-TRIP REMARK");
     }
 
     @Test
-    @DisplayName("desc round-trip: marks/description/descClause1/descClause2/remark 저장 후 재조회 시 모든 필드 유지")
-    void desc_roundTrip_allFieldsPreserved() {
+    @DisplayName("SEA desc replace: 기존 desc 삭제 후 신규 insert — 기존 descId로 조회 시 null")
+    void seaDesc_replace_oldRowDeletedNewRowInserted() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
+        em.persist(parent);
+        em.flush();
+
+        MasterBlSeaJpaEntity seaExt = newSeaExt(parent);
+        em.persist(seaExt);
+        em.flush();
+
+        MasterBlSeaDescJpaEntity oldDesc = seaDesc(seaExt, "OLD SEA MARKS");
+        em.persist(oldDesc);
+        em.flush();
+        Long oldDescId = oldDesc.getMasterBlSeaDescId();
+        em.clear();
+
+        // old desc 삭제 후 신규 insert
+        MasterBlSeaDescJpaEntity toDelete = em.find(MasterBlSeaDescJpaEntity.class, oldDescId);
+        em.remove(toDelete);
+        em.flush();
+
+        MasterBlSeaJpaEntity reloadedSea = em.find(MasterBlSeaJpaEntity.class, seaExt.getMasterBlSeaId());
+        MasterBlSeaDescJpaEntity newDesc = seaDesc(reloadedSea, "NEW SEA MARKS");
+        em.persist(newDesc);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlSeaDescJpaEntity.class, oldDescId)).isNull();
+        MasterBlSeaDescJpaEntity loadedNew = em.createQuery(
+                        "SELECT d FROM MasterBlSeaDescJpaEntity d WHERE d.sea.masterBlSeaId = :sid",
+                        MasterBlSeaDescJpaEntity.class)
+                .setParameter("sid", seaExt.getMasterBlSeaId())
+                .getSingleResult();
+        assertThat(loadedNew.getMarks()).isEqualTo("NEW SEA MARKS");
+    }
+
+    @Test
+    @DisplayName("SEA ext delete → sea_desc CASCADE 자동 정리 (ON DELETE CASCADE)")
+    void seaExtDelete_cascadeDeletesSeaDesc() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
+        em.persist(parent);
+        em.flush();
+
+        MasterBlSeaJpaEntity seaExt = newSeaExt(parent);
+        em.persist(seaExt);
+        em.flush();
+        Long seaExtId = seaExt.getMasterBlSeaId();
+
+        MasterBlSeaDescJpaEntity desc = seaDesc(seaExt, "CASCADE TEST");
+        em.persist(desc);
+        em.flush();
+        em.clear();
+
+        assertThat(countSeaDescs(seaExtId)).isEqualTo(1L);
+
+        // seaExt 삭제 — ON DELETE CASCADE로 desc도 DB에서 정리됨
+        MasterBlSeaJpaEntity loadedSea = em.find(MasterBlSeaJpaEntity.class, seaExtId);
+        em.remove(loadedSea);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlSeaJpaEntity.class, seaExtId)).isNull();
+        assertThat(countSeaDescs(seaExtId)).isZero();
+    }
+
+    // ── AIR desc 저장·교체·cascade 테스트 ────────────────────────────────
+
+    @Test
+    @DisplayName("AIR desc round-trip: marks/description/descClause1/descClause2/remark 저장 후 재조회 시 모든 필드 유지")
+    void airDesc_roundTrip_allFieldsPreserved() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         em.persist(parent);
         em.flush();
 
-        MasterBlDescJpaEntity descEntity = desc(parent, "ROUND-TRIP MARKS");
-        descEntity.setDescription("ROUND-TRIP DESCRIPTION");
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
+
+        MasterBlAirDescJpaEntity descEntity = airDesc(airExt, "AIR ROUND-TRIP MARKS");
+        descEntity.setDescription("AIR ROUND-TRIP DESCRIPTION");
         descEntity.setDescClause1(DescClause1.A);
         descEntity.setDescClause2(DescClause2.A);
-        descEntity.setRemark("ROUND-TRIP REMARK");
+        descEntity.setRemark("AIR ROUND-TRIP REMARK");
         em.persist(descEntity);
-        parent.replaceDesc(descEntity);
         em.flush();
         em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        MasterBlDescJpaEntity loadedDesc = loaded.getDesc();
+        MasterBlAirDescJpaEntity loadedDesc = em.createQuery(
+                        "SELECT d FROM MasterBlAirDescJpaEntity d WHERE d.air.masterBlAirId = :aid",
+                        MasterBlAirDescJpaEntity.class)
+                .setParameter("aid", airExt.getMasterBlAirId())
+                .getSingleResult();
 
-        assertThat(loadedDesc.getMarks()).isEqualTo("ROUND-TRIP MARKS");
-        assertThat(loadedDesc.getDescription()).isEqualTo("ROUND-TRIP DESCRIPTION");
+        assertThat(loadedDesc.getMarks()).isEqualTo("AIR ROUND-TRIP MARKS");
+        assertThat(loadedDesc.getDescription()).isEqualTo("AIR ROUND-TRIP DESCRIPTION");
         assertThat(loadedDesc.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(loadedDesc.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(loadedDesc.getRemark()).isEqualTo("ROUND-TRIP REMARK");
+        assertThat(loadedDesc.getRemark()).isEqualTo("AIR ROUND-TRIP REMARK");
+    }
+
+    @Test
+    @DisplayName("AIR ext delete → air_desc CASCADE 자동 정리 (ON DELETE CASCADE)")
+    void airExtDelete_cascadeDeletesAirDesc() {
+        MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
+        em.persist(parent);
+        em.flush();
+
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        em.persist(airExt);
+        em.flush();
+        Long airExtId = airExt.getMasterBlAirId();
+
+        MasterBlAirDescJpaEntity desc = airDesc(airExt, "AIR CASCADE TEST");
+        em.persist(desc);
+        em.flush();
+        em.clear();
+
+        assertThat(countAirDescs(airExtId)).isEqualTo(1L);
+
+        // airExt 삭제 — ON DELETE CASCADE로 desc도 DB에서 정리됨
+        MasterBlAirJpaEntity loadedAir = em.find(MasterBlAirJpaEntity.class, airExtId);
+        em.remove(loadedAir);
+        em.flush();
+        em.clear();
+
+        assertThat(em.find(MasterBlAirJpaEntity.class, airExtId)).isNull();
+        assertThat(countAirDescs(airExtId)).isZero();
     }
 }

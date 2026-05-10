@@ -107,6 +107,7 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "master_bl_air_id", nullable = false, updatable = false)
     private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
 
+    public void setMasterBlAirId(Long v) { this.masterBlAirId = v; }
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }

@@ -8,23 +8,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * JPA ORM 엔티티 — Master B/L Description (화물 표시 및 명세).
- * MasterBlJpaEntity 와 @OneToOne(FK: master_bl_id, unique) 관계.
+ * JPA ORM 엔티티 — Master B/L 항공(AIR) 화물 표시 및 품목 설명.
+ * MasterBlAirJpaEntity 와 @OneToOne(FK: master_bl_air_id) 관계.
+ * ON DELETE CASCADE — airExt 삭제 시 DB가 자동 정리.
  */
 @Entity
-@Table(schema = "fms", name = "master_bl_desc")
+@Table(schema = "fms", name = "master_bl_air_desc")
 @Getter
 @NoArgsConstructor
-public class MasterBlDescJpaEntity extends BaseJpaEntity {
+public class MasterBlAirDescJpaEntity extends BaseJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "master_bl_desc_id", updatable = false, nullable = false)
-    private Long masterBlDescId;
+    @Column(name = "master_bl_air_desc_id", updatable = false, nullable = false)
+    private Long masterBlAirDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_id", nullable = false, unique = true)
-    private MasterBlJpaEntity masterBl;
+    @JoinColumn(name = "master_bl_air_id", nullable = false, unique = true)
+    private MasterBlAirJpaEntity air;
 
     @Column(name = "marks", columnDefinition = "TEXT")
     private String marks;
@@ -43,7 +44,8 @@ public class MasterBlDescJpaEntity extends BaseJpaEntity {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
-    public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
+    public void setMasterBlAirDescId(Long v) { this.masterBlAirDescId = v; }
+    public void setAir(MasterBlAirJpaEntity v) { this.air = v; }
     public void setMarks(String v) { this.marks = v; }
     public void setDescription(String v) { this.description = v; }
     public void setDescClause1(DescClause1 v) { this.descClause1 = v; }
