@@ -515,6 +515,49 @@ BE 컨트롤러 응답 body를 축소·확장하면 FE adapter의 zod 파싱 스
 
 사례: 7e5e41d — Non B/L `createNonBl` 응답이 `NonBlDetailResponse` → `{id}`로 축소된 후 FE adapter zod 미정합으로 신규 저장 시 `405 Method Not Allowed for GET /api/non-bl` 발생(`saved.id` undefined → 후속 GET URL이 `/api/non-bl`로 됨). `apiResponse(z.object({ id: z.number() }))` + `NonBlPort.create: Promise<{id: number}>`로 fix.
 
+### 6.30 bulk DELETE의 `clearAutomatically=true` 부작용
+
+`@Modifying @Query("delete from ...")` JPQL bulk DELETE에 `clearAutomatically=true`를 켜면 1차 캐시가 **전부** 비워진다. 같은 트랜잭션에서 직후 `deleteById`/`findById`/cascade LAZY fetch가 일어나면 모두 캐시 미스로 추가 SELECT 발사 — 의도와 달리 SELECT 수가 오히려 증가한다.
+
+**올바른 패턴**:
+- bulk DELETE 직후 트랜잭션이 종료되거나 다른 read/write가 없는 흐름이면 `flushAutomatically=true`만 사용 (`clearAutomatically` 생략)
+- bulk DELETE 대상 엔티티가 부모 cascade 컬렉션에 매핑되어 있지 않으면 stale 위험 없음 (1:1 ext, desc 등)
+- bulk DELETE 후 같은 entity를 다시 read해야 하는 경우만 `clearAutomatically=true`
+
+사례: d9f9cd4 — HouseBl ext Repository 5개의 `clearAutomatically=true` 제거 후 NON_BL 삭제 SELECT 10→7회 회복(이전 켰을 때 부모 + container/dim 재SELECT 3건 추가 발생).
+
+### 6.31 ext FK 재배치 시 `@OnDelete(CASCADE)` JPA 어노테이션 필수
+
+DDL 마이그레이션의 `ON DELETE CASCADE`가 Hibernate `ddl-auto=create-drop` 재생성 시 누락된다(테스트 환경 H2 등). JPA 매핑에 `@org.hibernate.annotations.OnDelete(action=OnDeleteAction.CASCADE)` 어노테이션을 함께 명시해야 Hibernate가 DDL 생성 시 CASCADE 옵션을 포함한다.
+
+**적용 위치**:
+- 1:1 자식: 자식 entity의 `@OneToOne` `@JoinColumn` 옆
+- 1:N 자식: 부모(ext) entity의 `@OneToMany` `@JoinColumn` 옆
+
+**증상**: 마이그레이션 SQL에 `ON DELETE CASCADE` 명시했으나 통합 테스트에서 ext 삭제 시 `ConstraintViolationException` (FK 위반) 발생. 마이그레이션 SQL은 통과했다는 착각이 든다.
+
+사례: 7b6d0b6 — Phase 2 desc 분리 시 5개 desc JPA(HouseBl sea/air/truck + MasterBl sea/air)에 `@OnDelete CASCADE` 추가로 해결.
+
+### 6.32 ER 재구조화 — 단독 자식 vs 공유 자식 처리 원칙 (SSOT)
+
+자식 테이블 FK를 부모(`house_bl`/`master_bl`)에서 ext(`house_bl_<jobdiv>`)로 이전할 때:
+
+**단독 자식** (한 JobDiv만 사용): 테이블명 유지 + FK 컬럼만 ext PK로 이전
+- 예: `house_bl_schedule_leg.house_bl_id` → `house_bl_air_id` (AIR 전용)
+- 단순 ALTER TABLE 마이그레이션, JPA 부모 참조 변경만
+
+**공유 자식** (여러 JobDiv 사용): 테이블 자체를 ext별로 분리
+- 예: `house_bl_desc` → `house_bl_sea_desc` + `house_bl_air_desc` + `house_bl_truck_desc`
+- 도메인 객체는 단일(`HouseBlDesc`), JPA·Repository·mapper만 ext별 분기
+
+**원칙**: 단독은 그대로(이후 공유로 확장될 때 분리), 공유는 즉시 분리. 일관성을 위해 단독 자식까지 강제로 prefix(`house_bl_air_schedule_leg`)를 붙이지는 않음 — 테이블명에 ext 의미가 이미 포함되거나(`air_charge`, `truck_order`) prefix 중복(`air_air_charge`)이 어색한 경우 회피.
+
+**적용 흐름** (Phase 1~4):
+- Phase 1 (단독 5개): schedule_leg/air_charge/truck_order × HouseBl/MasterBl — FK만 이전
+- Phase 2 (공유 desc): HouseBl 3개(sea/air/truck) + MasterBl 2개(sea/air) — 테이블 분리
+- Phase 3 (공유 container): HouseBl 2개(sea/nonbl) — 테이블 분리, MasterBl 미사용
+- Phase 4 (공유 dim HouseBl + 단독 MasterBl): HouseBl 3개 분리, MasterBl FK만 이전
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
@@ -614,6 +657,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **Non B/L Entry Search EXACT PK 조회 endpoint 분리 (2026-05-10)** — Entry Search가 List용 `searchNonBlSummaries`(LIKE+COUNT, JOIN+22 projection)를 재사용하던 흐름을 폐기하고 `POST /api/non-bl/find-by-hbl-no` 신설. UseCase/Port/Repository에 `findNonBlKeysByHblNoExact(String): List<Long>` 추가, JOIN/projection/COUNT 모두 제거하고 `select house_bl_id where job_div='NON_BL' and hbl_no=? order by created_at desc limit 2`만 발사. FE `nonBlPort.findByHblNo` 어댑터 추가, Entry `handleSearch`의 30개 dummy filter 객체 제거. Detail 로드는 기존 useQuery `getById` 흐름이 그대로 담당. SQL 2회 → 1회. (§6.19 갱신)
 - **Non B/L Entry Update 응답용 중복 reload 제거 (2026-05-10)** — Non B/L Update 1회당 p6spy SELECT 6회 발생 분석. dirty checking 사전 fetch(parent + ext entity, line 46/189/126)는 필수, containers/dims lazy(line 81/85)는 응답에 필요하므로 유지. 진짜 redundant한 두 곳만 제거: (A) `HouseBlPersistenceAdapter.saveHouseBl` 본문 끝의 `return loadWithExt(savedJpa)` — NON_BL case 한정으로 `return nonBl;` (in-memory 직접 반환)으로 단축, `BaseEntity.assignIdentity`로 parent id + 감사 필드 sync, 신규 private `syncChildIds`/`syncDimIds`로 cascade flush 후 자식 PK를 도메인 자식에 역방향 인덱스 매핑 sync. SEA/AIR/TRUCK case는 기존대로 `return loadWithExt(savedJpa)` 경로 유지(회귀 차단). (B) `NonBlService.updateNonBl`의 `houseBlUseCase.updateHouseBl` 호출 + `findNonBlDomainById` 응답 재조회 둘 다 제거 — `NonBlService`가 `HouseBlPort` + `HouseBlFactory`를 직접 사용해 `findHouseBlById → applyToEntity → saveHouseBl`을 수행하고 반환 도메인을 `(HouseBlNonBl)` 캐스팅해서 `NonBlDetailResult.from(...)` 호출. ARCH1 — `HouseBlUseCase`에 도메인 노출용 메서드 추가는 금지(application↔application 참조는 허용). 결과: **SELECT 6 → 5회 (실측)**. line 141의 `loadWithExt` 자체는 자체 SELECT를 만들지만 그 내부 라인(189/81/85)은 사전 로드 시 이미 1차 캐시·lazy 초기화 완료되어 두 번째 호출에서 SELECT 미발사 → 실제 절감은 NonBlService 응답 재조회(#6, line 157의 QueryDSL fetchOne) 1건. dirty checking 사전 fetch(#5, line 126)는 영속성 컨텍스트 managed 상태 확보 목적이라 변경 데이터 유무와 무관하게 발사되며, 본 작업에서는 의도적으로 유지(추가 제거는 옵션 3 — 사전 로드된 ext JPA를 saveHouseBl 시그니처로 전달해 1차 캐시 히트 유도, 별도 plan). UPDATE 변경 없음(house_bl + house_bl_non_bl + container/dim merge). 테스트 정리 — `HouseBlPersistenceAdapterTest`의 NON_BL save 3개에서 `jpaToDomainMapper.toNonBlDomain` stubbing 라인 제거(`UnnecessaryStubbingException` 해소). `loadWithExt` 메서드 자체는 SEA/AIR/TRUCK 및 `findHouseBlById` 경로에서 그대로 사용.
 - **Non B/L Entry 신규 저장 응답 detail 재조회 제거 (2026-05-10, 608d0df·1be98fb·7e5e41d)** — POST `/api/non-bl` 응답 body를 `ApiResponse<NonBlDetailResponse>` → `ApiResponse<{id}>`로 축소, `nonBlUseCase.findNonBlById(id)` 재조회 호출 제거 → BE 응답 흐름 SELECT 3건(house_bl×non_bl join + containers LAZY + dims LAZY) 절감. 화면 detail 갱신은 컴포넌트 `onSuccess`의 `setFocus("nonBl", saved.id)` → useQuery `getById` refetch가 담당. FE adapter `non-bl.ts` `create` zod 파싱 스키마 `NON_BL_DETAIL_SCHEMA` → `apiResponse(z.object({ id: z.number() }))`, `NonBlPort.create` 반환 `Promise<NonBlDetail>` → `Promise<{id: number}>` 동시 정합. `non-bl-entry.tsx`는 `saved.id`만 사용하므로 무수정. web layer 테스트 1건(`createNonBl_happyPath_returns201WithIdAndLocation`) 추가 — Mockito `any(Class)` 매처는 null 미매칭 함정이 있어 `any()` 사용. (§6.29 SSOT 함정으로 등재)
+- **HouseBl 삭제 SELECT 최적화 시리즈 (2026-05-10, 2920bf9·07dd2dd·d9f9cd4)** — NON_BL 삭제 SQL 분석 후 단계 최적화. (1) 2920bf9: `deleteHouseBl`에 JobDiv 분기 도입 + ext bulk delete (work_division 무관 4개 ext 모두 SELECT-then-delete 패턴 폐기, NON_BL 삭제 SELECT 12→8회). (2) 07dd2dd: 5개 ext Repository(sea/air/truck/non_bl/desc)의 derived `deleteByXxx`를 `@Modifying @Query` JPQL bulk DELETE로 교체 — derived deleteBy의 SELECT-then-delete 패턴 회피. (3) d9f9cd4: bulk DELETE의 `clearAutomatically=true` 옵션 제거 — 1차 캐시 stale 회복으로 부모 deleteById의 cascade fetch가 캐시 hit (8→7회). (§6.30 SSOT 함정 등재)
+- **ER 재구조화 Phase 1 — 단독 자식 ext FK 이전 (2026-05-10·11)** — HouseBl/MasterBl의 1:N 자식이 부모 FK로 매달려 있어 cascade orphanRemoval로 JobDiv 무관 모든 자식 LAZY fetch가 트리거되는 근본 문제 해결의 첫 단계. 단독 사용 자식 5개를 ext PK FK로 이전(테이블명 유지). Step 1.1 schedule_leg→AIR (9bb5436·1a4207f), 1.2 air_charge→AIR (7cb1281), 1.3 truck_order→TRUCK (3335073), 1.4 master_schedule_leg→AIR (3884e83), 1.5 master_air_charge→AIR (14beff9·b9491b8). 각 step 마이그레이션은 컬럼 추가/백필/NOT NULL/FK CASCADE/기존 FK·컬럼 제거 5단계. AIR/TRUCK 분기 호출 순서: ext save → sync* (PK 확보 후, `savedAirJpa`/`savedTruckJpa` 변수 도입). (§6.32 SSOT 등재)
+- **ER 재구조화 Phase 2 — desc 분리 (2026-05-10·11, c07f701·b0ebc0f·7b6d0b6)** — desc는 여러 JobDiv 공유 자식이라 테이블 자체를 ext별로 분리. Step 2.1: HouseBl `house_bl_desc` → `sea_desc`+`air_desc`+`truck_desc` 3개. Step 2.2: MasterBl `master_bl_desc` → `sea_desc`+`air_desc` 2개. NON_BL은 desc 미사용. 도메인 `HouseBlDesc`/`MasterBlDesc` 그대로, adapter/mapper만 ext별 분기. `deleteHouseBl`에서 desc 명시 호출 모두 제거 (ext bulk DELETE의 ON DELETE CASCADE에 위임). 7b6d0b6에서 5개 desc JPA에 `@OnDelete(CASCADE)` 추가 — H2 ddl-auto 재생성 시 마이그레이션 SQL CASCADE 누락 회피. (§6.31·§6.32 SSOT 등재)
+- **ER 재구조화 Phase 3 — container 분리 (2026-05-10·11, 7d61e4b·ec6d06f)** — container는 SEA + NON_BL 공유 자식. `house_bl_container` → `house_bl_sea_container`+`house_bl_nonbl_container` 2개로 분리. SEA는 sync 패턴(`syncContainers`), NON_BL은 merge 패턴(`mergeContainers`, id 매칭 update + 신규 insert) 보존. SeaHouseRepositoryImpl QueryDSL Q타입/FK 경로 변경(`QHouseBlContainerJpaEntity` → `QHouseBlSeaContainerJpaEntity`, `houseBlId` → `houseBlSeaId`). ec6d06f: 신규 container entity 2개의 `@NoArgsConstructor` public 접근성 fix(PROTECTED → public, 다른 패키지 mapper의 `new` 호출 컴파일 오류 회피). MasterBl은 container 미사용으로 영향 없음.
+- **ER 재구조화 Phase 4 — dim 분리 (2026-05-11, 2b7f35e·a3e3a6c·afb0066)** — dim 처리: HouseBl(공유)는 분리, MasterBl(단독)은 FK만 이전. Step 4.1: HouseBl `house_bl_dim` → `air_dim`+`truck_dim`+`nonbl_dim` 3개로 분리, AIR/TRUCK은 sync 패턴, NON_BL은 merge 패턴. Step 4.2: MasterBl `master_bl_dim` 테이블 유지 + FK만 `master_bl_id` → `master_bl_air_id` 이전(AIR 단독, Phase 1 패턴). 모든 신규 ext 컬렉션 매핑에 `cascade=ALL`+`orphanRemoval=true`+`@OnDelete CASCADE` 적용. 도메인 `HouseBlDim`/`MasterBlDim` 그대로.
+- **ER 재구조화 최종 상태 (2026-05-11, Phase 1~4 완료)** — 모든 1:N/1:1 자식이 의미상 속한 ext의 PK FK로 매달림. 부모 `house_bl`/`master_bl`의 cascade 컬렉션 매핑 0개 → JobDiv 무관 LAZY fetch 0건. ext bulk DELETE의 ON DELETE CASCADE(DB 레벨) + `@OnDelete CASCADE`(JPA→DDL 정합)로 자식 자동 정리. **기술 부채 보고**: `HouseBlPersistenceAdapter.java` 327줄, `MasterBlMapper.java` 338줄 — 300줄 임계 초과(500 미만으로 강제 분리 X). 후속으로 `HouseBlPersistenceAdapter`의 `saveOrDelete<Sea/Air/Truck>Desc` 추출 + `MasterBlMapper` → `MasterBlDocMapper` 분리 검토 권장.
 
 ---
 
