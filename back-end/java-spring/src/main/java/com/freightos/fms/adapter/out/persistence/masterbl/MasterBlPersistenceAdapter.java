@@ -88,22 +88,22 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                         .orElseGet(MasterBlAirJpaEntity::new);
                 airJpa.setMasterBl(savedJpa);
                 masterBlMapper.applyAirFields(air, airJpa);
-                List<MasterBlAirChargeJpaEntity> jpaCharges = air.getAirCharges().stream()
-                        .map(c -> masterBlMapper.toAirChargeJpa(c, savedJpa))
-                        .toList();
-                savedJpa.syncAirCharges(jpaCharges);
                 List<MasterBlDimJpaEntity> jpaDims = air.getDims().stream()
                         .map(d -> masterBlMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(jpaDims);
                 MasterBlDescJpaEntity airDescJpa = Nullables.mapOrNull(air.getDesc(), d -> masterBlMapper.toDescJpa(d, savedJpa));
                 savedJpa.replaceDesc(airDescJpa);
-                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 scheduleLegs 동기화
+                // airJpa를 먼저 영속화하여 master_bl_air_id PK 확보 후 scheduleLegs/airCharges 동기화
                 MasterBlAirJpaEntity savedAirJpa = masterBlAirRepository.save(airJpa);
                 List<MasterBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
                         .map(masterBlMapper::toScheduleLegJpa)
                         .toList();
                 savedAirJpa.syncScheduleLegs(jpaLegs);
+                List<MasterBlAirChargeJpaEntity> jpaCharges = air.getAirCharges().stream()
+                        .map(masterBlMapper::toAirChargeJpa)
+                        .toList();
+                savedAirJpa.syncAirCharges(jpaCharges);
             }
             case MasterBlSea sea -> {
                 MasterBlSeaJpaEntity seaJpa = masterBlSeaRepository
@@ -140,7 +140,7 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
             case AIR -> {
                 MasterBlAirJpaEntity airJpa = masterBlAirRepository
                         .findByMasterBlMasterBlId(jpa.getMasterBlId()).orElse(null);
-                yield masterBlMapper.toAirDomain(jpa, airJpa);
+                yield masterBlMapper.toAirDomain(jpa, airJpa, airJpa != null ? airJpa.getAirCharges() : List.of());
             }
         };
     }

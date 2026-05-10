@@ -46,11 +46,13 @@ public class MasterBlMapper {
         return domain;
     }
 
-    public MasterBlAir toAirDomain(MasterBlJpaEntity jpa, MasterBlAirJpaEntity airJpa) {
+    /** FK가 master_bl_air_id로 이전된 이후 airCharges는 airJpa에서 전달받는다 (Step 1.5). */
+    public MasterBlAir toAirDomain(MasterBlJpaEntity jpa, MasterBlAirJpaEntity airJpa,
+                                   List<MasterBlAirChargeJpaEntity> airChargeJpaList) {
         MasterBlAir domain = MasterBlAir.create(jpa.getBound());
         copyBaseFields(jpa, domain);
         if (airJpa != null) copyAirFields(airJpa, domain);
-        List<MasterBlAirCharge> airCharges = jpa.getAirCharges().stream()
+        List<MasterBlAirCharge> airCharges = airChargeJpaList.stream()
                 .map(this::toAirChargeDomain)
                 .collect(Collectors.toList());
         domain.initAirCharges(airCharges);
@@ -273,7 +275,7 @@ public class MasterBlMapper {
     // ── AIR CHARGE ───────────────────────────────────────────────────
 
     public MasterBlAirCharge toAirChargeDomain(MasterBlAirChargeJpaEntity jpa) {
-        MasterBlAirCharge c = MasterBlAirCharge.create(jpa.getMasterBlId());
+        MasterBlAirCharge c = MasterBlAirCharge.create(jpa.getMasterBlAirId());
         c.assignIdentity(jpa.getMasterBlAirChargeId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         c.updateDetails(new MasterBlAirCharge.Details(
@@ -288,8 +290,8 @@ public class MasterBlMapper {
         return jpaList.stream().map(this::toAirChargeDomain).collect(Collectors.toList());
     }
 
-    public void applyAirChargeFields(MasterBlAirCharge domain, MasterBlAirChargeJpaEntity jpa,
-                                     MasterBlJpaEntity masterBlJpa) {
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncAirCharges(@JoinColumn)이 설정 — parent 인자 불필요 */
+    public void applyAirChargeFields(MasterBlAirCharge domain, MasterBlAirChargeJpaEntity jpa) {
         jpa.setFreightCode(domain.getFreightCode());
         jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
         jpa.setPer(domain.getPer());
@@ -300,9 +302,10 @@ public class MasterBlMapper {
         jpa.setRate(domain.getRate());
     }
 
-    public MasterBlAirChargeJpaEntity toAirChargeJpa(MasterBlAirCharge c, MasterBlJpaEntity masterBl) {
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncAirCharges(@JoinColumn)이 설정 — parent 인자 불필요 */
+    public MasterBlAirChargeJpaEntity toAirChargeJpa(MasterBlAirCharge c) {
         MasterBlAirChargeJpaEntity jpa = new MasterBlAirChargeJpaEntity();
-        applyAirChargeFields(c, jpa, masterBl);
+        applyAirChargeFields(c, jpa);
         return jpa;
     }
 

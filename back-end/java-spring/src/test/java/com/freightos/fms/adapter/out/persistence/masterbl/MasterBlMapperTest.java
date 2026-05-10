@@ -117,7 +117,7 @@ class MasterBlMapperTest {
         airJpa.setHandlingInfoText("ATTACHED : COMM INV & P/LIST");
         airJpa.setOtherTerm(FreightTerm.COLLECT);
 
-        MasterBlAir domain = mapper.toAirDomain(parentJpa, airJpa);
+        MasterBlAir domain = mapper.toAirDomain(parentJpa, airJpa, List.of());
 
         assertThat(domain.getOtherTerm()).isEqualTo(FreightTerm.COLLECT);
         assertThat(domain.getHandlingInformation()).isNotNull();
@@ -169,7 +169,7 @@ class MasterBlMapperTest {
         parentJpa.setCbm(BigDecimal.valueOf(2.5));
         // airExt null — seaExt/airExt 는 @OneToOne lazy, 직접 조립 불가
 
-        MasterBlAir domain = mapper.toAirDomain(parentJpa, null);
+        MasterBlAir domain = mapper.toAirDomain(parentJpa, null, List.of());
 
         assertThat(domain).isInstanceOf(MasterBlAir.class);
         assertThat(domain.getMblNo().value()).isEqualTo("MAWB-001");

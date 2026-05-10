@@ -92,17 +92,17 @@ class MasterBlMappingIntegrationTest {
                 .getSingleResult();
     }
 
-    private long countAirCharges(Long masterBlId) {
+    private long countAirCharges(Long masterBlAirId) {
         return em.createQuery(
-                        "SELECT COUNT(c) FROM MasterBlAirChargeJpaEntity c WHERE c.masterBlId = :pid", Long.class)
-                .setParameter("pid", masterBlId)
+                        "SELECT COUNT(c) FROM MasterBlAirChargeJpaEntity c WHERE c.masterBlAirId = :pid", Long.class)
+                .setParameter("pid", masterBlAirId)
                 .getSingleResult();
     }
 
     // ── 테스트 ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Sea 모드 save→load: dims 채움 라운드트립 (scheduleLegs는 AIR 전용)")
+    @DisplayName("Sea 모드 save→load: dims 채움 라운드트립 (scheduleLegs/airCharges는 AIR 전용)")
     void seaMode_fullRoundTrip_dimsRestored() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
         parent.syncDims(List.of(dim()));
@@ -115,20 +115,19 @@ class MasterBlMappingIntegrationTest {
 
         assertThat(loaded).isNotNull();
         assertThat(loaded.getDims()).hasSize(1);
-        assertThat(loaded.getAirCharges()).isEmpty();
     }
 
     @Test
-    @DisplayName("Air 모드 save→load: dims/airCharges 채움 + airExt 통해 scheduleLegs 라운드트립")
+    @DisplayName("Air 모드 save→load: dims 채움 + airExt 통해 scheduleLegs/airCharges 라운드트립")
     void airMode_fullRoundTrip_allCollectionsRestored() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         parent.syncDims(List.of(dim()));
-        parent.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(parent);
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
         airExt.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
+        airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -141,12 +140,12 @@ class MasterBlMappingIntegrationTest {
                 .getSingleResult();
 
         assertThat(loaded.getDims()).hasSize(1);
-        assertThat(loaded.getAirCharges()).hasSize(1);
         assertThat(loadedAir.getScheduleLegs()).hasSize(1);
+        assertThat(loadedAir.getAirCharges()).hasSize(1);
     }
 
     @Test
-    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, dims/airCharges 빈 List 반환")
+    @DisplayName("빈 컬렉션 저장/조회: NPE 없음, dims 빈 List 반환")
     void emptyCollections_noPeNpeAndEmptyListReturned() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
 
@@ -157,7 +156,6 @@ class MasterBlMappingIntegrationTest {
         MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
 
         assertThat(loaded.getDims()).isNotNull().isEmpty();
-        assertThat(loaded.getAirCharges()).isNotNull().isEmpty();
     }
 
     @Test
@@ -259,34 +257,43 @@ class MasterBlMappingIntegrationTest {
     }
 
     @Test
-    @DisplayName("syncAirCharges: 기존 2건 → 빈 리스트로 전체 삭제")
+    @DisplayName("AIR ext syncAirCharges: 기존 2건 → 빈 리스트로 전체 삭제 (orphanRemoval)")
     void syncAirCharges_emptyList_allChildrenDeleted() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
-        parent.syncAirCharges(List.of(airCharge("FUEL"), airCharge("AWC")));
-
         em.persist(parent);
         em.flush();
-        em.clear();
 
-        MasterBlJpaEntity loaded = em.find(MasterBlJpaEntity.class, parent.getMasterBlId());
-        loaded.syncAirCharges(List.of());
+        MasterBlAirJpaEntity airExt = newAirExt(parent);
+        airExt.syncAirCharges(List.of(airCharge("FUEL"), airCharge("AWC")));
+        em.persist(airExt);
         em.flush();
         em.clear();
 
-        assertThat(countAirCharges(parent.getMasterBlId())).isZero();
+        MasterBlAirJpaEntity loadedAir = em.createQuery(
+                        "SELECT a FROM MasterBlAirJpaEntity a WHERE a.masterBl.masterBlId = :id",
+                        MasterBlAirJpaEntity.class)
+                .setParameter("id", parent.getMasterBlId())
+                .getSingleResult();
+        Long airExtId = loadedAir.getMasterBlAirId();
+
+        loadedAir.syncAirCharges(List.of());
+        em.flush();
+        em.clear();
+
+        assertThat(countAirCharges(airExtId)).isZero();
     }
 
     @Test
-    @DisplayName("AIR ext delete → scheduleLegs 자식 row count 0 (cascade). dims/airCharges는 parent cascade")
-    void airExtDelete_cascadeDeleteScheduleLegs() {
+    @DisplayName("AIR ext delete → scheduleLegs/airCharges 자식 row count 모두 0 (cascade)")
+    void airExtDelete_cascadeDeleteScheduleLegsAndAirCharges() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         parent.syncDims(List.of(dim()));
-        parent.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(parent);
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
         airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        airExt.syncAirCharges(List.of(airCharge("FUEL")));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -305,14 +312,14 @@ class MasterBlMappingIntegrationTest {
 
         assertThat(em.find(MasterBlAirJpaEntity.class, airExtId)).isNull();
         assertThat(countScheduleLegs(airExtId)).isZero();
+        assertThat(countAirCharges(airExtId)).isZero();
     }
 
     @Test
-    @DisplayName("부모 delete → dims/airCharges 자식 row count 모두 0 (cascade)")
-    void parentDelete_cascadeDeleteDimsAndAirCharges() {
+    @DisplayName("부모 delete → dims 자식 row count 0 (cascade). airCharges는 airExt cascade로 정리")
+    void parentDelete_cascadeDeleteDims() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         parent.syncDims(List.of(dim()));
-        parent.syncAirCharges(List.of(airCharge("FUEL")));
 
         em.persist(parent);
         em.flush();
@@ -326,7 +333,6 @@ class MasterBlMappingIntegrationTest {
 
         assertThat(em.find(MasterBlJpaEntity.class, parentId)).isNull();
         assertThat(countDims(parentId)).isZero();
-        assertThat(countAirCharges(parentId)).isZero();
     }
 
     @Test

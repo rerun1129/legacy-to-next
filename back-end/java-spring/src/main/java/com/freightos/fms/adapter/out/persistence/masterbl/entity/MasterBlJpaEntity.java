@@ -119,12 +119,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
     private List<MasterBlDimJpaEntity> dims = new ArrayList<>();
 
-    // AIR에서만 채워짐, 다른 모드는 빈 컬렉션이 정상
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
-    @JoinColumn(name = "master_bl_id", nullable = false, updatable = false)
-    private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
-
     public void setMasterBlId(Long v) { this.masterBlId = v; }
     public void setMblNo(String v) { this.mblNo = v; }
     public void setMasterRefNo(String v) { this.masterRefNo = v; }
@@ -151,11 +145,6 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setHsCode(String v) { this.hsCode = v; }
     public void setMainItemName(String v) { this.mainItemName = v; }
     public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }
-
-    public void syncAirCharges(List<MasterBlAirChargeJpaEntity> v) {
-        this.airCharges.clear();
-        if (v != null) this.airCharges.addAll(v);
-    }
 
     public void syncDims(List<MasterBlDimJpaEntity> v) {
         this.dims.clear();

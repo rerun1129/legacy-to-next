@@ -101,6 +101,12 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @JoinColumn(name = "master_bl_air_id", nullable = false, updatable = false)
     private List<MasterBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
 
+    // AIR 전용 운임 그리드. master_bl_air_id FK로 소유 (Step 1.5).
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "master_bl_air_id", nullable = false, updatable = false)
+    private List<MasterBlAirChargeJpaEntity> airCharges = new ArrayList<>();
+
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
@@ -124,5 +130,10 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void syncScheduleLegs(List<MasterBlScheduleLegJpaEntity> newLegs) {
         this.scheduleLegs.clear();
         this.scheduleLegs.addAll(newLegs);
+    }
+
+    public void syncAirCharges(List<MasterBlAirChargeJpaEntity> newCharges) {
+        this.airCharges.clear();
+        this.airCharges.addAll(newCharges);
     }
 }
