@@ -15,7 +15,7 @@ public interface HouseBlDescRepository extends JpaRepository<HouseBlDescJpaEntit
     Optional<HouseBlDescJpaEntity> findByHouseBl_HouseBlId(Long houseBlId);
 
     // derived deleteBy는 SELECT-then-delete로 동작 — bulk DELETE로 교체하여 SELECT 제거
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("delete from HouseBlDescJpaEntity x where x.houseBl.houseBlId = :id")
     void deleteByHouseBl_HouseBlId(@Param("id") Long id);
 }
