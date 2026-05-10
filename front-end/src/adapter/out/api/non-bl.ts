@@ -238,13 +238,13 @@ export const API_NON_BL_PORT: NonBlPort = {
     return parsed.data.data;
   },
 
-  async create(req: CreateNonBlRequest): Promise<NonBlDetail> {
+  async create(req: CreateNonBlRequest): Promise<{ id: number }> {
     const json = await fetchJson(NON_BL_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(toBeRequest(req)),
     });
-    const parsed = apiResponse(NON_BL_DETAIL_SCHEMA).safeParse(json);
+    const parsed = apiResponse(z.object({ id: z.number() })).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid non-bl create response: ${parsed.error.message}`);
     return parsed.data.data;
   },
