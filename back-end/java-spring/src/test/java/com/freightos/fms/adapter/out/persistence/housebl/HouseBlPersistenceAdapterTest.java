@@ -53,22 +53,25 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(AIR) ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(AIR): syncDims→syncScheduleLegs→houseBlDescRepository 조회 순서 후 airRepository.save 호출")
+    @DisplayName("saveHouseBl(AIR): syncDims→airRepository.save→savedAirJpa.syncScheduleLegs 순서, descRepository 조회")
     void saveAirHouseBl_callsSyncInOrderThenSavesAirExt() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
         savedJpa.setJobDiv(JobDiv.AIR);
+        HouseBlAirJpaEntity savedAirJpa = spy(new HouseBlAirJpaEntity());
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        // airRepository.save가 savedAirJpa를 반환해야 syncScheduleLegs 호출 가능
+        given(houseBlAirRepository.save(any())).willReturn(savedAirJpa);
         given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
 
         adapter.saveHouseBl(air);
 
-        InOrder order = inOrder(savedJpa, houseBlAirRepository);
+        InOrder order = inOrder(savedJpa, houseBlAirRepository, savedAirJpa);
         order.verify(savedJpa).syncDims(any());
-        order.verify(savedJpa).syncScheduleLegs(any());
         order.verify(houseBlAirRepository).save(any());
+        order.verify(savedAirJpa).syncScheduleLegs(any());
     }
 
     @Test
@@ -79,6 +82,7 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.AIR);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlAirRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
+        given(houseBlAirRepository.save(any())).willReturn(spy(new HouseBlAirJpaEntity()));
         given(houseBlDescRepository.findByHouseBl_HouseBlId(any())).willReturn(Optional.empty());
         given(jpaToDomainMapper.toAirDomain(eq(savedJpa), any(), any())).willReturn(air);
 
@@ -130,7 +134,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) ────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/syncScheduleLegs/replaceDesc/houseBlDescRepository는 없다")
+    @DisplayName("saveHouseBl(TRUCK): syncDims만 호출되고 syncContainers/houseBlDescRepository는 없다")
     void saveTruckHouseBl_syncsDimsOnly_skipsLegsLicensesDesc() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -143,7 +147,6 @@ class HouseBlPersistenceAdapterTest {
 
         then(savedJpa).should().syncDims(any());
         then(savedJpa).should(never()).syncContainers(any());
-        then(savedJpa).should(never()).syncScheduleLegs(any());
         // TRUCK은 desc 미사용 — houseBlDescRepository 완전 미호출
         then(houseBlDescRepository).should(never()).findByHouseBl_HouseBlId(any());
         then(houseBlTruckRepository).should().save(any());
@@ -306,7 +309,7 @@ class HouseBlPersistenceAdapterTest {
     // ── saveHouseBl(TRUCK) — syncTruckOrders 호출 검증 ────────────────
 
     @Test
-    @DisplayName("saveHouseBl(TRUCK): syncDims→syncTruckOrders 호출, SEA 전용 sync는 미호출")
+    @DisplayName("saveHouseBl(TRUCK): syncDims→syncTruckOrders 호출, SEA 전용 syncContainers는 미호출")
     void saveHouseBl_truck_callsSyncTruckOrders() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -321,7 +324,6 @@ class HouseBlPersistenceAdapterTest {
         then(savedJpa).should().syncTruckOrders(any());
         // SEA 전용 sync는 호출하지 않음
         then(savedJpa).should(never()).syncContainers(any());
-        then(savedJpa).should(never()).syncScheduleLegs(any());
     }
 
     // ── deleteHouseBl — 타입별 분기 검증 ────────────────────────────────
@@ -552,7 +554,7 @@ class HouseBlPersistenceAdapterTest {
     }
 
     @Test
-    @DisplayName("saveHouseBl(NON_BL): SEA 전용 syncScheduleLegs/syncAirCharges는 호출하지 않는다")
+    @DisplayName("saveHouseBl(NON_BL): NON_BL 전용 sync만 호출 — syncAirCharges/syncTruckOrders는 미호출")
     void saveNonBlHouseBl_doesNotInvokeSeaOnlySync() {
         HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         HouseBlJpaEntity savedJpa = spy(new HouseBlJpaEntity());
@@ -562,7 +564,6 @@ class HouseBlPersistenceAdapterTest {
 
         adapter.saveHouseBl(nonBl);
 
-        then(savedJpa).should(never()).syncScheduleLegs(any());
         then(savedJpa).should(never()).syncAirCharges(any());
         then(savedJpa).should(never()).syncTruckOrders(any());
     }

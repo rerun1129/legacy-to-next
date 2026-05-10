@@ -97,16 +97,17 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                         .map(d -> houseBlCargoMapper.toDimJpa(d, savedJpa))
                         .toList();
                 savedJpa.syncDims(airDims);
+                // airJpa를 먼저 영속화하여 house_bl_air_id PK 확보 후 scheduleLegs 동기화
+                HouseBlAirJpaEntity savedAirJpa = houseBlAirRepository.save(airJpa);
                 List<HouseBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
-                        .map(l -> houseBlDocMapper.toScheduleLegJpa(l, savedJpa))
+                        .map(houseBlDocMapper::toScheduleLegJpa)
                         .toList();
-                savedJpa.syncScheduleLegs(jpaLegs);
+                savedAirJpa.syncScheduleLegs(jpaLegs);
                 List<HouseBlAirChargeJpaEntity> airCharges = air.getAirCharges().stream()
                         .map(c -> houseBlDocMapper.toAirChargeJpa(c, savedJpa))
                         .toList();
                 savedJpa.syncAirCharges(airCharges);
                 saveOrDeleteDesc(air.getDesc(), savedJpa);
-                houseBlAirRepository.save(airJpa);
             }
             case HouseBlTruck truck -> {
                 HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlTruckJpaEntity::new);

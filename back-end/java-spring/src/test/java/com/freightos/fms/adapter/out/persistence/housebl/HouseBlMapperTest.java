@@ -313,7 +313,6 @@ class HouseBlMapperTest {
     @DisplayName("toScheduleLegDomain: 항공 스케줄 레그 모든 필드가 도메인으로 복사된다")
     void toScheduleLegDomain_mapsAllFields() {
         HouseBlScheduleLegJpaEntity legJpa = new HouseBlScheduleLegJpaEntity();
-        legJpa.setHouseBlId(1L);
         legJpa.setToCode("NRT");
         legJpa.setByCarrier("OZ");
         legJpa.setFlightNo("OZ102");
@@ -336,14 +335,11 @@ class HouseBlMapperTest {
     @Test
     @DisplayName("applyScheduleLegFields: 도메인 → JPA 모든 스케줄 레그 필드가 세팅된다")
     void applyScheduleLegFields_setsAllFieldsToJpa() {
-        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
-        houseBlJpa.setHouseBlId(1L);
-
-        HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(1L, "NRT", "20240315", "20240316");
+        HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(null, "NRT", "20240315", "20240316");
         domain.updateDetails("NRT", "OZ", "OZ102", "20240315", "1800", "20240316", "0700");
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
 
-        docMapper.applyScheduleLegFields(domain, jpa, houseBlJpa);
+        docMapper.applyScheduleLegFields(domain, jpa);
 
         assertThat(jpa.getToCode()).isEqualTo("NRT");
         assertThat(jpa.getByCarrier()).isEqualTo("OZ");
@@ -358,12 +354,10 @@ class HouseBlMapperTest {
     @DisplayName("toScheduleLegDomainList: 2개 JPA 엔티티 → 크기 2인 도메인 리스트 반환")
     void toScheduleLegDomainList_returnsCorrectSize() {
         HouseBlScheduleLegJpaEntity leg1 = new HouseBlScheduleLegJpaEntity();
-        leg1.setHouseBlId(1L);
         leg1.setToCode("NRT");
         leg1.setOnBoardDt("20240315");
         leg1.setArrivalDt("20240316");
         HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
-        leg2.setHouseBlId(1L);
         leg2.setToCode("LAX");
         leg2.setOnBoardDt("20240317");
         leg2.setArrivalDt("20240318");

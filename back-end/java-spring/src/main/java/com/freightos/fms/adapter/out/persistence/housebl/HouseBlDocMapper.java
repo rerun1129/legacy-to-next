@@ -52,7 +52,7 @@ public class HouseBlDocMapper {
 
     public HouseBlScheduleLeg toScheduleLegDomain(HouseBlScheduleLegJpaEntity jpa) {
         HouseBlScheduleLeg domain = HouseBlScheduleLeg.create(
-                jpa.getHouseBlId(),
+                jpa.getHouseBlAirId(),
                 jpa.getToCode(), jpa.getOnBoardDt(), jpa.getArrivalDt());
         domain.assignIdentity(jpa.getHouseBlScheduleLegId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
@@ -65,7 +65,7 @@ public class HouseBlDocMapper {
         return jpaList.stream().map(this::toScheduleLegDomain).collect(Collectors.toList());
     }
 
-    public void applyScheduleLegFields(HouseBlScheduleLeg domain, HouseBlScheduleLegJpaEntity jpa, HouseBlJpaEntity houseBlJpa) {
+    public void applyScheduleLegFields(HouseBlScheduleLeg domain, HouseBlScheduleLegJpaEntity jpa) {
         jpa.setToCode(domain.getToCode());
         jpa.setByCarrier(domain.getByCarrier());
         jpa.setFlightNo(domain.getFlightNo());
@@ -75,9 +75,10 @@ public class HouseBlDocMapper {
         jpa.setArrivalTm(domain.getArrivalTm());
     }
 
-    public HouseBlScheduleLegJpaEntity toScheduleLegJpa(HouseBlScheduleLeg leg, HouseBlJpaEntity houseBl) {
+    /** FK(house_bl_air_id)는 HouseBlAirJpaEntity.syncScheduleLegs(@JoinColumn)이 설정 — airJpa 인자 불필요 */
+    public HouseBlScheduleLegJpaEntity toScheduleLegJpa(HouseBlScheduleLeg leg) {
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
-        applyScheduleLegFields(leg, jpa, houseBl);
+        applyScheduleLegFields(leg, jpa);
         return jpa;
     }
 

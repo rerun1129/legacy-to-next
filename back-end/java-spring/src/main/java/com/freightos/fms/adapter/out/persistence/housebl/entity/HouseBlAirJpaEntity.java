@@ -10,8 +10,11 @@ import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JPA ORM 엔티티 — House B/L 항공 확장.
@@ -95,6 +98,12 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private CargoType cargoType;
 
+    // AIR 전용 스케줄 구간. house_bl_air_id FK로 소유.
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    @JoinColumn(name = "house_bl_air_id", nullable = false, updatable = false)
+    private List<HouseBlScheduleLegJpaEntity> scheduleLegs = new ArrayList<>();
+
     public void setHouseBl(HouseBlJpaEntity v) { this.houseBl = v; }
     public void setAirlineCode(String v) { this.airlineCode = v; }
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
@@ -115,4 +124,9 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setOriginOfGoods(String v) { this.originOfGoods = v; }
     public void setCargoType(CargoType v) { this.cargoType = v; }
+
+    public void syncScheduleLegs(List<HouseBlScheduleLegJpaEntity> newLegs) {
+        this.scheduleLegs.clear();
+        this.scheduleLegs.addAll(newLegs);
+    }
 }

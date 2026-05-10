@@ -62,20 +62,5 @@ class HouseBlJpaEntityTest {
         assertThat(entity.getDims()).isEmpty();
     }
 
-    // ── syncScheduleLegs ──────────────────────────────────────────────
-
-    @Test
-    @DisplayName("syncScheduleLegs: 여러 leg를 sync하면 모두 포함되고 리스트 참조가 유지된다")
-    void syncScheduleLegs_multipleLegs_allPresentAndListIdentityPreserved() {
-        HouseBlJpaEntity entity = new HouseBlJpaEntity();
-        List<HouseBlScheduleLegJpaEntity> originalRef = entity.getScheduleLegs();
-        HouseBlScheduleLegJpaEntity leg1 = new HouseBlScheduleLegJpaEntity();
-        HouseBlScheduleLegJpaEntity leg2 = new HouseBlScheduleLegJpaEntity();
-
-        entity.syncScheduleLegs(List.of(leg1, leg2));
-
-        assertThat(entity.getScheduleLegs()).isSameAs(originalRef);
-        assertThat(entity.getScheduleLegs()).containsExactly(leg1, leg2);
-    }
-
 }
+
