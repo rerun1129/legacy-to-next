@@ -43,22 +43,7 @@ export function ChangeBlNoModal({ houseBlId, currentHblNo, isOpen, onClose }: Ch
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="modal">
-        <div className="modal__header">
-          <span className="modal__title">Change B/L No</span>
-          <div className="modal__header-actions">
-            <button
-              type="button"
-              className="btn btn--sm btn--primary"
-              onClick={form.handleSubmit(handleSubmit)}
-              disabled={mutation.isPending}
-            >
-              <Save size={12} />{mutation.isPending ? "Updating..." : "Update"}
-            </button>
-            <button type="button" className="btn btn--sm" onClick={onClose}>
-              <X size={12} />Close
-            </button>
-          </div>
-        </div>
+        <div className="modal__title">Change B/L No</div>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="modal__body">
           <div className="field">
             <div className="field__label">현재 B/L No</div>
@@ -73,6 +58,19 @@ export function ChangeBlNoModal({ houseBlId, currentHblNo, isOpen, onClose }: Ch
             </div>
           </div>
         </form>
+        <div className="modal__actions">
+          <button
+            type="button"
+            className="btn btn--sm btn--primary"
+            onClick={form.handleSubmit(handleSubmit)}
+            disabled={mutation.isPending}
+          >
+            <Save size={12} />{mutation.isPending ? "Updating..." : "Update"}
+          </button>
+          <button type="button" className="btn btn--sm" onClick={onClose}>
+            <X size={12} />Close
+          </button>
+        </div>
       </div>
     </div>
   );
