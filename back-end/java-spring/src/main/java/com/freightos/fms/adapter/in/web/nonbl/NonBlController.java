@@ -31,6 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Non B/L", description = "Non B/L 관리")
 @RestController
@@ -62,14 +63,14 @@ public class NonBlController {
 
     @Operation(summary = "Non B/L 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse<NonBlDetailResponse>> createNonBl(
+    public ResponseEntity<ApiResponse<Map<String, Long>>> createNonBl(
             @Valid @RequestBody CreateNonBlRequest req,
             UriComponentsBuilder uriBuilder) {
         Long id = nonBlUseCase.createNonBl(nonBlAssembler.toCreateCommand(req));
         URI location = uriBuilder.path("/api/non-bl/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location)
                 .body(ApiResponse.of(
-                        nonBlAssembler.toDetail(nonBlUseCase.findNonBlById(id)),
+                        Map.of("id", id),
                         MessageCode.NON_BL_CREATED.message()));
     }
 

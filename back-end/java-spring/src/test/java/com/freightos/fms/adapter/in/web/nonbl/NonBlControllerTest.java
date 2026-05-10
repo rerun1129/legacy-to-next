@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.nonbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.common.response.MessageCode;
 import org.junit.jupiter.api.DisplayName;
@@ -14,12 +15,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.hamcrest.Matchers;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +46,40 @@ class NonBlControllerTest {
     @MockitoBean
     @SuppressWarnings("unused")
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    // ── POST /api/non-bl ──────────────────────────────────────────────────
+
+    private static final String VALID_CREATE_JSON = """
+            {
+              "hblNo": "NB-001",
+              "workDivision": "SEA",
+              "polCode": "KRPUS",
+              "podCode": "USLAX",
+              "etd": "20260101",
+              "eta": "20260201",
+              "actualCustomerCode": "CUST01",
+              "operatorCode": "OP01",
+              "teamCode": "TEAM01"
+            }
+            """;
+
+    @Test
+    @DisplayName("POST /api/non-bl: 정상 요청 → 201, data.id 일치, Location 헤더 포함")
+    void createNonBl_happyPath_returns201WithIdAndLocation() throws Exception {
+        Long createdId = 42L;
+        given(nonBlAssembler.toCreateCommand(any())).willReturn(null);
+        given(nonBlUseCase.createNonBl(any(CreateHouseBlCommand.class))).willReturn(createdId);
+
+        mockMvc.perform(post("/api/non-bl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_CREATE_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", Matchers.endsWith("/api/non-bl/42")))
+                .andExpect(jsonPath("$.data.id").value(createdId))
+                .andExpect(jsonPath("$.message").value(MessageCode.NON_BL_CREATED.message()));
+
+        then(nonBlUseCase).should().createNonBl(any(CreateHouseBlCommand.class));
+    }
 
     // ── PUT /api/non-bl/{id}/hbl-no ──────────────────────────────────────
 
