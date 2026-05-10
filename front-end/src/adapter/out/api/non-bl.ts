@@ -185,7 +185,7 @@ function toBeRequest(req: CreateNonBlRequest) {
     mainItemName: req.mainItemName,
     hsCode: req.hsCode,
     rton: req.rton,
-    volumeWtKg: req.volumeWtKg,
+    volumeWeightKg: req.volumeWtKg,
     linerCode: req.linerCode,
     linerName: req.linerName,
     vesselName: req.vesselName,

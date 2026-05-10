@@ -76,6 +76,7 @@ export function NonBLEntry() {
       nonBlNo:            detail.hblNo ?? "",
       workDiv:            detail.workDivision ?? "",
       bound:              detail.bound ?? "",
+      refNo:              detail.originalBlRef ?? "",
       shipperCode:        detail.shipperCode ?? "",
       consigneeCode:      detail.consigneeCode ?? "",
       notifyCode:         detail.notifyCode ?? "",
