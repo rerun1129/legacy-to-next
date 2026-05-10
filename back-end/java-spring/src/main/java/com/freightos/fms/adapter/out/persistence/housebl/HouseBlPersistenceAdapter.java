@@ -152,12 +152,21 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     @Transactional
     public void deleteHouseBl(HouseBl houseBl) {
         Long id = houseBl.getId();
-        houseBlSeaRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlSeaRepository::delete);
-        houseBlAirRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlAirRepository::delete);
-        houseBlTruckRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlTruckRepository::delete);
-        houseBlNonBlRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlNonBlRepository::delete);
-        // house_bl_desc FK에 ON DELETE CASCADE 없으므로 명시 삭제
-        houseBlDescRepository.deleteByHouseBl_HouseBlId(id);
+        switch (houseBl) {
+            case HouseBlSea ignored -> {
+                houseBlSeaRepository.deleteByHouseBl_HouseBlId(id);
+                // house_bl_desc FK에 ON DELETE CASCADE 없으므로 명시 삭제
+                houseBlDescRepository.deleteByHouseBl_HouseBlId(id);
+            }
+            case HouseBlAir ignored -> {
+                houseBlAirRepository.deleteByHouseBl_HouseBlId(id);
+                // house_bl_desc FK에 ON DELETE CASCADE 없으므로 명시 삭제
+                houseBlDescRepository.deleteByHouseBl_HouseBlId(id);
+            }
+            case HouseBlTruck ignored -> houseBlTruckRepository.deleteByHouseBl_HouseBlId(id);
+            case HouseBlNonBl ignored -> houseBlNonBlRepository.deleteByHouseBl_HouseBlId(id);
+            default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + houseBl.getClass().getSimpleName());
+        }
         houseBlRepository.deleteById(id);
     }
 

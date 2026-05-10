@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface HouseBlNonBlRepository extends JpaRepository<HouseBlNonBlJpaEntity, Long> {
 
     Optional<HouseBlNonBlJpaEntity> findByHouseBlHouseBlId(Long houseBlId);
+
+    void deleteByHouseBl_HouseBlId(Long id);
 }

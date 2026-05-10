@@ -324,27 +324,74 @@ class HouseBlPersistenceAdapterTest {
         then(savedJpa).should(never()).syncScheduleLegs(any());
     }
 
-    // ── deleteHouseBl — ext 삭제 후 본체 삭제 순서 ────────────────────
+    // ── deleteHouseBl — 타입별 분기 검증 ────────────────────────────────
 
     @Test
-    @DisplayName("deleteHouseBl: sea/air/truck/nonBl ext 삭제 후 houseBlRepository.deleteById 호출 (InOrder)")
-    void deleteHouseBl_deletesExtAndChildrenThenBase() {
+    @DisplayName("deleteHouseBl(SEA): seaRepository.deleteByHouseBl_HouseBlId → descRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서")
+    void deleteHouseBl_sea_deletesSeaExtAndDescThenBase() {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
         sea.assignIdentity(50L, null, null, null, null);
-        given(houseBlSeaRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
-        given(houseBlAirRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
-        given(houseBlTruckRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
-        given(houseBlNonBlRepository.findByHouseBlHouseBlId(50L)).willReturn(Optional.empty());
 
         adapter.deleteHouseBl(sea);
 
-        InOrder order = inOrder(houseBlSeaRepository, houseBlAirRepository,
-                houseBlTruckRepository, houseBlNonBlRepository, houseBlRepository);
-        order.verify(houseBlSeaRepository).findByHouseBlHouseBlId(50L);
-        order.verify(houseBlAirRepository).findByHouseBlHouseBlId(50L);
-        order.verify(houseBlTruckRepository).findByHouseBlHouseBlId(50L);
-        order.verify(houseBlNonBlRepository).findByHouseBlHouseBlId(50L);
+        InOrder order = inOrder(houseBlSeaRepository, houseBlDescRepository, houseBlRepository);
+        order.verify(houseBlSeaRepository).deleteByHouseBl_HouseBlId(50L);
+        order.verify(houseBlDescRepository).deleteByHouseBl_HouseBlId(50L);
         order.verify(houseBlRepository).deleteById(50L);
+        then(houseBlAirRepository).shouldHaveNoInteractions();
+        then(houseBlTruckRepository).shouldHaveNoInteractions();
+        then(houseBlNonBlRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("deleteHouseBl(AIR): airRepository.deleteByHouseBl_HouseBlId → descRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서")
+    void deleteHouseBl_air_deletesAirExtAndDescThenBase() {
+        HouseBlAir air = HouseBlAir.create(Bound.EXP);
+        air.assignIdentity(51L, null, null, null, null);
+
+        adapter.deleteHouseBl(air);
+
+        InOrder order = inOrder(houseBlAirRepository, houseBlDescRepository, houseBlRepository);
+        order.verify(houseBlAirRepository).deleteByHouseBl_HouseBlId(51L);
+        order.verify(houseBlDescRepository).deleteByHouseBl_HouseBlId(51L);
+        order.verify(houseBlRepository).deleteById(51L);
+        then(houseBlSeaRepository).shouldHaveNoInteractions();
+        then(houseBlTruckRepository).shouldHaveNoInteractions();
+        then(houseBlNonBlRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("deleteHouseBl(TRUCK): truckRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서, descRepository 미호출")
+    void deleteHouseBl_truck_deletesTruckExtThenBase_withoutDesc() {
+        HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
+        truck.assignIdentity(52L, null, null, null, null);
+
+        adapter.deleteHouseBl(truck);
+
+        InOrder order = inOrder(houseBlTruckRepository, houseBlRepository);
+        order.verify(houseBlTruckRepository).deleteByHouseBl_HouseBlId(52L);
+        order.verify(houseBlRepository).deleteById(52L);
+        then(houseBlSeaRepository).shouldHaveNoInteractions();
+        then(houseBlAirRepository).shouldHaveNoInteractions();
+        then(houseBlNonBlRepository).shouldHaveNoInteractions();
+        then(houseBlDescRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("deleteHouseBl(NON_BL): nonBlRepository.deleteByHouseBl_HouseBlId → houseBlRepository.deleteById 순서, descRepository 미호출")
+    void deleteHouseBl_nonBl_deletesNonBlExtThenBase_withoutDesc() {
+        HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        nonBl.assignIdentity(53L, null, null, null, null);
+
+        adapter.deleteHouseBl(nonBl);
+
+        InOrder order = inOrder(houseBlNonBlRepository, houseBlRepository);
+        order.verify(houseBlNonBlRepository).deleteByHouseBl_HouseBlId(53L);
+        order.verify(houseBlRepository).deleteById(53L);
+        then(houseBlSeaRepository).shouldHaveNoInteractions();
+        then(houseBlAirRepository).shouldHaveNoInteractions();
+        then(houseBlTruckRepository).shouldHaveNoInteractions();
+        then(houseBlDescRepository).shouldHaveNoInteractions();
     }
 
     // ── findHouseBlsBySchedule — sortBy null ──────────────────────────
