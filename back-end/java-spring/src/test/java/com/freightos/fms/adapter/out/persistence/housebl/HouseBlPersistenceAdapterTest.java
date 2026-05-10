@@ -46,6 +46,8 @@ class HouseBlPersistenceAdapterTest {
     @Mock private HouseBlDescRepository houseBlDescRepository;
     @Mock private HouseBlJpaToDomainMapper jpaToDomainMapper;
     @Mock private HouseBlDomainToJpaMapper domainToJpaMapper;
+    @Mock private HouseBlCargoMapper houseBlCargoMapper;
+    @Mock private HouseBlDocMapper houseBlDocMapper;
 
     @InjectMocks
     private HouseBlPersistenceAdapter adapter;
