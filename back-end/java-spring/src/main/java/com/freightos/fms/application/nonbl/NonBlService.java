@@ -3,6 +3,7 @@ package com.freightos.fms.application.nonbl;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.HouseBlFactory;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
@@ -15,6 +16,7 @@ import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.vo.BlNumber;
+import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class NonBlService implements NonBlUseCase {
 
     private final HouseBlUseCase houseBlUseCase;
     private final HouseBlPort houseBlPort;
+    private final HouseBlFactory houseBlFactory;
     private final NonBlSearchPort nonBlSearchPort;
 
     @Override
@@ -53,8 +56,11 @@ public class NonBlService implements NonBlUseCase {
     @Override
     @Transactional
     public NonBlDetailResult updateNonBl(Long id, UpdateHouseBlCommand command) {
-        houseBlUseCase.updateHouseBl(id, command);
-        return NonBlDetailResult.from(findNonBlDomainById(id));
+        HouseBl existing = houseBlPort.findHouseBlById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND));
+        houseBlFactory.applyToEntity(command, existing);
+        HouseBlNonBl saved = (HouseBlNonBl) houseBlPort.saveHouseBl(existing);
+        return NonBlDetailResult.from(saved);
     }
 
     @Override

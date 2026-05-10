@@ -134,6 +134,13 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 savedJpa.mergeDims(nonBlDims);
                 // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 저장됨
                 houseBlNonBlRepository.save(nonBlJpa);
+                // in-memory 도메인에 JPA save 결과(parent id, 감사 필드, 자식 PK)를 역방향 sync.
+                // loadWithExt 제거로 응답용 SELECT 제거 — 직렬 저장 순서와 동일하므로 인덱스 매핑 안전.
+                nonBl.assignIdentity(savedJpa.getHouseBlId(), savedJpa.getCreatedAt(), savedJpa.getUpdatedAt(),
+                        savedJpa.getCreatedBy(), savedJpa.getUpdatedBy());
+                syncChildIds(nonBl.getContainers(), savedJpa.getContainers());
+                syncDimIds(nonBl.getDims(), savedJpa.getDims());
+                return nonBl;
             }
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
         }
@@ -206,5 +213,38 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
                 .orElseGet(HouseBlDescJpaEntity::new);
         houseBlDocMapper.applyDescFields(domainDesc, descJpa, parentJpa);
         houseBlDescRepository.save(descJpa);
+    }
+
+    /**
+     * NON_BL 컨테이너 도메인 자식에 JPA save 후 생성된 PK를 역방향 sync.
+     * mergeContainers의 결과 순서(incoming 순) = 도메인 자식 순서이므로 인덱스 1:1 매핑이 안전하다.
+     * 기존에 id가 있던 자식은 동일 id가 유지되므로 중복 할당 무해.
+     */
+    private void syncChildIds(List<HouseBlContainer> domainContainers, List<HouseBlContainerJpaEntity> jpaContainers) {
+        int size = Math.min(domainContainers.size(), jpaContainers.size());
+        for (int i = 0; i < size; i++) {
+            HouseBlContainerJpaEntity jpa = jpaContainers.get(i);
+            HouseBlContainer domain = domainContainers.get(i);
+            if (domain.getId() == null && jpa.getHouseBlContainerId() != null) {
+                domain.assignIdentity(jpa.getHouseBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                        jpa.getCreatedBy(), jpa.getUpdatedBy());
+            }
+        }
+    }
+
+    /**
+     * NON_BL DIM 도메인 자식에 JPA save 후 생성된 PK를 역방향 sync.
+     * mergeDims의 결과 순서(incoming 순) = 도메인 자식 순서이므로 인덱스 1:1 매핑이 안전하다.
+     */
+    private void syncDimIds(List<HouseBlDim> domainDims, List<HouseBlDimJpaEntity> jpaDims) {
+        int size = Math.min(domainDims.size(), jpaDims.size());
+        for (int i = 0; i < size; i++) {
+            HouseBlDimJpaEntity jpa = jpaDims.get(i);
+            HouseBlDim domain = domainDims.get(i);
+            if (domain.getId() == null && jpa.getHouseBlDimId() != null) {
+                domain.assignIdentity(jpa.getHouseBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
+                        jpa.getCreatedBy(), jpa.getUpdatedBy());
+            }
+        }
     }
 }

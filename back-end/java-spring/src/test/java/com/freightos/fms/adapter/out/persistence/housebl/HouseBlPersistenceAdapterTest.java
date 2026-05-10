@@ -160,7 +160,6 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.NON_BL);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(jpaToDomainMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
 
         adapter.saveHouseBl(nonBl);
 
@@ -424,7 +423,6 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.NON_BL);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(jpaToDomainMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
 
         adapter.saveHouseBl(nonBl);
 
@@ -514,7 +512,6 @@ class HouseBlPersistenceAdapterTest {
         savedJpa.setJobDiv(JobDiv.NON_BL);
         given(houseBlRepository.save(any())).willReturn(savedJpa);
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(any())).willReturn(Optional.empty());
-        given(jpaToDomainMapper.toNonBlDomain(eq(savedJpa), any())).willReturn(nonBl);
 
         adapter.saveHouseBl(nonBl);
 
