@@ -2,7 +2,6 @@ package com.freightos.fms.adapter.in.web.nonbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
-import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.common.response.MessageCode;
 import org.junit.jupiter.api.DisplayName;
@@ -68,7 +67,7 @@ class NonBlControllerTest {
     void createNonBl_happyPath_returns201WithIdAndLocation() throws Exception {
         Long createdId = 42L;
         given(nonBlAssembler.toCreateCommand(any())).willReturn(null);
-        given(nonBlUseCase.createNonBl(any(CreateHouseBlCommand.class))).willReturn(createdId);
+        given(nonBlUseCase.createNonBl(any())).willReturn(createdId);
 
         mockMvc.perform(post("/api/non-bl")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +77,7 @@ class NonBlControllerTest {
                 .andExpect(jsonPath("$.data.id").value(createdId))
                 .andExpect(jsonPath("$.message").value(MessageCode.NON_BL_CREATED.message()));
 
-        then(nonBlUseCase).should().createNonBl(any(CreateHouseBlCommand.class));
+        then(nonBlUseCase).should().createNonBl(any());
     }
 
     // ── PUT /api/non-bl/{id}/hbl-no ──────────────────────────────────────
