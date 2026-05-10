@@ -7,12 +7,15 @@ import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
+import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.freightos.fms.common.response.MessageCode;
+import com.freightos.fms.domain.common.vo.BlNumber;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NonBlService implements NonBlUseCase {
 
     private final HouseBlUseCase houseBlUseCase;
+    private final HouseBlPort houseBlPort;
     private final NonBlSearchPort nonBlSearchPort;
 
     @Override
@@ -61,8 +65,10 @@ public class NonBlService implements NonBlUseCase {
     @Override
     @Transactional
     public void changeNonBlHblNo(Long id, ChangeHouseBlNoCommand command) {
-        findNonBlDomainById(id); // NON_BL jobDiv 보장 (없으면 ResourceNotFoundException)
-        houseBlUseCase.changeHblNo(id, command);
+        BlNumber newHblNo = BlNumber.of(command.hblNo());
+        if (newHblNo == null) throw new IllegalArgumentException("hblNo must not be null or blank");
+        long affected = houseBlPort.updateHblNoById(id, newHblNo, JobDiv.NON_BL);
+        if (affected == 0) throw new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND);
     }
 
     private HouseBlNonBl findNonBlDomainById(Long id) {

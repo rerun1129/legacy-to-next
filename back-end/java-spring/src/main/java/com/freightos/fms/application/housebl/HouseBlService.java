@@ -64,9 +64,10 @@ public class HouseBlService implements HouseBlUseCase {
     @Override
     @Transactional
     public void changeHblNo(Long id, ChangeHouseBlNoCommand command) {
-        HouseBl existing = findEntityById(id);
-        existing.changeHblNo(BlNumber.of(command.hblNo()));
-        houseBlPort.saveHouseBl(existing);
+        BlNumber newHblNo = BlNumber.of(command.hblNo());
+        if (newHblNo == null) throw new IllegalArgumentException("hblNo must not be null or blank");
+        long affected = houseBlPort.updateHblNoById(id, newHblNo, null);
+        if (affected == 0) throw new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND);
         log.info("Changed HouseBl hblNo: id={}", id);
     }
 

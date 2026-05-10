@@ -8,6 +8,7 @@ import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.enums.DateKind;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.querydsl.core.types.dsl.StringPath;
@@ -18,6 +19,8 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -29,6 +32,9 @@ import java.util.List;
 public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public PagedResult<HouseBlSummary> searchSummaries(HouseBlFilter filter, PageRequest pageRequest) {
@@ -167,6 +173,17 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .where(h.masterBlId.eq(masterBlId))
             .orderBy(h.createdAt.desc())
             .fetch();
+    }
+
+    @Override
+    public long updateHblNoById(Long id, String newHblNo, JobDiv expectedJobDiv) {
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        BooleanExpression where = h.houseBlId.eq(id);
+        if (expectedJobDiv != null) where = where.and(h.jobDiv.eq(expectedJobDiv));
+        long affected = queryFactory.update(h).set(h.hblNo, newHblNo).where(where).execute();
+        em.flush();
+        em.clear();
+        return affected;
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {

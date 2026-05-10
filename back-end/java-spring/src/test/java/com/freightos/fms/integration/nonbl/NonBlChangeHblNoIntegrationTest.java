@@ -117,4 +117,28 @@ class NonBlChangeHblNoIntegrationTest {
 
         assertThat(result).isEmpty();
     }
+
+    @Test
+    @DisplayName("jobDiv 불일치: SEA 행 id에 NON_BL 조건으로 updateHblNoById → affected=0, SEA 행 hblNo 불변")
+    void updateHblNoById_jobDivMismatch_returnsZeroAndSeaRowUnchanged() {
+        HouseBlJpaEntity seaRow = persistSea("SEA-ORIGINAL");
+        em.flush();
+        em.clear();
+
+        long affected = houseBlPersistenceAdapter.updateHblNoById(seaRow.getHouseBlId(), BlNumber.of("CHANGED"), JobDiv.NON_BL);
+        em.flush();
+        em.clear();
+
+        assertThat(affected).isZero();
+        HouseBlJpaEntity reloaded = em.find(HouseBlJpaEntity.class, seaRow.getHouseBlId());
+        assertThat(reloaded.getHblNo()).isEqualTo("SEA-ORIGINAL");
+    }
+
+    @Test
+    @DisplayName("NON_BL 미존재: id=99999 으로 updateHblNoById → affected=0")
+    void updateHblNoById_nonExistentId_returnsZero() {
+        long affected = houseBlPersistenceAdapter.updateHblNoById(99999L, BlNumber.of("ANY"), JobDiv.NON_BL);
+
+        assertThat(affected).isZero();
+    }
 }

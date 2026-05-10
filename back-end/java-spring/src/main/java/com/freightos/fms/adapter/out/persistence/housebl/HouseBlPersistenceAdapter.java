@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlRepository;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
@@ -150,6 +151,12 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         houseBlTruckRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlTruckRepository::delete);
         houseBlNonBlRepository.findByHouseBlHouseBlId(id).ifPresent(houseBlNonBlRepository::delete);
         houseBlRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public long updateHblNoById(Long id, BlNumber newHblNo, JobDiv expectedJobDiv) {
+        return houseBlRepository.updateHblNoById(id, newHblNo.value(), expectedJobDiv);
     }
 
     private PagedResult<HouseBl> toPagedResult(Page<HouseBlJpaEntity> page) {

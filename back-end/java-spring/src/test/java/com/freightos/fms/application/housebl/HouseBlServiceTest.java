@@ -10,6 +10,7 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
+import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
@@ -207,26 +208,25 @@ class HouseBlServiceTest {
     // ── changeHblNo ──────────────────────────────────────────────────
 
     @Test
-    @DisplayName("changeHblNo - findHouseBlById → domain.changeHblNo → port.saveHouseBl 순서로 호출된다")
-    void changeHblNo_callsDomainAndPort() {
+    @DisplayName("changeHblNo - port.updateHblNoById 1회 호출, findHouseBlById/saveHouseBl 미호출")
+    void changeHblNo_callsUpdateHblNoById_notFindOrSave() {
         Long id = 1L;
         ChangeHouseBlNoCommand command = new ChangeHouseBlNoCommand("NEW-001");
-        HouseBl mockEntity = mock(HouseBl.class);
-        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
-        given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
+        given(houseBlPort.updateHblNoById(id, BlNumber.of("NEW-001"), null)).willReturn(1L);
 
         houseBlService.changeHblNo(id, command);
 
-        then(houseBlPort).should().findHouseBlById(id);
-        then(houseBlPort).should().saveHouseBl(mockEntity);
+        then(houseBlPort).should().updateHblNoById(id, BlNumber.of("NEW-001"), null);
+        then(houseBlPort).should(never()).findHouseBlById(any());
+        then(houseBlPort).should(never()).saveHouseBl(any());
     }
 
     @Test
-    @DisplayName("changeHblNo - 없는 ID 조회 시 ResourceNotFoundException 발생")
-    void changeHblNo_whenNotFound_throwsResourceNotFoundException() {
+    @DisplayName("changeHblNo - affected=0 시 ResourceNotFoundException 발생")
+    void changeHblNo_whenAffectedZero_throwsResourceNotFoundException() {
         Long id = 999L;
         ChangeHouseBlNoCommand command = new ChangeHouseBlNoCommand("NEW-001");
-        given(houseBlPort.findHouseBlById(id)).willReturn(Optional.empty());
+        given(houseBlPort.updateHblNoById(id, BlNumber.of("NEW-001"), null)).willReturn(0L);
 
         assertThatThrownBy(() -> houseBlService.changeHblNo(id, command))
                 .isInstanceOf(ResourceNotFoundException.class);

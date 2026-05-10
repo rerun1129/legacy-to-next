@@ -3,6 +3,7 @@ package com.freightos.fms.application.housebl.port.out;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -22,4 +23,10 @@ public interface HouseBlPort {
     void deleteHouseBl(HouseBl houseBl);
     List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId);
     List<ConsoledHouseBlAirSummary> findConsoledAirSummariesByMasterBlId(Long masterBlId);
+    /**
+     * hbl_no 단일 컬럼을 부분 UPDATE한다. SELECT 없이 직접 DB 갱신.
+     * expectedJobDiv == null 이면 jobDiv 조건을 WHERE에 포함하지 않는다.
+     * @return 영향받은 row 수 (0이면 id 미존재 또는 jobDiv 불일치)
+     */
+    long updateHblNoById(Long id, BlNumber newHblNo, JobDiv expectedJobDiv);
 }
