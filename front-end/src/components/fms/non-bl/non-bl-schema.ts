@@ -61,9 +61,10 @@ export const NON_BL_SCHEMA = z.object({
   // Cargo
   mainItem:  z.string().optional(),
   hsCode:    z.string().optional(),
-  cargoQty:  z.number().optional(),
-  cargoUnit: z.string().optional(),
-  grossWt:   z.number().optional(),
+  cargoQty:   z.number().optional(),
+  pkgUnit:    z.string().optional(),
+  weightUnit: z.string().optional(),
+  grossWt:    z.number().optional(),
   volWt:     z.number().optional(),
   totalCbm:  z.number().optional(),
   rton:      z.number().optional(),

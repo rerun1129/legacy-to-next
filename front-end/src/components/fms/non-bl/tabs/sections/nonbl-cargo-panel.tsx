@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
-import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
@@ -45,13 +45,7 @@ export function NonBLCargoPanel() {
               decimalPlaces={0}
               placeholder="0"
             />
-            <Controller
-              name="cargoUnit"
-              control={control}
-              render={({ field }) => (
-                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} />
-              )}
-            />
+            <CodeBox kind="code-only" variant="panel" codeProps={register("pkgUnit")} onLookup={() => {}} />
           </div>
         </div>
       ),
@@ -61,8 +55,15 @@ export function NonBLCargoPanel() {
       render: () => (
         <div className="li">
           <span className="li__label">Gross W/T</span>
-          <div className="li__input">
+          <div className="li__input li__input--tight">
             <NumberBox name="grossWt" variant="panel" decimalPlaces={3} />
+            <Controller
+              name="weightUnit"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} />
+              )}
+            />
           </div>
         </div>
       ),

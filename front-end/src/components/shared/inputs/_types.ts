@@ -13,7 +13,7 @@ export interface BoxBaseProps {
   style?: React.CSSProperties;
 }
 
-export type CodeBoxKind = "lcn" | "party-cn";
+export type CodeBoxKind = "lcn" | "party-cn" | "code-only";
 
 export interface ComboBoxOption {
   value: string;
@@ -24,8 +24,8 @@ export interface CodeBoxProps extends BoxBaseProps {
   kind?: CodeBoxKind;
   label?: string;
   codeProps: InputHTMLAttributes<HTMLInputElement>;
-  nameProps: InputHTMLAttributes<HTMLInputElement>;
-  onLookup: () => void;
+  nameProps?: InputHTMLAttributes<HTMLInputElement>;
+  onLookup?: () => void;
   mono?: boolean;
   lookupAriaLabel?: string;
   labelOptions?: LabelOption[];

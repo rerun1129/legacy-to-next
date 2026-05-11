@@ -38,6 +38,46 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
     },
     ref
   ) {
+    if (kind === "code-only") {
+      const { className: codeCn, ...restCodeProps } = codeProps;
+      const baseCodeCn = codeCn ?? (mono ? "text-mono" : undefined);
+      const mergedCodeCn = [baseCodeCn, required ? "is-required" : undefined].filter(Boolean).join(" ") || undefined;
+      return (
+        <div className="lcn">
+          {(label || labelOptions) && (
+            <LcnLabel
+              options={labelOptions}
+              value={labelValue}
+              onChange={onLabelChange}
+              required={required}
+            >
+              {label}
+            </LcnLabel>
+          )}
+          <div className="lcn__code" style={{ position: "relative" }}>
+            <input
+              ref={ref}
+              autoComplete="off"
+              className={mergedCodeCn}
+              readOnly={readOnly}
+              disabled={disabled}
+              {...restCodeProps}
+            />
+            {onLookup && !readOnly && !disabled && (
+              <button
+                type="button"
+                onClick={onLookup}
+                style={lookupBtnStyle}
+                aria-label={lookupAriaLabel ?? "Lookup"}
+              >
+                <Search size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     if (kind === "party-cn") {
       return (
         <div className="party-block">
@@ -69,7 +109,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
                 className="party-cn__name"
                 readOnly={readOnly}
                 disabled={disabled}
-                {...nameProps}
+                {...(nameProps ?? {})}
               />
             </div>
           </div>
@@ -119,7 +159,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
           className="lcn__name"
           readOnly={readOnly}
           disabled={disabled}
-          {...nameProps}
+          {...(nameProps ?? {})}
         />
       </div>
     );

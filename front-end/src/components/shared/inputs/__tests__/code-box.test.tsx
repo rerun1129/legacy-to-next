@@ -34,4 +34,36 @@ describe("CodeBox", () => {
     const { container } = render(<CodeBox {...baseProps} kind="party-cn" />);
     expect(container.querySelector(".party-cn__code")).toBeInTheDocument();
   });
+
+  describe("kind=code-only", () => {
+    it("lcn__code 존재, lcn__name 미존재", () => {
+      const { container } = render(
+        <CodeBox codeProps={{ "data-testid": "code-input" } as React.InputHTMLAttributes<HTMLInputElement>} kind="code-only" />
+      );
+      expect(container.querySelector(".lcn__code")).toBeInTheDocument();
+      expect(container.querySelector(".lcn__name")).not.toBeInTheDocument();
+    });
+
+    it("onLookup 미지정 시 Search 버튼 미존재", () => {
+      render(
+        <CodeBox codeProps={{ "data-testid": "code-input" } as React.InputHTMLAttributes<HTMLInputElement>} kind="code-only" />
+      );
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    });
+
+    it("onLookup 지정 시 Search 버튼 존재 및 클릭 시 호출", () => {
+      const onLookup = vi.fn();
+      render(
+        <CodeBox
+          codeProps={{ "data-testid": "code-input" } as React.InputHTMLAttributes<HTMLInputElement>}
+          kind="code-only"
+          onLookup={onLookup}
+          lookupAriaLabel="Lookup"
+        />
+      );
+      const btn = screen.getByRole("button", { name: "Lookup" });
+      fireEvent.click(btn);
+      expect(onLookup).toHaveBeenCalledOnce();
+    });
+  });
 });
