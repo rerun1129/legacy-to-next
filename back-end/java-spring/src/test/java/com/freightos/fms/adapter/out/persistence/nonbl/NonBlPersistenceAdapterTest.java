@@ -80,7 +80,7 @@ class NonBlPersistenceAdapterTest {
 
         then(jpaToDomainMapper).should().toNonBlDomain(parentJpa, nonBlJpa);
         then(houseBlFactory).should().applyToEntity(command, domain);
-        then(domainToJpaMapper).should().applyCommonFields(domain, parentJpa);
+        then(domainToJpaMapper).should().applyNonBlCommonFields(domain, parentJpa);
         then(domainToJpaMapper).should().applyNonBlFields(domain, nonBlJpa);
     }
 
@@ -151,7 +151,7 @@ class NonBlPersistenceAdapterTest {
         // 빈 리스트로 mergeContainers·mergeDims가 호출 — 도메인 컬렉션에서 houseBlCargoMapper 미호출
         then(houseBlCargoMapper).should(never()).toNonBlContainerJpa(any());
         then(houseBlCargoMapper).should(never()).toNonBlDimJpa(any());
-        then(domainToJpaMapper).should().applyCommonFields(domain, parentJpa);
+        then(domainToJpaMapper).should().applyNonBlCommonFields(domain, parentJpa);
         then(domainToJpaMapper).should().applyNonBlFields(domain, nonBlJpa);
     }
 

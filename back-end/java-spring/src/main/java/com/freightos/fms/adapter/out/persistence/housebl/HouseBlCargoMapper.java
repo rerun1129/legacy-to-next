@@ -164,17 +164,13 @@ public class HouseBlCargoMapper {
         jpa.setSealNo1(mapOrNull(c.getSealNo1(), SealNumber::value));
         jpa.setSealNo2(mapOrNull(c.getSealNo2(), SealNumber::value));
         jpa.setSealNo3(mapOrNull(c.getSealNo3(), SealNumber::value));
-        jpa.setSealNo4(mapOrNull(c.getSealNo4(), SealNumber::value));
-        jpa.setSealNo5(mapOrNull(c.getSealNo5(), SealNumber::value));
-        jpa.setSealNo6(mapOrNull(c.getSealNo6(), SealNumber::value));
         jpa.setPkgQty(mapOrNull(c.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(c.getPkgUnit());
         jpa.setGrossWeightKg(mapOrNull(c.getGrossWeightKg(), Weight::kg));
-        jpa.setNetWeightKg(mapOrNull(c.getNetWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(c.getCbm(), Volume::cbm));
-        jpa.setVgmKg(mapOrNull(c.getVgmKg(), Weight::kg));
-        jpa.setIsSoc(c.isSoc());
         jpa.setSeq(c.getSeq());
+        // sealNo4-6, netWeightKg, vgmKg, isSoc는 NonBl form 미사용 필드.
+        // INSERT 시 DB 기본값(false/1 등)을 유지하고, UPDATE 시 copyContainerFields에서 set 생략.
     }
 
     private HouseBlContainer.Details buildContainerDetails(

@@ -55,23 +55,15 @@ export interface NonBlFilter {
 
 export interface NonBlContainerView {
   id?: number;
-  seq?: number;
   containerNo?: string;
   containerType?: string;
-  lengthFeet?: number;
   sealNo1?: string;
   sealNo2?: string;
   sealNo3?: string;
-  sealNo4?: string;
-  sealNo5?: string;
-  sealNo6?: string;
   pkgQty?: number;
   pkgUnit?: string;
   grossWeightKg?: number;
-  netWeightKg?: number;
-  vgmKg?: number;
   cbm?: number;
-  isSoc?: boolean;
 }
 
 export interface NonBlDimView {
@@ -89,14 +81,10 @@ export interface NonBlDimView {
 export interface NonBlDetail {
   id: number;
   hblNo?: string;
-  jobDiv: string;
   bound: string;
-  shipmentType?: string;
-  freightTerm?: string;
   shipperCode?: string;
   consigneeCode?: string;
   notifyCode?: string;
-  docPartnerCode?: string;
   settlePartnerCode?: string;
   actualCustomerCode?: string;
   polCode?: string;
@@ -111,9 +99,6 @@ export interface NonBlDetail {
   operatorCode?: string;
   salesManCode?: string;
   teamCode?: string;
-  mblNo?: string;
-  masterRefNo?: string;
-  masterBlId?: number;
   mainItemName?: string;
   hsCode?: string;
   workDivision?: string;
@@ -140,23 +125,15 @@ export interface NonBlDetail {
 
 export interface NonBlContainerRequest {
   id?: number;
-  seq?: number;
   containerNo?: string;
   containerType?: string;
-  lengthFeet?: number;
   sealNo1?: string;
   sealNo2?: string;
   sealNo3?: string;
-  sealNo4?: string;
-  sealNo5?: string;
-  sealNo6?: string;
   pkgQty?: number;
   pkgUnit?: string;
   grossWeightKg?: number;
-  netWeightKg?: number;
-  vgmKg?: number;
   cbm?: number;
-  isSoc?: boolean;
 }
 
 export interface NonBlDimRequest {
@@ -175,12 +152,9 @@ export interface CreateNonBlRequest {
   hblNo?: string;
   bound: string;
   workDivision?: string;
-  shipmentType?: string;
-  freightTerm?: string;
   shipperCode?: string;
   consigneeCode?: string;
   notifyCode?: string;
-  docPartnerCode?: string;
   settlePartnerCode?: string;
   actualCustomerCode?: string;
   polCode?: string;
@@ -195,9 +169,6 @@ export interface CreateNonBlRequest {
   operatorCode?: string;
   salesManCode?: string;
   teamCode?: string;
-  mblNo?: string;
-  masterRefNo?: string;
-  masterBlId?: number;
   mainItemName?: string;
   hsCode?: string;
   rton?: number;

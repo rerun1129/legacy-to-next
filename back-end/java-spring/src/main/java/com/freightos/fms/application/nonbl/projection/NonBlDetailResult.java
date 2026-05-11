@@ -8,7 +8,6 @@ import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.ContainerNumber;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
-import com.freightos.fms.domain.common.vo.MblNo;
 import com.freightos.fms.domain.common.vo.PortCode;
 import com.freightos.fms.domain.common.vo.Quantity;
 import com.freightos.fms.domain.common.vo.Rton;
@@ -33,15 +32,11 @@ import java.util.List;
 public record NonBlDetailResult(
         Long id,
         String hblNo,
-        String jobDiv,
         String bound,
         String workDivision,
-        String shipmentType,
-        String freightTerm,
         String shipperCode,
         String consigneeCode,
         String notifyCode,
-        String docPartnerCode,
         String settlePartnerCode,
         String actualCustomerCode,
         String polCode,
@@ -68,9 +63,6 @@ public record NonBlDetailResult(
         String salesManCode,
         String teamCode,
         String salesClass,
-        String mblNo,
-        String masterRefNo,
-        Long masterBlId,
         String mainItemName,
         String hsCode,
         LocalDateTime createdAt,
@@ -84,15 +76,11 @@ public record NonBlDetailResult(
         return new NonBlDetailResult(
                 nonBl.getId(),
                 VoMapper.mapOrNull(nonBl.getHblNo(), BlNumber::value),
-                Nullables.mapOrNull(nonBl.getJobDiv(), Enum::name),
                 Nullables.mapOrNull(nonBl.getBound(), Bound::name),
                 Nullables.mapOrNull(nonBl.getWorkDivision(), HouseBlNonBl.WorkDivision::name),
-                Nullables.mapOrNull(nonBl.getShipmentType(), Enum::name),
-                Nullables.mapOrNull(nonBl.getFreightTerm(), Enum::name),
                 VoMapper.mapOrNull(nonBl.getShipperCode(), CustomerCode::value),
                 VoMapper.mapOrNull(nonBl.getConsigneeCode(), CustomerCode::value),
                 VoMapper.mapOrNull(nonBl.getNotifyCode(), CustomerCode::value),
-                VoMapper.mapOrNull(nonBl.getDocPartnerCode(), CustomerCode::value),
                 VoMapper.mapOrNull(nonBl.getSettlePartnerCode(), CustomerCode::value),
                 VoMapper.mapOrNull(nonBl.getActualCustomerCode(), CustomerCode::value),
                 VoMapper.mapOrNull(nonBl.getPolCode(), PortCode::value),
@@ -119,9 +107,6 @@ public record NonBlDetailResult(
                 VoMapper.mapOrNull(nonBl.getSalesManCode(), EmployeeCode::value),
                 VoMapper.mapOrNull(nonBl.getTeamCode(), TeamCode::value),
                 Nullables.mapOrNull(nonBl.getSalesClass(), Enum::name),
-                VoMapper.mapOrNull(nonBl.getMblNo(), MblNo::value),
-                nonBl.getMasterRefNo(),
-                nonBl.getMasterBlId(),
                 nonBl.getMainItemName(),
                 nonBl.getHsCode(),
                 nonBl.getCreatedAt(),
@@ -134,44 +119,28 @@ public record NonBlDetailResult(
 
     public record NonBlContainerView(
             Long id,
-            int seq,
             String containerNo,
             String containerType,
-            Integer lengthFeet,
             String sealNo1,
             String sealNo2,
             String sealNo3,
-            String sealNo4,
-            String sealNo5,
-            String sealNo6,
             Integer pkgQty,
             String pkgUnit,
             BigDecimal grossWeightKg,
-            BigDecimal netWeightKg,
-            BigDecimal vgmKg,
-            BigDecimal cbm,
-            boolean isSoc
+            BigDecimal cbm
     ) {
         public static NonBlContainerView from(HouseBlContainer c) {
             return new NonBlContainerView(
                     c.getId(),
-                    c.getSeq(),
                     VoMapper.mapOrNull(c.getContainerNo(), ContainerNumber::value),
                     Nullables.mapOrNull(c.getContainerType(), ContainerType::getCode),
-                    c.getLengthFeet(),
                     VoMapper.mapOrNull(c.getSealNo1(), SealNumber::value),
                     VoMapper.mapOrNull(c.getSealNo2(), SealNumber::value),
                     VoMapper.mapOrNull(c.getSealNo3(), SealNumber::value),
-                    VoMapper.mapOrNull(c.getSealNo4(), SealNumber::value),
-                    VoMapper.mapOrNull(c.getSealNo5(), SealNumber::value),
-                    VoMapper.mapOrNull(c.getSealNo6(), SealNumber::value),
                     VoMapper.mapOrNull(c.getPkgQty(), Quantity::count),
                     c.getPkgUnit(),
                     VoMapper.mapOrNull(c.getGrossWeightKg(), Weight::kg),
-                    VoMapper.mapOrNull(c.getNetWeightKg(), Weight::kg),
-                    VoMapper.mapOrNull(c.getVgmKg(), Weight::kg),
-                    VoMapper.mapOrNull(c.getCbm(), Volume::cbm),
-                    c.isSoc()
+                    VoMapper.mapOrNull(c.getCbm(), Volume::cbm)
             );
         }
     }

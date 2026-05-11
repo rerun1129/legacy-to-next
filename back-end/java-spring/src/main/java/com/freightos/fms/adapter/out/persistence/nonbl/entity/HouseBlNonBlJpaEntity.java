@@ -166,20 +166,14 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     private void copyContainerFields(HouseBlNonBlContainerJpaEntity src, HouseBlNonBlContainerJpaEntity dst) {
         dst.setContainerNo(src.getContainerNo());
         dst.setContainerType(src.getContainerType());
-        dst.setLengthFeet(src.getLengthFeet());
         dst.setSealNo1(src.getSealNo1());
         dst.setSealNo2(src.getSealNo2());
         dst.setSealNo3(src.getSealNo3());
-        dst.setSealNo4(src.getSealNo4());
-        dst.setSealNo5(src.getSealNo5());
-        dst.setSealNo6(src.getSealNo6());
         dst.setPkgQty(src.getPkgQty());
         dst.setPkgUnit(src.getPkgUnit());
         dst.setGrossWeightKg(src.getGrossWeightKg());
-        dst.setNetWeightKg(src.getNetWeightKg());
         dst.setCbm(src.getCbm());
-        dst.setVgmKg(src.getVgmKg());
-        dst.setIsSoc(src.isSoc());
-        dst.setSeq(src.getSeq());
+        // lengthFeet, sealNo4-6, netWeightKg, vgmKg, isSoc, seq는 NonBl form 미사용 필드.
+        // 기존 영속 엔티티 값을 그대로 유지하여 DB 덮어쓰기(데이터 손실) 방지.
     }
 }

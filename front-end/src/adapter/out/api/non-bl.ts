@@ -63,23 +63,15 @@ const NON_BL_ROW_SCHEMA = z.object({
 
 const NON_BL_CONTAINER_SCHEMA = z.object({
   id: z.number().optional(),
-  seq: z.number().optional(),
   containerNo: z.string().nullable().optional().transform((v) => v ?? undefined),
   containerType: z.string().nullable().optional().transform((v) => v ?? undefined),
-  lengthFeet: z.number().nullable().optional().transform((v) => v ?? undefined),
   sealNo1: z.string().nullable().optional().transform((v) => v ?? undefined),
   sealNo2: z.string().nullable().optional().transform((v) => v ?? undefined),
   sealNo3: z.string().nullable().optional().transform((v) => v ?? undefined),
-  sealNo4: z.string().nullable().optional().transform((v) => v ?? undefined),
-  sealNo5: z.string().nullable().optional().transform((v) => v ?? undefined),
-  sealNo6: z.string().nullable().optional().transform((v) => v ?? undefined),
   pkgQty: z.number().nullable().optional().transform((v) => v ?? undefined),
   pkgUnit: z.string().nullable().optional().transform((v) => v ?? undefined),
   grossWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
-  netWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
-  vgmKg: z.number().nullable().optional().transform((v) => v ?? undefined),
   cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
-  isSoc: z.boolean().nullable().optional().transform((v) => v ?? undefined),
 });
 
 const NON_BL_DIM_SCHEMA = z.object({
@@ -95,14 +87,10 @@ const NON_BL_DIM_SCHEMA = z.object({
 const NON_BL_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
-  jobDiv: z.string(),
   bound: z.string(),
-  shipmentType: z.string().nullable().optional().transform((v) => v ?? undefined),
-  freightTerm: z.string().nullable().optional().transform((v) => v ?? undefined),
   shipperCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   consigneeCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   notifyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
-  docPartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   actualCustomerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   polCode: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -117,9 +105,6 @@ const NON_BL_DETAIL_SCHEMA = z.object({
   operatorCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   salesManCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   teamCode: z.string().nullable().optional().transform((v) => v ?? undefined),
-  mblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
-  masterRefNo: z.string().nullable().optional().transform((v) => v ?? undefined),
-  masterBlId: z.number().nullable().optional().transform((v) => v ?? undefined),
   mainItemName: z.string().nullable().optional().transform((v) => v ?? undefined),
   hsCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   workDivision: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -154,19 +139,15 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
-/** FE CreateNonBlRequest → BE CreateHouseBlRequest 형식 변환. jobDiv는 항상 NON_BL 강제. */
+/** FE CreateNonBlRequest → BE CreateHouseBlRequest 형식 변환. */
 function toBeRequest(req: CreateNonBlRequest) {
   return {
-    jobDiv: 'NON_BL',
     hblNo: req.hblNo,
     bound: req.bound,
     workDivision: req.workDivision,
-    shipmentType: req.shipmentType,
-    freightTerm: req.freightTerm,
     shipperCode: req.shipperCode,
     consigneeCode: req.consigneeCode,
     notifyCode: req.notifyCode,
-    docPartnerCode: req.docPartnerCode,
     settlePartnerCode: req.settlePartnerCode,
     actualCustomerCode: req.actualCustomerCode,
     polCode: req.polCode,
@@ -181,9 +162,6 @@ function toBeRequest(req: CreateNonBlRequest) {
     operatorCode: req.operatorCode,
     salesManCode: req.salesManCode,
     teamCode: req.teamCode,
-    mblNo: req.mblNo,
-    masterRefNo: req.masterRefNo,
-    masterBlId: req.masterBlId,
     mainItemName: req.mainItemName,
     hsCode: req.hsCode,
     rton: req.rton,

@@ -13,15 +13,11 @@ import java.util.List;
 public record NonBlDetailResponse(
         Long id,
         String hblNo,
-        String jobDiv,
         String bound,
         String workDivision,
-        String shipmentType,
-        String freightTerm,
         String shipperCode,
         String consigneeCode,
         String notifyCode,
-        String docPartnerCode,
         String settlePartnerCode,
         String actualCustomerCode,
         String polCode,
@@ -48,9 +44,6 @@ public record NonBlDetailResponse(
         String salesManCode,
         String teamCode,
         String salesClass,
-        String mblNo,
-        String masterRefNo,
-        Long masterBlId,
         String mainItemName,
         String hsCode,
         LocalDateTime createdAt,
@@ -62,23 +55,15 @@ public record NonBlDetailResponse(
 
     public record ContainerView(
             Long id,
-            int seq,
             String containerNo,
             String containerType,
-            Integer lengthFeet,
             String sealNo1,
             String sealNo2,
             String sealNo3,
-            String sealNo4,
-            String sealNo5,
-            String sealNo6,
             Integer pkgQty,
             String pkgUnit,
             BigDecimal grossWeightKg,
-            BigDecimal netWeightKg,
-            BigDecimal vgmKg,
-            BigDecimal cbm,
-            boolean isSoc
+            BigDecimal cbm
     ) {}
 
     public record DimView(
@@ -95,15 +80,11 @@ public record NonBlDetailResponse(
         return new NonBlDetailResponse(
                 result.id(),
                 result.hblNo(),
-                result.jobDiv(),
                 result.bound(),
                 result.workDivision(),
-                result.shipmentType(),
-                result.freightTerm(),
                 result.shipperCode(),
                 result.consigneeCode(),
                 result.notifyCode(),
-                result.docPartnerCode(),
                 result.settlePartnerCode(),
                 result.actualCustomerCode(),
                 result.polCode(),
@@ -130,9 +111,6 @@ public record NonBlDetailResponse(
                 result.salesManCode(),
                 result.teamCode(),
                 result.salesClass(),
-                result.mblNo(),
-                result.masterRefNo(),
-                result.masterBlId(),
                 result.mainItemName(),
                 result.hsCode(),
                 result.createdAt(),
@@ -146,9 +124,9 @@ public record NonBlDetailResponse(
     private static List<ContainerView> toContainerViews(List<NonBlDetailResult.NonBlContainerView> src) {
         if (src == null) return List.of();
         return src.stream().map(c -> new ContainerView(
-                c.id(), c.seq(), c.containerNo(), c.containerType(), c.lengthFeet(),
-                c.sealNo1(), c.sealNo2(), c.sealNo3(), c.sealNo4(), c.sealNo5(), c.sealNo6(),
-                c.pkgQty(), c.pkgUnit(), c.grossWeightKg(), c.netWeightKg(), c.vgmKg(), c.cbm(), c.isSoc())).toList();
+                c.id(), c.containerNo(), c.containerType(),
+                c.sealNo1(), c.sealNo2(), c.sealNo3(),
+                c.pkgQty(), c.pkgUnit(), c.grossWeightKg(), c.cbm())).toList();
     }
 
     private static List<DimView> toDimViews(List<NonBlDetailResult.NonBlDimView> src) {

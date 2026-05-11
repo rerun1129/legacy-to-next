@@ -50,7 +50,7 @@ public class NonBlUpdatePersistenceAdapter implements NonBlPersistencePort {
         houseBlFactory.applyToEntity(command, domain);
 
         // 도메인 → JPA dirty-check 기반 필드 반영 (saveHouseBl 미호출)
-        domainToJpaMapper.applyCommonFields(domain, parentJpa);
+        domainToJpaMapper.applyNonBlCommonFields(domain, parentJpa);
         domainToJpaMapper.applyNonBlFields(domain, nonBlJpa);
 
         // 자식 컬렉션 merge — orphanRemoval이 DELETE, 신규 진입이 INSERT를 처리
