@@ -13,15 +13,17 @@ export function DescriptionPanel() {
         <span className="panel__title">Description</span>
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <div className="li" style={{ marginBottom: 8, flexShrink: 0 }}>
-          <span className="li__label">Clause</span>
-          <div className="li__input">
-            <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}>
-              <option value="">-- 부지약관 --</option>
-              <option>SAID TO CONTAIN</option>
-              <option>SHIPPER&apos;S LOAD AND COUNT</option>
-            </select>
-          </div>
+        <div style={{ display: "flex", gap: 4, marginBottom: 8, flexShrink: 0 }}>
+          <select style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}>
+            <option value="">-- 부지약관 --</option>
+            <option>SAID TO CONTAIN</option>
+            <option>SHIPPER&apos;S LOAD AND COUNT</option>
+          </select>
+          <select style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}>
+            <option value="">-- 부지약관 --</option>
+            <option>SAID TO CONTAIN</option>
+            <option>SHIPPER&apos;S LOAD AND COUNT</option>
+          </select>
         </div>
         <Controller
           control={control}
