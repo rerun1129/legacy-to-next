@@ -6,8 +6,9 @@ import { GridSection } from "./sections/grid-section";
 import { ButtonsSection } from "./sections/buttons-section";
 import { PaginationSection } from "./sections/pagination-section";
 import { ScreenGuardSection } from "./sections/screen-guard-section";
+import { ConfirmModalSection } from "./sections/confirm-modal-section";
 
-type SectionId = "inputs" | "grid" | "buttons" | "pagination" | "screen-guard";
+type SectionId = "inputs" | "grid" | "buttons" | "pagination" | "screen-guard" | "confirm-modal";
 
 const MENU: { id: SectionId; label: string }[] = [
   { id: "inputs", label: "Inputs" },
@@ -15,6 +16,7 @@ const MENU: { id: SectionId; label: string }[] = [
   { id: "buttons", label: "Buttons" },
   { id: "pagination", label: "Pagination" },
   { id: "screen-guard", label: "ScreenGuard" },
+  { id: "confirm-modal", label: "Confirm Modal" },
 ];
 
 export default function PreviewPage() {
@@ -58,6 +60,7 @@ export default function PreviewPage() {
         {active === "buttons"      && <ButtonsSection />}
         {active === "pagination"   && <PaginationSection />}
         {active === "screen-guard" && <ScreenGuardSection />}
+        {active === "confirm-modal" && <ConfirmModalSection />}
       </main>
     </div>
   );

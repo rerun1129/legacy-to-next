@@ -10,6 +10,7 @@
 @import "../styles/dashboard.css";
 @import "../styles/widgets.css";
 @import "../styles/modal.css";
+@import "../styles/confirm.css";
 
 /* =========================================================
    Tailwind v4 custom keyframes & animations (ScreenGuard)

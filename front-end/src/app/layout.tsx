@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ConfirmModalRoot } from "@/components/confirm";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" className={`h-full ${inter.variable}`}>
       <body className="h-full">
         <QueryProvider>{children}</QueryProvider>
+        <ConfirmModalRoot />
       </body>
     </html>
   );
