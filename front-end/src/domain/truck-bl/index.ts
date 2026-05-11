@@ -62,6 +62,82 @@ export interface TruckBlDetail {
   voyageNo?: string;
 }
 
+// ── Truck Order 자식 Request 타입 ─────────────────────────────
+export interface TruckOrderCreateRequest {
+  truckOrderNo?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  cbm?: number;
+  truckNo?: string;
+  truckType?: string;
+  driver?: string;
+  mobileNo?: string;
+  containerNo?: string;
+  containerType?: string;
+  sealNo1?: string;
+  sealNo2?: string;
+  sealNo3?: string;
+}
+
+export interface TruckOrderUpdateRequest extends TruckOrderCreateRequest {
+  id?: number;
+}
+
+// ── Marks/Description 패널 Request 타입 ─────────────────────
+export interface TruckDescRequest {
+  marks?: string;
+  description?: string;
+  descClause1?: string;
+  descClause2?: string;
+  remark?: string;
+}
+
+// ── Create / Update Request ────────────────────────────────────
+
+export interface CreateTruckBlRequest {
+  hblNo?: string;
+  bound?: string;
+  shipperCode?: string;
+  consigneeCode?: string;
+  notifyCode?: string;
+  settlePartnerCode?: string;
+  polCode?: string;
+  podCode?: string;
+  etd?: string;
+  eta?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  weightUnit?: string;
+  grossWeightKg?: number;
+  cbm?: number;
+  actualCustomerCode?: string;
+  operatorCode?: string;
+  teamCode?: string;
+  salesManCode?: string;
+  salesClass?: string;
+  mainItemName?: string;
+  hsCode?: string;
+  incoterms?: string;
+  truckerCode?: string;
+  truckerPic?: string;
+  chargeWeightKg?: number;
+  pickupDate?: string;
+  pickupTm?: string;
+  etdTm?: string;
+  etaTm?: string;
+  loadType?: string;
+  serviceTerm?: string;
+  voyageNo?: string;
+  desc?: TruckDescRequest;
+  truckOrders?: TruckOrderCreateRequest[];
+}
+
+/** Update 요청은 hblNo를 제외한 나머지 필드 (B/L No 변경은 PUT /{id}/hbl-no 전용) */
+export type UpdateTruckBlRequest = Omit<CreateTruckBlRequest, 'hblNo'> & {
+  truckOrders?: TruckOrderUpdateRequest[];
+};
+
 export interface TruckBlFilter {
   bound: string;
   dateFrom: string;

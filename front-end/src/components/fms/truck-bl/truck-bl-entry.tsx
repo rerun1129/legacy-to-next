@@ -1,37 +1,38 @@
 "use client";
 
-import { useState, useEffect, useRef }                from "react";
-import { useForm, FormProvider }                       from "react-hook-form";
-import { useMutation, useQuery }                        from "@tanstack/react-query";
-import { Save, Trash2, Truck, FilePlus }               from "lucide-react";
+import { useState, useEffect, useRef }               from "react";
+import { useForm, FormProvider, Controller }          from "react-hook-form";
+import { zodResolver }                               from "@hookform/resolvers/zod";
+import { useQuery }                                   from "@tanstack/react-query";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }     from "./tabs/main-truck";
-import type { HouseBlFormValues }                      from "@/components/fms/house-bl/house-bl-schema";
-import { createEmptyTruckBlFormValues }                from "./truck-bl-defaults";
-import { useBlDraftSync }                              from "@/lib/use-bl-draft-sync";
-import { useBLDraftStore }                             from "@/lib/use-bl-draft-store";
-import { truckBlPort }                                 from "@/lib/ports";
-import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
-import { ScreenGuard }                                 from "@/components/shared/screen-guard";
-
-// label → RHF 필드 경로 매핑 (toolbar 5개)
-const TOOLBAR_REGISTER: Record<string, keyof HouseBlFormValues> = {
-  "Truck B/L No": "truckBlNo",
-  "Settle":       "truckSettle",
-  "Incoterms":    "incoterms",
-  "Freight Term": "truckFreightTerm",
-  "Status":       "truckStatus",
-};
+import type { TruckBlFormValues }                    from "./truck-bl-schema";
+import { TRUCK_BL_SCHEMA }                           from "./truck-bl-schema";
+import { createEmptyTruckBlFormValues }              from "./truck-bl-defaults";
+import { useBlDraftSync }                            from "@/lib/use-bl-draft-sync";
+import { useBLDraftStore }                           from "@/lib/use-bl-draft-store";
+import { TextBox, ComboBox }                         from "@/components/shared/inputs";
+import { useEnumOptions }                            from "@/application/enums/use-enum";
+import { truckBlPort }                               from "@/lib/ports";
+import { useEntryFocusStore }                        from "@/lib/use-entry-focus-store";
+import { ScreenGuard }                               from "@/components/shared/screen-guard";
+import { toast }                                     from "@/lib/toast-store";
+import { TruckBlEntryHeader }                        from "./truck-bl-entry-header";
+import { TruckChangeBlNoModal }                      from "./truck-change-bl-no-modal";
+import { useTruckBlEntryMutations }                  from "./use-truck-bl-entry-mutations";
+import { useSearchTruckBl }                          from "./use-search-truck-bl";
 
 export function TruckBLEntry() {
   const [tab, setTab] = useState("main");
+  const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const id = useEntryFocusStore((s) => s.focus.truckBl);
   const isEdit = Boolean(id);
   const detailLoadedRef = useRef<boolean>(false);
 
-  const clearDraft = useBLDraftStore(state => state.clearDraft);
+  const clearDraft = useBLDraftStore((state) => state.clearDraft);
 
-  const form = useForm<HouseBlFormValues>({
+  const form = useForm<TruckBlFormValues>({
+    resolver: zodResolver(TRUCK_BL_SCHEMA),
     defaultValues: createEmptyTruckBlFormValues(),
   });
 
@@ -50,10 +51,22 @@ export function TruckBLEntry() {
     };
   }, [clearDraft, id]);
 
+  const { register, control } = form;
+
+  const { options: boundOptions, placeholder: boundPlaceholder } = useEnumOptions("Bound");
+  const { options: loadTypeOptions, placeholder: loadTypePlaceholder } = useEnumOptions("LoadType");
+  const { options: serviceTermOptions, placeholder: serviceTermPlaceholder } = useEnumOptions("ServiceTerm");
+
   const { data: detail, isFetching: isDetailFetching } = useQuery({
     queryKey: ["truck-bl", "detail", id],
     queryFn: () => truckBlPort.getById(id!),
     enabled: isEdit,
+    // 다른 화면 이동 후 재진입 시 자동 재조회 차단 — invalidateQueries(mutation 후) 시에는 active query 이므로 refetch 정상 동작
+    staleTime: Infinity,
+    refetchOnMount: false,
+    // refetch 결과가 직전 cache와 deep equal이어도 새 reference를 발급해
+    // useEffect(detail)의 form.reset이 항상 트리거되도록 강제
+    structuralSharing: false,
   });
 
   useEffect(() => {
@@ -62,42 +75,44 @@ export function TruckBLEntry() {
     detailLoadedRef.current = true;
     form.reset({
       ...createEmptyTruckBlFormValues(),
-      truckBlNo:          detail.hblNo ?? "",
-      incoterms:          detail.incoterms ?? "",
-      truckFreightTerm:   detail.freightTerm ?? "",
-      // truckSettle은 toolbar 표시용, settlePartnerCode와 동기화
-      truckSettle:        detail.settlePartnerCode ?? "",
-      settlePartnerCode:  detail.settlePartnerCode ?? "",
-      shipperCode:        detail.shipperCode ?? "",
-      consigneeCode:      detail.consigneeCode ?? "",
-      notifyCode:         detail.notifyCode ?? "",
-      pol:                detail.polCode ?? "",
-      pod:                detail.podCode ?? "",
-      etd:                detail.etd ?? "",
-      eta:                detail.eta ?? "",
-      pkgQty:             detail.pkgQty != null ? String(detail.pkgQty) : "",
-      pkgUnit:            detail.pkgUnit ?? "",
-      grossWeightKg:      detail.grossWeightKg != null ? String(detail.grossWeightKg) : "",
-      cbm:                detail.cbm != null ? String(detail.cbm) : "",
-      chargeWeightKg:     detail.chargeWeightKg != null ? String(detail.chargeWeightKg) : "",
+      truckBlNo:          detail.hblNo             ?? "",
+      bound:              detail.bound              ?? "",
+      loadType:           detail.loadType           ?? "",
+      serviceTerm:        detail.serviceTerm        ?? "",
+      shipperCode:        detail.shipperCode        ?? "",
+      consigneeCode:      detail.consigneeCode      ?? "",
+      notifyCode:         detail.notifyCode         ?? "",
+      polCode:            detail.polCode            ?? "",
+      polName:            "",
+      podCode:            detail.podCode            ?? "",
+      podName:            "",
+      etd:                detail.etd                ?? "",
+      eta:                detail.eta                ?? "",
+      voyNo:              detail.voyageNo           ?? "",
+      pkgQty:             detail.pkgQty             != null ? detail.pkgQty : undefined,
+      pkgUnit:            detail.pkgUnit            ?? "",
+      grossWeightKg:      detail.grossWeightKg      != null ? detail.grossWeightKg : undefined,
+      cbm:                detail.cbm                != null ? detail.cbm : undefined,
+      chargeWeightKg:     detail.chargeWeightKg     != null ? detail.chargeWeightKg : undefined,
       actualCustomerCode: detail.actualCustomerCode ?? "",
-      operatorCode:       detail.operatorCode ?? "",
-      teamCode:           detail.teamCode ?? "",
-      salesManCode:       detail.salesManCode ?? "",
-      truckerCode:        detail.truckerCode ?? "",
-      truckerPic:         detail.truckerPic ?? "",
-      pickupDate:         detail.pickupDate ?? "",
-    } satisfies Partial<HouseBlFormValues>);
+      operatorCode:       detail.operatorCode       ?? "",
+      teamCode:           detail.teamCode           ?? "",
+      salesManCode:       detail.salesManCode       ?? "",
+      settlePartnerCode:  detail.settlePartnerCode  ?? "",
+      truckerCode:        detail.truckerCode        ?? "",
+      truckerPic:         detail.truckerPic         ?? "",
+      pickupDate:         detail.pickupDate         ?? "",
+    });
   }, [detail, form]);
 
-  // Save/Delete 구현 전: isPending 상태 관리용 — onClick은 아직 연결하지 않는다
-  const mutation = useMutation({
-    mutationFn: async () => { /* not yet implemented */ },
+  const { deleteMutation, isSavePending, handleSubmit, handleDelete } = useTruckBlEntryMutations({
+    id: id ?? null,
+    form,
+    detailLoadedRef,
+    clearDraft,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => { /* not yet implemented */ },
-  });
+  const { handleSearch } = useSearchTruckBl({ form, id: id ?? null, detailLoadedRef });
 
   function handleResetEntry() {
     form.reset(createEmptyTruckBlFormValues());
@@ -106,64 +121,109 @@ export function TruckBLEntry() {
     useEntryFocusStore.getState().clearFocus("truckBl");
   }
 
-  const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
-  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+  function handleChangeBlNo() {
+    if (!isEdit || !id) {
+      toast.info("먼저 Truck B/L을 조회해주세요.");
+      return;
+    }
+    setIsChangeBlNoModalOpen(true);
+  }
+
+  const isLoading = isDetailFetching || isSavePending || deleteMutation.isPending;
+  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : isSavePending ? "저장 중..." : "조회 중...";
 
   return (
     <FormProvider {...form}>
-    <>
-      <ScreenGuard visible={isLoading} message={loadingMessage} />
-      {/* Page header — NO Print button per PRD §S-06 */}
-      <div className="page-head">
-        <div className="page-head__title">
-          <div className="page-head__title-icon"><Truck size={14} /></div>
-          Truck B/L Entry
-        </div>
-        <div className="page-head__meta">
-          <span className={`badge ${isEdit ? "badge--saved" : "badge--draft"}`}>
-            {isEdit ? "SAVED" : "DRAFT"}
-          </span>
-        </div>
-        <div className="page-head__actions">
-          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <FilePlus size={12} />New
-          </button>
-          <button
-            type="button"
-            className="btn btn--sm btn--danger"
-            disabled={!isEdit || deleteMutation.isPending}
-          >
-            <Trash2 size={12} />Delete
-          </button>
-          <button
-            type="button"
-            className="btn btn--sm btn--primary"
-            disabled={mutation.isPending}
-          >
-            <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
-          </button>
-        </div>
-      </div>
+    <ScreenGuard visible={isLoading} message={loadingMessage} />
+    <form
+      onSubmit={form.handleSubmit(handleSubmit)}
+      onKeyDown={(e) => {
+        // textarea 줄바꿈은 보존, 그 외 Enter는 implicit form submission 차단
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+          e.preventDefault();
+        }
+      }}
+      style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
+    >
+      <TruckBlEntryHeader
+        isEdit={isEdit}
+        isSavePending={isSavePending}
+        isDeletePending={deleteMutation.isPending}
+        onNew={handleResetEntry}
+        onSearch={handleSearch}
+        onSave={() => {
+          if (!isEdit) {
+            toast.info("먼저 Truck B/L을 조회해주세요.");
+            return;
+          }
+          form.handleSubmit(handleSubmit)();
+        }}
+        onDelete={handleDelete}
+        onChangeBlNo={handleChangeBlNo}
+      />
 
-      {/* Toolbar: Document Key fields */}
-      <div className="toolbar" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
-        {[
-          { l: "Truck B/L No",    req: true  },
-          { l: "Settle",          req: true  },
-          { l: "Incoterms",       req: false },
-          { l: "Freight Term",    req: false },
-          { l: "Status",          req: false },
-        ].map((f) => (
-          <div key={f.l} className={`field${f.req ? " is-required" : ""}`}>
-            <div className={`field__label${f.req ? " is-required" : ""}`}>{f.l}</div>
-            <div className="field__input">
-              <input
-                {...form.register(TOOLBAR_REGISTER[f.l])}
-                placeholder={f.l === "Truck B/L No" ? "Auto on save" : f.l}
-              />
-            </div>
+      {/* Toolbar: 4필드 — gridTemplateColumns는 툴바 레이아웃에 필수이므로 인라인 유지 */}
+      <div className="toolbar" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+        <div className="field is-required">
+          <div className="field__label is-required">Truck B/L No</div>
+          <div className="field__input">
+            <TextBox variant="panel" placeholder="Auto on save" {...register("truckBlNo")} />
           </div>
-        ))}
+        </div>
+        <div className="field is-required">
+          <div className="field__label is-required">Bound</div>
+          <div className="field__input">
+            <Controller
+              name="bound"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={boundOptions}
+                  placeholder={boundPlaceholder}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">Load Type</div>
+          <div className="field__input">
+            <Controller
+              name="loadType"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={loadTypeOptions}
+                  placeholder={loadTypePlaceholder}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">Service Term</div>
+          <div className="field__input">
+            <Controller
+              name="serviceTerm"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={serviceTermOptions}
+                  placeholder={serviceTermPlaceholder}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Tabbar — 2 tabs only */}
@@ -184,7 +244,16 @@ export function TruckBLEntry() {
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MainTruck   active={tab === "main"}    /></div>
       <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab active={tab === "freight"} /></div>
-    </>
+    </form>
+    {isEdit && id && (
+      <TruckChangeBlNoModal
+        truckBlId={id}
+        currentHblNo={detail?.hblNo}
+        isOpen={isChangeBlNoModalOpen}
+        onClose={() => setIsChangeBlNoModalOpen(false)}
+        onChanged={() => { detailLoadedRef.current = false; }}
+      />
+    )}
     </FormProvider>
   );
 }

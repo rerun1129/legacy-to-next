@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import type { TruckBlPort, TruckBlPageResult } from '@/application/truck-bl/ports';
-import type { TruckBlRow, TruckBlFilter, TruckBlDetail } from '@/domain/truck-bl';
+import type {
+  TruckBlRow,
+  TruckBlFilter,
+  TruckBlDetail,
+  CreateTruckBlRequest,
+  UpdateTruckBlRequest,
+} from '@/domain/truck-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
 
@@ -137,5 +143,48 @@ export const API_TRUCK_BL_PORT: TruckBlPort = {
     const parsed = apiResponse(TRUCK_BL_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid truck-bl detail response: ${parsed.error.message}`);
     return parsed.data.data;
+  },
+
+  async create(payload: CreateTruckBlRequest): Promise<{ id: number }> {
+    const json = await fetchJson(TRUCK_BL_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const parsed = apiResponse(z.object({ id: z.number() })).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid truck-bl create response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async update(id: number, payload: UpdateTruckBlRequest): Promise<void> {
+    // BE는 204 또는 200+data=null 반환 — 응답 본문 무시
+    await fetchJson(`${TRUCK_BL_BASE}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async delete(id: number): Promise<void> {
+    await fetchJson(`${TRUCK_BL_BASE}/${id}`, { method: 'DELETE' });
+  },
+
+  async findByHblNo(hblNo: string): Promise<number[]> {
+    const json = await fetchJson(`${TRUCK_BL_BASE}/find-by-hbl-no`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hblNo }),
+    });
+    const parsed = apiResponse(z.array(z.number())).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid truck-bl find-by-hbl-no response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async changeHblNo(id: number, hblNo: string): Promise<void> {
+    await fetchJson(`${TRUCK_BL_BASE}/${id}/hbl-no`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hblNo }),
+    });
   },
 };

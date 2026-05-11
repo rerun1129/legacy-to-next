@@ -3,50 +3,34 @@
 import { useMemo, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
-import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
+import { EMPTY_TRUCK_ORDER_ROW } from "@/components/fms/truck-bl/truck-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { NumericCell, TextCell } from "@/components/shared/grid-cell-inputs";
+import { TextBox, NumberBox } from "@/components/shared/inputs";
 
-type TruckOrderRow = NonNullable<HouseBlFormValues["truckOrders"]>[number];
-
-const EMPTY_TRUCK_ORDER_ROW: TruckOrderRow = {
-  truckOrderNo:  "",
-  pkgQty:        "",
-  pkgUnit:       "",
-  grossWeightKg: "",
-  cbm:           "",
-  truckNo:       "",
-  truckType:     "",
-  driver:        "",
-  mobileNo:      "",
-  containerNo:   "",
-  containerType: "",
-  sealNo1:       "",
-  sealNo2:       "",
-  sealNo3:       "",
-};
+type TruckOrderRow = NonNullable<TruckBlFormValues["truckOrders"]>[number];
 
 export function TruckOrderGridPanel() {
-  const { control, register } = useFormContext<HouseBlFormValues>();
+  const { control, register } = useFormContext<TruckBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "truckOrders" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const columns = useMemo<GridColumn<TruckOrderRow>[]>(() => [
     { key: "_no",           label: "#",              width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "truckOrderNo",  label: "Truck Order No", width: 130, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.truckOrderNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
-    { key: "pkgQty",        label: "Package",        width: 70,  className: "is-num", render: (_, __, i) => <NumericCell {...register(`truckOrders.${i}.pkgQty`)} /> },
-    { key: "pkgUnit",       label: "Unit",           width: 60,  render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.pkgUnit`)} /> },
-    { key: "grossWeightKg", label: "Gross W/T",      width: 90,  className: "is-num", render: (_, __, i) => <NumericCell {...register(`truckOrders.${i}.grossWeightKg`)} /> },
-    { key: "cbm",           label: "CBM",            width: 80,  className: "is-num", render: (_, __, i) => <NumericCell {...register(`truckOrders.${i}.cbm`)} /> },
-    { key: "truckNo",       label: "Truck No.",      width: 110, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.truckType`)} /> },
-    { key: "driver",        label: "Driver",         width: 120, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.driver`)} /> },
-    { key: "mobileNo",      label: "Mobile No",      width: 120, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.mobileNo`)} /> },
-    { key: "containerNo",   label: "Container No.",  width: 130, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.containerNo`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.containerType`)} /> },
-    { key: "sealNo1",       label: "Seal No.1",      width: 100, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "sealNo2",       label: "Seal No.2",      width: 100, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "sealNo3",       label: "Seal No.3",      width: 100, render: (_, __, i) => <TextCell    {...register(`truckOrders.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "truckOrderNo",  label: "Truck Order No", width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckOrderNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
+    { key: "pkgQty",        label: "Package",        width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
+    { key: "pkgUnit",       label: "Unit",           width: 60,  render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.pkgUnit`)} /> },
+    { key: "grossWeightKg", label: "Gross W/T",      width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
+    { key: "cbm",           label: "CBM",            width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
+    { key: "truckNo",       label: "Truck No.",      width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckType`)} /> },
+    { key: "driver",        label: "Driver",         width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.driver`)} /> },
+    { key: "mobileNo",      label: "Mobile No",      width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.mobileNo`)} /> },
+    { key: "containerNo",   label: "Container No.",  width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerNo`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerType`)} /> },
+    { key: "sealNo1",       label: "Seal No.1",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo2",       label: "Seal No.2",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo3",       label: "Seal No.3",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
   ], [register]);
 
   const selectedIdx = selectedKey !== null

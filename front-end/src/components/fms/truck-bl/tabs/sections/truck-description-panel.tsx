@@ -1,0 +1,66 @@
+"use client";
+
+import { useFormContext, Controller } from "react-hook-form";
+import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
+import { ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
+import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
+
+export function TruckDescriptionPanel() {
+  const { control } = useFormContext<TruckBlFormValues>();
+  const { options: clauseOptions, placeholder: clausePlaceholder } = useEnumOptions("DescriptionClause");
+
+  return (
+    <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Description</span>
+      </div>
+      <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", gap: 4, marginBottom: 8, flexShrink: 0 }}>
+          <Controller
+            name="descClause1"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={clauseOptions}
+                placeholder={clausePlaceholder ?? "-- 부지약관 --"}
+                value={field.value}
+                onChange={field.onChange}
+                style={{ flex: 1 }}
+              />
+            )}
+          />
+          <Controller
+            name="descClause2"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={clauseOptions}
+                placeholder={clausePlaceholder ?? "-- 부지약관 --"}
+                value={field.value}
+                onChange={field.onChange}
+                style={{ flex: 1 }}
+              />
+            )}
+          />
+        </div>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <LineNumberTextarea
+              name={field.name}
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              style={{ flex: 1, minHeight: 0 }}
+            />
+          )}
+        />
+      </div>
+    </div>
+  );
+}

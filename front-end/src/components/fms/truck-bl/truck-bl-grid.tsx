@@ -47,6 +47,8 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
       render: (v, row) => (
         <div
           onDoubleClick={() => {
+            // hot-marker: Entry 화면이 신규 진입 시 하이라이트에 사용 (§6.16)
+            sessionStorage.setItem(`truck-bl-entry:hot:${row.id}`, "1");
             setFocus(entryFocusKeys.truckBl, row.id);
             addTab("Truck B/L Entry", "/fms/truck-bl/entry");
             router.push("/fms/truck-bl/entry");
