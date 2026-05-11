@@ -65,6 +65,9 @@ export function NonBLEntry() {
     queryKey: ["non-bl", "detail", id],
     queryFn: () => nonBlPort.getById(id!),
     enabled: isEdit,
+    // 다른 화면 이동 후 재진입 시 자동 재조회 차단 — invalidateQueries(mutation 후) 시에는 active query 이므로 refetch 정상 동작
+    staleTime: Infinity,
+    refetchOnMount: false,
     // refetch 결과가 직전 cache 와 deep equal 이어도 새 reference 를 발급해
     // useEffect(detail) 의 form.reset 가 항상 트리거되도록 강제
     structuralSharing: false,
