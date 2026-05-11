@@ -109,7 +109,8 @@ public class HouseBlJpaToDomainMapper {
                 CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()),
                 CustomerCode.of(jpa.getDocPartnerCode(), jpa.getDocPartnerAddress()),
                 null);
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), Nullables.mapOrNull(jpa.getPkgUnit(), WeightUnit::fromCode),
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()),
+                WeightUnit.fromCodeOrDefault(jpa.getPkgUnit(), WeightUnit.KGS),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());

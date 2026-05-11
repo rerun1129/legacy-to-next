@@ -98,7 +98,7 @@ public abstract class MasterBl extends BaseEntity {
 
     public void updateCargoSummary(CargoSummary cargo) {
         this.pkgQty        = cargo.packageCount();
-        this.pkgUnit       = cargo.packageUnit();
+        this.pkgUnit       = cargo.weightUnit();
         this.grossWeightKg = cargo.grossWeight();
         this.cbm           = cargo.volume();
     }

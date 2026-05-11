@@ -14,4 +14,13 @@ public enum WeightUnit {
         if (code == null || code.isBlank()) return null;
         return WeightUnit.valueOf(code);
     }
+
+    public static WeightUnit fromCodeOrDefault(String code, WeightUnit defaultUnit) {
+        if (code == null || code.isBlank()) return defaultUnit;
+        try {
+            return WeightUnit.valueOf(code);
+        } catch (IllegalArgumentException e) {
+            return defaultUnit;
+        }
+    }
 }

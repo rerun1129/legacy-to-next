@@ -66,7 +66,7 @@ public class MasterBlFactory {
         entity.assignParties(CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()), CustomerCode.of(cmd.notifyCode()));
         entity.updateSchedule(PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()), BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
         entity.updateFreightAndOperator(Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf), EmployeeCode.of(cmd.operatorCode()), null);
-        entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), WeightUnit.fromCode(cmd.pkgUnit()), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
+        entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), WeightUnit.fromCodeOrDefault(cmd.pkgUnit(), WeightUnit.KGS), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         if (cmd.mainItemName() != null || cmd.hsCode() != null) entity.updateTradeInfo(cmd.mainItemName(), cmd.hsCode());
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
@@ -100,7 +100,9 @@ public class MasterBlFactory {
         );
         entity.updateCargoSummary(new CargoSummary(
                 Nullables.mapOrElse(cmd.pkgQty(), Quantity::of, entity::getPkgQty),
-                Nullables.mapOrElse(cmd.pkgUnit(), WeightUnit::fromCode, entity::getPkgUnit),
+                Nullables.mapOrElse(cmd.pkgUnit(),
+                        code -> WeightUnit.fromCodeOrDefault(code, entity.getPkgUnit()),
+                        entity::getPkgUnit),
                 Nullables.mapOrElse(cmd.grossWeightKg(), Weight::of, entity::getGrossWeightKg),
                 Nullables.mapOrElse(cmd.cbm(), Volume::of, entity::getCbm)
         ));

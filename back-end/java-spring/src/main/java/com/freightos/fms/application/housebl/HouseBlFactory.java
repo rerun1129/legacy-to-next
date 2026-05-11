@@ -92,7 +92,7 @@ public class HouseBlFactory {
                 BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
         entity.updateCargoSummary(new CargoSummary(
                 Quantity.of(cmd.pkgQty()),
-                Nullables.mapOrNull(cmd.pkgUnit(), WeightUnit::fromCode),
+                WeightUnit.fromCodeOrDefault(cmd.pkgUnit(), WeightUnit.KGS),
                 Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         entity.assignOperator(
                 CustomerCode.of(cmd.actualCustomerCode()), EmployeeCode.of(cmd.operatorCode()),
@@ -121,7 +121,7 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(cmd.etd(), BlDate::of),
                 Nullables.mapOrNull(cmd.eta(), BlDate::of),
                 Nullables.mapOrNull(cmd.pkgQty(), Quantity::of),
-                Nullables.mapOrNull(cmd.pkgUnit(), WeightUnit::fromCode),
+                WeightUnit.fromCodeOrDefault(cmd.pkgUnit(), WeightUnit.KGS),
                 Nullables.mapOrNull(cmd.grossWeightKg(), Weight::of),
                 Nullables.mapOrNull(cmd.cbm(), Volume::of),
                 Nullables.mapOrNull(cmd.actualCustomerCode(), CustomerCode::of),
