@@ -52,7 +52,7 @@ export function NonBLEntry() {
     };
   }, [clearDraft, id]);
 
-  const { register, control, formState: { errors } } = methods;
+  const { register, control } = methods;
 
   // status: 백엔드 관리 필드 — UI 노출 없이 form에만 등록
   register("status");
@@ -157,12 +157,9 @@ export function NonBLEntry() {
               name="bound"
               control={control}
               render={({ field }) => (
-                <ComboBox required variant="panel" options={boundOptions} placeholder={boundPlaceholder} value={field.value} onChange={field.onChange} />
+                <ComboBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} value={field.value} onChange={field.onChange} />
               )}
             />
-            {errors.bound && (
-              <span className="field__error">{errors.bound.message}</span>
-            )}
           </div>
         </div>
         <div className="field">
