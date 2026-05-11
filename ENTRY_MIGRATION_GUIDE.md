@@ -958,6 +958,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 - **Non B/L Entry 공용 confirm 모달 적용 + Copy 제거 + 조회 전 Save 가드 (2026-05-11, 16dbc0b)** — `e55af73` 에서 도입된 `@/components/confirm` 의 **product 첫 적용 사례**. (1) `use-non-bl-entry-mutations.ts` 의 `handleSubmit`/`handleDelete` 를 async 화하고 `await confirm({...})` Promise API 호출 — Save `variant: "default"` + 기본 메시지, Delete `variant: "destructive" + confirmText: "삭제"` + "삭제된 데이터는 복구할 수 없습니다." description. 기존 `window.confirm` 폐기. 반환 타입 시그니처 `handleSubmit`/`handleDelete` → `Promise<void>` 로 정합. (2) `non-bl-entry-header.tsx` 의 onClick 미정의 Copy 버튼(스텁) + lucide-react `Copy` import 제거 — props 인터페이스 변경 없음(`onCopy` 원래 미존재). Copy 자리는 추후 다른 기능으로 대체 예정. (3) `non-bl-entry.tsx` 의 `onSave` prop 을 inline 가드 함수로 교체 — `!isEdit` 시 `toast.info("먼저 Non B/L을 조회해주세요.")` 후 early return, isEdit 일 때만 `methods.handleSubmit(handleSubmit)()` 호출(`handleChangeBlNo` 와 동일 가드 패턴, toast import 기존 재사용). `useNonBlEntryMutations` 의 `createMutation` 코드는 dead code 화되지만 추후 신규 생성 워크플로우 재활성화 가능성으로 **의도적 유지**. ScreenGuard(§6.27) 와 충돌 없음 — confirm 모달은 mutate 외부에서 해소 후 모달 닫힘 → 기존 `isSavePending`/`deleteMutation.isPending` 로딩 표시 흐름 그대로 동작. 다른 Entry(Sea/Air HBL, Master BL, Truck BL, SwitchBlModal) 의 `window.confirm` 잔존 — 동일 패턴 후속 적용 권장.
 
+- **Truck B/L Entry 풀 마이그레이션 (2026-05-12)** — Non B/L Entry 패턴을 그대로 적용한 두 번째 풀 마이그레이션 사례. **(BE)** `TruckBlController`에 `POST /api/truck-bl`(create→`{id}`, §6.29)·`PUT /{id}`(update→`Void`, §6.35)·`DELETE /{id}`·`POST /find-by-hbl-no`(EXACT PK, §6.19)·`PUT /{id}/hbl-no`(Change BL No, §930) 5개 endpoint 신설. DTO 4종(`CreateTruckBlRequest`/`UpdateTruckBlRequest`/`ChangeTruckBlHblNoRequest`/`FindTruckBlByHblNoRequest`) §6.25 BE SSOT 적용(UI required `hblNo`/`bound`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`/`salesManCode` 10개 `@NotBlank` 유지, `UpdateTruckBlRequest`에 `hblNo` 자체 제외 §10 SSOT). `TruckBlPersistencePort` + `TruckBlUpdatePersistenceAdapter` 신설(§6.35 패턴). `TruckBlService`는 자기 jobDiv(TRUCK) 직접 알아 `houseBlPort.deleteByIdAndJobDiv(id, JobDiv.TRUCK)` 호출. `HouseBlFactory`에 `applyTruckCreate/applyTruckUpdate` 메서드 추가(305→335줄, 300줄 분리 검토 대상으로 `HouseBlTruckSubFactory` 향후 분리 권장). `Create/UpdateHouseBlCommand` record에 `TruckDetailCommand` nested record 추가 — 함정: `NonBlPersistenceAdapterTest.emptyCommand()` 파라미터 53→54 컴파일 오류 발생, null 추가로 수정(사용자 사후 보고). 신규 테스트 5종 29 케이스 전원 PASS, 전체 642 테스트 그린. **(FE)** `truck-bl-schema.ts`/`truck-bl-defaults.ts` 신설(Non B/L 패턴, `HouseBlFormValues` 의존 완전 제거). Toolbar 5→4 재구성(`Truck B/L No`/`Bound`/`Load Type`/`Service Term`, 기존 `Settle`은 Performance 패널의 `settlePartnerCode`로 입력 경로 유지, `Incoterms`/`Freight Term`/`Status`는 truck b/l 도메인 미사용으로 단순 제거). 작업 중 `truck-panels.tsx` 411줄로 증가 → 5개 패널 파일(party/schedule/cargo/document/performance)로 강제 분리, 기존 파일은 7줄 배럴로 축소. `truck-marks-panel.tsx`/`truck-description-panel.tsx` truck 전용 신설(House-BL 공유에서 분리). `pkgUnit`은 §10 Non B/L 정책 따라 `CodeBox kind="code-only"` 자유 텍스트(기존 `<select>` 7개 옵션 사라짐). `truck-order-grid-panel` cell SSOT(§6.12) `TextBox/NumberBox variant="cell"`로 교체. `use-truck-bl-entry-mutations.ts`(88줄) 신설(create/update mutation 분리 §6.29, 공용 confirm 모달 §959). `truck-bl-submit.ts`(114줄) `buildTruckBlCreateRequest`/`buildTruckBlUpdateRequest`(hblNo destructure 제외 §10 SSOT, 자식 row `id` 포함 §6.28). `truck-change-bl-no-modal.tsx` truck 전용 신설 — Non B/L `change-bl-no-modal.tsx`는 `nonBlPort`/`["non-bl",...]` queryKey 하드코딩이라 prop 분기 불가, 동일 구조로 truck 전용 신설. Entry 결선: hot-marker `truck-bl-entry:hot:${id}`(§6.16), F5 redirect, EXACT Search(§6.19), onSave 미조회 가드 toast.info, Enter implicit submit 차단(§6.24), detail useQuery `staleTime:Infinity`+`refetchOnMount:false`(§6.36). `truck-bl-grid.tsx` 더블클릭 hot-marker 추가 — §10 메모리상 "이미 적용"으로 표시됐으나 실제 미적용 상태였음, Phase C에서 보정. FE lint 0 error/build PASS.
+
 ---
 
 ## 11. 본 가이드의 후속 갱신 시점
@@ -983,3 +985,24 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - 각 확장(`HouseBlNonBl`, `HouseBlAirHouse` 등)에 별도 보유 — 일관성 떨어짐, 이전 비용 발생
 
 > **결정 시점**: 항공 Entry 마이그레이션 plan 수립 단계.
+
+### 12.2 TruckBlDetailResponse 자식 응답 확장 (Truck B/L 마이그레이션 후속)
+
+Truck B/L Phase A에서 `TruckBlDetailResponse`에 자식 컬렉션(`truckOrders`)과 `desc`(marks/description/clause1/clause2) 필드가 포함되지 않았다.
+저장 후 detail 재조회 시 다음 데이터가 form에 반영되지 않을 위험:
+
+- `truck_order` 그리드 14컬럼(Truck Information 그리드 행) — `TruckBlDetailResponse.truckOrders` 부재
+- `house_bl_truck_desc`의 marks/description/descClause1/descClause2 — `TruckBlDetailResponse.desc` 부재
+
+> **결정 시점**: Truck B/L Entry 첫 실 데이터 저장 회귀 시점 또는 사용자 보고 시. 응답 시그니처 확장 시 §6.29(BE 응답 body 변경 시 FE adapter zod 스키마 동시 정합 필수)를 반드시 적용.
+
+### 12.3 ChangeBlNoModal 도메인 공통화 검토
+
+Non B/L(`change-bl-no-modal.tsx`)과 Truck B/L(`truck-change-bl-no-modal.tsx`)이 동일 구조(현재 hbl_no readOnly + 신 hbl_no 입력 + Update/Close)이지만 `port`/`queryKey` 하드코딩 때문에 도메인 prop 분기 불가로 신설되어 있다.
+
+향후 House B/L Sea/Air/Master B/L 등 동일 패턴 적용 시 다음을 고려:
+
+- 도메인 prop(`{ port, queryKey, label }`)을 받는 단일 컴포넌트로 리팩토링
+- `useMutation`을 컴포넌트 외부에서 주입(`{ mutation: UseMutationResult }`)하는 패턴
+
+> **결정 시점**: 세 번째 도메인 ChangeBlNoModal 적용 시.
