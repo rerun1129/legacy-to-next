@@ -12,7 +12,7 @@ export interface NonBlPort {
   list(filter: NonBlFilter, page: number, size?: number): Promise<NonBlPageResult>;
   getById(id: number): Promise<NonBlDetail>;
   create(req: CreateNonBlRequest): Promise<{ id: number }>;
-  update(id: number, req: UpdateNonBlRequest): Promise<NonBlDetail>;
+  update(id: number, req: UpdateNonBlRequest): Promise<void>;
   delete(id: number): Promise<void>;
   changeHblNo(id: number, hblNo: string): Promise<void>;
   findByHblNo(hblNo: string): Promise<number[]>;

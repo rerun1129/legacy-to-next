@@ -145,11 +145,12 @@ export function NonBLEntry() {
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
       if (!isEdit) {
-        useEntryFocusStore.getState().setFocus("nonBl", saved.id);
+        // create 분기: saved는 반드시 { id: number }
+        useEntryFocusStore.getState().setFocus("nonBl", (saved as { id: number }).id);
         detailLoadedRef.current = false;
       } else {
         queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
-        // refetch 된 detail 로 form.reset 재발동
+        // update는 void 반환 — saved 미사용. refetch 된 detail 로 form.reset 재발동
         detailLoadedRef.current = false;
       }
     },

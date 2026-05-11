@@ -251,15 +251,13 @@ export const API_NON_BL_PORT: NonBlPort = {
     return parsed.data.data;
   },
 
-  async update(id: number, req: UpdateNonBlRequest): Promise<NonBlDetail> {
-    const json = await fetchJson(`${NON_BL_BASE}/${id}`, {
+  async update(id: number, req: UpdateNonBlRequest): Promise<void> {
+    // BE는 204 또는 200+data=null 반환 — 응답 본문 무시, fetchJson이 HTTP 에러를 처리함
+    await fetchJson(`${NON_BL_BASE}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(toBeRequest(req as CreateNonBlRequest)),
     });
-    const parsed = apiResponse(NON_BL_DETAIL_SCHEMA).safeParse(json);
-    if (!parsed.success) throw new ResponseParseError(`Invalid non-bl update response: ${parsed.error.message}`);
-    return parsed.data.data;
   },
 
   async delete(id: number): Promise<void> {
