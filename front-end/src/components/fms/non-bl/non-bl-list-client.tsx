@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, Search } from 'lucide-react';
@@ -50,11 +50,19 @@ export function NonBlListClient() {
   const form = useForm<NonBlFilter>({ defaultValues: DEFAULT_VALUES });
   const qc = useQueryClient();
 
+  // Entry → List SPA 이동 시 검색어 자동 바인딩 — inject 슬롯 mount 시 1회 읽기 (pure read)
+  const initialInject = useMemo(
+    () => listFilterStore.getState().getInject(SCOPE) as NonBlListInject | undefined,
+    [],
+  );
+
   const [extraFilter, setExtraFilter] = useState<NonBlFilter | null>(() => {
+    if (initialInject?.nonBlNo) return { ...DEFAULT_VALUES, nonBlNo: initialInject.nonBlNo };
     const s = listFilterStore.getState().getSearch(SCOPE) as NonBlSearchState | undefined;
     return s?.extraFilter ?? null;
   });
   const [currentPage, setCurrentPage] = useState(() => {
+    if (initialInject?.nonBlNo) return 1;
     const s = listFilterStore.getState().getSearch(SCOPE);
     return s?.currentPage ?? 1;
   });
@@ -63,19 +71,13 @@ export function NonBlListClient() {
     return s?.showAll ?? true;
   });
 
-  // Entry → List SPA 이동 시 검색어 자동 바인딩 — inject 슬롯 우선, 읽은 즉시 clear
-  const injectConsumedRef = useRef(false);
+  // inject가 있었으면 form 세팅 + 슬롯 clear (form은 mount 후 존재)
   useEffect(() => {
-    if (injectConsumedRef.current) return;
-    injectConsumedRef.current = true;
-    const inject = listFilterStore.getState().getInject(SCOPE) as NonBlListInject | undefined;
-    if (inject?.nonBlNo) {
+    if (initialInject?.nonBlNo) {
       listFilterStore.getState().clearInject(SCOPE);
-      form.setValue("nonBlNo", inject.nonBlNo);
-      setExtraFilter({ ...DEFAULT_VALUES, nonBlNo: inject.nonBlNo });
-      setCurrentPage(1);
+      form.setValue("nonBlNo", initialInject.nonBlNo);
     }
-  }, [form]);
+  }, [form, initialInject]);
 
   useEffect(() => {
     listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, showAll });
