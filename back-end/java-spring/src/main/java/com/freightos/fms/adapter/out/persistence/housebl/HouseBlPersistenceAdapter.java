@@ -1,25 +1,26 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
-import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
-import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlContainerRepository;
-import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlDimRepository;
-import com.freightos.fms.adapter.out.persistence.nonbl.HouseBlNonBlRepository;
-import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
-import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
-import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlAirPersistenceStrategy;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlNonBlPersistenceStrategy;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlSeaPersistenceStrategy;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlTruckPersistenceStrategy;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
-import com.freightos.fms.domain.housebl.entity.*;
+import com.freightos.fms.domain.housebl.entity.HouseBlAir;
+import com.freightos.fms.domain.housebl.entity.HouseBlSea;
+import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
+import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
+import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.common.util.Nullables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,25 +36,11 @@ import java.util.Optional;
 public class HouseBlPersistenceAdapter implements HouseBlPort {
 
     private final HouseBlRepository houseBlRepository;
-    private final HouseBlSeaRepository houseBlSeaRepository;
-    private final HouseBlAirRepository houseBlAirRepository;
-    private final HouseBlTruckRepository houseBlTruckRepository;
-    private final HouseBlNonBlRepository houseBlNonBlRepository;
-    private final HouseBlSeaDescRepository houseBlSeaDescRepository;
-    private final HouseBlAirDescRepository houseBlAirDescRepository;
-    private final HouseBlTruckDescRepository houseBlTruckDescRepository;
-    private final HouseBlSeaContainerRepository houseBlSeaContainerRepository;
-    private final HouseBlNonBlContainerRepository houseBlNonBlContainerRepository;
-    private final HouseBlAirDimRepository houseBlAirDimRepository;
-    private final HouseBlTruckDimRepository houseBlTruckDimRepository;
-    private final HouseBlNonBlDimRepository houseBlNonBlDimRepository;
-    private final HouseBlScheduleLegRepository houseBlScheduleLegRepository;
-    private final HouseBlAirChargeRepository houseBlAirChargeRepository;
-    private final HouseBlTruckOrderRepository houseBlTruckOrderRepository;
-    private final HouseBlJpaToDomainMapper jpaToDomainMapper;
     private final HouseBlDomainToJpaMapper domainToJpaMapper;
-    private final HouseBlCargoMapper houseBlCargoMapper;
-    private final HouseBlDocMapper houseBlDocMapper;
+    private final HouseBlSeaPersistenceStrategy seaStrategy;
+    private final HouseBlAirPersistenceStrategy airStrategy;
+    private final HouseBlTruckPersistenceStrategy truckStrategy;
+    private final HouseBlNonBlPersistenceStrategy nonBlStrategy;
 
     @Override
     public Optional<HouseBl> findHouseBlById(Long id) {
@@ -99,116 +86,26 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             parentJpa = new HouseBlJpaEntity();
         }
         domainToJpaMapper.applyCommonFields(domain, parentJpa);
-        final HouseBlJpaEntity savedJpa = houseBlRepository.save(parentJpa);
+        HouseBlJpaEntity savedJpa = houseBlRepository.save(parentJpa);
 
-        // extension 엔티티 save/update
-        switch (domain) {
-            case HouseBlSea sea -> {
-                HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlSeaJpaEntity::new);
-                seaJpa.setHouseBl(savedJpa);
-                domainToJpaMapper.applySeaFields(sea, seaJpa);
-                // seaExt를 먼저 영속화하여 house_bl_sea_id PK 확보 후 컨테이너·desc 저장
-                HouseBlSeaJpaEntity savedSeaJpa = houseBlSeaRepository.save(seaJpa);
-                // SEA 컨테이너 동기화 — seaJpa 소유 (house_bl_sea_container)
-                List<HouseBlSeaContainerJpaEntity> seaContainers = sea.getContainers().stream()
-                        .map(houseBlCargoMapper::toSeaContainerJpa)
-                        .toList();
-                savedSeaJpa.syncContainers(seaContainers);
-                saveOrDeleteSeaDesc(sea.getDesc(), savedSeaJpa);
-            }
-            case HouseBlAir air -> {
-                HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlAirJpaEntity::new);
-                airJpa.setHouseBl(savedJpa);
-                domainToJpaMapper.applyAirFields(air, airJpa);
-                // airJpa를 먼저 영속화하여 house_bl_air_id PK 확보 후 dims/scheduleLegs/airCharges 동기화
-                HouseBlAirJpaEntity savedAirJpa = houseBlAirRepository.save(airJpa);
-                List<HouseBlAirDimJpaEntity> airDims = air.getDims().stream()
-                        .map(houseBlCargoMapper::toAirDimJpa)
-                        .toList();
-                savedAirJpa.syncDims(airDims);
-                List<HouseBlScheduleLegJpaEntity> jpaLegs = air.getScheduleLegs().stream()
-                        .map(houseBlDocMapper::toScheduleLegJpa)
-                        .toList();
-                savedAirJpa.syncScheduleLegs(jpaLegs);
-                List<HouseBlAirChargeJpaEntity> airCharges = air.getAirCharges().stream()
-                        .map(houseBlDocMapper::toAirChargeJpa)
-                        .toList();
-                savedAirJpa.syncAirCharges(airCharges);
-                saveOrDeleteAirDesc(air.getDesc(), savedAirJpa);
-            }
-            case HouseBlTruck truck -> {
-                HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlTruckJpaEntity::new);
-                truckJpa.setHouseBl(savedJpa);
-                domainToJpaMapper.applyTruckFields(truck, truckJpa);
-                // truckJpa를 먼저 영속화하여 house_bl_truck_id PK 확보 후 dims/truckOrders 동기화
-                HouseBlTruckJpaEntity savedTruckJpa = houseBlTruckRepository.save(truckJpa);
-                List<HouseBlTruckDimJpaEntity> truckDims = truck.getDims().stream()
-                        .map(houseBlCargoMapper::toTruckDimJpa)
-                        .toList();
-                savedTruckJpa.syncDims(truckDims);
-                List<HouseBlTruckOrderJpaEntity> truckOrders = truck.getTruckOrders().stream()
-                        .map(houseBlDocMapper::toTruckOrderJpa)
-                        .toList();
-                savedTruckJpa.syncTruckOrders(truckOrders);
-                saveOrDeleteTruckDesc(truck.getDesc(), savedTruckJpa);
-            }
-            case HouseBlNonBl nonBl -> {
-                HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(savedJpa.getHouseBlId()).orElseGet(HouseBlNonBlJpaEntity::new);
-                nonBlJpa.setHouseBl(savedJpa);
-                domainToJpaMapper.applyNonBlFields(nonBl, nonBlJpa);
-                // NON_BL 컨테이너 merge — nonBlJpa 소유 (house_bl_nonbl_container)
-                List<HouseBlNonBlContainerJpaEntity> nonBlContainers = nonBl.getContainers().stream()
-                        .map(houseBlCargoMapper::toNonBlContainerJpa)
-                        .toList();
-                nonBlJpa.mergeContainers(nonBlContainers);
-                // NON_BL dim merge — nonBlJpa 소유 (house_bl_nonbl_dim)
-                List<HouseBlNonBlDimJpaEntity> nonBlDims = nonBl.getDims().stream()
-                        .map(houseBlCargoMapper::toNonBlDimJpa)
-                        .toList();
-                nonBlJpa.mergeDims(nonBlDims);
-                // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 저장됨
-                houseBlNonBlRepository.save(nonBlJpa);
-                // in-memory 도메인에 JPA save 결과(parent id, 감사 필드, 자식 PK)를 역방향 sync.
-                // loadWithExt 제거로 응답용 SELECT 제거 — 직렬 저장 순서와 동일하므로 인덱스 매핑 안전.
-                nonBl.assignIdentity(savedJpa.getHouseBlId(), savedJpa.getCreatedAt(), savedJpa.getUpdatedAt(),
-                        savedJpa.getCreatedBy(), savedJpa.getUpdatedBy());
-                syncChildIds(nonBl.getContainers(), nonBlJpa.getContainers());
-                syncDimIds(nonBl.getDims(), nonBlJpa.getDims());
-                return nonBl;
-            }
+        // jobDiv별 확장 엔티티 save/update — Strategy에 위임 (타입 안전 switch)
+        return switch (domain) {
+            case HouseBlSea sea -> seaStrategy.saveExt(sea, savedJpa);
+            case HouseBlAir air -> airStrategy.saveExt(air, savedJpa);
+            case HouseBlTruck truck -> truckStrategy.saveExt(truck, savedJpa);
+            case HouseBlNonBl nonBl -> nonBlStrategy.saveExt(nonBl, savedJpa);
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
-        }
-
-        return loadWithExt(savedJpa);
+        };
     }
 
     @Override
     @Transactional
     public void deleteByIdAndJobDiv(Long id, JobDiv jobDiv) {
         switch (jobDiv) {
-            case SEA -> {
-                houseBlSeaContainerRepository.deleteByParentHouseBlId(id);
-                houseBlSeaDescRepository.deleteByParentHouseBlId(id);
-                houseBlSeaRepository.deleteByHouseBl_HouseBlId(id);
-            }
-            case AIR -> {
-                houseBlAirDimRepository.deleteByParentHouseBlId(id);
-                houseBlScheduleLegRepository.deleteByParentHouseBlId(id);
-                houseBlAirChargeRepository.deleteByParentHouseBlId(id);
-                houseBlAirDescRepository.deleteByParentHouseBlId(id);
-                houseBlAirRepository.deleteByHouseBl_HouseBlId(id);
-            }
-            case TRUCK -> {
-                houseBlTruckDimRepository.deleteByParentHouseBlId(id);
-                houseBlTruckOrderRepository.deleteByParentHouseBlId(id);
-                houseBlTruckDescRepository.deleteByParentHouseBlId(id);
-                houseBlTruckRepository.deleteByHouseBl_HouseBlId(id);
-            }
-            case NON_BL -> {
-                houseBlNonBlContainerRepository.deleteByParentHouseBlId(id);
-                houseBlNonBlDimRepository.deleteByParentHouseBlId(id);
-                houseBlNonBlRepository.deleteByHouseBl_HouseBlId(id);
-            }
+            case SEA -> seaStrategy.deleteExt(id);
+            case AIR -> airStrategy.deleteExt(id);
+            case TRUCK -> truckStrategy.deleteExt(id);
+            case NON_BL -> nonBlStrategy.deleteExt(id);
         }
         houseBlRepository.deleteByIdBulk(id);
     }
@@ -235,118 +132,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     private HouseBl loadWithExt(HouseBlJpaEntity jpa) {
-        Long id = jpa.getHouseBlId();
         return switch (jpa.getJobDiv()) {
-            // SEA/AIR/TRUCK은 ext id 기준으로 desc 조회 — NON_BL은 desc 미사용이므로 조회 생략
-            case SEA -> {
-                HouseBlSeaJpaEntity seaJpa = houseBlSeaRepository.findByHouseBlHouseBlId(id).orElse(null);
-                HouseBlSeaDescJpaEntity seaDescJpa = seaJpa != null
-                        ? houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaJpa.getHouseBlSeaId()).orElse(null)
-                        : null;
-                yield jpaToDomainMapper.toSeaDomain(jpa, seaJpa, seaDescJpa);
-            }
-            case AIR -> {
-                HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(id).orElse(null);
-                HouseBlAirDescJpaEntity airDescJpa = airJpa != null
-                        ? houseBlAirDescRepository.findByAir_HouseBlAirId(airJpa.getHouseBlAirId()).orElse(null)
-                        : null;
-                yield jpaToDomainMapper.toAirDomain(jpa, airJpa, airDescJpa);
-            }
-            case TRUCK -> {
-                HouseBlTruckJpaEntity truckJpa = houseBlTruckRepository.findByHouseBlHouseBlId(id).orElse(null);
-                HouseBlTruckDescJpaEntity truckDescJpa = truckJpa != null
-                        ? houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckJpa.getHouseBlTruckId()).orElse(null)
-                        : null;
-                yield jpaToDomainMapper.toTruckDomain(jpa, truckJpa, truckDescJpa);
-            }
-            case NON_BL -> jpaToDomainMapper.toNonBlDomain(jpa, houseBlNonBlRepository.findByHouseBlHouseBlId(id).orElse(null));
+            case SEA -> seaStrategy.loadWithExt(jpa);
+            case AIR -> airStrategy.loadWithExt(jpa);
+            case TRUCK -> truckStrategy.loadWithExt(jpa);
+            case NON_BL -> nonBlStrategy.loadWithExt(jpa);
         };
-    }
-
-    /**
-     * SEA desc 저장·삭제 처리. seaExt PK 확보 후 호출해야 한다.
-     * 도메인 desc가 있으면 기존 row를 조회해 필드를 덮어쓰거나(UPDATE) 신규 insert한다.
-     * 도메인 desc가 null이면 기존 row를 삭제한다(orphanRemoval 흉내).
-     */
-    private void saveOrDeleteSeaDesc(HouseBlDesc domainDesc, HouseBlSeaJpaEntity savedSeaJpa) {
-        Long seaId = savedSeaJpa.getHouseBlSeaId();
-        if (domainDesc == null) {
-            houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaId)
-                    .ifPresent(houseBlSeaDescRepository::delete);
-            return;
-        }
-        HouseBlSeaDescJpaEntity descJpa = houseBlSeaDescRepository.findBySea_HouseBlSeaId(seaId)
-                .orElseGet(HouseBlSeaDescJpaEntity::new);
-        houseBlDocMapper.applySeaDescFields(domainDesc, descJpa, savedSeaJpa);
-        houseBlSeaDescRepository.save(descJpa);
-    }
-
-    /**
-     * AIR desc 저장·삭제 처리. airExt PK 확보 후 호출해야 한다.
-     * 도메인 desc가 있으면 기존 row를 조회해 필드를 덮어쓰거나(UPDATE) 신규 insert한다.
-     * 도메인 desc가 null이면 기존 row를 삭제한다(orphanRemoval 흉내).
-     */
-    private void saveOrDeleteAirDesc(HouseBlDesc domainDesc, HouseBlAirJpaEntity savedAirJpa) {
-        Long airId = savedAirJpa.getHouseBlAirId();
-        if (domainDesc == null) {
-            houseBlAirDescRepository.findByAir_HouseBlAirId(airId)
-                    .ifPresent(houseBlAirDescRepository::delete);
-            return;
-        }
-        HouseBlAirDescJpaEntity descJpa = houseBlAirDescRepository.findByAir_HouseBlAirId(airId)
-                .orElseGet(HouseBlAirDescJpaEntity::new);
-        houseBlDocMapper.applyAirDescFields(domainDesc, descJpa, savedAirJpa);
-        houseBlAirDescRepository.save(descJpa);
-    }
-
-    /**
-     * TRUCK desc 저장·삭제 처리. truckExt PK 확보 후 호출해야 한다.
-     * 도메인 desc가 있으면 기존 row를 조회해 필드를 덮어쓰거나(UPDATE) 신규 insert한다.
-     * 도메인 desc가 null이면 기존 row를 삭제한다(orphanRemoval 흉내).
-     */
-    private void saveOrDeleteTruckDesc(HouseBlDesc domainDesc, HouseBlTruckJpaEntity savedTruckJpa) {
-        Long truckId = savedTruckJpa.getHouseBlTruckId();
-        if (domainDesc == null) {
-            houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckId)
-                    .ifPresent(houseBlTruckDescRepository::delete);
-            return;
-        }
-        HouseBlTruckDescJpaEntity descJpa = houseBlTruckDescRepository.findByTruck_HouseBlTruckId(truckId)
-                .orElseGet(HouseBlTruckDescJpaEntity::new);
-        houseBlDocMapper.applyTruckDescFields(domainDesc, descJpa, savedTruckJpa);
-        houseBlTruckDescRepository.save(descJpa);
-    }
-
-    /**
-     * NON_BL 컨테이너 도메인 자식에 JPA save 후 생성된 PK를 역방향 sync.
-     * mergeContainers의 결과 순서(incoming 순) = 도메인 자식 순서이므로 인덱스 1:1 매핑이 안전하다.
-     * 기존에 id가 있던 자식은 동일 id가 유지되므로 중복 할당 무해.
-     */
-    private void syncChildIds(List<HouseBlContainer> domainContainers, List<HouseBlNonBlContainerJpaEntity> jpaContainers) {
-        int size = Math.min(domainContainers.size(), jpaContainers.size());
-        for (int i = 0; i < size; i++) {
-            HouseBlNonBlContainerJpaEntity jpa = jpaContainers.get(i);
-            HouseBlContainer domainContainer = domainContainers.get(i);
-            if (domainContainer.getId() == null && jpa.getHouseBlNonBlContainerId() != null) {
-                domainContainer.assignIdentity(jpa.getHouseBlNonBlContainerId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
-                        jpa.getCreatedBy(), jpa.getUpdatedBy());
-            }
-        }
-    }
-
-    /**
-     * NON_BL DIM 도메인 자식에 JPA save 후 생성된 PK를 역방향 sync.
-     * mergeDims의 결과 순서(incoming 순) = 도메인 자식 순서이므로 인덱스 1:1 매핑이 안전하다.
-     */
-    private void syncDimIds(List<HouseBlDim> domainDims, List<HouseBlNonBlDimJpaEntity> jpaDims) {
-        int size = Math.min(domainDims.size(), jpaDims.size());
-        for (int i = 0; i < size; i++) {
-            HouseBlNonBlDimJpaEntity jpa = jpaDims.get(i);
-            HouseBlDim domainDim = domainDims.get(i);
-            if (domainDim.getId() == null && jpa.getHouseBlNonBlDimId() != null) {
-                domainDim.assignIdentity(jpa.getHouseBlNonBlDimId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
-                        jpa.getCreatedBy(), jpa.getUpdatedBy());
-            }
-        }
     }
 }
