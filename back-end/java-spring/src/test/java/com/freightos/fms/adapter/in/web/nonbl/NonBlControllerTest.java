@@ -81,6 +81,55 @@ class NonBlControllerTest {
         then(nonBlUseCase).should().createNonBl(any());
     }
 
+    // ── PUT /api/non-bl/{id} ─────────────────────────────────────────────
+
+    private static final String VALID_UPDATE_JSON = """
+            {
+              "bound": "EXP",
+              "workDivision": "SEA",
+              "polCode": "KRPUS",
+              "podCode": "USLAX",
+              "etd": "20260101",
+              "eta": "20260201",
+              "actualCustomerCode": "CUST01",
+              "operatorCode": "OP01",
+              "teamCode": "TEAM01"
+            }
+            """;
+
+    @Test
+    @DisplayName("PUT /api/non-bl/1: 정상 요청 → 200, data null, message 포함")
+    void updateNonBl_happyPath_returns200WithNullData() throws Exception {
+        Long id = 1L;
+        given(nonBlAssembler.toUpdateCommand(any())).willReturn(null);
+        willDoNothing().given(nonBlUseCase).updateNonBl(eq(id), any());
+
+        mockMvc.perform(put("/api/non-bl/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.message").value(MessageCode.NON_BL_UPDATED.message()));
+
+        then(nonBlUseCase).should().updateNonBl(eq(id), any());
+    }
+
+    @Test
+    @DisplayName("PUT /api/non-bl/999: 미존재 id → 404, GlobalExceptionHandler 처리")
+    void updateNonBl_whenNotFound_returns404() throws Exception {
+        Long id = 999L;
+        given(nonBlAssembler.toUpdateCommand(any())).willReturn(null);
+        willThrow(new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND))
+                .given(nonBlUseCase).updateNonBl(eq(id), any());
+
+        mockMvc.perform(put("/api/non-bl/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value(MessageCode.NON_BL_NOT_FOUND.message()));
+    }
+
     // ── PUT /api/non-bl/{id}/hbl-no ──────────────────────────────────────
 
     @Test

@@ -15,7 +15,7 @@ public interface NonBlUseCase {
     PagedResult<NonBlSummary> searchNonBls(SearchNonBlCommand cmd, PageRequest pageRequest);
     NonBlDetailResult findNonBlById(Long id);
     Long createNonBl(CreateHouseBlCommand command);
-    NonBlDetailResult updateNonBl(Long id, UpdateHouseBlCommand command);
+    void updateNonBl(Long id, UpdateHouseBlCommand command);
     void deleteNonBlById(Long id);
     void changeNonBlHblNo(Long id, ChangeHouseBlNoCommand command);
     List<Long> findNonBlKeysByHblNoExact(String hblNo);

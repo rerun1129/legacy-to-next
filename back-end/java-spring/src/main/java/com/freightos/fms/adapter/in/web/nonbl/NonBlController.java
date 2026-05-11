@@ -82,11 +82,11 @@ public class NonBlController {
 
     @Operation(summary = "Non B/L 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<NonBlDetailResponse>> updateNonBl(
+    public ResponseEntity<ApiResponse<Void>> updateNonBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateNonBlRequest req) {
-        return ResponseEntity.ok(ApiResponse.of(
-                nonBlAssembler.toDetail(nonBlUseCase.updateNonBl(id, nonBlAssembler.toUpdateCommand(req)))));
+        nonBlUseCase.updateNonBl(id, nonBlAssembler.toUpdateCommand(req));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.NON_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Non B/L 번호 변경 (전용 엔드포인트)")

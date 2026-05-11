@@ -13,6 +13,7 @@ import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface HouseBlPort {
     Optional<HouseBl> findHouseBlById(Long id);
@@ -24,6 +25,11 @@ public interface HouseBlPort {
     void deleteByIdAndJobDiv(Long id, JobDiv jobDiv);
     List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId);
     List<ConsoledHouseBlAirSummary> findConsoledAirSummariesByMasterBlId(Long masterBlId);
+    /**
+     * 동일 트랜잭션 내에서 fetch → mutator 적용 → save를 1회 호출로 묶는다.
+     * 1차 캐시 hit으로 재조회 SELECT 제거.
+     */
+    void update(Long id, Consumer<HouseBl> mutator);
     /**
      * hbl_no 단일 컬럼을 부분 UPDATE한다. SELECT 없이 직접 DB 갱신.
      * expectedJobDiv == null 이면 jobDiv 조건을 WHERE에 포함하지 않는다.

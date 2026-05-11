@@ -55,12 +55,13 @@ public class NonBlService implements NonBlUseCase {
 
     @Override
     @Transactional
-    public NonBlDetailResult updateNonBl(Long id, UpdateHouseBlCommand command) {
-        HouseBl existing = houseBlPort.findHouseBlById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND));
-        houseBlFactory.applyToEntity(command, existing);
-        HouseBlNonBl saved = (HouseBlNonBl) houseBlPort.saveHouseBl(existing);
-        return NonBlDetailResult.from(saved);
+    public void updateNonBl(Long id, UpdateHouseBlCommand command) {
+        houseBlPort.update(id, existing -> {
+            if (!(existing instanceof HouseBlNonBl)) {
+                throw new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND);
+            }
+            houseBlFactory.applyToEntity(command, existing);
+        });
     }
 
     @Override
