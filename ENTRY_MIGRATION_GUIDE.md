@@ -585,6 +585,177 @@ void deleteByParentHouseBlId(@Param("parentId") Long parentId);
 - Phase 3 (공유 container): HouseBl 2개(sea/nonbl) — 테이블 분리, MasterBl 미사용
 - Phase 4 (공유 dim HouseBl + 단독 MasterBl): HouseBl 3개 분리, MasterBl FK만 이전
 
+### 6.33 HouseBl 영속성 어댑터 — jobDiv별 Strategy 분리 SSOT
+
+`HouseBlPersistenceAdapter`가 SEA/AIR/TRUCK/NON_BL 네 jobDiv를 단일 클래스의 switch/instanceof로 분기 처리하면 16+ Repository와 4개 Mapper가 한 어댑터에 주입되어 책임 경계가 흐려진다. jobDiv별 `HouseBl<JobDiv>PersistenceStrategy`로 추출 + dispatcher 패턴.
+
+**구조**:
+```
+HouseBlPersistenceAdapter (dispatcher, ~150줄)
+ ├─ 공통 부모 처리: HouseBlRepository, HouseBlDomainToJpaMapper
+ │  (existsById/getReferenceById/applyCommonFields/save)
+ └─ jobDiv별 ext는 strategy 위임
+       seaStrategy   : HouseBlSeaPersistenceStrategy
+       airStrategy   : HouseBlAirPersistenceStrategy
+       truckStrategy : HouseBlTruckPersistenceStrategy
+       nonBlStrategy : HouseBlNonBlPersistenceStrategy
+```
+
+**Strategy 인터페이스** (`adapter/out/persistence/housebl/strategy/HouseBlPersistenceStrategy.java`, package-private):
+```java
+interface HouseBlPersistenceStrategy<T extends HouseBl> {
+    JobDiv jobDiv();
+    T saveExt(T domain, HouseBlJpaEntity savedParent);
+    HouseBl loadWithExt(HouseBlJpaEntity parent);
+    void deleteExt(Long parentId);
+}
+```
+
+**원칙**:
+- Strategy 인터페이스는 adapter 패키지 내부에만 노출 — Application·도메인 계층은 Strategy 존재를 모름
+- 트랜잭션은 `HouseBlPersistenceAdapter`의 `saveHouseBl`/`deleteByIdAndJobDiv`에 `@Transactional`(REQUIRED) 유지, Strategy는 어댑터 트랜잭션 안에서 호출 — `@Transactional` 미부착
+- Port 시그니처(`HouseBlPort`) / 호출자(NonBlService, HouseBlService 등) 무변경
+- jobDiv별 의존성(자식 Repository, mapper)을 strategy로 분산 — 어댑터에는 공통 3개만
+
+**효과**:
+- 어댑터 350+ 줄 → 142줄 dispatcher
+- 신규 jobDiv 추가/제거가 단일 strategy 클래스 작업으로 축소
+- jobDiv 단위 회귀 테스트 가능 — `HouseBl<JobDiv>PersistenceStrategyTest` 4개로 검증 분리
+
+**다른 도메인 적용 시**:
+- MasterBl도 동일 패턴: `MasterBlPersistenceAdapter` + 2개 strategy(`MasterBlSea/Air`) — Master 도메인은 NON_BL/TRUCK 없음
+- 통합 테스트 `@Import` 블록에 Strategy 클래스 4개 추가 필수(누락 시 Spring 컨텍스트 로드 실패: `NoSuchBeanDefinitionException`)
+- 어댑터 직접 mock 검증 테스트는 dispatcher 동작만 검증으로 축소, Repository 호출 순서 검증은 Strategy 단위 테스트로 이전
+
+사례: a8f04c7(메인 5 신규 + 1 수정) + 2d5ba76(테스트 정합 + Strategy별 단위 테스트 4개 신규). 605 → 605 PASS 회귀 없음.
+
+### 6.34 1차 캐시 hit은 PK 기반 조회만 작동
+
+같은 트랜잭션이라도 hibernate 1차 캐시 hit은 **PK 기반 조회**만 보장. JPQL/Criteria/derived 메서드 쿼리는 **항상 DB까지 SELECT**가 발사된다.
+
+| 호출 | 1차 캐시 |
+|---|---|
+| `findById(pk)` | hit (SELECT 없음) |
+| `getReferenceById(pk)` | hit (프록시, 필드 접근 시 hit 검증) |
+| `existsById(pk)` | **미스** (count(*) SELECT 발사) |
+| `findByXxxId(fk)` derived | **미스** (JPQL SELECT) |
+| `@Query("from ...")` 명시 JPQL/QueryDSL | **미스** |
+
+따라서 같은 엔티티를 2회 fetch해도 두 번째가 자동으로 SELECT 절감되는 게 아니다. **PK로 fetch하거나 attached 참조를 직접 사용**해야 절감 가능.
+
+**적용 함정**: NonBl update 1회 분석 시 `existsById`(count SELECT) + `findByHouseBlHouseBlId`(FK 메서드 쿼리)가 모두 1차 캐시 우회로 발사되는 현상 확인. **§6.35의 attached JPA 직접 매핑 패턴**으로 `saveHouseBl` 우회해야 절감.
+
+사례: 3037a44 분석 — 같은 트랜잭션에서 service가 fetch한 후 adapter가 다시 fetch하던 패턴(SELECT 6건)을 attached 직접 매핑으로 4건까지 축소.
+
+### 6.35 Update 흐름 책임 분리 SSOT — 도메인별 Port + Adapter (Consumer 콜백 안티패턴 폐기)
+
+**원칙**: 도메인별 update는 **도메인 전용 Port + Adapter**로 분리해 service는 1줄 위임. adapter가 jobDiv 검증·factory·attached JPA 직접 매핑까지 일괄 처리한다.
+
+**안티패턴 — Consumer 콜백 trampoline (실측상 위임 표면적)**:
+```java
+// Port (안티패턴)
+void update(Long id, Consumer<HouseBl> mutator);
+
+// Service — instanceof 검증·factory 호출이 여전히 남음
+houseBlPort.update(id, existing -> {
+    if (!(existing instanceof HouseBlNonBl)) throw new ResourceNotFoundException(...);
+    houseBlFactory.applyToEntity(command, existing);
+});
+
+// Adapter — saveHouseBl을 내부 호출 → existsById + FK 재조회 그대로 발사
+public void update(Long id, Consumer<HouseBl> mutator) {
+    HouseBl domain = houseBlRepository.findById(id).map(this::loadWithExt).orElseThrow(...);
+    mutator.accept(domain);
+    saveHouseBl(domain);  // ← 내부 existsById(SELECT count) + strategy.saveExt(FK 재조회)
+}
+```
+
+결과: SELECT 6 → 6 (절감 0). Service에 `instanceof` 검증과 `factory.applyToEntity` 호출이 그대로 남아 위임 책임이 사실상 service에 잔존.
+
+**올바른 패턴 — 도메인 전용 Port + Adapter**:
+```java
+// Service — 진짜 1줄 위임
+public void updateNonBl(Long id, UpdateHouseBlCommand command) {
+    nonBlPersistencePort.update(id, command);
+}
+
+// Port (application/<domain>/port/out/) — Command를 받음
+public interface NonBlPersistencePort {
+    void update(Long id, UpdateHouseBlCommand command);
+}
+
+// Adapter (adapter/out/persistence/<domain>/)
+@Component
+@Transactional
+public class NonBlUpdatePersistenceAdapter implements NonBlPersistencePort {
+    public void update(Long id, UpdateHouseBlCommand command) {
+        // 1) parent PK fetch + jobDiv 검증
+        HouseBlJpaEntity parentJpa = houseBlRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND));
+        if (parentJpa.getJobDiv() != JobDiv.NON_BL) {
+            throw new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND);
+        }
+
+        // 2) ext fetch (FK 쿼리, attached 보관)
+        HouseBlNonBlJpaEntity nonBlJpa = houseBlNonBlRepository.findByHouseBlHouseBlId(id)
+            .orElseThrow(() -> new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND));
+
+        // 3) 도메인 변환 (자식 컬렉션 LAZY 트리거)
+        HouseBlNonBl domain = jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa);
+
+        // 4) factory로 command 적용 (adapter→application/factory 의존 — 실용적 헥사고널 완화)
+        houseBlFactory.applyToEntity(command, domain);
+
+        // 5) attached JPA에 직접 매핑 — saveHouseBl 미호출
+        domainToJpaMapper.applyCommonFields(domain, parentJpa);
+        domainToJpaMapper.applyNonBlFields(domain, nonBlJpa);
+
+        // 6) 자식 collection은 attached JPA에 merge — LAZY 재트리거 없음(loadWithExt에서 이미 fetch)
+        nonBlJpa.mergeContainers(domain.getContainers().stream().map(...).toList());
+        nonBlJpa.mergeDims(domain.getDims().stream().map(...).toList());
+
+        // dirty checking이 트랜잭션 종료 시 UPDATE 자동 발사
+    }
+}
+```
+
+**SELECT 절감 (NonBl update 기준)**:
+| # | Consumer 패턴 | Port+Adapter 패턴 |
+|---|---|---|
+| 1 | SELECT house_bl (PK) | SELECT house_bl (PK) |
+| 2 | SELECT house_bl_non_bl (FK) | SELECT house_bl_non_bl (FK) |
+| 3 | SELECT container | SELECT container |
+| 4 | SELECT dim | SELECT dim |
+| 5 | SELECT count(*) (saveHouseBl 내 existsById) | **제거** |
+| 6 | SELECT house_bl_non_bl (strategy.saveExt FK 재조회) | **제거** |
+| **합계** | **6** | **4** |
+
+**컨트롤러 응답 void화 함께 적용**:
+FE가 PUT 응답을 받고 `invalidateQueries` + GET refetch 패턴이면 응답 본문은 무용. `ApiResponse<DetailResponse>` → `ApiResponse<Void>` 축소.
+- Backend: `UseCase.updateXxx` 반환 `void`, Controller 응답 `ApiResponse<Void>`, Assembler `toDetail` 호출 제거
+- FE: `xxxPort.update`/api client 반환 `Promise<void>`, zod schema 검증 제거
+- create/update mutation 분리(반환 union 회피) — `useMutation` 제네릭 불일치 회피용 패턴(§6.29 참고)
+
+**다른 도메인 적용 시 체크리스트**:
+1. `<Domain>PersistencePort` 신설 — `application/<domain>/port/out/`. Command 직접 받음.
+2. `<Domain>UpdatePersistenceAdapter` 신설 — `adapter/out/persistence/<domain>/`. 명명 충돌 회피 위해 `Update` 접미사 사용(기존 `xxxPersistenceAdapter`가 Search 등 다른 책임을 가질 때).
+3. Service의 `update<X>` 본문은 `<x>PersistencePort.update(id, command);` 1줄
+4. UseCase 반환 `void`로 변경 + Controller 응답 `ApiResponse<Void>`
+5. FE adapter `Promise<void>` 정합 — `xxxPort` 인터페이스 + api client + 응답 schema 검증 제거
+6. 기존 `HouseBlPort.saveHouseBl`은 다른 호출자(create 등) 호환 위해 유지 — update만 새 Port로 전환
+7. 테스트:
+   - 신규 Adapter 단위 테스트: happy path(factory·applyCommonFields·applyNonBlFields·mergeContainers·mergeDims 호출 검증), notFound, wrong jobDiv
+   - Adapter 테스트의 mock stub은 실제 호출 경로와 정확히 일치(Mockito strict mode `UnnecessaryStubbingException` 회피)
+   - Command 레코드 파라미터 수 정확히 일치(인수 누락 시 컴파일 실패)
+8. p6spy 실측으로 SELECT 절감 확인
+
+**리스크 — adapter→application/factory 의존**:
+정통 헥사고널은 adapter→application 의존 금지지만, factory가 stateless command→도메인 mutator 호출 헬퍼라 실용적으로 허용. 의존 회피하려면 service에서 command→fields 변환 후 fields만 port에 전달하는 패턴(분량 더 큼).
+
+사례: 3037a44(메인 5) + b0a92ad·8b70969(테스트 fix). 613 PASS 회귀 없음. NonBl update SELECT 6→4.
+
+**HouseBl/MasterBl/SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행.
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
@@ -692,6 +863,18 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **ER 재구조화 최종 상태 (2026-05-11, Phase 1~4 완료)** — 모든 1:N/1:1 자식이 의미상 속한 ext의 PK FK로 매달림. 부모 `house_bl`/`master_bl`의 cascade 컬렉션 매핑 0개 → JobDiv 무관 LAZY fetch 0건. **자식 정리는 후속 옵션 D 작업에서 어댑터 명시 bulk DELETE로 전환**(§6.31 갱신 SSOT). **기술 부채 보고**: `HouseBlPersistenceAdapter.java` 347줄, `MasterBlMapper.java` 338줄 — 300줄 임계 초과(500 미만으로 강제 분리 X). 후속으로 `HouseBlPersistenceAdapter`의 `saveOrDelete<Sea/Air/Truck>Desc` 추출 + `MasterBlMapper` → `MasterBlDocMapper` 분리 검토 권장.
 
 - **DDL_RULES §5 정합화 + ID-only 삭제 흐름(옵션 D) (2026-05-11)** — ER 재구조화 Phase 2~4가 DB `ON DELETE CASCADE`+JPA `@OnDelete`에 의존하던 흐름을 §5 준수로 전환. 16개 ext FK의 `ON DELETE CASCADE` 제거(`schema/V1__fms_initial_schema.sql` 통합본으로 14개 마이그레이션 파일 정리). 10개 JPA(desc 5 + ext 5)의 `@OnDelete` 어노테이션·import 제거. `HouseBlPort`/`MasterBlPort`의 `delete<X>Bl(<X>Bl)` 시그니처 폐기 → `deleteByIdAndJobDiv(Long id, JobDiv jobDiv)`+`findJobDivById(Long): Optional<JobDiv>` 신설. Adapter는 `switch(jobDiv)` 분기마다 자식 subquery bulk DELETE → ext bulk DELETE → 부모 bulk DELETE 순서로 명시 호출. Service 계층은 `findJobDivById` projection 1회 후 port 직접 호출(기존 `findEntityById`/`loadWithExt` 호출 제거). `NonBlService.deleteNonBlById`는 자기 jobDiv 알므로 `houseBlPort.deleteByIdAndJobDiv(id, JobDiv.NON_BL)` 직접 호출(HouseBlUseCase 우회). 자식 Repository 13곳에 `deleteByParentHouseBlId`/`deleteByParentMasterBlId` subquery bulk DELETE 메서드 추가(11개 신규 Repository + 5 desc Repository 메서드 추가). 테스트는 cascade 검증을 어댑터 명시 호출 검증으로 일괄 교체(`HouseBlPersistenceAdapterTest`/`MasterBlPersistenceAdapterTest`/`HouseBlServiceTest`/`MasterBlServiceTest`/`MasterBlMappingIntegrationTest`+신규 `NonBlServiceTest`). 성능: NON_BL 삭제 기준 SELECT 4 + DELETE 4 → SELECT 0 + DELETE 4(`HouseBlService` 경유 시 jobDiv projection 1회만 추가). (§6.31 SSOT 갱신)
+
+- **pkgUnit/weightUnit 필드 분리 + Non-BL Cargo UI 재배치 시리즈 (2026-05-11, f6c3657·4423db9·9f88b76)** — `CargoSummary.packageUnit` 단일 필드가 포장 단위(자유텍스트, 'CTN' 등)와 중량 단위(`WeightUnit` enum, KGS/LBS)의 의미를 혼재시키던 문제를 3-step 으로 해소. (1) f6c3657: `WeightUnit.fromCodeOrDefault(String)` 신설(unknown/null/blank → KGS 기본값 반환, `IllegalArgumentException` 제거) + `CargoSummary.packageUnit` → `weightUnit` 리네임(타입-필드명 정합), HouseBl/MasterBl 매퍼·팩토리 5곳의 `fromCode` 호출을 `fromCodeOrDefault` 로 교체 — Non B/L List 더블클릭으로 Entry 진입 시 invalid pkg_unit('CTN' 등)이 던지던 500 에러 즉시 해소. (2) 4423db9: 의미적 분리 완성 — `CargoSummary`/`HouseBl`/`MasterBl` 도메인에 `pkgUnit(String, 자유텍스트)` + `weightUnit(WeightUnit enum)` 두 필드로 분리, `HouseBlSea`/`MasterBlSea`에 있던 `weightUnit`을 **부모 BL로 승격**(Air/Truck/NonBl도 모두 weightUnit 보유 — 모드 무관 공통 필드). DDL: `house_bl`/`master_bl`에 `weight_unit` 컬럼 추가, `house_bl_sea`/`master_bl_sea`에서 제거. BE 어셈블러·매퍼·DTO(Create/Update Request, Detail Response)·Command·Projection·Factory + FE 도메인·schema·api 어댑터·Entry 컴포넌트 일괄 정합화. (3) 9f88b76: Non-BL Cargo 패널 UI 재배치 — `CodeBox` 에 `kind="code-only"` variant 추가(코드 한 칸 + 검색 아이콘, name 영역 미렌더), `non-bl-schema` 의 `cargoUnit` → `weightUnit` 리네임 + `pkgUnit` 신규 필드, `non-bl-submit`/`non-bl-entry`/`non-bl-defaults` 의 pkgUnit·weightUnit 분리 매핑(기존 pkgUnit=undefined 손실 수정), Cargo 패널에서 Package 옆 ComboBox 제거 → `CodeBox kind="code-only"` (pkgUnit), Gross W/T 옆 ComboBox 신설(weightUnit). `CodeBox` 테스트 케이스 추가.
+
+- **HouseBl Bound 필드 NON_BL Entry 필수화 (2026-05-11)** — `CreateNonBlRequest`/`UpdateNonBlRequest`의 `bound`에 `@NotBlank` 추가(DB는 이미 NOT NULL이나 API 검증 누락 NPE 위험). FE `non-bl-schema` `bound: z.string().min(1, "Bound를 선택하세요.")` + 툴바 `is-required` 클래스/라벨 + ComboBox `rules.required` 연동. 신규 의존성 `@hookform/resolvers ^5.2.2` 추가(react-hook-form v7 호환, zodResolver). `NonBlBoundValidationTest` 4 케이스 신규(bound null/blank × create/update). 기존 `NonBlControllerTest.VALID_CREATE_JSON`에 `"bound": "EXP"` 추가(사용자 명시 승인). §6.25 정책 적용 — UI required 필드에 @NotBlank 유지.
+
+- **HouseBlPersistenceAdapter Strategy 분리 (2026-05-11, a8f04c7·2d5ba76)** — 352줄 어댑터의 SEA/AIR/TRUCK/NON_BL switch 분기 3곳(saveHouseBl 96줄·deleteByIdAndJobDiv 28줄·loadWithExt 27줄)을 4개 `HouseBl<JobDiv>PersistenceStrategy`로 추출 + dispatcher 패턴. Strategy 인터페이스(`adapter/out/persistence/housebl/strategy/`)는 package-private로 adapter 외부 노출 차단. 어댑터는 142줄로 축약(공통 `HouseBlRepository`+`HouseBlDomainToJpaMapper`+4 Strategy만 주입), 기존 16+ Repository는 strategy로 분산. 트랜잭션은 어댑터에 `@Transactional` 유지, Strategy는 미부착. Port 시그니처/호출자(NonBlService, HouseBlService 등) 무변경. 통합 테스트 `NonBlChangeHblNoIntegrationTest`/`NonBlFindByHblNoIntegrationTest` `@Import` 블록에 Strategy 4개 추가 필수(누락 시 `NoSuchBeanDefinitionException`). `HouseBlPersistenceAdapterTest`(644→369줄, dispatcher 검증만)+신규 4개 `HouseBl<JobDiv>PersistenceStrategyTest`(각 ~140줄)로 검증 분리. 동작 동등성: p6spy SQL 횟수/순서 변화 없음. (§6.33 SSOT 등재)
+
+- **NonBl update 1차 위임 시도 + 응답 void화 (Phase 2, 2026-05-11, a6d96cd·4165b8a·db98df4)** — `HouseBlPort.update(Long id, Consumer<HouseBl> mutator)` 추가하여 Service의 fetch+mutate+save 3단계를 1줄 위임으로 축약 시도. Controller 응답 `ApiResponse<NonBlDetailResponse>` → `ApiResponse<Void>`(FE invalidate+refetch라 영향 없음). FE `nonBlPort.update`/api client 반환 `Promise<void>`, zod 응답 검증 제거. `non-bl-entry.tsx`의 create(Promise<{id}>)+update(Promise<void>) 단일 `useMutation` 삼항 패턴이 TS2322 제네릭 불일치 → create/update mutation 분리. **함정**: 1차 캐시 hit이 PK 기반 조회만 작동(§6.34)하므로 adapter의 `update`가 내부적으로 `saveHouseBl`을 호출하면 `existsById`(count SELECT)+`strategy.saveExt`의 `findByHouseBlHouseBlId`(FK 메서드 쿼리) 2건이 그대로 발사 → SELECT 절감 0. Service에 `instanceof HouseBlNonBl` 검증과 `factory.applyToEntity` 호출이 남아 위임도 표면적. **Phase 2 보강 작업으로 폐기**됨.
+
+- **NonBl update 진짜 위임 + SELECT 절감 6→4 (Phase 2 보강, 2026-05-11, 3037a44·b0a92ad·8b70969)** — Phase 2의 Consumer trampoline 안티패턴을 폐기하고 **NonBl 전용 Port + Adapter** 신설. `application/nonbl/port/out/NonBlPersistencePort.update(Long id, UpdateHouseBlCommand command)` + `adapter/out/persistence/nonbl/NonBlUpdatePersistenceAdapter`(명명 충돌 회피 — 같은 패키지의 `NonBlPersistenceAdapter`가 `NonBlSearchPort` 구현 중). Service는 `nonBlPersistencePort.update(id, command);` 1줄 위임 + `houseBlFactory` 의존 제거. Adapter가 jobDiv 검증·factory.applyToEntity·attached JPA 직접 매핑까지 일괄 처리하며 `saveHouseBl` 미호출 — dirty checking이 트랜잭션 종료 시 UPDATE 자동 발사. `existsById`(count SELECT) + `findByHouseBlHouseBlId`(FK 재조회) 2건 제거. `HouseBlPort.update(Consumer)` 및 어댑터 구현은 미사용으로 제거(`HouseBlPersistenceAdapterTest`의 update 2 케이스도 제거 — 메인 메서드 제거에 따른 자연 정리, 사용자 승인됨). 신규 `NonBlPersistenceAdapterTest` 6 케이스(happy path·containers·empty collections·notFound·ext notFound·wrong jobDiv). 함정: `emptyCommand()` 헬퍼의 `UpdateHouseBlCommand` 인수 수 정확히 일치 필요(50/53 → 컴파일 실패), Mockito strict mode에서 미사용 stub `UnnecessaryStubbingException` 제거. mergeContainers/mergeDims LAZY 재트리거 없음(`toNonBlDomain`이 이미 1차 캐시 적재). **adapter→application/factory 의존**은 실용적 헥사고널 완화로 사용자 합의. 헥사고널 정통 회피하려면 service에서 command→fields 변환 후 fields만 port에 전달하는 패턴(분량 더 큼, 별도 작업). (§6.33·§6.34·§6.35 SSOT 등재)
+
+  **다른 도메인(HouseBl Sea/Air/Truck · MasterBl · SwitchBl) 적용 권장 — 별도 작업으로 진행. 체크리스트는 §6.35.**
 
 ---
 
