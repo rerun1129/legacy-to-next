@@ -7,6 +7,10 @@ import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDomainToJpaMappe
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlJpaToDomainMapper;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlPersistenceAdapter;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlAirPersistenceStrategy;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlNonBlPersistenceStrategy;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlSeaPersistenceStrategy;
+import com.freightos.fms.adapter.out.persistence.housebl.strategy.HouseBlTruckPersistenceStrategy;
 import com.freightos.fms.adapter.out.persistence.nonbl.NonBlPersistenceAdapter;
 import com.freightos.fms.adapter.out.persistence.nonbl.NonBlRepositoryImpl;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
@@ -41,7 +45,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         HouseBlJpaToDomainMapper.class,
         HouseBlDomainToJpaMapper.class,
         HouseBlCargoMapper.class,
-        HouseBlDocMapper.class
+        HouseBlDocMapper.class,
+        HouseBlSeaPersistenceStrategy.class,
+        HouseBlAirPersistenceStrategy.class,
+        HouseBlTruckPersistenceStrategy.class,
+        HouseBlNonBlPersistenceStrategy.class
 })
 class NonBlChangeHblNoIntegrationTest {
 
