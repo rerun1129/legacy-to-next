@@ -1,13 +1,14 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
+import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.List;
 
 // null 필드는 기존 값 유지 정책 (PATCH 의미론)
 public record UpdateNonBlRequest(
         String jobDiv,
-        String bound,
+        @NotBlank String bound,
         String workDivision,
         String originalBlRef,
         String volumeDivisor,

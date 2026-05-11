@@ -9,7 +9,7 @@ import java.util.List;
 
 public record CreateNonBlRequest(
         String jobDiv,
-        String bound,
+        @NotBlank String bound,
         @NotBlank @Size(max = 35) String hblNo,
         @NotBlank String workDivision,
         String originalBlRef,
