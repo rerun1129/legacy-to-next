@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, Search } from 'lucide-react';
@@ -44,6 +44,7 @@ const DEFAULT_VALUES: NonBlFilter = {
 const SCOPE = "/fms/non-bl/list";
 
 type NonBlSearchState = SavedSearchState & { extraFilter: NonBlFilter | null };
+type NonBlListInject = { nonBlNo: string };
 
 export function NonBlListClient() {
   const form = useForm<NonBlFilter>({ defaultValues: DEFAULT_VALUES });
@@ -61,6 +62,20 @@ export function NonBlListClient() {
     const s = listFilterStore.getState().getSearch(SCOPE);
     return s?.showAll ?? true;
   });
+
+  // Entry → List SPA 이동 시 검색어 자동 바인딩 — inject 슬롯 우선, 읽은 즉시 clear
+  const injectConsumedRef = useRef(false);
+  useEffect(() => {
+    if (injectConsumedRef.current) return;
+    injectConsumedRef.current = true;
+    const inject = listFilterStore.getState().getInject(SCOPE) as NonBlListInject | undefined;
+    if (inject?.nonBlNo) {
+      listFilterStore.getState().clearInject(SCOPE);
+      form.setValue("nonBlNo", inject.nonBlNo);
+      setExtraFilter({ ...DEFAULT_VALUES, nonBlNo: inject.nonBlNo });
+      setCurrentPage(1);
+    }
+  }, [form]);
 
   useEffect(() => {
     listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, showAll });

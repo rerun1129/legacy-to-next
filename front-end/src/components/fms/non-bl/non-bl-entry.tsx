@@ -21,6 +21,10 @@ import { toast }                                       from "@/lib/toast-store";
 import { useEntryFocusStore }                          from "@/lib/use-entry-focus-store";
 import { ScreenGuard }                                 from "@/components/shared/screen-guard";
 import { ChangeBlNoModal }                             from "./change-bl-no-modal";
+import { listFilterStore }                             from "@/lib/use-list-filter-store";
+
+// List 화면과 동일한 SCOPE를 사용하여 inject 슬롯 키 일치 보장
+const NON_BL_LIST_SCOPE = "/fms/non-bl/list";
 
 export function NonBLEntry() {
   const [tab, setTab] = useState("main");
@@ -191,6 +195,7 @@ export function NonBLEntry() {
 
     if (ids.length > 1) {
       toast.info("여러 건이 검색되었습니다. List에서 선택하세요.");
+      listFilterStore.getState().setInject(NON_BL_LIST_SCOPE, { nonBlNo: nonBlNo });
       router.push("/fms/non-bl/list");
       return;
     }
