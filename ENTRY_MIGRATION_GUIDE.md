@@ -797,6 +797,47 @@ useQuery({
 
 ---
 
+### 6.37 Entry sub-set 화면 — Request DTO·매퍼에서 form 미매핑 필드 sub-set화 필수
+
+화면 form schema가 entity 일부만 다룰 때, 백엔드 Request DTO가 entity 전체 필드를 받으면 **프론트가 안 보내는 필드는 null로 도착 → 도메인/JPA에 null set → DB 기존 값을 null로 덮어씀(데이터 손실)**.
+
+증상: 무수정 저장인데 SQL UPDATE 발생 + 일부 컬럼이 NULL로 덮어써짐. 첫 저장 후 idempotent(두 번째부터 dirty 없음 — 이미 정규화됐기 때문).
+
+```java
+// ❌ entity 전체 필드를 받는 Request DTO
+public record UpdateXxxRequest(
+    String shipperCode, String shipperAddress,  // form엔 코드만 → address null 도착
+    String incoterms, String mblNo, ...
+) {}
+
+// ✅ 화면 전용 sub-set
+public record UpdateXxxRequest(String shipperCode, ...) {}
+```
+
+매퍼 단계 분기:
+
+| 매퍼 위치 | 처리 |
+|---|---|
+| **화면 전용 매퍼/엔티티** (예: `HouseBlNonBlJpaEntity.copyContainerFields`) | 미사용 setter **직접 제거** → DB 기존 값 유지 |
+| **공유 매퍼** (예: `HouseBlDomainToJpaMapper.applyCommonFields` — House B/L/Master B/L과 공유) | 공통 setter 제거 금지(타 화면 회귀). **화면 전용 메서드 신설** (예: `applyNonBlCommonFields`) — 공통과 동일하되 미매핑 setter 제외. 어댑터에서 호출 교체 |
+
+**위험 신호**: `setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address))` 같은 auto-derive setter. `CustomerCode`는 단순 record `(value, address)` — lookup 없이 코드만 들어온 VO는 address가 null → 위 데이터 손실 경로 직격. House B/L/Master B/L은 form에서 address를 명시 받아 정상 동작하지만, NonBl 같이 form에 address 없는 화면은 setter가 그대로 호출되면 데이터 손실.
+
+**점검 순서**:
+1. detail 응답·Request DTO와 form schema mismatch 필드 식별
+2. 백엔드: Detail/Request/Projection/Command 인자/Assembler 매핑에서 제거(공유 Command 시그니처가 막히면 null 고정)
+3. 매퍼: 화면 전용이면 setter 제거 / 공유면 신규 화면 전용 메서드 분기 + 어댑터 호출 교체
+4. 프론트: zod schema + 도메인 타입 sub-set 동기화(§6.29 참조 — 응답 schema mismatch 방지)
+5. 회귀: 두 번째 저장 UPDATE 미발생 + 다른 화면(공유 매퍼 사용 시) 정상 동작
+
+**유사 증상 분리**: `?? "CM6000"` 디폴트 주입, `trim()` 정규화 등 fetch/payload 비대칭도 첫 저장 dirty + 이후 idempotent 패턴이 동일. **반드시 백엔드 SQL log로 dirty 컬럼 특정 후** sub-set화 vs 정규화 정렬 분기 판단.
+
+사례: f15736e — NonBl Entry 컨테이너 8필드(`lengthFeet, sealNo4-6, netWeightKg, vgmKg, isSoc, seq`) + 메인 11필드(`jobDiv, shipmentType, freightTerm, docPartner*, address×3, incoterms, mbl*×3`) sub-set화 + `applyNonBlCommonFields` 신설 (12 files, 75+/177-).
+
+**다른 도메인 적용 권장**: Master B/L, Truck B/L 등 form에서 address 명시 매핑이 빠진 화면 점검. 같은 데이터 손실 패턴 발생 가능.
+
+---
+
 ## 7. CSS 토큰화 디자인 (참고 위치)
 
 - `front-end/src/styles/forms.css` — `.lcn`, `.lcn__label`, `.lcn__code`, `.lcn__name`
