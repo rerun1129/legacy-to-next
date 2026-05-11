@@ -500,7 +500,7 @@ class HouseBlPersistenceAdapterTest {
     void saveHouseBl_withExistingId_whenNotFound_throwsResourceNotFound() {
         HouseBlSea sea = HouseBlSea.create(Bound.EXP);
         sea.assignIdentity(777L, null, null, null, null);
-        given(houseBlRepository.findById(777L)).willReturn(Optional.empty());
+        given(houseBlRepository.existsById(777L)).willReturn(false);
 
         assertThatThrownBy(() -> adapter.saveHouseBl(sea))
                 .isInstanceOf(ResourceNotFoundException.class);
