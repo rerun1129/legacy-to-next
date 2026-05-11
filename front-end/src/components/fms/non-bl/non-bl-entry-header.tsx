@@ -11,7 +11,7 @@ export function NonBlEntryHeader(props: {
   onSave: () => void;
   onDelete: () => void;
   onChangeBlNo: () => void;
-}): JSX.Element {
+}) {
   const { isEdit, isSavePending, isDeletePending, onNew, onSearch, onSave, onDelete, onChangeBlNo } = props;
 
   return (
