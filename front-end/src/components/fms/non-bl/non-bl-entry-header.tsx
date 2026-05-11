@@ -1,6 +1,6 @@
 "use client";
 
-import { Package, FilePlus, Search, Save, Trash2, Copy, RefreshCw } from "lucide-react";
+import { Package, FilePlus, Search, Save, Trash2, RefreshCw } from "lucide-react";
 
 export function NonBlEntryHeader(props: {
   isEdit: boolean;
@@ -47,12 +47,6 @@ export function NonBlEntryHeader(props: {
           disabled={!isEdit || isDeletePending}
         >
           <Trash2 size={12} />Delete
-        </button>
-        <button
-          type="button"
-          className="btn btn--sm btn--transaction"
-        >
-          <Copy size={12} />Copy
         </button>
         <button
           type="button"

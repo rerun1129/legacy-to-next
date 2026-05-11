@@ -125,7 +125,13 @@ export function NonBLEntry() {
         isDeletePending={deleteMutation.isPending}
         onNew={handleResetEntry}
         onSearch={handleSearch}
-        onSave={methods.handleSubmit(handleSubmit)}
+        onSave={() => {
+          if (!isEdit) {
+            toast.info("먼저 Non B/L을 조회해주세요.");
+            return;
+          }
+          methods.handleSubmit(handleSubmit)();
+        }}
         onDelete={handleDelete}
         onChangeBlNo={handleChangeBlNo}
       />

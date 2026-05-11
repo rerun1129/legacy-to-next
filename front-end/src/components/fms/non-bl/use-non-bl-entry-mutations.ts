@@ -4,6 +4,7 @@ import type { UseMutationResult } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nonBlPort } from "@/lib/ports";
 import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
+import { confirm } from "@/components/confirm";
 import { createEmptyNonBlFormValues } from "./non-bl-defaults";
 import { buildNonBlRequest, buildNonBlUpdateRequest } from "./non-bl-submit";
 import type { NonBlFormValues } from "./non-bl-schema";
@@ -18,8 +19,8 @@ export function useNonBlEntryMutations(args: {
   updateMutation: UseMutationResult<void, Error, NonBlFormValues>;
   deleteMutation: UseMutationResult<void, Error, void>;
   isSavePending: boolean;
-  handleSubmit: (data: NonBlFormValues) => void;
-  handleDelete: () => void;
+  handleSubmit: (data: NonBlFormValues) => Promise<void>;
+  handleDelete: () => Promise<void>;
 } {
   const { id, methods, detailLoadedRef, clearDraft } = args;
   const queryClient = useQueryClient();
@@ -55,7 +56,12 @@ export function useNonBlEntryMutations(args: {
     },
   });
 
-  function handleSubmit(data: NonBlFormValues) {
+  async function handleSubmit(data: NonBlFormValues) {
+    const ok = await confirm({
+      title: "저장하시겠습니까?",
+      variant: "default",
+    });
+    if (!ok) return;
     if (isEdit) {
       updateMutation.mutate(data);
     } else {
@@ -63,11 +69,16 @@ export function useNonBlEntryMutations(args: {
     }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!isEdit) return;
-    if (window.confirm("삭제하시겠습니까?")) {
-      deleteMutation.mutate();
-    }
+    const ok = await confirm({
+      title: "삭제하시겠습니까?",
+      description: "삭제된 데이터는 복구할 수 없습니다.",
+      variant: "destructive",
+      confirmText: "삭제",
+    });
+    if (!ok) return;
+    deleteMutation.mutate();
   }
 
   const isSavePending = createMutation.isPending || updateMutation.isPending;
