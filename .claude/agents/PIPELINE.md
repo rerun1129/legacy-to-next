@@ -11,18 +11,21 @@
   → (승인) 도메인별 순차 구현:
       · back-end 변경 있으면:
             echo "backend" > .claude/.coder_scope
-            → [Backend-coder] 구현 (빌드·테스트 미수행, QA 담당)
+            → [Backend-coder] 구현 (빌드·테스트 미수행, Backend-QA 담당)
             → rm -f .claude/.coder_scope
             → [메인] git add <변경파일> && git commit
       · front-end 변경 있으면:
             echo "frontend" > .claude/.coder_scope
-            → [Frontend-coder] 구현 (빌드·테스트 미수행, QA 담당)
+            → [Frontend-coder] 구현 (빌드·lint 미수행, Frontend-QA 담당)
             → rm -f .claude/.coder_scope
             → [메인] git add <변경파일> && git commit
       · 공유영역(schema/, docs/, .claude/ 등) → 메인 직접 처리 → git add + commit
-  → [QA]                         통합 빌드·테스트
-      · PASS → 사용자 보고 후 종료
-      · FAIL → 해당 도메인 Backend/Frontend-coder 재호출 → commit → QA 재실행
+  → QA 단계 (도메인별 분기):
+      · back-end만 변경 → [Backend-QA] 호출
+      · front-end만 변경 → [Frontend-QA] 호출
+      · 둘 다 변경 → [Backend-QA] + [Frontend-QA] 한 메시지에서 병렬 호출 (Agent 도구 2개)
+      · 전체 PASS → 사용자 보고 후 종료
+      · 한쪽이라도 FAIL → 실패 도메인의 Backend/Frontend-coder 재호출 → commit → 같은 도메인 QA 재실행
              → FAIL 2회차 → 메인이 사용자에게 실패 항목 보고 + 중단
 ```
 
@@ -56,8 +59,9 @@ rm -f .claude/.coder_scope
 | Main → Backend-coder | Agent 도구 순차 호출 (사용자 승인 후) | 백엔드 작업 단위 기획 |
 | Main → Frontend-coder | Agent 도구 순차 호출 | 프론트엔드 작업 단위 기획 |
 | Backend/Frontend-coder → Main | 완료 반환 | 변경 파일 목록 |
-| Main → QA | Backend/Frontend-coder 완료 후 Agent 도구 호출 | 변경 파일 목록 |
-| QA → Main (FAIL 시) | 미통과 보고 | Backend/Frontend-coder 재작업 항목 + 실패 명령어 출력 |
+| Main → Backend-QA | Backend-coder 완료 후 Agent 도구 호출 (BE 변경 있을 때) | 변경 파일 목록 (back-end) |
+| Main → Frontend-QA | Frontend-coder 완료 후 Agent 도구 호출 (FE 변경 있을 때) | 변경 파일 목록 (front-end) |
+| Backend-QA / Frontend-QA → Main (FAIL 시) | 미통과 보고 | 해당 도메인 Coder 재작업 항목 + 실패 명령어 출력 |
 | Main → Backend/Frontend-coder (재작업 — QA FAIL) | Agent 도구 호출 | 실패 항목 목록 + 수정 대상 파일 |
 
 ## 메인 에이전트 참조 명령어

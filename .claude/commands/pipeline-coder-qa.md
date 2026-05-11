@@ -41,11 +41,16 @@ allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
    - **공유영역(schema/, docs/, .claude/ 등) 변경 있으면**: 메인 직접 처리 → `git add + commit`.
    - 종료 시 반드시 `.claude/.coder_scope` 삭제: `rm -f .claude/.coder_scope`
 
-2. **QA 호출**: `subagent_type=QA`로 호출. 변경 파일 목록 전달.
+2. **QA 호출** (변경 도메인에 따라):
+   - **back-end만 변경** → `subagent_type=Backend-QA`
+   - **front-end만 변경** → `subagent_type=Frontend-QA`
+   - **둘 다 변경** → `subagent_type=Backend-QA`와 `subagent_type=Frontend-QA`를 **한 메시지에서 병렬 호출** (Agent 도구 2개)
+
+   변경 파일 목록 전달.
 
 3. **QA 결과 분기**:
-   - **PASS** → 사용자에게 결과 보고 후 종료.
-   - **FAIL (1회차)**: 해당 도메인 Backend/Frontend-coder 재호출 → commit → QA 재실행.
+   - **전체 PASS** → 사용자에게 결과 보고 후 종료.
+   - **한쪽이라도 FAIL (1회차)**: 실패 도메인의 Backend/Frontend-coder 재호출 → commit → 해당 도메인 QA 재실행.
    - **FAIL (2회차)**: 사용자에게 실패 항목 보고 + 중단.
 
 ## 종료 메시지

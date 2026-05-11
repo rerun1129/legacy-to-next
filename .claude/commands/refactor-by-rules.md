@@ -1,5 +1,5 @@
 ---
-description: rules/master_coding_rules.md 기준으로 지정 파일을 Haiku Refactorer로 리팩토링. 변경만 하고 종료(git commit·QA·Reviewer 미수행).
+description: rules/master_coding_rules.md 기준으로 지정 파일을 Haiku Refactorer로 리팩토링. 변경만 하고 종료(git commit·Backend-QA·Frontend-QA·Reviewer 미수행).
 allowed-tools: Agent, Bash, Read, Write, Edit, Glob, Grep
 ---
 
