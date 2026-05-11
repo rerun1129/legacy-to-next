@@ -317,48 +317,6 @@ class HouseBlPersistenceAdapterTest {
         );
     }
 
-    // ── update — fetch → mutator → saveHouseBl 흐름 ───────────────────
-
-    @Test
-    @DisplayName("update: 존재하는 NON_BL id → loadWithExt 호출 후 mutator 실행 + saveHouseBl 위임")
-    void update_existingNonBl_callsMutatorAndSaves() {
-        Long id = 10L;
-        HouseBlJpaEntity jpa = new HouseBlJpaEntity();
-        jpa.setJobDiv(JobDiv.NON_BL);
-        jpa.setHouseBlId(id);
-        HouseBlNonBl nonBl = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
-        nonBl.assignIdentity(id, null, null, null, null);
-
-        given(houseBlRepository.findById(id)).willReturn(Optional.of(jpa));
-        given(nonBlStrategy.loadWithExt(jpa)).willReturn(nonBl);
-        given(houseBlRepository.existsById(id)).willReturn(true);
-        given(houseBlRepository.getReferenceById(id)).willReturn(jpa);
-        given(houseBlRepository.save(any())).willReturn(jpa);
-        given(nonBlStrategy.saveExt(eq(nonBl), eq(jpa))).willReturn(nonBl);
-
-        boolean[] mutatorCalled = {false};
-        adapter.update(id, existing -> mutatorCalled[0] = true);
-
-        assertThat(mutatorCalled[0]).isTrue();
-        then(nonBlStrategy).should().loadWithExt(jpa);
-        then(nonBlStrategy).should().saveExt(eq(nonBl), any());
-    }
-
-    @Test
-    @DisplayName("update: 존재하지 않는 id → ResourceNotFoundException, mutator 미호출")
-    void update_notFound_throwsResourceNotFoundException() {
-        Long id = 999L;
-        given(houseBlRepository.findById(id)).willReturn(Optional.empty());
-
-        boolean[] mutatorCalled = {false};
-        assertThatThrownBy(() -> adapter.update(id, existing -> mutatorCalled[0] = true))
-                .isInstanceOf(ResourceNotFoundException.class);
-
-        assertThat(mutatorCalled[0]).isFalse();
-        then(nonBlStrategy).should(never()).loadWithExt(any());
-        then(nonBlStrategy).should(never()).saveExt(any(), any());
-    }
-
     // ── 위임 메서드 ────────────────────────────────────────────────────
 
     @Test

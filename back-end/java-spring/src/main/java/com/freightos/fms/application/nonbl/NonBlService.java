@@ -3,7 +3,6 @@ package com.freightos.fms.application.nonbl;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
-import com.freightos.fms.application.housebl.HouseBlFactory;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
@@ -11,12 +10,12 @@ import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
+import com.freightos.fms.application.nonbl.port.out.NonBlPersistencePort;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.vo.BlNumber;
-import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,7 @@ public class NonBlService implements NonBlUseCase {
 
     private final HouseBlUseCase houseBlUseCase;
     private final HouseBlPort houseBlPort;
-    private final HouseBlFactory houseBlFactory;
+    private final NonBlPersistencePort nonBlPersistencePort;
     private final NonBlSearchPort nonBlSearchPort;
 
     @Override
@@ -56,12 +55,7 @@ public class NonBlService implements NonBlUseCase {
     @Override
     @Transactional
     public void updateNonBl(Long id, UpdateHouseBlCommand command) {
-        houseBlPort.update(id, existing -> {
-            if (!(existing instanceof HouseBlNonBl)) {
-                throw new ResourceNotFoundException(MessageCode.NON_BL_NOT_FOUND);
-            }
-            houseBlFactory.applyToEntity(command, existing);
-        });
+        nonBlPersistencePort.update(id, command);
     }
 
     @Override

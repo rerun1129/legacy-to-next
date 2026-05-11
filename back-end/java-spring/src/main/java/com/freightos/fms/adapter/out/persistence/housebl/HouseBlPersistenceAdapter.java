@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
@@ -97,18 +96,6 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
             case HouseBlNonBl nonBl -> nonBlStrategy.saveExt(nonBl, savedJpa);
             default -> throw new IllegalArgumentException("Unsupported HouseBl type: " + domain.getClass().getSimpleName());
         };
-    }
-
-    @Override
-    @Transactional
-    public void update(Long id, Consumer<HouseBl> mutator) {
-        // findById 1회로 존재 검증 + 도메인 로드 동시 처리.
-        // 이후 saveHouseBl 내 existsById는 1차 캐시 hit으로 SELECT 없이 처리.
-        HouseBl domain = houseBlRepository.findById(id)
-                .map(this::loadWithExt)
-                .orElseThrow(() -> new ResourceNotFoundException("HouseBl", id));
-        mutator.accept(domain);
-        saveHouseBl(domain);
     }
 
     @Override
