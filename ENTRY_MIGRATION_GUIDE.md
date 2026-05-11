@@ -956,6 +956,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
   **다른 도메인(HouseBl Sea/Air/Truck · MasterBl · SwitchBl) 적용 권장 — 별도 작업으로 진행. 체크리스트는 §6.35.**
 
+- **Non B/L Entry 공용 confirm 모달 적용 + Copy 제거 + 조회 전 Save 가드 (2026-05-11, 16dbc0b)** — `e55af73` 에서 도입된 `@/components/confirm` 의 **product 첫 적용 사례**. (1) `use-non-bl-entry-mutations.ts` 의 `handleSubmit`/`handleDelete` 를 async 화하고 `await confirm({...})` Promise API 호출 — Save `variant: "default"` + 기본 메시지, Delete `variant: "destructive" + confirmText: "삭제"` + "삭제된 데이터는 복구할 수 없습니다." description. 기존 `window.confirm` 폐기. 반환 타입 시그니처 `handleSubmit`/`handleDelete` → `Promise<void>` 로 정합. (2) `non-bl-entry-header.tsx` 의 onClick 미정의 Copy 버튼(스텁) + lucide-react `Copy` import 제거 — props 인터페이스 변경 없음(`onCopy` 원래 미존재). Copy 자리는 추후 다른 기능으로 대체 예정. (3) `non-bl-entry.tsx` 의 `onSave` prop 을 inline 가드 함수로 교체 — `!isEdit` 시 `toast.info("먼저 Non B/L을 조회해주세요.")` 후 early return, isEdit 일 때만 `methods.handleSubmit(handleSubmit)()` 호출(`handleChangeBlNo` 와 동일 가드 패턴, toast import 기존 재사용). `useNonBlEntryMutations` 의 `createMutation` 코드는 dead code 화되지만 추후 신규 생성 워크플로우 재활성화 가능성으로 **의도적 유지**. ScreenGuard(§6.27) 와 충돌 없음 — confirm 모달은 mutate 외부에서 해소 후 모달 닫힘 → 기존 `isSavePending`/`deleteMutation.isPending` 로딩 표시 흐름 그대로 동작. 다른 Entry(Sea/Air HBL, Master BL, Truck BL, SwitchBlModal) 의 `window.confirm` 잔존 — 동일 패턴 후속 적용 권장.
+
 ---
 
 ## 11. 본 가이드의 후속 갱신 시점
