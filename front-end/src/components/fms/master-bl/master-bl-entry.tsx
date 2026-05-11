@@ -112,6 +112,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         eta:      data.eta || undefined,
         pkgQty:        data.pkgQty,
         pkgUnit:       data.pkgUnit || undefined,
+        weightUnit:    data.weightUnit || undefined,
         grossWeightKg: data.grossWeightKg,
         cbm:           data.cbm,
         hsCode:        data.hsCode || undefined,

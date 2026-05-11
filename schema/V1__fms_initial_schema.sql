@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS master_bl (
     team_code             VARCHAR(20),
     pkg_qty               INT,
     pkg_unit              VARCHAR(10),
+    weight_unit           VARCHAR(5),
     gross_weight_kg       NUMERIC(12,3),
     cbm                   NUMERIC(10,3),
     hs_code               VARCHAR(12),
@@ -66,7 +67,8 @@ COMMENT ON COLUMN master_bl.freight_term      IS '운임조건: PREPAID(선불) 
 COMMENT ON COLUMN master_bl.operator_code     IS '담당자 코드';
 COMMENT ON COLUMN master_bl.team_code         IS '담당팀 코드';
 COMMENT ON COLUMN master_bl.pkg_qty           IS '포장 수량';
-COMMENT ON COLUMN master_bl.pkg_unit          IS '포장 단위 (CTN, PLT 등)';
+COMMENT ON COLUMN master_bl.pkg_unit          IS '포장 단위 (CTN, PLT 등 자유 텍스트)';
+COMMENT ON COLUMN master_bl.weight_unit       IS '무게 단위 (KGS/LBS)';
 COMMENT ON COLUMN master_bl.gross_weight_kg   IS '총 중량(kg)';
 COMMENT ON COLUMN master_bl.cbm               IS '용적(CBM)';
 
@@ -84,7 +86,6 @@ CREATE TABLE IF NOT EXISTS master_bl_sea (
     line_bkg_no         VARCHAR(50),
     issue_date          VARCHAR(8),
     vessel_nationality  VARCHAR(50),
-    weight_unit         VARCHAR(5),
     service_term        VARCHAR(20),
     bl_type             VARCHAR(15),
     vessel_code         VARCHAR(20),
@@ -306,6 +307,7 @@ CREATE TABLE IF NOT EXISTS house_bl (
     eta                   VARCHAR(8),
     pkg_qty               INT,
     pkg_unit              VARCHAR(10),
+    weight_unit           VARCHAR(5),
     gross_weight_kg       NUMERIC(12,3),
     cbm                   NUMERIC(10,3),
     actual_customer_code  VARCHAR(20),
@@ -339,7 +341,8 @@ COMMENT ON COLUMN house_bl.pod_code             IS '양하항 코드 (Port of Di
 COMMENT ON COLUMN house_bl.etd                  IS '출항예정일 YYYYMMDD';
 COMMENT ON COLUMN house_bl.eta                  IS '도착예정일 YYYYMMDD';
 COMMENT ON COLUMN house_bl.pkg_qty              IS '포장 수량';
-COMMENT ON COLUMN house_bl.pkg_unit             IS '포장 단위 (CTN, PLT 등)';
+COMMENT ON COLUMN house_bl.pkg_unit             IS '포장 단위 (CTN, PLT 등 자유 텍스트)';
+COMMENT ON COLUMN house_bl.weight_unit          IS '무게 단위 (KGS/LBS)';
 COMMENT ON COLUMN house_bl.gross_weight_kg      IS '총 중량(kg)';
 COMMENT ON COLUMN house_bl.cbm                  IS '용적(CBM)';
 COMMENT ON COLUMN house_bl.actual_customer_code IS '실제 고객 거래처 코드';
@@ -375,7 +378,6 @@ CREATE TABLE IF NOT EXISTS house_bl_sea (
     service_term                VARCHAR(20),
     vessel_code                 VARCHAR(20),
     vessel_nationality          VARCHAR(50),
-    weight_unit                 VARCHAR(5),
     rton                        NUMERIC(10,3),
     say_information             VARCHAR(500),
     no_of_container_or_packages VARCHAR(100),

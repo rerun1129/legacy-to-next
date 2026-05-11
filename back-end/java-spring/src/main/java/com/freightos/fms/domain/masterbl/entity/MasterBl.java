@@ -52,7 +52,8 @@ public abstract class MasterBl extends BaseEntity {
 
     // ── Cargo 요약 ─────────────────────────────────────────────
     private Quantity pkgQty;
-    private WeightUnit pkgUnit;
+    private String pkgUnit;           // 패키지 코드 (자유 텍스트, 추후 코드 검색용)
+    private WeightUnit weightUnit;    // 무게 단위 (KGS/LBS)
     private Weight grossWeightKg;
     private Volume cbm;
     private String mainItemName;
@@ -98,7 +99,8 @@ public abstract class MasterBl extends BaseEntity {
 
     public void updateCargoSummary(CargoSummary cargo) {
         this.pkgQty        = cargo.packageCount();
-        this.pkgUnit       = cargo.weightUnit();
+        this.pkgUnit       = cargo.pkgUnit();
+        this.weightUnit    = cargo.weightUnit();
         this.grossWeightKg = cargo.grossWeight();
         this.cbm           = cargo.volume();
     }

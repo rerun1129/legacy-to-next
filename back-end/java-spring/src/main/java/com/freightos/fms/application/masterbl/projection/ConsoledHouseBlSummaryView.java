@@ -14,6 +14,7 @@ public record ConsoledHouseBlSummaryView(
         String docPartnerCode,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         // SEA 전용

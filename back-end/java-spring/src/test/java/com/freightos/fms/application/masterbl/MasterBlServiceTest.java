@@ -97,7 +97,7 @@ class MasterBlServiceTest {
     void findMasterBlById_seaMaster_loadsSeaSummaries() {
         Long id = 1L;
         MasterBlSea master = MasterBlSea.create(Bound.EXP);
-        ConsoledHouseBlSeaSummary s1 = new ConsoledHouseBlSeaSummary(1L, "HBL-001", "SHIP01", "CONS01", "DOC01", 10, "CTN", BigDecimal.valueOf(100), BigDecimal.valueOf(1), "20251130", "20251201", "VESSEL A", "V001", "KRPUS", "USNYC");
+        ConsoledHouseBlSeaSummary s1 = new ConsoledHouseBlSeaSummary(1L, "HBL-001", "SHIP01", "CONS01", "DOC01", 10, "CTN", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1), "20251130", "20251201", "VESSEL A", "V001", "KRPUS", "USNYC");
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
         given(houseBlPort.findConsoledSeaSummariesByMasterBlId(id)).willReturn(List.of(s1));
         given(masterBlFactory.toDetailResult(any(), any())).willReturn(mock(MasterBlDetailResult.class));
@@ -113,7 +113,7 @@ class MasterBlServiceTest {
     void findMasterBlById_airMaster_loadsAirSummaries() {
         Long id = 2L;
         MasterBlAir master = MasterBlAir.create(Bound.EXP);
-        ConsoledHouseBlAirSummary a1 = new ConsoledHouseBlAirSummary(10L, "HBL-A01", "SHIP01", "CONS01", "DOC01", 3, "PKG", BigDecimal.valueOf(30), BigDecimal.valueOf(0.3), BigDecimal.valueOf(45));
+        ConsoledHouseBlAirSummary a1 = new ConsoledHouseBlAirSummary(10L, "HBL-A01", "SHIP01", "CONS01", "DOC01", 3, "PKG", null, BigDecimal.valueOf(30), BigDecimal.valueOf(0.3), BigDecimal.valueOf(45));
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
         given(houseBlPort.findConsoledAirSummariesByMasterBlId(id)).willReturn(List.of(a1));
         given(masterBlFactory.toDetailResult(any(), any())).willReturn(mock(MasterBlDetailResult.class));

@@ -92,7 +92,8 @@ public class HouseBlFactory {
                 BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
         entity.updateCargoSummary(new CargoSummary(
                 Quantity.of(cmd.pkgQty()),
-                WeightUnit.fromCodeOrDefault(cmd.pkgUnit(), WeightUnit.KGS),
+                cmd.pkgUnit(),
+                Nullables.mapOrNull(cmd.weightUnit(), WeightUnit::fromCode),
                 Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         entity.assignOperator(
                 CustomerCode.of(cmd.actualCustomerCode()), EmployeeCode.of(cmd.operatorCode()),
@@ -121,7 +122,8 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(cmd.etd(), BlDate::of),
                 Nullables.mapOrNull(cmd.eta(), BlDate::of),
                 Nullables.mapOrNull(cmd.pkgQty(), Quantity::of),
-                WeightUnit.fromCodeOrDefault(cmd.pkgUnit(), WeightUnit.KGS),
+                cmd.pkgUnit(),
+                Nullables.mapOrNull(cmd.weightUnit(), WeightUnit::fromCode),
                 Nullables.mapOrNull(cmd.grossWeightKg(), Weight::of),
                 Nullables.mapOrNull(cmd.cbm(), Volume::of),
                 Nullables.mapOrNull(cmd.actualCustomerCode(), CustomerCode::of),
@@ -149,7 +151,7 @@ public class HouseBlFactory {
                 BlDate.of(s.issueDate()), NoOfBl.fromNumber(s.noOfBl()),
                 PortCode.of(s.issuePlace()), BlDate.of(s.doDate()), PortCode.of(s.payableAt()),
                 Boolean.TRUE.equals(s.triangle()), Nullables.mapOrNull(s.loadType(), LoadType::valueOf)));
-        applySeaCargoTerms(sea, s.serviceTerm(), s.weightUnit(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
+        applySeaCargoTerms(sea, s.serviceTerm(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
         if (s.blType() != null) sea.updateBlType(BlType.valueOf(s.blType()));
         if (s.vesselNationality() != null) sea.updateVesselNationality(s.vesselNationality());
     }
@@ -174,17 +176,16 @@ public class HouseBlFactory {
                     Nullables.firstNonNull(s.triangle(),                           sea::isTriangle),
                     Nullables.mapOrElse(s.loadType(),      LoadType::valueOf,     sea::getLoadType)));
         }
-        applySeaCargoTerms(sea, s.serviceTerm(), s.weightUnit(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
+        applySeaCargoTerms(sea, s.serviceTerm(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
         if (s.blType() != null) sea.updateBlType(BlType.valueOf(s.blType()));
         if (s.vesselNationality() != null) sea.updateVesselNationality(s.vesselNationality());
     }
 
-    private void applySeaCargoTerms(HouseBlSea sea, String serviceTerm, String weightUnit,
+    private void applySeaCargoTerms(HouseBlSea sea, String serviceTerm,
                                     java.math.BigDecimal rton, String sayInfo, String noOfCtnr) {
-        if (serviceTerm != null || weightUnit != null || rton != null || sayInfo != null || noOfCtnr != null) {
+        if (serviceTerm != null || rton != null || sayInfo != null || noOfCtnr != null) {
             sea.updateSeaCargoTerms(
                     Nullables.mapOrElse(serviceTerm, ServiceTerm::fromLabel, sea::getServiceTerm),
-                    Nullables.mapOrElse(weightUnit,  WeightUnit::fromCode,   sea::getWeightUnit),
                     Nullables.mapOrElse(rton,        Rton::of,               sea::getRton),
                     Nullables.firstNonNull(sayInfo,  sea::getSayInformation),
                     Nullables.firstNonNull(noOfCtnr, sea::getNoOfContainerOrPackages));
@@ -277,7 +278,8 @@ public class HouseBlFactory {
                 VoMapper.mapOrNull(entity.getEtd(), BlDate::asString),
                 VoMapper.mapOrNull(entity.getEta(), BlDate::asString),
                 VoMapper.mapOrNull(entity.getPkgQty(), Quantity::count),
-                Nullables.mapOrNull(entity.getPkgUnit(), WeightUnit::name),
+                entity.getPkgUnit(),
+                Nullables.mapOrNull(entity.getWeightUnit(), WeightUnit::name),
                 VoMapper.mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
                 VoMapper.mapOrNull(entity.getActualCustomerCode(), CustomerCode::value),

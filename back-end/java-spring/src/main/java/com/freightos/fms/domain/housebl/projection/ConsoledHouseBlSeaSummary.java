@@ -10,6 +10,7 @@ public record ConsoledHouseBlSeaSummary(
         String docPartnerCode,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         String etd,

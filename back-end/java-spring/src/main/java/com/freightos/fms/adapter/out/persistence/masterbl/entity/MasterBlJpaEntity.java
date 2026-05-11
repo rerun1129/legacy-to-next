@@ -4,6 +4,7 @@ import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -90,6 +91,10 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     @Column(name = "pkg_unit", length = 10)
     private String pkgUnit;
 
+    @Column(name = "weight_unit", length = 5)
+    @Enumerated(EnumType.STRING)
+    private WeightUnit weightUnit;
+
     @Column(name = "gross_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal grossWeightKg;
 
@@ -126,6 +131,7 @@ public class MasterBlJpaEntity extends BaseJpaEntity {
     public void setTeamCode(String v) { this.teamCode = v; }
     public void setPkgQty(Integer v) { this.pkgQty = v; }
     public void setPkgUnit(String v) { this.pkgUnit = v; }
+    public void setWeightUnit(WeightUnit v) { this.weightUnit = v; }
     public void setGrossWeightKg(BigDecimal v) { this.grossWeightKg = v; }
     public void setCbm(BigDecimal v) { this.cbm = v; }
     public void setHsCode(String v) { this.hsCode = v; }

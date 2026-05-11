@@ -10,6 +10,7 @@ public record ConsoledHouseBlAirSummary(
         String docPartnerCode,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         BigDecimal chargeWeightKg

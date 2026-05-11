@@ -2,7 +2,6 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
@@ -110,7 +109,8 @@ public class HouseBlJpaToDomainMapper {
                 CustomerCode.of(jpa.getDocPartnerCode(), jpa.getDocPartnerAddress()),
                 null);
         domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()),
-                WeightUnit.fromCodeOrDefault(jpa.getPkgUnit(), WeightUnit.KGS),
+                jpa.getPkgUnit(),
+                jpa.getWeightUnit(),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         if (jpa.getMasterBlId() != null) domain.linkToMaster(jpa.getMasterBlId());
@@ -136,7 +136,6 @@ public class HouseBlJpaToDomainMapper {
         domain.updateVesselNationality(jpa.getVesselNationality());
         domain.updateSeaCargoTerms(
                 jpa.getServiceTerm(),
-                jpa.getWeightUnit(),
                 Rton.of(jpa.getRton()),
                 jpa.getSayInformation(),
                 jpa.getNoOfContainerOrPackages());

@@ -55,7 +55,8 @@ public abstract class HouseBl extends BaseEntity {
 
     // ── 화물 요약 (비정규화 — 빠른 리스트 조회용) ────────────────────
     private Quantity pkgQty;
-    private WeightUnit pkgUnit;
+    private String pkgUnit;           // 패키지 코드 (자유 텍스트, 추후 코드 검색용)
+    private WeightUnit weightUnit;    // 무게 단위 (KGS/LBS)
     private Weight grossWeightKg;
     private Volume cbm;
 
@@ -114,7 +115,8 @@ public abstract class HouseBl extends BaseEntity {
             BlDate etd,
             BlDate eta,
             Quantity pkgQty,
-            WeightUnit pkgUnit,
+            String pkgUnit,
+            WeightUnit weightUnit,
             Weight grossWeightKg,
             Volume cbm,
             CustomerCode actualCustomerCode,
@@ -157,11 +159,12 @@ public abstract class HouseBl extends BaseEntity {
                     Nullables.firstNonNull(fields.etd(),     () -> this.etd),
                     Nullables.firstNonNull(fields.eta(),     () -> this.eta));
         }
-        if (fields.pkgQty() != null || fields.pkgUnit() != null
+        if (fields.pkgQty() != null || fields.pkgUnit() != null || fields.weightUnit() != null
                 || fields.grossWeightKg() != null || fields.cbm() != null) {
             updateCargoSummary(new CargoSummary(
                     Nullables.firstNonNull(fields.pkgQty(),        () -> this.pkgQty),
                     Nullables.firstNonNull(fields.pkgUnit(),       () -> this.pkgUnit),
+                    Nullables.firstNonNull(fields.weightUnit(),    () -> this.weightUnit),
                     Nullables.firstNonNull(fields.grossWeightKg(), () -> this.grossWeightKg),
                     Nullables.firstNonNull(fields.cbm(),           () -> this.cbm)));
         }
@@ -262,7 +265,8 @@ public abstract class HouseBl extends BaseEntity {
 
     public void updateCargoSummary(CargoSummary cargo) {
         this.pkgQty        = cargo.packageCount();
-        this.pkgUnit       = cargo.weightUnit();
+        this.pkgUnit       = cargo.pkgUnit();
+        this.weightUnit    = cargo.weightUnit();
         this.grossWeightKg = cargo.grossWeight();
         this.cbm           = cargo.volume();
     }

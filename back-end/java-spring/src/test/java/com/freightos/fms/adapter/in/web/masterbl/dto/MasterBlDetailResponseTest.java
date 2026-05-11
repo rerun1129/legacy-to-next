@@ -15,13 +15,13 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 23개이고, 23번째는 consolidatedHouseBls이다")
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 24개이고, 24번째는 consolidatedHouseBls이다")
     void recordComponents_haveExactlyTwentyThreeFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(23);
-        assertThat(components[22].getName()).isEqualTo("consolidatedHouseBls");
-        assertThat(components[22].getType()).isEqualTo(List.class);
+        assertThat(components).hasSize(24);
+        assertThat(components[23].getName()).isEqualTo("consolidatedHouseBls");
+        assertThat(components[23].getType()).isEqualTo(List.class);
     }
 
     // ── from(MasterBlDetailResult) 매핑 검증 ─────────────────────────
@@ -31,7 +31,7 @@ class MasterBlDetailResponseTest {
     void from_withMasterBlDetailResultContainingSea_mapsAllFieldsAndConsolidatedList() {
         ConsoledHouseBlSummaryView seaSummary = new ConsoledHouseBlSummaryView(
                 1L, "HBL-001", "SHIP01", "CONS01", "DOC01",
-                10, "CTN", BigDecimal.valueOf(100), BigDecimal.valueOf(1),
+                10, "CTN", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
                 "20251130", "20251201", "VESSEL A", "V001", "KRPUS", "USNYC",
                 null
         );
@@ -41,7 +41,7 @@ class MasterBlDetailResponseTest {
                 "SHIP01", "CONS01", "NOTIFY01",
                 "KRPUS", "USNYC", "20251130", "20251201",
                 "PREPAID", "OPR01", "TEAM01",
-                10, "KGS", BigDecimal.valueOf(100), BigDecimal.valueOf(1),
+                10, "KGS", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
                 null, null,
                 List.of(seaSummary)
         );
@@ -62,7 +62,7 @@ class MasterBlDetailResponseTest {
                 null, null, null,
                 null, null, null, null,
                 "PREPAID", null, null,
-                null, null, null, null,
+                null, null, null, null, null,
                 null, null,
                 List.of()
         );

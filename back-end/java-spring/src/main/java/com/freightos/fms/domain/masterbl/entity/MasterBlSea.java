@@ -2,7 +2,6 @@ package com.freightos.fms.domain.masterbl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.vo.*;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.LoadType;
@@ -28,7 +27,6 @@ public class MasterBlSea extends MasterBl {
 
     // 수출 전용
     private BlDate issueDate;
-    private WeightUnit weightUnit;
     private String vesselNationality;
 
     private ServiceTerm serviceTerm;
@@ -59,10 +57,6 @@ public class MasterBlSea extends MasterBl {
 
     public void updateVesselNationality(String vesselNationality) {
         this.vesselNationality = vesselNationality;
-    }
-
-    public void updateWeightUnit(WeightUnit weightUnit) {
-        this.weightUnit = weightUnit;
     }
 
     public void updateServiceTerm(ServiceTerm serviceTerm) { this.serviceTerm = serviceTerm; }

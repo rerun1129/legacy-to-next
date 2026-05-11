@@ -33,6 +33,7 @@ public record CreateNonBlRequest(
         @NotBlank @Pattern(regexp = "\\d{8}") String eta,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         @NotBlank @Size(max = 20) String actualCustomerCode,

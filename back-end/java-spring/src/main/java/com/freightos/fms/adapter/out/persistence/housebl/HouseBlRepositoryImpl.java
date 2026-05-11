@@ -134,6 +134,7 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
                 h.docPartnerCode,
                 h.pkgQty,
                 h.pkgUnit,
+                h.weightUnit.stringValue(),
                 h.grossWeightKg,
                 h.cbm,
                 h.etd,
@@ -164,6 +165,7 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
                 h.docPartnerCode,
                 h.pkgQty,
                 h.pkgUnit,
+                h.weightUnit.stringValue(),
                 h.grossWeightKg,
                 h.cbm,
                 air.chargeWeightKg

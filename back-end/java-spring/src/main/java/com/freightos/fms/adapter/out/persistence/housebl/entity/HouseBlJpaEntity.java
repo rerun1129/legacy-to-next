@@ -7,6 +7,7 @@ import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.common.enums.ShipmentType;
+import com.freightos.fms.domain.common.enums.WeightUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -93,6 +94,10 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     @Column(name = "pkg_unit", length = 10)
     private String pkgUnit;
 
+    @Column(name = "weight_unit", length = 5)
+    @Enumerated(EnumType.STRING)
+    private WeightUnit weightUnit;
+
     @Column(name = "gross_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal grossWeightKg;
 
@@ -160,6 +165,7 @@ public class HouseBlJpaEntity extends BaseJpaEntity {
     public void setSettlePartnerCode(String settlePartnerCode) { this.settlePartnerCode = settlePartnerCode; }
     public void setPkgQty(Integer pkgQty) { this.pkgQty = pkgQty; }
     public void setPkgUnit(String pkgUnit) { this.pkgUnit = pkgUnit; }
+    public void setWeightUnit(WeightUnit weightUnit) { this.weightUnit = weightUnit; }
     public void setGrossWeightKg(BigDecimal grossWeightKg) { this.grossWeightKg = grossWeightKg; }
     public void setCbm(BigDecimal cbm) { this.cbm = cbm; }
     public void setIncoterms(Incoterms incoterms) { this.incoterms = incoterms; }

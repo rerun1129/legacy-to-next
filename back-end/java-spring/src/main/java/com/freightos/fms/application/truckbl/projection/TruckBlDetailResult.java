@@ -26,6 +26,7 @@ public record TruckBlDetailResult(
         String eta,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         String actualCustomerCode,

@@ -14,6 +14,7 @@ export interface HouseBlRow {
   consigneeCode: string | null;
   pkgQty: number | null;
   pkgUnit: string | null;
+  weightUnit?: string;
   createdAt: string;
 }
 
@@ -75,7 +76,6 @@ export interface SeaDetailRequest {
   triangle?: boolean;
   serviceTerm?: string;
   vesselNationality?: string;
-  weightUnit?: string;
   rton?: number;
   sayInformation?: string;
   noOfContainerOrPackages?: string;
@@ -194,6 +194,7 @@ export interface CreateHouseBlRequest {
   eta?: string;
   pkgQty?: number;
   pkgUnit?: string;
+  weightUnit?: string;
   grossWeightKg?: number;
   cbm?: number;
   actualCustomerCode?: string;

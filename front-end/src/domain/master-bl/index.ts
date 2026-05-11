@@ -19,6 +19,7 @@ export interface MasterBlRow {
 export interface MasterBlDetail extends MasterBlRow {
   freightTerm: 'PREPAID' | 'COLLECT' | null;
   pkgQty: number | null;
+  weightUnit?: string;
   grossWeightKg: number | null;
   cbm: number | null;
   consolidatedHouseBls: ConsolidatedHouseBlSummary[];
@@ -54,7 +55,6 @@ export interface SeaDetailRequest {
   voyageNo?: string;
   onboardDate?: string;
   vesselNationality?: string;
-  weightUnit?: string;
   serviceTerm?: string;
   blType?: string;
   porCode?: string;
@@ -120,6 +120,7 @@ export interface CreateMasterBlRequest {
   eta?: string;
   pkgQty?: number;
   pkgUnit?: string;
+  weightUnit?: string;
   grossWeightKg?: number;
   cbm?: number;
   hsCode?: string;

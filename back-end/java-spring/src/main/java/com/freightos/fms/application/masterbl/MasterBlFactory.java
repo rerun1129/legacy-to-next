@@ -66,7 +66,7 @@ public class MasterBlFactory {
         entity.assignParties(CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()), CustomerCode.of(cmd.notifyCode()));
         entity.updateSchedule(PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()), BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
         entity.updateFreightAndOperator(Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf), EmployeeCode.of(cmd.operatorCode()), null);
-        entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), WeightUnit.fromCodeOrDefault(cmd.pkgUnit(), WeightUnit.KGS), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
+        entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), cmd.pkgUnit(), Nullables.mapOrNull(cmd.weightUnit(), WeightUnit::fromCode), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         if (cmd.mainItemName() != null || cmd.hsCode() != null) entity.updateTradeInfo(cmd.mainItemName(), cmd.hsCode());
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
@@ -100,9 +100,8 @@ public class MasterBlFactory {
         );
         entity.updateCargoSummary(new CargoSummary(
                 Nullables.mapOrElse(cmd.pkgQty(), Quantity::of, entity::getPkgQty),
-                Nullables.mapOrElse(cmd.pkgUnit(),
-                        code -> WeightUnit.fromCodeOrDefault(code, entity.getPkgUnit()),
-                        entity::getPkgUnit),
+                Nullables.firstNonNull(cmd.pkgUnit(), entity::getPkgUnit),
+                Nullables.mapOrElse(cmd.weightUnit(), WeightUnit::fromCode, entity::getWeightUnit),
                 Nullables.mapOrElse(cmd.grossWeightKg(), Weight::of, entity::getGrossWeightKg),
                 Nullables.mapOrElse(cmd.cbm(), Volume::of, entity::getCbm)
         ));
@@ -154,7 +153,8 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(entity.getOperatorCode(), EmployeeCode::value),
                 VoMapper.mapOrNull(entity.getTeamCode(), TeamCode::value),
                 VoMapper.mapOrNull(entity.getPkgQty(), Quantity::count),
-                Nullables.mapOrNull(entity.getPkgUnit(), WeightUnit::name),
+                entity.getPkgUnit(),
+                Nullables.mapOrNull(entity.getWeightUnit(), WeightUnit::name),
                 VoMapper.mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
                 entity.getCreatedAt(),
@@ -173,7 +173,7 @@ public class MasterBlFactory {
                 VesselVoyage.of(s.vesselCode(), s.vesselName(), s.voyageNo()),
                 BlDate.of(s.onboardDate()), BlNumber.of(s.lineBkgNo()), BlDate.of(s.issueDate())
         );
-        applySeaCommon(sea, s.vesselNationality(), s.weightUnit(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
+        applySeaCommon(sea, s.vesselNationality(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
     }
 
     private void applySeaUpdate(MasterBl entity, UpdateMasterBlCommand.SeaDetailCommand s) {
@@ -186,13 +186,12 @@ public class MasterBlFactory {
                 Nullables.mapOrElse(s.lineBkgNo(),   BlNumber::of,                                             sea::getLineBkgNo),
                 Nullables.mapOrElse(s.issueDate(),   BlDate::of,                                               sea::getIssueDate)
         );
-        applySeaCommon(sea, s.vesselNationality(), s.weightUnit(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
+        applySeaCommon(sea, s.vesselNationality(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
     }
 
-    private void applySeaCommon(MasterBlSea sea, String vesselNationality, String weightUnit,
+    private void applySeaCommon(MasterBlSea sea, String vesselNationality,
                                 String serviceTerm, String blType, String porCode, String finalDestCode, BigDecimal rton) {
         if (vesselNationality != null) sea.updateVesselNationality(vesselNationality);
-        if (weightUnit != null)        sea.updateWeightUnit(WeightUnit.fromCode(weightUnit));
         if (serviceTerm != null)       sea.updateServiceTerm(ServiceTerm.fromLabel(serviceTerm));
         if (blType != null)            sea.updateBlType(BlType.valueOf(blType));
         if (porCode != null || finalDestCode != null) sea.updateRoute(PortCode.of(porCode), PortCode.of(finalDestCode));
@@ -210,12 +209,12 @@ public class MasterBlFactory {
         return switch (summary) {
             case ConsoledHouseBlSeaSummary s -> new ConsoledHouseBlSummaryView(
                     s.houseBlId(), s.hblNo(), s.shipperCode(), s.consigneeCode(), s.docPartnerCode(),
-                    s.pkgQty(), s.pkgUnit(), s.grossWeightKg(), s.cbm(),
+                    s.pkgQty(), s.pkgUnit(), s.weightUnit(), s.grossWeightKg(), s.cbm(),
                     s.etd(), s.eta(), s.vesselName(), s.voyageNo(), s.polCode(), s.podCode(), null
             );
             case ConsoledHouseBlAirSummary a -> new ConsoledHouseBlSummaryView(
                     a.houseBlId(), a.hblNo(), a.shipperCode(), a.consigneeCode(), a.docPartnerCode(),
-                    a.pkgQty(), a.pkgUnit(), a.grossWeightKg(), a.cbm(),
+                    a.pkgQty(), a.pkgUnit(), a.weightUnit(), a.grossWeightKg(), a.cbm(),
                     null, null, null, null, null, null, a.chargeWeightKg()
             );
         };

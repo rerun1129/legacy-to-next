@@ -2,7 +2,6 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.*;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
@@ -46,7 +45,8 @@ public class HouseBlDomainToJpaMapper {
         jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
         jpa.setDocPartnerAddress(mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), WeightUnit::name));
+        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setWeightUnit(domain.getWeightUnit());
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
         jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
@@ -80,7 +80,6 @@ public class HouseBlDomainToJpaMapper {
             jpa.setVesselCode(domain.getVesselVoyage().vesselCode());
         }
         jpa.setVesselNationality(domain.getVesselNationality());
-        jpa.setWeightUnit(domain.getWeightUnit());
         jpa.setRton(mapOrNull(domain.getRton(), Rton::ton));
         jpa.setSayInformation(domain.getSayInformation());
         jpa.setNoOfContainerOrPackages(domain.getNoOfContainerOrPackages());

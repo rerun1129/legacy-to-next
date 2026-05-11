@@ -105,6 +105,7 @@ export interface NonBlDetail {
   eta?: string;
   pkgQty?: number;
   pkgUnit?: string;
+  weightUnit?: string;
   grossWeightKg?: number;
   cbm?: number;
   operatorCode?: string;
@@ -188,6 +189,7 @@ export interface CreateNonBlRequest {
   eta?: string;
   pkgQty?: number;
   pkgUnit?: string;
+  weightUnit?: string;
   grossWeightKg?: number;
   cbm?: number;
   operatorCode?: string;

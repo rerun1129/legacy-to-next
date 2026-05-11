@@ -136,7 +136,6 @@ export const SEA_DETAIL_SCHEMA = z.object({
   triangle:                z.boolean().optional(),
   serviceTerm:             z.string().optional(),
   vesselNationality:       z.string().optional(),
-  weightUnit:              z.string().optional(),
   rton:                    z.string().optional(),
   sayInformation:          z.string().optional(),
   noOfContainerOrPackages: z.string().optional(),
@@ -187,6 +186,7 @@ export const HOUSE_BL_SCHEMA = z.object({
   // cargo summary
   pkgQty:          z.string().optional(),
   pkgUnit:         z.string().optional(),
+  weightUnit:      z.string().optional(),
   grossWeightKg:   z.string().optional(),
   cbm:             z.string().optional(),
   rateClass:       z.string().optional(),

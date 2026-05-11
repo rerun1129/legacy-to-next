@@ -32,6 +32,7 @@ const CONSOLIDATED_HBL_SCHEMA = z.object({
 const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   freightTerm: z.enum(['PREPAID', 'COLLECT']).nullable(),
   pkgQty: z.number().nullable(),
+  weightUnit: z.string().nullable().optional().transform((v) => v ?? ''),
   grossWeightKg: z.number().nullable(),
   cbm: z.number().nullable(),
   consolidatedHouseBls: z.array(CONSOLIDATED_HBL_SCHEMA),

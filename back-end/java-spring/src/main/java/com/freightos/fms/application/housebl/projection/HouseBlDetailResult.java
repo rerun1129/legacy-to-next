@@ -27,6 +27,7 @@ public record HouseBlDetailResult(
         String eta,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         String actualCustomerCode,

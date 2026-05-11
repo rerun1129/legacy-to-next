@@ -31,7 +31,7 @@ class HouseBlTest {
                 null, null, null, null, null, null,
                 null, null, null, null, null, null,
                 null, null, null, null, null, null,
-                null
+                null, null
         );
     }
 
@@ -57,7 +57,7 @@ class HouseBlTest {
         HouseBl.HouseBlUpdateFields fields = new HouseBl.HouseBlUpdateFields(
                 null, null, null, null, null, null,
                 PortCode.of("KRPUS"), null, null, null,
-                null, null, null, null, null, null,
+                null, null, null, null, null, null, null,
                 null, null, null, null, null, null,
                 null, null, null
         );

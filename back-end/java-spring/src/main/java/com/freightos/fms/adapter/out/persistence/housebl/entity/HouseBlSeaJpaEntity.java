@@ -1,7 +1,6 @@
 package com.freightos.fms.adapter.out.persistence.housebl.entity;
 
 import com.freightos.common.persistence.BaseJpaEntity;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
@@ -84,10 +83,6 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "vessel_nationality", length = 50)
     private String vesselNationality;
 
-    @Column(name = "weight_unit", length = 5)
-    @Enumerated(EnumType.STRING)
-    private WeightUnit weightUnit;
-
     @Column(name = "rton", columnDefinition = "NUMERIC(10,3)")
     private BigDecimal rton;
 
@@ -127,7 +122,6 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
     public void setVesselCode(String v) { this.vesselCode = v; }
     public void setVesselNationality(String v) { this.vesselNationality = v; }
-    public void setWeightUnit(WeightUnit v) { this.weightUnit = v; }
     public void setRton(BigDecimal v) { this.rton = v; }
     public void setSayInformation(String v) { this.sayInformation = v; }
     public void setNoOfContainerOrPackages(String v) { this.noOfContainerOrPackages = v; }

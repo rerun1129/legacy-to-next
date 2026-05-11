@@ -96,7 +96,7 @@ export function NonBLEntry() {
       mainItem:           detail.mainItemName ?? "",
       hsCode:             detail.hsCode ?? "",
       cargoQty:           detail.pkgQty,
-      cargoUnit:          detail.pkgUnit ?? "",
+      cargoUnit:          detail.weightUnit ?? "",
       grossWt:            detail.grossWeightKg,
       totalCbm:           detail.cbm,
       rton:               detail.rton,

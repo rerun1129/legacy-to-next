@@ -58,6 +58,7 @@ public class MasterBlAssembler {
                 req.eta(),
                 req.pkgQty(),
                 req.pkgUnit(),
+                req.weightUnit(),
                 req.grossWeightKg(),
                 req.cbm(),
                 req.hsCode(),
@@ -91,6 +92,7 @@ public class MasterBlAssembler {
                 req.eta(),
                 req.pkgQty(),
                 req.pkgUnit(),
+                req.weightUnit(),
                 req.grossWeightKg(),
                 req.cbm(),
                 req.hsCode(),
@@ -109,12 +111,12 @@ public class MasterBlAssembler {
 
     private CreateMasterBlCommand.SeaDetailCommand toSeaDetailCommand(CreateMasterBlRequest.SeaDetailRequest r) {
         if (r == null) return null;
-        return new CreateMasterBlCommand.SeaDetailCommand(r.loadType(), r.linerCode(), r.vesselCode(), r.vesselName(), r.voyageNo(), r.onboardDate(), r.vesselNationality(), r.weightUnit(), r.serviceTerm(), r.blType(), r.porCode(), r.finalDestCode(), r.rton(), r.lineBkgNo(), r.issueDate());
+        return new CreateMasterBlCommand.SeaDetailCommand(r.loadType(), r.linerCode(), r.vesselCode(), r.vesselName(), r.voyageNo(), r.onboardDate(), r.vesselNationality(), r.serviceTerm(), r.blType(), r.porCode(), r.finalDestCode(), r.rton(), r.lineBkgNo(), r.issueDate());
     }
 
     private UpdateMasterBlCommand.SeaDetailCommand toSeaDetailCommand(UpdateMasterBlRequest.SeaDetailRequest r) {
         if (r == null) return null;
-        return new UpdateMasterBlCommand.SeaDetailCommand(r.loadType(), r.linerCode(), r.vesselCode(), r.vesselName(), r.voyageNo(), r.onboardDate(), r.vesselNationality(), r.weightUnit(), r.serviceTerm(), r.blType(), r.porCode(), r.finalDestCode(), r.rton(), r.lineBkgNo(), r.issueDate());
+        return new UpdateMasterBlCommand.SeaDetailCommand(r.loadType(), r.linerCode(), r.vesselCode(), r.vesselName(), r.voyageNo(), r.onboardDate(), r.vesselNationality(), r.serviceTerm(), r.blType(), r.porCode(), r.finalDestCode(), r.rton(), r.lineBkgNo(), r.issueDate());
     }
 
     private CreateMasterBlCommand.DescCommand toDescCommand(CreateMasterBlRequest.DescRequest r) {

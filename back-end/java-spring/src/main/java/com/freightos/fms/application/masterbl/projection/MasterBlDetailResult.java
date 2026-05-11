@@ -28,6 +28,7 @@ public record MasterBlDetailResult(
         String teamCode,
         Integer pkgQty,
         String pkgUnit,
+        String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
         LocalDateTime createdAt,

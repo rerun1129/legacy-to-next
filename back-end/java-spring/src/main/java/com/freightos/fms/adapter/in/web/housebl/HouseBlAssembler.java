@@ -71,6 +71,7 @@ public class HouseBlAssembler {
                 req.eta(),
                 req.pkgQty(),
                 req.pkgUnit(),
+                req.weightUnit(),
                 req.grossWeightKg(),
                 req.cbm(),
                 req.actualCustomerCode(),
@@ -129,6 +130,7 @@ public class HouseBlAssembler {
                 req.eta(),
                 req.pkgQty(),
                 req.pkgUnit(),
+                req.weightUnit(),
                 req.grossWeightKg(),
                 req.cbm(),
                 req.actualCustomerCode(),
@@ -173,7 +175,7 @@ public class HouseBlAssembler {
                 s.loadType(), s.linerCode(), s.vesselCode(), s.vesselName(), s.voyageNo(),
                 s.onboardDate(), s.porCode(), s.finalDestCode(), s.issueDate(), s.noOfBl(),
                 s.issuePlace(), s.doDate(), s.payableAt(), s.triangle(), s.serviceTerm(),
-                s.vesselCode2(), s.vesselNationality(), s.weightUnit(), s.rton(),
+                s.vesselCode2(), s.vesselNationality(), s.rton(),
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
     }
 
@@ -226,7 +228,7 @@ public class HouseBlAssembler {
                 s.loadType(), s.linerCode(), s.vesselCode(), s.vesselName(), s.voyageNo(),
                 s.onboardDate(), s.porCode(), s.finalDestCode(), s.issueDate(), s.noOfBl(),
                 s.issuePlace(), s.doDate(), s.payableAt(), s.triangle(), s.serviceTerm(),
-                s.vesselNationality(), s.weightUnit(), s.rton(),
+                s.vesselNationality(), s.rton(),
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
     }
 

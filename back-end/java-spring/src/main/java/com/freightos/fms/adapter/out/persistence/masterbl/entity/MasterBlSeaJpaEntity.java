@@ -4,7 +4,6 @@ import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
-import com.freightos.fms.domain.common.enums.WeightUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,10 +54,6 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "vessel_nationality", length = 50)
     private String vesselNationality;
 
-    @Column(name = "weight_unit", length = 5)
-    @Enumerated(EnumType.STRING)
-    private WeightUnit weightUnit;
-
     @Column(name = "service_term", length = 20)
     @Enumerated(EnumType.STRING)
     private ServiceTerm serviceTerm;
@@ -89,7 +84,6 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     public void setLineBkgNo(String v) { this.lineBkgNo = v; }
     public void setIssueDate(String v) { this.issueDate = v; }
     public void setVesselNationality(String v) { this.vesselNationality = v; }
-    public void setWeightUnit(WeightUnit v) { this.weightUnit = v; }
     public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
     public void setBlType(BlType v) { this.blType = v; }
     public void setVesselCode(String v) { this.vesselCode = v; }

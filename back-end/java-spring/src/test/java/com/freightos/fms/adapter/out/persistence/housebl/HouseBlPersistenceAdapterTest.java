@@ -321,7 +321,7 @@ class HouseBlPersistenceAdapterTest {
         Long masterBlId = 123L;
         ConsoledHouseBlSeaSummary summary = new ConsoledHouseBlSeaSummary(
                 1L, "HBL-001", "SHIP01", "CONS01", "DOC01",
-                10, "CTN", BigDecimal.valueOf(100), BigDecimal.valueOf(1),
+                10, "CTN", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
                 "20251130", "20251201", "VESSEL A", "V001", "KRPUS", "USNYC"
         );
         List<ConsoledHouseBlSeaSummary> expected = List.of(summary);
@@ -340,7 +340,7 @@ class HouseBlPersistenceAdapterTest {
         Long masterBlId = 123L;
         ConsoledHouseBlAirSummary summary = new ConsoledHouseBlAirSummary(
                 1L, "HBL-002", "SHIP02", "CONS02", "DOC02",
-                5, "PCS", BigDecimal.valueOf(50), BigDecimal.valueOf(2),
+                5, "PCS", null, BigDecimal.valueOf(50), BigDecimal.valueOf(2),
                 BigDecimal.valueOf(55)
         );
         List<ConsoledHouseBlAirSummary> expected = List.of(summary);

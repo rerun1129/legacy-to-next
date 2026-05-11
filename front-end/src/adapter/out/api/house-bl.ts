@@ -20,6 +20,7 @@ const HOUSE_BL_ROW_SCHEMA = z.object({
   consigneeCode: z.string().nullable(),
   pkgQty: z.number().nullable(),
   pkgUnit: z.string().nullable(),
+  weightUnit: z.string().nullable().optional().transform((v) => v ?? ''),
   createdAt: z.string(),
 });
 

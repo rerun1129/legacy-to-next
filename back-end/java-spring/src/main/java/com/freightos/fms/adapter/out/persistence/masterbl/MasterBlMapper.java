@@ -76,7 +76,9 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getEtd()), BlDate.of(jpa.getEta()));
         domain.updateFreightAndOperator(jpa.getFreightTerm(), EmployeeCode.of(jpa.getOperatorCode()),
                 TeamCode.of(jpa.getTeamCode()));
-        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()), null, // weightUnit: sea 확장 테이블에서 별도 로드
+        domain.updateCargoSummary(new CargoSummary(Quantity.of(jpa.getPkgQty()),
+                jpa.getPkgUnit(),
+                jpa.getWeightUnit(),
                 Weight.of(jpa.getGrossWeightKg()), Volume.of(jpa.getCbm())));
         domain.assignSettlePartner(CustomerCode.of(jpa.getSettlePartnerCode()));
         domain.updateTradeInfo(jpa.getMainItemName(), jpa.getHsCode());
@@ -89,7 +91,6 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getOnboardDate()), BlNumber.of(jpa.getLineBkgNo()),
                 BlDate.of(jpa.getIssueDate()));
         domain.updateVesselNationality(jpa.getVesselNationality());
-        domain.updateWeightUnit(jpa.getWeightUnit());
         domain.updateServiceTerm(jpa.getServiceTerm());
         domain.updateBlType(jpa.getBlType());
         domain.updateRoute(PortCode.of(jpa.getPorCode()), PortCode.of(jpa.getFinalDestCode()));
@@ -131,7 +132,8 @@ public class MasterBlMapper {
         jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
         jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
-        jpa.setPkgUnit(mapOrNull(domain.getPkgUnit(), WeightUnit::name));
+        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setWeightUnit(domain.getWeightUnit());
         jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
         jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
         jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
@@ -152,7 +154,6 @@ public class MasterBlMapper {
         jpa.setLineBkgNo(mapOrNull(domain.getLineBkgNo(), BlNumber::value));
         jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
         jpa.setVesselNationality(domain.getVesselNationality());
-        jpa.setWeightUnit(domain.getWeightUnit());
         jpa.setServiceTerm(domain.getServiceTerm());
         jpa.setBlType(domain.getBlType());
         jpa.setPorCode(mapOrNull(domain.getPorCode(), PortCode::value));
