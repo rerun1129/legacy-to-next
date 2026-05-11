@@ -51,6 +51,7 @@ class NonBlControllerTest {
     private static final String VALID_CREATE_JSON = """
             {
               "hblNo": "NB-001",
+              "bound": "EXP",
               "workDivision": "SEA",
               "polCode": "KRPUS",
               "podCode": "USLAX",
