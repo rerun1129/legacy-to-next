@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef }                from "react";
 import { useForm, FormProvider, Controller }            from "react-hook-form";
+import { zodResolver }                                 from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient }       from "@tanstack/react-query";
 import { useRouter }                                   from "next/navigation";
 import { Save, Trash2, Package, FilePlus, Search, Copy, RefreshCw } from "lucide-react";
 import { FreightTab }     from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }      from "./tabs/main-non-bl";
 import type { NonBlFormValues }                        from "./non-bl-schema";
+import { NON_BL_SCHEMA }                               from "./non-bl-schema";
 import { createEmptyNonBlFormValues }                  from "./non-bl-defaults";
 import { buildNonBlRequest, buildNonBlUpdateRequest }   from "./non-bl-submit";
 import { useBlDraftSync }                              from "@/lib/use-bl-draft-sync";
@@ -32,6 +34,7 @@ export function NonBLEntry() {
   const clearDraft = useBLDraftStore(state => state.clearDraft);
 
   const methods = useForm<NonBlFormValues>({
+    resolver: zodResolver(NON_BL_SCHEMA),
     defaultValues: createEmptyNonBlFormValues(),
   });
 
@@ -50,7 +53,7 @@ export function NonBLEntry() {
     };
   }, [clearDraft, id]);
 
-  const { register, control } = methods;
+  const { register, control, formState: { errors } } = methods;
 
   // status: 백엔드 관리 필드 — UI 노출 없이 form에만 등록
   register("status");
@@ -297,16 +300,19 @@ export function NonBLEntry() {
             />
           </div>
         </div>
-        <div className="field">
-          <div className="field__label">Bound</div>
+        <div className="field is-required">
+          <div className="field__label is-required">Bound</div>
           <div className="field__input">
             <Controller
               name="bound"
               control={control}
               render={({ field }) => (
-                <ComboBox variant="panel" options={boundOptions} placeholder={boundPlaceholder} value={field.value} onChange={field.onChange} />
+                <ComboBox required variant="panel" options={boundOptions} placeholder={boundPlaceholder} value={field.value} onChange={field.onChange} />
               )}
             />
+            {errors.bound && (
+              <span className="field__error">{errors.bound.message}</span>
+            )}
           </div>
         </div>
         <div className="field">
