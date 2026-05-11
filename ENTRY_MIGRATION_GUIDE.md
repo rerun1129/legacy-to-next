@@ -756,6 +756,45 @@ FE가 PUT 응답을 받고 `invalidateQueries` + GET refetch 패턴이면 응답
 
 **HouseBl/MasterBl/SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행.
 
+### 6.36 Entry detail useQuery — 화면 재진입 시 자동 refetch 차단
+
+Entry 상세 `useQuery`는 옵션 미지정 시 전역 `QueryClient` 기본값(`staleTime: 30_000`, `refetchOnMount: true`)으로 동작한다. 결과: Entry → 다른 화면 → 30초 후 Entry 재진입 시 **mount 자동 refetch 발생**.
+
+§6.21(mutation 후 List 자동 invalidate 금지)과 동일한 원칙 — **사용자 명시 트리거(Search 버튼 / mutation invalidate) 외에는 백엔드 호출하지 않는다** — 의 detail 측 보완 항목.
+
+```ts
+// ❌ 기본 동작 — 30초 stale 후 mount 시 자동 refetch
+useQuery({
+  queryKey: ['non-bl', 'detail', id],
+  queryFn: () => fetchDetail(id),
+  enabled: id != null,
+});
+
+// ✅ Entry 화면 정책 — 명시 invalidate에만 재조회
+useQuery({
+  queryKey: ['non-bl', 'detail', id],
+  queryFn: () => fetchDetail(id),
+  enabled: id != null,
+  staleTime: Infinity,
+  refetchOnMount: false,
+  structuralSharing: false,
+});
+```
+
+**mutation invalidate는 정상 동작**: `invalidateQueries`는 active query를 즉시 stale 표시 + refetch 트리거하므로 `staleTime: Infinity`라도 create/update/delete 직후 detail 재조회는 그대로 작동. 차단되는 것은 **stale time 만료 + mount** 조합으로 발생하는 비명시 refetch뿐이다.
+
+**전역 설정과의 관계**: `QueryProvider`의 `refetchOnWindowFocus: false`는 이미 적용되어 있으나 `refetchOnMount`/`staleTime`은 글로벌이 30초/true다. 글로벌 변경 시 List/그리드 등 다른 화면 영향이 크므로 **화면 단위(Entry detail useQuery)에서 옵션 명시**로 한정.
+
+**그리드(List)와의 분업**:
+| 위치 | 옵션 | 근거 |
+|---|---|---|
+| `<Domain>Grid` (List) | `staleTime: Infinity`, `refetchOnMount: false` (기존 적용) | Search 버튼 명시 트리거만 |
+| `<Domain>Entry` (Detail) | `staleTime: Infinity`, `refetchOnMount: false` (본 항목) | mutation invalidate만 |
+
+사례: 0d5d492 — NonBlEntry detail useQuery에 두 옵션 추가(3 insertions).
+
+**다른 도메인 적용 권장**: Master B/L `<MasterBlEntry>`, House B/L `<HouseBlEntry>`도 동일 패턴(현재 둘 다 옵션 미지정 → 30초 후 mount 자동 refetch 발생). 별도 작업으로 일괄 정렬.
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
