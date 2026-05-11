@@ -47,7 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         String detail = ex.getBindingResult().getFieldErrors().stream()
                 .map(fe -> "[%s] %s".formatted(fe.getField(), fe.getDefaultMessage()))
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.joining("\n"));
 
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setType(URI.create(TYPE_BASE + "VALIDATION_FAILED"));
