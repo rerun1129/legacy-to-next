@@ -62,6 +62,7 @@ public class HouseBlFactory {
         applyCommonCreate(entity, cmd);
         applySeaCreate(entity, cmd.seaDetail());
         applyNonBlCreate(entity, cmd);
+        applyTruckCreate(entity, cmd.truckDetail());
         applySubCreate(entity, cmd);
         return entity;
     }
@@ -73,6 +74,7 @@ public class HouseBlFactory {
         entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
         applySeaUpdate(entity, cmd.seaDetail());
         applyNonBlUpdate(entity, cmd);
+        applyTruckUpdate(entity, cmd.truckDetail());
         applySubUpdate(entity, cmd);
     }
 
@@ -211,6 +213,34 @@ public class HouseBlFactory {
                 cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
         nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
         nonBl.updateRemark(cmd.remark());
+    }
+
+    // ── Truck 전용 퍼포먼스 패널 필드 매핑 ────────────────────────────
+
+    private void applyTruckCreate(HouseBl entity, CreateHouseBlCommand.TruckDetailCommand t) {
+        if (t == null || !(entity instanceof HouseBlTruck truck)) return;
+        truck.updateTruckFields(new HouseBlTruck.TruckFields(
+                VesselVoyage.of(null, "TRUCK", t.voyageNo()),
+                BlDate.of(t.pickupDate()), t.pickupTm(),
+                t.etdTm(), t.etaTm(),
+                Nullables.mapOrNull(t.loadType(), LoadType::valueOf),
+                Nullables.mapOrNull(t.serviceTerm(), ServiceTerm::valueOf),
+                CustomerCode.of(t.truckerCode()),
+                EmployeeCode.of(t.truckerPic()),
+                Weight.of(t.chargeWeightKg())));
+    }
+
+    private void applyTruckUpdate(HouseBl entity, UpdateHouseBlCommand.TruckDetailCommand t) {
+        if (t == null || !(entity instanceof HouseBlTruck truck)) return;
+        truck.updateTruckFields(new HouseBlTruck.TruckFields(
+                VesselVoyage.of(null, "TRUCK", t.voyageNo()),
+                BlDate.of(t.pickupDate()), t.pickupTm(),
+                t.etdTm(), t.etaTm(),
+                Nullables.mapOrNull(t.loadType(), LoadType::valueOf),
+                Nullables.mapOrNull(t.serviceTerm(), ServiceTerm::valueOf),
+                CustomerCode.of(t.truckerCode()),
+                EmployeeCode.of(t.truckerPic()),
+                Weight.of(t.chargeWeightKg())));
     }
 
     // ── Sub 엔티티 일괄 적용 (CREATE) ────────────────────────────────

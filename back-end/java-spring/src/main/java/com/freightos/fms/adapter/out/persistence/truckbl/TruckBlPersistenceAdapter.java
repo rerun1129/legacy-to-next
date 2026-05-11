@@ -8,6 +8,8 @@ import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class TruckBlPersistenceAdapter implements TruckBlSearchPort {
@@ -17,5 +19,10 @@ public class TruckBlPersistenceAdapter implements TruckBlSearchPort {
     @Override
     public PagedResult<TruckBlSummary> searchTruckBlSummaries(TruckBlFilter filter, PageRequest pageRequest) {
         return truckBlRepositoryCustom.searchTruckBlSummaries(filter, pageRequest);
+    }
+
+    @Override
+    public List<Long> findTruckBlKeysByHblNoExact(String hblNo) {
+        return truckBlRepositoryCustom.findTruckBlKeysByHblNoExact(hblNo);
     }
 }

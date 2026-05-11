@@ -102,7 +102,8 @@ public class NonBlAssembler {
                 toContainerCommands(req.containers()),
                 toScheduleLegCommands(req.scheduleLegs()),
                 toTruckOrderCommands(req.truckOrders()),
-                toAirChargeCommands(req.airCharges())
+                toAirChargeCommands(req.airCharges()),
+                null // truckDetail — NON_BL 전용 아님
         );
     }
 
@@ -160,7 +161,8 @@ public class NonBlAssembler {
                 toContainerCommandsU(req.containers()),
                 toScheduleLegCommandsU(req.scheduleLegs()),
                 toTruckOrderCommandsU(req.truckOrders()),
-                toAirChargeCommandsU(req.airCharges())
+                toAirChargeCommandsU(req.airCharges()),
+                null // truckDetail — NON_BL 전용 아님
         );
     }
 

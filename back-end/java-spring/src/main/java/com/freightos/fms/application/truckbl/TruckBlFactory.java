@@ -1,5 +1,7 @@
 package com.freightos.fms.application.truckbl;
 
+import com.freightos.fms.application.housebl.HouseBlFactory;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailResult;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.LoadType;
@@ -15,17 +17,33 @@ import com.freightos.fms.domain.common.vo.TeamCode;
 import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.Weight;
+import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
 import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
 
 /**
- * HouseBlTruck → TruckBlDetailResult 변환 팩토리.
- * VO 접근자 패턴은 HouseBlFactory.toDetailResult와 동일하게 유지한다.
+ * Truck B/L 도메인 변환 팩토리.
+ * CREATE: HouseBlFactory.toEntity()에 위임 (jobDiv="TRUCK" 고정).
+ * READ:   HouseBlTruck → TruckBlDetailResult 변환.
  */
 @Component
 public class TruckBlFactory {
+
+    private final HouseBlFactory houseBlFactory;
+
+    public TruckBlFactory(HouseBlFactory houseBlFactory) {
+        this.houseBlFactory = houseBlFactory;
+    }
+
+    /**
+     * CreateHouseBlCommand → HouseBl(HouseBlTruck) 생성.
+     * jobDiv는 컨트롤러/어셈블러에서 "TRUCK"으로 고정하여 전달한다.
+     */
+    public HouseBl toEntity(CreateHouseBlCommand command) {
+        return houseBlFactory.toEntity(command);
+    }
 
     public TruckBlDetailResult toDetailResult(HouseBlTruck truck) {
         return new TruckBlDetailResult(

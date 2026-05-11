@@ -1,19 +1,20 @@
-package com.freightos.fms.adapter.out.persistence.nonbl;
+package com.freightos.fms.adapter.out.persistence.truckbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlCargoMapper;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDocMapper;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlDomainToJpaMapper;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlJpaToDomainMapper;
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlRepository;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlTruckDescRepository;
+import com.freightos.fms.adapter.out.persistence.housebl.HouseBlTruckRepository;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
-import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
-import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckJpaEntity;
 import com.freightos.fms.application.housebl.HouseBlFactory;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.entity.HouseBlContainer;
-import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,24 +29,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 
 /**
- * NonBlUpdatePersistenceAdapter update 흐름 단위 테스트.
+ * TruckBlUpdatePersistenceAdapter update 흐름 단위 테스트.
  * parent fetch → jobDiv 검증 → ext fetch → domain 변환 → factory 적용 → JPA dirty-check 반영 순서를 검증한다.
  */
 @ExtendWith(MockitoExtension.class)
-class NonBlPersistenceAdapterTest {
+class TruckBlUpdatePersistenceAdapterTest {
 
     @Mock private HouseBlRepository houseBlRepository;
-    @Mock private HouseBlNonBlRepository houseBlNonBlRepository;
+    @Mock private HouseBlTruckRepository houseBlTruckRepository;
+    @Mock private HouseBlTruckDescRepository houseBlTruckDescRepository;
     @Mock private HouseBlJpaToDomainMapper jpaToDomainMapper;
     @Mock private HouseBlDomainToJpaMapper domainToJpaMapper;
     @Mock private HouseBlCargoMapper houseBlCargoMapper;
+    @Mock private HouseBlDocMapper houseBlDocMapper;
     @Mock private HouseBlFactory houseBlFactory;
 
     @InjectMocks
-    private NonBlUpdatePersistenceAdapter adapter;
+    private TruckBlUpdatePersistenceAdapter adapter;
 
     private static UpdateHouseBlCommand emptyCommand() {
         // 54 파라미터 — 모두 null (PATCH 의미론, 마지막 truckDetail 포함)
@@ -61,27 +62,28 @@ class NonBlPersistenceAdapterTest {
     }
 
     @Test
-    @DisplayName("update: 정상 NON_BL — factory·applyCommonFields·applyNonBlFields·mergeContainers·mergeDims 호출 검증")
-    void update_existingNonBl_callsFactoryAndAppliesAttachedMapping() {
+    @DisplayName("update: 정상 TRUCK — factory·applyCommonFields·applyTruckFields·syncTruckOrders 호출 검증")
+    void update_existingTruck_callsFactoryAndAppliesAttachedMapping() {
         Long id = 10L;
         HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
         parentJpa.setHouseBlId(id);
-        parentJpa.setJobDiv(JobDiv.NON_BL);
-        HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
-        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        parentJpa.setJobDiv(JobDiv.TRUCK);
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
+        HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
         domain.assignIdentity(id, null, null, null, null);
 
         given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
-        given(houseBlNonBlRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(nonBlJpa));
-        given(jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa)).willReturn(domain);
+        given(houseBlTruckRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(truckJpa));
+        given(houseBlTruckDescRepository.findByTruck_HouseBlTruckId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toTruckDomain(parentJpa, truckJpa, null)).willReturn(domain);
 
         UpdateHouseBlCommand command = emptyCommand();
         adapter.update(id, command);
 
-        then(jpaToDomainMapper).should().toNonBlDomain(parentJpa, nonBlJpa);
+        then(jpaToDomainMapper).should().toTruckDomain(parentJpa, truckJpa, null);
         then(houseBlFactory).should().applyToEntity(command, domain);
-        then(domainToJpaMapper).should().applyNonBlCommonFields(domain, parentJpa);
-        then(domainToJpaMapper).should().applyNonBlFields(domain, nonBlJpa);
+        then(domainToJpaMapper).should().applyCommonFields(domain, parentJpa);
+        then(domainToJpaMapper).should().applyTruckFields(domain, truckJpa);
     }
 
     @Test
@@ -93,12 +95,12 @@ class NonBlPersistenceAdapterTest {
         assertThatThrownBy(() -> adapter.update(id, emptyCommand()))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        then(houseBlNonBlRepository).should(never()).findByHouseBlHouseBlId(any());
+        then(houseBlTruckRepository).should(never()).findByHouseBlHouseBlId(any());
         then(houseBlFactory).should(never()).applyToEntity(any(), any());
     }
 
     @Test
-    @DisplayName("update: parent jobDiv가 NON_BL이 아니면 ResourceNotFoundException, ext fetch 미호출")
+    @DisplayName("update: parent jobDiv가 TRUCK이 아니면 ResourceNotFoundException, ext fetch 미호출")
     void update_wrongJobDiv_throwsResourceNotFoundException() {
         Long id = 20L;
         HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
@@ -109,75 +111,48 @@ class NonBlPersistenceAdapterTest {
         assertThatThrownBy(() -> adapter.update(id, emptyCommand()))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        then(houseBlNonBlRepository).should(never()).findByHouseBlHouseBlId(any());
+        then(houseBlTruckRepository).should(never()).findByHouseBlHouseBlId(any());
         then(houseBlFactory).should(never()).applyToEntity(any(), any());
     }
 
     @Test
-    @DisplayName("update: ext(house_bl_non_bl)가 없으면 ResourceNotFoundException(데이터 일관성 깨진 상태 보호)")
+    @DisplayName("update: ext(house_bl_truck)가 없으면 ResourceNotFoundException(데이터 일관성 깨진 상태 보호)")
     void update_extNotFound_throwsResourceNotFoundException() {
         Long id = 30L;
         HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
         parentJpa.setHouseBlId(id);
-        parentJpa.setJobDiv(JobDiv.NON_BL);
+        parentJpa.setJobDiv(JobDiv.TRUCK);
         given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
-        given(houseBlNonBlRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.empty());
+        given(houseBlTruckRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adapter.update(id, emptyCommand()))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        then(jpaToDomainMapper).should(never()).toNonBlDomain(any(), any());
+        then(jpaToDomainMapper).should(never()).toTruckDomain(any(), any(), any());
         then(houseBlFactory).should(never()).applyToEntity(any(), any());
     }
 
     @Test
-    @DisplayName("update: containers·dims가 없는 경우 mergeContainers·mergeDims에 빈 리스트 전달")
-    void update_emptyCollections_mergesEmptyLists() {
+    @DisplayName("update: truckOrders·dims가 없는 경우 syncTruckOrders·syncDims에 빈 리스트 전달")
+    void update_emptyCollections_syncsEmptyLists() {
         Long id = 40L;
         HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
         parentJpa.setHouseBlId(id);
-        parentJpa.setJobDiv(JobDiv.NON_BL);
-        HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
-        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
+        parentJpa.setJobDiv(JobDiv.TRUCK);
+        HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
+        HouseBlTruck domain = HouseBlTruck.create(Bound.EXP);
         domain.assignIdentity(id, null, null, null, null);
-        // domain.getContainers()·domain.getDims()는 빈 리스트 반환
 
         given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
-        given(houseBlNonBlRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(nonBlJpa));
-        given(jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa)).willReturn(domain);
+        given(houseBlTruckRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(truckJpa));
+        given(houseBlTruckDescRepository.findByTruck_HouseBlTruckId(any())).willReturn(Optional.empty());
+        given(jpaToDomainMapper.toTruckDomain(parentJpa, truckJpa, null)).willReturn(domain);
 
         adapter.update(id, emptyCommand());
 
-        // 빈 리스트로 mergeContainers·mergeDims가 호출 — 도메인 컬렉션에서 houseBlCargoMapper 미호출
-        then(houseBlCargoMapper).should(never()).toNonBlContainerJpa(any());
-        then(houseBlCargoMapper).should(never()).toNonBlDimJpa(any());
-        then(domainToJpaMapper).should().applyNonBlCommonFields(domain, parentJpa);
-        then(domainToJpaMapper).should().applyNonBlFields(domain, nonBlJpa);
-    }
-
-    @Test
-    @DisplayName("update: containers 있는 경우 toNonBlContainerJpa 호출 수 일치")
-    void update_withContainers_callsCargoMapperForEachContainer() {
-        Long id = 50L;
-        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
-        parentJpa.setHouseBlId(id);
-        parentJpa.setJobDiv(JobDiv.NON_BL);
-        HouseBlNonBlJpaEntity nonBlJpa = new HouseBlNonBlJpaEntity();
-        HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
-        domain.assignIdentity(id, null, null, null, null);
-        // 컨테이너 2개 추가
-        domain.initContainers(List.of(
-                HouseBlContainer.of(domain, null, null, 20),
-                HouseBlContainer.of(domain, null, null, 20)
-        ));
-
-        given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
-        given(houseBlNonBlRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(nonBlJpa));
-        given(jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa)).willReturn(domain);
-        given(houseBlCargoMapper.toNonBlContainerJpa(any())).willReturn(new HouseBlNonBlContainerJpaEntity());
-
-        adapter.update(id, emptyCommand());
-
-        then(houseBlCargoMapper).should(times(2)).toNonBlContainerJpa(any());
+        // 빈 컬렉션으로 처리 — houseBlCargoMapper·houseBlDocMapper 미호출
+        then(houseBlCargoMapper).should(never()).toTruckDimJpa(any());
+        then(domainToJpaMapper).should().applyCommonFields(domain, parentJpa);
+        then(domainToJpaMapper).should().applyTruckFields(domain, truckJpa);
     }
 }

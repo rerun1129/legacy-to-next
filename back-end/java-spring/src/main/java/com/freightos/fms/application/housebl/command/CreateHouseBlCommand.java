@@ -67,7 +67,10 @@ public record CreateHouseBlCommand(
         List<ContainerCommand> containers,
         List<ScheduleLegCommand> scheduleLegs,
         List<TruckOrderCommand> truckOrders,
-        List<AirChargeCommand> airCharges
+        List<AirChargeCommand> airCharges,
+
+        // Truck 전용 퍼포먼스 패널 필드 (non-TRUCK 모드는 null 전달)
+        TruckDetailCommand truckDetail
 ) {
 
     public record SeaDetailCommand(
@@ -168,5 +171,19 @@ public record CreateHouseBlCommand(
             String rateClass,
             BigDecimal chargeWeightKg,
             BigDecimal rate
+    ) {}
+
+    /** Truck B/L 퍼포먼스 패널 전용 필드. non-TRUCK 모드는 null. */
+    public record TruckDetailCommand(
+            String truckerCode,
+            String truckerPic,
+            BigDecimal chargeWeightKg,
+            String pickupDate,
+            String pickupTm,
+            String etdTm,
+            String etaTm,
+            String loadType,
+            String serviceTerm,
+            String voyageNo
     ) {}
 }

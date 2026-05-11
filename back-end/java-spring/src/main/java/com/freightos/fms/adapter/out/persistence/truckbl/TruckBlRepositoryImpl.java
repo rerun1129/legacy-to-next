@@ -130,6 +130,18 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
         return col.eq(code);
     }
 
+    @Override
+    public List<Long> findTruckBlKeysByHblNoExact(String hblNo) {
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        return queryFactory
+                .select(h.houseBlId)
+                .from(h)
+                .where(h.jobDiv.eq(JobDiv.TRUCK).and(h.hblNo.eq(hblNo)))
+                .orderBy(h.createdAt.desc())
+                .limit(2)
+                .fetch();
+    }
+
     private static BooleanExpression eqPort(
             QHouseBlJpaEntity h, String code, PortKind kind) {
         if (!StringUtils.hasText(code)) return null;

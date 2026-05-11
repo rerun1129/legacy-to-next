@@ -104,7 +104,8 @@ public class HouseBlAssembler {
                 toContainerCommands(req.containers()),
                 toScheduleLegCommands(req.scheduleLegs()),
                 toTruckOrderCommands(req.truckOrders()),
-                toAirChargeCommands(req.airCharges())
+                toAirChargeCommands(req.airCharges()),
+                null // truckDetail — HouseBlController는 TRUCK 전용 아님
         );
     }
 
@@ -163,7 +164,8 @@ public class HouseBlAssembler {
                 toContainerCommandsU(req.containers()),
                 toScheduleLegCommandsU(req.scheduleLegs()),
                 toTruckOrderCommandsU(req.truckOrders()),
-                toAirChargeCommandsU(req.airCharges())
+                toAirChargeCommandsU(req.airCharges()),
+                null // truckDetail — HouseBlController는 TRUCK 전용 아님
         );
     }
 
