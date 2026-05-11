@@ -7,7 +7,6 @@ import com.freightos.fms.adapter.out.persistence.housebl.HouseBlJpaToDomainMappe
 import com.freightos.fms.adapter.out.persistence.housebl.HouseBlRepository;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlContainerJpaEntity;
-import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.HouseBlNonBlJpaEntity;
 import com.freightos.fms.application.housebl.HouseBlFactory;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
@@ -75,8 +74,6 @@ class NonBlPersistenceAdapterTest {
         given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
         given(houseBlNonBlRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(nonBlJpa));
         given(jpaToDomainMapper.toNonBlDomain(parentJpa, nonBlJpa)).willReturn(domain);
-        given(houseBlCargoMapper.toNonBlContainerJpa(any())).willReturn(new HouseBlNonBlContainerJpaEntity());
-        given(houseBlCargoMapper.toNonBlDimJpa(any())).willReturn(new HouseBlNonBlDimJpaEntity());
 
         UpdateHouseBlCommand command = emptyCommand();
         adapter.update(id, command);
