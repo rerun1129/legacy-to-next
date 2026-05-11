@@ -89,7 +89,12 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         // 부모 엔티티 save/update
         HouseBlJpaEntity parentJpa;
         if (domain.getId() != null) {
-            parentJpa = houseBlRepository.findById(domain.getId()).orElseThrow(() -> new ResourceNotFoundException("HouseBl", domain.getId()));
+            // applyCommonFields는 setter만 사용하므로 프록시 초기화 없이 dirty-checking으로 UPDATE 가능.
+            // 존재하지 않는 id는 ResourceNotFoundException으로 선행 차단.
+            if (!houseBlRepository.existsById(domain.getId())) {
+                throw new ResourceNotFoundException("HouseBl", domain.getId());
+            }
+            parentJpa = houseBlRepository.getReferenceById(domain.getId());
         } else {
             parentJpa = new HouseBlJpaEntity();
         }
