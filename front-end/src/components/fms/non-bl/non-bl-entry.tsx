@@ -136,23 +136,22 @@ export function NonBLEntry() {
     });
   }, [detail, methods]);
 
-  const mutation = useMutation({
-    mutationFn: (data: NonBlFormValues) => {
-      return isEdit
-        ? nonBlPort.update(id!, buildNonBlUpdateRequest(data))
-        : nonBlPort.create(buildNonBlRequest(data));
-    },
+  const createMutation = useMutation<{ id: number }, Error, NonBlFormValues>({
+    mutationFn: (data) => nonBlPort.create(buildNonBlRequest(data)),
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
-      if (!isEdit) {
-        // create 분기: saved는 반드시 { id: number }
-        useEntryFocusStore.getState().setFocus("nonBl", (saved as { id: number }).id);
-        detailLoadedRef.current = false;
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
-        // update는 void 반환 — saved 미사용. refetch 된 detail 로 form.reset 재발동
-        detailLoadedRef.current = false;
-      }
+      useEntryFocusStore.getState().setFocus("nonBl", saved.id);
+      detailLoadedRef.current = false;
+    },
+  });
+
+  const updateMutation = useMutation<void, Error, NonBlFormValues>({
+    mutationFn: (data) => nonBlPort.update(id!, buildNonBlUpdateRequest(data)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
+      // refetch 된 detail 로 form.reset 재발동
+      detailLoadedRef.current = false;
     },
   });
 
@@ -210,11 +209,16 @@ export function NonBLEntry() {
   }
 
   function handleSubmit(data: NonBlFormValues) {
-    mutation.mutate(data);
+    if (isEdit) {
+      updateMutation.mutate(data);
+    } else {
+      createMutation.mutate(data);
+    }
   }
 
-  const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
-  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+  const isSavePending = createMutation.isPending || updateMutation.isPending;
+  const isLoading = isDetailFetching || isSavePending || deleteMutation.isPending;
+  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : isSavePending ? "저장 중..." : "조회 중...";
 
   return (
     <FormProvider {...methods}>
@@ -249,10 +253,10 @@ export function NonBLEntry() {
           <button
             type="button"
             className="btn btn--sm btn--transaction"
-            disabled={mutation.isPending}
+            disabled={isSavePending}
             onClick={methods.handleSubmit(handleSubmit)}
           >
-            <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
+            <Save size={12} />{isSavePending ? "Saving..." : "Save"}
           </button>
           <button
             type="button"
