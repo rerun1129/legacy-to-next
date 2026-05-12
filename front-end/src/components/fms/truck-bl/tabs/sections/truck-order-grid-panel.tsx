@@ -56,8 +56,8 @@ export function TruckOrderGridPanel() {
         <span className="panel__title">Truck Information</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--danger" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList
@@ -67,6 +67,7 @@ export function TruckOrderGridPanel() {
         onRowClick={(row) => setSelectedKey((row as unknown as { id: string }).id)}
         rowClassName={(row) => (row as unknown as { id: string }).id === selectedKey ? "is-selected" : undefined}
         style={{ flex: 1, minHeight: 0 }}
+        onClearRow={() => setSelectedKey(null)}
       />
     </div>
   );
