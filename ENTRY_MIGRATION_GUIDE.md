@@ -774,7 +774,11 @@ FE가 PUT 응답을 받고 `invalidateQueries` + GET refetch 패턴이면 응답
 
 사례: 3037a44(메인 5) + b0a92ad·8b70969(테스트 fix). 613 PASS 회귀 없음. NonBl update SELECT 6→4.
 
-**HouseBl/MasterBl/SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행.
+**Truck B/L 적용 완료 (2026-05-12, 8c54dd9·d5bbc99·61f5f87)** — `house_bl_truck_dim` / `house_bl_truck_order` 가 매 update마다 신규 INSERT N건 + 기존 DELETE N건을 발사하던 `syncDims`/`syncTruckOrders`(clear+addAll) 패턴을 `mergeDims`/`mergeTruckOrders`(id 기반 매칭)로 전환. Truck 전용 sub-set 매퍼(`applyTruckCommonFields`/`applyTruckBlFields`) 동반 신설로 form 미보유 필드 NULL 덮어쓰기 차단. UpdateHouseBlCommand.TruckOrderCommand 에 `Long id` 추가 + TruckBlAssembler `toTruckOrderCommandsU` 가 row id 전달. CREATE 경로 호출처 호환 위해 기존 `syncDims`/`syncTruckOrders` 메서드는 유지.
+
+**회귀 회고 (2026-05-12, ed24829 → 8c54dd9)** — Truck B/L Dimension 그리드 신규 도입(commit 6a31ae6) 시 본 §6.35 + §6.28 + §6.37 reference가 누락된 채 NonBl 이전의 sync(clear+addAll) 패턴을 그대로 차용해 매 update마다 자식 그리드 전체 교체 + 부모 NULL 덮어쓰기가 발사됨. **신규 도메인에 child grid를 추가할 때는 본 §6.35(mergeXxx) + §6.28(자식 row id PUT 페이로드 포함) + §6.37(sub-set Request DTO/매퍼) 세 가이드를 동반 적용 의무.** Coder 작업 단위 지시에 항상 본 절을 reference 로 포함할 것.
+
+**HouseBl Sea/Air · MasterBl · SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행.
 
 ### 6.36 Entry detail useQuery — 화면 재진입 시 자동 refetch 차단
 
