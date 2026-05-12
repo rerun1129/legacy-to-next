@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef }           from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm }                                from "react-hook-form";
 import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
@@ -71,6 +71,10 @@ export function useNonBlEntry() {
     methods.reset(mapNonBlDetailToFormValues(detail));
   }, [detail, methods]);
 
+  const resetDetailLoaded = useCallback(() => {
+    detailLoadedRef.current = false;
+  }, []);
+
   const { handleSearch } = useSearchNonBl({ methods, id: id ?? null, detailLoadedRef });
 
   const { deleteMutation, isSavePending, handleSubmit, handleDelete } = useNonBlEntryMutations({
@@ -113,7 +117,7 @@ export function useNonBlEntry() {
     setTab,
     isChangeBlNoModalOpen,
     setIsChangeBlNoModalOpen,
-    detailLoadedRef,
+    resetDetailLoaded,
     handleSubmit,
     handleDelete,
     handleSearch,

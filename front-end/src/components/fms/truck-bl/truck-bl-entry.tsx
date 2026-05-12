@@ -132,7 +132,7 @@ export function TruckBLEntry() {
         currentHblNo={entry.detail?.hblNo}
         isOpen={entry.isChangeBlNoModalOpen}
         onClose={() => entry.setIsChangeBlNoModalOpen(false)}
-        onChanged={() => { entry.detailLoadedRef.current = false; }}
+        onChanged={entry.resetDetailLoaded}
       />
     )}
     </FormProvider>

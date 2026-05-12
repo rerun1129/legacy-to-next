@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef }           from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm }                                from "react-hook-form";
 import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
@@ -125,6 +125,10 @@ export function useTruckBlEntry() {
     clearDraft,
   });
 
+  const resetDetailLoaded = useCallback(() => {
+    detailLoadedRef.current = false;
+  }, []);
+
   const { handleSearch } = useSearchTruckBl({ form, id: id ?? null, detailLoadedRef });
 
   function handleResetEntry() {
@@ -160,7 +164,7 @@ export function useTruckBlEntry() {
     setTab,
     isChangeBlNoModalOpen,
     setIsChangeBlNoModalOpen,
-    detailLoadedRef,
+    resetDetailLoaded,
     handleSubmit,
     handleDelete,
     handleSearch,
