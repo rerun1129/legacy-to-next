@@ -778,6 +778,8 @@ FE가 PUT 응답을 받고 `invalidateQueries` + GET refetch 패턴이면 응답
 
 **회귀 회고 (2026-05-12, ed24829 → 8c54dd9)** — Truck B/L Dimension 그리드 신규 도입(commit 6a31ae6) 시 본 §6.35 + §6.28 + §6.37 reference가 누락된 채 NonBl 이전의 sync(clear+addAll) 패턴을 그대로 차용해 매 update마다 자식 그리드 전체 교체 + 부모 NULL 덮어쓰기가 발사됨. **신규 도메인에 child grid를 추가할 때는 본 §6.35(mergeXxx) + §6.28(자식 row id PUT 페이로드 포함) + §6.37(sub-set Request DTO/매퍼) 세 가이드를 동반 적용 의무.** Coder 작업 단위 지시에 항상 본 절을 reference 로 포함할 것.
 
+**후속 정규화 (2026-05-12 후속)** — sub-set 매퍼 도입(8c54dd9) + address 4필드 보강(41205f8) 이후에도 무수정 조회→저장이 여전히 `house_bl` + `house_bl_truck` 두 테이블에 UPDATE를 발사하는 케이스 발견. 원인은 **디폴트 주입 비대칭** 두 군데. (1) FE `use-truck-bl-entry.ts`의 `dimensionDivisor: detail.volumeDivisor ?? "CM6000"` — DB NULL → form "CM6000" 정규화 → payload "CM6000" → entity dirty. (2) BE `applyTruckBlFields`의 `setVesselName(vv != null ? vv.vesselName() : "TRUCK")` — form 미보유인데 vv null일 때 "TRUCK" 강제 set → DB NULL → "TRUCK" dirty. 해결: FE는 `?? ""`로 디폴트 주입 제거(정규화 정렬), BE는 vv null이면 vesselName/voyageNo setter skip(sub-set). 신규 INSERT 경로(`applyTruckFields`)는 그대로 "TRUCK" 고정값 유지 — Update 경로 전용 분기.
+
 **HouseBl Sea/Air · MasterBl · SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행.
 
 ### 6.36 Entry detail useQuery — 화면 재진입 시 자동 refetch 차단

@@ -207,12 +207,17 @@ public class HouseBlDomainToJpaMapper {
     /**
      * Truck 전용 확장 필드 적용 (Update 경로 전용).
      * Truck form 미보유 필드(pickupTm)는 SET하지 않아 DB 기존 값을 보호한다.
-     * vesselName은 "TRUCK" 고정값이므로 폼에 노출하지 않으나 항상 SET하여 일관성 유지.
+     * vesselName/voyageNo는 form 미보유 필드이므로 vv null이면 setter skip —
+     * DB 기존 값(NULL 또는 'TRUCK')을 보호하여 무수정 조회→저장 시 dirty 미발생 (§6.37 sub-set).
      */
     public void applyTruckBlFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
         VesselVoyage vv = domain.getVesselVoyage();
-        jpa.setVesselName(vv != null ? vv.vesselName() : "TRUCK");
-        jpa.setVoyageNo(Nullables.mapOrNull(vv, VesselVoyage::voyageNo));
+        // form 미보유(vesselName/voyageNo) — vv null이면 setter skip.
+        // DB 기존 값(NULL 또는 'TRUCK')을 보호하여 무수정 조회→저장 시 dirty 미발생 (§6.37 sub-set).
+        if (vv != null) {
+            jpa.setVesselName(vv.vesselName());
+            jpa.setVoyageNo(vv.voyageNo());
+        }
         jpa.setPickupDate(mapOrNull(domain.getPickupDate(), BlDate::asString));
         jpa.setEtdTm(domain.getEtdTm());
         jpa.setEtaTm(domain.getEtaTm());
