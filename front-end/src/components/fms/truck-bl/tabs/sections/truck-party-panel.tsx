@@ -26,28 +26,28 @@ const TRUCK_PARTIES: PartyDef[] = [
 function TruckPartyBlock({ party }: { party: PartyDef }) {
   const { register, control, setValue } = useFormContext<TruckBlFormValues>();
   return (
-    <div className="party-block">
-      <div className="party-block__head">
-        <span style={{ fontSize: 11, color: "var(--ink)", minWidth: 90, flexShrink: 0 }}>{party.role}</span>
-        <CodeBox
-          kind="party-cn"
-          label={party.role}
-          codeProps={{ ...register(party.codeKey) }}
-          nameProps={{ ...register(party.nameKey) }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-        <div className="party-block__head-actions">
-          {party.btn && (
-            <button type="button" className="party-block__head-btn">{party.btn}</button>
-          )}
-          <button
-            type="button"
-            className="party-block__head-btn"
-            onClick={() => setValue(party.codeKey, "")}
-          >
-            Clear
-          </button>
-        </div>
+    <>
+      {/* CodeBox party-cn이 자체적으로 .party-block + .party-block__head + 라벨 span을 렌더 */}
+      <CodeBox
+        kind="party-cn"
+        variant="panel"
+        label={party.role}
+        codeProps={{ ...register(party.codeKey) }}
+        nameProps={{ ...register(party.nameKey) }}
+        onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      />
+      {/* 액션 버튼 행 — head 바깥 별도 row */}
+      <div className="party-block__head-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginTop: 2 }}>
+        {party.btn && (
+          <button type="button" className="party-block__head-btn">{party.btn}</button>
+        )}
+        <button
+          type="button"
+          className="party-block__head-btn"
+          onClick={() => setValue(party.codeKey, "")}
+        >
+          Clear
+        </button>
       </div>
       <Controller
         control={control}
@@ -63,7 +63,7 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
           />
         )}
       />
-    </div>
+    </>
   );
 }
 

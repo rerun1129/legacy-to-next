@@ -2,7 +2,7 @@
 
 import { useFormContext, Controller } from "react-hook-form";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
-import { ComboBox } from "@/components/shared/inputs";
+import { ComboBox, TextArea } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
@@ -62,13 +62,7 @@ export function TruckDescriptionPanel() {
           )}
         />
         <div style={{ marginTop: 8, flexShrink: 0 }}>
-          <label className="field-label" style={{ display: "block", marginBottom: 2 }}>Remark</label>
-          <textarea
-            {...register("remark")}
-            className="input input--panel"
-            rows={3}
-            style={{ width: "100%", resize: "vertical" }}
-          />
+          <TextArea variant="panel" {...register("remark")} rows={3} style={{ width: "100%", resize: "vertical" }} />
         </div>
       </div>
     </div>
