@@ -1,11 +1,11 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
-import { TextArea } from "@/components/shared/inputs";
+import { useFormContext, Controller } from "react-hook-form";
+import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
 export function TruckRemarkPanel() {
-  const { register } = useFormContext<TruckBlFormValues>();
+  const { control } = useFormContext<TruckBlFormValues>();
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
@@ -13,10 +13,18 @@ export function TruckRemarkPanel() {
         <span className="panel__title">Remark</span>
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        <TextArea
-          variant="panel"
-          {...register("remark")}
-          style={{ flex: 1, minHeight: 0, resize: "none", width: "100%" }}
+        <Controller
+          control={control}
+          name="remark"
+          render={({ field }) => (
+            <LineNumberTextarea
+              name={field.name}
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              style={{ flex: 1, minHeight: 0 }}
+            />
+          )}
         />
       </div>
     </div>
