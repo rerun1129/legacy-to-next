@@ -49,6 +49,7 @@ public record CreateTruckBlRequest(
         String voyageNo,
 
         // Marks/Description 패널
+        String remark,
         DescRequest desc,
 
         // Truck Order 그리드
@@ -60,8 +61,7 @@ public record CreateTruckBlRequest(
             String marks,
             String description,
             String descClause1,
-            String descClause2,
-            String remark
+            String descClause2
     ) {}
 
     /** Truck Order 그리드 행 (CREATE — id 없음). */

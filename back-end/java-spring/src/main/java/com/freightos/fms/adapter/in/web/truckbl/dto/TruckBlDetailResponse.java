@@ -48,6 +48,9 @@ public record TruckBlDetailResponse(
         String serviceTerm,
         String voyageNo,
 
+        // Marks/Description 패널
+        String remark,
+
         // 자식 데이터
         List<TruckOrderView> truckOrders,
         DescView desc
@@ -63,7 +66,7 @@ public record TruckBlDetailResponse(
 
     public record DescView(
             String marks, String description,
-            String descClause1, String descClause2, String remark
+            String descClause1, String descClause2
     ) {}
 
     public static TruckBlDetailResponse from(TruckBlDetailResult result) {
@@ -79,8 +82,7 @@ public record TruckBlDetailResponse(
         DescView descView = result.desc() == null ? null
                 : new DescView(
                         result.desc().marks(), result.desc().description(),
-                        result.desc().descClause1(), result.desc().descClause2(),
-                        result.desc().remark());
+                        result.desc().descClause1(), result.desc().descClause2());
         return new TruckBlDetailResponse(
                 result.id(),
                 result.hblNo(),
@@ -119,6 +121,7 @@ public record TruckBlDetailResponse(
                 result.loadType(),
                 result.serviceTerm(),
                 result.voyageNo(),
+                result.remark(),
                 truckOrderViews,
                 descView
         );

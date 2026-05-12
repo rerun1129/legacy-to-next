@@ -31,6 +31,7 @@ public record CreateMasterBlRequest(
         String mainItemName,
         @Size(max = 20) String settlePartnerCode,
         String operatorCode,
+        String remark,
 
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
@@ -65,8 +66,7 @@ public record CreateMasterBlRequest(
             String marks,
             String description,
             String descClause1,
-            String descClause2,
-            String remark
+            String descClause2
     ) {}
 
     /** 포장 치수 명세 1행. */

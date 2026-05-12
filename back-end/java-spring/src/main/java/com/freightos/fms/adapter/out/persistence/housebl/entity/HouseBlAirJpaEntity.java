@@ -98,6 +98,9 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private CargoType cargoType;
 
+    @Column(name = "remark", length = 1000)
+    private String remark;
+
     // AIR 전용 치수 명세. house_bl_air_id FK로 소유.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -136,6 +139,7 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setOriginOfGoods(String v) { this.originOfGoods = v; }
     public void setCargoType(CargoType v) { this.cargoType = v; }
+    public void setRemark(String v) { this.remark = v; }
 
     public List<HouseBlAirDimJpaEntity> getDims() { return dims; }
 

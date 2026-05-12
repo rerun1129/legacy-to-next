@@ -92,7 +92,7 @@ public class TruckBlAssembler {
                 null, // finalEta
                 null, // volumeWeightKg
                 null, // rton
-                null, // remark
+                req.remark(),
                 null, // seaDetail — TRUCK 미사용
                 toDescCommand(req.desc()),
                 null, // dims
@@ -152,7 +152,7 @@ public class TruckBlAssembler {
                 null, // finalEta
                 null, // volumeWeightKg
                 null, // rton
-                null, // remark
+                req.remark(),
                 null, // seaDetail
                 toDescCommandU(req.desc()),
                 null, // dims
@@ -168,7 +168,7 @@ public class TruckBlAssembler {
 
     private CreateHouseBlCommand.DescCommand toDescCommand(CreateTruckBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new CreateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new CreateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2());
     }
 
     private List<CreateHouseBlCommand.TruckOrderCommand> toTruckOrderCommands(
@@ -184,7 +184,7 @@ public class TruckBlAssembler {
 
     private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateTruckBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new UpdateHouseBlCommand.DescCommand(r.id(), r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new UpdateHouseBlCommand.DescCommand(r.id(), r.marks(), r.description(), r.descClause1(), r.descClause2());
     }
 
     private List<UpdateHouseBlCommand.TruckOrderCommand> toTruckOrderCommandsU(

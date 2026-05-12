@@ -44,6 +44,7 @@ public class HouseBlSea extends HouseBl {
     private Rton rton;
     private String sayInformation;
     private String noOfContainerOrPackages;
+    private String remark;
 
     protected HouseBlSea(Bound bound) {
         super(JobDiv.SEA, bound);
@@ -79,6 +80,8 @@ public class HouseBlSea extends HouseBl {
     public void updateVesselNationality(String vesselNationality) {
         this.vesselNationality = vesselNationality;
     }
+
+    public void updateRemark(String remark) { this.remark = remark; }
 
     public void updateSeaRouteAndFlags(SeaRouteAndFlags f) {
         this.porCode       = f.porCode();

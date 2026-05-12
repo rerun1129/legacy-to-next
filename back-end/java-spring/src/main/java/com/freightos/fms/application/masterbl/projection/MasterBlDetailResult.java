@@ -33,5 +33,6 @@ public record MasterBlDetailResult(
         BigDecimal cbm,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<ConsoledHouseBlSummaryView> consolidatedHouseBls
+        List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
+        String remark
 ) {}

@@ -32,6 +32,7 @@ public record CreateMasterBlCommand(
         String mainItemName,
         String settlePartnerCode,
         String operatorCode,
+        String remark,
 
         // SEA 확장 필드
         SeaDetailCommand seaDetail,
@@ -64,8 +65,7 @@ public record CreateMasterBlCommand(
             String marks,
             String description,
             String descClause1,
-            String descClause2,
-            String remark
+            String descClause2
     ) {}
 
     public record DimCommand(

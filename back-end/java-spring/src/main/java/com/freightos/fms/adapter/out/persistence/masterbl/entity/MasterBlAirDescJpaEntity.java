@@ -39,14 +39,10 @@ public class MasterBlAirDescJpaEntity extends BaseJpaEntity {
     @Column(name = "desc_clause_2")
     private DescClause2 descClause2;
 
-    @Column(name = "remark", columnDefinition = "TEXT")
-    private String remark;
-
     public void setMasterBlAirDescId(Long v) { this.masterBlAirDescId = v; }
     public void setAir(MasterBlAirJpaEntity v) { this.air = v; }
     public void setMarks(String v) { this.marks = v; }
     public void setDescription(String v) { this.description = v; }
     public void setDescClause1(DescClause1 v) { this.descClause1 = v; }
     public void setDescClause2(DescClause2 v) { this.descClause2 = v; }
-    public void setRemark(String v) { this.remark = v; }
 }

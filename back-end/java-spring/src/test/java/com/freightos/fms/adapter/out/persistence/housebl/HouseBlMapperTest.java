@@ -277,7 +277,7 @@ class HouseBlMapperTest {
     // ── E-13 DESC (SEA) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("toSeaDescDomain: marks/description/descClause/remark 필드가 도메인으로 복사된다")
+    @DisplayName("toSeaDescDomain: marks/description/descClause 필드가 도메인으로 복사된다")
     void toSeaDescDomain_mapsAllTextFields() {
         HouseBlSeaJpaEntity seaJpa = new HouseBlSeaJpaEntity();
 
@@ -287,14 +287,12 @@ class HouseBlMapperTest {
         descJpa.setDescription("DESCRIPTION");
         descJpa.setDescClause1(DescClause1.A);
         descJpa.setDescClause2(DescClause2.A);
-        descJpa.setRemark("REMARK TEXT");
 
         HouseBlDesc domain = docMapper.toSeaDescDomain(descJpa);
 
         assertThat(domain.getMarks()).isEqualTo("MARKS");
         assertThat(domain.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(domain.getRemark()).isEqualTo("REMARK TEXT");
     }
 
     @Test
@@ -303,7 +301,7 @@ class HouseBlMapperTest {
         HouseBlSeaJpaEntity seaJpa = new HouseBlSeaJpaEntity();
 
         HouseBlDesc domain = HouseBlDesc.create(1L);
-        domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A, "REMARK TEXT");
+        domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A);
         HouseBlSeaDescJpaEntity jpa = new HouseBlSeaDescJpaEntity();
 
         docMapper.applySeaDescFields(domain, jpa, seaJpa);
@@ -311,14 +309,13 @@ class HouseBlMapperTest {
         assertThat(jpa.getMarks()).isEqualTo("MARKS");
         assertThat(jpa.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(jpa.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(jpa.getRemark()).isEqualTo("REMARK TEXT");
         assertThat(jpa.getSea()).isEqualTo(seaJpa);
     }
 
     // ── E-13 DESC (AIR) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("toAirDescDomain: marks/description/descClause/remark 필드가 도메인으로 복사된다")
+    @DisplayName("toAirDescDomain: marks/description/descClause 필드가 도메인으로 복사된다")
     void toAirDescDomain_mapsAllTextFields() {
         HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
 
@@ -328,14 +325,12 @@ class HouseBlMapperTest {
         descJpa.setDescription("AIR-DESC");
         descJpa.setDescClause1(DescClause1.A);
         descJpa.setDescClause2(DescClause2.A);
-        descJpa.setRemark("AIR-REMARK");
 
         HouseBlDesc domain = docMapper.toAirDescDomain(descJpa);
 
         assertThat(domain.getMarks()).isEqualTo("AIR-MARKS");
         assertThat(domain.getDescription()).isEqualTo("AIR-DESC");
         assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(domain.getRemark()).isEqualTo("AIR-REMARK");
     }
 
     @Test
@@ -344,7 +339,7 @@ class HouseBlMapperTest {
         HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
 
         HouseBlDesc domain = HouseBlDesc.create(1L);
-        domain.updateContent("AIR-MARKS", "AIR-DESC", DescClause1.A, DescClause2.A, "AIR-REMARK");
+        domain.updateContent("AIR-MARKS", "AIR-DESC", DescClause1.A, DescClause2.A);
         HouseBlAirDescJpaEntity jpa = new HouseBlAirDescJpaEntity();
 
         docMapper.applyAirDescFields(domain, jpa, airJpa);
@@ -352,7 +347,6 @@ class HouseBlMapperTest {
         assertThat(jpa.getMarks()).isEqualTo("AIR-MARKS");
         assertThat(jpa.getDescription()).isEqualTo("AIR-DESC");
         assertThat(jpa.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(jpa.getRemark()).isEqualTo("AIR-REMARK");
         assertThat(jpa.getAir()).isEqualTo(airJpa);
     }
 
@@ -546,7 +540,7 @@ class HouseBlMapperTest {
     // ── E-13 DESC (TRUCK) ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("toTruckDescDomain: marks/description/descClause/remark 필드가 도메인으로 복사된다")
+    @DisplayName("toTruckDescDomain: marks/description/descClause 필드가 도메인으로 복사된다")
     void toTruckDescDomain_mapsAllTextFields() {
         HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
 
@@ -556,14 +550,12 @@ class HouseBlMapperTest {
         descJpa.setDescription("TRUCK-DESC");
         descJpa.setDescClause1(DescClause1.A);
         descJpa.setDescClause2(DescClause2.A);
-        descJpa.setRemark("TRUCK-REMARK");
 
         HouseBlDesc domain = docMapper.toTruckDescDomain(descJpa);
 
         assertThat(domain.getMarks()).isEqualTo("TRUCK-MARKS");
         assertThat(domain.getDescription()).isEqualTo("TRUCK-DESC");
         assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(domain.getRemark()).isEqualTo("TRUCK-REMARK");
     }
 
     @Test
@@ -572,7 +564,7 @@ class HouseBlMapperTest {
         HouseBlTruckJpaEntity truckJpa = new HouseBlTruckJpaEntity();
 
         HouseBlDesc domain = HouseBlDesc.create(1L);
-        domain.updateContent("TRUCK-MARKS", "TRUCK-DESC", DescClause1.A, DescClause2.A, "TRUCK-REMARK");
+        domain.updateContent("TRUCK-MARKS", "TRUCK-DESC", DescClause1.A, DescClause2.A);
         HouseBlTruckDescJpaEntity jpa = new HouseBlTruckDescJpaEntity();
 
         docMapper.applyTruckDescFields(domain, jpa, truckJpa);
@@ -580,7 +572,6 @@ class HouseBlMapperTest {
         assertThat(jpa.getMarks()).isEqualTo("TRUCK-MARKS");
         assertThat(jpa.getDescription()).isEqualTo("TRUCK-DESC");
         assertThat(jpa.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(jpa.getRemark()).isEqualTo("TRUCK-REMARK");
         assertThat(jpa.getTruck()).isEqualTo(truckJpa);
     }
 

@@ -74,6 +74,9 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "rton", columnDefinition = "NUMERIC(10,3)")
     private BigDecimal rton;
 
+    @Column(name = "remark", length = 1000)
+    private String remark;
+
     public void setMasterBlSeaId(Long v) { this.masterBlSeaId = v; }
     public void setMasterBl(MasterBlJpaEntity v) { this.masterBl = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
@@ -90,4 +93,5 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     public void setPorCode(String v) { this.porCode = v; }
     public void setFinalDestCode(String v) { this.finalDestCode = v; }
     public void setRton(BigDecimal v) { this.rton = v; }
+    public void setRemark(String v) { this.remark = v; }
 }

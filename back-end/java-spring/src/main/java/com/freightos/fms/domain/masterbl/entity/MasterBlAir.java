@@ -41,6 +41,7 @@ public class MasterBlAir extends MasterBl {
     private BlDate issueDate;
     private PortCode issuePlace;
     private String signature;
+    private String remark;
 
     protected MasterBlAir(Bound bound) {
         super(MasterBlJobDiv.AIR, bound);
@@ -52,6 +53,8 @@ public class MasterBlAir extends MasterBl {
         e.insurance             = "NIL";
         return e;
     }
+
+    public void updateRemark(String remark) { this.remark = remark; }
 
     public static record AirFields(
             AirlineCode airlineCode,

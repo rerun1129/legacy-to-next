@@ -140,8 +140,9 @@ class TruckBlFactoryTest {
         truck.assignIdentity(1L, null, null, null, null);
 
         HouseBlDesc desc = HouseBlDesc.create(1L);
-        desc.updateContent("MARK-001", "화물 설명", DescClause1.A, DescClause2.fromCode("A"), "비고");
+        desc.updateContent("MARK-001", "화물 설명", DescClause1.A, DescClause2.fromCode("A"));
         truck.initDesc(desc);
+        truck.updateRemark("비고");
 
         TruckBlDetailResult result = truckBlFactory.toDetailResult(truck);
 
@@ -150,6 +151,6 @@ class TruckBlFactoryTest {
         assertThat(result.desc().description()).isEqualTo("화물 설명");
         assertThat(result.desc().descClause1()).isEqualTo("A");
         assertThat(result.desc().descClause2()).isNotNull();
-        assertThat(result.desc().remark()).isEqualTo("비고");
+        assertThat(result.remark()).isEqualTo("비고");
     }
 }

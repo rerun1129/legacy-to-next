@@ -102,8 +102,7 @@ public record CreateHouseBlCommand(
             String marks,
             String description,
             String descClause1,
-            String descClause2,
-            String remark
+            String descClause2
     ) {}
 
     public record DimCommand(

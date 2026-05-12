@@ -47,7 +47,10 @@ public record HouseBlDetailResponse(
         String finalDestName,
         String finalEta,
         BigDecimal volumeWeightKg,
-        BigDecimal rton
+        BigDecimal rton,
+
+        // SEA/AIR/TRUCK 본체 remark
+        String remark
 ) {
     public static HouseBlDetailResponse from(HouseBlDetailResult result) {
         return new HouseBlDetailResponse(
@@ -89,7 +92,8 @@ public record HouseBlDetailResponse(
                 result.finalDestName(),
                 result.finalEta(),
                 result.volumeWeightKg(),
-                result.rton()
+                result.rton(),
+                result.remark()
         );
     }
 }

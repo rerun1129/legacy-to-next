@@ -50,6 +50,9 @@ public record TruckBlDetailResult(
         String serviceTerm,
         String voyageNo,
 
+        // Marks/Description 패널
+        String remark,
+
         // 자식 데이터
         List<TruckOrderView> truckOrders,
         DescView desc
@@ -65,6 +68,6 @@ public record TruckBlDetailResult(
 
     public record DescView(
             String marks, String description,
-            String descClause1, String descClause2, String remark
+            String descClause1, String descClause2
     ) {}
 }

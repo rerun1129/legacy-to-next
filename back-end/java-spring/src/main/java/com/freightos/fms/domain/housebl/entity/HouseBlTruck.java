@@ -30,6 +30,7 @@ public class HouseBlTruck extends HouseBl {
     private EmployeeCode truckerPic;
     /** 트럭 전용: 청구중량 */
     private Weight chargeWeightKg;
+    private String remark;
 
     protected HouseBlTruck(Bound bound) {
         super(JobDiv.TRUCK, bound);
@@ -44,6 +45,8 @@ public class HouseBlTruck extends HouseBl {
     public String getVesselName() {
         return Nullables.mapOrElse(vesselVoyage, VesselVoyage::vesselName, () -> "TRUCK");
     }
+
+    public void updateRemark(String remark) { this.remark = remark; }
 
     public record TruckFields(
             VesselVoyage vesselVoyage,

@@ -90,6 +90,7 @@ public class TruckBlFactory {
                 Nullables.mapOrNull(truck.getLoadType(), LoadType::name),
                 Nullables.mapOrNull(truck.getServiceTerm(), ServiceTerm::name),
                 VoMapper.mapOrNull(truck.getVesselVoyage(), VesselVoyage::voyageNo),
+                truck.getRemark(),
                 toTruckOrderViews(truck.getTruckOrders()),
                 toDescView(truck.getDesc())
         );
@@ -126,8 +127,7 @@ public class TruckBlFactory {
                 desc.getMarks(),
                 desc.getDescription(),
                 Nullables.mapOrNull(desc.getDescClause1(), Enum::name),
-                Nullables.mapOrNull(desc.getDescClause2(), Enum::name),
-                desc.getRemark()
+                Nullables.mapOrNull(desc.getDescClause2(), Enum::name)
         );
     }
 }

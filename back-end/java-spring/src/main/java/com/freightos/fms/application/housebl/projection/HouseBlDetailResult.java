@@ -49,6 +49,9 @@ public record HouseBlDetailResult(
         String finalDestName,
         String finalEta,
         BigDecimal volumeWeightKg,
-        BigDecimal rton
+        BigDecimal rton,
+
+        // SEA/AIR/TRUCK 본체 remark
+        String remark
 ) {
 }

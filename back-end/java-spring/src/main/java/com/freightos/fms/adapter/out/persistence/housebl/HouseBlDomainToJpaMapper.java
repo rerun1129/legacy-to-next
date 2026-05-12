@@ -121,6 +121,7 @@ public class HouseBlDomainToJpaMapper {
         jpa.setNoOfContainerOrPackages(domain.getNoOfContainerOrPackages());
         jpa.setBlType(domain.getBlType());
         jpa.setDeliveryCode(mapOrNull(domain.getDeliveryCode(), PortCode::value));
+        jpa.setRemark(domain.getRemark());
     }
 
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
@@ -143,6 +144,7 @@ public class HouseBlDomainToJpaMapper {
         jpa.setHandlingInfoText(hi == null ? null : hi.description());
         jpa.setOriginOfGoods(domain.getOriginOfGoods());
         jpa.setCargoType(domain.getCargoType());
+        jpa.setRemark(domain.getRemark());
     }
 
     public void applyTruckFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
@@ -158,6 +160,7 @@ public class HouseBlDomainToJpaMapper {
         jpa.setTruckerCode(mapOrNull(domain.getTruckerCode(), CustomerCode::value));
         jpa.setTruckerPic(mapOrNull(domain.getTruckerPic(), EmployeeCode::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        jpa.setRemark(domain.getRemark());
     }
 
     public void applyNonBlFields(HouseBlNonBl domain, HouseBlNonBlJpaEntity jpa) {

@@ -71,6 +71,7 @@ public class MasterBlFactory {
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
         if (cmd.seaDetail() != null) applySeaCreate(entity, cmd.seaDetail());
+        applyRemark(entity, cmd.remark());
         applySubEntities(entity, toDescParams(cmd.desc()), toDimParamsFromCreate(cmd.dims()), toLegParamsFromCreate(cmd.scheduleLegs()), toChargeParamsFromCreate(cmd.airCharges()));
         return entity;
     }
@@ -114,6 +115,7 @@ public class MasterBlFactory {
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
         if (cmd.seaDetail() != null) applySeaUpdate(entity, cmd.seaDetail());
+        applyRemark(entity, cmd.remark());
         applySubEntities(entity, toDescParams(cmd.desc()), toDimParams(cmd.dims()), toLegParams(cmd.scheduleLegs()), toChargeParams(cmd.airCharges()));
     }
 
@@ -135,6 +137,11 @@ public class MasterBlFactory {
     // ── Entity → Projection 변환 ─────────────────────────────────────
 
     public MasterBlDetailResult toDetailResult(MasterBl entity, List<ConsoledHouseBlSummary> consolidatedHouseBls) {
+        String remark = switch (entity) {
+            case MasterBlSea sea -> sea.getRemark();
+            case MasterBlAir air -> air.getRemark();
+            default -> null;
+        };
         return new MasterBlDetailResult(
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getMblNo(), BlNumber::value),
@@ -159,7 +166,8 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
-                toConsoledViews(consolidatedHouseBls)
+                toConsoledViews(consolidatedHouseBls),
+                remark
         );
     }
 
@@ -198,6 +206,16 @@ public class MasterBlFactory {
         if (rton != null)              sea.updateRton(Rton.of(rton));
     }
 
+    // ── remark 매핑 ───────────────────────────────────────────────────
+
+    private void applyRemark(MasterBl entity, String remark) {
+        switch (entity) {
+            case MasterBlSea sea -> sea.updateRemark(remark);
+            case MasterBlAir air -> air.updateRemark(remark);
+            default -> { /* 다른 타입은 remark 미지원 */ }
+        }
+    }
+
     // ── ConsoledHouseBlSummary → ConsoledHouseBlSummaryView 변환 ─────
 
     private List<ConsoledHouseBlSummaryView> toConsoledViews(List<ConsoledHouseBlSummary> sources) {
@@ -224,12 +242,12 @@ public class MasterBlFactory {
 
     private String[] toDescParams(CreateMasterBlCommand.DescCommand r) {
         if (r == null) return null;
-        return new String[]{ r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark() };
+        return new String[]{ r.marks(), r.description(), r.descClause1(), r.descClause2() };
     }
 
     private String[] toDescParams(UpdateMasterBlCommand.DescCommand r) {
         if (r == null) return null;
-        return new String[]{ r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark() };
+        return new String[]{ r.marks(), r.description(), r.descClause1(), r.descClause2() };
     }
 
     private List<DimParams> toDimParamsFromCreate(List<CreateMasterBlCommand.DimCommand> cmds) {
@@ -270,7 +288,7 @@ public class MasterBlFactory {
         if (descParams != null) {
             MasterBlDesc desc = MasterBlDesc.create(null);
             desc.updateContent(descParams[0], descParams[1],
-                    DescClause1.fromCode(descParams[2]), DescClause2.fromCode(descParams[3]), descParams[4]);
+                    DescClause1.fromCode(descParams[2]), DescClause2.fromCode(descParams[3]));
             entity.initDesc(desc);
         }
         if (!dimParams.isEmpty()) {

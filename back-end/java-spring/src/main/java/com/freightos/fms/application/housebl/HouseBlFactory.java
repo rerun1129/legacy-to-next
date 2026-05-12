@@ -69,8 +69,11 @@ public class HouseBlFactory {
 
         applyCommonCreate(entity, cmd);
         seaSubFactory.applySeaCreate(entity, cmd.seaDetail());
+        seaSubFactory.applySeaRemark(entity, cmd.remark());
         nonBlSubFactory.applyNonBlCreate(entity, cmd);
         truckSubFactory.applyTruckCreate(entity, cmd.truckDetail());
+        truckSubFactory.applyTruckRemark(entity, cmd.remark());
+        airSubFactory.applyAirCreate(entity, cmd);
         applySubCreate(entity, cmd);
         return entity;
     }
@@ -81,8 +84,11 @@ public class HouseBlFactory {
         entity.update(toUpdateFields(cmd));
         entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
         seaSubFactory.applySeaUpdate(entity, cmd.seaDetail());
+        seaSubFactory.applySeaRemark(entity, cmd.remark());
         nonBlSubFactory.applyNonBlUpdate(entity, cmd);
         truckSubFactory.applyTruckUpdate(entity, cmd.truckDetail());
+        truckSubFactory.applyTruckRemark(entity, cmd.remark());
+        airSubFactory.applyAirUpdate(entity, cmd);
         applySubUpdate(entity, cmd);
     }
 
@@ -197,6 +203,12 @@ public class HouseBlFactory {
     public HouseBlDetailResult toDetailResult(HouseBl entity) {
         HouseBlNonBl nonBl = entity instanceof HouseBlNonBl n ? n : null;
         BlType seaBlType = entity instanceof HouseBlSea sea ? sea.getBlType() : null;
+        String remark = switch (entity) {
+            case HouseBlSea sea -> sea.getRemark();
+            case HouseBlAir air -> air.getRemark();
+            case HouseBlTruck truck -> truck.getRemark();
+            default -> null;
+        };
         return new HouseBlDetailResult(
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getHblNo(), BlNumber::value),
@@ -236,7 +248,8 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(nonBl, HouseBlNonBl::getFinalDestName),
                 Nullables.mapOrNull(nonBl, HouseBlNonBl::getFinalEta),
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getVolumeWtKg(), Weight::kg)),
-                Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getRton(), Rton::ton))
+                Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getRton(), Rton::ton)),
+                remark
         );
     }
 }

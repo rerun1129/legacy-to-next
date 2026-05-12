@@ -258,7 +258,6 @@ class MasterBlMapperTest {
         descJpa.setDescription("SEA DESCRIPTION");
         descJpa.setDescClause1(DescClause1.A);
         descJpa.setDescClause2(DescClause2.A);
-        descJpa.setRemark("SEA REMARK");
 
         MasterBlDesc domain = mapper.toSeaDescDomain(descJpa);
 
@@ -266,7 +265,6 @@ class MasterBlMapperTest {
         assertThat(domain.getDescription()).isEqualTo("SEA DESCRIPTION");
         assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(domain.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(domain.getRemark()).isEqualTo("SEA REMARK");
     }
 
     @Test
@@ -276,7 +274,7 @@ class MasterBlMapperTest {
         seaJpa.setMasterBlSeaId(10L);
 
         MasterBlDesc domain = MasterBlDesc.create(10L);
-        domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A, "REMARK");
+        domain.updateContent("MARKS", "DESCRIPTION", DescClause1.A, DescClause2.A);
         MasterBlSeaDescJpaEntity descJpa = new MasterBlSeaDescJpaEntity();
 
         mapper.applySeaDescFields(domain, descJpa, seaJpa);
@@ -284,7 +282,6 @@ class MasterBlMapperTest {
         assertThat(descJpa.getMarks()).isEqualTo("MARKS");
         assertThat(descJpa.getDescription()).isEqualTo("DESCRIPTION");
         assertThat(descJpa.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(descJpa.getRemark()).isEqualTo("REMARK");
         assertThat(descJpa.getSea()).isSameAs(seaJpa);
     }
 
@@ -295,7 +292,7 @@ class MasterBlMapperTest {
         seaJpa.setMasterBlSeaId(10L);
 
         MasterBlDesc domain = MasterBlDesc.create(10L);
-        domain.updateContent("MARKS", "DESC", DescClause1.A, DescClause2.A, "REMARK");
+        domain.updateContent("MARKS", "DESC", DescClause1.A, DescClause2.A);
 
         MasterBlSeaDescJpaEntity result = mapper.toSeaDescJpa(domain, seaJpa);
 
@@ -304,7 +301,6 @@ class MasterBlMapperTest {
         assertThat(result.getDescription()).isEqualTo("DESC");
         assertThat(result.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(result.getRemark()).isEqualTo("REMARK");
     }
 
     // ── E-06 DESC (AIR) ──────────────────────────────────────────────────
@@ -321,7 +317,6 @@ class MasterBlMapperTest {
         descJpa.setDescription("AIR DESCRIPTION");
         descJpa.setDescClause1(DescClause1.A);
         descJpa.setDescClause2(DescClause2.A);
-        descJpa.setRemark("AIR REMARK");
 
         MasterBlDesc domain = mapper.toAirDescDomain(descJpa);
 
@@ -329,7 +324,6 @@ class MasterBlMapperTest {
         assertThat(domain.getDescription()).isEqualTo("AIR DESCRIPTION");
         assertThat(domain.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(domain.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(domain.getRemark()).isEqualTo("AIR REMARK");
     }
 
     @Test
@@ -339,7 +333,7 @@ class MasterBlMapperTest {
         airJpa.setMasterBlAirId(20L);
 
         MasterBlDesc domain = MasterBlDesc.create(20L);
-        domain.updateContent("AIR MARKS", "AIR DESC", DescClause1.A, DescClause2.A, "AIR REMARK");
+        domain.updateContent("AIR MARKS", "AIR DESC", DescClause1.A, DescClause2.A);
         MasterBlAirDescJpaEntity descJpa = new MasterBlAirDescJpaEntity();
 
         mapper.applyAirDescFields(domain, descJpa, airJpa);
@@ -347,7 +341,6 @@ class MasterBlMapperTest {
         assertThat(descJpa.getMarks()).isEqualTo("AIR MARKS");
         assertThat(descJpa.getDescription()).isEqualTo("AIR DESC");
         assertThat(descJpa.getDescClause1()).isEqualTo(DescClause1.A);
-        assertThat(descJpa.getRemark()).isEqualTo("AIR REMARK");
         assertThat(descJpa.getAir()).isSameAs(airJpa);
     }
 
@@ -358,7 +351,7 @@ class MasterBlMapperTest {
         airJpa.setMasterBlAirId(20L);
 
         MasterBlDesc domain = MasterBlDesc.create(20L);
-        domain.updateContent("AIR MARKS", "AIR DESC", DescClause1.A, DescClause2.A, "AIR REMARK");
+        domain.updateContent("AIR MARKS", "AIR DESC", DescClause1.A, DescClause2.A);
 
         MasterBlAirDescJpaEntity result = mapper.toAirDescJpa(domain, airJpa);
 
@@ -367,7 +360,6 @@ class MasterBlMapperTest {
         assertThat(result.getDescription()).isEqualTo("AIR DESC");
         assertThat(result.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(result.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(result.getRemark()).isEqualTo("AIR REMARK");
     }
 
     // ── E-07 SCHEDULE LEG ────────────────────────────────────────────────

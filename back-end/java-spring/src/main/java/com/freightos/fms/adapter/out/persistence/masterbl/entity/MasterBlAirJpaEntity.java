@@ -95,6 +95,9 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private VolumeDivisor volumeDivisor;
 
+    @Column(name = "remark", length = 1000)
+    private String remark;
+
     // AIR 단독 치수 명세. master_bl_air_id FK로 소유 (Step 4.2 — 부모 FK 이전).
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -133,6 +136,7 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setHandlingInfoCode(HandlingInfoCode v) { this.handlingInfoCode = v; }
     public void setHandlingInfoText(String v) { this.handlingInfoText = v; }
     public void setVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
+    public void setRemark(String v) { this.remark = v; }
 
     public void syncDims(List<MasterBlDimJpaEntity> newDims) {
         this.dims.clear();

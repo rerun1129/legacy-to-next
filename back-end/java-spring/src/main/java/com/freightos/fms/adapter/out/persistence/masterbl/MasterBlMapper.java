@@ -95,6 +95,7 @@ public class MasterBlMapper {
         domain.updateBlType(jpa.getBlType());
         domain.updateRoute(PortCode.of(jpa.getPorCode()), PortCode.of(jpa.getFinalDestCode()));
         domain.updateRton(Rton.of(jpa.getRton()));
+        domain.updateRemark(jpa.getRemark());
     }
 
     private void copyAirFields(MasterBlAirJpaEntity jpa, MasterBlAir domain) {
@@ -159,6 +160,7 @@ public class MasterBlMapper {
         jpa.setPorCode(mapOrNull(domain.getPorCode(), PortCode::value));
         jpa.setFinalDestCode(mapOrNull(domain.getFinalDestCode(), PortCode::value));
         jpa.setRton(mapOrNull(domain.getRton(), Rton::ton));
+        jpa.setRemark(domain.getRemark());
     }
 
     public void applyAirFields(MasterBlAir domain, MasterBlAirJpaEntity jpa) {
@@ -179,6 +181,7 @@ public class MasterBlMapper {
         jpa.setOtherTerm(domain.getOtherTerm());
         jpa.setHandlingInfoCode(mapOrNull(domain.getHandlingInformation(), HandlingInformation::code));
         jpa.setHandlingInfoText(mapOrNull(domain.getHandlingInformation(), HandlingInformation::description));
+        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-05 DIM ──────────────────────────────────────────────────────
@@ -214,7 +217,7 @@ public class MasterBlMapper {
         domain.assignIdentity(jpa.getMasterBlSeaDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
-                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+                jpa.getDescClause1(), jpa.getDescClause2());
         return domain;
     }
 
@@ -223,7 +226,7 @@ public class MasterBlMapper {
         domain.assignIdentity(jpa.getMasterBlAirDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
-                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+                jpa.getDescClause1(), jpa.getDescClause2());
         return domain;
     }
 
@@ -233,7 +236,6 @@ public class MasterBlMapper {
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
-        jpa.setRemark(domain.getRemark());
     }
 
     public void applyAirDescFields(MasterBlDesc domain, MasterBlAirDescJpaEntity jpa, MasterBlAirJpaEntity airJpa) {
@@ -242,7 +244,6 @@ public class MasterBlMapper {
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
-        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-07 SCHEDULE LEG ─────────────────────────────────────────────

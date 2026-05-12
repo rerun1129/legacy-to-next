@@ -140,6 +140,7 @@ public class HouseBlJpaToDomainMapper {
                 jpa.getSayInformation(),
                 jpa.getNoOfContainerOrPackages());
         domain.updateBlType(jpa.getBlType());
+        domain.updateRemark(jpa.getRemark());
     }
 
     private void copyAirFields(HouseBlAirJpaEntity jpa, HouseBlAir domain) {
@@ -154,6 +155,7 @@ public class HouseBlJpaToDomainMapper {
                 HandlingInformation.of(jpa.getHandlingInfoCode(), jpa.getHandlingInfoText()),
                 jpa.getOriginOfGoods(),
                 jpa.getCargoType()));
+        domain.updateRemark(jpa.getRemark());
     }
 
     private void copyTruckFields(HouseBlTruckJpaEntity jpa, HouseBlTruck domain) {
@@ -165,6 +167,7 @@ public class HouseBlJpaToDomainMapper {
                 CustomerCode.of(jpa.getTruckerCode()),
                 EmployeeCode.of(jpa.getTruckerPic()),
                 Weight.of(jpa.getChargeWeightKg())));
+        domain.updateRemark(jpa.getRemark());
     }
 
     private void copyNonBlFields(HouseBlNonBlJpaEntity jpa, HouseBlNonBl domain) {

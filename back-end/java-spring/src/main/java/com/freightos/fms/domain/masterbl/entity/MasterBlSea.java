@@ -34,6 +34,7 @@ public class MasterBlSea extends MasterBl {
     private PortCode porCode;
     private PortCode finalDestCode;
     private Rton rton;
+    private String remark;
 
     // Container 그리드는 House B/L 소속 컨테이너의 읽기 전용 집계 뷰 — 별도 테이블 없음
 
@@ -69,4 +70,6 @@ public class MasterBlSea extends MasterBl {
     }
 
     public void updateRton(Rton rton) { this.rton = rton; }
+
+    public void updateRemark(String remark) { this.remark = remark; }
 }

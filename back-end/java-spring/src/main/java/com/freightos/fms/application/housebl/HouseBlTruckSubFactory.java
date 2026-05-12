@@ -46,4 +46,9 @@ class HouseBlTruckSubFactory {
                 EmployeeCode.of(t.truckerPic()),
                 Weight.of(t.chargeWeightKg())));
     }
+
+    void applyTruckRemark(HouseBl entity, String remark) {
+        if (!(entity instanceof HouseBlTruck truck)) return;
+        truck.updateRemark(remark);
+    }
 }

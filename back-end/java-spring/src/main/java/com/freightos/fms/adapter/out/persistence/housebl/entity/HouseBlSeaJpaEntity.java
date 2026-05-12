@@ -99,6 +99,9 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     @Column(name = "delivery_code", length = 10)
     private String deliveryCode;
 
+    @Column(name = "remark", length = 1000)
+    private String remark;
+
     // SEA 전용 컨테이너 컬렉션 — house_bl_sea_container.house_bl_sea_id FK 소유
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -127,6 +130,7 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setNoOfContainerOrPackages(String v) { this.noOfContainerOrPackages = v; }
     public void setBlType(BlType v) { this.blType = v; }
     public void setDeliveryCode(String v) { this.deliveryCode = v; }
+    public void setRemark(String v) { this.remark = v; }
 
     /** SEA 컨테이너 동기화: 기존 컬렉션 참조를 유지하면서 내용 교체 (orphanRemoval 지원). */
     public void syncContainers(List<HouseBlSeaContainerJpaEntity> newContainers) {

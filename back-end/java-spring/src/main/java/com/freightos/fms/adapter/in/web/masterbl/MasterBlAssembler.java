@@ -65,6 +65,7 @@ public class MasterBlAssembler {
                 req.mainItemName(),
                 req.settlePartnerCode(),
                 req.operatorCode(),
+                req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
                 toDescCommand(req.desc()),
                 toDimCommands(req.dims()),
@@ -99,6 +100,7 @@ public class MasterBlAssembler {
                 req.mainItemName(),
                 req.settlePartnerCode(),
                 req.operatorCode(),
+                req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
                 toDescCommand(req.desc()),
                 toDimCommandsU(req.dims()),
@@ -121,12 +123,12 @@ public class MasterBlAssembler {
 
     private CreateMasterBlCommand.DescCommand toDescCommand(CreateMasterBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new CreateMasterBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new CreateMasterBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2());
     }
 
     private UpdateMasterBlCommand.DescCommand toDescCommand(UpdateMasterBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new UpdateMasterBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new UpdateMasterBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2());
     }
 
     private List<CreateMasterBlCommand.DimCommand> toDimCommands(List<CreateMasterBlRequest.DimRequest> reqs) {

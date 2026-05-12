@@ -23,7 +23,7 @@ public class HouseBlDocMapper {
         domain.assignIdentity(jpa.getHouseBlSeaDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
-                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+                jpa.getDescClause1(), jpa.getDescClause2());
         return domain;
     }
 
@@ -33,7 +33,6 @@ public class HouseBlDocMapper {
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
-        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-13 DESC (AIR) ───────────────────────────────────────────────
@@ -43,7 +42,7 @@ public class HouseBlDocMapper {
         domain.assignIdentity(jpa.getHouseBlAirDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
-                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+                jpa.getDescClause1(), jpa.getDescClause2());
         return domain;
     }
 
@@ -53,7 +52,6 @@ public class HouseBlDocMapper {
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
-        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-13 DESC (TRUCK) ────────────────────────────────────────────
@@ -63,7 +61,7 @@ public class HouseBlDocMapper {
         domain.assignIdentity(jpa.getHouseBlTruckDescId(), jpa.getCreatedAt(), jpa.getUpdatedAt(),
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.updateContent(jpa.getMarks(), jpa.getDescription(),
-                jpa.getDescClause1(), jpa.getDescClause2(), jpa.getRemark());
+                jpa.getDescClause1(), jpa.getDescClause2());
         return domain;
     }
 
@@ -73,7 +71,6 @@ public class HouseBlDocMapper {
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
-        jpa.setRemark(domain.getRemark());
     }
 
     // ── E-19 SCHEDULE LEG ─────────────────────────────────────────────

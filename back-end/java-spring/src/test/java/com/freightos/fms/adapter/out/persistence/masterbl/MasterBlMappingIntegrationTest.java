@@ -409,7 +409,7 @@ class MasterBlMappingIntegrationTest {
     // ── SEA desc 저장·교체·cascade 테스트 ────────────────────────────────
 
     @Test
-    @DisplayName("SEA desc round-trip: marks/description/descClause1/descClause2/remark 저장 후 재조회 시 모든 필드 유지")
+    @DisplayName("SEA desc round-trip: marks/description/descClause1/descClause2 저장 후 재조회 시 모든 필드 유지")
     void seaDesc_roundTrip_allFieldsPreserved() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.SEA);
         em.persist(parent);
@@ -423,7 +423,6 @@ class MasterBlMappingIntegrationTest {
         descEntity.setDescription("SEA ROUND-TRIP DESCRIPTION");
         descEntity.setDescClause1(DescClause1.A);
         descEntity.setDescClause2(DescClause2.A);
-        descEntity.setRemark("SEA ROUND-TRIP REMARK");
         em.persist(descEntity);
         em.flush();
         em.clear();
@@ -438,7 +437,6 @@ class MasterBlMappingIntegrationTest {
         assertThat(loadedDesc.getDescription()).isEqualTo("SEA ROUND-TRIP DESCRIPTION");
         assertThat(loadedDesc.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(loadedDesc.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(loadedDesc.getRemark()).isEqualTo("SEA ROUND-TRIP REMARK");
     }
 
     @Test
@@ -512,7 +510,7 @@ class MasterBlMappingIntegrationTest {
     // ── AIR desc 저장·교체·cascade 테스트 ────────────────────────────────
 
     @Test
-    @DisplayName("AIR desc round-trip: marks/description/descClause1/descClause2/remark 저장 후 재조회 시 모든 필드 유지")
+    @DisplayName("AIR desc round-trip: marks/description/descClause1/descClause2 저장 후 재조회 시 모든 필드 유지")
     void airDesc_roundTrip_allFieldsPreserved() {
         MasterBlJpaEntity parent = newParent(MasterBlJobDiv.AIR);
         em.persist(parent);
@@ -526,7 +524,6 @@ class MasterBlMappingIntegrationTest {
         descEntity.setDescription("AIR ROUND-TRIP DESCRIPTION");
         descEntity.setDescClause1(DescClause1.A);
         descEntity.setDescClause2(DescClause2.A);
-        descEntity.setRemark("AIR ROUND-TRIP REMARK");
         em.persist(descEntity);
         em.flush();
         em.clear();
@@ -541,7 +538,6 @@ class MasterBlMappingIntegrationTest {
         assertThat(loadedDesc.getDescription()).isEqualTo("AIR ROUND-TRIP DESCRIPTION");
         assertThat(loadedDesc.getDescClause1()).isEqualTo(DescClause1.A);
         assertThat(loadedDesc.getDescClause2()).isEqualTo(DescClause2.A);
-        assertThat(loadedDesc.getRemark()).isEqualTo("AIR ROUND-TRIP REMARK");
     }
 
     @Test

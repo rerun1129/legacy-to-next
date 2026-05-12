@@ -32,7 +32,8 @@ public record MasterBlDetailResponse(
         BigDecimal cbm,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<ConsoledHouseBlSummaryView> consolidatedHouseBls
+        List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
+        String remark
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailResult result) {
         return new MasterBlDetailResponse(
@@ -59,7 +60,8 @@ public record MasterBlDetailResponse(
                 result.cbm(),
                 result.createdAt(),
                 result.updatedAt(),
-                result.consolidatedHouseBls()
+                result.consolidatedHouseBls(),
+                result.remark()
         );
     }
 }

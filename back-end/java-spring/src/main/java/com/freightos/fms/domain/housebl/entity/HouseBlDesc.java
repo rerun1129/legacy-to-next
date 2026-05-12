@@ -21,7 +21,6 @@ public class HouseBlDesc extends BaseEntity {
     private String description;
     private DescClause1 descClause1;
     private DescClause2 descClause2;
-    private String remark;
 
     public static HouseBlDesc create(Long houseBlId) {
         HouseBlDesc d = new HouseBlDesc();
@@ -30,11 +29,10 @@ public class HouseBlDesc extends BaseEntity {
     }
 
     public void updateContent(String marks, String description,
-                              DescClause1 descClause1, DescClause2 descClause2, String remark) {
+                              DescClause1 descClause1, DescClause2 descClause2) {
         this.marks       = marks;
         this.description = description;
         this.descClause1 = descClause1;
         this.descClause2 = descClause2;
-        this.remark      = remark;
     }
 }

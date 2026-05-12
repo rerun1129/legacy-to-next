@@ -67,6 +67,9 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private ServiceTerm serviceTerm;
 
+    @Column(name = "remark", length = 1000)
+    private String remark;
+
     // TRUCK 전용 치수 명세. house_bl_truck_id FK로 소유.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 50)
@@ -91,6 +94,7 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
+    public void setRemark(String v) { this.remark = v; }
 
     public List<HouseBlTruckDimJpaEntity> getDims() { return dims; }
 

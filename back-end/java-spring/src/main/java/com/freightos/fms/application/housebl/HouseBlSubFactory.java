@@ -38,23 +38,23 @@ class HouseBlSubFactory {
     // ── Desc ─────────────────────────────────────────────────────────
 
     void applyDesc(HouseBl entity, CreateHouseBlCommand.DescCommand r) {
-        // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 관리됨
+        // NON_BL은 desc를 사용하지 않음 — remark는 본체 sub 엔티티 컬럼으로 관리됨
         if (entity instanceof HouseBlNonBl) return;
         if (r == null) return;
         HouseBlDesc desc = HouseBlDesc.create(null);
         desc.updateContent(r.marks(), r.description(),
-                DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()), r.remark());
+                DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()));
         entity.initDesc(desc);
     }
 
     void applyDescUpdate(HouseBl entity, UpdateHouseBlCommand.DescCommand r) {
-        // NON_BL은 desc를 사용하지 않음 — remark는 house_bl_non_bl 컬럼으로 관리됨
+        // NON_BL은 desc를 사용하지 않음 — remark는 본체 sub 엔티티 컬럼으로 관리됨
         if (entity instanceof HouseBlNonBl) return;
         if (r == null) return;
         HouseBlDesc desc = HouseBlDesc.create(null);
         if (r.id() != null) desc.assignIdentity(r.id(), null, null, null, null);
         desc.updateContent(r.marks(), r.description(),
-                DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()), r.remark());
+                DescClause1.fromCode(r.descClause1()), DescClause2.fromCode(r.descClause2()));
         entity.initDesc(desc);
     }
 

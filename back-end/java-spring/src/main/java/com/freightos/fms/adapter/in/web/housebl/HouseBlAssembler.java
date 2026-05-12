@@ -97,7 +97,7 @@ public class HouseBlAssembler {
                 req.finalEta(),
                 req.volumeWeightKg(),
                 req.rton(),
-                null,
+                req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
                 toDescCommand(req.desc()),
                 toDimCommands(req.dims()),
@@ -157,7 +157,7 @@ public class HouseBlAssembler {
                 req.finalEta(),
                 req.volumeWeightKg(),
                 req.rton(),
-                null,
+                req.remark(),
                 toSeaDetailCommandU(req.seaDetail()),
                 toDescCommandU(req.desc()),
                 toDimCommandsU(req.dims()),
@@ -183,7 +183,7 @@ public class HouseBlAssembler {
 
     private CreateHouseBlCommand.DescCommand toDescCommand(CreateHouseBlRequest.DescRequest r) {
         if (r == null) return null;
-        return new CreateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new CreateHouseBlCommand.DescCommand(r.marks(), r.description(), r.descClause1(), r.descClause2());
     }
 
     private List<CreateHouseBlCommand.DimCommand> toDimCommands(List<CreateHouseBlRequest.DimRequest> reqs) {
@@ -237,7 +237,7 @@ public class HouseBlAssembler {
     private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateHouseBlRequest.DescRequest r) {
         if (r == null) return null;
         // Sea/Air/Truck UPDATE는 sync 방식이므로 id null 허용
-        return new UpdateHouseBlCommand.DescCommand(null, r.marks(), r.description(), r.descClause1(), r.descClause2(), r.remark());
+        return new UpdateHouseBlCommand.DescCommand(null, r.marks(), r.description(), r.descClause1(), r.descClause2());
     }
 
     private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<UpdateHouseBlRequest.DimRequest> reqs) {

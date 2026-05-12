@@ -52,6 +52,9 @@ public record UpdateHouseBlRequest(
         BigDecimal volumeWeightKg,
         BigDecimal rton,
 
+        // SEA/AIR/TRUCK 본체 remark
+        String remark,
+
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
 
@@ -94,8 +97,7 @@ public record UpdateHouseBlRequest(
             String marks,
             String description,
             String descClause1,
-            String descClause2,
-            String remark
+            String descClause2
     ) {}
 
     /** 포장 치수 명세 1행. */

@@ -26,7 +26,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
 
         CreateHouseBlCommand result = assembler.toCreateCommand(request);
@@ -49,7 +49,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
 
         CreateHouseBlCommand result = assembler.toCreateCommand(request);
@@ -72,7 +72,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
 
         CreateHouseBlCommand result = assembler.toCreateCommand(request);
@@ -94,7 +94,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
 
         CreateHouseBlCommand result = assembler.toCreateCommand(request);
@@ -116,7 +116,7 @@ class HouseBlAssemblerTest {
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null,
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
 
         CreateHouseBlCommand result = assembler.toCreateCommand(request);

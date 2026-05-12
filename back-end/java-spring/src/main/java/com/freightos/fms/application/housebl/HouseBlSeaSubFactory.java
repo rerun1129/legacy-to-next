@@ -37,6 +37,11 @@ class HouseBlSeaSubFactory {
         if (s.vesselNationality() != null) sea.updateVesselNationality(s.vesselNationality());
     }
 
+    void applySeaRemark(HouseBl entity, String remark) {
+        if (!(entity instanceof HouseBlSea sea)) return;
+        sea.updateRemark(remark);
+    }
+
     void applySeaUpdate(HouseBl entity, UpdateHouseBlCommand.SeaDetailCommand s) {
         if (s == null || !(entity instanceof HouseBlSea sea)) return;
         sea.updateSeaSchedule(

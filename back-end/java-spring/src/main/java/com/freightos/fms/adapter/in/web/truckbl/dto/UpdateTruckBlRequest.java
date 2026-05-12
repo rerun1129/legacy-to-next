@@ -46,6 +46,7 @@ public record UpdateTruckBlRequest(
         String voyageNo,
 
         // Marks/Description 패널
+        String remark,
         DescRequest desc,
 
         // Truck Order 그리드 (UPDATE — id 필수, §6.28 자식 row merge-by-id)
@@ -58,8 +59,7 @@ public record UpdateTruckBlRequest(
             String marks,
             String description,
             String descClause1,
-            String descClause2,
-            String remark
+            String descClause2
     ) {}
 
     /** Truck Order 그리드 행 (UPDATE — id 포함, 기존 행 식별). */

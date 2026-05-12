@@ -45,6 +45,7 @@ public class HouseBlAir extends HouseBl {
     private HandlingInformation handlingInformation;
     private String originOfGoods;
     private CargoType cargoType;
+    private String remark;
 
     protected HouseBlAir(Bound bound) {
         super(JobDiv.AIR, bound);
@@ -56,6 +57,8 @@ public class HouseBlAir extends HouseBl {
         entity.insurance             = "NIL";
         return entity;
     }
+
+    public void updateRemark(String remark) { this.remark = remark; }
 
     public static record AirFields(
             AirlineCode airlineCode,
