@@ -1166,8 +1166,12 @@ cleanup useEffect로 unmount 시 일괄 제거(§6.18 안티패턴)하는 방식
 추가: Non B/L 비교 없이 Truck B/L 단독으로 발견된 케이스도 본 절에 포함해 차기 도메인에 반영.
 
 | ⑦ | `onSave` 핸들러 `!isEdit` 차단 — 잘못된 가드 | (Non B/L 동등 코드 무) | `truck-bl-entry.tsx` 가드 3줄 제거 (eff46c4) | 본 절 |
+| ⑧ | Detail Response 필드 노출 누락 + FE schema/form.reset 동기 누락 | NonBl "body 콤보박스 4종 + Ref.No"(2026-05-09) — §6.37 사례 인용 | Truck Party address/docPartner/vesselName BE response 보강(`ff0ff68`) + FE 응답스키마·도메인·form.reset 7필드 바인딩(`519177c`) | §6.29, §6.37 |
+| ②-보강 | 자식 collection 영속 분기 안전성 | NonBl 자식 UPDATE 쿼리 누락 수정(`67aa1d4`) | Truck dim detached entity persist 에러(`ed24829`) + 부모 어댑터 분기(`a8f04c7`) | §6.35, §6.33 |
 
-#### 신규 도메인 추가 시 의무 점검 7항목
+> 본 매트릭스는 **최소 식별 집합**이다. Truck B/L 마이그레이션 전체 commit log(약 60+ commits, `git log --grep=truck -i`)를 grep해 본 결과 위 8 + 1패턴 외에도 ComboBox cell variant(`d0dcf1b`, §6.46 신설 계기)·draft sync 분기(`56f8f1d`, §6.18 갱신 계기)·outside-click(`5f48185`, §6.40 신설 계기) 등 **Truck 작업 중 신설된 가이드 절이 다수** 존재한다. 이들은 Non B/L 시점엔 미발견된 신규 패턴이라 "재발"은 아니지만, **차기 도메인에서는 동일 위치에서 재발할 가능성**이 있으므로 본 절의 "점검 항목"으로 동등 취급. 신규 도메인 작업자는 본 매트릭스 외에 §6.18·§6.40·§6.45·§6.46·§6.47까지 함께 점검 의무.
+
+#### 신규 도메인 추가 시 의무 점검 8항목
 
 1. **§6.37 sub-set 매퍼** — form 미보유 필드 setter 호출 제거. `apply<Domain>CommonFields` + `apply<Domain>Fields` 신설. 공통 `applyCommonFields` 직접 호출 금지. 검증: 무수정 조회→저장 시 UPDATE 미발사.
 2. **§6.37 정규화 정렬** — fetch 응답·payload·DB 디폴트 일관성. `?? "default"` 디폴트 주입은 `createEmpty<Domain>FormValues()`에만 한정, `form.reset(detail)` 분기에서는 빈 값 유지. 검증: legacy NULL row 무수정 저장 시 UPDATE 미발사.
@@ -1176,6 +1180,7 @@ cleanup useEffect로 unmount 시 일괄 제거(§6.18 안티패턴)하는 방식
 5. **address 4필드 풀스택** — `shipperAddress`/`consigneeAddress`/`notifyAddress`/`docPartnerAddress` 모두 (a) FE submit 빌더 (b) `Create<Domain>BlRequest`/`Update<Domain>BlRequest` (c) `Create/UpdateHouseBlCommand` 인자 위치 (d) Assembler 매핑 (e) factory `entity.assignParties(CustomerCode.of(code, addr), ...)` (f) `HouseBlDomainToJpaMapper` setter 호출 6단계 일관 점검. 어느 한 단계라도 빠지면 address 손실.
 6. **공유 VO 동작 가정 점검** — `CustomerCode.of(code, address)`는 **code blank이어도 address가 있으면 VO 생성** (legacy free-text address 지원). VO `.value()`/`.address()` 사용처에서 null 체크 의무. 신규 VO 추가 시 동일 invariant 적용. 매퍼는 `mapOrNull(domain.getXxxCode(), CustomerCode::value/::address)` null-safe 패턴 사용.
 7. **`onSave` 핸들러 가드 금지** — `<Domain>BLEntry.tsx`의 `onSave={() => { if (!entry.isEdit) { toast.info(...); return; } ... }}` 패턴 금지. `handleSubmit` 내부의 `isEdit` 분기가 create/update mutation 발사를 책임지므로 onClick에 별도 차단 가드는 잘못된 패턴(신규 작성 모드 차단). 동등 패턴 `handleChangeBlNo`(B/L 번호 변경 — 신규엔 endpoint 없음)는 그대로 유효 — 혼동 주의.
+8. **Detail Response ↔ FE form.reset 3축 동기** — BE `<Domain>DetailResponse` record · FE 도메인 응답 타입(`*Detail` 인터페이스) · FE `form.reset(detail)` 매핑 — 세 곳이 정확히 같은 필드 집합을 가져야 한다. 한 축이라도 누락되면 detail에서 NULL → form 빈 값 → 저장 시 BE 매퍼가 null로 덮어쓰기(데이터 손실). 점검: form schema의 모든 키가 `form.reset(detail)`에서 detail 필드와 매핑되는지 1:1로 확인. §6.29(zod schema 동시 정합)와 함께 적용.
 
 #### Plan/Coder 지시 의무
 
@@ -1187,6 +1192,7 @@ cleanup useEffect로 unmount 시 일괄 제거(§6.18 안티패턴)하는 방식
 
 - **2026-05-12 본 세션** — Non B/L에서 이미 해결된 패턴 ④⑤⑥과 단독 패턴 ⑦이 Truck B/L에서 재발 확인. 본 절 신설.
 - **2026-05-12 회귀 회고(§6.35)** — Truck B/L Dimension 그리드 도입(6a31ae6) 시 §6.35 + §6.28 + §6.37 reference 누락으로 ①②③ 동시 회귀. 본 절은 §6.35 회귀 회고의 일반화·체크리스트화.
+- **2026-05-12 보강** — 사용자 지적("저것들만 재발한게 아닐텐데 git log 제대로 확인해서 작성한거 맞아?")에 따라 Truck B/L 마이그레이션 commit log 전체(`git log --grep=truck -i`, 약 60+ commits) 재점검. ⑧(detail response 필드 노출 ↔ FE schema/form.reset 동기 — `ff0ff68`+`519177c`) 추가, ②-보강(자식 collection 영속 분기 — `ed24829`) 사례 추가. 본 절은 살아있는 문서 — 차기 도메인에서 새 재발 패턴 발견 시 본 매트릭스 보강 의무.
 
 ---
 
