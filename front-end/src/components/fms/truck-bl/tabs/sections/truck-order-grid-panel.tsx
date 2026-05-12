@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
@@ -21,6 +21,7 @@ export function TruckOrderGridPanel() {
   );
   const { fields, append, remove } = useFieldArray({ control, name: "truckOrders" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const focusedRowKeyRef = useRef<string | null>(null);
 
   const columns = useMemo<GridColumn<TruckOrderRow>[]>(() => [
     { key: "_no",           label: "#",              width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
@@ -60,6 +61,12 @@ export function TruckOrderGridPanel() {
     ? fields.findIndex(f => f.id === selectedKey)
     : -1;
 
+  function captureFocusedRow() {
+    const activeEl = document.activeElement as HTMLElement | null;
+    const td = activeEl?.closest("td[data-row-key]") as HTMLElement | null;
+    focusedRowKeyRef.current = td?.dataset.rowKey ?? null;
+  }
+
   function handleAdd() {
     append({ ...EMPTY_TRUCK_ORDER_ROW });
     setSelectedKey(null);
@@ -67,9 +74,18 @@ export function TruckOrderGridPanel() {
 
   function handleRemove() {
     if (fields.length === 0) return;
-    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
+    const focused = focusedRowKeyRef.current;
+    let targetIdx = -1;
+    if (focused !== null) {
+      targetIdx = fields.findIndex(f => (f as unknown as { id: string }).id === focused);
+    }
+    if (targetIdx === -1 && selectedKey !== null && selectedIdx !== -1) {
+      targetIdx = selectedIdx;
+    }
+    if (targetIdx === -1) targetIdx = fields.length - 1;
     remove(targetIdx);
     setSelectedKey(null);
+    focusedRowKeyRef.current = null;
   }
 
   return (
@@ -80,7 +96,7 @@ export function TruckOrderGridPanel() {
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--icon btn--danger" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList

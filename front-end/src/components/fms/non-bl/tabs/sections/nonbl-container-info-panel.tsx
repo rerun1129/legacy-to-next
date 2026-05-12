@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo }                     from "react";
+import { useState, useMemo, useRef }              from "react";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
@@ -49,9 +49,16 @@ export function NonBLContainerInfoPanel() {
     { key: "cbm",      width: 80, label: "CBM",         render: (_, __, i) => <NumberBox name={`containers.${i}.cbm`} variant="cell" decimalPlaces={3} /> },
   ], [register, control, contTypeOptions]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const focusedRowKeyRef = useRef<string | null>(null);
 
   // id: z.number(), selectedKey: string state → 비교 시 명시 변환 필요 (가이드 §6.9)
   const selectedIdx = fields.findIndex(f => f.id === Number(selectedKey));
+
+  function captureFocusedRow() {
+    const activeEl = document.activeElement as HTMLElement | null;
+    const td = activeEl?.closest("td[data-row-key]") as HTMLElement | null;
+    focusedRowKeyRef.current = td?.dataset.rowKey ?? null;
+  }
 
   function handleAdd() {
     const nextId = Math.max(0, ...fields.map(f => f.id)) + 1;
@@ -61,9 +68,18 @@ export function NonBLContainerInfoPanel() {
 
   function handleRemove() {
     if (fields.length === 0) return;
-    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
+    const focused = focusedRowKeyRef.current;
+    let targetIdx = -1;
+    if (focused !== null) {
+      targetIdx = fields.findIndex(f => String((f as { id: number }).id) === focused);
+    }
+    if (targetIdx === -1 && selectedKey !== null && selectedIdx !== -1) {
+      targetIdx = selectedIdx;
+    }
+    if (targetIdx === -1) targetIdx = fields.length - 1;
     remove(targetIdx);
     setSelectedKey(null);
+    focusedRowKeyRef.current = null;
   }
 
   return (
@@ -74,7 +90,7 @@ export function NonBLContainerInfoPanel() {
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--icon btn--danger" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList
