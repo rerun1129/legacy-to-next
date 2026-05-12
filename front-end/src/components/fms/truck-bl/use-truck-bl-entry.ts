@@ -33,15 +33,7 @@ export function useTruckBlEntry() {
     detailLoadedRef.current = false;
   }, [id]);
 
-  useBlDraftSync(form, "truck::" + (id ?? "new"));
-
-  // unmount 시 draft 제거 — 재진입(remount) 시 이전 값 복원 방지
-  useEffect(() => {
-    const draftKey = "truck::" + (id ?? "new");
-    return () => {
-      clearDraft(draftKey);
-    };
-  }, [clearDraft, id]);
+  const { didRestoreFromDraftRef } = useBlDraftSync(form, "truck::" + (id ?? "new"));
 
   const { register, control } = form;
 
@@ -65,6 +57,8 @@ export function useTruckBlEntry() {
     if (detailLoadedRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
+    // 이번 mount에서 useBlDraftSync가 stored draft로 실제 form.reset을 호출했으면 detail로 덮어쓰지 않음
+    if (didRestoreFromDraftRef.current) return;
     form.reset({
       ...createEmptyTruckBlFormValues(),
       truckBlNo:          detail.hblNo             ?? "",
@@ -124,7 +118,7 @@ export function useTruckBlEntry() {
       descClause2: detail.desc?.descClause2 ?? "",
       remark:      detail.remark            ?? "",
     });
-  }, [detail, form]);
+  }, [detail, form, didRestoreFromDraftRef]);
 
   const { deleteMutation, isSavePending, handleSubmit, handleDelete } = useTruckBlEntryMutations({
     id: id ?? null,

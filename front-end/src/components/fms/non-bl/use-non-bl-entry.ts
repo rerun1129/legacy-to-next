@@ -34,15 +34,7 @@ export function useNonBlEntry() {
     detailLoadedRef.current = false;
   }, [id]);
 
-  useBlDraftSync(methods, `non::${id ?? "new"}`);
-
-  // unmount 시 draft 제거 — 재진입(remount) 시 이전 값 복원 방지
-  useEffect(() => {
-    const draftKey = `non::${id ?? "new"}`;
-    return () => {
-      clearDraft(draftKey);
-    };
-  }, [clearDraft, id]);
+  const { didRestoreFromDraftRef } = useBlDraftSync(methods, `non::${id ?? "new"}`);
 
   const { register, control } = methods;
 
@@ -68,8 +60,10 @@ export function useNonBlEntry() {
     if (detailLoadedRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
+    // 이번 mount에서 useBlDraftSync가 stored draft로 실제 form.reset을 호출했으면 detail로 덮어쓰지 않음
+    if (didRestoreFromDraftRef.current) return;
     methods.reset(mapNonBlDetailToFormValues(detail));
-  }, [detail, methods]);
+  }, [detail, methods, didRestoreFromDraftRef]);
 
   const resetDetailLoaded = useCallback(() => {
     detailLoadedRef.current = false;
