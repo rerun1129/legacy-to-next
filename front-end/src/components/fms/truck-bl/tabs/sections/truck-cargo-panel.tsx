@@ -19,7 +19,9 @@ function TruckCargoFields() {
           <div className="li__input li__input--tight">
             <NumberBox name="pkgQty" variant="panel" decimalPlaces={0} placeholder="0" />
             {/* pkgUnit: Non B/L §10 정책 준용 — CodeBox code-only (자유 텍스트) */}
-            <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+            <div style={{ flex: "0 0 80px" }}>
+              <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+            </div>
           </div>
         </div>
       ),
@@ -35,7 +37,7 @@ function TruckCargoFields() {
               name="weightUnit"
               control={control}
               render={({ field }) => (
-                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} />
+                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} style={{ flex: "0 0 80px" }} />
               )}
             />
           </div>
