@@ -37,6 +37,7 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   cbm: z.number().nullable(),
   consolidatedHouseBls: z.array(CONSOLIDATED_HBL_SCHEMA),
   updatedAt: z.string().nullable(),
+  remark: z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

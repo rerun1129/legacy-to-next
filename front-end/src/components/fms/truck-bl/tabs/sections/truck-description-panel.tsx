@@ -7,7 +7,7 @@ import { useEnumOptions } from "@/application/enums/use-enum";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
 export function TruckDescriptionPanel() {
-  const { control } = useFormContext<TruckBlFormValues>();
+  const { control, register } = useFormContext<TruckBlFormValues>();
   const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
   const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
 
@@ -57,10 +57,19 @@ export function TruckDescriptionPanel() {
               value={field.value ?? ""}
               onChange={field.onChange}
               onBlur={field.onBlur}
-              style={{ flex: 1, minHeight: 0 }}
+              style={{ flex: 2, minHeight: 0 }}
             />
           )}
         />
+        <div style={{ marginTop: 8, flexShrink: 0 }}>
+          <label className="field-label" style={{ display: "block", marginBottom: 2 }}>Remark</label>
+          <textarea
+            {...register("remark")}
+            className="input input--panel"
+            rows={3}
+            style={{ width: "100%", resize: "vertical" }}
+          />
+        </div>
       </div>
     </div>
   );

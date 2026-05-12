@@ -115,6 +115,7 @@ export function useTruckBlEntry() {
       description: detail.desc?.description ?? "",
       descClause1: detail.desc?.descClause1 ?? "",
       descClause2: detail.desc?.descClause2 ?? "",
+      remark:      detail.remark            ?? "",
     });
   }, [detail, form]);
 

@@ -46,6 +46,7 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   finalEta: z.string().optional(),
   volumeWeightKg: z.number().optional(),
   rton: z.number().optional(),
+  remark: z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

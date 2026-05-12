@@ -40,6 +40,7 @@ export interface HouseBlDetail extends HouseBlRow {
   finalEta?: string;
   volumeWeightKg?: number;
   rton?: number;
+  remark?: string;
 }
 
 export interface HouseBlFilter {
@@ -88,7 +89,6 @@ export interface DescRequest {
   description?: string;
   descClause1?: string;
   descClause2?: string;
-  remark?: string;
 }
 
 export interface DimRequest {

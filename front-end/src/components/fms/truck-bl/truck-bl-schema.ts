@@ -85,6 +85,7 @@ export const TRUCK_BL_SCHEMA = z.object({
   description:  z.string().optional(),
   descClause1:  z.string().optional(),
   descClause2:  z.string().optional(),
+  remark:       z.string().optional(),
 
   // Freight (FreightTab 공유용)
   freightSelling: z.array(z.any()).optional(),

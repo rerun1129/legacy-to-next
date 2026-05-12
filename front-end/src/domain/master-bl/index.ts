@@ -24,6 +24,7 @@ export interface MasterBlDetail extends MasterBlRow {
   cbm: number | null;
   consolidatedHouseBls: ConsolidatedHouseBlSummary[];
   updatedAt: string | null;
+  remark?: string;
 }
 
 export interface ConsolidatedHouseBlSummary {
@@ -69,7 +70,6 @@ export interface DescRequest {
   description?: string;
   descClause1?: string;
   descClause2?: string;
-  remark?: string;
 }
 
 export interface DimRequest {

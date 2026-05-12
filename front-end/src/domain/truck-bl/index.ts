@@ -47,7 +47,6 @@ export interface DescDetail {
   description?: string;
   descClause1?: string;
   descClause2?: string;
-  remark?: string;
 }
 
 export interface TruckBlDetail {
@@ -87,6 +86,7 @@ export interface TruckBlDetail {
   loadType?: string;
   serviceTerm?: string;
   voyageNo?: string;
+  remark?: string;
   truckOrders?: TruckOrderDetail[];
   desc?: DescDetail;
 }
@@ -119,7 +119,6 @@ export interface TruckDescRequest {
   description?: string;
   descClause1?: string;
   descClause2?: string;
-  remark?: string;
 }
 
 // ── Create / Update Request ────────────────────────────────────
@@ -158,6 +157,7 @@ export interface CreateTruckBlRequest {
   loadType?: string;
   serviceTerm?: string;
   voyageNo?: string;
+  remark?: string;
   desc?: TruckDescRequest;
   truckOrders?: TruckOrderCreateRequest[];
 }

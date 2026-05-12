@@ -27,7 +27,7 @@ function buildDescRequest(form: TruckBlFormValues): TruckDescRequest | undefined
   const description = toStr(form.description);
   const descClause1 = toStr(form.descClause1);
   const descClause2 = toStr(form.descClause2);
-  // desc 필드 중 하나라도 있으면 객체 생성
+  // desc 필드 중 하나라도 있으면 객체 생성 (remark는 본체로 이전 — §0d8c3b4)
   if (!marks && !description && !descClause1 && !descClause2) return undefined;
   return { marks, description, descClause1, descClause2 };
 }
@@ -103,6 +103,7 @@ export function buildTruckBlCreateRequest(form: TruckBlFormValues): CreateTruckB
     loadType:           toStr(form.loadType),
     serviceTerm:        toStr(form.serviceTerm),
     voyageNo:           toStr(form.voyNo),
+    remark:             toStr(form.remark),
     desc:               buildDescRequest(form),
     truckOrders:        buildTruckOrderCreateRows(form),
   };

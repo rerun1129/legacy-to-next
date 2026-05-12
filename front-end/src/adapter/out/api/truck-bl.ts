@@ -94,7 +94,6 @@ const DESC_DETAIL_SCHEMA = z.object({
   description: z.string().nullable().optional().transform((v) => v ?? undefined),
   descClause1: z.string().nullable().optional().transform((v) => v ?? undefined),
   descClause2: z.string().nullable().optional().transform((v) => v ?? undefined),
-  remark: z.string().nullable().optional().transform((v) => v ?? undefined),
 }).optional();
 
 const TRUCK_BL_DETAIL_SCHEMA = z.object({
@@ -134,6 +133,7 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
   loadType: z.string().nullable().optional().transform((v) => v ?? undefined),
   serviceTerm: z.string().nullable().optional().transform((v) => v ?? undefined),
   voyageNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  remark: z.string().nullable().optional().transform((v) => v ?? undefined),
   truckOrders: z.array(TRUCK_ORDER_DETAIL_SCHEMA).nullable().optional().transform((v) => v ?? undefined),
   desc: DESC_DETAIL_SCHEMA,
 });
