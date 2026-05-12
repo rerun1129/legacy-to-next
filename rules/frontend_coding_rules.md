@@ -143,3 +143,24 @@ Clock/IdGenerator 포트로 추상화. React 컴포넌트에서는 props 또는 
 - 브라우저 콘솔에 토큰·민감 정보 노출 금지.
 - 운영 배포에 `console.log` 디버그 흔적 커밋 금지.
 - 에러 로그는 식별자 + 컨텍스트 포함.
+
+
+# 테스트 규칙
+
+테스트 자체가 결정적이고 신뢰 가능해야 한다. 코드의 정확성을 보장하는 도구가 자기 자신부터 신뢰 불가하면 모든 검증이 무력화된다.
+
+## T1. 비결정적(flaky) 테스트 작성 금지
+
+아래 신호는 발견 즉시 결정적 패턴으로 재작성한다.
+
+- **시간 의존**: `Date.now()` / `new Date()` / `performance.now()` 를 검증값에 직접 비교 금지. 시간 제어가 필요하면 `vi.useFakeTimers()` / `jest.useFakeTimers()` 또는 명시적 시각 fixture.
+- **자동 생성 id 절대값 비교**: 백엔드 mock 응답이나 클라이언트 임시 id 의 절대값 하드코딩 금지. 셋업에서 부여한 값을 동적 참조하거나 stable seed.
+- **정렬 tie-break 미정의**: `sort((a,b) => b.createdAt - a.createdAt)` 만으로 동일 timestamp row 의 순서를 단언 금지. secondary key 동반.
+- **다른 테스트 사이드이펙트 의존**: localStorage / sessionStorage / IndexedDB / 전역 zustand store / module-scoped 상태 잔여 의존 금지. beforeEach 에서 명시적으로 초기화.
+- **외부 네트워크·랜덤**: 실제 fetch, `Math.random()`, `crypto.randomUUID()` 결과 비교 금지. MSW · 명시 mock · seed 고정으로 격리.
+- **`setTimeout` / 폴링으로 기다리기**: `await waitFor(condition, { timeout })` 또는 promise resolution 신호 사용. fixed sleep 으로 비동기 결과 기다리는 패턴 금지.
+- **snapshot 에 동적 데이터 포함**: 현재 시각, 자동 id, 랜덤값이 들어간 snapshot 은 첫 실행 이후 깨진다. 동적 필드는 mask 또는 별도 단언으로 분리.
+
+## T2. flaky 발견 시 처리 원칙
+
+플레이키 테스트가 발견되면 **검증값을 완화하거나 sleep / retry 로 회피 금지** — 검증 의도가 손실된다. 별도 PR 로 결정성을 확보한 뒤 본 작업을 진행한다. Coder 가 단독 판단으로 테스트 의도를 약화시키지 않는다(테스트 수정·삭제는 CLAUDE.md 의 사용자 승인 의무 그대로 적용).

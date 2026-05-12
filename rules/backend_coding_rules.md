@@ -150,6 +150,28 @@ JDBC `Connection`, `InputStream`, Reactor 구독은 반드시 닫거나 dispose 
 - (백엔드) 로거는 Lombok `@Slf4j` 어노테이션으로 선언한다. `LoggerFactory.getLogger(클래스명.class)` 직접 선언 금지.
 
 
+# 테스트 규칙
+
+테스트 자체가 결정적이고 신뢰 가능해야 한다. 코드의 정확성을 보장하는 도구가 자기 자신부터 신뢰 불가하면 모든 검증이 무력화된다.
+
+## T1. 비결정적(flaky) 테스트 작성 금지
+
+아래 신호는 발견 즉시 결정적 패턴으로 재작성한다.
+
+- **시간 의존**: `Instant.now()` / `LocalDateTime.now()` / `System.currentTimeMillis()` 를 검증값에 직접 비교 금지. 시간 통제가 필요하면 `Clock` 주입 + `Clock.fixed(...)` 또는 명시적 시각 fixture.
+- **시퀀스·id 절대값 비교**: `assertThat(id).isEqualTo(12L)` 같이 DB IDENTITY 시퀀스 절대값을 하드코딩 금지. `isEqualTo(saved.getHouseBlId())` 등 동적 참조. `@DataJpaTest` / `@Transactional` 롤백 환경에서도 H2 IDENTITY 시퀀스는 롤백되지 않으므로, 다른 테스트의 INSERT 갯수가 시퀀스 시작값에 영향을 준다.
+- **정렬 tie-break 미정의**: `ORDER BY createdAt DESC` 만으로 동일 ms 두 row 의 순서를 검증하면 실행 환경/JIT 워밍업/다른 테스트와의 인터리브에 따라 깨진다. **secondary key 항상 동반** — `ORDER BY createdAt DESC, id DESC`. 검증 측에서도 절대 순서 가정 금지.
+- **다른 테스트 사이드이펙트 의존**: 공용 캐시 / static 필드 / DB 잔여 row / 시퀀스 위치에 의존하는 테스트 금지. 각 테스트는 자체 fixture 로 시작·정리.
+- **외부 시스템·네트워크·랜덤**: 실제 외부 API 호출, `Math.random()`, `UUID.randomUUID()` 결과 비교 금지. WireMock · Testcontainers · seed 고정 random 으로 격리.
+- **`Thread.sleep` / 폴링**: 결정적 동기화 수단(`CountDownLatch`, `Awaitility` 명시 timeout + condition) 대신 sleep 으로 "기다리기"는 flaky 의 근원.
+
+## T2. flaky 발견 시 처리 원칙
+
+플레이키 테스트가 발견되면 **검증값을 완화하거나 sleep / retry 로 회피 금지** — 검증 의도가 손실된다. 별도 PR 로 결정성을 확보한 뒤 본 작업을 진행한다. Coder 가 단독 판단으로 테스트 의도를 약화시키지 않는다(테스트 수정·삭제는 CLAUDE.md 의 사용자 승인 의무 그대로 적용).
+
+`@DataJpaTest` / `@SpringBootTest` 통합 테스트에서 시퀀스·createdAt 절대값 비교 패턴이 발견되면 작업 단위와 무관해도 보고한다.
+
+
 # 프로젝트 누적 규칙
 
 사용자 검수 라운드에서 도출된 이 프로젝트 특화 규칙.
