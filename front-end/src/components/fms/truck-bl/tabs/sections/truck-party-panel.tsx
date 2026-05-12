@@ -27,15 +27,6 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
   const { register, control, setValue } = useFormContext<TruckBlFormValues>();
   return (
     <>
-      {/* CodeBox party-cn이 자체적으로 .party-block + .party-block__head + 라벨 span을 렌더 */}
-      <CodeBox
-        kind="party-cn"
-        variant="panel"
-        label={party.role}
-        codeProps={{ ...register(party.codeKey) }}
-        nameProps={{ ...register(party.nameKey) }}
-        onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-      />
       {/* 액션 버튼 행 — head 바깥 별도 row */}
       <div className="party-block__head-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginTop: 2 }}>
         {party.btn && (
@@ -49,6 +40,15 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
           Clear
         </button>
       </div>
+      {/* CodeBox party-cn이 자체적으로 .party-block + .party-block__head + 라벨 span을 렌더 */}
+      <CodeBox
+        kind="party-cn"
+        variant="panel"
+        label={party.role}
+        codeProps={{ ...register(party.codeKey) }}
+        nameProps={{ ...register(party.nameKey) }}
+        onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      />
       <Controller
         control={control}
         name={party.addrKey}
