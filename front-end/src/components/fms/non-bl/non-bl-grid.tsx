@@ -36,6 +36,7 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
     queryFn: () => nonBlPort.list(extraFilter!, showAll ? 1 : currentPage, showAll ? 10000000 : 50),
     enabled: extraFilter !== null,
     staleTime: Infinity,
+    gcTime: Infinity, // staleTime: Infinity만으로는 gcTime 기본 5분에 막혀 무력화됨 (§6.36)
     refetchOnMount: false,
   });
 

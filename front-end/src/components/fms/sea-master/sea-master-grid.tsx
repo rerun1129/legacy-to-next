@@ -33,6 +33,7 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
     ),
     enabled: extraFilter !== null,
     staleTime: Infinity,
+    gcTime: Infinity, // staleTime: Infinity만으로는 gcTime 기본 5분에 막혀 무력화됨 (§6.36)
     refetchOnMount: false,
   });
 
