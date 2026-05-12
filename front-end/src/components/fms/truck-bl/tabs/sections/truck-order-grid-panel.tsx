@@ -6,12 +6,15 @@ import { Plus, Minus } from "lucide-react";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 import { EMPTY_TRUCK_ORDER_ROW } from "@/components/fms/truck-bl/truck-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { TextBox, NumberBox } from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 
 type TruckOrderRow = NonNullable<TruckBlFormValues["truckOrders"]>[number];
 
 export function TruckOrderGridPanel() {
   const { control, register } = useFormContext<TruckBlFormValues>();
+  const { options: truckTypeOptions }     = useEnumOptions("TruckType");
+  const { options: containerTypeOptions } = useEnumOptions("ContainerType");
   const { fields, append, remove } = useFieldArray({ control, name: "truckOrders" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -23,15 +26,15 @@ export function TruckOrderGridPanel() {
     { key: "grossWeightKg", label: "Gross W/T",      width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
     { key: "cbm",           label: "CBM",            width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
     { key: "truckNo",       label: "Truck No.",      width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckType`)} /> },
+    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => <ComboBox  variant="cell" options={truckTypeOptions} {...register(`truckOrders.${i}.truckType`)} /> },
     { key: "driver",        label: "Driver",         width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.driver`)} /> },
     { key: "mobileNo",      label: "Mobile No",      width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.mobileNo`)} /> },
     { key: "containerNo",   label: "Container No.",  width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerNo`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerType`)} /> },
+    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => <ComboBox  variant="cell" options={containerTypeOptions} {...register(`truckOrders.${i}.containerType`)} /> },
     { key: "sealNo1",       label: "Seal No.1",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "sealNo2",       label: "Seal No.2",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "sealNo3",       label: "Seal No.3",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-  ], [register]);
+  ], [register, truckTypeOptions, containerTypeOptions]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
