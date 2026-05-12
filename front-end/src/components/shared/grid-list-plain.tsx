@@ -83,6 +83,15 @@ export function PlainGridList<T>({
     overscan: 30,
     // 실제 DOM 높이로 측정해 추정값과의 누적 오차를 제거한다.
     measureElement: (el) => el?.getBoundingClientRect().height ?? ROW_HEIGHT_PX,
+    // index 기반 default key는 행 삭제 시 같은 위치에 다른 row가 들어와
+    // uncontrolled input의 DOM value가 stale로 남는 버그를 유발한다.
+    getItemKey: (index) => {
+      if (rowKey) {
+        try { return String(rowKey(data[index], index)); } catch { return index; }
+      }
+      const idVal = (data[index] as Record<string, unknown> | undefined)?.id;
+      return idVal != null ? String(idVal) : index;
+    },
   });
 
   const getRowOffset = useCallback(
