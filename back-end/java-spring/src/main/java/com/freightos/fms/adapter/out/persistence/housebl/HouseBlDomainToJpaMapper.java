@@ -61,9 +61,8 @@ public class HouseBlDomainToJpaMapper {
 
     /**
      * Truck 전용 공통 필드 적용.
-     * applyCommonFields와 달리 Truck form 미보유 필드(masterBlId, mblNo, masterRefNo,
-     * shipperAddress, consigneeAddress, notifyAddress, docPartnerAddress)는 SET하지 않아
-     * DB 기존 값을 보호한다.
+     * applyCommonFields와 달리 Truck form 미보유 필드(masterBlId, mblNo, masterRefNo)는
+     * SET하지 않아 DB 기존 값을 보호한다.
      */
     public void applyTruckCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
@@ -81,9 +80,13 @@ public class HouseBlDomainToJpaMapper {
         jpa.setShipmentType(domain.getShipmentType());
         jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
         jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
         jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
         jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
+        jpa.setDocPartnerAddress(mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(domain.getPkgUnit());
         jpa.setWeightUnit(domain.getWeightUnit());

@@ -156,9 +156,13 @@ export interface CreateTruckBlRequest {
   hblNo?: string;
   bound?: string;
   shipperCode?: string;
+  shipperAddress?: string;
   consigneeCode?: string;
+  consigneeAddress?: string;
   notifyCode?: string;
+  notifyAddress?: string;
   settlePartnerCode?: string;
+  docPartnerAddress?: string;
   polCode?: string;
   podCode?: string;
   etd?: string;

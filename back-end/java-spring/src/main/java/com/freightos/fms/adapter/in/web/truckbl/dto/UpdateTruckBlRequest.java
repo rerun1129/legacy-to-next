@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.in.web.truckbl.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -12,8 +13,13 @@ import java.util.List;
 public record UpdateTruckBlRequest(
         @NotBlank String bound,
         String shipperCode,
+        @Size(max = 200) String shipperAddress,
         String consigneeCode,
+        @Size(max = 200) String consigneeAddress,
         String notifyCode,
+        @Size(max = 200) String notifyAddress,
+        String docPartnerCode,
+        @Size(max = 200) String docPartnerAddress,
         String settlePartnerCode,
         String polCode,
         String podCode,

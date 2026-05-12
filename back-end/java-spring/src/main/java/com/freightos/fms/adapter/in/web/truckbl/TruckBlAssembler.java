@@ -52,13 +52,13 @@ public class TruckBlAssembler {
                 null, // shipmentType
                 null, // freightTerm
                 req.shipperCode(),
-                null, // shipperAddress
+                req.shipperAddress(),
                 req.consigneeCode(),
-                null, // consigneeAddress
+                req.consigneeAddress(),
                 req.notifyCode(),
-                null, // notifyAddress
-                null, // docPartnerCode
-                null, // docPartnerAddress
+                req.notifyAddress(),
+                req.docPartnerCode(),
+                req.docPartnerAddress(),
                 req.settlePartnerCode(),
                 req.polCode(),
                 req.podCode(),
@@ -112,13 +112,13 @@ public class TruckBlAssembler {
                 null, // shipmentType
                 null, // freightTerm
                 req.shipperCode(),
-                null, // shipperAddress
+                req.shipperAddress(),
                 req.consigneeCode(),
-                null, // consigneeAddress
+                req.consigneeAddress(),
                 req.notifyCode(),
-                null, // notifyAddress
-                null, // docPartnerCode
-                null, // docPartnerAddress
+                req.notifyAddress(),
+                req.docPartnerCode(),
+                req.docPartnerAddress(),
                 req.settlePartnerCode(),
                 req.polCode(),
                 req.podCode(),

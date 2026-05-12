@@ -102,8 +102,10 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf),
                 Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf));
         entity.assignParties(
-                CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()),
-                CustomerCode.of(cmd.notifyCode()), CustomerCode.of(cmd.docPartnerCode()),
+                CustomerCode.of(cmd.shipperCode(), cmd.shipperAddress()),
+                CustomerCode.of(cmd.consigneeCode(), cmd.consigneeAddress()),
+                CustomerCode.of(cmd.notifyCode(), cmd.notifyAddress()),
+                CustomerCode.of(cmd.docPartnerCode(), cmd.docPartnerAddress()),
                 PortCode.of(Nullables.mapOrNull(cmd.seaDetail(), CreateHouseBlCommand.SeaDetailCommand::deliveryCode)));
         entity.updateSchedule(
                 PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()),
@@ -131,10 +133,10 @@ public class HouseBlFactory {
         return new HouseBl.HouseBlUpdateFields(
                 Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf),
                 Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf),
-                Nullables.mapOrNull(cmd.shipperCode(), CustomerCode::of),
-                Nullables.mapOrNull(cmd.consigneeCode(), CustomerCode::of),
-                Nullables.mapOrNull(cmd.notifyCode(), CustomerCode::of),
-                Nullables.mapOrNull(cmd.docPartnerCode(), CustomerCode::of),
+                Nullables.mapOrNull(cmd.shipperCode(), c -> CustomerCode.of(c, cmd.shipperAddress())),
+                Nullables.mapOrNull(cmd.consigneeCode(), c -> CustomerCode.of(c, cmd.consigneeAddress())),
+                Nullables.mapOrNull(cmd.notifyCode(), c -> CustomerCode.of(c, cmd.notifyAddress())),
+                Nullables.mapOrNull(cmd.docPartnerCode(), c -> CustomerCode.of(c, cmd.docPartnerAddress())),
                 Nullables.mapOrNull(cmd.polCode(), PortCode::of),
                 Nullables.mapOrNull(cmd.podCode(), PortCode::of),
                 Nullables.mapOrNull(cmd.etd(), BlDate::of),
