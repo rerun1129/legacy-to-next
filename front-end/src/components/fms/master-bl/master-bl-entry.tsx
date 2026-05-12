@@ -162,6 +162,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           alert('해당 B/L을 찾을 수 없습니다.');
           return;
         }
+        // 프레시 조회: stale 캐시·draft 제거
+        queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', rows[0].id] });
+        clearDraft(`master:${variantKey}:${rows[0].id}`);
         return masterBlPort.getById(rows[0].id).then((detail) => {
           form.reset({
             ...createEmptyMasterBlFormValues(),

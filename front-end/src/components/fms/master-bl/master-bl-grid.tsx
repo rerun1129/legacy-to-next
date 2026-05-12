@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import { masterBlPort } from "@/lib/ports";
 import type { MasterBlRow, MasterBlFilter } from "@/domain/master-bl";
@@ -19,6 +20,8 @@ interface Props {
 
 export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
   const [selected, setSelected] = useState<number | null>(null);
   const modeLabels = getModeLabels(variant.mode);
 
@@ -37,7 +40,12 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
       render: (_v, row) => (
         <span
           className="cell-hbl"
-          onDoubleClick={() => router.push(`/fms/master-bl/${variantKey}/entry?id=${row.id}`)}
+          onDoubleClick={() => {
+            // 프레시 조회: stale 캐시·draft 제거 후 Entry 진입
+            queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", row.id] });
+            clearDraft(`master:${variantKey}:${row.id}`);
+            router.push(`/fms/master-bl/${variantKey}/entry?id=${row.id}`);
+          }}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"
         >

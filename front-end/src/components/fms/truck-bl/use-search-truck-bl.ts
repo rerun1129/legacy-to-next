@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { truckBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import type { TruckBlFormValues } from "./truck-bl-schema";
 
 export function useSearchTruckBl(args: {
@@ -15,6 +16,7 @@ export function useSearchTruckBl(args: {
   const { form, id, detailLoadedRef } = args;
   const router = useRouter();
   const queryClient = useQueryClient();
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
 
   async function handleSearch() {
     const truckBlNo = form.getValues("truckBlNo")?.trim();
@@ -38,11 +40,14 @@ export function useSearchTruckBl(args: {
 
     const targetId = ids[0];
     if (targetId === id) {
-      // 동일 id 재조회 — detail invalidate로 refetch 트리거
+      // 동일 id 재조회 — detail invalidate + draft 클리어로 프레시 조회
       queryClient.invalidateQueries({ queryKey: ["truck-bl", "detail", id] });
+      clearDraft("truck::" + id);
       detailLoadedRef.current = false;
     } else {
-      // 다른 id — hot-marker 세팅 후 focus 이동 (§6.16)
+      // 다른 id — 프레시 조회: stale 캐시·draft 제거 후 focus 이동 (§6.16)
+      queryClient.invalidateQueries({ queryKey: ["truck-bl", "detail", targetId] });
+      clearDraft("truck::" + targetId);
       sessionStorage.setItem(`truck-bl-entry:hot:${targetId}`, "1");
       useEntryFocusStore.getState().setFocus("truckBl", targetId);
     }

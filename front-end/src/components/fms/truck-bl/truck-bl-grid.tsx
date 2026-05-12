@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { truckBlPort } from "@/lib/ports";
@@ -25,6 +26,8 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
   const router = useRouter();
   const addTab = useTabs((s) => s.addTab);
   const setFocus = useEntryFocusStore((s) => s.setFocus);
+  const queryClient = useQueryClient();
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
   const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -47,6 +50,9 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
       render: (v, row) => (
         <div
           onDoubleClick={() => {
+            // 프레시 조회: stale 캐시·draft 제거 후 Entry 진입
+            queryClient.invalidateQueries({ queryKey: ["truck-bl", "detail", row.id] });
+            clearDraft("truck::" + row.id);
             // hot-marker: Entry 화면이 신규 진입 시 하이라이트에 사용 (§6.16)
             sessionStorage.setItem(`truck-bl-entry:hot:${row.id}`, "1");
             setFocus(entryFocusKeys.truckBl, row.id);

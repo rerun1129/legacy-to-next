@@ -6,6 +6,7 @@ import { nonBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
 import { listFilterStore } from "@/lib/use-list-filter-store";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import type { NonBlFormValues } from "./non-bl-schema";
 
 // List 화면과 동일한 SCOPE를 사용하여 inject 슬롯 키 일치 보장
@@ -19,6 +20,7 @@ export function useSearchNonBl(args: {
   const { methods, id, detailLoadedRef } = args;
   const router = useRouter();
   const queryClient = useQueryClient();
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
 
   async function handleSearch() {
     const nonBlNo = methods.getValues("nonBlNo")?.trim();
@@ -44,9 +46,14 @@ export function useSearchNonBl(args: {
 
     const targetId = ids[0];
     if (targetId === id) {
+      // 동일 id 재조회 — detail invalidate + draft 클리어로 프레시 조회
       queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", id] });
+      clearDraft(`non::${id}`);
       detailLoadedRef.current = false;
     } else {
+      // 다른 id — 프레시 조회: stale 캐시·draft 제거 후 focus 이동
+      queryClient.invalidateQueries({ queryKey: ["non-bl", "detail", targetId] });
+      clearDraft(`non::${targetId}`);
       useEntryFocusStore.getState().setFocus("nonBl", targetId);
     }
   }

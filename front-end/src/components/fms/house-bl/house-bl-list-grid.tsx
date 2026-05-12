@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { houseBlPort } from "@/lib/ports";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { getBLVariant, getPageTitle } from "@/lib/bl-variants";
 import type { HouseBlRow, HouseBlFilter, Bound } from "@/domain/house-bl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -22,6 +23,8 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const setFocus = useEntryFocusStore((s) => s.setFocus);
   const addTab = useTabs((s) => s.addTab);
+  const queryClient = useQueryClient();
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
 
   // variant.mode → jobDiv (SEA/AIR), variant.direction → bound (EXP/IMP)
   // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
@@ -36,6 +39,9 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
 
   function handleHblDoubleClick(row: HouseBlRow) {
     const path = `/fms/house-bl/${variantKey}/entry`;
+    // 프레시 조회: stale 캐시·draft 제거 후 Entry 진입
+    queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", row.id] });
+    clearDraft(`house:${variantKey}:${row.id}`);
     setFocus(entryFocusKeys.houseBl(variantKey), row.id);
     addTab(getPageTitle(variant, "House", "Entry"), path);
     router.push(path);
