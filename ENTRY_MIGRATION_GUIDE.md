@@ -819,6 +819,46 @@ useQuery({
 
 ⚠️ **글로벌 `gcTime: Infinity` 절대 금지**: `QueryProvider` defaultOptions에 적용 시 검색 결과·enum·일회성 조회 등 **모든 inactive 쿼리가 영원히 GC되지 않아 메모리 누수**. 캐시 유지가 의도된 화면(Entry detail / Grid list)에만 화면 단위로 적용.
 
+**List `gcTime: Infinity`의 부작용 — 검색 조건 다양화 시 무한 누적**: `gcTime`은 "시간 기반" 만료라 사용자가 검색 조건을 다양하게 바꿔 빠르게 돌리면 시간으로는 못 잡는다. queryKey가 매번 달라지면(예: `[domain, "list", extraFilter1]` → `[..., extraFilter2]` → `[..., extraFilter3]` ...) 이전 entry는 inactive로 전환만 될 뿐 영원히 메모리 잔존. 보완책: **건수 기반 LRU 큐** — `query-provider.tsx`의 `QueryCache.subscribe`에서 화면별 list inactive entry를 5개로 상한. 활성 entry는 카운트 제외, detail은 미적용(BL ID당 1개라 누적 제한).
+
+```ts
+// query-provider.tsx — 글로벌 1곳에서 처리, list-client 수정 불필요
+const queryCache = client.getQueryCache();
+queryCache.subscribe((event) => {
+  if (event.type !== 'added' && event.type !== 'observerRemoved') return;
+  // 화면별 그룹핑 — [domain, "list", variantKey?] 기준 (variantKey가 string이면 화면 식별자에 포함, 객체면 미포함)
+  const groups = new Map<string, { queryKey: unknown[]; updatedAt: number }[]>();
+  queryCache.findAll({
+    predicate: (q) =>
+      Array.isArray(q.queryKey) &&
+      q.queryKey[1] === 'list' &&
+      q.getObserversCount() === 0,
+  }).forEach((q) => {
+    const qk = q.queryKey as unknown[];
+    const key = [qk[0], qk[1], typeof qk[2] === 'string' ? qk[2] : ''].join('::');
+    const arr = groups.get(key) ?? [];
+    arr.push({ queryKey: qk, updatedAt: q.state.dataUpdatedAt });
+    groups.set(key, arr);
+  });
+  for (const arr of groups.values()) {
+    if (arr.length <= 5) continue;
+    arr.sort((a, b) => a.updatedAt - b.updatedAt)
+      .slice(0, arr.length - 5)
+      .forEach((entry) => queryCache.remove(queryCache.find({ queryKey: entry.queryKey })!));
+  }
+});
+```
+
+**LRU 정책 정량 효과**:
+- 활성 화면(현재 grid) → observer ≥ 1 → 카운트 제외, 영향 0
+- 같은 화면 inactive entry 5개까지 보존 → 5 × 50KB ≈ 250KB / 화면
+- 11~15 화면(variant 포함) × 250KB ≈ **상한 ~3MB로 고정**
+- showAll 분기도 자동 LRU 대상 — 5MB × 5 = 25MB 화면당 (단일 화면이라 총량은 동일)
+
+**Trade-off**: 같은 검색 조건에서 페이지만 6+ 넘게 이동 후 첫 페이지 복귀 시 첫 페이지 entry가 밀려나 백엔드 1회 호출. 일반 작업 단위(50 rows × 5 페이지 = 250 rows)에서 실용상 문제 없음.
+
+사례: 2026-05-12 — 사용자 보고 "검색 조건 다양화 시 누적 위험" 분석에서 시작된 후속 정렬.
+
 **그리드(List)와의 분업**:
 | 위치 | 옵션 | 근거 |
 |---|---|---|
