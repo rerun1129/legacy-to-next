@@ -69,7 +69,7 @@ export function TruckPartyPanel() {
   }));
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel truck-party-panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Party</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope="truck-party-panel" fields={fields} />

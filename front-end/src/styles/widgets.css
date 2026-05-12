@@ -347,6 +347,7 @@
 /* ── Field widget list ── */
 .field-widget-item { position: relative; }
 .field-widget-item.is-dragging { opacity: 0.35; }
+.truck-party-panel .field-widget-item + .field-widget-item { padding-top: 4px; }
 
 .field-widget-container.is-edit {
   outline: 1px dashed color-mix(in srgb, var(--tab-accent) 35%, transparent);
