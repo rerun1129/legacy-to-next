@@ -2,6 +2,7 @@ package com.freightos.fms.application.truckbl.projection;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Truck B/L 단건 조회 결과 Projection.
@@ -47,6 +48,23 @@ public record TruckBlDetailResult(
         String etaTm,
         String loadType,
         String serviceTerm,
-        String voyageNo
+        String voyageNo,
+
+        // 자식 데이터
+        List<TruckOrderView> truckOrders,
+        DescView desc
 ) {
+    public record TruckOrderView(
+            Long id,
+            String truckOrderNo, Integer pkgQty, String pkgUnit,
+            BigDecimal grossWeightKg, BigDecimal cbm,
+            String truckNo, String truckType, String driver, String mobileNo,
+            String containerNo, String containerType,
+            String sealNo1, String sealNo2, String sealNo3
+    ) {}
+
+    public record DescView(
+            String marks, String description,
+            String descClause1, String descClause2, String remark
+    ) {}
 }

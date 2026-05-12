@@ -9,19 +9,25 @@ import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
+import com.freightos.fms.domain.common.vo.ContainerNumber;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
 import com.freightos.fms.domain.common.vo.PortCode;
 import com.freightos.fms.domain.common.vo.Quantity;
+import com.freightos.fms.domain.common.vo.SealNumber;
 import com.freightos.fms.domain.common.vo.TeamCode;
 import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
+import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
+import com.freightos.fms.domain.housebl.entity.HouseBlTruckOrder;
 import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Truck B/L 도메인 변환 팩토리.
@@ -83,7 +89,45 @@ public class TruckBlFactory {
                 truck.getEtaTm(),
                 Nullables.mapOrNull(truck.getLoadType(), LoadType::name),
                 Nullables.mapOrNull(truck.getServiceTerm(), ServiceTerm::name),
-                VoMapper.mapOrNull(truck.getVesselVoyage(), VesselVoyage::voyageNo)
+                VoMapper.mapOrNull(truck.getVesselVoyage(), VesselVoyage::voyageNo),
+                toTruckOrderViews(truck.getTruckOrders()),
+                toDescView(truck.getDesc())
+        );
+    }
+
+    private List<TruckBlDetailResult.TruckOrderView> toTruckOrderViews(List<HouseBlTruckOrder> orders) {
+        if (orders == null) return null;
+        return orders.stream().map(this::toTruckOrderView).toList();
+    }
+
+    private TruckBlDetailResult.TruckOrderView toTruckOrderView(HouseBlTruckOrder order) {
+        return new TruckBlDetailResult.TruckOrderView(
+                order.getId(),
+                order.getTruckOrderNo(),
+                order.getPkgQty(),
+                order.getPkgUnit(),
+                VoMapper.mapOrNull(order.getGrossWeightKg(), Weight::kg),
+                VoMapper.mapOrNull(order.getCbm(), Volume::cbm),
+                order.getTruckNo(),
+                Nullables.mapOrNull(order.getTruckType(), Enum::name),
+                order.getDriver(),
+                order.getMobileNo(),
+                VoMapper.mapOrNull(order.getContainerNo(), ContainerNumber::value),
+                Nullables.mapOrNull(order.getContainerType(), Enum::name),
+                VoMapper.mapOrNull(order.getSealNo1(), SealNumber::value),
+                VoMapper.mapOrNull(order.getSealNo2(), SealNumber::value),
+                VoMapper.mapOrNull(order.getSealNo3(), SealNumber::value)
+        );
+    }
+
+    private TruckBlDetailResult.DescView toDescView(HouseBlDesc desc) {
+        if (desc == null) return null;
+        return new TruckBlDetailResult.DescView(
+                desc.getMarks(),
+                desc.getDescription(),
+                Nullables.mapOrNull(desc.getDescClause1(), Enum::name),
+                Nullables.mapOrNull(desc.getDescClause2(), Enum::name),
+                desc.getRemark()
         );
     }
 }

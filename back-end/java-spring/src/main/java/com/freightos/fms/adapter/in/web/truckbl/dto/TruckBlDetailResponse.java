@@ -4,6 +4,7 @@ import com.freightos.fms.application.truckbl.projection.TruckBlDetailResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /** Truck B/L 상세 응답 DTO. 도메인 엔티티를 직접 노출하지 않는다. */
 public record TruckBlDetailResponse(
@@ -45,9 +46,41 @@ public record TruckBlDetailResponse(
         String etaTm,
         String loadType,
         String serviceTerm,
-        String voyageNo
+        String voyageNo,
+
+        // 자식 데이터
+        List<TruckOrderView> truckOrders,
+        DescView desc
 ) {
+    public record TruckOrderView(
+            Long id,
+            String truckOrderNo, Integer pkgQty, String pkgUnit,
+            BigDecimal grossWeightKg, BigDecimal cbm,
+            String truckNo, String truckType, String driver, String mobileNo,
+            String containerNo, String containerType,
+            String sealNo1, String sealNo2, String sealNo3
+    ) {}
+
+    public record DescView(
+            String marks, String description,
+            String descClause1, String descClause2, String remark
+    ) {}
+
     public static TruckBlDetailResponse from(TruckBlDetailResult result) {
+        List<TruckOrderView> truckOrderViews = result.truckOrders() == null ? null
+                : result.truckOrders().stream()
+                        .map(o -> new TruckOrderView(
+                                o.id(), o.truckOrderNo(), o.pkgQty(), o.pkgUnit(),
+                                o.grossWeightKg(), o.cbm(),
+                                o.truckNo(), o.truckType(), o.driver(), o.mobileNo(),
+                                o.containerNo(), o.containerType(),
+                                o.sealNo1(), o.sealNo2(), o.sealNo3()))
+                        .toList();
+        DescView descView = result.desc() == null ? null
+                : new DescView(
+                        result.desc().marks(), result.desc().description(),
+                        result.desc().descClause1(), result.desc().descClause2(),
+                        result.desc().remark());
         return new TruckBlDetailResponse(
                 result.id(),
                 result.hblNo(),
@@ -85,7 +118,9 @@ public record TruckBlDetailResponse(
                 result.etaTm(),
                 result.loadType(),
                 result.serviceTerm(),
-                result.voyageNo()
+                result.voyageNo(),
+                truckOrderViews,
+                descView
         );
     }
 }
