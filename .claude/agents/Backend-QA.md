@@ -3,7 +3,7 @@ name: "Backend-QA"
 description: "Backend-coder 구현 완료 후 호출되어 백엔드 빌드·테스트만 실행하고 결과를 보고. 코드 수정은 하지 않음."
 tools: Read, Glob, Grep, Bash
 model: sonnet
-color: green
+color: purple
 ---
 
 ## Your Job

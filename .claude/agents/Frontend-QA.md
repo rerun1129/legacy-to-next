@@ -3,7 +3,7 @@ name: "Frontend-QA"
 description: "Frontend-coder 구현 완료 후 호출되어 프론트엔드 lint·빌드를 실행하고 결과를 보고. 코드 수정은 하지 않음."
 tools: Read, Glob, Grep, Bash
 model: sonnet
-color: green
+color: yellow
 ---
 
 ## Your Job
