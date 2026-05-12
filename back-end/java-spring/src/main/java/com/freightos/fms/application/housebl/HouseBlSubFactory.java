@@ -156,6 +156,7 @@ class HouseBlSubFactory {
         if (cmds == null || cmds.isEmpty()) return;
         entity.initTruckOrders(cmds.stream().map(c -> {
             HouseBlTruckOrder o = HouseBlTruckOrder.create(null);
+            if (c.id() != null) o.assignIdentity(c.id(), null, null, null, null);
             o.updateDetails(new HouseBlTruckOrder.Details(
                     c.truckOrderNo(), c.pkgQty(), c.pkgUnit(),
                     Weight.of(c.grossWeightKg()), Volume.of(c.cbm()),

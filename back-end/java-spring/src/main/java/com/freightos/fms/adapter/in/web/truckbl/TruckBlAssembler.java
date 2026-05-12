@@ -202,10 +202,8 @@ public class TruckBlAssembler {
     private List<UpdateHouseBlCommand.TruckOrderCommand> toTruckOrderCommandsU(
             List<UpdateTruckBlRequest.TruckOrderRequest> reqs) {
         if (reqs == null) return null;
-        // UpdateHouseBlCommand.TruckOrderCommand에 id 필드가 없으므로 id는 adapter update 시 사용 불가.
-        // Truck update adapter는 syncTruckOrders(clear+addAll) 패턴으로 처리한다.
         return reqs.stream().map(r -> new UpdateHouseBlCommand.TruckOrderCommand(
-                r.truckOrderNo(), r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.cbm(),
+                r.id(), r.truckOrderNo(), r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.cbm(),
                 r.truckNo(), r.truckType(), r.driver(), r.mobileNo(),
                 r.containerNo(), r.containerType(), r.sealNo1(), r.sealNo2(), r.sealNo3())).toList();
     }

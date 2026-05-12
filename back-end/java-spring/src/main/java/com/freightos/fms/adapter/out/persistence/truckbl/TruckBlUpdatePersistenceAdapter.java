@@ -60,22 +60,22 @@ public class TruckBlUpdatePersistenceAdapter implements TruckBlPersistencePort {
         houseBlFactory.applyToEntity(command, domain);
 
         // 도메인 → JPA dirty-check 기반 필드 반영
-        domainToJpaMapper.applyCommonFields(domain, parentJpa);
-        domainToJpaMapper.applyTruckFields(domain, truckJpa);
+        domainToJpaMapper.applyTruckCommonFields(domain, parentJpa);
+        domainToJpaMapper.applyTruckBlFields(domain, truckJpa);
 
         // Desc 동기화 — 1:1 관계
         applyDescSync(domain, truckJpa, descJpa);
 
-        // TruckOrder 그리드 sync (clear+addAll — orphanRemoval이 DELETE 처리)
+        // TruckOrder 그리드 merge-by-id — id 일치 시 UPDATE, 미일치 시 INSERT, orphanRemoval이 DELETE 처리
         List<HouseBlTruckOrderJpaEntity> incomingOrders = domain.getTruckOrders().stream()
                 .map(this::toTruckOrderJpa)
                 .toList();
-        truckJpa.syncTruckOrders(incomingOrders);
+        truckJpa.mergeTruckOrders(incomingOrders);
 
-        // Dim 동기화
+        // Dim merge-by-id
         List<com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlTruckDimJpaEntity> incomingDims =
                 domain.getDims().stream().map(houseBlCargoMapper::toTruckDimJpa).toList();
-        truckJpa.syncDims(incomingDims);
+        truckJpa.mergeDims(incomingDims);
         // 트랜잭션 커밋 시 dirty-checking으로 parentJpa·truckJpa UPDATE 자동 발생
     }
 
@@ -95,6 +95,8 @@ public class TruckBlUpdatePersistenceAdapter implements TruckBlPersistencePort {
 
     private HouseBlTruckOrderJpaEntity toTruckOrderJpa(HouseBlTruckOrder order) {
         HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
+        // mergeTruckOrders 매칭용 id set — 미매칭 시 IDENTITY 신규 INSERT
+        if (order.getId() != null) jpa.setHouseBlTruckOrderId(order.getId());
         houseBlDocMapper.applyTruckOrderFields(order, jpa);
         return jpa;
     }

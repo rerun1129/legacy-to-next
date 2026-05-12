@@ -113,7 +113,8 @@ public class HouseBlCargoMapper {
 
     public HouseBlTruckDimJpaEntity toTruckDimJpa(HouseBlDim d) {
         HouseBlTruckDimJpaEntity jpa = new HouseBlTruckDimJpaEntity();
-        // syncDims(clear+addAll) + orphanRemoval=true 패턴이라 매번 신규 INSERT. @Id는 IDENTITY가 발급.
+        // mergeDims 매칭용 id set — 미매칭 시 IDENTITY 신규 INSERT
+        if (d.getId() != null) jpa.setHouseBlTruckDimId(d.getId());
         jpa.setLengthCm(d.getLengthCm());
         jpa.setWidthCm(d.getWidthCm());
         jpa.setHeightCm(d.getHeightCm());

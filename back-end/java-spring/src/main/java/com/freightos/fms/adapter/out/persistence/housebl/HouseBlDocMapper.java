@@ -127,7 +127,7 @@ public class HouseBlDocMapper {
         return jpaList.stream().map(this::toTruckOrderDomain).collect(Collectors.toList());
     }
 
-    /** FK(house_bl_truck_id)는 HouseBlTruckJpaEntity.syncTruckOrders(@JoinColumn)이 설정 — truckJpa 인자 불필요 */
+    /** FK(house_bl_truck_id)는 HouseBlTruckJpaEntity.mergeTruckOrders/@JoinColumn이 설정 — truckJpa 인자 불필요 */
     public void applyTruckOrderFields(HouseBlTruckOrder domain, HouseBlTruckOrderJpaEntity jpa) {
         jpa.setTruckOrderNo(domain.getTruckOrderNo());
         jpa.setPkgQty(domain.getPkgQty());
@@ -145,7 +145,7 @@ public class HouseBlDocMapper {
         jpa.setSealNo3(mapOrNull(domain.getSealNo3(), SealNumber::value));
     }
 
-    /** FK(house_bl_truck_id)는 HouseBlTruckJpaEntity.syncTruckOrders(@JoinColumn)이 설정 — truckJpa 인자 불필요 */
+    /** FK(house_bl_truck_id)는 HouseBlTruckJpaEntity.mergeTruckOrders/@JoinColumn이 설정 — truckJpa 인자 불필요 */
     public HouseBlTruckOrderJpaEntity toTruckOrderJpa(HouseBlTruckOrder o) {
         HouseBlTruckOrderJpaEntity jpa = new HouseBlTruckOrderJpaEntity();
         applyTruckOrderFields(o, jpa);

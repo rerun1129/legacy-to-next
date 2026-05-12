@@ -71,6 +71,7 @@ public class HouseBlTruckOrderJpaEntity extends BaseJpaEntity {
     @Column(name = "seal_no_3", length = 30)
     private String sealNo3;
 
+    public void setHouseBlTruckOrderId(Long v)      { this.houseBlTruckOrderId = v; }
     public void setHouseBlTruckId(Long v)           { this.houseBlTruckId = v; }
     public void setTruckOrderNo(String v)          { this.truckOrderNo = v; }
     public void setPkgQty(Integer v)               { this.pkgQty       = v; }

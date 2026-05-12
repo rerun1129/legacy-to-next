@@ -60,6 +60,43 @@ public class HouseBlDomainToJpaMapper {
     }
 
     /**
+     * Truck 전용 공통 필드 적용.
+     * applyCommonFields와 달리 Truck form 미보유 필드(masterBlId, mblNo, masterRefNo,
+     * shipperAddress, consigneeAddress, notifyAddress, docPartnerAddress)는 SET하지 않아
+     * DB 기존 값을 보호한다.
+     */
+    public void applyTruckCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
+        jpa.setBound(domain.getBound());
+        jpa.setJobDiv(JobDiv.TRUCK);
+        jpa.setHblNo(mapOrNull(domain.getHblNo(), BlNumber::value));
+        jpa.setPolCode(mapOrNull(domain.getPolCode(), PortCode::value));
+        jpa.setPodCode(mapOrNull(domain.getPodCode(), PortCode::value));
+        jpa.setEtd(mapOrNull(domain.getEtd(), BlDate::asString));
+        jpa.setEta(mapOrNull(domain.getEta(), BlDate::asString));
+        jpa.setActualCustomerCode(mapOrNull(domain.getActualCustomerCode(), CustomerCode::value));
+        jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
+        jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
+        jpa.setSalesManCode(mapOrNull(domain.getSalesManCode(), EmployeeCode::value));
+        jpa.setShipmentType(domain.getShipmentType());
+        jpa.setFreightTerm(domain.getFreightTerm());
+        jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
+        jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
+        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setWeightUnit(domain.getWeightUnit());
+        jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
+        jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
+        jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
+        jpa.setIncoterms(domain.getIncoterms());
+        jpa.setSalesClass(domain.getSalesClass());
+        jpa.setMainItemName(domain.getMainItemName());
+        jpa.setHsCode(domain.getHsCode());
+    }
+
+    /**
      * NonBl 전용 공통 필드 적용.
      * applyCommonFields와 거의 동일하나, NonBl form이 보내지 않는 필드는 SET하지 않아
      * DB 기존 값을 보호한다: shipperAddress, consigneeAddress, notifyAddress,
@@ -153,6 +190,27 @@ public class HouseBlDomainToJpaMapper {
         jpa.setVoyageNo(Nullables.mapOrNull(vv, VesselVoyage::voyageNo));
         jpa.setPickupDate(mapOrNull(domain.getPickupDate(), BlDate::asString));
         jpa.setPickupTm(domain.getPickupTm());
+        jpa.setEtdTm(domain.getEtdTm());
+        jpa.setEtaTm(domain.getEtaTm());
+        jpa.setLoadType(domain.getLoadType());
+        jpa.setServiceTerm(domain.getServiceTerm());
+        jpa.setTruckerCode(mapOrNull(domain.getTruckerCode(), CustomerCode::value));
+        jpa.setTruckerPic(mapOrNull(domain.getTruckerPic(), EmployeeCode::value));
+        jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        jpa.setVolumeDivisor(domain.getVolumeDivisor());
+        jpa.setRemark(domain.getRemark());
+    }
+
+    /**
+     * Truck 전용 확장 필드 적용 (Update 경로 전용).
+     * Truck form 미보유 필드(pickupTm)는 SET하지 않아 DB 기존 값을 보호한다.
+     * vesselName은 "TRUCK" 고정값이므로 폼에 노출하지 않으나 항상 SET하여 일관성 유지.
+     */
+    public void applyTruckBlFields(HouseBlTruck domain, HouseBlTruckJpaEntity jpa) {
+        VesselVoyage vv = domain.getVesselVoyage();
+        jpa.setVesselName(vv != null ? vv.vesselName() : "TRUCK");
+        jpa.setVoyageNo(Nullables.mapOrNull(vv, VesselVoyage::voyageNo));
+        jpa.setPickupDate(mapOrNull(domain.getPickupDate(), BlDate::asString));
         jpa.setEtdTm(domain.getEtdTm());
         jpa.setEtaTm(domain.getEtaTm());
         jpa.setLoadType(domain.getLoadType());

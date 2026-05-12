@@ -11,7 +11,9 @@ import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JPA ORM 엔티티 — House B/L 트럭 확장.
@@ -112,5 +114,79 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     public void syncTruckOrders(List<HouseBlTruckOrderJpaEntity> newOrders) {
         this.truckOrders.clear();
         this.truckOrders.addAll(newOrders);
+    }
+
+    /**
+     * TRUCK DIM merge-by-id.
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeDims(List<HouseBlTruckDimJpaEntity> incoming) {
+        Map<Long, HouseBlTruckDimJpaEntity> existingById = new HashMap<>();
+        for (HouseBlTruckDimJpaEntity e : this.dims) {
+            if (e.getHouseBlTruckDimId() != null) existingById.put(e.getHouseBlTruckDimId(), e);
+        }
+        List<HouseBlTruckDimJpaEntity> merged = new ArrayList<>();
+        for (HouseBlTruckDimJpaEntity inc : incoming) {
+            if (inc.getHouseBlTruckDimId() != null && existingById.containsKey(inc.getHouseBlTruckDimId())) {
+                HouseBlTruckDimJpaEntity existing = existingById.get(inc.getHouseBlTruckDimId());
+                copyDimFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.dims.clear();
+        this.dims.addAll(merged);
+    }
+
+    /**
+     * TRUCK Order merge-by-id.
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeTruckOrders(List<HouseBlTruckOrderJpaEntity> incoming) {
+        Map<Long, HouseBlTruckOrderJpaEntity> existingById = new HashMap<>();
+        for (HouseBlTruckOrderJpaEntity e : this.truckOrders) {
+            if (e.getHouseBlTruckOrderId() != null) existingById.put(e.getHouseBlTruckOrderId(), e);
+        }
+        List<HouseBlTruckOrderJpaEntity> merged = new ArrayList<>();
+        for (HouseBlTruckOrderJpaEntity inc : incoming) {
+            if (inc.getHouseBlTruckOrderId() != null && existingById.containsKey(inc.getHouseBlTruckOrderId())) {
+                HouseBlTruckOrderJpaEntity existing = existingById.get(inc.getHouseBlTruckOrderId());
+                copyTruckOrderFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.truckOrders.clear();
+        this.truckOrders.addAll(merged);
+    }
+
+    private void copyDimFields(HouseBlTruckDimJpaEntity src, HouseBlTruckDimJpaEntity dst) {
+        dst.setLengthCm(src.getLengthCm());
+        dst.setWidthCm(src.getWidthCm());
+        dst.setHeightCm(src.getHeightCm());
+        dst.setQuantity(src.getQuantity());
+        dst.setCbm(src.getCbm());
+        dst.setVolumeWeightKg(src.getVolumeWeightKg());
+    }
+
+    private void copyTruckOrderFields(HouseBlTruckOrderJpaEntity src, HouseBlTruckOrderJpaEntity dst) {
+        dst.setTruckOrderNo(src.getTruckOrderNo());
+        dst.setPkgQty(src.getPkgQty());
+        dst.setPkgUnit(src.getPkgUnit());
+        dst.setGrossWeightKg(src.getGrossWeightKg());
+        dst.setCbm(src.getCbm());
+        dst.setTruckNo(src.getTruckNo());
+        dst.setTruckType(src.getTruckType());
+        dst.setDriver(src.getDriver());
+        dst.setMobileNo(src.getMobileNo());
+        dst.setContainerNo(src.getContainerNo());
+        dst.setContainerType(src.getContainerType());
+        dst.setSealNo1(src.getSealNo1());
+        dst.setSealNo2(src.getSealNo2());
+        dst.setSealNo3(src.getSealNo3());
     }
 }

@@ -147,6 +147,7 @@ public record UpdateHouseBlCommand(
     ) {}
 
     public record TruckOrderCommand(
+            Long id,
             String truckOrderNo,
             Integer pkgQty,
             String pkgUnit,
