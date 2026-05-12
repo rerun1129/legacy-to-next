@@ -5,7 +5,6 @@ import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }     from "./tabs/main-truck";
 import { TextBox, ComboBox }                     from "@/components/shared/inputs";
 import { ScreenGuard }                           from "@/components/shared/screen-guard";
-import { toast }                                 from "@/lib/toast-store";
 import { TruckBlEntryHeader }                    from "./truck-bl-entry-header";
 import { TruckChangeBlNoModal }                  from "./truck-change-bl-no-modal";
 import { useTruckBlEntry }                       from "./use-truck-bl-entry";
@@ -33,10 +32,6 @@ export function TruckBLEntry() {
         onNew={entry.handleResetEntry}
         onSearch={entry.handleSearch}
         onSave={() => {
-          if (!entry.isEdit) {
-            toast.info("먼저 Truck B/L을 조회해주세요.");
-            return;
-          }
           entry.form.handleSubmit(entry.handleSubmit)();
         }}
         onDelete={entry.handleDelete}
