@@ -24,31 +24,25 @@ const TRUCK_PARTIES: PartyDef[] = [
 ];
 
 function TruckPartyBlock({ party }: { party: PartyDef }) {
-  const { register, control, setValue } = useFormContext<TruckBlFormValues>();
+  const { register, control } = useFormContext<TruckBlFormValues>();
   return (
     <>
-      {/* 액션 버튼 행 — head 바깥 별도 row */}
-      <div className="party-block__head-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 4, marginTop: 2 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        {/* CodeBox party-cn이 자체적으로 .party-block + .party-block__head + 라벨 span을 렌더 */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <CodeBox
+            kind="party-cn"
+            variant="panel"
+            label={party.role}
+            codeProps={{ ...register(party.codeKey) }}
+            nameProps={{ ...register(party.nameKey) }}
+            onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          />
+        </div>
         {party.btn && (
           <button type="button" className="party-block__head-btn">{party.btn}</button>
         )}
-        <button
-          type="button"
-          className="party-block__head-btn"
-          onClick={() => setValue(party.codeKey, "")}
-        >
-          Clear
-        </button>
       </div>
-      {/* CodeBox party-cn이 자체적으로 .party-block + .party-block__head + 라벨 span을 렌더 */}
-      <CodeBox
-        kind="party-cn"
-        variant="panel"
-        label={party.role}
-        codeProps={{ ...register(party.codeKey) }}
-        nameProps={{ ...register(party.nameKey) }}
-        onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-      />
       <Controller
         control={control}
         name={party.addrKey}
@@ -59,7 +53,7 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
             onBlur={field.onBlur}
             name={field.name}
             placeholder="Address (free text)"
-            style={{ height: 100 }}
+            style={{ height: 100, marginTop: 4 }}
           />
         )}
       />
