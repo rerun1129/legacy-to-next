@@ -26,7 +26,7 @@ const TOOLBAR_FIELDS_SEA = [
   "Shipment Type", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
 ] as const;
 const TOOLBAR_FIELDS_AIR = [
-  "Shipment Type", "Settle", "HAWB No", "MAWB No", "Rate Class", "Service Term", "B/L Type", "Master Ref",
+  "Shipment Type", "HAWB No", "MAWB No", "Master Ref",
 ] as const;
 const TOOLBAR_FIELDS_TRUCK = [
   "Truck B/L No", "Settle",
@@ -41,9 +41,8 @@ const DEFAULTS_SEA: Record<string, string> = {
   "B/L Type": "", "Master Ref": "",
 };
 const DEFAULTS_AIR: Record<string, string> = {
-  "Shipment Type": "", "Settle": "", "HAWB No": "",
-  "MAWB No": "", "Rate Class": "", "Service Term": "",
-  "B/L Type": "", "Master Ref": "",
+  "Shipment Type": "", "HAWB No": "",
+  "MAWB No": "", "Master Ref": "",
 };
 const DEFAULTS_TRUCK: Record<string, string> = {
   "Truck B/L No": "", "Settle": "",
@@ -85,7 +84,6 @@ const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
   "Service Term":   "seaDetail.serviceTerm",
   "B/L Type":       "seaDetail.blType",
   "Master Ref":     "masterRefNo",
-  "Rate Class":     "rateClass",
 };
 
 const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type", "Settle"]);
