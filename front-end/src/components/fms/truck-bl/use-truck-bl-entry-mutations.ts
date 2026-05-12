@@ -51,11 +51,16 @@ export function useTruckBlEntryMutations(args: {
   const deleteMutation = useMutation({
     mutationFn: () => truckBlPort.delete(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["truck-bl", "detail", id] });
+      // 삭제 후 detail 자동 재조회 금지 — invalidateQueries는 active query를 refetch해
+      // 이미 삭제된 id로 GET을 발생시켜 404(RESOURCE_NOT_FOUND)를 일으킨다.
+      // 1) focus 먼저 해제해 isEdit=false → detail query 비활성화
+      useEntryFocusStore.getState().clearFocus("truckBl");
+      // 2) refetch 없이 캐시만 제거
+      queryClient.removeQueries({ queryKey: ["truck-bl", "detail", id] });
       form.reset(createEmptyTruckBlFormValues());
       clearDraft(`truck::${id}`);
       clearDraft("truck::new");
-      useEntryFocusStore.getState().clearFocus("truckBl");
+      detailLoadedRef.current = false;
     },
   });
 
