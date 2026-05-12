@@ -99,10 +99,6 @@ function IssueSection({ issueFields, panelScope }: { issueFields: string[]; pane
   );
 }
 
-function DoDateSection() {
-  return <SchedField label="D/O Date" name="seaDetail.doDate" type="date" />;
-}
-
 // ── RHF-bound liner row ─────────────────────────────────────
 function LinerRow({ codeProps, nameProps }: { codeProps: React.InputHTMLAttributes<HTMLInputElement>; nameProps: React.InputHTMLAttributes<HTMLInputElement> }) {
   return (
@@ -178,9 +174,6 @@ export function SchedulePanel({ variant }: Props) {
     },
     ...(variant.issueFields.length > 0
       ? [{ key: "issue", label: "Issue Information", render: () => <IssueSection issueFields={variant.issueFields} panelScope={panelScope} /> }]
-      : []),
-    ...(variant.hasDoDate
-      ? [{ key: "do-date", label: "D/O Date",          render: () => <DoDateSection /> }]
       : []),
   ];
 

@@ -23,7 +23,7 @@ import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store"
 import { ScreenGuard } from "@/components/shared/screen-guard";
 
 const TOOLBAR_FIELDS_SEA = [
-  "Shipment Type", "Settle", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
+  "Shipment Type", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
 ] as const;
 const TOOLBAR_FIELDS_AIR = [
   "Shipment Type", "Settle", "HAWB No", "MAWB No", "Rate Class", "Service Term", "B/L Type", "Master Ref",
@@ -36,7 +36,7 @@ const TOOLBAR_FIELDS_NON_BL = [
 ] as const;
 
 const DEFAULTS_SEA: Record<string, string> = {
-  "Shipment Type": "", "Settle": "", "HBL No": "",
+  "Shipment Type": "", "HBL No": "",
   "MBL No": "", "Load Type": "", "Service Term": "",
   "B/L Type": "", "Master Ref": "",
 };
