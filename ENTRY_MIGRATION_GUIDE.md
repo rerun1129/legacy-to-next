@@ -1146,6 +1146,48 @@ cleanup useEffect로 unmount 시 일괄 제거(§6.18 안티패턴)하는 방식
 
 사례: bab177f — Truck/Non/House/Master 4 도메인 list grid 더블클릭 + search 훅 동시 적용.
 
+### 6.48 ⚠️ 신규 도메인 마이그레이션 의무 체크리스트 — Non B/L 발견 패턴이 Truck B/L에서 재발한 케이스
+
+> ## ⚠️ 회귀 위험 핫스팟 (READ FIRST)
+>
+> 2026-05 Truck B/L 마이그레이션 과정에서 **Non B/L에서 이미 발견·수정된 6종의 동일 패턴이 그대로 재발**했다. 신규 B/L 도메인(현 미진행분 — Sea Master / Air Master / 잔여 Sea/Air House variant 등) 추가 시 **본 체크리스트를 거치지 않으면 같은 회귀가 거의 확실**하다. Plan 단계에서 본 절 reference 의무, Coder 작업 단위 지시에 본 절 포함 의무.
+
+#### 재발 패턴 매트릭스 (Non B/L → Truck B/L)
+
+| # | 패턴 | Non B/L 해결 | Truck 재발 → 수정 | 가이드 절 |
+|---|---|---|---|---|
+| ① | form 미보유 필드 sub-set 매퍼 | `applyNonBlCommonFields` (f15736e) | `applyTruckCommonFields`/`applyTruckBlFields` (8c54dd9) | §6.37 |
+| ② | child grid merge-by-id (clear+addAll 금지) | `mergeContainers`/`mergeDims` (3037a44) | `mergeTruckOrders`/`mergeDims` (8c54dd9) | §6.35, §6.28 |
+| ③ | address 4필드 풀스택(FE submit · BE Request · Command · Mapper) | NonBl address 정합 완료 | Truck address 4필드 풀스택 보강 (41205f8) | §6.37 |
+| ④ | 디폴트 주입 비대칭(`?? "CM6000"`, vv null→"TRUCK") | NonBl `volumeDivisor` 정규화 정렬 | Truck `dimensionDivisor`/`vesselName` 정규화 (23852d8) | §6.37 유사 증상 |
+| ⑤ | enum detail 매핑 — `getCode()` vs `Enum::name` 정합 | `NonBlDetailResult.java:136` `getCode` | `TruckBlFactory.java:126` `Enum::name` → `getCode` (e32816f) | §6.45 |
+| ⑥ | 공유 VO — code 없이 address만 저장 (legacy free-text) | (미발견) | `CustomerCode` invariant 완화 (18f767f) — 모든 도메인 자동 적용 | 신설 (본 절) |
+
+추가: Non B/L 비교 없이 Truck B/L 단독으로 발견된 케이스도 본 절에 포함해 차기 도메인에 반영.
+
+| ⑦ | `onSave` 핸들러 `!isEdit` 차단 — 잘못된 가드 | (Non B/L 동등 코드 무) | `truck-bl-entry.tsx` 가드 3줄 제거 (eff46c4) | 본 절 |
+
+#### 신규 도메인 추가 시 의무 점검 7항목
+
+1. **§6.37 sub-set 매퍼** — form 미보유 필드 setter 호출 제거. `apply<Domain>CommonFields` + `apply<Domain>Fields` 신설. 공통 `applyCommonFields` 직접 호출 금지. 검증: 무수정 조회→저장 시 UPDATE 미발사.
+2. **§6.37 정규화 정렬** — fetch 응답·payload·DB 디폴트 일관성. `?? "default"` 디폴트 주입은 `createEmpty<Domain>FormValues()`에만 한정, `form.reset(detail)` 분기에서는 빈 값 유지. 검증: legacy NULL row 무수정 저장 시 UPDATE 미발사.
+3. **§6.35 child grid merge-by-id** — sync(clear+addAll) 패턴 금지. 자식 row id를 PUT 페이로드(§6.28) · `UpdateRequest` DTO · `Update<Domain>Command` record · Assembler `to<Child>CommandsU` · `merge<Children>(...)` 어댑터 호출 5단계 모두 적용. 검증: 자식 그리드 단일 행 수정 시 해당 행만 UPDATE.
+4. **§6.45 enum 매핑 양방향 정합** — BE detail 응답이 enum→String 변환할 때 반드시 `EnumRegistryFactory` 등록과 같은 변환기 사용. `e -> new EnumOption(e.getCode(), ...)` 등록은 detail에도 `<Enum>::getCode`, `e -> new EnumOption(e.name(), ...)` 등록은 detail에도 `Enum::name`. **Non B/L 동등 코드(`NonBlDetailResult` ↔ `<Domain>BlFactory.toXxxView`)와 라인 단위 1:1 비교 의무.** 검증: 조회→저장 round-trip에서 `IllegalArgumentException` 미발생.
+5. **address 4필드 풀스택** — `shipperAddress`/`consigneeAddress`/`notifyAddress`/`docPartnerAddress` 모두 (a) FE submit 빌더 (b) `Create<Domain>BlRequest`/`Update<Domain>BlRequest` (c) `Create/UpdateHouseBlCommand` 인자 위치 (d) Assembler 매핑 (e) factory `entity.assignParties(CustomerCode.of(code, addr), ...)` (f) `HouseBlDomainToJpaMapper` setter 호출 6단계 일관 점검. 어느 한 단계라도 빠지면 address 손실.
+6. **공유 VO 동작 가정 점검** — `CustomerCode.of(code, address)`는 **code blank이어도 address가 있으면 VO 생성** (legacy free-text address 지원). VO `.value()`/`.address()` 사용처에서 null 체크 의무. 신규 VO 추가 시 동일 invariant 적용. 매퍼는 `mapOrNull(domain.getXxxCode(), CustomerCode::value/::address)` null-safe 패턴 사용.
+7. **`onSave` 핸들러 가드 금지** — `<Domain>BLEntry.tsx`의 `onSave={() => { if (!entry.isEdit) { toast.info(...); return; } ... }}` 패턴 금지. `handleSubmit` 내부의 `isEdit` 분기가 create/update mutation 발사를 책임지므로 onClick에 별도 차단 가드는 잘못된 패턴(신규 작성 모드 차단). 동등 패턴 `handleChangeBlNo`(B/L 번호 변경 — 신규엔 endpoint 없음)는 그대로 유효 — 혼동 주의.
+
+#### Plan/Coder 지시 의무
+
+- **Plan 단계**: plan 본문 첫 줄에 `본 가이드 §6.48 체크리스트를 따른다.` 명시.
+- **Coder 작업 단위 지시**: 각 변경 단위마다 위 7항목 중 해당 절 reference를 인용. 완료 보고에 `Non B/L 동등 코드와 1:1 비교 결과: 일치/차이 N건` 포함을 요구.
+- **검토 단계**: 신규 도메인 INSERT 1회 + UPDATE 무수정 1회 + 자식 그리드 1행 수정 1회 + enum 옵션 round-trip 1회 — 4종 회귀 시나리오를 p6spy 로그로 검증.
+
+#### 사례
+
+- **2026-05-12 본 세션** — Non B/L에서 이미 해결된 패턴 ④⑤⑥과 단독 패턴 ⑦이 Truck B/L에서 재발 확인. 본 절 신설.
+- **2026-05-12 회귀 회고(§6.35)** — Truck B/L Dimension 그리드 도입(6a31ae6) 시 §6.35 + §6.28 + §6.37 reference 누락으로 ①②③ 동시 회귀. 본 절은 §6.35 회귀 회고의 일반화·체크리스트화.
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
