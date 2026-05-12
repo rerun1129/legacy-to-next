@@ -2,12 +2,12 @@
 
 import { useFormContext, Controller } from "react-hook-form";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
-import { ComboBox, TextArea } from "@/components/shared/inputs";
+import { ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
 export function TruckDescriptionPanel() {
-  const { control, register } = useFormContext<TruckBlFormValues>();
+  const { control } = useFormContext<TruckBlFormValues>();
   const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
   const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
 
@@ -61,9 +61,6 @@ export function TruckDescriptionPanel() {
             />
           )}
         />
-        <div style={{ marginTop: 8, flexShrink: 0 }}>
-          <TextArea variant="panel" {...register("remark")} rows={3} style={{ width: "100%", resize: "vertical" }} />
-        </div>
       </div>
     </div>
   );
