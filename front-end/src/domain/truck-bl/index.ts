@@ -57,9 +57,14 @@ export interface TruckBlDetail {
   shipmentType?: string;
   freightTerm?: string;
   shipperCode?: string;
+  shipperAddr?: string;
   consigneeCode?: string;
+  consigneeAddr?: string;
   notifyCode?: string;
+  notifyAddr?: string;
   settlePartnerCode?: string;
+  docPartnerCode?: string;
+  docPartnerAddress?: string;
   polCode?: string;
   podCode?: string;
   deliveryCode?: string;
@@ -69,6 +74,7 @@ export interface TruckBlDetail {
   pkgUnit?: string;
   grossWeightKg?: number;
   cbm?: number;
+  weightUnit?: string;
   actualCustomerCode?: string;
   operatorCode?: string;
   teamCode?: string;
@@ -86,6 +92,7 @@ export interface TruckBlDetail {
   loadType?: string;
   serviceTerm?: string;
   voyageNo?: string;
+  vesselName?: string;
   remark?: string;
   truckOrders?: TruckOrderDetail[];
   desc?: DescDetail;
