@@ -8,7 +8,6 @@ import { AirCargoPanel }        from "./sections/air-cargo-panel";
 import { DimensionPanel }       from "./sections/dimension-panel";
 import { MarksPanel }           from "./sections/marks-panel";
 import { NatureGoodsPanel }     from "./sections/nature-goods-panel";
-import { ItemHsPanel }          from "./sections/item-hs-panel";
 
 interface Props { variant: BLVariantConfig; active?: boolean }
 
@@ -20,7 +19,6 @@ export const HOUSE_BL_AIR_REGISTRY: WidgetDef[] = [
   { key: "dimension",    label: "Dimension",       component: DimensionPanel,   defaultPosition: { col: 0, row: 6, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
   { key: "marks-air",    label: "Marks & Numbers", component: MarksPanel,       defaultPosition: { col: 0, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "nature-goods", label: "Nature & Qty",    component: NatureGoodsPanel, defaultPosition: { col: 2, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
-  { key: "item-hs-air",  label: "Item / HS Code",  component: ItemHsPanel,      defaultPosition: { col: 4, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 2, minRowSpan: 2 },
 ];
 
 export function MainTabAir({ variant, active }: Props) {
