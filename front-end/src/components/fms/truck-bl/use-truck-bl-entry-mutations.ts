@@ -54,6 +54,7 @@ export function useTruckBlEntryMutations(args: {
       queryClient.invalidateQueries({ queryKey: ["truck-bl", "detail", id] });
       form.reset(createEmptyTruckBlFormValues());
       clearDraft(`truck::${id}`);
+      clearDraft("truck::new");
       useEntryFocusStore.getState().clearFocus("truckBl");
     },
   });

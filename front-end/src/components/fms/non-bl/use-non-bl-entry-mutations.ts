@@ -52,6 +52,7 @@ export function useNonBlEntryMutations(args: {
       methods.reset(createEmptyNonBlFormValues());
       // hook 인자로 받은 id를 캡처 — hook 재호출 시점의 최신 값 사용
       clearDraft(`non::${id}`);
+      clearDraft("non::new");
       useEntryFocusStore.getState().clearFocus("nonBl");
     },
   });

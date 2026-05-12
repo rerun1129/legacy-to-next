@@ -82,6 +82,7 @@ export function useNonBlEntry() {
   function handleResetEntry() {
     methods.reset(createEmptyNonBlFormValues());
     clearDraft(`non::${id ?? "new"}`);
+    clearDraft("non::new");
     detailLoadedRef.current = false;
     useEntryFocusStore.getState().clearFocus("nonBl");
   }

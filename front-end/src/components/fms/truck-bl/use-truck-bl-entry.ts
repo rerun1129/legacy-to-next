@@ -147,6 +147,7 @@ export function useTruckBlEntry() {
   function handleResetEntry() {
     form.reset(createEmptyTruckBlFormValues());
     clearDraft("truck::" + (id ?? "new"));
+    clearDraft("truck::new");
     detailLoadedRef.current = false;
     useEntryFocusStore.getState().clearFocus("truckBl");
   }

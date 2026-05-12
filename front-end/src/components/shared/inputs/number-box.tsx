@@ -46,9 +46,10 @@ const NumberBoxControlled = forwardRef<HTMLInputElement, NumberBoxProps & { name
     const lastValidRef = useRef<string>("");
     const [focused, setFocused] = useState(false);
 
-    // field.value 변화(reset / setValue 등) 시 DOM 동기화 — 편집 중에는 실행 안 함
     useEffect(() => {
-      if (focused || !innerRef.current) return;
+      if (!innerRef.current) return;
+      const isEmpty = field.value === undefined || field.value === null || field.value === "";
+      if (focused && !isEmpty) return; // 편집 중 caret 보존, 단 reset(empty)는 무조건 반영
       const display = toDisplayString(field.value, decimalPlaces);
       innerRef.current.value = display;
       lastValidRef.current = display;
