@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
@@ -17,6 +17,7 @@ export function ItemHsPanel() {
   const { control, register } = useFormContext<HouseBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "itemHs", keyName: "fieldId" });
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
+  const focusedRowKeyRef = useRef<string | null>(null);
   const columns = useMemo<GridColumn<ItemRow>[]>(() => [
     { key: "_no",   label: "#",           width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
     { key: "hs",    label: "HS Code",     width: 100, render: (_, __, i) => <TextCell {...register(`itemHs.${i}.hs`)} style={{ fontFamily: "var(--font-mono)" }} /> },
@@ -31,6 +32,12 @@ export function ItemHsPanel() {
     ? fields.findIndex(f => f.id === selectedKey)
     : -1;
 
+  function captureFocusedRow() {
+    const activeEl = document.activeElement as HTMLElement | null;
+    const td = activeEl?.closest("td[data-row-key]") as HTMLElement | null;
+    focusedRowKeyRef.current = td?.dataset.rowKey ?? null;
+  }
+
   function handleAdd() {
     const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id ?? 0)) + 1 : 1;
     append({ ...EMPTY_ITEM_HS_ROW, id: nextId });
@@ -39,9 +46,18 @@ export function ItemHsPanel() {
 
   function handleRemove() {
     if (fields.length === 0) return;
-    const targetIdx = selectedKey !== null && selectedIdx !== -1 ? selectedIdx : fields.length - 1;
+    const focused = focusedRowKeyRef.current;
+    let targetIdx = -1;
+    if (focused !== null) {
+      targetIdx = fields.findIndex(f => (f as unknown as { fieldId: string }).fieldId === focused);
+    }
+    if (targetIdx === -1 && selectedKey !== null && selectedIdx !== -1) {
+      targetIdx = selectedIdx;
+    }
+    if (targetIdx === -1) targetIdx = fields.length - 1;
     remove(targetIdx);
     setSelectedKey(null);
+    focusedRowKeyRef.current = null;
   }
 
   return (
@@ -52,7 +68,7 @@ export function ItemHsPanel() {
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList

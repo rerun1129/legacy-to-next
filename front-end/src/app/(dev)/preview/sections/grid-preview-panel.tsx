@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -69,6 +69,7 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly]   = useState(false);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const focusedRowKeyRef = useRef<string | null>(null);
 
   const cols = useMemo<GridColumn<DimPreviewRow>[]>(() => [
     {
@@ -171,6 +172,12 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
     },
   ], [register, required, readOnly]);
 
+  function captureFocusedRow() {
+    const activeEl = document.activeElement as HTMLElement | null;
+    const td = activeEl?.closest("td[data-row-key]") as HTMLElement | null;
+    focusedRowKeyRef.current = td?.dataset.rowKey ?? null;
+  }
+
   function handleAdd() {
     const nextId = Math.max(0, ...fields.map((f) => f.id)) + 1;
     append({
@@ -182,7 +189,18 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
 
   function handleRemove() {
     if (fields.length === 0) return;
-    remove(fields.length - 1);
+    const focused = focusedRowKeyRef.current;
+    let targetIdx = -1;
+    if (focused !== null) {
+      targetIdx = fields.findIndex(f => String((f as { id: number }).id) === focused);
+    }
+    if (targetIdx === -1 && selectedKey !== null) {
+      const idx = fields.findIndex(f => f.id === Number(selectedKey));
+      if (idx !== -1) targetIdx = idx;
+    }
+    if (targetIdx === -1) targetIdx = fields.length - 1;
+    remove(targetIdx);
+    focusedRowKeyRef.current = null;
   }
 
   return (
@@ -224,6 +242,7 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
           <button
             type="button"
             className="btn btn--sm btn--icon btn--danger"
+            onMouseDown={captureFocusedRow}
             onClick={handleRemove}
             disabled={fields.length === 0}
           >

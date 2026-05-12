@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { getModeLabels } from "@/lib/bl-mode-labels";
@@ -22,10 +22,17 @@ export function MasterHouseBLGrid({ variant }: Props) {
     keyName: "rhfKey",
   });
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const focusedRowKeyRef = useRef<string | null>(null);
 
   if (!variant) return null;
   const isSea = variant.mode === "SEA";
   const ml    = getModeLabels(variant.mode);
+
+  function captureFocusedRow() {
+    const activeEl = document.activeElement as HTMLElement | null;
+    const tr = activeEl?.closest("tr[data-row-key]") as HTMLElement | null;
+    focusedRowKeyRef.current = tr?.dataset.rowKey ?? null;
+  }
 
   function handleAdd() {
     // field.id는 스키마의 숫자 ID; 신규 행에 현재 max+1 할당
@@ -38,9 +45,18 @@ export function MasterHouseBLGrid({ variant }: Props) {
 
   function handleRemove() {
     if (fields.length === 0) return;
-    const targetIdx = selectedIdx ?? fields.length - 1;
+    const focused = focusedRowKeyRef.current;
+    let targetIdx = -1;
+    if (focused !== null) {
+      targetIdx = fields.findIndex(f => (f as unknown as { rhfKey: string }).rhfKey === focused);
+    }
+    if (targetIdx === -1 && selectedIdx !== null) {
+      targetIdx = selectedIdx;
+    }
+    if (targetIdx === -1) targetIdx = fields.length - 1;
     remove(targetIdx);
     setSelectedIdx(null);
+    focusedRowKeyRef.current = null;
   }
 
   return (
@@ -56,6 +72,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
           <button
             type="button"
             className="btn btn--sm"
+            onMouseDown={captureFocusedRow}
             onClick={handleRemove}
             disabled={fields.length === 0}
           >
@@ -88,6 +105,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
             {fields.map((field, idx) => (
               <tr
                 key={field.rhfKey}
+                data-row-key={field.rhfKey}
                 className={idx === selectedIdx ? "is-selected" : undefined}
                 onClick={() => setSelectedIdx(idx)}
                 style={{ cursor: "pointer" }}
