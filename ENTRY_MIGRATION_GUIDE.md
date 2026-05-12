@@ -836,6 +836,187 @@ public record UpdateXxxRequest(String shipperCode, ...) {}
 
 **다른 도메인 적용 권장**: Master B/L, Truck B/L 등 form에서 address 명시 매핑이 빠진 화면 점검. 같은 데이터 손실 패턴 발생 가능.
 
+### 6.38 그리드 +/- 버튼 클래스 SSOT — `btn--icon btn--success` / `btn--icon btn--danger`
+
+카탈로그 표준(`grid-preview-panel.tsx:221-231`) 정합 클래스:
+- Plus(+): `<button className="btn btn--sm btn--icon btn--success">`
+- Minus(-): `<button className="btn btn--sm btn--icon btn--danger">`
+
+`btn btn--sm` 단독 또는 `btn btn--sm btn--ghost`는 카탈로그와 불일치 — 28px 정사각 + 성공/위험색 미적용.
+
+신규 그리드 마이그레이션 시 즉시 적용. 사례: Truck Information(86e6493), Non B/L Dimension/Container Info(056b648).
+
+### 6.39 그리드 행 삭제 — 포커싱 셀 행 우선 패턴 SSOT
+
+**사용자 정의 "선택한 행" = 마우스/Tab으로 셀에 포커싱 중인 행**. 외부 `selectedKey` state만으로는 행 클릭 → setSelectedKey 외부 sync까지 도달하는 흐름이 신뢰성 부족(셀 input 없는 컬럼 클릭/외부 callback stale 등). mousedown 시점 `document.activeElement.closest("td[data-row-key]")`로 직접 capture.
+
+```tsx
+const focusedRowKeyRef = useRef<string | null>(null);
+
+function captureFocusedRow() {
+  const activeEl = document.activeElement as HTMLElement | null;
+  const td = activeEl?.closest("td[data-row-key]") as HTMLElement | null;
+  focusedRowKeyRef.current = td?.dataset.rowKey ?? null;
+}
+
+function handleRemove() {
+  if (fields.length === 0) return;
+  const focused = focusedRowKeyRef.current;
+  let targetIdx = -1;
+  if (focused !== null) {
+    targetIdx = fields.findIndex(f => String((f as { id: number | string }).id) === focused);
+  }
+  if (targetIdx === -1 && selectedKey !== null && selectedIdx !== -1) {
+    targetIdx = selectedIdx;
+  }
+  if (targetIdx === -1) targetIdx = fields.length - 1;
+  remove(targetIdx);
+  setSelectedKey(null);
+  focusedRowKeyRef.current = null;
+}
+
+<button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}>
+  <Minus size={12} />
+</button>
+```
+
+우선순위: **포커싱된 td의 row → selectedKey state → 마지막 행**. 모든 그리드 패널 + 카탈로그(`grid-preview-panel.tsx`)에 일관 적용. 사례: aefe8e9·746a304.
+
+### 6.40 GridList outside-click 가드 — 같은 패널 내 클릭은 selection 유지
+
+`use-grid-cell-selection.ts`의 `handleOutsideClick`이 테이블 element 바깥의 모든 mousedown을 outside로 처리해 `onClearActiveRow`로 selection을 즉시 풀어버리는 문제. panel head의 +/- 버튼 클릭 시에도 mousedown으로 selection이 풀려, 같은 mousedown으로 발생한 handleRemove는 항상 마지막 행만 삭제하던 버그.
+
+해결: `e.target.closest(".panel") === tableEl.closest(".panel")`이면 outside로 처리하지 않음.
+
+```ts
+function handleOutsideClick(e: MouseEvent) {
+  const tableEl = getTableRef.current();
+  if (tableEl?.contains(e.target as Node)) return;
+  // 같은 패널 안의 외부(예: panel__head의 +/- 버튼) 클릭은 outside로 보지 않음
+  const targetEl = e.target as HTMLElement | null;
+  const samePanel = targetEl?.closest(".panel");
+  const tablePanel = tableEl?.closest(".panel");
+  if (samePanel && tablePanel && samePanel === tablePanel) return;
+  selectedRangeRef.current = null;
+  copiedRangeRef.current = null;
+  applyOverlay();
+  applyCopiedOverlay();
+  onClearActiveRowRef.current?.();
+}
+```
+
+사례: 5f48185.
+
+### 6.41 useVirtualizer `getItemKey` row.id 기반 — 행 삭제 후 stale input value 방지
+
+TanStack `useVirtualizer`의 default `getItemKey`는 **index 기반**. 행 삭제 시 같은 dataIndex 위치에 들어온 새 row를 React가 같은 key로 인식해 `<input>` element를 **재사용** → `register()` uncontrolled로 RHF가 DOM input.value를 sync하지 않아 **이전 row의 값이 셀에 그대로 남음**.
+
+해결: `useVirtualizer`에 `getItemKey` 추가(PlainGridList + ManagedGridList 둘 다):
+
+```ts
+const rowVirtualizer = useVirtualizer({
+  count: data.length,
+  getScrollElement: () => scrollRef.current,
+  estimateSize: () => ROW_HEIGHT_PX,
+  overscan: 30,
+  measureElement: (el) => el?.getBoundingClientRect().height ?? ROW_HEIGHT_PX,
+  getItemKey: (index) => {
+    if (rowKey) {
+      try { return String(rowKey(data[index], index)); } catch { return index; }
+    }
+    const idVal = (data[index] as Record<string, unknown> | undefined)?.id;
+    return idVal != null ? String(idVal) : index;
+  },
+});
+```
+
+row identity가 바뀌면 React가 element를 unmount/remount → register는 mount 시 RHF의 latest value를 input.defaultValue로 적용 → 정상 표시. GridList에 적용 완료 — 모든 호출처 자동 정상화. 사례: 12e3047.
+
+### 6.42 `.li__input--tight` 자식 width 고정 — inline `flex: "0 0 80px"` 덮어쓰기
+
+`forms.css`의 `.li__input--tight > * { flex: 1 1 0; min-width: 0; }`이 자식 모두에 동일 비율을 강제. 특정 자식만 width 80px 고정하려면 인라인 `flex: "0 0 80px"`로 덮어써야 함.
+
+- **ComboBox**: 외곽 `.combo` div에 style prop 적용 → 직접 전달
+  ```tsx
+  <ComboBox variant="panel" style={{ flex: "0 0 80px" }} options={opts} {...} />
+  ```
+- **CodeBox**: 외곽 `.lcn`/`.party-block`에 style 미적용 → 외부 wrapper div 필요
+  ```tsx
+  <div style={{ flex: "0 0 80px" }}>
+    <CodeBox kind="code-only" variant="panel" codeProps={...} />
+  </div>
+  ```
+
+사례: Truck Cargo Package/G/W 우측 박스 80px 고정 (91bcd90).
+
+### 6.43 CodeBox `kind="lcn"`/`code-only` width 좁힐 때 `.lcn` grid 해제 필요
+
+`.lcn`(`forms.css:202`)은 `display: grid; grid-template-columns: 110px 120px minmax(0, 1fr);`. wrapper width가 80px이어도 grid 첫 column 110px이 강제되어 시각적으로 깨짐.
+
+해결: 패널 외곽 div에 식별 클래스 부여 + 해당 스코프 안 `.lcn` grid 해제. CodeBox 자체는 수정 금지(Non B/L 호환 유지).
+
+```tsx
+// truck-cargo-panel.tsx
+<div className="panel truck-cargo-panel" ...>
+```
+
+```css
+/* widgets.css */
+.truck-cargo-panel .li__input--tight > div > .lcn { display: block; width: 100%; padding: 0; gap: 0; }
+```
+
+사례: 0710cb7.
+
+### 6.44 CodeBox kind 명칭 컨벤션 — LCN / code-only / party-cn
+
+사용자가 코드박스 형태를 부를 때 사용하는 표준 명칭은 컴포넌트의 `kind` prop과 1:1 매칭:
+
+| 형태 | 부르는 말 | CodeBox kind |
+|---|---|---|
+| Label + Code + Name 한 줄 | **LCN** (lcn 박스, lcn) | `kind="lcn"` |
+| Code 한 칸만 | **code-only** (코드 온리) | `kind="code-only"` |
+| Party 행 전체(외곽 .party-block까지 자체 렌더) | **party-cn** | `kind="party-cn"` |
+
+사용자가 "이 필드를 LCN으로 만들어줘"라고 하면 `<CodeBox kind="lcn" label="..." codeProps={...} nameProps={...} />` 패턴. LCN의 Name 필드가 schema에 없으면 nameProps 미지정으로 빈 input 유지(추후 master 데이터 join 정책 — Truck Performance customerPic 사례, 22a2886).
+
+메모리: `feedback_codebox_terms.md`.
+
+### 6.45 enum option label이 description인 경우 → 프론트에서 `label = value` 재매핑
+
+`EnumRegistryFactory`의 매핑이 `e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription())` 형태인 enum(예: `ContainerType`, `CargoType`, `Per`, `Fhd`, `FlightType`, `FreightCondition`, `HandlingInfoCode`)은 옵션 label에 긴 설명이 들어옴. UI에서 짧은 코드만 표시하려면 프론트에서 재매핑:
+
+```tsx
+const { options: rawOptions } = useEnumOptions("ContainerType");
+const containerTypeOptions = useMemo(
+  () => rawOptions.map(o => ({ value: o.value, label: o.value })),
+  [rawOptions]
+);
+```
+
+사례: Non B/L Container Info `contType`, Truck Information `containerType`(d0dcf1b).
+
+### 6.46 ComboBox cell variant도 register spread 금지 — Controller 필수
+
+§6.15(패널 variant)와 동일하게 **cell variant도 Controller 필수**. 그리드 셀 ComboBox에 `register()` spread 시 외부 `value` prop이 주입되지 않아 ComboBox 내부 `strValue`가 항상 `""` → 선택해도 표시·반영 안 됨.
+
+```tsx
+// ❌ register spread — value 미반영
+<ComboBox variant="cell" options={opts} {...register(`array.${i}.field`)} />
+
+// ✅ Controller — value/onChange 직접 전달
+<Controller
+  name={`array.${i}.field`}
+  control={control}
+  render={({ field }) => (
+    <ComboBox variant="cell" options={opts} value={field.value} onChange={field.onChange} />
+  )}
+/>
+```
+
+> **함정**: 카탈로그(`grid-preview-panel.tsx:117`)는 register spread 형태로 쓰여있지만 실제 form 바인딩 검증 없음. 카탈로그 코드를 복사할 때는 Controller 패턴으로 교체.
+
+사례: Truck Information TruckType/ContainerType ComboBox(d0dcf1b).
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
@@ -957,6 +1138,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
   **다른 도메인(HouseBl Sea/Air/Truck · MasterBl · SwitchBl) 적용 권장 — 별도 작업으로 진행. 체크리스트는 §6.35.**
 
 - **Non B/L Entry 공용 confirm 모달 적용 + Copy 제거 + 조회 전 Save 가드 (2026-05-11, 16dbc0b)** — `e55af73` 에서 도입된 `@/components/confirm` 의 **product 첫 적용 사례**. (1) `use-non-bl-entry-mutations.ts` 의 `handleSubmit`/`handleDelete` 를 async 화하고 `await confirm({...})` Promise API 호출 — Save `variant: "default"` + 기본 메시지, Delete `variant: "destructive" + confirmText: "삭제"` + "삭제된 데이터는 복구할 수 없습니다." description. 기존 `window.confirm` 폐기. 반환 타입 시그니처 `handleSubmit`/`handleDelete` → `Promise<void>` 로 정합. (2) `non-bl-entry-header.tsx` 의 onClick 미정의 Copy 버튼(스텁) + lucide-react `Copy` import 제거 — props 인터페이스 변경 없음(`onCopy` 원래 미존재). Copy 자리는 추후 다른 기능으로 대체 예정. (3) `non-bl-entry.tsx` 의 `onSave` prop 을 inline 가드 함수로 교체 — `!isEdit` 시 `toast.info("먼저 Non B/L을 조회해주세요.")` 후 early return, isEdit 일 때만 `methods.handleSubmit(handleSubmit)()` 호출(`handleChangeBlNo` 와 동일 가드 패턴, toast import 기존 재사용). `useNonBlEntryMutations` 의 `createMutation` 코드는 dead code 화되지만 추후 신규 생성 워크플로우 재활성화 가능성으로 **의도적 유지**. ScreenGuard(§6.27) 와 충돌 없음 — confirm 모달은 mutate 외부에서 해소 후 모달 닫힘 → 기존 `isSavePending`/`deleteMutation.isPending` 로딩 표시 흐름 그대로 동작. 다른 Entry(Sea/Air HBL, Master BL, Truck BL, SwitchBlModal) 의 `window.confirm` 잔존 — 동일 패턴 후속 적용 권장.
+
+- **Truck B/L Entry 패널 디테일 정합화 시리즈 (2026-05-12)** — Phase A 풀 마이그레이션 후 패널/그리드 디테일 정합. (1) **Remark 패널 분리 + LineNumberTextarea 통일** (b942e34·d4fb855) — Description 패널에서 Remark 필드 분리해 신규 `truck-remark-panel.tsx`(2x2, Performance 아래 col:4 row:4)로 추출, 처음 TextArea 평문 사용했다가 Description/Marks/Party Address와 동일하게 `Controller + LineNumberTextarea`로 통일. (2) **Party 패널 Non B/L 패턴 채택** (6a1b49c·d1844ed·3df603a·69d8eea) — CodeBox `kind="party-cn"`이 자체 `.party-block`+`.party-block__head`+라벨까지 렌더하므로 외부 wrapper 제거(라벨 중복 해소), Clear 버튼 제거, 잔존 액션 버튼(To Order/Same as Cne.)을 CodeBox 옆 같은 행에 인접 배치(flex gap:4) + Address LineNumberTextarea와의 사이 marginTop:4 추가, `.truck-party-panel .field-widget-item + .field-widget-item { padding-top: 4px }` 스코프 CSS 신설. (3) **Performance 패널 6필드 모두 LCN 통일** (22a2886) — `<div className="li">+TextBox` → `<CodeBox kind="lcn" label="..." required? ...>` 단독 호출 6개, `customerPic`은 schema에 Name 없어 nameProps 미지정(빈 Name input 유지, 추후 master 데이터 join 정책). (4) **Cargo Package/G/W 우측 박스 80px 고정** (91bcd90·0710cb7, §6.42·§6.43 등재) — `.li__input--tight > *` 강제 flex 덮어쓰기 + `.truck-cargo-panel` 스코프 CSS로 `.lcn` grid 해제. (5) **Truck Information 그리드 카탈로그 정합** (86e6493, §6.38) — +/- 버튼 `btn--icon btn--success`/`btn--icon btn--danger`, GridList `onClearRow={() => setSelectedKey(null)}` 추가. (6) **truckType/containerType ComboBox(cell) + BE enum 바인딩** (39469e5·d0dcf1b, §6.45·§6.46) — `useEnumOptions("TruckType")`/`useEnumOptions("ContainerType")` 호출, ContainerType label=description이라 `rawOptions.map(o => ({ value: o.value, label: o.value }))` 재매핑, register spread는 ComboBox value 미주입 → Controller 패턴으로 교체.
+
+- **GridList SSOT 보강 시리즈 (2026-05-12, 5f48185·12e3047·aefe8e9·746a304·056b648)** — Truck B/L Entry 디테일 정합 중 발견한 GridList 공통 버그 4건 일괄 해소. (1) **outside-click 같은 패널 액션 버튼까지 outside 처리** (5f48185, §6.40) — `handleOutsideClick` 가드 추가, `e.target`과 tableEl 둘 다 `closest(".panel")`로 동일 panel인지 확인 후 outside 제외. (2) **useVirtualizer default getItemKey index 기반으로 인한 행 삭제 후 stale input value 표시** (12e3047, §6.41) — `getItemKey` 옵션 추가(rowKey > row.id > index 폴백), row identity 변화 시 React가 element를 unmount/remount → register가 mount 시 RHF latest value를 defaultValue로 적용. PlainGridList + ManagedGridList 둘 다 수정 → 모든 호출처 자동 정상화. (3) **포커싱 셀 행 우선 삭제 패턴 8 그리드 + 카탈로그 일관 적용** (aefe8e9·746a304, §6.39) — Truck Information / Non B/L Dimension·Container Info + House B/L Container·Dimension·Item HS + Master House B/L + 카탈로그 `grid-preview-panel`에 `focusedRowKeyRef` + `captureFocusedRow()` + - 버튼 `onMouseDown` 패턴 일관 적용. handleRemove 우선순위: 포커싱된 td의 row → selectedKey state → 마지막 행. Master House B/L Grid는 커스텀 `<table>` 구조라 `<tr data-row-key={field.rhfKey}>` 마크업도 함께 추가. (4) **Non B/L Dimension/Container Info 그리드 +/- 버튼 카탈로그 정합** (056b648, §6.38) — `btn btn--sm btn--ghost` → `btn btn--sm btn--icon btn--success`/`btn--icon btn--danger`.
+
+- **CodeBox kind 명칭 컨벤션 등재 (2026-05-12, §6.44)** — 사용자가 코드박스 형태를 호명할 때 사용하는 표준 명칭(LCN / code-only / party-cn)을 CodeBox `kind` prop과 1:1 매칭. 메모리 `feedback_codebox_terms.md` 신설.
 
 - **Truck B/L Entry 풀 마이그레이션 (2026-05-12)** — Non B/L Entry 패턴을 그대로 적용한 두 번째 풀 마이그레이션 사례. **(BE)** `TruckBlController`에 `POST /api/truck-bl`(create→`{id}`, §6.29)·`PUT /{id}`(update→`Void`, §6.35)·`DELETE /{id}`·`POST /find-by-hbl-no`(EXACT PK, §6.19)·`PUT /{id}/hbl-no`(Change BL No, §930) 5개 endpoint 신설. DTO 4종(`CreateTruckBlRequest`/`UpdateTruckBlRequest`/`ChangeTruckBlHblNoRequest`/`FindTruckBlByHblNoRequest`) §6.25 BE SSOT 적용(UI required `hblNo`/`bound`/`polCode`/`podCode`/`etd`/`eta`/`actualCustomerCode`/`operatorCode`/`teamCode`/`salesManCode` 10개 `@NotBlank` 유지, `UpdateTruckBlRequest`에 `hblNo` 자체 제외 §10 SSOT). `TruckBlPersistencePort` + `TruckBlUpdatePersistenceAdapter` 신설(§6.35 패턴). `TruckBlService`는 자기 jobDiv(TRUCK) 직접 알아 `houseBlPort.deleteByIdAndJobDiv(id, JobDiv.TRUCK)` 호출. `HouseBlFactory`에 `applyTruckCreate/applyTruckUpdate` 메서드 추가(305→335줄, 300줄 분리 검토 대상으로 `HouseBlTruckSubFactory` 향후 분리 권장). `Create/UpdateHouseBlCommand` record에 `TruckDetailCommand` nested record 추가 — 함정: `NonBlPersistenceAdapterTest.emptyCommand()` 파라미터 53→54 컴파일 오류 발생, null 추가로 수정(사용자 사후 보고). 신규 테스트 5종 29 케이스 전원 PASS, 전체 642 테스트 그린. **(FE)** `truck-bl-schema.ts`/`truck-bl-defaults.ts` 신설(Non B/L 패턴, `HouseBlFormValues` 의존 완전 제거). Toolbar 5→4 재구성(`Truck B/L No`/`Bound`/`Load Type`/`Service Term`, 기존 `Settle`은 Performance 패널의 `settlePartnerCode`로 입력 경로 유지, `Incoterms`/`Freight Term`/`Status`는 truck b/l 도메인 미사용으로 단순 제거). 작업 중 `truck-panels.tsx` 411줄로 증가 → 5개 패널 파일(party/schedule/cargo/document/performance)로 강제 분리, 기존 파일은 7줄 배럴로 축소. `truck-marks-panel.tsx`/`truck-description-panel.tsx` truck 전용 신설(House-BL 공유에서 분리). `pkgUnit`은 §10 Non B/L 정책 따라 `CodeBox kind="code-only"` 자유 텍스트(기존 `<select>` 7개 옵션 사라짐). `truck-order-grid-panel` cell SSOT(§6.12) `TextBox/NumberBox variant="cell"`로 교체. `use-truck-bl-entry-mutations.ts`(88줄) 신설(create/update mutation 분리 §6.29, 공용 confirm 모달 §959). `truck-bl-submit.ts`(114줄) `buildTruckBlCreateRequest`/`buildTruckBlUpdateRequest`(hblNo destructure 제외 §10 SSOT, 자식 row `id` 포함 §6.28). `truck-change-bl-no-modal.tsx` truck 전용 신설 — Non B/L `change-bl-no-modal.tsx`는 `nonBlPort`/`["non-bl",...]` queryKey 하드코딩이라 prop 분기 불가, 동일 구조로 truck 전용 신설. Entry 결선: hot-marker `truck-bl-entry:hot:${id}`(§6.16), F5 redirect, EXACT Search(§6.19), onSave 미조회 가드 toast.info, Enter implicit submit 차단(§6.24), detail useQuery `staleTime:Infinity`+`refetchOnMount:false`(§6.36). `truck-bl-grid.tsx` 더블클릭 hot-marker 추가 — §10 메모리상 "이미 적용"으로 표시됐으나 실제 미적용 상태였음, Phase C에서 보정. FE lint 0 error/build PASS.
 
