@@ -17,9 +17,14 @@ public record TruckBlDetailResult(
         String shipmentType,
         String freightTerm,
         String shipperCode,
+        String shipperAddr,
         String consigneeCode,
+        String consigneeAddr,
         String notifyCode,
+        String notifyAddr,
         String settlePartnerCode,
+        String docPartnerCode,
+        String docPartnerAddress,
         String polCode,
         String podCode,
         String deliveryCode,
@@ -48,6 +53,7 @@ public record TruckBlDetailResult(
         String etaTm,
         String loadType,
         String serviceTerm,
+        String vesselName,
         String voyageNo,
 
         // Marks/Description 패널
