@@ -12,10 +12,7 @@ import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
-import com.freightos.fms.domain.common.enums.LoadType;
-import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
-import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
@@ -24,21 +21,32 @@ import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl.WorkDivision;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
-import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import org.springframework.stereotype.Component;
 
 /**
- * Command → 도메인 Entity 변환 팩토리.
- * Adapter(in)에서 분리된 VO/Entity 생성 로직을 이 계층에 집중한다.
+ * Command → 도메인 Entity 변환 팩토리 (dispatcher).
+ * 유형별 확장 필드 매핑은 각 SubFactory에 위임한다.
  */
 @Component
 public class HouseBlFactory {
 
     private final HouseBlSubFactory sub;
+    private final HouseBlSeaSubFactory seaSubFactory;
+    private final HouseBlTruckSubFactory truckSubFactory;
+    private final HouseBlNonBlSubFactory nonBlSubFactory;
+    private final HouseBlAirSubFactory airSubFactory;
 
-    public HouseBlFactory(HouseBlSubFactory sub) {
+    public HouseBlFactory(HouseBlSubFactory sub,
+                          HouseBlSeaSubFactory seaSubFactory,
+                          HouseBlTruckSubFactory truckSubFactory,
+                          HouseBlNonBlSubFactory nonBlSubFactory,
+                          HouseBlAirSubFactory airSubFactory) {
         this.sub = sub;
+        this.seaSubFactory = seaSubFactory;
+        this.truckSubFactory = truckSubFactory;
+        this.nonBlSubFactory = nonBlSubFactory;
+        this.airSubFactory = airSubFactory;
     }
 
     // ── CREATE ────────────────────────────────────────────────────────
@@ -60,9 +68,9 @@ public class HouseBlFactory {
         };
 
         applyCommonCreate(entity, cmd);
-        applySeaCreate(entity, cmd.seaDetail());
-        applyNonBlCreate(entity, cmd);
-        applyTruckCreate(entity, cmd.truckDetail());
+        seaSubFactory.applySeaCreate(entity, cmd.seaDetail());
+        nonBlSubFactory.applyNonBlCreate(entity, cmd);
+        truckSubFactory.applyTruckCreate(entity, cmd.truckDetail());
         applySubCreate(entity, cmd);
         return entity;
     }
@@ -72,9 +80,9 @@ public class HouseBlFactory {
     public void applyToEntity(UpdateHouseBlCommand cmd, HouseBl entity) {
         entity.update(toUpdateFields(cmd));
         entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
-        applySeaUpdate(entity, cmd.seaDetail());
-        applyNonBlUpdate(entity, cmd);
-        applyTruckUpdate(entity, cmd.truckDetail());
+        seaSubFactory.applySeaUpdate(entity, cmd.seaDetail());
+        nonBlSubFactory.applyNonBlUpdate(entity, cmd);
+        truckSubFactory.applyTruckUpdate(entity, cmd.truckDetail());
         applySubUpdate(entity, cmd);
     }
 
@@ -140,107 +148,6 @@ public class HouseBlFactory {
                 cmd.masterBlId(),
                 Nullables.mapOrNull(cmd.bound(), Bound::valueOf)
         );
-    }
-
-    // ── SEA 확장 필드 매핑 ────────────────────────────────────────────
-
-    private void applySeaCreate(HouseBl entity, CreateHouseBlCommand.SeaDetailCommand s) {
-        if (s == null || !(entity instanceof HouseBlSea sea)) return;
-        sea.updateSeaSchedule(LinerCode.of(s.linerCode()),
-                VesselVoyage.of(s.vesselCode(), s.vesselName(), s.voyageNo()), BlDate.of(s.onboardDate()));
-        sea.updateSeaRouteAndFlags(new HouseBlSea.SeaRouteAndFlags(
-                PortCode.of(s.porCode()), PortCode.of(s.finalDestCode()),
-                BlDate.of(s.issueDate()), NoOfBl.fromNumber(s.noOfBl()),
-                PortCode.of(s.issuePlace()), BlDate.of(s.doDate()), PortCode.of(s.payableAt()),
-                Boolean.TRUE.equals(s.triangle()), Nullables.mapOrNull(s.loadType(), LoadType::valueOf)));
-        applySeaCargoTerms(sea, s.serviceTerm(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
-        if (s.blType() != null) sea.updateBlType(BlType.valueOf(s.blType()));
-        if (s.vesselNationality() != null) sea.updateVesselNationality(s.vesselNationality());
-    }
-
-    private void applySeaUpdate(HouseBl entity, UpdateHouseBlCommand.SeaDetailCommand s) {
-        if (s == null || !(entity instanceof HouseBlSea sea)) return;
-        sea.updateSeaSchedule(
-                Nullables.mapOrElse(s.linerCode(),   LinerCode::of,                                              sea::getLinerCode),
-                Nullables.mapOrElse(s.vesselName(),  v -> VesselVoyage.of(s.vesselCode(), v, s.voyageNo()),       sea::getVesselVoyage),
-                Nullables.mapOrElse(s.onboardDate(), BlDate::of,                                                  sea::getOnboardDate));
-        if (s.porCode() != null || s.finalDestCode() != null || s.issueDate() != null
-                || s.noOfBl() != null || s.issuePlace() != null || s.doDate() != null
-                || s.payableAt() != null || s.triangle() != null || s.loadType() != null) {
-            sea.updateSeaRouteAndFlags(new HouseBlSea.SeaRouteAndFlags(
-                    Nullables.mapOrElse(s.porCode(),       PortCode::of,          sea::getPorCode),
-                    Nullables.mapOrElse(s.finalDestCode(), PortCode::of,          sea::getFinalDestCode),
-                    Nullables.mapOrElse(s.issueDate(),     BlDate::of,            sea::getIssueDate),
-                    Nullables.mapOrElse(s.noOfBl(),        NoOfBl::fromNumber,    sea::getNoOfBl),
-                    Nullables.mapOrElse(s.issuePlace(),    PortCode::of,          sea::getIssuePlace),
-                    Nullables.mapOrElse(s.doDate(),        BlDate::of,            sea::getDoDate),
-                    Nullables.mapOrElse(s.payableAt(),     PortCode::of,          sea::getPayableAt),
-                    Nullables.firstNonNull(s.triangle(),                           sea::isTriangle),
-                    Nullables.mapOrElse(s.loadType(),      LoadType::valueOf,     sea::getLoadType)));
-        }
-        applySeaCargoTerms(sea, s.serviceTerm(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
-        if (s.blType() != null) sea.updateBlType(BlType.valueOf(s.blType()));
-        if (s.vesselNationality() != null) sea.updateVesselNationality(s.vesselNationality());
-    }
-
-    private void applySeaCargoTerms(HouseBlSea sea, String serviceTerm,
-                                    java.math.BigDecimal rton, String sayInfo, String noOfCtnr) {
-        if (serviceTerm != null || rton != null || sayInfo != null || noOfCtnr != null) {
-            sea.updateSeaCargoTerms(
-                    Nullables.mapOrElse(serviceTerm, ServiceTerm::fromLabel, sea::getServiceTerm),
-                    Nullables.mapOrElse(rton,        Rton::of,               sea::getRton),
-                    Nullables.firstNonNull(sayInfo,  sea::getSayInformation),
-                    Nullables.firstNonNull(noOfCtnr, sea::getNoOfContainerOrPackages));
-        }
-    }
-
-    // ── Non B/L 확장 필드 매핑 ────────────────────────────────────────
-
-    private void applyNonBlCreate(HouseBl entity, CreateHouseBlCommand cmd) {
-        if (!(entity instanceof HouseBlNonBl nonBl)) return;
-        nonBl.updateNonBlFields(BlNumber.of(cmd.originalBlRef()), Rton.of(cmd.rton()), Weight.of(cmd.volumeWeightKg()));
-        nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
-                cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
-        nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
-        nonBl.updateRemark(cmd.remark());
-    }
-
-    private void applyNonBlUpdate(HouseBl entity, UpdateHouseBlCommand cmd) {
-        if (!(entity instanceof HouseBlNonBl nonBl)) return;
-        if (cmd.workDivision() != null) nonBl.updateWorkDivision(WorkDivision.valueOf(cmd.workDivision()));
-        nonBl.updateNonBlFields(BlNumber.of(cmd.originalBlRef()), Rton.of(cmd.rton()), Weight.of(cmd.volumeWeightKg()));
-        nonBl.updateScheduleFields(cmd.linerCode(), cmd.linerName(), cmd.vesselName(), cmd.voyageNo(),
-                cmd.finalDestCode(), cmd.finalDestName(), cmd.finalEta());
-        nonBl.assignVolumeDivisor(Nullables.mapOrNull(cmd.volumeDivisor(), VolumeDivisor::valueOf));
-        nonBl.updateRemark(cmd.remark());
-    }
-
-    // ── Truck 전용 퍼포먼스 패널 필드 매핑 ────────────────────────────
-
-    private void applyTruckCreate(HouseBl entity, CreateHouseBlCommand.TruckDetailCommand t) {
-        if (t == null || !(entity instanceof HouseBlTruck truck)) return;
-        truck.updateTruckFields(new HouseBlTruck.TruckFields(
-                VesselVoyage.of(null, "TRUCK", t.voyageNo()),
-                BlDate.of(t.pickupDate()), t.pickupTm(),
-                t.etdTm(), t.etaTm(),
-                Nullables.mapOrNull(t.loadType(), LoadType::valueOf),
-                Nullables.mapOrNull(t.serviceTerm(), ServiceTerm::valueOf),
-                CustomerCode.of(t.truckerCode()),
-                EmployeeCode.of(t.truckerPic()),
-                Weight.of(t.chargeWeightKg())));
-    }
-
-    private void applyTruckUpdate(HouseBl entity, UpdateHouseBlCommand.TruckDetailCommand t) {
-        if (t == null || !(entity instanceof HouseBlTruck truck)) return;
-        truck.updateTruckFields(new HouseBlTruck.TruckFields(
-                VesselVoyage.of(null, "TRUCK", t.voyageNo()),
-                BlDate.of(t.pickupDate()), t.pickupTm(),
-                t.etdTm(), t.etaTm(),
-                Nullables.mapOrNull(t.loadType(), LoadType::valueOf),
-                Nullables.mapOrNull(t.serviceTerm(), ServiceTerm::valueOf),
-                CustomerCode.of(t.truckerCode()),
-                EmployeeCode.of(t.truckerPic()),
-                Weight.of(t.chargeWeightKg())));
     }
 
     // ── Sub 엔티티 일괄 적용 (CREATE) ────────────────────────────────
