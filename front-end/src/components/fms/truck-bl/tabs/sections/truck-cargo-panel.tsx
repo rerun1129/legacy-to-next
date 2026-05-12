@@ -73,7 +73,7 @@ function TruckCargoFields() {
 
 export function TruckCargoPanel() {
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel truck-cargo-panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Cargo</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <TruckCargoFields />
