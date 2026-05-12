@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
-import { TextBox } from "@/components/shared/inputs";
+import { CodeBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
 export function TruckPerformancePanel() {
@@ -12,67 +12,76 @@ export function TruckPerformancePanel() {
     {
       key: "actual-customer",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Actual Customer</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Actual Customer" {...register("actualCustomerCode")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          label="Actual Customer"
+          required
+          codeProps={{ ...register("actualCustomerCode") }}
+          nameProps={{ ...register("actualCustomerName") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
     {
       key: "customer-pic",
       render: () => (
-        <div className="li">
-          <span className="li__label">Customer PIC</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Customer PIC" {...register("customerPic")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          label="Customer PIC"
+          codeProps={{ ...register("customerPic") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
     {
       key: "settle-partner",
       render: () => (
-        <div className="li">
-          <span className="li__label">Settle Partner</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Settle Partner" {...register("settlePartnerCode")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          label="Settle Partner"
+          codeProps={{ ...register("settlePartnerCode") }}
+          nameProps={{ ...register("settlePartnerName") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
     {
       key: "sales-man",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Sales Man</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Sales Man" {...register("salesManCode")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          label="Sales Man"
+          required
+          codeProps={{ ...register("salesManCode") }}
+          nameProps={{ ...register("salesManName") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
     {
       key: "operator",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Operator</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Operator" {...register("operatorCode")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          label="Operator"
+          required
+          codeProps={{ ...register("operatorCode") }}
+          nameProps={{ ...register("operatorName") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
     {
       key: "team",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Team</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Team" {...register("teamCode")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          label="Team"
+          required
+          codeProps={{ ...register("teamCode") }}
+          nameProps={{ ...register("teamName") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
   ];
