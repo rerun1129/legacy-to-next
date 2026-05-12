@@ -102,6 +102,27 @@ export function TruckBLEntry() {
       truckerCode:        detail.truckerCode        ?? "",
       truckerPic:         detail.truckerPic         ?? "",
       pickupDate:         detail.pickupDate         ?? "",
+      truckOrders: detail.truckOrders?.map((o) => ({
+        id:            o.id,
+        truckOrderNo:  o.truckOrderNo   ?? "",
+        pkgQty:        o.pkgQty         != null ? String(o.pkgQty)         : "",
+        pkgUnit:       o.pkgUnit        ?? "",
+        grossWeightKg: o.grossWeightKg  != null ? String(o.grossWeightKg)  : "",
+        cbm:           o.cbm            != null ? String(o.cbm)            : "",
+        truckNo:       o.truckNo        ?? "",
+        truckType:     o.truckType      ?? "",
+        driver:        o.driver         ?? "",
+        mobileNo:      o.mobileNo       ?? "",
+        containerNo:   o.containerNo    ?? "",
+        containerType: o.containerType  ?? "",
+        sealNo1:       o.sealNo1        ?? "",
+        sealNo2:       o.sealNo2        ?? "",
+        sealNo3:       o.sealNo3        ?? "",
+      })) ?? [],
+      marks:       detail.desc?.marks       ?? "",
+      description: detail.desc?.description ?? "",
+      descClause1: detail.desc?.descClause1 ?? "",
+      descClause2: detail.desc?.descClause2 ?? "",
     });
   }, [detail, form]);
 

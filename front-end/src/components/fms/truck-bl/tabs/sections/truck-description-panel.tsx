@@ -8,7 +8,8 @@ import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schem
 
 export function TruckDescriptionPanel() {
   const { control } = useFormContext<TruckBlFormValues>();
-  const { options: clauseOptions, placeholder: clausePlaceholder } = useEnumOptions("DescriptionClause");
+  const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
+  const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
 
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -24,8 +25,8 @@ export function TruckDescriptionPanel() {
             render={({ field }) => (
               <ComboBox
                 variant="panel"
-                options={clauseOptions}
-                placeholder={clausePlaceholder ?? "-- 부지약관 --"}
+                options={clause1Options}
+                placeholder={clause1Placeholder ?? "-- 부지약관 --"}
                 value={field.value}
                 onChange={field.onChange}
                 style={{ flex: 1 }}
@@ -38,8 +39,8 @@ export function TruckDescriptionPanel() {
             render={({ field }) => (
               <ComboBox
                 variant="panel"
-                options={clauseOptions}
-                placeholder={clausePlaceholder ?? "-- 부지약관 --"}
+                options={clause2Options}
+                placeholder={clause2Placeholder ?? "-- 부지약관 --"}
                 value={field.value}
                 onChange={field.onChange}
                 style={{ flex: 1 }}

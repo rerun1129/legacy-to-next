@@ -23,6 +23,33 @@ export interface TruckBlRow {
   teamName: string;
 }
 
+// ── Truck Order / Desc 응답 전용 타입 (BE TruckBlDetailResponse 중첩 record) ──
+export interface TruckOrderDetail {
+  id?: number;
+  truckOrderNo?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  cbm?: number;
+  truckNo?: string;
+  truckType?: string;
+  driver?: string;
+  mobileNo?: string;
+  containerNo?: string;
+  containerType?: string;
+  sealNo1?: string;
+  sealNo2?: string;
+  sealNo3?: string;
+}
+
+export interface DescDetail {
+  marks?: string;
+  description?: string;
+  descClause1?: string;
+  descClause2?: string;
+  remark?: string;
+}
+
 export interface TruckBlDetail {
   id: number;
   hblNo?: string;
@@ -60,6 +87,8 @@ export interface TruckBlDetail {
   loadType?: string;
   serviceTerm?: string;
   voyageNo?: string;
+  truckOrders?: TruckOrderDetail[];
+  desc?: DescDetail;
 }
 
 // ── Truck Order 자식 Request 타입 ─────────────────────────────

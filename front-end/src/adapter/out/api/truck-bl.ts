@@ -71,6 +71,32 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
+const TRUCK_ORDER_DETAIL_SCHEMA = z.object({
+  id: z.number().optional(),
+  truckOrderNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  pkgQty: z.number().nullable().optional().transform((v) => v ?? undefined),
+  pkgUnit: z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  truckNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  truckType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  driver: z.string().nullable().optional().transform((v) => v ?? undefined),
+  mobileNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  containerNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  containerType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo1: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo2: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo3: z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const DESC_DETAIL_SCHEMA = z.object({
+  marks: z.string().nullable().optional().transform((v) => v ?? undefined),
+  description: z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause1: z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause2: z.string().nullable().optional().transform((v) => v ?? undefined),
+  remark: z.string().nullable().optional().transform((v) => v ?? undefined),
+}).optional();
+
 const TRUCK_BL_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -108,6 +134,8 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
   loadType: z.string().nullable().optional().transform((v) => v ?? undefined),
   serviceTerm: z.string().nullable().optional().transform((v) => v ?? undefined),
   voyageNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  truckOrders: z.array(TRUCK_ORDER_DETAIL_SCHEMA).nullable().optional().transform((v) => v ?? undefined),
+  desc: DESC_DETAIL_SCHEMA,
 });
 
 export const API_TRUCK_BL_PORT: TruckBlPort = {
