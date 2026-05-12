@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+// ── Dimension 그리드 행 ────────────────────────────────────
+export const TRUCK_DIM_SCHEMA = z.object({
+  id: z.number(),
+  length: z.string().optional(),
+  width:  z.string().optional(),
+  height: z.string().optional(),
+  qty:    z.string().optional(),
+  cbm:    z.string().optional(),
+  volWt:  z.string().optional(),
+});
+
 // ── 자식 그리드 행 ─────────────────────────────────────────
 export const TRUCK_ORDER_SCHEMA = z.object({
   // DB 식별자 — Update 시 BE merge-by-id 에 사용 (§6.28)
@@ -91,11 +102,19 @@ export const TRUCK_BL_SCHEMA = z.object({
   freightSelling: z.array(z.any()).optional(),
   freightBuying:  z.array(z.any()).optional(),
 
+  // Dimension 단위 (form schema로 승격)
+  dimensionDivisor: z.string().optional(),
+
   // 자식 그리드
   truckOrders: z.array(TRUCK_ORDER_SCHEMA).optional(),
+  dimensions:  z.array(TRUCK_DIM_SCHEMA).optional(),
 });
 
 export type TruckBlFormValues = z.infer<typeof TRUCK_BL_SCHEMA>;
+
+export const EMPTY_TRUCK_DIM_ROW: Omit<z.infer<typeof TRUCK_DIM_SCHEMA>, "id"> = {
+  length: "", width: "", height: "", qty: "", cbm: "", volWt: "",
+};
 
 export const EMPTY_TRUCK_ORDER_ROW: z.infer<typeof TRUCK_ORDER_SCHEMA> = {
   truckOrderNo:  "",

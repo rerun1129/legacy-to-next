@@ -96,6 +96,16 @@ const DESC_DETAIL_SCHEMA = z.object({
   descClause2: z.string().nullable().optional().transform((v) => v ?? undefined),
 }).optional();
 
+const TRUCK_BL_DIM_SCHEMA = z.object({
+  id: z.number().optional(),
+  lengthCm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  widthCm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  heightCm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  quantity: z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm: z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
 const TRUCK_BL_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -141,8 +151,10 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
   voyageNo: z.string().nullable().optional().transform((v) => v ?? undefined),
   vesselName: z.string().nullable().optional().transform((v) => v ?? undefined),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
+  volumeDivisor: z.string().nullable().optional(),
   truckOrders: z.array(TRUCK_ORDER_DETAIL_SCHEMA).nullable().optional().transform((v) => v ?? undefined),
   desc: DESC_DETAIL_SCHEMA,
+  dims: z.array(TRUCK_BL_DIM_SCHEMA).default([]),
 });
 
 export const API_TRUCK_BL_PORT: TruckBlPort = {

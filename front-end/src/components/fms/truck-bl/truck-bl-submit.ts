@@ -4,6 +4,7 @@ import type {
   TruckOrderCreateRequest,
   TruckOrderUpdateRequest,
   TruckDescRequest,
+  TruckBlDimRequest,
 } from '@/domain/truck-bl';
 import type { TruckBlFormValues } from './truck-bl-schema';
 
@@ -49,6 +50,31 @@ function buildTruckOrderCreateRows(form: TruckBlFormValues): TruckOrderCreateReq
     sealNo1:       toStr(row.sealNo1),
     sealNo2:       toStr(row.sealNo2),
     sealNo3:       toStr(row.sealNo3),
+  }));
+}
+
+function buildTruckDimCreateRows(form: TruckBlFormValues): TruckBlDimRequest[] | undefined {
+  if (!form.dimensions || form.dimensions.length === 0) return undefined;
+  return form.dimensions.map((d) => ({
+    lengthCm:       toNum(d.length),
+    widthCm:        toNum(d.width),
+    heightCm:       toNum(d.height),
+    quantity:       toNum(d.qty),
+    cbm:            toNum(d.cbm),
+    volumeWeightKg: toNum(d.volWt),
+  }));
+}
+
+function buildTruckDimUpdateRows(form: TruckBlFormValues): TruckBlDimRequest[] | undefined {
+  if (!form.dimensions || form.dimensions.length === 0) return undefined;
+  return form.dimensions.map((d) => ({
+    id:             d.id,
+    lengthCm:       toNum(d.length),
+    widthCm:        toNum(d.width),
+    heightCm:       toNum(d.height),
+    quantity:       toNum(d.qty),
+    cbm:            toNum(d.cbm),
+    volumeWeightKg: toNum(d.volWt),
   }));
 }
 
@@ -104,8 +130,10 @@ export function buildTruckBlCreateRequest(form: TruckBlFormValues): CreateTruckB
     serviceTerm:        toStr(form.serviceTerm),
     voyageNo:           toStr(form.voyNo),
     remark:             toStr(form.remark),
+    volumeDivisor:      toStr(form.dimensionDivisor),
     desc:               buildDescRequest(form),
     truckOrders:        buildTruckOrderCreateRows(form),
+    dims:               buildTruckDimCreateRows(form),
   };
 }
 
@@ -118,5 +146,6 @@ export function buildTruckBlUpdateRequest(form: TruckBlFormValues): UpdateTruckB
   return {
     ...base,
     truckOrders: buildTruckOrderUpdateRows(form),
+    dims:        buildTruckDimUpdateRows(form),
   };
 }

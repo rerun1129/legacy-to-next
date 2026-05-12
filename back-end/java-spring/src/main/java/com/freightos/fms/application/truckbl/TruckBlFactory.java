@@ -21,6 +21,7 @@ import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
+import com.freightos.fms.domain.housebl.entity.HouseBlDim;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruckOrder;
 import com.freightos.common.util.Nullables;
@@ -98,7 +99,9 @@ public class TruckBlFactory {
                 VoMapper.mapOrNull(truck.getVesselVoyage(), VesselVoyage::voyageNo),
                 truck.getRemark(),
                 toTruckOrderViews(truck.getTruckOrders()),
-                toDescView(truck.getDesc())
+                toDescView(truck.getDesc()),
+                Nullables.mapOrNull(truck.getVolumeDivisor(), Enum::name),
+                toDimViews(truck.getDims())
         );
     }
 
@@ -125,6 +128,13 @@ public class TruckBlFactory {
                 VoMapper.mapOrNull(order.getSealNo2(), SealNumber::value),
                 VoMapper.mapOrNull(order.getSealNo3(), SealNumber::value)
         );
+    }
+
+    private List<TruckBlDetailResult.DimView> toDimViews(List<HouseBlDim> dims) {
+        if (dims == null) return null;
+        return dims.stream().map(d -> new TruckBlDetailResult.DimView(
+                d.getId(), d.getLengthCm(), d.getWidthCm(), d.getHeightCm(),
+                d.getQuantity(), d.getCbm(), d.getVolumeWeightKg())).toList();
     }
 
     private TruckBlDetailResult.DescView toDescView(HouseBlDesc desc) {

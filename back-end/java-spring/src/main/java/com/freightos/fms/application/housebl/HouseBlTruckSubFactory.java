@@ -4,6 +4,7 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
@@ -50,5 +51,10 @@ class HouseBlTruckSubFactory {
     void applyTruckRemark(HouseBl entity, String remark) {
         if (!(entity instanceof HouseBlTruck truck)) return;
         truck.updateRemark(remark);
+    }
+
+    void applyTruckVolumeDivisor(HouseBl entity, String volumeDivisor) {
+        if (!(entity instanceof HouseBlTruck truck)) return;
+        truck.assignVolumeDivisor(Nullables.mapOrNull(volumeDivisor, VolumeDivisor::valueOf));
     }
 }

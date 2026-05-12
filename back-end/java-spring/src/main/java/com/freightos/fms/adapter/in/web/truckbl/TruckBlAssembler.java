@@ -82,7 +82,7 @@ public class TruckBlAssembler {
                 null, // masterRefNo
                 null, // workDivision
                 null, // originalBlRef
-                null, // volumeDivisor
+                req.volumeDivisor(),
                 null, // linerCode
                 null, // linerName
                 null, // vesselName (TRUCK: "TRUCK" 고정, HouseBlTruck.create에서 처리)
@@ -95,7 +95,7 @@ public class TruckBlAssembler {
                 req.remark(),
                 null, // seaDetail — TRUCK 미사용
                 toDescCommand(req.desc()),
-                null, // dims
+                toDimCommands(req.dims()),
                 null, // containers
                 null, // scheduleLegs
                 toTruckOrderCommands(req.truckOrders()),
@@ -142,7 +142,7 @@ public class TruckBlAssembler {
                 null, // masterRefNo
                 null, // workDivision
                 null, // originalBlRef
-                null, // volumeDivisor
+                req.volumeDivisor(),
                 null, // linerCode
                 null, // linerName
                 null, // vesselName
@@ -155,7 +155,7 @@ public class TruckBlAssembler {
                 req.remark(),
                 null, // seaDetail
                 toDescCommandU(req.desc()),
-                null, // dims
+                toDimCommandsU(req.dims()),
                 null, // containers
                 null, // scheduleLegs
                 toTruckOrderCommandsU(req.truckOrders()),
@@ -165,6 +165,12 @@ public class TruckBlAssembler {
     }
 
     // ── CREATE 서브 변환 ──────────────────────────────────────────────
+
+    private List<CreateHouseBlCommand.DimCommand> toDimCommands(List<CreateTruckBlRequest.DimRequest> reqs) {
+        if (reqs == null) return null;
+        return reqs.stream().map(r -> new CreateHouseBlCommand.DimCommand(
+                r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+    }
 
     private CreateHouseBlCommand.DescCommand toDescCommand(CreateTruckBlRequest.DescRequest r) {
         if (r == null) return null;
@@ -181,6 +187,12 @@ public class TruckBlAssembler {
     }
 
     // ── UPDATE 서브 변환 ──────────────────────────────────────────────
+
+    private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<UpdateTruckBlRequest.DimRequest> reqs) {
+        if (reqs == null) return null;
+        return reqs.stream().map(r -> new UpdateHouseBlCommand.DimCommand(
+                r.id(), r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+    }
 
     private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateTruckBlRequest.DescRequest r) {
         if (r == null) return null;

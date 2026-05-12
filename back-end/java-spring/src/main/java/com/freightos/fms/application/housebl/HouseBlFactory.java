@@ -72,6 +72,7 @@ public class HouseBlFactory {
         seaSubFactory.applySeaRemark(entity, cmd.remark());
         nonBlSubFactory.applyNonBlCreate(entity, cmd);
         truckSubFactory.applyTruckCreate(entity, cmd.truckDetail());
+        truckSubFactory.applyTruckVolumeDivisor(entity, cmd.volumeDivisor());
         truckSubFactory.applyTruckRemark(entity, cmd.remark());
         airSubFactory.applyAirCreate(entity, cmd);
         applySubCreate(entity, cmd);
@@ -87,6 +88,7 @@ public class HouseBlFactory {
         seaSubFactory.applySeaRemark(entity, cmd.remark());
         nonBlSubFactory.applyNonBlUpdate(entity, cmd);
         truckSubFactory.applyTruckUpdate(entity, cmd.truckDetail());
+        truckSubFactory.applyTruckVolumeDivisor(entity, cmd.volumeDivisor());
         truckSubFactory.applyTruckRemark(entity, cmd.remark());
         airSubFactory.applyAirUpdate(entity, cmd);
         applySubUpdate(entity, cmd);

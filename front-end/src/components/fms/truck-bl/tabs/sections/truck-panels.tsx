@@ -6,3 +6,4 @@ export { TruckCargoPanel }       from "./truck-cargo-panel";
 export { TruckDocumentPanel }    from "./truck-document-panel";
 export { TruckPerformancePanel } from "./truck-performance-panel";
 export { TruckRemarkPanel }      from "./truck-remark-panel";
+export { TruckDimensionPanel }   from "./truck-dimension-panel";

@@ -47,13 +47,17 @@ public record CreateTruckBlRequest(
         String loadType,
         String serviceTerm,
         String voyageNo,
+        String volumeDivisor,
 
         // Marks/Description 패널
         String remark,
         DescRequest desc,
 
         // Truck Order 그리드
-        List<TruckOrderRequest> truckOrders
+        List<TruckOrderRequest> truckOrders,
+
+        // Dimension 그리드 (CREATE — id 없음)
+        List<DimRequest> dims
 ) {
 
     /** Marks/Description 패널 1건. */
@@ -62,6 +66,16 @@ public record CreateTruckBlRequest(
             String description,
             String descClause1,
             String descClause2
+    ) {}
+
+    /** Dimension 그리드 행 (CREATE — id 없음). */
+    public record DimRequest(
+            BigDecimal lengthCm,
+            BigDecimal widthCm,
+            BigDecimal heightCm,
+            Integer quantity,
+            BigDecimal cbm,
+            BigDecimal volumeWeightKg
     ) {}
 
     /** Truck Order 그리드 행 (CREATE — id 없음). */

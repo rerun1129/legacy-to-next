@@ -469,6 +469,7 @@ CREATE TABLE IF NOT EXISTS house_bl_truck (
     charge_weight_kg   NUMERIC(12,3),
     load_type          VARCHAR(10),
     service_term       VARCHAR(15),
+    volume_divisor     VARCHAR(10),
     remark             VARCHAR(1000),
     created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -482,6 +483,7 @@ COMMENT ON COLUMN house_bl_truck.pickup_date       IS '화물 픽업일 YYYYMMDD
 COMMENT ON COLUMN house_bl_truck.trucker_code      IS '트럭 업체 거래처 코드';
 COMMENT ON COLUMN house_bl_truck.trucker_pic       IS '트럭 업체 담당자명';
 COMMENT ON COLUMN house_bl_truck.charge_weight_kg  IS '운임 적용 중량(kg)';
+COMMENT ON COLUMN house_bl_truck.volume_divisor    IS 'Truck Dimension 그리드 단위 선택자 (CM/6000 등)';
 
 -- =============================================================================
 -- E-24 House B/L Non-B/L 확장 (Schedule 필드 + remark + volume_divisor 통합)

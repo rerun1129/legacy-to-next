@@ -118,6 +118,16 @@ export function useTruckBlEntry() {
       descClause1: detail.desc?.descClause1 ?? "",
       descClause2: detail.desc?.descClause2 ?? "",
       remark:      detail.remark            ?? "",
+      dimensionDivisor: detail.volumeDivisor ?? "CM6000",
+      dimensions: detail.dims?.map((d, idx) => ({
+        id:     d.id ?? idx,
+        length: d.lengthCm       != null ? String(d.lengthCm)       : "",
+        width:  d.widthCm        != null ? String(d.widthCm)        : "",
+        height: d.heightCm       != null ? String(d.heightCm)       : "",
+        qty:    d.quantity       != null ? String(d.quantity)       : "",
+        cbm:    d.cbm            != null ? String(d.cbm)            : "",
+        volWt:  d.volumeWeightKg != null ? String(d.volumeWeightKg) : "",
+      })) ?? [],
     });
   }, [detail, form, didRestoreFromDraftRef]);
 

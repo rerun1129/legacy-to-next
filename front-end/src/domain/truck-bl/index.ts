@@ -49,6 +49,26 @@ export interface DescDetail {
   descClause2?: string;
 }
 
+export interface TruckBlDimView {
+  id?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  quantity?: number;
+  cbm?: number;
+  volumeWeightKg?: number;
+}
+
+export interface TruckBlDimRequest {
+  id?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  quantity?: number;
+  cbm?: number;
+  volumeWeightKg?: number;
+}
+
 export interface TruckBlDetail {
   id: number;
   hblNo?: string;
@@ -94,8 +114,10 @@ export interface TruckBlDetail {
   voyageNo?: string;
   vesselName?: string;
   remark?: string;
+  volumeDivisor?: string | null;
   truckOrders?: TruckOrderDetail[];
   desc?: DescDetail;
+  dims?: TruckBlDimView[];
 }
 
 // ── Truck Order 자식 Request 타입 ─────────────────────────────
@@ -165,8 +187,10 @@ export interface CreateTruckBlRequest {
   serviceTerm?: string;
   voyageNo?: string;
   remark?: string;
+  volumeDivisor?: string;
   desc?: TruckDescRequest;
   truckOrders?: TruckOrderCreateRequest[];
+  dims?: TruckBlDimRequest[];
 }
 
 /** Update 요청은 hblNo를 제외한 나머지 필드 (B/L No 변경은 PUT /{id}/hbl-no 전용) */

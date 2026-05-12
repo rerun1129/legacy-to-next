@@ -160,6 +160,7 @@ public class HouseBlDomainToJpaMapper {
         jpa.setTruckerCode(mapOrNull(domain.getTruckerCode(), CustomerCode::value));
         jpa.setTruckerPic(mapOrNull(domain.getTruckerPic(), EmployeeCode::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        jpa.setVolumeDivisor(domain.getVolumeDivisor());
         jpa.setRemark(domain.getRemark());
     }
 

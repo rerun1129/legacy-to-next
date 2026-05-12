@@ -51,7 +51,11 @@ export function createEmptyTruckBlFormValues(): TruckBlFormValues {
     freightSelling: [],
     freightBuying:  [],
 
+    // Dimension
+    dimensionDivisor: "CM6000",
+
     // 자식 그리드
     truckOrders: [],
+    dimensions:  [],
   };
 }

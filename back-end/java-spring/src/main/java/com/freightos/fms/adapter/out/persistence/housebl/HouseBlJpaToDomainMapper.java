@@ -167,6 +167,7 @@ public class HouseBlJpaToDomainMapper {
                 CustomerCode.of(jpa.getTruckerCode()),
                 EmployeeCode.of(jpa.getTruckerPic()),
                 Weight.of(jpa.getChargeWeightKg())));
+        domain.assignVolumeDivisor(jpa.getVolumeDivisor());
         domain.updateRemark(jpa.getRemark());
     }
 

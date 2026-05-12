@@ -1,6 +1,7 @@
 package com.freightos.fms.domain.housebl.entity;
 
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.common.enums.LoadType;
@@ -30,6 +31,7 @@ public class HouseBlTruck extends HouseBl {
     private EmployeeCode truckerPic;
     /** 트럭 전용: 청구중량 */
     private Weight chargeWeightKg;
+    private VolumeDivisor volumeDivisor;
     private String remark;
 
     protected HouseBlTruck(Bound bound) {
@@ -45,6 +47,8 @@ public class HouseBlTruck extends HouseBl {
     public String getVesselName() {
         return Nullables.mapOrElse(vesselVoyage, VesselVoyage::vesselName, () -> "TRUCK");
     }
+
+    public void assignVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
 
     public void updateRemark(String remark) { this.remark = remark; }
 

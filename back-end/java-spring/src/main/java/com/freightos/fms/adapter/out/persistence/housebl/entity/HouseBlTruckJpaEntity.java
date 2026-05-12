@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.housebl.entity;
 import com.freightos.common.persistence.BaseJpaEntity;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.VolumeDivisor;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -67,6 +68,10 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     @Enumerated(EnumType.STRING)
     private ServiceTerm serviceTerm;
 
+    @Column(name = "volume_divisor", length = 10)
+    @Enumerated(EnumType.STRING)
+    private VolumeDivisor volumeDivisor;
+
     @Column(name = "remark", length = 1000)
     private String remark;
 
@@ -94,6 +99,7 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     public void setChargeWeightKg(BigDecimal v) { this.chargeWeightKg = v; }
     public void setLoadType(LoadType v) { this.loadType = v; }
     public void setServiceTerm(ServiceTerm v) { this.serviceTerm = v; }
+    public void setVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
     public void setRemark(String v) { this.remark = v; }
 
     public List<HouseBlTruckDimJpaEntity> getDims() { return dims; }

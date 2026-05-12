@@ -44,13 +44,17 @@ public record UpdateTruckBlRequest(
         String loadType,
         String serviceTerm,
         String voyageNo,
+        String volumeDivisor,
 
         // Marks/Description 패널
         String remark,
         DescRequest desc,
 
         // Truck Order 그리드 (UPDATE — id 필수, §6.28 자식 row merge-by-id)
-        List<TruckOrderRequest> truckOrders
+        List<TruckOrderRequest> truckOrders,
+
+        // Dimension 그리드 (UPDATE — id 포함, 기존 행 식별)
+        List<DimRequest> dims
 ) {
 
     /** Marks/Description 패널 1건. id 포함으로 기존 행 식별. */
@@ -60,6 +64,17 @@ public record UpdateTruckBlRequest(
             String description,
             String descClause1,
             String descClause2
+    ) {}
+
+    /** Dimension 그리드 행 (UPDATE — id 포함, 기존 행 식별). */
+    public record DimRequest(
+            Long id,
+            BigDecimal lengthCm,
+            BigDecimal widthCm,
+            BigDecimal heightCm,
+            Integer quantity,
+            BigDecimal cbm,
+            BigDecimal volumeWeightKg
     ) {}
 
     /** Truck Order 그리드 행 (UPDATE — id 포함, 기존 행 식별). */

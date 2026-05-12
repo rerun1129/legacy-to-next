@@ -59,8 +59,22 @@ public record TruckBlDetailResponse(
 
         // 자식 데이터
         List<TruckOrderView> truckOrders,
-        DescView desc
+        DescView desc,
+
+        // Dimension 그리드
+        String volumeDivisor,
+        List<DimView> dims
 ) {
+    public record DimView(
+            Long id,
+            BigDecimal lengthCm,
+            BigDecimal widthCm,
+            BigDecimal heightCm,
+            Integer quantity,
+            BigDecimal cbm,
+            BigDecimal volumeWeightKg
+    ) {}
+
     public record TruckOrderView(
             Long id,
             String truckOrderNo, Integer pkgQty, String pkgUnit,
@@ -135,7 +149,11 @@ public record TruckBlDetailResponse(
                 result.voyageNo(),
                 result.remark(),
                 truckOrderViews,
-                descView
+                descView,
+                result.volumeDivisor(),
+                result.dims() == null ? null : result.dims().stream()
+                        .map(d -> new DimView(d.id(), d.lengthCm(), d.widthCm(), d.heightCm(), d.quantity(), d.cbm(), d.volumeWeightKg()))
+                        .toList()
         );
     }
 }
