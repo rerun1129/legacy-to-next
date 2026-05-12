@@ -63,8 +63,8 @@ export function NonBLDimensionPanel() {
               />
             )}
           />
-          <button type="button" className="btn btn--sm btn--ghost" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--ghost" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--danger" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList
