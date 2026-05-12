@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 import { EMPTY_TRUCK_ORDER_ROW } from "@/components/fms/truck-bl/truck-bl-schema";
@@ -13,8 +13,12 @@ type TruckOrderRow = NonNullable<TruckBlFormValues["truckOrders"]>[number];
 
 export function TruckOrderGridPanel() {
   const { control, register } = useFormContext<TruckBlFormValues>();
-  const { options: truckTypeOptions }     = useEnumOptions("TruckType");
-  const { options: containerTypeOptions } = useEnumOptions("ContainerType");
+  const { options: truckTypeOptions }            = useEnumOptions("TruckType");
+  const { options: containerTypeOptionsRaw }     = useEnumOptions("ContainerType");
+  const containerTypeOptions = useMemo(
+    () => containerTypeOptionsRaw.map(o => ({ value: o.value, label: o.value })),
+    [containerTypeOptionsRaw]
+  );
   const { fields, append, remove } = useFieldArray({ control, name: "truckOrders" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -26,15 +30,31 @@ export function TruckOrderGridPanel() {
     { key: "grossWeightKg", label: "Gross W/T",      width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
     { key: "cbm",           label: "CBM",            width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
     { key: "truckNo",       label: "Truck No.",      width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => <ComboBox  variant="cell" options={truckTypeOptions} {...register(`truckOrders.${i}.truckType`)} /> },
+    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => (
+      <Controller
+        name={`truckOrders.${i}.truckType`}
+        control={control}
+        render={({ field }) => (
+          <ComboBox variant="cell" options={truckTypeOptions} value={field.value} onChange={field.onChange} />
+        )}
+      />
+    ) },
     { key: "driver",        label: "Driver",         width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.driver`)} /> },
     { key: "mobileNo",      label: "Mobile No",      width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.mobileNo`)} /> },
     { key: "containerNo",   label: "Container No.",  width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerNo`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => <ComboBox  variant="cell" options={containerTypeOptions} {...register(`truckOrders.${i}.containerType`)} /> },
+    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => (
+      <Controller
+        name={`truckOrders.${i}.containerType`}
+        control={control}
+        render={({ field }) => (
+          <ComboBox variant="cell" options={containerTypeOptions} value={field.value} onChange={field.onChange} />
+        )}
+      />
+    ) },
     { key: "sealNo1",       label: "Seal No.1",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "sealNo2",       label: "Seal No.2",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "sealNo3",       label: "Seal No.3",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-  ], [register, truckTypeOptions, containerTypeOptions]);
+  ], [register, control, truckTypeOptions, containerTypeOptions]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
