@@ -62,7 +62,7 @@ class TruckBlUpdatePersistenceAdapterTest {
     }
 
     @Test
-    @DisplayName("update: 정상 TRUCK — factory·applyCommonFields·applyTruckFields·syncTruckOrders 호출 검증")
+    @DisplayName("update: 정상 TRUCK — factory·applyTruckCommonFields·applyTruckBlFields·syncTruckOrders 호출 검증")
     void update_existingTruck_callsFactoryAndAppliesAttachedMapping() {
         Long id = 10L;
         HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
@@ -82,8 +82,8 @@ class TruckBlUpdatePersistenceAdapterTest {
 
         then(jpaToDomainMapper).should().toTruckDomain(parentJpa, truckJpa, null);
         then(houseBlFactory).should().applyToEntity(command, domain);
-        then(domainToJpaMapper).should().applyCommonFields(domain, parentJpa);
-        then(domainToJpaMapper).should().applyTruckFields(domain, truckJpa);
+        then(domainToJpaMapper).should().applyTruckCommonFields(domain, parentJpa);
+        then(domainToJpaMapper).should().applyTruckBlFields(domain, truckJpa);
     }
 
     @Test
@@ -152,7 +152,7 @@ class TruckBlUpdatePersistenceAdapterTest {
 
         // 빈 컬렉션으로 처리 — houseBlCargoMapper·houseBlDocMapper 미호출
         then(houseBlCargoMapper).should(never()).toTruckDimJpa(any());
-        then(domainToJpaMapper).should().applyCommonFields(domain, parentJpa);
-        then(domainToJpaMapper).should().applyTruckFields(domain, truckJpa);
+        then(domainToJpaMapper).should().applyTruckCommonFields(domain, parentJpa);
+        then(domainToJpaMapper).should().applyTruckBlFields(domain, truckJpa);
     }
 }
