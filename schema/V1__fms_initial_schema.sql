@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS master_bl_sea (
     por_code            VARCHAR(10),
     final_dest_code     VARCHAR(10),
     rton                NUMERIC(10,3),
+    remark              VARCHAR(1000),
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by          VARCHAR(50),
@@ -131,6 +132,7 @@ CREATE TABLE IF NOT EXISTS master_bl_air (
     handling_info_code        VARCHAR(30),
     handling_info_text        VARCHAR(500),
     volume_divisor            VARCHAR(10),
+    remark                    VARCHAR(1000),
     created_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by                VARCHAR(50),
@@ -164,7 +166,6 @@ CREATE TABLE IF NOT EXISTS master_bl_sea_desc (
     description            TEXT,
     desc_clause_1          VARCHAR(50),
     desc_clause_2          VARCHAR(50),
-    remark                 TEXT,
     created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by             VARCHAR(50),
@@ -174,7 +175,6 @@ CREATE TABLE IF NOT EXISTS master_bl_sea_desc (
 COMMENT ON COLUMN master_bl_sea_desc.master_bl_sea_id IS 'Master B/L SEA ext 참조 FK (1:1)';
 COMMENT ON COLUMN master_bl_sea_desc.desc_clause_1    IS '부지약관 구문 1 (해상 수출 전용)';
 COMMENT ON COLUMN master_bl_sea_desc.desc_clause_2    IS '부지약관 구문 2 (해상 수출 전용)';
-COMMENT ON COLUMN master_bl_sea_desc.remark           IS '비고';
 
 -- =============================================================================
 -- E-06b Master B/L AIR 설명 (1:1, ER 재구조화 Phase 2)
@@ -187,7 +187,6 @@ CREATE TABLE IF NOT EXISTS master_bl_air_desc (
     description            TEXT,
     desc_clause_1          VARCHAR(50),
     desc_clause_2          VARCHAR(50),
-    remark                 TEXT,
     created_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at             TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by             VARCHAR(50),
@@ -195,7 +194,6 @@ CREATE TABLE IF NOT EXISTS master_bl_air_desc (
 );
 
 COMMENT ON COLUMN master_bl_air_desc.master_bl_air_id IS 'Master B/L AIR ext 참조 FK (1:1)';
-COMMENT ON COLUMN master_bl_air_desc.remark           IS '비고';
 
 -- =============================================================================
 -- E-05 Master B/L 치수 (1:N, ER 재구조화 Phase 4 — AIR 단독)
@@ -383,6 +381,7 @@ CREATE TABLE IF NOT EXISTS house_bl_sea (
     no_of_container_or_packages VARCHAR(100),
     bl_type                     VARCHAR(15),
     delivery_code               VARCHAR(10),
+    remark                      VARCHAR(1000),
     created_at                  TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at                  TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by                  VARCHAR(50),
@@ -429,6 +428,7 @@ CREATE TABLE IF NOT EXISTS house_bl_air (
     handling_info_text        VARCHAR(500),
     origin_of_goods           VARCHAR(100),
     cargo_type                VARCHAR(30),
+    remark                    VARCHAR(1000),
     created_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at                TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by                VARCHAR(50),
@@ -469,6 +469,7 @@ CREATE TABLE IF NOT EXISTS house_bl_truck (
     charge_weight_kg   NUMERIC(12,3),
     load_type          VARCHAR(10),
     service_term       VARCHAR(15),
+    remark             VARCHAR(1000),
     created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by         VARCHAR(50),
@@ -524,7 +525,6 @@ CREATE TABLE IF NOT EXISTS house_bl_sea_desc (
     description           TEXT,
     desc_clause_1         VARCHAR(50),
     desc_clause_2         VARCHAR(50),
-    remark                TEXT,
     created_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by            VARCHAR(50),
@@ -534,7 +534,6 @@ CREATE TABLE IF NOT EXISTS house_bl_sea_desc (
 COMMENT ON COLUMN house_bl_sea_desc.house_bl_sea_id IS 'House B/L SEA ext 참조 FK (1:1)';
 COMMENT ON COLUMN house_bl_sea_desc.desc_clause_1   IS '부지약관 구문 1 (해상 수출 전용)';
 COMMENT ON COLUMN house_bl_sea_desc.desc_clause_2   IS '부지약관 구문 2 (해상 수출 전용)';
-COMMENT ON COLUMN house_bl_sea_desc.remark          IS '비고';
 
 -- =============================================================================
 -- E-13b House B/L AIR 설명 (1:1, ER 재구조화 Phase 2)
@@ -547,7 +546,6 @@ CREATE TABLE IF NOT EXISTS house_bl_air_desc (
     description           TEXT,
     desc_clause_1         VARCHAR(50),
     desc_clause_2         VARCHAR(50),
-    remark                TEXT,
     created_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at            TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by            VARCHAR(50),
@@ -555,7 +553,6 @@ CREATE TABLE IF NOT EXISTS house_bl_air_desc (
 );
 
 COMMENT ON COLUMN house_bl_air_desc.house_bl_air_id IS 'House B/L AIR ext 참조 FK (1:1)';
-COMMENT ON COLUMN house_bl_air_desc.remark          IS '비고';
 
 -- =============================================================================
 -- E-13c House B/L TRUCK 설명 (1:1, ER 재구조화 Phase 2)
@@ -568,7 +565,6 @@ CREATE TABLE IF NOT EXISTS house_bl_truck_desc (
     description             TEXT,
     desc_clause_1           VARCHAR(50),
     desc_clause_2           VARCHAR(50),
-    remark                  TEXT,
     created_at              TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at              TIMESTAMPTZ  NOT NULL DEFAULT now(),
     created_by              VARCHAR(50),
@@ -576,7 +572,6 @@ CREATE TABLE IF NOT EXISTS house_bl_truck_desc (
 );
 
 COMMENT ON COLUMN house_bl_truck_desc.house_bl_truck_id IS 'House B/L TRUCK ext 참조 FK (1:1)';
-COMMENT ON COLUMN house_bl_truck_desc.remark            IS '비고';
 
 -- =============================================================================
 -- E-12a House B/L AIR 치수 (1:N, ER 재구조화 Phase 4)
