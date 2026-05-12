@@ -10,6 +10,7 @@ import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.ContainerNumber;
+import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
 import com.freightos.fms.domain.common.vo.PortCode;
@@ -123,7 +124,7 @@ public class TruckBlFactory {
                 order.getDriver(),
                 order.getMobileNo(),
                 VoMapper.mapOrNull(order.getContainerNo(), ContainerNumber::value),
-                Nullables.mapOrNull(order.getContainerType(), Enum::name),
+                Nullables.mapOrNull(order.getContainerType(), ContainerType::getCode),  // FE 옵션 value와 정합 (§6.45)
                 VoMapper.mapOrNull(order.getSealNo1(), SealNumber::value),
                 VoMapper.mapOrNull(order.getSealNo2(), SealNumber::value),
                 VoMapper.mapOrNull(order.getSealNo3(), SealNumber::value)
