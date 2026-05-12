@@ -15,11 +15,11 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 24개이고, 24번째는 consolidatedHouseBls이다")
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 25개이고, 24번째는 consolidatedHouseBls이다")
     void recordComponents_haveExactlyTwentyThreeFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(24);
+        assertThat(components).hasSize(25);
         assertThat(components[23].getName()).isEqualTo("consolidatedHouseBls");
         assertThat(components[23].getType()).isEqualTo(List.class);
     }
@@ -43,7 +43,8 @@ class MasterBlDetailResponseTest {
                 "PREPAID", "OPR01", "TEAM01",
                 10, "KGS", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
                 null, null,
-                List.of(seaSummary)
+                List.of(seaSummary),
+                "REMARK-SAMPLE"
         );
 
         MasterBlDetailResponse response = MasterBlDetailResponse.from(result);
@@ -64,7 +65,8 @@ class MasterBlDetailResponseTest {
                 "PREPAID", null, null,
                 null, null, null, null, null,
                 null, null,
-                List.of()
+                List.of(),
+                null
         );
 
         MasterBlDetailResponse response = MasterBlDetailResponse.from(result);
