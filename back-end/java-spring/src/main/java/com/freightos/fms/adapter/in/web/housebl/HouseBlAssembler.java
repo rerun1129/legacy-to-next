@@ -265,8 +265,9 @@ public class HouseBlAssembler {
 
     private List<UpdateHouseBlCommand.TruckOrderCommand> toTruckOrderCommandsU(List<UpdateHouseBlRequest.TruckOrderRequest> reqs) {
         if (reqs == null) return null;
+        // TruckOrderRequest에 id 필드가 없으므로 null 전달 — HouseBl UPDATE는 sync(전체 교체) 방식
         return reqs.stream().map(r -> new UpdateHouseBlCommand.TruckOrderCommand(
-                r.truckOrderNo(), r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.cbm(),
+                null, r.truckOrderNo(), r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.cbm(),
                 r.truckNo(), r.truckType(), r.driver(), r.mobileNo(),
                 r.containerNo(), r.containerType(), r.sealNo1(), r.sealNo2(), r.sealNo3())).toList();
     }

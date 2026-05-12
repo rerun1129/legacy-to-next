@@ -253,8 +253,9 @@ public class NonBlAssembler {
 
     private List<UpdateHouseBlCommand.TruckOrderCommand> toTruckOrderCommandsU(List<CreateHouseBlRequest.TruckOrderRequest> reqs) {
         if (reqs == null) return null;
+        // CreateHouseBlRequest.TruckOrderRequest(NonBl UPDATE 재사용)에 id 필드가 없으므로 null 전달 — NonBl UPDATE도 sync 방식
         return reqs.stream().map(r -> new UpdateHouseBlCommand.TruckOrderCommand(
-                r.truckOrderNo(), r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.cbm(),
+                null, r.truckOrderNo(), r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.cbm(),
                 r.truckNo(), r.truckType(), r.driver(), r.mobileNo(),
                 r.containerNo(), r.containerType(), r.sealNo1(), r.sealNo2(), r.sealNo3())).toList();
     }
