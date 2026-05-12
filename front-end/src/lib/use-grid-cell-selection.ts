@@ -158,6 +158,11 @@ export function useGridCellSelection<T>(params: {
     function handleOutsideClick(e: MouseEvent) {
       const tableEl = getTableRef.current();
       if (tableEl?.contains(e.target as Node)) return;
+      // 같은 패널 안의 외부(예: panel__head의 +/- 버튼) 클릭은 outside로 보지 않음
+      const targetEl = e.target as HTMLElement | null;
+      const samePanel = targetEl?.closest(".panel");
+      const tablePanel = tableEl?.closest(".panel");
+      if (samePanel && tablePanel && samePanel === tablePanel) return;
       selectedRangeRef.current = null;
       copiedRangeRef.current = null;
       applyOverlay();
