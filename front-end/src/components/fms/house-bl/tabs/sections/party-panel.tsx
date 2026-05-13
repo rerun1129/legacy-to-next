@@ -51,7 +51,6 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
         {cfg.role === "NOTIFY" && (
           <button type="button" className="party-block__head-btn">Same as Cne.</button>
         )}
-        <button type="button" className="party-block__head-btn">Clear</button>
       </div>
       <Controller
         control={control}
@@ -63,7 +62,7 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
             onChange={field.onChange}
             onBlur={field.onBlur}
             placeholder="Address (free text)"
-            style={{ height: 108, marginTop: 4 }}
+            style={{ height: 100, marginTop: 4 }}
           />
         )}
       />
