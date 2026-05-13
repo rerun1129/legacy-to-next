@@ -24,13 +24,13 @@ export function DimensionPanel() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
   const columns = useMemo<GridColumn<DimRow>[]>(() => [
-    { key: "_no",            label: "#",          className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "lengthCm",       label: "Length",     className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.lengthCm`)} /> },
-    { key: "widthCm",        label: "Width",      className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.widthCm`)} /> },
-    { key: "heightCm",       label: "Height",     className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.heightCm`)} /> },
-    { key: "quantity",       label: "Qty",        className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.quantity`)} /> },
-    { key: "cbm",            label: "CBM",        className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.cbm`)} /> },
-    { key: "volumeWeightKg", label: "Volume Wt.", className: "is-num",  render: (_, __, i) => <NumericCell {...register(`dims.${i}.volumeWeightKg`)} /> },
+    { key: "_no",            label: "#",          className: "row-num", width: 50,  render: (_, __, i) => i + 1 },
+    { key: "lengthCm",       label: "Length",     className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.lengthCm`)} /> },
+    { key: "widthCm",        label: "Width",      className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.widthCm`)} /> },
+    { key: "heightCm",       label: "Height",     className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.heightCm`)} /> },
+    { key: "quantity",       label: "Qty",        className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.quantity`)} /> },
+    { key: "cbm",            label: "CBM",        className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.cbm`)} /> },
+    { key: "volumeWeightKg", label: "Volume Wt.", className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.volumeWeightKg`)} /> },
   ], [register]);
 
   const selectedIdx = selectedKey !== null

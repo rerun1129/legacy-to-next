@@ -242,6 +242,13 @@ export const HOUSE_BL_SCHEMA = z.object({
   // truck performance
   customerPic: z.string().optional(),
 
+  // handling information
+  handlingInfoCode: z.string().optional(),
+  handlingInfoText: z.string().max(500).optional(),
+
+  // remark (root)
+  remark: z.string().optional(),
+
   // SEA detail
   seaDetail: SEA_DETAIL_SCHEMA.optional(),
 
