@@ -66,16 +66,6 @@ function PaymentTypeField({ inputProps }: { inputProps: React.InputHTMLAttribute
   );
 }
 
-function PaymentPlaceField({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
-  return (
-    <div className="li">
-      <span className="li__label">Payable At</span>
-      <div className="li__input">
-        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
-      </div>
-    </div>
-  );
-}
 
 export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
   const { register, control } = useFormContext<HouseBlFormValues>();
@@ -107,8 +97,6 @@ export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
       ),
     },
     { key: "freight-term", render: () => <PaymentTypeField inputProps={register("freightTerm")} /> },
-    { key: "payable-at",   render: () => <PaymentPlaceField inputProps={register("paymentPlace")} /> },
-    { key: "co-load",      render: () => <LiField label="Co-Load"      name="coLoad" /> },
   ];
 
   const perfItems: FieldItemDef[] = [

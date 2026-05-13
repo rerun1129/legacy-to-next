@@ -67,7 +67,7 @@ interface IssueSectionProps {
 }
 
 function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPlaceholder }: IssueSectionProps) {
-  const { control } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
   const issueItems: FieldItemDef[] = issueFields.map(f => {
     const fieldName = ISSUE_LABEL_TO_FIELD[f];
     if (f === "No. of B/L") {
@@ -92,6 +92,21 @@ function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPlaceholde
               />
             </div>
           </div>
+        ),
+      };
+    }
+    if (f === "Issue Place") {
+      return {
+        key: "issue-place",
+        render: () => (
+          <CodeBox
+            kind="lcn"
+            variant="panel"
+            label="Issue Place"
+            codeProps={{ ...register("seaDetail.issuePlace") }}
+            nameProps={{ ...register("seaDetail.issuePlaceName") }}
+            onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          />
         ),
       };
     }

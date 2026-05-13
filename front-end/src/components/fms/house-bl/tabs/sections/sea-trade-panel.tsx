@@ -3,7 +3,7 @@
 import { useFormContext, Controller } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
-import { TextBox, CodeBox, ComboBox } from "@/components/shared/inputs";
+import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 
@@ -62,23 +62,14 @@ export function SeaTradePanel() {
     {
       key: "payable-at",
       render: () => (
-        <div className="li">
-          <span className="li__label">Payable At</span>
-          <div className="li__input">
-            <TextBox variant="panel" {...register("paymentPlace")} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "co-load",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Co-Load</span>
-          <div className="li__input">
-            <TextBox variant="panel" {...register("coLoad")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="Payable At"
+          codeProps={{ ...register("seaDetail.payableAt") }}
+          nameProps={{ ...register("seaDetail.payableAtName") }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        />
       ),
     },
   ];

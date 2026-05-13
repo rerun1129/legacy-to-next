@@ -135,8 +135,10 @@ export const SEA_DETAIL_SCHEMA = z.object({
   issueDate:               DATE8,
   noOfBl:                  z.string().optional(),
   issuePlace:              z.string().max(5).optional(),
+  issuePlaceName:          z.string().optional(),
   doDate:                  DATE8,
   payableAt:               z.string().max(5).optional(),
+  payableAtName:           z.string().optional(),
   triangle:                z.boolean().optional(),
   serviceTerm:             z.string().optional(),
   vesselNationality:       z.string().optional(),
@@ -213,7 +215,6 @@ export const HOUSE_BL_SCHEMA = z.object({
   mainItemName: z.string().optional(),
   hsCode:       z.string().optional(),
   freightTerm:  z.enum(['', 'PREPAID', 'COLLECT']),
-  paymentPlace: z.string().optional(),
   currency:     z.string().optional(),
   otherTerm:    z.string().optional(),
   dvCarriage:   z.string().optional(),
@@ -221,7 +222,6 @@ export const HOUSE_BL_SCHEMA = z.object({
   dvCustoms:    z.string().optional(),
   accountInfo:  z.string().optional(),
   fhd:          z.string().optional(),
-  coLoad:       z.string().optional(),
 
   // truck toolbar
   truckBlNo:        z.string().optional(),
