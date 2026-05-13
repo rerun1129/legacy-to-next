@@ -1,45 +1,27 @@
 "use client";
 
+import { useFormContext, Controller } from "react-hook-form";
 import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
+import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 
-// House BL form 상태와 완전 격리 — RHF useFormContext/useController/register/Controller 불사용.
-// 마이그레이션 시점에 schema/매핑 일괄 정리 예정.
 export function SeaCargoPanel() {
+  const { register, control } = useFormContext<HouseBlFormValues>();
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
 
   const CARGO_ITEMS: FieldItemDef[] = [
-    {
-      key: "main-item",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Main Item</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="Main Item" />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "hs-code",
-      render: () => (
-        <div className="li">
-          <span className="li__label">HS Code</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="HS Code" />
-          </div>
-        </div>
-      ),
-    },
     {
       key: "package",
       render: () => (
         <div className="li">
           <span className="li__label">Package</span>
           <div className="li__input li__input--tight">
-            <NumberBox variant="panel" decimalPlaces={0} placeholder="0" />
-            <CodeBox kind="code-only" variant="panel" codeProps={{}} onLookup={() => {}} />
+            <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
+            {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능) */}
+            <div style={{ flex: "0 0 80px" }}>
+              <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+            </div>
           </div>
         </div>
       ),
@@ -50,8 +32,14 @@ export function SeaCargoPanel() {
         <div className="li">
           <span className="li__label">Gross W/T</span>
           <div className="li__input li__input--tight">
-            <NumberBox variant="panel" decimalPlaces={3} />
-            <ComboBox variant="panel" options={weightUnitOptions} value="" onChange={() => {}} />
+            <NumberBox variant="panel" decimalPlaces={3} {...register("grossWeightKg")} />
+            <Controller
+              name="weightUnit"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} style={{ flex: "0 0 80px" }} />
+              )}
+            />
           </div>
         </div>
       ),
@@ -62,7 +50,7 @@ export function SeaCargoPanel() {
         <div className="li">
           <span className="li__label">CBM</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} />
+            <NumberBox variant="panel" decimalPlaces={3} {...register("cbm")} />
           </div>
         </div>
       ),
@@ -73,7 +61,7 @@ export function SeaCargoPanel() {
         <div className="li">
           <span className="li__label">R/Ton</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} />
+            <NumberBox variant="panel" decimalPlaces={3} {...register("seaDetail.rton")} />
           </div>
         </div>
       ),

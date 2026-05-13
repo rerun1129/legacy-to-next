@@ -1,8 +1,7 @@
 import type React from "react";
 import { useFormContext, Controller, type FieldPath } from "react-hook-form";
-import { Search } from "lucide-react";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
-import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
@@ -40,43 +39,21 @@ function SchedField({
             control={control}
             name={name}
             render={({ field }) => (
-              <PanelDateInput
+              <DateBox
+                variant="panel"
                 required={req}
+                ref={field.ref}
+                name={field.name}
                 value={field.value as string}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
-                ref={field.ref}
               />
             )}
           />
         ) : (
-          <input type={type} style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...register(name)} />
+          <TextBox variant="panel" {...register(name)} />
         )}
       </div>
-    </div>
-  );
-}
-
-function LcnField({
-  label,
-  req,
-  codeField,
-  nameField,
-}: {
-  label: string;
-  req?: boolean;
-  codeField: FieldPath<HouseBlFormValues>;
-  nameField: FieldPath<HouseBlFormValues>;
-}) {
-  const { register } = useFormContext<HouseBlFormValues>();
-  return (
-    <div className="lcn">
-      <span className={`lcn__label${req ? " is-required" : ""}`}>{label}</span>
-      <div className="lcn__code" style={{ position: "relative" }}>
-        <input placeholder="UNLOC" style={{ width: "100%", height: 22, padding: "0 24px 0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register(codeField)} />
-        <Search size={12} className="lcn__icon" />
-      </div>
-      <input className="lcn__name" placeholder="Port Name" {...register(nameField)} />
     </div>
   );
 }
@@ -99,61 +76,168 @@ function IssueSection({ issueFields, panelScope }: { issueFields: string[]; pane
   );
 }
 
-// ── RHF-bound liner row ─────────────────────────────────────
-function LinerRow({ codeProps, nameProps }: { codeProps: React.InputHTMLAttributes<HTMLInputElement>; nameProps: React.InputHTMLAttributes<HTMLInputElement> }) {
-  return (
-    <div className="li">
-      <span className="li__label is-required">Liner</span>
-      <div className="li__input" style={{ gap: 4 }}>
-        <input placeholder="Code" style={{ width: 72, height: 22, padding: "0 8px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...codeProps} />
-        <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} {...nameProps} />
-      </div>
-    </div>
-  );
-}
-
-function VesselRow({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
-  return (
-    <div className="li">
-      <span className="li__label is-required">Vessel</span>
-      <div className="li__input">
-        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
-      </div>
-    </div>
-  );
-}
-
-function VoyageRow({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
-  return (
-    <div className="li">
-      <span className="li__label is-required">Voyage</span>
-      <div className="li__input">
-        <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
-      </div>
-    </div>
-  );
-}
-
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
 
   if (!variant) return null;
   const panelScope = `schedule-panel.${variant.key}`;
 
   const PORT_ITEMS: FieldItemDef[] = [
-    { key: "pol",      render: () => <LcnField label="POL"      req  codeField="pol"                    nameField="seaDetail.polName" /> },
-    { key: "pod",      render: () => <LcnField label="POD"      req  codeField="pod"                    nameField="seaDetail.podName" /> },
-    { key: "delivery", render: () => <LcnField label="Delivery"      codeField="seaDetail.deliveryCode" nameField="seaDetail.deliveryName" /> },
+    {
+      key: "pol",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="POL"
+          required
+          codeProps={{ ...register("pol"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("seaDetail.polName"), placeholder: "Port Name" }}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        />
+      ),
+    },
+    {
+      key: "pod",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="POD"
+          required
+          codeProps={{ ...register("pod"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("seaDetail.podName"), placeholder: "Port Name" }}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        />
+      ),
+    },
+    {
+      key: "delivery",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="Delivery"
+          codeProps={{ ...register("seaDetail.deliveryCode"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("seaDetail.deliveryName"), placeholder: "Port Name" }}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        />
+      ),
+    },
   ];
 
   const linerItems: FieldItemDef[] = [
-    { key: "liner",    render: () => <LinerRow codeProps={register("linerCode")} nameProps={register("linerName")} /> },
-    { key: "vessel",   render: () => <VesselRow inputProps={register("vesselName")} /> },
-    { key: "voyage",   render: () => <VoyageRow inputProps={register("voyNo")} /> },
-    { key: "etd",      render: () => <SchedField label="ETD"      name="etd"                  req  type="date" /> },
-    { key: "eta",      render: () => <SchedField label="ETA"      name="eta"                  req  type="date" /> },
-    { key: "on-board", render: () => <SchedField label="On Board" name="seaDetail.onboardDate"     type="date" /> },
+    {
+      key: "liner",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="Liner"
+          required
+          codeProps={{ ...register("linerCode"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("linerName") }}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        />
+      ),
+    },
+    {
+      key: "vessel",
+      render: () => (
+        <div className="li">
+          <span className="li__label is-required">Vessel</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("vesselName")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "voyage",
+      render: () => (
+        <div className="li">
+          <span className="li__label is-required">Voyage</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("voyNo")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "etd",
+      render: () => (
+        <div className="li">
+          <span className="li__label is-required">ETD</span>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="etd"
+              render={({ field }) => (
+                <DateBox
+                  variant="panel"
+                  required
+                  ref={field.ref}
+                  name={field.name}
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "eta",
+      render: () => (
+        <div className="li">
+          <span className="li__label is-required">ETA</span>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="eta"
+              render={({ field }) => (
+                <DateBox
+                  variant="panel"
+                  required
+                  ref={field.ref}
+                  name={field.name}
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "on-board",
+      render: () => (
+        <div className="li">
+          <span className="li__label">On Board</span>
+          <div className="li__input">
+            <Controller
+              control={control}
+              name="seaDetail.onboardDate"
+              render={({ field }) => (
+                <DateBox
+                  variant="panel"
+                  ref={field.ref}
+                  name={field.name}
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
   ];
 
   const fields: FieldWidgetDef[] = [
