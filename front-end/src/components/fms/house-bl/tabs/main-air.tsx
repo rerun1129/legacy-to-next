@@ -13,8 +13,8 @@ import { NatureGoodsPanel }     from "./sections/nature-goods-panel";
 interface Props { variant: BLVariantConfig; active?: boolean }
 
 export const HOUSE_BL_AIR_EXP_REGISTRY: WidgetDef[] = [
-  { key: "party-air",    label: "Party",             component: PartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 6 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "schedule-air", label: "Schedule",          component: AirSchedulePanel, defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "party-air",    label: "Party",             component: PartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 5 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "schedule-air", label: "Schedule",          component: AirSchedulePanel, defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
   { key: "trade-air",    label: "Trade",             component: AirTradePanel,    defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
   { key: "issue-air",    label: "Issue Information", component: AirIssuePanel,    defaultPosition: { col: 4, row: 2, colSpan: 2, rowSpan: 1 }, minColSpan: 1, minRowSpan: 1 },
   { key: "cargo-air",    label: "Cargo",             component: AirCargoPanel,    defaultPosition: { col: 2, row: 4, colSpan: 4, rowSpan: 2 }, minColSpan: 2, minRowSpan: 1 },
@@ -24,8 +24,8 @@ export const HOUSE_BL_AIR_EXP_REGISTRY: WidgetDef[] = [
 ];
 
 export const HOUSE_BL_AIR_IMP_REGISTRY: WidgetDef[] = [
-  { key: "party-air",    label: "Party",           component: PartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 6 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "schedule-air", label: "Schedule",        component: AirSchedulePanel, defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "party-air",    label: "Party",           component: PartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 5 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "schedule-air", label: "Schedule",        component: AirSchedulePanel, defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
   { key: "trade-air",    label: "Trade",           component: AirTradePanel,    defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
   { key: "cargo-air",    label: "Cargo",           component: AirCargoPanel,    defaultPosition: { col: 2, row: 4, colSpan: 4, rowSpan: 2 }, minColSpan: 2, minRowSpan: 1 },
   { key: "dimension",    label: "Dimension",       component: DimensionPanel,   defaultPosition: { col: 0, row: 6, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
