@@ -110,8 +110,9 @@ public record UpdateHouseBlRequest(
             BigDecimal volumeWeightKg
     ) {}
 
-    /** 컨테이너 배정 1행. */
+    /** 컨테이너 배정 1행. UPDATE 전용 — 기존 행 식별을 위한 id 포함. */
     public record ContainerRequest(
+            Long id,
             String containerNo,
             String containerType,
             Integer lengthFeet,
@@ -131,8 +132,9 @@ public record UpdateHouseBlRequest(
             Integer seq
     ) {}
 
-    /** 구간별 운항 스케줄 1행. */
+    /** 구간별 운항 스케줄 1행. UPDATE 전용 — 기존 행 식별을 위한 id 포함. */
     public record ScheduleLegRequest(
+            Long id,
             String toCode,
             String byCarrier,
             String flightNo,

@@ -131,6 +131,7 @@ class HouseBlSubFactory {
         if (cmds == null || cmds.isEmpty()) return;
         entity.initScheduleLegs(cmds.stream().map(c -> {
             HouseBlScheduleLeg leg = HouseBlScheduleLeg.create(null, c.toCode(), c.onBoardDt(), c.arrivalDt());
+            if (c.id() != null) leg.assignIdentity(c.id(), null, null, null, null);
             leg.updateDetails(c.toCode(), c.byCarrier(), c.flightNo(), c.onBoardDt(), c.onBoardTm(), c.arrivalDt(), c.arrivalTm());
             return leg;
         }).toList());

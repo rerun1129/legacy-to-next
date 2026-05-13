@@ -249,9 +249,8 @@ public class HouseBlAssembler {
 
     private List<UpdateHouseBlCommand.ContainerCommand> toContainerCommandsU(List<UpdateHouseBlRequest.ContainerRequest> reqs) {
         if (reqs == null) return null;
-        // Sea/Air/Truck UPDATE는 sync 방식이므로 id null 허용
         return reqs.stream().map(r -> new UpdateHouseBlCommand.ContainerCommand(
-                null, r.containerNo(), r.containerType(), r.lengthFeet(),
+                r.id(), r.containerNo(), r.containerType(), r.lengthFeet(),
                 r.sealNo1(), r.sealNo2(), r.sealNo3(), r.sealNo4(), r.sealNo5(), r.sealNo6(),
                 r.pkgQty(), r.pkgUnit(), r.grossWeightKg(), r.netWeightKg(), r.cbm(),
                 r.vgmKg(), r.soc(), r.seq())).toList();
@@ -260,7 +259,7 @@ public class HouseBlAssembler {
     private List<UpdateHouseBlCommand.ScheduleLegCommand> toScheduleLegCommandsU(List<UpdateHouseBlRequest.ScheduleLegRequest> reqs) {
         if (reqs == null) return null;
         return reqs.stream().map(r -> new UpdateHouseBlCommand.ScheduleLegCommand(
-                r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
+                r.id(), r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
     }
 
     private List<UpdateHouseBlCommand.TruckOrderCommand> toTruckOrderCommandsU(List<UpdateHouseBlRequest.TruckOrderRequest> reqs) {

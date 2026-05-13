@@ -137,6 +137,7 @@ public record UpdateHouseBlCommand(
     ) {}
 
     public record ScheduleLegCommand(
+            Long id,
             String toCode,
             String byCarrier,
             String flightNo,

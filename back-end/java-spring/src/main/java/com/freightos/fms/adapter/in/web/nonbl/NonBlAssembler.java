@@ -247,8 +247,9 @@ public class NonBlAssembler {
 
     private List<UpdateHouseBlCommand.ScheduleLegCommand> toScheduleLegCommandsU(List<CreateHouseBlRequest.ScheduleLegRequest> reqs) {
         if (reqs == null) return null;
+        // NonBl UPDATE는 scheduleLegs를 CreateHouseBlRequest.ScheduleLegRequest(id 없음)로 재사용 — sync 방식이므로 id null 전달
         return reqs.stream().map(r -> new UpdateHouseBlCommand.ScheduleLegCommand(
-                r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
+                null, r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
     }
 
     private List<UpdateHouseBlCommand.TruckOrderCommand> toTruckOrderCommandsU(List<CreateHouseBlRequest.TruckOrderRequest> reqs) {
