@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.housebl;
 
+import com.freightos.fms.adapter.in.web.housebl.dto.ChangeHouseBlHblNoRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
@@ -9,6 +10,7 @@ import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,6 +72,15 @@ public class HouseBlController {
             return ResponseEntity.ok(ApiResponse.ok(MessageCode.SEA_HBL_UPDATED.message()));
         }
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.updateHouseBl(id, cmd))));
+    }
+
+    @Operation(summary = "House B/L 번호 변경 (전용 엔드포인트)")
+    @PutMapping("/{id}/hbl-no")
+    public ResponseEntity<ApiResponse<Void>> changeHblNo(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangeHouseBlHblNoRequest req) {
+        houseBlUseCase.changeHblNo(id, new ChangeHouseBlNoCommand(req.hblNo()));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.HOUSE_BL_UPDATED.message()));
     }
 
     @Operation(summary = "House B/L 삭제")
