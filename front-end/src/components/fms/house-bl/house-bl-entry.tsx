@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Save, Printer, Copy, Trash2, FileText, Download, RefreshCw, Search, FilePlus } from "lucide-react";
@@ -21,6 +21,9 @@ import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { useSearchBl } from "./use-search-bl";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { ScreenGuard } from "@/components/shared/screen-guard";
+import { Button } from "@/components/shared/button";
+import { ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 
 const TOOLBAR_FIELDS_SEA = [
   "Shipment Type", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
@@ -109,6 +112,17 @@ export function HouseBLEntry({ variant }: Props) {
   const form = useForm<HouseBlFormValues>({
     defaultValues: createEmptyHouseBlFormValues(),
   });
+
+  const { options: loadTypeOptions, placeholder: loadTypePh }       = useEnumOptions("LoadType");
+  const { options: serviceTermOptions, placeholder: serviceTermPh } = useEnumOptions("ServiceTerm");
+  const { options: blTypeOptions, placeholder: blTypePh }           = useEnumOptions("BlType");
+
+  // LoadType / ServiceTerm / BlType 은 모두 e.name() 기반 등록이므로 §6.45 재매핑 불필요
+  const TOOLBAR_ENUM: Record<string, { options: typeof loadTypeOptions; placeholder: string | undefined }> = {
+    "Load Type":    { options: loadTypeOptions,    placeholder: loadTypePh },
+    "Service Term": { options: serviceTermOptions, placeholder: serviceTermPh },
+    "B/L Type":     { options: blTypeOptions,      placeholder: blTypePh },
+  };
 
   useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
 
@@ -255,46 +269,38 @@ export function HouseBLEntry({ variant }: Props) {
             <span className="badge badge--draft">DRAFT</span>
           </div>
           <div className="page-head__actions">
-            <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-              <FilePlus size={12} />New
-            </button>
-            <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
-              <Search size={12} />Search B/L
-            </button>
-            <button
-              type="button"
-              className="btn btn--sm btn--danger"
+            <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
+            <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearchBl}>Search B/L</Button>
+            <Button
+              size="sm"
+              variant="danger"
+              leftIcon={<Trash2 size={12} />}
               onClick={() => {
                 if (!isEdit) return;
                 if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
               }}
               disabled={!isEdit || deleteMutation.isPending}
-            >
-              <Trash2 size={12} />Delete
-            </button>
-            <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
-            <button type="button" className="btn btn--sm"><Download size={12} />Export</button>
+            >Delete</Button>
+            <Button size="sm" variant="normal" leftIcon={<Copy size={12} />}>Copy</Button>
+            <Button size="sm" variant="normal" leftIcon={<Download size={12} />}>Export</Button>
             {variant.printDocs.length > 0 && (
-              <button type="button" className="btn btn--sm btn--success"><Printer size={12} />Print</button>
+              <Button size="sm" variant="normal" leftIcon={<Printer size={12} />}>Print</Button>
             )}
-            <button
-              type="button"
-              className="btn btn--sm btn--secondary"
+            <Button
+              size="sm"
+              variant="transaction"
+              leftIcon={<RefreshCw size={12} />}
               disabled={!canSwitchBl}
               onClick={() => setIsSwitchBlModalOpen(true)}
-            >
-              <RefreshCw size={12} />Switch B/L
-            </button>
-            <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-              <FilePlus size={12} />New
-            </button>
-            <button
+            >Switch B/L</Button>
+            <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
+            <Button
               type="submit"
-              className="btn btn--sm btn--primary"
-              disabled={mutation.isPending}
-            >
-              <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
-            </button>
+              size="sm"
+              variant="transaction"
+              leftIcon={<Save size={12} />}
+              loading={mutation.isPending}
+            >{mutation.isPending ? "Saving..." : "Save"}</Button>
           </div>
         </div>
 
@@ -308,10 +314,25 @@ export function HouseBLEntry({ variant }: Props) {
                 <div className="field__input">
                   {fieldName ? (
                     <>
-                      <input
-                        {...(form.register as (n: string) => object)(fieldName)}
-                        placeholder={f}
-                      />
+                      {TOOLBAR_ENUM[f] ? (
+                        <Controller
+                          name={fieldName as keyof HouseBlFormValues}
+                          control={form.control}
+                          render={({ field }) => (
+                            <ComboBox
+                              options={TOOLBAR_ENUM[f].options}
+                              placeholder={TOOLBAR_ENUM[f].placeholder}
+                              value={(field.value as string) ?? ""}
+                              onChange={field.onChange}
+                            />
+                          )}
+                        />
+                      ) : (
+                        <input
+                          {...(form.register as (n: string) => object)(fieldName)}
+                          placeholder={f}
+                        />
+                      )}
                       {(form.formState.errors as Record<string, unknown>)[fieldName] && (
                         <span className="field__error">
                           {(form.formState.errors as Record<string, { message?: string }>)[fieldName]?.message}
