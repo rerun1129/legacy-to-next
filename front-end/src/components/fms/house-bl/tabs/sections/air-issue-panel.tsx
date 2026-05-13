@@ -18,10 +18,10 @@ const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
 };
 
 export function AirIssuePanel({ variant }: Props) {
+  const { register, control } = useFormContext<HouseBlFormValues>();
   if (!variant) return null;
   if (variant.issueFields.length === 0) return null;
 
-  const { register, control } = useFormContext<HouseBlFormValues>();
   const panelScope = `air-issue-panel.${variant.key}`;
 
   const issueItems: FieldItemDef[] = variant.issueFields.map(f => {
