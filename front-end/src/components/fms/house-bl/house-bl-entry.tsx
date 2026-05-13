@@ -123,6 +123,13 @@ export function HouseBLEntry({ variant }: Props) {
     queryKey: ["house-bl", "detail", id],
     queryFn: () => houseBlPort.getById(id!),
     enabled: isEdit,
+    // 다른 화면 이동 후 재진입 시 자동 재조회 차단 — invalidateQueries(mutation 후) 시에는 active query 이므로 refetch 정상 동작
+    staleTime: Infinity,
+    gcTime: Infinity, // staleTime: Infinity만으로는 gcTime 기본 5분에 막혀 무력화됨 (§6.36)
+    refetchOnMount: false,
+    // refetch 결과가 직전 cache와 deep equal이어도 새 reference를 발급해
+    // useEffect(detail)의 form.reset이 항상 트리거되도록 강제
+    structuralSharing: false,
   });
 
   useEffect(() => {

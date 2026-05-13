@@ -33,6 +33,9 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
     queryFn: () =>
       houseBlPort.list({ jobDiv: variant.mode, bound: variant.direction as Bound, ...extraFilter }),
     enabled: variant.direction !== null,
+    staleTime: Infinity,
+    gcTime: Infinity, // staleTime: Infinity만으로는 gcTime 기본 5분에 막혀 무력화됨 (§6.36)
+    refetchOnMount: false,
   });
 
   if (error) return <div className="p-4 text-sm text-destructive">데이터를 불러올 수 없습니다.</div>;
