@@ -58,7 +58,7 @@ function LcnField({
 function PaymentTypeField({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
   return (
     <div className="li">
-      <span className="li__label is-required">Freight Term</span>
+      <span className="li__label">Freight Term</span>
       <div className="li__input">
         <input style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...inputProps} />
       </div>
@@ -77,7 +77,7 @@ export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
       key: "incoterms",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">Incoterms</span>
+          <span className="li__label">Incoterms</span>
           <div className="li__input">
             <Controller
               name="incoterms"

@@ -181,7 +181,17 @@ class HouseBlControllerWebMvcTest {
 
         mockMvc.perform(post("/api/house-bl")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\",\"shipmentType\":\"HOUSE\",\"freightTerm\":\"PREPAID\"}"))
+                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\",\"shipmentType\":\"HOUSE\",\"freightTerm\":\"PREPAID\"" +
+                                ",\"hblNo\":\"TEST-HBL-001\"" +
+                                ",\"polCode\":\"KRPUS\"" +
+                                ",\"podCode\":\"USLAX\"" +
+                                ",\"etd\":\"20260101\"" +
+                                ",\"eta\":\"20260115\"" +
+                                ",\"operatorCode\":\"OP001\"" +
+                                ",\"teamCode\":\"TM001\"" +
+                                ",\"actualCustomerCode\":\"CUST001\"" +
+                                ",\"docPartnerCode\":\"DOC001\"" +
+                                "}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/house-bl/1")));
 

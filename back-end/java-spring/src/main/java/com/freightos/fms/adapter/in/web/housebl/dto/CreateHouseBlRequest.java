@@ -1,36 +1,38 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
+import com.freightos.fms.adapter.in.web.validation.SeaGroup;
+import com.freightos.fms.adapter.in.web.validation.SeaImpGroup;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateHouseBlRequest(
         @NotNull String jobDiv,
-        @NotNull String bound,
-        @Size(max = 35) String hblNo,
-        @NotNull String shipmentType,
+        @NotNull @NotBlank(groups = SeaGroup.class) String bound,
+        @Size(max = 35) @NotBlank(groups = SeaGroup.class) String hblNo,
+        @NotNull @NotBlank(groups = SeaGroup.class) String shipmentType,
         @NotNull String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
-        @Size(max = 20) String consigneeCode,
+        @Size(max = 20) @NotBlank(groups = SeaImpGroup.class) String consigneeCode,
         String consigneeAddress,
         @Size(max = 20) String notifyCode,
         String notifyAddress,
-        @Size(max = 20) String docPartnerCode,
+        @Size(max = 20) @NotBlank(groups = SeaGroup.class) String docPartnerCode,
         String docPartnerAddress,
         @Size(max = 20) String settlePartnerCode,
-        @Size(max = 5) String polCode,
-        @Size(max = 5) String podCode,
-        @Pattern(regexp = "\\d{8}") String etd,
-        @Pattern(regexp = "\\d{8}") String eta,
+        @Size(max = 5) @NotBlank(groups = SeaGroup.class) String polCode,
+        @Size(max = 5) @NotBlank(groups = SeaGroup.class) String podCode,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaGroup.class) String etd,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaGroup.class) String eta,
         @Min(0) Integer pkgQty,
         String pkgUnit,
         String weightUnit,
         @DecimalMin("0") BigDecimal grossWeightKg,
         @DecimalMin("0") BigDecimal cbm,
-        @Size(max = 20) String actualCustomerCode,
-        String operatorCode,
-        String teamCode,
+        @Size(max = 20) @NotBlank(groups = SeaGroup.class) String actualCustomerCode,
+        @NotBlank(groups = SeaGroup.class) String operatorCode,
+        @NotBlank(groups = SeaGroup.class) String teamCode,
         String salesManCode,
         Long masterBlId,
         String incoterms,

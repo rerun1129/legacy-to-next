@@ -185,7 +185,6 @@ export function SchedulePanel({ variant }: Props) {
           kind="lcn"
           variant="panel"
           label="Liner"
-          required
           codeProps={{ ...register("linerCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("linerName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -196,7 +195,7 @@ export function SchedulePanel({ variant }: Props) {
       key: "vessel",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">Vessel</span>
+          <span className="li__label">Vessel</span>
           <div className="li__input">
             <TextBox variant="panel" {...register("seaDetail.vesselName")} />
           </div>
@@ -207,7 +206,7 @@ export function SchedulePanel({ variant }: Props) {
       key: "voyage",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">Voyage</span>
+          <span className="li__label">Voyage</span>
           <div className="li__input">
             <TextBox variant="panel" {...register("seaDetail.voyageNo")} />
           </div>

@@ -17,7 +17,7 @@ export function SeaTradePanel() {
       key: "incoterms",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">Incoterms</span>
+          <span className="li__label">Incoterms</span>
           <div className="li__input">
             <Controller
               name="incoterms"
@@ -40,7 +40,7 @@ export function SeaTradePanel() {
       key: "freight-term",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">Freight Term</span>
+          <span className="li__label">Freight Term</span>
           <div className="li__input">
             <Controller
               name="freightTerm"

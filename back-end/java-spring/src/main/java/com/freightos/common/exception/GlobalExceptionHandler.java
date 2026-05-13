@@ -1,5 +1,6 @@
 package com.freightos.common.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -54,6 +55,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setTitle("Validation Failed");
         pd.setDetail(detail);
         return ResponseEntity.status(status)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex) {
+        log.warn("ConstraintViolationException: {}", ex.getMessage());
+        String detail = ex.getConstraintViolations().stream()
+                .map(v -> {
+                    String path = v.getPropertyPath().toString();
+                    int dotIdx = path.lastIndexOf('.');
+                    String field = dotIdx >= 0 ? path.substring(dotIdx + 1) : path;
+                    return "[%s] %s".formatted(field, v.getMessage());
+                })
+                .collect(Collectors.joining("\n"));
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setType(URI.create(TYPE_BASE + "VALIDATION_FAILED"));
+        pd.setTitle("Validation Failed");
+        pd.setDetail(detail);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(pd);
     }

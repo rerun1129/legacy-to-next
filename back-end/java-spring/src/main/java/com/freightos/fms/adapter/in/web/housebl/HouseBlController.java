@@ -7,6 +7,8 @@ import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.SearchHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
+import com.freightos.fms.adapter.in.web.validation.SeaGroup;
+import com.freightos.fms.adapter.in.web.validation.SeaImpGroup;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
@@ -17,7 +19,10 @@ import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Tag(name = "House B/L", description = "House B/L CRUD — S-02/S-03")
 @RestController
@@ -37,6 +43,7 @@ public class HouseBlController {
 
     private final HouseBlUseCase houseBlUseCase;
     private final HouseBlAssembler houseBlAssembler;
+    private final Validator validator;
 
     @Operation(summary = "House B/L 검색 (POST body)")
     @PostMapping("/search")
@@ -59,6 +66,11 @@ public class HouseBlController {
     public ResponseEntity<ApiResponse<HouseBlDetailResponse>> createHouseBl(
             @Valid @RequestBody CreateHouseBlRequest request,
             UriComponentsBuilder uriBuilder) {
+        if ("SEA".equals(request.jobDiv())) {
+            Class<?> group = "IMP".equals(request.bound()) ? SeaImpGroup.class : SeaGroup.class;
+            Set<ConstraintViolation<CreateHouseBlRequest>> violations = validator.validate(request, group);
+            if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        }
         Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toCreateCommand(request));
         URI location = uriBuilder.path("/api/house-bl/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location)
