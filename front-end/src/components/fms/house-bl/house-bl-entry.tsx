@@ -6,7 +6,7 @@ import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Save, Printer, Copy, Trash2, FileText, Download, RefreshCw, Search, FilePlus } from "lucide-react";
+import { Save, Printer, Trash2, FileText, RefreshCw, Search, FilePlus } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
@@ -18,7 +18,9 @@ import type { HouseBlFormValues } from "./house-bl-schema";
 import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import { buildHouseBlRequest, buildHouseBlUpdateRequest } from "./house-bl-submit";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
+import { HouseChangeBlNoModal } from "./house-change-bl-no-modal";
 import { useSearchBl } from "./use-search-bl";
+import { toast } from "@/lib/toast-store";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { ScreenGuard } from "@/components/shared/screen-guard";
 import { Button } from "@/components/shared/button";
@@ -97,6 +99,7 @@ interface Props {
 export function HouseBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
+  const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.houseBl(variant.key)]);
@@ -251,7 +254,16 @@ export function HouseBLEntry({ variant }: Props) {
     mutation.mutate(raw);
   }
 
+  const isExp = variant.direction === "EXP";
   const canSwitchBl = isEdit && id != null && variant.key.startsWith('sea-');
+
+  function handleChangeBlNo() {
+    if (!isEdit || !id) {
+      toast.info("먼저 House B/L을 조회해주세요.");
+      return;
+    }
+    setIsChangeBlNoModalOpen(true);
+  }
 
   const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
   const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
@@ -273,6 +285,13 @@ export function HouseBLEntry({ variant }: Props) {
             <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
             <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearchBl}>Search B/L</Button>
             <Button
+              type="submit"
+              size="sm"
+              variant="transaction"
+              leftIcon={<Save size={12} />}
+              loading={mutation.isPending}
+            >{mutation.isPending ? "Saving..." : "Save"}</Button>
+            <Button
               size="sm"
               variant="danger"
               leftIcon={<Trash2 size={12} />}
@@ -282,26 +301,25 @@ export function HouseBLEntry({ variant }: Props) {
               }}
               disabled={!isEdit || deleteMutation.isPending}
             >Delete</Button>
-            <Button size="sm" variant="normal" leftIcon={<Copy size={12} />}>Copy</Button>
-            <Button size="sm" variant="normal" leftIcon={<Download size={12} />}>Export</Button>
-            {variant.printDocs.length > 0 && (
+            {isExp && variant.printDocs.length > 0 && (
               <Button size="sm" variant="normal" leftIcon={<Printer size={12} />}>Print</Button>
+            )}
+            {isExp && (
+              <Button
+                size="sm"
+                variant="transaction"
+                leftIcon={<RefreshCw size={12} />}
+                disabled={!canSwitchBl}
+                onClick={() => setIsSwitchBlModalOpen(true)}
+              >Switch B/L</Button>
             )}
             <Button
               size="sm"
               variant="transaction"
               leftIcon={<RefreshCw size={12} />}
-              disabled={!canSwitchBl}
-              onClick={() => setIsSwitchBlModalOpen(true)}
-            >Switch B/L</Button>
-            <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
-            <Button
-              type="submit"
-              size="sm"
-              variant="transaction"
-              leftIcon={<Save size={12} />}
-              loading={mutation.isPending}
-            >{mutation.isPending ? "Saving..." : "Save"}</Button>
+              onClick={handleChangeBlNo}
+              disabled={!isEdit}
+            >Change B/L No.</Button>
           </div>
         </div>
 
@@ -376,6 +394,18 @@ export function HouseBLEntry({ variant }: Props) {
           houseBlId={id!}
           isOpen={isSwitchBlModalOpen}
           onClose={() => setIsSwitchBlModalOpen(false)}
+        />
+      )}
+      {isEdit && id && (
+        <HouseChangeBlNoModal
+          houseBlId={id}
+          currentHblNo={detail?.hblNo}
+          isOpen={isChangeBlNoModalOpen}
+          onClose={() => setIsChangeBlNoModalOpen(false)}
+          onChanged={() => {
+            detailLoadedRef.current = false;
+            queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", id] });
+          }}
         />
       )}
     </>

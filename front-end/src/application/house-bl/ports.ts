@@ -8,4 +8,5 @@ export interface HouseBlPort {
   // §6.29 — SEA jobDiv 분기에서 BE가 ApiResponse<Void> 반환 → null, 그 외 HouseBlDetail 반환
   update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail | null>;
   delete(id: number): Promise<void>;
+  changeHblNo(id: number, hblNo: string): Promise<void>;
 }

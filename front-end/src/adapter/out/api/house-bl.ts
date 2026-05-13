@@ -132,4 +132,12 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
   async delete(id: number): Promise<void> {
     await fetchJson(`${HOUSE_BL_BASE}/${id}`, { method: 'DELETE' });
   },
+
+  async changeHblNo(id: number, hblNo: string): Promise<void> {
+    await fetchJson(`${HOUSE_BL_BASE}/${id}/hbl-no`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hblNo }),
+    });
+  },
 };

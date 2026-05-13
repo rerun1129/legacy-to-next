@@ -54,4 +54,7 @@ export const mockHouseBlPort: HouseBlPort = {
   async delete(_id: number): Promise<void> {
     // mock: no-op
   },
+  async changeHblNo(_id: number, _hblNo: string): Promise<void> {
+    // mock: no-op
+  },
 };
