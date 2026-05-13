@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { confirm } from "@/components/confirm";
+import { Button } from "@/components/shared/button";
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -98,15 +99,15 @@ export function ConfirmModalSection() {
           default / destructive / warning
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn" onClick={handleDefaultVariant}>
+          <Button onClick={handleDefaultVariant}>
             Default
-          </button>
-          <button className="btn btn--danger" onClick={handleDestructiveVariant}>
+          </Button>
+          <Button variant="danger" onClick={handleDestructiveVariant}>
             Destructive
-          </button>
-          <button className="btn btn--normal" onClick={handleWarningVariant}>
+          </Button>
+          <Button variant="normal" onClick={handleWarningVariant}>
             Warning
-          </button>
+          </Button>
         </div>
         {variantResult && (
           <p style={{ marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>
@@ -123,9 +124,9 @@ export function ConfirmModalSection() {
         <p style={{ fontSize: 11, color: "var(--ink-4)", marginBottom: 12, fontFamily: "monospace" }}>
           destructive + details: [[key, value], ...]
         </p>
-        <button className="btn btn--danger" onClick={handleWithDetails}>
+        <Button variant="danger" onClick={handleWithDetails}>
           details 포함 삭제 확인
-        </button>
+        </Button>
         {detailsResult && (
           <p style={{ marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>
             결과: <strong>{detailsResult}</strong>
@@ -142,12 +143,12 @@ export function ConfirmModalSection() {
           onConfirm: async () =&gt; &#123; await sleep(1500) &#125; — 로딩 스핀 + 버튼 disabled 확인
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn btn--transaction" onClick={handleAsyncConfirm}>
+          <Button variant="transaction" onClick={handleAsyncConfirm}>
             Async 저장 (1.5s)
-          </button>
-          <button className="btn btn--normal" onClick={handleAsyncThrow}>
+          </Button>
+          <Button variant="normal" onClick={handleAsyncThrow}>
             Async throw 데모 (50%)
-          </button>
+          </Button>
         </div>
         {asyncResult && (
           <p style={{ marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>

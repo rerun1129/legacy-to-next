@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Save, Trash2, X } from "lucide-react";
+import { Button } from "@/components/shared/button";
 import { switchBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { SwitchBlPartyPanel } from "./switch-bl-party-panel";
@@ -187,14 +188,14 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
           <span className="modal__title">SEA Switch B/L Management</span>
           <div className="modal__header-actions">
             {isUpdateMode && (
-              <button
-                type="button"
-                className="btn btn--sm btn--danger"
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
               >
                 <Trash2 size={12} />Delete
-              </button>
+              </Button>
             )}
             <button
               type="button"

@@ -1,6 +1,7 @@
 "use client";
 
 import { Truck, FilePlus, Search, Save, Trash2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/shared/button";
 
 export function TruckBlEntryHeader(props: {
   isEdit: boolean;
@@ -49,14 +50,14 @@ export function TruckBlEntryHeader(props: {
         >
           <Save size={12} />{isSavePending ? "Saving..." : "Save"}
         </button>
-        <button
-          type="button"
-          className="btn btn--sm btn--danger"
+        <Button
+          variant="danger"
+          size="sm"
           onClick={onDelete}
           disabled={!isEdit || isDeletePending}
         >
           <Trash2 size={12} />Delete
-        </button>
+        </Button>
         <button
           type="button"
           className="btn btn--sm btn--transaction"

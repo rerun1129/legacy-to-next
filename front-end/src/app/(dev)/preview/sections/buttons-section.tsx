@@ -2,6 +2,7 @@
 
 import { PageHeadActionsGroup } from "./buttons/page-head-actions-group";
 import { PageBundleGroup } from "./buttons/page-bundle-group";
+import { IconButtonsGroup } from "./buttons/icon-buttons-group";
 
 export function ButtonsSection() {
   return (
@@ -9,6 +10,7 @@ export function ButtonsSection() {
       <h1 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Buttons Preview</h1>
       <PageHeadActionsGroup />
       <PageBundleGroup />
+      <IconButtonsGroup />
     </div>
   );
 }

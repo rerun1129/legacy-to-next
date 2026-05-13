@@ -7,6 +7,7 @@ import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/air-schedule-legs-cols";
+import { Button } from "@/components/shared/button";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
@@ -76,8 +77,8 @@ export function AirSchedulePanel({ variant }: Props) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
               <span className="panel__rowcount">{fields.length}</span>
               <div className="panel__actions" style={{ display: "flex", gap: 4 }}>
-                <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-                <button type="button" className="btn btn--sm btn--icon btn--danger" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+                <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
+                <Button variant="danger" size="sm" iconOnly onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></Button>
               </div>
             </div>
             <div style={{ overflow: "auto" }}>

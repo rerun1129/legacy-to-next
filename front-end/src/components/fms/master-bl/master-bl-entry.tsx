@@ -10,6 +10,7 @@ import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { createEmptyMasterBlFormValues, TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
 import { Save, Copy, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
+import { Button } from "@/components/shared/button";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
@@ -239,9 +240,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
             <Search size={12} />Search B/L
           </button>
-          <button
-            type="button"
-            className="btn btn--sm btn--danger"
+          <Button
+            variant="danger"
+            size="sm"
             onClick={() => {
               if (!isEdit) return;
               if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
@@ -249,7 +250,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
             disabled={!isEdit || deleteMutation.isPending}
           >
             <Trash2 size={12} />Delete
-          </button>
+          </Button>
           <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
           <button type="button" className="btn btn--sm">
             <RefreshCw size={12} />{modeLabels.changeBLNo}

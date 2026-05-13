@@ -7,6 +7,7 @@ import { clsx } from "clsx";
 export type ButtonVariant =
   | "default"
   | "danger"
+  | "success"
   | "search"
   | "transaction"
   | "normal";

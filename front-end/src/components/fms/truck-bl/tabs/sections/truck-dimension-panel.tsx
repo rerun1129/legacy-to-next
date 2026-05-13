@@ -8,6 +8,7 @@ import { ComboBox, NumberBox }                    from "@/components/shared/inpu
 import { useEnumOptions }                        from "@/application/enums/use-enum";
 import type { TruckBlFormValues }                from "@/components/fms/truck-bl/truck-bl-schema";
 import { EMPTY_TRUCK_DIM_ROW }                   from "@/components/fms/truck-bl/truck-bl-schema";
+import { Button }                                from "@/components/shared/button";
 
 interface DimRow { id: number; length: string; width: string; height: string; qty: string; cbm: string; volWt: string; }
 
@@ -79,8 +80,8 @@ export function TruckDimensionPanel() {
               />
             )}
           />
-          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
+          <Button variant="danger" size="sm" iconOnly onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></Button>
         </div>
       </div>
       <GridList

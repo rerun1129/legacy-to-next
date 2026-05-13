@@ -8,6 +8,7 @@ import { EMPTY_TRUCK_ORDER_ROW } from "@/components/fms/truck-bl/truck-bl-schema
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { Button } from "@/components/shared/button";
 
 type TruckOrderRow = NonNullable<TruckBlFormValues["truckOrders"]>[number];
 
@@ -95,8 +96,8 @@ export function TruckOrderGridPanel() {
         <span className="panel__title">Truck Information</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
+          <Button variant="danger" size="sm" iconOnly onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></Button>
         </div>
       </div>
       <GridList

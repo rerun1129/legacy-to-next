@@ -9,6 +9,7 @@ import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/air-schedule-legs-cols";
+import { Button } from "@/components/shared/button";
 
 interface Props { variant?: AnyVariantConfig; form?: UseFormReturn<MasterBlFormValues> }
 
@@ -147,8 +148,8 @@ function AirLegsWidget({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
           <span className="panel__rowcount">{fields.length}</span>
           <div className="panel__actions" style={{ display: "flex", gap: 4 }}>
-            <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-            <button type="button" className="btn btn--sm btn--icon btn--danger" onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+            <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
+            <Button variant="danger" size="sm" iconOnly onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></Button>
           </div>
         </div>
         <div style={{ overflow: "auto" }}>

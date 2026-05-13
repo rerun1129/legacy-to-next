@@ -6,6 +6,7 @@ import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
+import { Button } from "@/components/shared/button";
 
 type DimRow = NonNullable<HouseBlFormValues["dims"]>[number];
 
@@ -71,8 +72,8 @@ export function DimensionPanel() {
         <span className="panel__title">Dimension</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
+          <Button variant="danger" size="sm" iconOnly onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></Button>
         </div>
       </div>
       <GridList

@@ -6,6 +6,7 @@ import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { TextBox, NumberBox } from "@/components/shared/inputs";
+import { Button } from "@/components/shared/button";
 
 type ItemRow = NonNullable<HouseBlFormValues["itemHs"]>[number];
 
@@ -66,8 +67,8 @@ export function ItemHsPanel() {
         <span className="panel__title">Item / HS Code</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
+          <Button variant="danger" size="sm" iconOnly onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></Button>
         </div>
       </div>
       <GridList

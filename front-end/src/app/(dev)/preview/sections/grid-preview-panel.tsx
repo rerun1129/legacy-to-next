@@ -11,6 +11,7 @@ import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { LinkBox } from "@/components/shared/inputs/link-box";
 import { TimeBox } from "@/components/shared/inputs";
+import { Button } from "@/components/shared/button";
 
 interface DimPreviewRow {
   id: number;
@@ -236,18 +237,19 @@ export function GridPreviewPanel({ isLoading = false, gridId }: GridPreviewPanel
           >
             readOnly
           </button>
-          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}>
+          <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
             <Plus size={12} />
-          </button>
-          <button
-            type="button"
-            className="btn btn--sm btn--icon btn--danger"
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            iconOnly
             onMouseDown={captureFocusedRow}
             onClick={handleRemove}
             disabled={fields.length === 0}
           >
             <Minus size={12} />
-          </button>
+          </Button>
         </div>
       </div>
       <GridList
