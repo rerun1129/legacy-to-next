@@ -182,6 +182,7 @@ export const HOUSE_BL_SCHEMA = z.object({
   docPartnerName:   z.string().optional(),
   docPartnerAddress: z.string().optional(),
   settlePartnerCode: z.string().max(20).optional(),
+  settlePartnerName: z.string().optional(),
 
   // cargo summary
   pkgQty:          z.string().optional(),
