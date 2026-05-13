@@ -20,7 +20,6 @@ const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
 export function AirIssuePanel({ variant }: Props) {
   const { register, control } = useFormContext<HouseBlFormValues>();
   if (!variant) return null;
-  if (variant.issueFields.length === 0) return null;
 
   const panelScope = `air-issue-panel.${variant.key}`;
 
@@ -62,7 +61,7 @@ export function AirIssuePanel({ variant }: Props) {
         <FieldItemGrid
           itemScope={`${panelScope}.issue`}
           items={issueItems}
-          cols={3}
+          cols={1}
           shouldShowRowControls={false}
         />
       ),
