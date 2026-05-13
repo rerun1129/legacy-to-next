@@ -37,6 +37,11 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   salesManCode: z.string().nullable(),
   masterBlId: z.number().nullable(),
   updatedAt: z.string().nullable(),
+  // §6.48 ⑧ / §6.29 — BE 860abfb에서 노출된 party address 4필드
+  shipperAddress: z.string().nullable(),
+  consigneeAddress: z.string().nullable(),
+  notifyAddress: z.string().nullable(),
+  docPartnerAddress: z.string().nullable(),
   linerCode: z.string().optional(),
   linerName: z.string().optional(),
   vesselName: z.string().optional(),
@@ -106,12 +111,16 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
     return parsed.data.data;
   },
 
-  async update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail> {
+  async update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail | null> {
     const json = await fetchJson(`${HOUSE_BL_BASE}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
     });
+    // §6.29 — SEA jobDiv 분기에서 BE가 ApiResponse<Void> 반환 (data=null).
+    // data가 null이면 void 응답으로 간주하고 null 반환. 그 외 jobDiv는 HouseBlDetail 파싱.
+    const maybeVoid = z.object({ data: z.null() }).safeParse(json);
+    if (maybeVoid.success) return null;
     const parsed = apiResponse(HOUSE_BL_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid update response: ${parsed.error.message}`);
     return parsed.data.data;

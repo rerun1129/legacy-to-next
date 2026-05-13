@@ -31,6 +31,11 @@ export interface HouseBlDetail extends HouseBlRow {
   salesManCode: string | null;
   masterBlId: number | null;
   updatedAt: string | null;
+  // §6.48 ⑧ — BE 860abfb에서 노출된 party address 4필드
+  shipperAddress: string | null;
+  consigneeAddress: string | null;
+  notifyAddress: string | null;
+  docPartnerAddress: string | null;
   linerCode?: string;
   linerName?: string;
   vesselName?: string;
@@ -101,6 +106,8 @@ export interface DimRequest {
 }
 
 export interface ContainerRequest {
+  // §6.28 — UPDATE 분기에서 row id 포함 필수 (신규 생성 시 undefined)
+  id?: number;
   containerNo?: string;
   containerType?: string;
   lengthFeet?: number;
@@ -121,6 +128,8 @@ export interface ContainerRequest {
 }
 
 export interface ScheduleLegRequest {
+  // §6.28 — UPDATE 분기에서 row id 포함 필수 (신규 생성 시 undefined)
+  id?: number;
   toCode?: string;
   byCarrier?: string;
   flightNo?: string;

@@ -129,18 +129,48 @@ export function HouseBLEntry({ variant }: Props) {
     if (detailLoadedRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
+    // §6.48 ⑧ — BE 응답 필드 전체를 form에 반영 (3축 동기: BE response ↔ FE domain type ↔ form.reset)
     form.reset({
       ...createEmptyHouseBlFormValues(),
-      hbl:    detail.hblNo ?? "",
-      mbl:    detail.masterBlId != null ? String(detail.masterBlId) : "",
-      sType:  detail.shipmentType ?? "",
-      lType:  detail.blType ?? "",
-      etd:    detail.etd ?? "",
-      eta:    detail.eta ?? "",
-      pol:    detail.polCode ?? "",
-      pod:    detail.podCode ?? "",
-      settle: detail.freightTerm ?? "",
-      expImp: detail.bound,
+      // toolbar
+      hbl:         detail.hblNo ?? "",
+      mbl:         detail.masterBlId != null ? String(detail.masterBlId) : "",
+      sType:       detail.shipmentType ?? "",
+      lType:       detail.blType ?? "",
+      etd:         detail.etd ?? "",
+      eta:         detail.eta ?? "",
+      pol:         detail.polCode ?? "",
+      pod:         detail.podCode ?? "",
+      settle:      (detail.freightTerm ?? "") as "" | "PREPAID" | "COLLECT",
+      expImp:      detail.bound,
+      // party
+      shipperCode:        detail.shipperCode    ?? "",
+      shipperAddress:     detail.shipperAddress ?? "",
+      consigneeCode:      detail.consigneeCode  ?? "",
+      consigneeAddress:   detail.consigneeAddress ?? "",
+      notifyCode:         detail.notifyCode     ?? "",
+      notifyAddress:      detail.notifyAddress  ?? "",
+      docPartnerCode:     detail.docPartnerCode ?? "",
+      docPartnerAddress:  detail.docPartnerAddress ?? "",
+      // cargo summary
+      pkgQty:          detail.pkgQty    != null ? String(detail.pkgQty)    : "",
+      pkgUnit:         detail.pkgUnit   ?? "",
+      weightUnit:      detail.weightUnit ?? "",
+      grossWeightKg:   detail.grossWeightKg != null ? String(detail.grossWeightKg) : "",
+      cbm:             detail.cbm        != null ? String(detail.cbm)        : "",
+      volumeWeightKg:  detail.volumeWeightKg != null ? String(detail.volumeWeightKg) : "",
+      // performance
+      actualCustomerCode: detail.actualCustomerCode ?? "",
+      operatorCode:        detail.operatorCode  ?? "",
+      teamCode:            detail.teamCode      ?? "",
+      salesManCode:        detail.salesManCode  ?? "",
+      // schedule (Non B/L 전용 필드가 BE 응답에 포함될 수 있어 옵셔널 처리)
+      linerCode:  detail.linerCode  ?? "",
+      linerName:  detail.linerName  ?? "",
+      vesselName: detail.vesselName ?? "",
+      voyNo:      detail.voyageNo   ?? "",
+      // remark
+      remark: detail.remark ?? "",
     });
   }, [detail, form]);
 
@@ -153,7 +183,12 @@ export function HouseBLEntry({ variant }: Props) {
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       if (!isEdit) {
-        useEntryFocusStore.getState().setFocus(entryFocusKeys.houseBl(variant.key), saved.id);
+        // create 시: saved는 HouseBlDetail (non-null). §6.29 — SEA update는 null 반환이므로
+        // isEdit=false 분기에서만 saved.id에 접근해 타입 안전성 보장.
+        const newId = saved?.id;
+        if (newId != null) {
+          useEntryFocusStore.getState().setFocus(entryFocusKeys.houseBl(variant.key), newId);
+        }
         detailLoadedRef.current = false;
       } else {
         router.push(`/fms/house-bl/${variant.key}/list`);

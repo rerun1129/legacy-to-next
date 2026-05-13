@@ -22,6 +22,8 @@ export const DIM_SCHEMA = z.object({
 });
 
 export const CONTAINER_SCHEMA = z.object({
+  // DB 식별자 — Update 시 BE mergeContainers id 매칭에 사용 (§6.28)
+  id:            z.number().optional(),
   containerNo:   z.string().max(20).optional(),
   containerType: z.string().optional(),
   lengthFeet:    z.string().optional(),
@@ -42,6 +44,8 @@ export const CONTAINER_SCHEMA = z.object({
 });
 
 export const SCHEDULE_LEG_SCHEMA = z.object({
+  // DB 식별자 — Update 시 BE merge id 매칭에 사용 (§6.28)
+  id:        z.number().optional(),
   toCode:    z.string().max(5).optional(),
   byCarrier: z.string().optional(),
   flightNo:  z.string().optional(),

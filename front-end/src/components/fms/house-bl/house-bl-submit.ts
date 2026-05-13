@@ -92,6 +92,8 @@ export function buildHouseBlRequest(
   // SEA 전용 — containers, licenses
   if (jobDiv === 'SEA') {
     base.containers = values.containers?.map(c => ({
+      // §6.28 — id가 있으면 그대로 포함(UPDATE merge-by-id), 없으면 undefined(신규 INSERT)
+      id:            c.id,
       containerNo:   toStr(c.containerNo),
       containerType: toStr(c.containerType),
       lengthFeet:    toNum(c.lengthFeet),
@@ -131,6 +133,8 @@ export function buildHouseBlRequest(
   // AIR 전용 — scheduleLegs, airCharges, dims
   if (jobDiv === 'AIR') {
     base.scheduleLegs = values.scheduleLegs?.map(s => ({
+      // §6.28 — id가 있으면 그대로 포함(UPDATE merge-by-id), 없으면 undefined(신규 INSERT)
+      id:        s.id,
       toCode:    toStr(s.toCode),
       byCarrier: toStr(s.byCarrier),
       flightNo:  toStr(s.flightNo),
