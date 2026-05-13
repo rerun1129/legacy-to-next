@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
@@ -101,6 +102,7 @@ export function HouseBLEntry({ variant }: Props) {
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
+  const searchParams = useSearchParams();
   const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.houseBl(variant.key)]);
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
@@ -129,6 +131,18 @@ export function HouseBLEntry({ variant }: Props) {
   const { didRestoreFromDraftRef } = useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
 
   const detailLoadedRef = useRef<boolean>(false);
+
+  // URL ?id → store 동기: 북마크/리프레시/외부 링크로 진입 시 URL id를 store에 반영 (store가 비어있어 isEdit=false가 되는 문제 방지)
+  useEffect(() => {
+    const urlId = searchParams.get("id");
+    if (urlId == null) return;
+    const parsed = Number(urlId);
+    if (!Number.isFinite(parsed) || parsed <= 0) return;
+    const currentId = useEntryFocusStore.getState().focus[entryFocusKeys.houseBl(variant.key)];
+    if (currentId === parsed) return; // 이미 일치하면 no-op
+    useEntryFocusStore.getState().setFocus(entryFocusKeys.houseBl(variant.key), parsed);
+    detailLoadedRef.current = false; // 새 id로 form.reset 재트리거
+  }, [searchParams, variant.key]);
 
   // id 변경 시 form.reset 재트리거를 위해 ref 초기화
   useEffect(() => {
