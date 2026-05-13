@@ -196,6 +196,37 @@ export function HouseBLEntry({ variant }: Props) {
       voyNo:      detail.voyageNo   ?? "",
       // remark
       remark: detail.remark ?? "",
+      // SEA nested detail — BE Phase A-1에서 추가된 seaDetail 서브 엔티티 매핑
+      seaDetail: {
+        loadType:                detail.loadType                          ?? "",
+        linerCode:               detail.seaDetail?.linerCode             ?? "",
+        vesselCode:              detail.seaDetail?.vesselCode            ?? "",
+        vesselName:              detail.seaDetail?.vesselName            ?? "",
+        voyageNo:                detail.seaDetail?.voyageNo              ?? "",
+        onboardDate:             detail.seaDetail?.onboardDate           ?? "",
+        porCode:                 detail.seaDetail?.porCode               ?? "",
+        finalDestCode:           detail.seaDetail?.finalDestCode         ?? "",
+        issueDate:               detail.seaDetail?.issueDate             ?? "",
+        noOfBl:                  detail.seaDetail?.noOfBl                ?? "",
+        issuePlace:              detail.seaDetail?.issuePlace            ?? "",
+        issuePlaceName:          "",
+        doDate:                  detail.seaDetail?.doDate                ?? "",
+        payableAt:               detail.seaDetail?.payableAt             ?? "",
+        payableAtName:           "",
+        triangle:                detail.seaDetail?.triangle              ?? false,
+        serviceTerm:             detail.seaDetail?.serviceTerm           ?? "",
+        vesselNationality:       detail.seaDetail?.vesselNationality     ?? "",
+        rton:                    detail.seaDetail?.rton != null ? String(detail.seaDetail.rton) : "",
+        sayInformation:          detail.seaDetail?.sayInformation        ?? "",
+        noOfContainerOrPackages: detail.seaDetail?.noOfContainerOrPackages ?? "",
+        blType:                  detail.blType                           ?? "",
+        deliveryCode:            detail.deliveryCode                     ?? "",
+        polName:                 "",
+        podName:                 "",
+        deliveryName:            "",
+        freightTermDetail:       "",
+        signature:               "",
+      },
     });
   }, [detail, form]);
 

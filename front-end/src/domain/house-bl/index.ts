@@ -22,6 +22,26 @@ export interface HouseBlDetail extends HouseBlRow {
   shipmentType: 'HOUSE' | 'DIRECT' | null;
   blType: 'OBL' | 'SWB' | 'SURRENDER' | null;
   loadType?: string;
+  seaDetail?: {
+    linerCode?: string;
+    vesselCode?: string;
+    vesselName?: string;
+    voyageNo?: string;
+    onboardDate?: string;
+    porCode?: string;
+    finalDestCode?: string;
+    issueDate?: string;
+    noOfBl?: string;
+    issuePlace?: string;
+    doDate?: string;
+    payableAt?: string;
+    triangle?: boolean;
+    serviceTerm?: string;
+    vesselNationality?: string;
+    rton?: number;
+    sayInformation?: string;
+    noOfContainerOrPackages?: string;
+  } | null;
   freightTerm: 'PREPAID' | 'COLLECT' | null;
   notifyCode: string | null;
   deliveryCode: string | null;

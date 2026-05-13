@@ -24,6 +24,27 @@ const HOUSE_BL_ROW_SCHEMA = z.object({
   createdAt: z.string(),
 });
 
+const SEA_DETAIL_SCHEMA = z.object({
+  linerCode:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselCode:               z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselName:               z.string().nullable().optional().transform((v) => v ?? undefined),
+  voyageNo:                 z.string().nullable().optional().transform((v) => v ?? undefined),
+  onboardDate:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  porCode:                  z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalDestCode:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  issueDate:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  noOfBl:                   z.string().nullable().optional().transform((v) => v ?? undefined),
+  issuePlace:               z.string().nullable().optional().transform((v) => v ?? undefined),
+  doDate:                   z.string().nullable().optional().transform((v) => v ?? undefined),
+  payableAt:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  triangle:                 z.boolean().nullable().optional().transform((v) => v ?? false),
+  serviceTerm:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselNationality:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  rton:                     z.number().nullable().optional().transform((v) => v ?? undefined),
+  sayInformation:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  noOfContainerOrPackages:  z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
 const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   shipmentType: z.enum(['HOUSE', 'DIRECT']).nullable(),
   blType: z.enum(['OBL', 'SWB', 'SURRENDER']).nullable(),
@@ -55,6 +76,7 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   volumeWeightKg: z.number().optional(),
   rton: z.number().optional(),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
+  seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
