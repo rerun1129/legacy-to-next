@@ -128,7 +128,7 @@ export function HouseBLEntry({ variant }: Props) {
     "Shipment Type": { options: shipmentTypeOptions, placeholder: shipmentTypePh },
   };
 
-  useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
+  const { didRestoreFromDraftRef } = useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
 
   const detailLoadedRef = useRef<boolean>(false);
 
@@ -154,6 +154,7 @@ export function HouseBLEntry({ variant }: Props) {
     if (detailLoadedRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
+    if (didRestoreFromDraftRef.current) return; // draft 복원 시 detail로 덮어쓰지 않음 (Truck 패턴 정합)
     // §6.48 ⑧ — BE 응답 필드 전체를 form에 반영 (3축 동기: BE response ↔ FE domain type ↔ form.reset)
     form.reset({
       ...createEmptyHouseBlFormValues(),
@@ -228,7 +229,7 @@ export function HouseBLEntry({ variant }: Props) {
         signature:               "",
       },
     });
-  }, [detail, form]);
+  }, [detail, form, didRestoreFromDraftRef]);
 
   const mutation = useMutation({
     mutationFn: (data: HouseBlFormValues) => {
