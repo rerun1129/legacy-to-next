@@ -89,7 +89,7 @@ export function buildHouseBlRequest(
     };
   }
 
-  // SEA 전용 — containers, licenses
+  // SEA 전용 — containers
   if (jobDiv === 'SEA') {
     base.containers = values.containers?.map(c => ({
       // §6.28 — id가 있으면 그대로 포함(UPDATE merge-by-id), 없으면 undefined(신규 INSERT)
@@ -112,22 +112,6 @@ export function buildHouseBlRequest(
       soc:           c.soc,
       seq:           toNum(c.seq),
     }));
-
-    // SEA EXP 전용 — licenses
-    if (variant.direction === 'EXP') {
-      base.licenses = values.licenses?.map(l => ({
-        licenseNo:            toStr(l.licenseNo),
-        pkgQty:               toNum(l.pkgQty),
-        pkgUnit:              toStr(l.pkgUnit),
-        grossWeightKg:        toNum(l.grossWeightKg),
-        combinedPackingMark:  toStr(l.combinedPackingMark),
-        combinedPackingQty:   toNum(l.combinedPackingQty),
-        combinedPackingUnit:  toStr(l.combinedPackingUnit),
-        partialShipment:      l.partialShipment,
-        partialShipmentSeq:   toNum(l.partialShipmentSeq),
-        hsnNo:                toStr(l.hsnNo),
-      }));
-    }
   }
 
   // AIR 전용 — scheduleLegs, airCharges, dims

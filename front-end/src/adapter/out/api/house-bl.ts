@@ -24,6 +24,35 @@ const HOUSE_BL_ROW_SCHEMA = z.object({
   createdAt: z.string(),
 });
 
+// §BE-sync — SeaContainerView / SeaDescView (BE SeaDetailResponse nested 컬렉션)
+const SEA_CONTAINER_VIEW_SCHEMA = z.object({
+  id:            z.number(),
+  containerNo:   z.string().nullable().optional().transform((v) => v ?? undefined),
+  containerType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  lengthFeet:    z.number().nullable().optional().transform((v) => v ?? undefined),
+  sealNo1:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo2:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo3:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo4:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo5:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  sealNo6:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  pkgQty:        z.number().nullable().optional().transform((v) => v ?? undefined),
+  pkgUnit:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  netWeightKg:   z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm:           z.number().nullable().optional().transform((v) => v ?? undefined),
+  vgmKg:         z.number().nullable().optional().transform((v) => v ?? undefined),
+  soc:           z.boolean().nullable().optional().transform((v) => v ?? undefined),
+  seq:           z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const SEA_DESC_VIEW_SCHEMA = z.object({
+  marks:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  description:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause1:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause2:  z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
 const SEA_DETAIL_SCHEMA = z.object({
   linerCode:                z.string().nullable().optional().transform((v) => v ?? undefined),
   vesselCode:               z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -77,6 +106,9 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   rton: z.number().optional(),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
   seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
+  // §BE-sync — BE SeaDetailResponse.containers / .desc
+  containers: z.array(SEA_CONTAINER_VIEW_SCHEMA).optional(),
+  desc: SEA_DESC_VIEW_SCHEMA.optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
@@ -161,5 +193,16 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hblNo }),
     });
+  },
+
+  async findByHblNo(hblNo: string, jobDiv: 'SEA' | 'AIR' | 'TRUCK' | 'NON_BL'): Promise<number[]> {
+    const json = await fetchJson(`${HOUSE_BL_BASE}/find-by-hbl-no`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hblNo, jobDiv }),
+    });
+    const parsed = apiResponse(z.array(z.number())).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid find-by-hbl-no response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
 };

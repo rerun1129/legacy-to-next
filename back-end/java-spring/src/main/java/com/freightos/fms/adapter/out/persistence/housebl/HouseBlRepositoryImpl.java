@@ -188,6 +188,18 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
         return affected;
     }
 
+    @Override
+    public List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv) {
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        return queryFactory
+                .select(h.houseBlId)
+                .from(h)
+                .where(h.jobDiv.eq(jobDiv).and(h.hblNo.eq(hblNo)))
+                .orderBy(h.createdAt.desc(), h.houseBlId.desc())
+                .limit(2)
+                .fetch();
+    }
+
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
         return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }

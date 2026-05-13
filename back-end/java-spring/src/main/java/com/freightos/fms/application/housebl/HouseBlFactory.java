@@ -4,6 +4,8 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.housebl.projection.SeaContainerProjection;
+import com.freightos.fms.application.housebl.projection.SeaDescProjection;
 import com.freightos.fms.application.housebl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.enums.DateKind;
@@ -22,11 +24,14 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl.WorkDivision;
+import com.freightos.fms.domain.housebl.enums.ContainerType;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Command → 도메인 Entity 변환 팩토리 (dispatcher).
@@ -186,6 +191,42 @@ public class HouseBlFactory {
         sub.applyAirChargesUpdate(entity, cmd.airCharges());
     }
 
+    // ── SEA 자식 projection 변환 헬퍼 ────────────────────────────────
+
+    private List<SeaContainerProjection> toSeaContainerProjections(List<HouseBlContainer> containers) {
+        if (containers == null) return List.of();
+        return containers.stream().map(c -> new SeaContainerProjection(
+                c.getId(),
+                VoMapper.mapOrNull(c.getContainerNo(), ContainerNumber::value),
+                Nullables.mapOrNull(c.getContainerType(), ContainerType::name),
+                c.getLengthFeet(),
+                VoMapper.mapOrNull(c.getSealNo1(), SealNumber::value),
+                VoMapper.mapOrNull(c.getSealNo2(), SealNumber::value),
+                VoMapper.mapOrNull(c.getSealNo3(), SealNumber::value),
+                VoMapper.mapOrNull(c.getSealNo4(), SealNumber::value),
+                VoMapper.mapOrNull(c.getSealNo5(), SealNumber::value),
+                VoMapper.mapOrNull(c.getSealNo6(), SealNumber::value),
+                VoMapper.mapOrNull(c.getPkgQty(), Quantity::count),
+                c.getPkgUnit(),
+                VoMapper.mapOrNull(c.getGrossWeightKg(), Weight::kg),
+                VoMapper.mapOrNull(c.getNetWeightKg(), Weight::kg),
+                VoMapper.mapOrNull(c.getCbm(), Volume::cbm),
+                VoMapper.mapOrNull(c.getVgmKg(), Weight::kg),
+                c.isSoc(),
+                c.getSeq()
+        )).toList();
+    }
+
+    private SeaDescProjection toSeaDescProjection(HouseBlDesc desc) {
+        if (desc == null) return null;
+        return new SeaDescProjection(
+                desc.getMarks(),
+                desc.getDescription(),
+                Nullables.mapOrNull(desc.getDescClause1(), Enum::name),
+                Nullables.mapOrNull(desc.getDescClause2(), Enum::name)
+        );
+    }
+
     // ── SearchCommand → Domain Filter 변환 ───────────────────────────
 
     public HouseBlFilter toFilter(SearchHouseBlCommand cmd) {
@@ -240,7 +281,9 @@ public class HouseBlFactory {
                 sea.getVesselNationality(),
                 VoMapper.mapOrNull(sea.getRton(), Rton::ton),
                 sea.getSayInformation(),
-                sea.getNoOfContainerOrPackages()
+                sea.getNoOfContainerOrPackages(),
+                toSeaContainerProjections(sea.getContainers()),
+                toSeaDescProjection(sea.getDesc())
         ) : null;
         return new HouseBlDetailResult(
                 entity.getId(),

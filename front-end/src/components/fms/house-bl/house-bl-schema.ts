@@ -55,19 +55,6 @@ export const SCHEDULE_LEG_SCHEMA = z.object({
   arrivalTm: z.string().optional(),
 });
 
-export const LICENSE_SCHEMA = z.object({
-  licenseNo:            z.string().optional(),
-  pkgQty:               z.string().optional(),
-  pkgUnit:              z.string().optional(),
-  grossWeightKg:        z.string().optional(),
-  combinedPackingMark:  z.string().optional(),
-  combinedPackingQty:   z.string().optional(),
-  combinedPackingUnit:  z.string().optional(),
-  partialShipment:      z.boolean().optional(),
-  partialShipmentSeq:   z.string().optional(),
-  hsnNo:                z.string().optional(),
-});
-
 export const TRUCK_ORDER_SCHEMA = z.object({
   truckOrderNo:  z.string().optional(),
   pkgQty:        z.string().optional(),
@@ -279,7 +266,6 @@ export const HOUSE_BL_SCHEMA = z.object({
   dims:         z.array(DIM_SCHEMA).optional(),
   containers:   z.array(CONTAINER_SCHEMA).optional(),
   scheduleLegs: z.array(SCHEDULE_LEG_SCHEMA).optional(),
-  licenses:     z.array(LICENSE_SCHEMA).optional(),
   truckOrders:  z.array(TRUCK_ORDER_SCHEMA).optional(),
   airCharges:   z.array(AIR_CHARGE_SCHEMA).optional(),
   itemHs:         z.array(ITEM_HS_SCHEMA).optional(),

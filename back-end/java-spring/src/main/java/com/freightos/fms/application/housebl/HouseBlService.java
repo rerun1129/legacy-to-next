@@ -17,6 +17,8 @@ import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +82,11 @@ public class HouseBlService implements HouseBlUseCase {
         long affected = houseBlPort.updateHblNoById(id, newHblNo, null);
         if (affected == 0) throw new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND);
         log.info("Changed HouseBl hblNo: id={}", id);
+    }
+
+    @Override
+    public List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv) {
+        return houseBlPort.findHouseBlKeysByHblNoExact(hblNo, jobDiv);
     }
 
     private HouseBl findEntityById(Long id) {

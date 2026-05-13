@@ -15,4 +15,5 @@ public interface HouseBlRepositoryCustom {
     List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId);
     List<ConsoledHouseBlAirSummary> findConsoledAirSummariesByMasterBlId(Long masterBlId);
     long updateHblNoById(Long id, String newHblNo, JobDiv expectedJobDiv);
+    List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv);
 }

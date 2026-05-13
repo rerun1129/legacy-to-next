@@ -18,6 +18,35 @@ export interface HouseBlRow {
   createdAt: string;
 }
 
+// §BE-sync — SeaContainerView / SeaDescView (BE SeaDetailResponse nested 필드)
+export interface HouseBlSeaContainerView {
+  id: number;
+  containerNo?: string;
+  containerType?: string;
+  lengthFeet?: number;
+  sealNo1?: string;
+  sealNo2?: string;
+  sealNo3?: string;
+  sealNo4?: string;
+  sealNo5?: string;
+  sealNo6?: string;
+  pkgQty?: number;
+  pkgUnit?: string;
+  grossWeightKg?: number;
+  netWeightKg?: number;
+  cbm?: number;
+  vgmKg?: number;
+  soc?: boolean;
+  seq?: number;
+}
+
+export interface HouseBlSeaDescView {
+  marks?: string;
+  description?: string;
+  descClause1?: string;
+  descClause2?: string;
+}
+
 export interface HouseBlDetail extends HouseBlRow {
   shipmentType: 'HOUSE' | 'DIRECT' | null;
   blType: 'OBL' | 'SWB' | 'SURRENDER' | null;
@@ -42,6 +71,9 @@ export interface HouseBlDetail extends HouseBlRow {
     sayInformation?: string;
     noOfContainerOrPackages?: string;
   } | null;
+  // §BE-sync — BE SeaDetailResponse.containers / .desc 필드
+  containers?: HouseBlSeaContainerView[];
+  desc?: HouseBlSeaDescView;
   freightTerm: 'PREPAID' | 'COLLECT' | null;
   notifyCode: string | null;
   deliveryCode: string | null;
@@ -162,19 +194,6 @@ export interface ScheduleLegRequest {
   arrivalTm?: string;
 }
 
-export interface LicenseRequest {
-  licenseNo?: string;
-  pkgQty?: number;
-  pkgUnit?: string;
-  grossWeightKg?: number;
-  combinedPackingMark?: string;
-  combinedPackingQty?: number;
-  combinedPackingUnit?: string;
-  partialShipment?: boolean;
-  partialShipmentSeq?: number;
-  hsnNo?: string;
-}
-
 export interface TruckOrderRequest {
   truckOrderNo?: string;
   pkgQty?: number;
@@ -245,7 +264,6 @@ export interface CreateHouseBlRequest {
   dims?: DimRequest[];
   containers?: ContainerRequest[];
   scheduleLegs?: ScheduleLegRequest[];
-  licenses?: LicenseRequest[];
   truckOrders?: TruckOrderRequest[];
   airCharges?: AirChargeRequest[];
 }

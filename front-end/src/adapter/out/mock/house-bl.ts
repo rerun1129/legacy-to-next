@@ -57,4 +57,7 @@ export const mockHouseBlPort: HouseBlPort = {
   async changeHblNo(_id: number, _hblNo: string): Promise<void> {
     // mock: no-op
   },
+  async findByHblNo(_hblNo: string, _jobDiv: 'SEA' | 'AIR' | 'TRUCK'): Promise<number[]> {
+    return [];
+  },
 };

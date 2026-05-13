@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.housebl;
 
 import com.freightos.fms.adapter.in.web.housebl.dto.ChangeHouseBlHblNoRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
+import com.freightos.fms.adapter.in.web.housebl.dto.FindHouseBlByHblNoRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.SearchHouseBlRequest;
@@ -13,6 +14,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
+import com.freightos.fms.domain.housebl.enums.JobDiv;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 
 @Tag(name = "House B/L", description = "House B/L CRUD — S-02/S-03")
@@ -41,6 +44,14 @@ public class HouseBlController {
             @Valid @RequestBody SearchHouseBlRequest req) {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toSummaryPage(
                 houseBlUseCase.searchHouseBls(houseBlAssembler.toSearchCommand(req), PageRequest.of(req.page(), req.size())))));
+    }
+
+    @Operation(summary = "House B/L hblNo EXACT 매칭으로 house_bl_id PK 목록 조회 (최대 2건)")
+    @PostMapping("/find-by-hbl-no")
+    public ResponseEntity<ApiResponse<List<Long>>> findHouseBlByHblNo(
+            @Valid @RequestBody FindHouseBlByHblNoRequest req) {
+        return ResponseEntity.ok(ApiResponse.of(
+                houseBlUseCase.findHouseBlKeysByHblNoExact(req.hblNo(), JobDiv.valueOf(req.jobDiv()))));
     }
 
     @Operation(summary = "House B/L 생성")

@@ -122,7 +122,6 @@ export function createEmptyHouseBlFormValues(): HouseBlFormValues {
     dims: [],
     containers: [],
     scheduleLegs: [],
-    licenses: [],
     truckOrders: [],
     airCharges: [],
     itemHs: [],

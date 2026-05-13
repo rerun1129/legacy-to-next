@@ -30,4 +30,7 @@ public interface HouseBlPort {
      * @return 영향받은 row 수 (0이면 id 미존재 또는 jobDiv 불일치)
      */
     long updateHblNoById(Long id, BlNumber newHblNo, JobDiv expectedJobDiv);
+
+    /** hbl_no EXACT 매칭으로 house_bl_id PK 목록 조회 (최대 2건). jobDiv로 도메인 격리. */
+    List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv);
 }

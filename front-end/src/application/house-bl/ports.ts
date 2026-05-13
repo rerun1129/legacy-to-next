@@ -1,4 +1,4 @@
-import type { HouseBlRow, HouseBlDetail, HouseBlFilter, CreateHouseBlRequest, UpdateHouseBlRequest } from '@/domain/house-bl';
+import type { HouseBlRow, HouseBlDetail, HouseBlFilter, CreateHouseBlRequest, UpdateHouseBlRequest, JobDiv } from '@/domain/house-bl';
 
 export interface HouseBlPort {
   list(filter: HouseBlFilter): Promise<HouseBlRow[]>;
@@ -9,4 +9,6 @@ export interface HouseBlPort {
   update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail | null>;
   delete(id: number): Promise<void>;
   changeHblNo(id: number, hblNo: string): Promise<void>;
+  // EXACT 매칭 — POST /api/house-bl/find-by-hbl-no
+  findByHblNo(hblNo: string, jobDiv: JobDiv): Promise<number[]>;
 }

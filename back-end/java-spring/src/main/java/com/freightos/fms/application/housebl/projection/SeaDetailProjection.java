@@ -1,6 +1,7 @@
 package com.freightos.fms.application.housebl.projection;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * SEA 본체(HouseBlSea) 상세 필드의 application-layer projection.
@@ -24,5 +25,7 @@ public record SeaDetailProjection(
         String vesselNationality,
         BigDecimal rton,
         String sayInformation,
-        String noOfContainerOrPackages
+        String noOfContainerOrPackages,
+        List<SeaContainerProjection> containers,
+        SeaDescProjection desc
 ) {}

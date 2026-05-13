@@ -8,6 +8,7 @@ import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save, Printer, Trash2, FileText, RefreshCw, Search, FilePlus } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { confirm } from "@/components/confirm";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
 import { MainTabSea }  from "./tabs/main-sea";
@@ -17,6 +18,7 @@ import { houseBlPort } from "@/lib/ports";
 import type { HouseBlFormValues } from "./house-bl-schema";
 import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import { buildHouseBlRequest, buildHouseBlUpdateRequest } from "./house-bl-submit";
+import { mapHouseBlDetailToForm } from "./map-house-bl-detail";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { HouseChangeBlNoModal } from "./house-change-bl-no-modal";
 import { useSearchBl } from "./use-search-bl";
@@ -168,79 +170,7 @@ export function HouseBLEntry({ variant }: Props) {
     detailLoadedRef.current = true;
     if (didRestoreFromDraftRef.current) return; // draft 복원 시 detail로 덮어쓰지 않음 (Truck 패턴 정합)
     // §6.48 ⑧ — BE 응답 필드 전체를 form에 반영 (3축 동기: BE response ↔ FE domain type ↔ form.reset)
-    form.reset({
-      ...createEmptyHouseBlFormValues(),
-      // toolbar
-      hbl:         detail.hblNo ?? "",
-      mbl:         detail.masterBlId != null ? String(detail.masterBlId) : "",
-      sType:       detail.shipmentType ?? "",
-      lType:       detail.loadType ?? "",
-      etd:         detail.etd ?? "",
-      eta:         detail.eta ?? "",
-      pol:         detail.polCode ?? "",
-      pod:         detail.podCode ?? "",
-      freightTerm: (detail.freightTerm ?? "") as "" | "PREPAID" | "COLLECT",
-      expImp:      detail.bound,
-      // party
-      shipperCode:        detail.shipperCode    ?? "",
-      shipperAddress:     detail.shipperAddress ?? "",
-      consigneeCode:      detail.consigneeCode  ?? "",
-      consigneeAddress:   detail.consigneeAddress ?? "",
-      notifyCode:         detail.notifyCode     ?? "",
-      notifyAddress:      detail.notifyAddress  ?? "",
-      docPartnerCode:     detail.docPartnerCode ?? "",
-      docPartnerAddress:  detail.docPartnerAddress ?? "",
-      // cargo summary
-      pkgQty:          detail.pkgQty    != null ? String(detail.pkgQty)    : "",
-      pkgUnit:         detail.pkgUnit   ?? "",
-      weightUnit:      detail.weightUnit ?? "",
-      grossWeightKg:   detail.grossWeightKg != null ? String(detail.grossWeightKg) : "",
-      cbm:             detail.cbm        != null ? String(detail.cbm)        : "",
-      volumeWeightKg:  detail.volumeWeightKg != null ? String(detail.volumeWeightKg) : "",
-      // performance
-      actualCustomerCode: detail.actualCustomerCode ?? "",
-      operatorCode:        detail.operatorCode  ?? "",
-      teamCode:            detail.teamCode      ?? "",
-      salesManCode:        detail.salesManCode  ?? "",
-      // schedule (Non B/L 전용 필드가 BE 응답에 포함될 수 있어 옵셔널 처리)
-      linerCode:  detail.linerCode  ?? "",
-      linerName:  detail.linerName  ?? "",
-      vesselName: detail.vesselName ?? "",
-      voyNo:      detail.voyageNo   ?? "",
-      // remark
-      remark: detail.remark ?? "",
-      // SEA nested detail — BE Phase A-1에서 추가된 seaDetail 서브 엔티티 매핑
-      seaDetail: {
-        loadType:                detail.loadType                          ?? "",
-        linerCode:               detail.seaDetail?.linerCode             ?? "",
-        vesselCode:              detail.seaDetail?.vesselCode            ?? "",
-        vesselName:              detail.seaDetail?.vesselName            ?? "",
-        voyageNo:                detail.seaDetail?.voyageNo              ?? "",
-        onboardDate:             detail.seaDetail?.onboardDate           ?? "",
-        porCode:                 detail.seaDetail?.porCode               ?? "",
-        finalDestCode:           detail.seaDetail?.finalDestCode         ?? "",
-        issueDate:               detail.seaDetail?.issueDate             ?? "",
-        noOfBl:                  detail.seaDetail?.noOfBl                ?? "",
-        issuePlace:              detail.seaDetail?.issuePlace            ?? "",
-        issuePlaceName:          "",
-        doDate:                  detail.seaDetail?.doDate                ?? "",
-        payableAt:               detail.seaDetail?.payableAt             ?? "",
-        payableAtName:           "",
-        triangle:                detail.seaDetail?.triangle              ?? false,
-        serviceTerm:             detail.seaDetail?.serviceTerm           ?? "",
-        vesselNationality:       detail.seaDetail?.vesselNationality     ?? "",
-        rton:                    detail.seaDetail?.rton != null ? String(detail.seaDetail.rton) : "",
-        sayInformation:          detail.seaDetail?.sayInformation        ?? "",
-        noOfContainerOrPackages: detail.seaDetail?.noOfContainerOrPackages ?? "",
-        blType:                  detail.blType                           ?? "",
-        deliveryCode:            detail.deliveryCode                     ?? "",
-        polName:                 "",
-        podName:                 "",
-        deliveryName:            "",
-        freightTermDetail:       "",
-        signature:               "",
-      },
-    });
+    form.reset(mapHouseBlDetailToForm(detail));
   }, [detail, form, didRestoreFromDraftRef]);
 
   const mutation = useMutation({
@@ -276,7 +206,7 @@ export function HouseBLEntry({ variant }: Props) {
   const deleteMutation = useMutation({
     mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['house-bl', 'list'] });
+      // List 자동 invalidate 금지 (§6.21) — 사용자가 List에서 Search로 직접 재조회
       form.reset(createEmptyHouseBlFormValues());
       useEntryFocusStore.getState().clearFocus(entryFocusKeys.houseBl(variant.key));
     },
@@ -294,7 +224,13 @@ export function HouseBLEntry({ variant }: Props) {
     { key: "freight", label: "Freight" },
   ];
 
-  const { handleSearchBl } = useSearchBl(form, variant);
+  const { handleSearchBl } = useSearchBl(form, variant, {
+    id,
+    onAfterFound: (_targetId, _sameAsCurrent) => {
+      // useSearchBl은 외부 ref를 직접 mutate할 수 없으므로 콜백으로 위임
+      detailLoadedRef.current = false;
+    },
+  });
 
   function handleResetEntry() {
     form.reset(createEmptyHouseBlFormValues());
@@ -304,6 +240,17 @@ export function HouseBLEntry({ variant }: Props) {
 
   function handleSubmit(raw: HouseBlFormValues) {
     mutation.mutate(raw);
+  }
+
+  async function handleDelete() {
+    if (!isEdit) return;
+    const ok = await confirm({
+      variant: 'destructive',
+      title: '삭제하시겠습니까?',
+      confirmText: '삭제',
+      description: '삭제된 데이터는 복구할 수 없습니다.',
+    });
+    if (ok) deleteMutation.mutate();
   }
 
   const isExp = variant.direction === "EXP";
@@ -347,10 +294,7 @@ export function HouseBLEntry({ variant }: Props) {
               size="sm"
               variant="danger"
               leftIcon={<Trash2 size={12} />}
-              onClick={() => {
-                if (!isEdit) return;
-                if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
-              }}
+              onClick={handleDelete}
               disabled={!isEdit || deleteMutation.isPending}
             >Delete</Button>
             {isExp && variant.printDocs.length > 0 && (

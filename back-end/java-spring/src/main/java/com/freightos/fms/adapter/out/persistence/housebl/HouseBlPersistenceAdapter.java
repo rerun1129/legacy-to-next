@@ -116,6 +116,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
         return houseBlRepository.updateHblNoById(id, newHblNo.value(), expectedJobDiv);
     }
 
+    @Override
+    public List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv) {
+        return houseBlRepository.findHouseBlKeysByHblNoExact(hblNo, jobDiv);
+    }
+
     private PagedResult<HouseBl> toPagedResult(Page<HouseBlJpaEntity> page) {
         List<HouseBl> content = page.getContent().stream().map(this::loadWithExt).toList();
         return PagedResult.of(content, page.getTotalElements(), page.getTotalPages(), page.getNumber(), page.getSize());
