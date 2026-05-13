@@ -4,6 +4,7 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.housebl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
@@ -22,7 +23,9 @@ import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl.WorkDivision;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
+import com.freightos.fms.domain.common.enums.ServiceTerm;
 import org.springframework.stereotype.Component;
 
 /**
@@ -219,6 +222,26 @@ public class HouseBlFactory {
             case HouseBlTruck truck -> truck.getRemark();
             default -> null;
         };
+        SeaDetailProjection seaDetail = (entity instanceof HouseBlSea sea) ? new SeaDetailProjection(
+                VoMapper.mapOrNull(sea.getLinerCode(), LinerCode::value),
+                Nullables.mapOrNull(sea.getVesselVoyage(), VesselVoyage::vesselCode),
+                Nullables.mapOrNull(sea.getVesselVoyage(), VesselVoyage::vesselName),
+                Nullables.mapOrNull(sea.getVesselVoyage(), VesselVoyage::voyageNo),
+                VoMapper.mapOrNull(sea.getOnboardDate(), BlDate::asString),
+                VoMapper.mapOrNull(sea.getPorCode(), PortCode::value),
+                VoMapper.mapOrNull(sea.getFinalDestCode(), PortCode::value),
+                VoMapper.mapOrNull(sea.getIssueDate(), BlDate::asString),
+                Nullables.mapOrNull(sea.getNoOfBl(), NoOfBl::name),
+                VoMapper.mapOrNull(sea.getIssuePlace(), PortCode::value),
+                VoMapper.mapOrNull(sea.getDoDate(), BlDate::asString),
+                VoMapper.mapOrNull(sea.getPayableAt(), PortCode::value),
+                sea.isTriangle(),
+                Nullables.mapOrNull(sea.getServiceTerm(), ServiceTerm::name),
+                sea.getVesselNationality(),
+                VoMapper.mapOrNull(sea.getRton(), Rton::ton),
+                sea.getSayInformation(),
+                sea.getNoOfContainerOrPackages()
+        ) : null;
         return new HouseBlDetailResult(
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getHblNo(), BlNumber::value),
@@ -264,7 +287,8 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getVolumeWtKg(), Weight::kg)),
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getRton(), Rton::ton)),
                 Nullables.mapOrNull(loadType, LoadType::name),
-                remark
+                remark,
+                seaDetail
         );
     }
 }

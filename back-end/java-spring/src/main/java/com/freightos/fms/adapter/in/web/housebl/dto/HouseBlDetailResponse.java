@@ -57,7 +57,10 @@ public record HouseBlDetailResponse(
         String loadType,
 
         // SEA/AIR/TRUCK 본체 remark
-        String remark
+        String remark,
+
+        // SEA 본체 상세 (AIR/TRUCK/NON_BL은 null)
+        SeaDetailResponse seaDetail
 ) {
     public static HouseBlDetailResponse from(HouseBlDetailResult result) {
         return new HouseBlDetailResponse(
@@ -105,7 +108,8 @@ public record HouseBlDetailResponse(
                 result.volumeWeightKg(),
                 result.rton(),
                 result.loadType(),
-                result.remark()
+                result.remark(),
+                result.seaDetail() != null ? SeaDetailResponse.from(result.seaDetail()) : null
         );
     }
 }

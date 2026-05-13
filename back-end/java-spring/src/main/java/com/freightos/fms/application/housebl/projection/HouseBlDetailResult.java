@@ -59,6 +59,9 @@ public record HouseBlDetailResult(
         String loadType,
 
         // SEA/AIR/TRUCK 본체 remark
-        String remark
+        String remark,
+
+        // SEA 본체 상세 (AIR/TRUCK/NON_BL은 null)
+        SeaDetailProjection seaDetail
 ) {
 }
