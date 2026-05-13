@@ -14,7 +14,7 @@ interface Props { variant: BLVariantConfig; active?: boolean }
 export const HOUSE_BL_AIR_REGISTRY: WidgetDef[] = [
   { key: "party-air",    label: "Party",           component: PartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 6 }, minColSpan: 1, minRowSpan: 2 },
   { key: "schedule-air", label: "Schedule",        component: AirSchedulePanel, defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "trade-air",    label: "Trade",           component: AirTradePanel,    defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "trade-air",    label: "Trade",           component: AirTradePanel,    defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
   { key: "cargo-air",    label: "Cargo",           component: AirCargoPanel,    defaultPosition: { col: 2, row: 4, colSpan: 4, rowSpan: 2 }, minColSpan: 2, minRowSpan: 1 },
   { key: "dimension",    label: "Dimension",       component: DimensionPanel,   defaultPosition: { col: 0, row: 6, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
   { key: "marks-air",    label: "Marks & Numbers", component: MarksPanel,       defaultPosition: { col: 0, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },

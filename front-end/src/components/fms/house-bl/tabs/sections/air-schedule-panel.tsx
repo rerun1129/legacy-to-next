@@ -131,6 +131,89 @@ export function AirSchedulePanel({ variant }: Props) {
         );
       },
     },
+    {
+      key:   "destination",
+      label: "Destination",
+      render: () => (
+        <FieldItemGrid
+          itemScope={`${panelScope}.destination`}
+          items={[{
+            key: "destination",
+            render: () => (
+              <div className="li">
+                <span className="li__label">Destination</span>
+                <div className="li__input" style={{ gap: 4 }}>
+                  <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
+                    {...register("pod")} />
+                  <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}
+                    placeholder="(미구현)"
+                    {...register("podName")} />
+                </div>
+              </div>
+            ),
+          }]}
+          cols={1}
+          shouldShowRowControls={false}
+        />
+      ),
+    },
+    {
+      key:   "dates",
+      label: "On board / Arrival",
+      render: () => (
+        <FieldItemGrid
+          itemScope={`${panelScope}.dates`}
+          items={[
+            {
+              key: "onboard",
+              render: () => (
+                <div className="li">
+                  <span className="li__label">On board</span>
+                  <div className="li__input">
+                    <Controller
+                      control={control}
+                      name="etd"
+                      render={({ field }) => (
+                        <PanelDateInput
+                          value={field.value as string}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: "arrival",
+              render: () => (
+                <div className="li">
+                  <span className="li__label">Arrival</span>
+                  <div className="li__input">
+                    <Controller
+                      control={control}
+                      name="eta"
+                      render={({ field }) => (
+                        <PanelDateInput
+                          value={field.value as string}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              ),
+            },
+          ]}
+          cols={2}
+          shouldShowRowControls={false}
+        />
+      ),
+    },
     ...(variant.issueFields.length > 0
       ? [{
           key:   "issue",
