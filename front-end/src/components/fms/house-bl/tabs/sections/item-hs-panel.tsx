@@ -5,7 +5,7 @@ import { useFormContext, useFieldArray } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { NumericCell, TextCell } from "@/components/shared/grid-cell-inputs";
+import { TextBox, NumberBox } from "@/components/shared/inputs";
 
 type ItemRow = NonNullable<HouseBlFormValues["itemHs"]>[number];
 
@@ -20,12 +20,12 @@ export function ItemHsPanel() {
   const focusedRowKeyRef = useRef<string | null>(null);
   const columns = useMemo<GridColumn<ItemRow>[]>(() => [
     { key: "_no",   label: "#",           width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "hs",    label: "HS Code",     width: 100, render: (_, __, i) => <TextCell {...register(`itemHs.${i}.hs`)} style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "desc",  label: "Description", width: 200, render: (_, __, i) => <TextCell {...register(`itemHs.${i}.desc`)} /> },
-    { key: "qty",   label: "Qty",         width: 70,  className: "is-num", render: (_, __, i) => <NumericCell {...register(`itemHs.${i}.qty`)} /> },
-    { key: "unit",  label: "Unit",        width: 60,  render: (_, __, i) => <TextCell {...register(`itemHs.${i}.unit`)} /> },
-    { key: "value", label: "Value",       width: 100, className: "is-num", render: (_, __, i) => <NumericCell {...register(`itemHs.${i}.value`)} /> },
-    { key: "cur",   label: "Currency",    width: 80,  render: (_, __, i) => <TextCell {...register(`itemHs.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "hs",    label: "HS Code",     width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`itemHs.${i}.hs`)}    style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "desc",  label: "Description", width: 200, render: (_, __, i) => <TextBox   variant="cell" {...register(`itemHs.${i}.desc`)} /> },
+    { key: "qty",   label: "Qty",         width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`itemHs.${i}.qty`}   valueAsNumber={false} /> },
+    { key: "unit",  label: "Unit",        width: 60,  render: (_, __, i) => <TextBox   variant="cell" {...register(`itemHs.${i}.unit`)} /> },
+    { key: "value", label: "Value",       width: 100, className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`itemHs.${i}.value`} valueAsNumber={false} /> },
+    { key: "cur",   label: "Currency",    width: 80,  render: (_, __, i) => <TextBox   variant="cell" {...register(`itemHs.${i}.cur`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
   ], [register]);
 
   const selectedIdx = selectedKey !== null
@@ -67,8 +67,8 @@ export function ItemHsPanel() {
         <span className="panel__title">Item / HS Code</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button type="button" className="btn btn--sm" onClick={handleAdd}><Plus size={12} /></button>
-          <button type="button" className="btn btn--sm" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--success" onClick={handleAdd}><Plus size={12} /></button>
+          <button type="button" className="btn btn--sm btn--icon btn--danger" onMouseDown={captureFocusedRow} onClick={handleRemove} disabled={fields.length === 0}><Minus size={12} /></button>
         </div>
       </div>
       <GridList
@@ -77,6 +77,7 @@ export function ItemHsPanel() {
         rowKey={(_, i) => fields[i].fieldId}
         onRowClick={(row) => setSelectedKey(row.id)}
         rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
+        onClearRow={() => setSelectedKey(null)}
         style={{ flex: 1, minHeight: 0 }}
       />
     </div>

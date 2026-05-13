@@ -1,10 +1,15 @@
+"use client";
+
 import { useFormContext, Controller } from "react-hook-form";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
+import { ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function DescriptionPanel() {
   const { control } = useFormContext<HouseBlFormValues>();
+  const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
+  const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
 
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -14,21 +19,38 @@ export function DescriptionPanel() {
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", gap: 4, marginBottom: 8, flexShrink: 0 }}>
-          <select style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}>
-            <option value="">-- 부지약관 --</option>
-            <option>SAID TO CONTAIN</option>
-            <option>SHIPPER&apos;S LOAD AND COUNT</option>
-          </select>
-          <select style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}>
-            <option value="">-- 부지약관 --</option>
-            <option>SAID TO CONTAIN</option>
-            <option>SHIPPER&apos;S LOAD AND COUNT</option>
-          </select>
+          <Controller
+            name="desc.descClause1"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={clause1Options}
+                placeholder={clause1Placeholder ?? "-- 부지약관 --"}
+                value={field.value}
+                onChange={field.onChange}
+                style={{ flex: 1 }}
+              />
+            )}
+          />
+          <Controller
+            name="desc.descClause2"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={clause2Options}
+                placeholder={clause2Placeholder ?? "-- 부지약관 --"}
+                value={field.value}
+                onChange={field.onChange}
+                style={{ flex: 1 }}
+              />
+            )}
+          />
         </div>
         <Controller
           control={control}
           name="descriptionOfGoods"
-          defaultValue=""
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

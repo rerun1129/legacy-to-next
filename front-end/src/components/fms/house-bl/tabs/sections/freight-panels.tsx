@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { NumericCell } from "@/components/shared/grid-cell-inputs";
+import { TextBox, NumberBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues, FreightRow } from "@/components/fms/house-bl/house-bl-schema";
@@ -33,23 +33,6 @@ const ACCOUNT_ROWS: AccountRow[] = [];
 // ── Sample data ────────────────────────────────────────────
 const RATE_ROWS: FreightRow[] = [];
 
-// ── Rate input styles ──────────────────────────────────────
-const CUR_SELECT: React.CSSProperties = {
-  height: 22, padding: "0 6px", fontSize: 10,
-  background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4,
-  color: "var(--ink)", outline: "none", width: 55,
-};
-const RATE_INPUT: React.CSSProperties = {
-  height: 22, width: 100, padding: "0 6px", fontSize: 10,
-  background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4,
-  color: "var(--ink)", fontFamily: "var(--font-mono)", textAlign: "right", outline: "none",
-};
-const DATE_INPUT: React.CSSProperties = {
-  height: 22, width: 110, padding: "0 6px", fontSize: 10,
-  background: "var(--surface-0)", border: "1px solid var(--border)", borderRadius: 4,
-  color: "var(--ink)", outline: "none",
-};
-
 // ── Rate header 공통 블록 ──────────────────────────────────
 interface CustomerItemProps { label: string; code: string; name: string }
 
@@ -59,12 +42,10 @@ function CustomerItem({ label, code, name }: CustomerItemProps) {
       <span style={{ fontSize: 10, minWidth: 110, flexShrink: 0 }}>{label}</span>
       <div className="party-cn">
         <div className="party-cn__code">
-          <input className="text-mono" placeholder="Code" defaultValue={code} readOnly
-            style={{ background: "var(--surface)", cursor: "default" }} />
+          <TextBox variant="panel" readOnly defaultValue={code} />
           <Search size={12} className="party-cn__icon" />
         </div>
-        <input className="party-cn__name" placeholder="Company Name" defaultValue={name} readOnly
-          style={{ background: "var(--surface)", cursor: "default" }} />
+        <TextBox variant="panel" readOnly defaultValue={name} />
       </div>
     </div>
   );
@@ -77,9 +58,9 @@ function ExRateItem({ label }: ExRateItemProps) {
     <div className="party-block__head">
       <span style={{ fontSize: 10, minWidth: 110, flexShrink: 0, color: "var(--ink-2)" }}>{label}</span>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <input type="date" defaultValue="" style={DATE_INPUT} />
-        <select defaultValue="" style={CUR_SELECT}><option value=""></option><option>USD</option><option>KRW</option><option>EUR</option></select>
-        <input type="number" min="0" step="0.01" defaultValue="" style={RATE_INPUT} />
+        <TextBox variant="panel" readOnly defaultValue="" />
+        <TextBox variant="panel" readOnly defaultValue="" />
+        <TextBox variant="panel" readOnly defaultValue="" />
       </div>
     </div>
   );
@@ -123,23 +104,23 @@ export function FreightSellingPanel() {
   const sellingCols: GridColumn<FreightRow>[] = useMemo(() => [
     { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
     { key: "code", label: "Charge Code", isRequired: true,
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightSelling.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
     { key: "desc", label: "Description",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightSelling.${i}.desc`)} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.desc`)} /> },
     { key: "qty",  label: "Qty", className: "is-num",
-      render: (_, __, i) => <input autoComplete="off" type="number" step="any" className="grid__cell-input" {...register(`freightSelling.${i}.qty`)} /> },
+      render: (_, __, i) => <NumberBox variant="cell" name={`freightSelling.${i}.qty`}  valueAsNumber={false} /> },
     { key: "unit", label: "Unit",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightSelling.${i}.unit`)} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.unit`)} /> },
     { key: "sell", label: "Rate", className: "is-num", isRequired: true,
-      render: (_, __, i) => <input autoComplete="off" type="number" step="any" className="grid__cell-input" {...register(`freightSelling.${i}.sell`)} /> },
+      render: (_, __, i) => <NumberBox variant="cell" name={`freightSelling.${i}.sell`} valueAsNumber={false} /> },
     { key: "_amt", label: "Amount", className: "is-num",
-      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.sell ?? "0") * 2).toFixed(2)} /> },
+      render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.sell ?? "0") * 2).toFixed(2)} /> },
     { key: "cur",  label: "Currency",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightSelling.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "_krw", label: "KRW Equiv.", className: "is-num",
-      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.sell ?? "0") * 2 * 1376.5).toFixed(0)} /> },
+      render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.sell ?? "0") * 2 * 1376.5).toFixed(0)} /> },
     { key: "_rem", label: "Remark",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightSelling.${i}.remark`)} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.remark`)} /> },
   ], [register]);
 
   return (
@@ -160,23 +141,23 @@ export function FreightBuyingPanel() {
   const buyingCols: GridColumn<FreightRow>[] = useMemo(() => [
     { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
     { key: "code", label: "Charge Code", isRequired: true,
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightBuying.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
     { key: "desc", label: "Description",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightBuying.${i}.desc`)} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.desc`)} /> },
     { key: "qty",  label: "Qty", className: "is-num",
-      render: (_, __, i) => <input autoComplete="off" type="number" step="any" className="grid__cell-input" {...register(`freightBuying.${i}.qty`)} /> },
+      render: (_, __, i) => <NumberBox variant="cell" name={`freightBuying.${i}.qty`}  valueAsNumber={false} /> },
     { key: "unit", label: "Unit",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightBuying.${i}.unit`)} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.unit`)} /> },
     { key: "buy",  label: "Rate", className: "is-num", isRequired: true,
-      render: (_, __, i) => <input autoComplete="off" type="number" step="any" className="grid__cell-input" {...register(`freightBuying.${i}.buy`)} /> },
+      render: (_, __, i) => <NumberBox variant="cell" name={`freightBuying.${i}.buy`}  valueAsNumber={false} /> },
     { key: "_amt", label: "Amount", className: "is-num",
-      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.buy ?? "0") * 2).toFixed(2)} /> },
+      render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.buy ?? "0") * 2).toFixed(2)} /> },
     { key: "cur",  label: "Currency",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightBuying.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "_krw", label: "KRW Equiv.", className: "is-num",
-      render: (_, row) => <NumericCell defaultValue={(parseFloat(row.buy ?? "0") * 2 * 1376.5).toFixed(0)} /> },
+      render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.buy ?? "0") * 2 * 1376.5).toFixed(0)} /> },
     { key: "_rem", label: "Remark",
-      render: (_, __, i) => <input autoComplete="off" className="grid__cell-input" {...register(`freightBuying.${i}.remark`)} /> },
+      render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.remark`)} /> },
   ], [register]);
 
   return (
