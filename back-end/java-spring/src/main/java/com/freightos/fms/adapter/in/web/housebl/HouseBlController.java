@@ -9,6 +9,7 @@ import com.freightos.common.response.ApiResponse;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Objects;
 
 @Tag(name = "House B/L", description = "House B/L CRUD — S-02/S-03")
 @RestController
@@ -56,13 +58,18 @@ public class HouseBlController {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.findHouseBlById(id))));
     }
 
-    @Operation(summary = "House B/L 수정")
+    @Operation(summary = "House B/L 수정 (SEA: ApiResponse<Void>, 기타 jobDiv: ApiResponse<HouseBlDetailResponse>)")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> updateHouseBl(
+    public ResponseEntity<ApiResponse<?>> updateHouseBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateHouseBlRequest req) {
-        return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(
-                houseBlUseCase.updateHouseBl(id, houseBlAssembler.toUpdateCommand(req)))));
+        UpdateHouseBlCommand cmd = houseBlAssembler.toUpdateCommand(req);
+        // Sea jobDiv는 §6.35 전용 Port+Adapter — void 반환으로 Assembler.toDetail 호출 생략
+        if (Objects.equals("SEA", req.jobDiv())) {
+            houseBlUseCase.updateSeaHbl(id, cmd);
+            return ResponseEntity.ok(ApiResponse.ok(MessageCode.SEA_HBL_UPDATED.message()));
+        }
+        return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.updateHouseBl(id, cmd))));
     }
 
     @Operation(summary = "House B/L 삭제")

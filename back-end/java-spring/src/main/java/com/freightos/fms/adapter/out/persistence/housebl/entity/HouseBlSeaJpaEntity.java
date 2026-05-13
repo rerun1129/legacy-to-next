@@ -8,7 +8,9 @@ import com.freightos.fms.domain.common.enums.ServiceTerm;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
@@ -132,10 +134,54 @@ public class HouseBlSeaJpaEntity extends BaseJpaEntity {
     public void setDeliveryCode(String v) { this.deliveryCode = v; }
     public void setRemark(String v) { this.remark = v; }
 
-    /** SEA 컨테이너 동기화: 기존 컬렉션 참조를 유지하면서 내용 교체 (orphanRemoval 지원). */
+    /** SEA 컨테이너 동기화: 기존 컬렉션 참조를 유지하면서 내용 교체 (CREATE 경로 전용, orphanRemoval 지원). */
     public void syncContainers(List<HouseBlSeaContainerJpaEntity> newContainers) {
         this.containers.clear();
         this.containers.addAll(newContainers);
+    }
+
+    /**
+     * SEA Container merge-by-id (UPDATE 경로 전용).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 컬렉션에서 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeContainers(List<HouseBlSeaContainerJpaEntity> incoming) {
+        Map<Long, HouseBlSeaContainerJpaEntity> existingById = new HashMap<>();
+        for (HouseBlSeaContainerJpaEntity e : this.containers) {
+            if (e.getHouseBlSeaContainerId() != null) existingById.put(e.getHouseBlSeaContainerId(), e);
+        }
+        List<HouseBlSeaContainerJpaEntity> merged = new ArrayList<>();
+        for (HouseBlSeaContainerJpaEntity inc : incoming) {
+            if (inc.getHouseBlSeaContainerId() != null && existingById.containsKey(inc.getHouseBlSeaContainerId())) {
+                HouseBlSeaContainerJpaEntity existing = existingById.get(inc.getHouseBlSeaContainerId());
+                copyContainerFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.containers.clear();
+        this.containers.addAll(merged);
+    }
+
+    private void copyContainerFields(HouseBlSeaContainerJpaEntity src, HouseBlSeaContainerJpaEntity dst) {
+        dst.setContainerNo(src.getContainerNo());
+        dst.setContainerType(src.getContainerType());
+        dst.setLengthFeet(src.getLengthFeet());
+        dst.setSealNo1(src.getSealNo1());
+        dst.setSealNo2(src.getSealNo2());
+        dst.setSealNo3(src.getSealNo3());
+        dst.setSealNo4(src.getSealNo4());
+        dst.setSealNo5(src.getSealNo5());
+        dst.setSealNo6(src.getSealNo6());
+        dst.setPkgQty(src.getPkgQty());
+        dst.setPkgUnit(src.getPkgUnit());
+        dst.setGrossWeightKg(src.getGrossWeightKg());
+        dst.setNetWeightKg(src.getNetWeightKg());
+        dst.setCbm(src.getCbm());
+        dst.setVgmKg(src.getVgmKg());
+        dst.setIsSoc(src.isSoc());
+        dst.setSeq(src.getSeq());
     }
 
     public List<HouseBlSeaContainerJpaEntity> getContainers() { return containers; }

@@ -9,6 +9,7 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.seahbl.port.out.SeaHblPersistencePort;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -28,6 +29,7 @@ public class HouseBlService implements HouseBlUseCase {
 
     private final HouseBlPort houseBlPort;
     private final HouseBlFactory houseBlFactory;
+    private final SeaHblPersistencePort seaHblPersistencePort;
 
     @Override
     public PagedResult<HouseBlSummary> searchHouseBls(SearchHouseBlCommand cmd, PageRequest pageRequest) {
@@ -53,6 +55,12 @@ public class HouseBlService implements HouseBlUseCase {
         HouseBl existing = findEntityById(id);
         houseBlFactory.applyToEntity(command, existing);
         return houseBlFactory.toDetailResult(houseBlPort.saveHouseBl(existing));
+    }
+
+    @Override
+    @Transactional
+    public void updateSeaHbl(Long id, UpdateHouseBlCommand command) {
+        seaHblPersistencePort.update(id, command);
     }
 
     @Override

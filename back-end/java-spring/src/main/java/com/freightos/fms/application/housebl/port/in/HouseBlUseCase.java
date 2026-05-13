@@ -14,6 +14,8 @@ public interface HouseBlUseCase {
     HouseBlDetailResult findHouseBlById(Long id);
     Long createHouseBl(CreateHouseBlCommand command);
     HouseBlDetailResult updateHouseBl(Long id, UpdateHouseBlCommand command);
+    /** Sea House B/L 전용 update — §6.35 Port+Adapter 패턴. void 반환으로 Controller ApiResponse<Void>화. */
+    void updateSeaHbl(Long id, UpdateHouseBlCommand command);
     void deleteHouseBlById(Long id);
     void changeHblNo(Long id, ChangeHouseBlNoCommand command);
 }
