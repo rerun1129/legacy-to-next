@@ -71,7 +71,7 @@ class HouseBlSeaSubFactory {
                                     java.math.BigDecimal rton, String sayInfo, String noOfCtnr) {
         if (serviceTerm != null || rton != null || sayInfo != null || noOfCtnr != null) {
             sea.updateSeaCargoTerms(
-                    Nullables.mapOrElse(serviceTerm, ServiceTerm::fromLabel, sea::getServiceTerm),
+                    Nullables.mapOrElse(serviceTerm, ServiceTerm::valueOf, sea::getServiceTerm),
                     Nullables.mapOrElse(rton,        Rton::of,               sea::getRton),
                     Nullables.firstNonNull(sayInfo,  sea::getSayInformation),
                     Nullables.firstNonNull(noOfCtnr, sea::getNoOfContainerOrPackages));

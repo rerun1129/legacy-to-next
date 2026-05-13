@@ -200,7 +200,7 @@ public class MasterBlFactory {
     private void applySeaCommon(MasterBlSea sea, String vesselNationality,
                                 String serviceTerm, String blType, String porCode, String finalDestCode, BigDecimal rton) {
         if (vesselNationality != null) sea.updateVesselNationality(vesselNationality);
-        if (serviceTerm != null)       sea.updateServiceTerm(ServiceTerm.fromLabel(serviceTerm));
+        if (serviceTerm != null)       sea.updateServiceTerm(ServiceTerm.valueOf(serviceTerm));
         if (blType != null)            sea.updateBlType(BlType.valueOf(blType));
         if (porCode != null || finalDestCode != null) sea.updateRoute(PortCode.of(porCode), PortCode.of(finalDestCode));
         if (rton != null)              sea.updateRton(Rton.of(rton));

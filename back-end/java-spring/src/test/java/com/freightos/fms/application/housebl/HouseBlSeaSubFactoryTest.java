@@ -135,7 +135,7 @@ class HouseBlSeaSubFactoryTest {
                 "20250103",     // doDate
                 "USNYC",        // payableAt
                 false,          // triangle
-                "CY/CY",        // serviceTerm
+                "CY_CY",        // serviceTerm
                 null,           // vesselCode2
                 "KR",           // vesselNationality
                 BigDecimal.TEN, // rton
