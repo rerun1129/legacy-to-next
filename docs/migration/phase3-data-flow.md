@@ -717,4 +717,153 @@ House/Master B/L은 variant가 draftKey에 포함됨. grid는 prop(`variantKey`)
 
 cleanup useEffect로 unmount 시 일괄 제거(§6.18 안티패턴)하는 방식 대신, **진입 시점에 명시 제거 + 메뉴 이동은 보존**의 분리 정책. 신규 도메인 entry 마이그레이션 시 list grid + handleSearch 두 진입 경로 모두 적용.
 
+### 6.50 Modal + 부모 Entry 양쪽 캐시 invalidate 중복 금지 (SSOT)
+
+자식 모달(ChangeBlNoModal/SwitchBlModal 등)의 mutation onSuccess와 부모 Entry의 `onChanged` 콜백 양쪽에서 **같은 queryKey에 대해 `invalidateQueries`를 중복 호출**하면 React Query가 fetch를 2회 발사한다. SELECT 발생 횟수가 2배가 될 뿐 아니라, 두 fetch의 완료 순서·취소 동작에 따라 useEffect의 `form.reset` 가드(`if (detailLoadedRef.current) return;`)에 막혀 갱신된 값이 form에 반영되지 못하는 race가 발생한다.
+
+**원인 패턴 (안티)**
+
+```tsx
+// child modal — onSuccess에서 invalidate
+queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", id] });
+onChanged?.();
+
+// parent Entry — onChanged 콜백에서 또 invalidate ❌
+onChanged={() => {
+  detailLoadedRef.current = false;
+  queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", id] }); // 중복
+}}
+```
+
+**SSOT — 책임 분리**
+
+- **모달**: 자기 mutation 후 detail 캐시 invalidate 단일 책임 (BE 응답 변경의 캐시 일관성은 mutation 호출자가 책임)
+- **부모 Entry**: `onChanged` 콜백에서 `detailLoadedRef.current = false`만 처리하여 fetch 완료 후 useEffect의 `form.reset(mapDetailToForm(detail))` 재발동 트리거
+
+**동기 흐름 보장**
+
+모달 onSuccess: `invalidate → onChanged() → onClose()`. React Query refetch는 비동기로 다음 tick에 시작. `detailLoadedRef.current = false`는 라인 onChanged 동기 실행으로 즉시 적용. fetch 완료 시점에는 ref가 항상 `false` → `form.reset` 안정 실행 → toolbar/form 갱신.
+
+**사례**: 0b8a2ee — Sea House Entry Change B/L No flow에서 모달 + 부모 양쪽 invalidate 중복으로 BE detail SELECT 4×2=8회 발생 + form.reset 스킵 race 발생. `house-bl-entry.tsx`의 `onChanged` 콜백에서 `invalidateQueries` 1줄 제거로 SELECT 8→4 절감 + race 해소.
+
+**신규 도메인 적용**: 다른 Entry의 `*ChangeBlNoModal`/`SwitchBlModal` onChanged 콜백에 부모 측 `invalidateQueries`가 있으면 동일 fix.
+
+### 6.51 Enum 매칭 함수 SSOT — EnumRegistryFactory 노출값과 호출처 변환 함수 1:1 정합
+
+`EnumRegistryFactory`가 FE에 enum 옵션을 노출할 때의 `value` 정의(`e.name()` vs `e.getCode()`)는 **FE form 저장 형식**을 결정한다. FE는 ComboBox로 받은 `option.value`를 그대로 form에 저장하고 update Command로 BE에 전송하므로, BE 호출처의 enum 변환 함수(`valueOf` vs `fromCode` vs `fromLabel`)가 이 형식과 1:1 정합해야 한다.
+
+**불일치 시 결과**
+
+`EnumRegistryFactory`가 `value=e.name()`("CFS_CFS")로 노출하는데 BE 호출처가 `Enum::fromLabel`(label 매칭 — "CFS/CFS"만 인식)을 사용하면 `IllegalArgumentException: Unknown service term code: CFS_CFS` 발생. 같은 enum에 대해 호출처별로 함수가 비대칭이면(예: Truck은 `valueOf`, Sea/Master는 `fromLabel`) 일부 도메인에서만 결함이 표면화된다.
+
+**SSOT — 5가지 매칭 패턴**
+
+| `EnumRegistryFactory` value | 호출처 변환 함수 | 사례 |
+|---|---|---|
+| `e.name()` | `Enum::valueOf` | Bound, BlType, ShipmentType, FreightTerm, LoadType, ServiceTerm 등 대부분 |
+| `e.getCode()` | `Enum::fromCode` (valueOf 우선 + getCode fallback dual matching) | ContainerType (e0d13c4) |
+| `e.getCode()` (label은 description) | `Enum::fromCode` dual matching | (현재 ContainerType만) |
+
+**점검 의무**
+
+신규 enum 도입 또는 enum 사용 호출처 추가 시 — `EnumRegistryFactory` 등록 라인의 value lambda와 모든 BE 호출처의 변환 함수가 정합하는지 grep으로 점검:
+
+```bash
+# 예시: ServiceTerm 호출처 전수 검색
+grep -rn "ServiceTerm::\(valueOf\|fromLabel\|fromCode\)\|ServiceTerm\.\(valueOf\|fromLabel\|fromCode\)" back-end/java-spring/src/main/java
+```
+
+**사례**: 7f91282 — Sea House/Master B/L Entry에서 ServiceTerm 포함 Save 시 throw. `HouseBlSeaSubFactory:74` + `MasterBlFactory:203`이 `ServiceTerm::fromLabel` 사용, Truck(`HouseBlTruckSubFactory:32, 45`)은 이미 `ServiceTerm::valueOf` 사용. Sea/Master 2곳을 valueOf로 통일하여 SSOT 정합. `ServiceTerm.fromLabel` 메서드 본체는 외부 호환 목적으로 enum에 보존(현재 호출처 0건). 테스트 헬퍼 입력값도 `"CY/CY"`(label) → `"CY_CY"`(name)으로 production 흐름 정합(사용자 명시 승인).
+
+메모리 [feedback_enum_db_value] SSOT — ENUM DB 저장값은 enum 인스턴스 필드명(`name()`).
+
+### 6.52 BE `@JsonInclude(NON_NULL)` + FE zod void 응답 파싱 호환 (SSOT)
+
+BE `ApiResponse` 클래스에 `@JsonInclude(JsonInclude.Include.NON_NULL)`이 있는 경우, `ApiResponse.ok(message)` (= `data=null, message=...`) 직렬화 시 **`data` 키가 응답 JSON에서 제거된다** → 실제 응답: `{"message": "..."}`. FE adapter가 SEA void 응답을 `z.object({ data: z.null() })`로 검사하면 zod 입장에서 `data: undefined`는 `z.null()` 거부 → 폴백된 detail 파싱에서 `expected object, received undefined` throw.
+
+**안티패턴**
+
+```ts
+const maybeVoid = z.object({ data: z.null() }).safeParse(json); // ❌
+if (maybeVoid.success) return null;
+```
+
+**SSOT — null/undefined 모두 void 처리**
+
+```ts
+const j = (json ?? {}) as { data?: unknown };
+if (j.data == null) return null; // null과 undefined 모두 매칭
+const parsed = apiResponse(SOMETHING_SCHEMA).safeParse(json);
+```
+
+또는 zod 패턴 유지 시:
+```ts
+const maybeVoid = z.object({ data: z.null().optional() }).safeParse(json);
+```
+
+**사례**: dd76d64 — Sea House Entry Save(SEA jobDiv update PATCH) 시 화면에 `Invalid update response: ... expected object, received undefined` 빨간 박스. 직전 ServiceTerm fix(7f91282)로 update가 BE 단에서 성공하게 되자 응답 파싱 결함이 표면화. `house-bl.ts:184` maybeVoid 검사 완화.
+
+**잔여 점검 권장**: `non-bl.ts`/`truck-bl.ts`/`master-bl.ts` 등 다른 adapter의 update/save 메서드에 같은 `z.null()` 검사 패턴이 있으면 동일 fix. BE `ApiResponse`의 `@JsonInclude(NON_NULL)`은 다른 응답들에 폭넓게 걸려 있어 건드리지 않음(영향 범위 차단).
+
+### 6.53 BE Create 검증 EXP/IMP 분기 — Bean Validation Groups SSOT
+
+Entry Create 시 EXP/IMP에 따라 필수 필드가 다를 경우(예: Consignee는 IMP에서만 필수), Bean Validation **Groups 인터페이스**로 표현하고 컨트롤러에서 `bound` 값을 보고 동적으로 그룹을 선택해 `Validator`로 수동 검증한다.
+
+**SSOT 구조**
+
+```java
+// 1) Group 인터페이스 (도메인별 + EXP/IMP 분기)
+public interface SeaGroup {}
+public interface SeaImpGroup extends SeaGroup {} // IMP 검증 시 공통도 함께
+```
+
+```java
+// 2) Request DTO — 공통은 SeaGroup, IMP-only는 SeaImpGroup
+public record CreateHouseBlRequest(
+    @NotBlank(groups = SeaGroup.class) String hblNo,
+    @NotBlank(groups = SeaGroup.class) String shipmentType,
+    @NotBlank(groups = SeaGroup.class) String etd,
+    @NotBlank(groups = SeaGroup.class) String eta,
+    @NotBlank(groups = SeaGroup.class) String polCode,
+    @NotBlank(groups = SeaGroup.class) String podCode,
+    @NotBlank(groups = SeaGroup.class) String actualCustomerCode,
+    @NotBlank(groups = SeaGroup.class) String docPartnerCode,
+    @NotBlank(groups = SeaGroup.class) String operatorCode,
+    @NotBlank(groups = SeaGroup.class) String teamCode,
+    @Size(max = 20) @NotBlank(groups = SeaImpGroup.class) String consigneeCode,
+    // ...
+) {}
+```
+
+```java
+// 3) Controller — bound 값에 따라 동적 그룹 선택
+@PostMapping
+public ResponseEntity<...> createHouseBl(@RequestBody @Valid CreateHouseBlRequest req) {
+    if ("SEA".equals(req.jobDiv())) {
+        Class<?> group = "IMP".equals(req.bound()) ? SeaImpGroup.class : SeaGroup.class;
+        Set<ConstraintViolation<CreateHouseBlRequest>> violations = validator.validate(req, group);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+    }
+    // ...
+}
+```
+
+```java
+// 4) GlobalExceptionHandler — ConstraintViolationException 전용 핸들러 (기존 MethodArgumentNotValidException 핸들러와 동일 ProblemDetail 응답 패턴)
+@ExceptionHandler(ConstraintViolationException.class)
+public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex) {
+    // [field] message 포맷 + status 400 + application/problem+json
+}
+```
+
+**FE는 시각 클래스(`is-required`)만 정합**
+
+메모리 [feedback_validation_be_ssot] SSOT — FE에 zodResolver/HTML5 required 추가 금지. EXP/IMP 동적 표시는 부모에서 `isExp` prop chain으로 패널에 전달(예: `party-panel.tsx` Consignee는 `cfg.role === "CONSIGNEE" ? !isExp : cfg.required`).
+
+**사례**: 69271ea — Sea House Entry Create에서 11개 필드 필수 검증 누락(빈 값 통과). `SeaGroup`/`SeaImpGroup` 2개 인터페이스 신설 + `CreateHouseBlRequest` 11개 필드 어노테이션 + Controller 동적 검증 + `ConstraintViolationException` 핸들러 + happy path 테스트 9개 필드 보강. FE 3패널 잉여 `is-required` 정리.
+
+**Update는 PATCH 의미론 유지**: `UpdateHouseBlRequest`는 null=기존값 유지이므로 어노테이션 없음(기존 정책 보존).
+
+**잔여 점검 권장**: Air/Truck House Entry, Sea/Air Master Entry에 동일 패턴(`AirGroup`/`AirImpGroup`, `TruckGroup`, `MasterSeaGroup` 등) 적용은 별도 작업. 신규 도메인 마이그레이션 시 본 절을 SSOT로 인용.
+
 사례: bab177f — Truck/Non/House/Master 4 도메인 list grid 더블클릭 + search 훅 동시 적용.
