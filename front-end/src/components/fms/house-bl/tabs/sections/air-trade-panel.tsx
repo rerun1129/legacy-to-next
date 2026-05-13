@@ -1,7 +1,9 @@
 import type React from "react";
-import { useFormContext, type FieldPath } from "react-hook-form";
+import { useFormContext, Controller, type FieldPath } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import { ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
@@ -37,7 +39,8 @@ function FreightTermField({ inputProps }: { inputProps: React.InputHTMLAttribute
 }
 
 export function AirTradePanel({ variant }: Props) {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
 
   if (!variant) return null;
   const panelScope = `air-trade-panel.${variant.key}`;
@@ -45,7 +48,29 @@ export function AirTradePanel({ variant }: Props) {
 
   const baseItems: FieldItemDef[] = [
     { key: "currency",     render: () => <LiField label="Currency"     name="currency"   /> },
-    { key: "incoterms",    render: () => <LiField label="Incoterms"    name="incoterms"  /> },
+    {
+      key: "incoterms",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Incoterms</span>
+          <div className="li__input">
+            <Controller
+              name="incoterms"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={incotermsOptions}
+                  placeholder={incotermPlaceholder}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
     { key: "freight-term", render: () => <FreightTermField inputProps={register("freightTerm")} /> },
     { key: "other-term",   render: () => <LiField label="Other Term"   name="otherTerm"  /> },
     { key: "dv-carriage",  render: () => <LiField label="D.V Carriage" name="dvCarriage" /> },

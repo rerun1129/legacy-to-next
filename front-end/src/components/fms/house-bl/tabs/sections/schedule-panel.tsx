@@ -1,7 +1,8 @@
 import type React from "react";
 import { useFormContext, Controller, type FieldPath } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
-import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
+import { TextBox, CodeBox, DateBox, ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
@@ -58,9 +59,42 @@ function SchedField({
   );
 }
 
-function IssueSection({ issueFields, panelScope }: { issueFields: string[]; panelScope: string }) {
+interface IssueSectionProps {
+  issueFields: string[];
+  panelScope: string;
+  noOfBlOptions: { value: string; label: string }[];
+  noOfBlPlaceholder: string | undefined;
+}
+
+function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPlaceholder }: IssueSectionProps) {
+  const { control } = useFormContext<HouseBlFormValues>();
   const issueItems: FieldItemDef[] = issueFields.map(f => {
     const fieldName = ISSUE_LABEL_TO_FIELD[f];
+    if (f === "No. of B/L") {
+      return {
+        key: "no-of-bl",
+        render: () => (
+          <div className="li">
+            <span className="li__label">No. of B/L</span>
+            <div className="li__input">
+              <Controller
+                name="seaDetail.noOfBl"
+                control={control}
+                render={({ field }) => (
+                  <ComboBox
+                    variant="panel"
+                    options={noOfBlOptions}
+                    placeholder={noOfBlPlaceholder}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        ),
+      };
+    }
     return {
       key:    f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
       render: () => fieldName
@@ -79,6 +113,7 @@ function IssueSection({ issueFields, panelScope }: { issueFields: string[]; pane
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
   const { register, control } = useFormContext<HouseBlFormValues>();
+  const { options: noOfBlOptions, placeholder: noOfBlPlaceholder } = useEnumOptions("NoOfBl");
 
   if (!variant) return null;
   const panelScope = `schedule-panel.${variant.key}`;
@@ -257,7 +292,7 @@ export function SchedulePanel({ variant }: Props) {
       ),
     },
     ...(variant.issueFields.length > 0
-      ? [{ key: "issue", label: "Issue Information", render: () => <IssueSection issueFields={variant.issueFields} panelScope={panelScope} /> }]
+      ? [{ key: "issue", label: "Issue Information", render: () => <IssueSection issueFields={variant.issueFields} panelScope={panelScope} noOfBlOptions={noOfBlOptions} noOfBlPlaceholder={noOfBlPlaceholder} /> }]
       : []),
   ];
 

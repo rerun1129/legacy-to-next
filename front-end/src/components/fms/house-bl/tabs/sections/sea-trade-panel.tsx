@@ -10,6 +10,7 @@ import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schem
 export function SeaTradePanel() {
   const { register, control } = useFormContext<HouseBlFormValues>();
   const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
+  const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
 
   const tradeTermItems: FieldItemDef[] = [
     {
@@ -18,7 +19,19 @@ export function SeaTradePanel() {
         <div className="li">
           <span className="li__label is-required">Incoterms</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("incoterms")} />
+            <Controller
+              name="incoterms"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={incotermsOptions}
+                  placeholder={incotermPlaceholder}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       ),

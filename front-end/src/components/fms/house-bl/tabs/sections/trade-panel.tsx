@@ -1,8 +1,10 @@
 import type React from "react";
-import { useFormContext, type FieldPath } from "react-hook-form";
+import { useFormContext, Controller, type FieldPath } from "react-hook-form";
 import { Search } from "lucide-react";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
+import { ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 
@@ -76,11 +78,34 @@ function PaymentPlaceField({ inputProps }: { inputProps: React.InputHTMLAttribut
 }
 
 export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
   const panelScope = variant ? `trade-panel.${variant.key}` : "trade-panel";
 
   const tradeTermItems: FieldItemDef[] = [
-    { key: "incoterms",    render: () => <LiField label="Incoterms"    name="incoterms" req /> },
+    {
+      key: "incoterms",
+      render: () => (
+        <div className="li">
+          <span className="li__label is-required">Incoterms</span>
+          <div className="li__input">
+            <Controller
+              name="incoterms"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={incotermsOptions}
+                  placeholder={incotermPlaceholder}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
     { key: "freight-term", render: () => <PaymentTypeField inputProps={register("freightTerm")} /> },
     { key: "payable-at",   render: () => <PaymentPlaceField inputProps={register("paymentPlace")} /> },
     { key: "co-load",      render: () => <LiField label="Co-Load"      name="coLoad" /> },
