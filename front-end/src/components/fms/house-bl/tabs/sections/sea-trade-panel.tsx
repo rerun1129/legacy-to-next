@@ -1,13 +1,15 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
-import { TextBox, CodeBox } from "@/components/shared/inputs";
+import { TextBox, CodeBox, ComboBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 
 export function SeaTradePanel() {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
 
   const tradeTermItems: FieldItemDef[] = [
     {
@@ -27,7 +29,19 @@ export function SeaTradePanel() {
         <div className="li">
           <span className="li__label is-required">Freight Term</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("paymentType")} />
+            <Controller
+              name="paymentType"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={freightTermOptions}
+                  placeholder={freightTermPlaceholder}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       ),
