@@ -400,7 +400,6 @@ export function HouseBLEntry({ variant }: Props) {
           onClose={() => setIsChangeBlNoModalOpen(false)}
           onChanged={() => {
             detailLoadedRef.current = false;
-            queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", id] });
           }}
         />
       )}
