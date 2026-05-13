@@ -5,7 +5,6 @@ import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { Save, Printer, Trash2, FileText, RefreshCw, Search, FilePlus } from "lucide-react";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
@@ -105,7 +104,6 @@ export function HouseBLEntry({ variant }: Props) {
   const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.houseBl(variant.key)]);
   const isEdit = Boolean(id);
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   const defaults = getToolbarDefaults(variant);
 
@@ -238,17 +236,25 @@ export function HouseBLEntry({ variant }: Props) {
         : houseBlPort.create(buildHouseBlRequest(data, variant));
     },
     onSuccess: (saved) => {
-      queryClient.invalidateQueries({ queryKey: ["house-bl", "list"] });
       if (!isEdit) {
         // create 시: saved는 HouseBlDetail (non-null). §6.29 — SEA update는 null 반환이므로
         // isEdit=false 분기에서만 saved.id에 접근해 타입 안전성 보장.
         const newId = saved?.id;
         if (newId != null) {
+          // List 자동 invalidate 금지 (§6.21) — detail만 갱신
+          queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", newId] });
+          // hot-marker: List 화면 진입 시 하이라이트에 사용 (§6.16, Truck 정합)
+          sessionStorage.setItem(`house-bl-entry:hot:${newId}`, "1");
           useEntryFocusStore.getState().setFocus(entryFocusKeys.houseBl(variant.key), newId);
+          clearDraft(`house:${variant.key}:new`);
+          detailLoadedRef.current = false;
         }
-        detailLoadedRef.current = false;
       } else {
-        router.push(`/fms/house-bl/${variant.key}/list`);
+        // List 자동 invalidate 금지 (§6.21) — detail만 갱신
+        queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", id] });
+        clearDraft(`house:${variant.key}:${id}`);
+        // refetch된 detail로 form.reset 재발동 (Truck 패턴 정합)
+        detailLoadedRef.current = false;
       }
     },
   });
