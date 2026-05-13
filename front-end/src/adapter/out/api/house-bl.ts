@@ -179,10 +179,11 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
     });
-    // §6.29 — SEA jobDiv 분기에서 BE가 ApiResponse<Void> 반환 (data=null).
-    // data가 null이면 void 응답으로 간주하고 null 반환. 그 외 jobDiv는 HouseBlDetail 파싱.
-    const maybeVoid = z.object({ data: z.null() }).safeParse(json);
-    if (maybeVoid.success) return null;
+    // §6.29 — SEA jobDiv 분기에서 BE가 ApiResponse<Void> 반환.
+    // BE ApiResponse는 @JsonInclude(NON_NULL)로 data=null 필드가 직렬화에서 제거되므로
+    // 응답 JSON에 data 키 자체가 없을 수 있음. null/undefined 모두 void로 간주.
+    const j = (json ?? {}) as { data?: unknown };
+    if (j.data == null) return null;
     const parsed = apiResponse(HOUSE_BL_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid update response: ${parsed.error.message}`);
     return parsed.data.data;
