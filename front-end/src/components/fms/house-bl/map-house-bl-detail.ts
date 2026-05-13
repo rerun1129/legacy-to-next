@@ -9,6 +9,7 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     // toolbar
     hbl:         detail.hblNo ?? "",
     mbl:         detail.mblNo ?? "",
+    masterRefNo: detail.masterRefNo ?? "",
     masterBlId:  detail.masterBlId != null ? String(detail.masterBlId) : "",
     sType:       detail.shipmentType ?? "",
     lType:       detail.loadType ?? "",

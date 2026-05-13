@@ -111,6 +111,7 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   incoterms: z.string().nullable().optional().transform((v) => v ?? undefined),
   salesClass: z.string().nullable().optional().transform((v) => v ?? undefined),
   mblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  masterRefNo: z.string().nullable().optional().transform((v) => v ?? undefined),
   settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
 });

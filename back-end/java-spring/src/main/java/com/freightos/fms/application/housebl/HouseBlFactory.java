@@ -317,6 +317,7 @@ public class HouseBlFactory {
                 VoMapper.mapOrNull(entity.getSalesManCode(), EmployeeCode::value),
                 entity.getMasterBlId(),
                 VoMapper.mapOrNull(entity.getMblNo(), MblNo::value),
+                entity.getMasterRefNo(),
                 VoMapper.mapOrNull(entity.getSettlePartnerCode(), CustomerCode::value),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),

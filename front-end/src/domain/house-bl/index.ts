@@ -104,6 +104,7 @@ export interface HouseBlDetail extends HouseBlRow {
   incoterms?: string;
   salesClass?: string;
   mblNo?: string;
+  masterRefNo?: string;
   settlePartnerCode?: string;
 }
 

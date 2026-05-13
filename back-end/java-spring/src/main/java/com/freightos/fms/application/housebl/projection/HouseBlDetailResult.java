@@ -40,6 +40,7 @@ public record HouseBlDetailResult(
         String salesManCode,
         Long masterBlId,
         String mblNo,
+        String masterRefNo,
         String settlePartnerCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
