@@ -1216,6 +1216,42 @@ cleanup useEffect로 unmount 시 일괄 제거(§6.18 안티패턴)하는 방식
 - **2026-05-12 회귀 회고(§6.35)** — Truck B/L Dimension 그리드 도입(6a31ae6) 시 §6.35 + §6.28 + §6.37 reference 누락으로 ①②③ 동시 회귀. 본 절은 §6.35 회귀 회고의 일반화·체크리스트화.
 - **2026-05-12 보강** — 사용자 지적("저것들만 재발한게 아닐텐데 git log 제대로 확인해서 작성한거 맞아?")에 따라 Truck B/L 마이그레이션 commit log 전체(`git log --grep=truck -i`, 약 60+ commits) 재점검. ⑧(detail response 필드 노출 ↔ FE schema/form.reset 동기 — `ff0ff68`+`519177c`) 추가, ②-보강(자식 collection 영속 분기 — `ed24829`) 사례 추가. 본 절은 살아있는 문서 — 차기 도메인에서 새 재발 패턴 발견 시 본 매트릭스 보강 의무.
 
+### 6.49 🚨 FE 카탈로그 마이그레이션 사전 점검 매트릭스 — Sea House 회귀 회고 (READ FIRST)
+
+> # 🚨🚨🚨 STOP — 마이그레이션 시작 전 반드시 읽고 체크 의무 🚨🚨🚨
+>
+> §6.48이 풀스택 BE+FE 회귀 패턴이라면, **본 절은 FE 카탈로그 마이그레이션 작업 범위 책정 단계에서 빠뜨리기 쉬운 7가지 사전 점검 항목**이다. Sea House B/L 마이그레이션(2026-05-13)에서 Round 1 작업 단위 5의 범위를 좁게 잡은 결과, **HOUSE_BL_SEA_REGISTRY 9개 패널 중 5개 누락 + toolbar 영역 미점검 + 카탈로그 Button 컴포넌트 미적용 + rowKey 안티패턴 잔존**이 사용자 검수 단계에서 한꺼번에 회귀로 드러나 Round 2(단위 7~10)로 재작업했다. 가이드 본문에 SSOT가 있었으나 **plan 단계에서 점검 의무로 명시되지 않아 답습**된 사례 — Plan/Coder 작업 단위 지시 시 본 절을 reference로 인용 의무.
+
+#### 🔴 7대 누락 패턴 매트릭스
+
+| # | 누락 패턴 | 회귀 결과 | SSOT 위치 | **사전 점검 의무 (plan 단계)** |
+|---|---|---|---|---|
+| ① | **Registry 등록 패널 전수 점검** | Sea House: schedule/document/cargo/marks/remark 5개 패널 미점검 → native input 8건+ 잔존 | `main-<jobDiv>.tsx`의 `HOUSE_BL_<JobDiv>_REGISTRY` 배열 | Registry 배열의 **모든 entry를 grep 후 read** 의무. 작업 범위에 N/9 식으로 명시. 본 세션 Round 1: 6/9 → Round 2: 9/9. |
+| ② | **toolbar 영역 점검** | `<Domain>Entry.tsx`의 `.toolbar` map 콜백이 패널 디렉터리 밖이라 사각지대. Sea House: Load Type/Service Term/B/L Type native input 3건 | `<Domain>Entry.tsx`의 `TOOLBAR_LABEL_TO_FIELD` 매핑 | `toolbar` map + `.page-head__actions` + `.page-head__meta` 영역 grep 의무. native `<input>`/`<select>`/`<button>` 잔존 식별. |
+| ③ | **page-head Button 컴포넌트 SSOT** | Save/Search/Delete/Copy/Export/Print/Switch/New 등 page-head 9개 native `<button className="btn ...">` 잔존 | `@/components/shared/button` + `(dev)/preview/sections/buttons/_bundles-data.ts`·`_actions-data.ts` | 카탈로그 `_bundles-data.ts`에서 페이지별 액션 묶음 견본의 `initialVariant` 라인 단위 인용 의무. **추측 매핑 금지**. |
+| ④ | **Button variant 카탈로그 매핑** | `btn--success`/`btn--secondary`/`btn--primary` 같은 임의 클래스 → 카탈로그 variant(default/danger/search/transaction/normal)와 1:1 매핑 누락 | 동일 (`_bundles-data.ts`) | 임의 클래스 발견 시 카탈로그 SSOT에 대응 variant 있는지 grep. 없으면 SSOT 확장 또는 사용자 의사결정 요청. |
+| ⑤ | **rowKey 인덱스 안티패턴** (§6.41-보강) | `(_, i) => fields[i].id` 패턴 → RHF `append` 직후 `fields[i]` undefined → `Cannot read properties of undefined (reading 'id')` throw | §6.41-보강 + Truck `truck-order-grid-panel:105-107` 모범 | 모든 그리드 패널에서 `rowKey={(_, i)` / `onRowClick={(_, i)` / `rowClassName={(_, i)` 패턴 grep 의무. 발견 시 `(r) => String(r.id)` 정정. |
+| ⑥ | **detail mapping ↔ UI 라벨 ↔ BE field ↔ BE enum 4축 정합** | Sea House: toolbar UI "Load Type" → `lType` 필드 → ComboBox는 `LoadType` enum, 그러나 `form.reset(detail)`은 `lType: detail.blType` → BE/UI 미스매치 | (본 절 신설) | toolbar/패널 라벨, form schema 키, BE detail 필드, EnumRegistry 등록 4축을 표로 정렬해 점검. 어느 한 축이라도 불일치 시 product 의문 보고. |
+| ⑦ | **dev server 캐시 stale로 인한 검증 실패** | fix 후 사용자가 화면에서 "그대로"라고 보고 → 실제로는 dev `.next` 캐시 stale | (본 절 신설) | fix 후 사용자 검증 안내에 **`Remove-Item -Recurse -Force front-end\.next` + dev server 재시작** 명시 의무. |
+
+#### 🔴 신규 도메인 마이그레이션 시 의무 사전 점검 (plan 단계 체크리스트)
+
+다음 7가지를 **plan 단계에서 명시적으로 작업 범위에 포함**하라. 누락 시 사용자 검수 단계에서 회귀가 드러나 재작업한다.
+
+1. **Registry 전수 read** — `main-<jobDiv>.tsx`의 등록 배열을 read하여 모든 패널 파일 식별. native `<input>`/`<select>`/`<button>`/code+name pair grep 후 일람을 plan에 첨부.
+2. **toolbar/page-head 영역 read** — `<Domain>Entry.tsx`의 `.toolbar` map 콜백 + `.page-head__actions` 버튼 영역 + `.page-head__meta` badge 영역을 plan 범위에 명시 포함. 패널 밖 사각지대 차단.
+3. **카탈로그 SSOT pre-read** — `@/components/shared/button` 시그니처 + `(dev)/preview/sections/buttons/_bundles-data.ts` + `(dev)/preview/sections/inputs/*` 파일을 plan 작성 전 read. 적용 대상 액션·필드 매트릭스를 plan에 첨부.
+4. **enum 매핑 후보 list-up** — `form schema`의 `z.string()` 필드 중 `EnumRegistryFactory`에 등록된 23개 enum과 매핑 가능한 후보를 사전에 list-up. ComboBox 적용 대상으로 plan에 명시.
+5. **rowKey 패턴 grep** — 모든 그리드 패널의 `rowKey={(_, i)`/`onRowClick={(_, i)`/`rowClassName={(_, i)` 패턴 grep. 발견 즉시 정정 단위에 포함.
+6. **4축 정합 점검** — `form.reset(detail)` 매핑이 (a) form 필드명 ↔ (b) UI 라벨 ↔ (c) BE detail 필드명 ↔ (d) BE EnumRegistry 등록과 일치하는지 표로 정렬. 1축이라도 어긋나면 product 의문 보고.
+7. **검증 절차에 캐시 정리 포함** — fix 후 사용자 검증 안내에 `.next` 삭제 + dev server 재시작 명시. 사용자가 "그대로"라고 보고하면 추측 fix 전에 cache clear 재검증 요청.
+
+#### 본 세션 사례 (2026-05-13)
+
+- **Round 1 (commits 860abfb~bdc757f, c481ac2)** — 작업 단위 5(카탈로그 교체) 범위를 6개 패널(party/sea-trade/description/freight/container-grid/item-hs)로 좁게 잡음. HOUSE_BL_SEA_REGISTRY 9개 중 5개(schedule/document/cargo/marks/remark) 누락. toolbar 영역·page-head Button 영역 미점검. rowKey 인덱스 안티패턴 잔존. Frontend-QA build PASS이지만 사용자 검수에서 회귀 4건 발견.
+- **Round 2 (commits 8e792dd, 60694a9, 5320d0b, 4bd1a0c)** — 단위 7(누락 5개 패널) + 단위 8(ComboBox 교정 + Container useMemo) + 단위 9(rowKey 안티패턴 + 가이드 §6.41-보강) + 단위 10(toolbar ComboBox + page-head Button)으로 보강. **본 절 매트릭스가 plan 단계에 명시되어 있었다면 Round 1에서 일괄 처리 가능**.
+- **본 절은 살아있는 문서** — 차기 도메인에서 새로운 누락 패턴 발견 시 매트릭스에 추가 의무.
+
 ---
 
 ## 7. CSS 토큰화 디자인 (참고 위치)
