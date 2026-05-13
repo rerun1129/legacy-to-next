@@ -78,6 +78,35 @@ export const useFieldLayout = create<FieldLayoutStore>()(
       initItemRows(scope, items, cols = 2) {
         const layout = get().layouts[scope];
         if (layout?.itemRows) {
+          // layout.cols가 명시된 경우에만 cols 변경을 감지해 재배치
+          // layout.cols === undefined 인 레거시 데이터는 재배치 대상에서 제외 (기존 커스터마이즈 보존)
+          if (layout.cols !== undefined && layout.cols !== cols) {
+            const flat = layout.itemRows.flat();
+            const itemsSet = new Set(items);
+            // 기존 flat 순서(사용자 정렬 결과)를 보존하되, items에 없는 stale 키는 드롭
+            const preserved = flat.filter(k => itemsSet.has(k));
+            // items에만 있는 신규 키는 뒤에 추가
+            const missing = items.filter(k => !preserved.includes(k));
+            const ordered = [...preserved, ...missing];
+            const rows: string[][] = [];
+            for (let i = 0; i < ordered.length; i += cols) rows.push(ordered.slice(i, i + cols));
+            const rowIds = rows.map(() => nextRowId());
+            set(s => ({
+              layouts: {
+                ...s.layouts,
+                [scope]: {
+                  ...s.layouts[scope]!,
+                  itemRows: rows,
+                  rowIds,
+                  cols,
+                  // 행 인덱스 의미가 무너지므로 행 단위 모드/분할 설정 리셋
+                  rowModes:  {},
+                  splitCols: {},
+                },
+              },
+            }));
+            return;
+          }
           // rowIds 중복 감지 시 자동 재생성
           if (layout.rowIds) {
             const seen = new Set<string>();
