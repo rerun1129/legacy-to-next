@@ -17,7 +17,7 @@ export function TruckOrderGridPanel() {
   const { options: truckTypeOptions }            = useEnumOptions("TruckType");
   const { options: containerTypeOptionsRaw }     = useEnumOptions("ContainerType");
   const containerTypeOptions = useMemo(
-    () => containerTypeOptionsRaw.map(o => ({ value: o.value, label: o.value })),
+    () => containerTypeOptionsRaw.map(o => ({ value: o.value, label: o.label })),
     [containerTypeOptionsRaw]
   );
   const { fields, append, remove } = useFieldArray({ control, name: "truckOrders" });

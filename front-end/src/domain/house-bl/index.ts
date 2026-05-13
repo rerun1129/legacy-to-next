@@ -49,7 +49,7 @@ export interface HouseBlSeaDescView {
 
 export interface HouseBlDetail extends HouseBlRow {
   shipmentType: 'HOUSE' | 'DIRECT' | null;
-  blType: 'OBL' | 'SWB' | 'SURRENDER' | null;
+  blType: string | null;
   loadType?: string;
   seaDetail?: {
     linerCode?: string;
@@ -70,10 +70,10 @@ export interface HouseBlDetail extends HouseBlRow {
     rton?: number;
     sayInformation?: string;
     noOfContainerOrPackages?: string;
+    // §BE-sync — BE SeaDetailResponse.containers / .desc (seaDetail nested)
+    containers?: HouseBlSeaContainerView[];
+    desc?: HouseBlSeaDescView;
   } | null;
-  // §BE-sync — BE SeaDetailResponse.containers / .desc 필드
-  containers?: HouseBlSeaContainerView[];
-  desc?: HouseBlSeaDescView;
   freightTerm: 'PREPAID' | 'COLLECT' | null;
   notifyCode: string | null;
   deliveryCode: string | null;
@@ -101,6 +101,8 @@ export interface HouseBlDetail extends HouseBlRow {
   volumeWeightKg?: number;
   rton?: number;
   remark?: string;
+  incoterms?: string;
+  salesClass?: string;
 }
 
 export interface HouseBlFilter {
@@ -259,6 +261,7 @@ export interface CreateHouseBlRequest {
   hsCode?: string;
   mblNo?: string;
   masterRefNo?: string;
+  remark?: string;
   seaDetail?: SeaDetailRequest;
   desc?: DescRequest;
   dims?: DimRequest[];

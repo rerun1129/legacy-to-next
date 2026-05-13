@@ -15,7 +15,7 @@ export function SeaRemarkPanel() {
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <Controller
           control={control}
-          name="desc.remark"
+          name="remark"
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

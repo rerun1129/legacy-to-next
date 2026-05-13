@@ -72,11 +72,14 @@ const SEA_DETAIL_SCHEMA = z.object({
   rton:                     z.number().nullable().optional().transform((v) => v ?? undefined),
   sayInformation:           z.string().nullable().optional().transform((v) => v ?? undefined),
   noOfContainerOrPackages:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  // §BE-sync — BE SeaDetailResponse.containers / .desc (seaDetail nested)
+  containers: z.array(SEA_CONTAINER_VIEW_SCHEMA).optional(),
+  desc: SEA_DESC_VIEW_SCHEMA.optional(),
 });
 
 const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   shipmentType: z.enum(['HOUSE', 'DIRECT']).nullable(),
-  blType: z.enum(['OBL', 'SWB', 'SURRENDER']).nullable(),
+  blType: z.string().nullable(),
   freightTerm: z.enum(['PREPAID', 'COLLECT']).nullable(),
   notifyCode: z.string().nullable(),
   deliveryCode: z.string().nullable(),
@@ -95,20 +98,19 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   notifyAddress: z.string().nullable(),
   docPartnerAddress: z.string().nullable(),
   loadType: z.string().nullable().optional().transform((v) => v ?? undefined),
-  linerCode: z.string().optional(),
-  linerName: z.string().optional(),
-  vesselName: z.string().optional(),
-  voyageNo: z.string().optional(),
-  finalDestCode: z.string().optional(),
-  finalDestName: z.string().optional(),
-  finalEta: z.string().optional(),
-  volumeWeightKg: z.number().optional(),
-  rton: z.number().optional(),
+  linerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  linerName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  voyageNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalDestCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalDestName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalEta: z.string().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  rton: z.number().nullable().optional().transform((v) => v ?? undefined),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
+  incoterms: z.string().nullable().optional().transform((v) => v ?? undefined),
+  salesClass: z.string().nullable().optional().transform((v) => v ?? undefined),
   seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
-  // §BE-sync — BE SeaDetailResponse.containers / .desc
-  containers: z.array(SEA_CONTAINER_VIEW_SCHEMA).optional(),
-  desc: SEA_DESC_VIEW_SCHEMA.optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

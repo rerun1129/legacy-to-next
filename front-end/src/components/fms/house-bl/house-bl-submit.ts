@@ -58,6 +58,7 @@ export function buildHouseBlRequest(
     hsCode:           toStr(values.hsCode),
     mblNo:            toStr(values.mblNo),
     masterRefNo:      toStr(values.masterRefNo),
+    remark:           toStr(values.remark),
     desc:             values.desc,
   };
 

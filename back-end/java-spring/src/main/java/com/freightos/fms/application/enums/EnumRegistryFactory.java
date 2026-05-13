@@ -71,7 +71,7 @@ public class EnumRegistryFactory {
         register(map, "HandlingInfoCode", HandlingInfoCode.values(),
                 e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription()));
         register(map, "ContainerType", ContainerType.values(),
-                e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription()));
+                e -> new EnumOption(e.name(), e.getCode(), e.getDescription()));
         // housebl enums — label 통일
         register(map, "TruckType", TruckType.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));

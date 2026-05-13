@@ -15,8 +15,7 @@ export function MarksPanel() {
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <Controller
           control={control}
-          name="marksAndNumbers"
-          defaultValue=""
+          name="desc.marks"
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

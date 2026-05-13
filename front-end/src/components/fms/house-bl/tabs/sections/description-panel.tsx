@@ -50,7 +50,7 @@ export function DescriptionPanel() {
         </div>
         <Controller
           control={control}
-          name="descriptionOfGoods"
+          name="desc.description"
           render={({ field }) => (
             <LineNumberTextarea
               name={field.name}

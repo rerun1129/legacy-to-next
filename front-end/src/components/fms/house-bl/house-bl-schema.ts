@@ -157,18 +157,15 @@ export const HOUSE_BL_SCHEMA = z.object({
   pod:    z.string().max(5).optional(),
   expImp: z.enum(['EXP', 'IMP']).nullable(),
 
-  // party fields (Coder: name/addr 추가)
+  // party fields
   shipperCode:      z.string().max(20).optional(),
   shipperName:      z.string().optional(),
-  shipperAddr:      z.string().optional(),
   shipperAddress:   z.string().optional(),
   consigneeCode:    z.string().max(20).optional(),
   consigneeName:    z.string().optional(),
-  consigneeAddr:    z.string().optional(),
   consigneeAddress: z.string().optional(),
   notifyCode:       z.string().max(20).optional(),
   notifyName:       z.string().optional(),
-  notifyAddr:       z.string().optional(),
   notifyAddress:    z.string().optional(),
   docPartnerCode:   z.string().max(20).optional(),
   docPartnerName:   z.string().optional(),
@@ -242,12 +239,10 @@ export const HOUSE_BL_SCHEMA = z.object({
   // SEA detail
   seaDetail: SEA_DETAIL_SCHEMA.optional(),
 
-  // schedule fields (Coder)
+  // schedule fields — NonBl/Truck 전용 본체 필드 (SEA는 seaDetail nested 사용)
   linerCode:   z.string().optional(),
   linerName:   z.string().optional(),
   vesselCode:  z.string().optional(),
-  vesselName:  z.string().optional(),
-  voyNo:       z.string().optional(),
   onboardDate: z.string().optional(),
 
   // air schedule fields (Coder)
@@ -256,10 +251,8 @@ export const HOUSE_BL_SCHEMA = z.object({
   flightNo:    z.string().optional(),
   flightDate:  z.string().optional(),
 
-  // marks & description (Coder)
-  marksAndNumbers:    z.string().optional(),
-  descriptionOfGoods: z.string().optional(),
-  natureOfGoods:      z.string().optional(),
+  // marks & description — desc nested로 통합됨. natureOfGoods는 향후 용도 대기
+  natureOfGoods: z.string().optional(),
 
   // sub-entities
   desc:         DESC_SCHEMA.optional(),

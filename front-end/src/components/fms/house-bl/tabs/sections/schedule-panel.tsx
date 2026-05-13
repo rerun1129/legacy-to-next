@@ -198,7 +198,7 @@ export function SchedulePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label is-required">Vessel</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("vesselName")} />
+            <TextBox variant="panel" {...register("seaDetail.vesselName")} />
           </div>
         </div>
       ),
@@ -209,7 +209,7 @@ export function SchedulePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label is-required">Voyage</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("voyNo")} />
+            <TextBox variant="panel" {...register("seaDetail.voyageNo")} />
           </div>
         </div>
       ),

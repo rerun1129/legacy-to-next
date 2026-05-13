@@ -38,12 +38,13 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     operatorCode:        detail.operatorCode  ?? "",
     teamCode:            detail.teamCode      ?? "",
     salesManCode:        detail.salesManCode  ?? "",
-    // schedule (Non B/L 전용 필드가 BE 응답에 포함될 수 있어 옵셔널 처리)
+    // schedule — linerCode/linerName은 toolbar 표시용 본체 필드 (SEA: seaDetail에도 중복 있음)
     linerCode:  detail.linerCode  ?? "",
     linerName:  detail.linerName  ?? "",
-    vesselName: detail.vesselName ?? "",
-    voyNo:      detail.voyageNo   ?? "",
-    // remark
+    // trade
+    incoterms:  detail.incoterms  ?? "",
+    salesClass: detail.salesClass ?? "",
+    // remark (본체 — SEA: HouseBlSea.remark, 화면: sea-remark-panel)
     remark: detail.remark ?? "",
     // SEA nested detail — BE Phase A-1에서 추가된 seaDetail 서브 엔티티 매핑
     seaDetail: {
@@ -76,8 +77,8 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       freightTermDetail:       "",
       signature:               "",
     },
-    // §BE-sync — BE SeaDetailResponse.containers / .desc
-    containers: detail.containers?.map(c => ({
+    // §BE-sync — BE SeaDetailResponse.containers / .desc (seaDetail nested 경로)
+    containers: detail.seaDetail?.containers?.map(c => ({
       id:            c.id,
       containerNo:   c.containerNo   ?? "",
       containerType: c.containerType ?? "",
@@ -98,10 +99,12 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       seq:           c.seq           != null ? String(c.seq)           : "",
     })) ?? [],
     desc: {
-      marks:        detail.desc?.marks        ?? "",
-      description:  detail.desc?.description  ?? "",
-      descClause1:  detail.desc?.descClause1  ?? "",
-      descClause2:  detail.desc?.descClause2  ?? "",
+      marks:        detail.seaDetail?.desc?.marks        ?? "",
+      description:  detail.seaDetail?.desc?.description  ?? "",
+      descClause1:  detail.seaDetail?.desc?.descClause1  ?? "",
+      descClause2:  detail.seaDetail?.desc?.descClause2  ?? "",
+      // remark는 본체 필드 — desc에는 저장하지 않으므로 빈 문자열 유지
+      remark:       "",
     },
   };
 }

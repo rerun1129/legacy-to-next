@@ -7,6 +7,8 @@ import com.freightos.fms.application.housebl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
+import com.freightos.fms.domain.common.enums.Incoterms;
+import com.freightos.fms.domain.housebl.enums.SalesClass;
 import com.freightos.fms.domain.common.vo.ContainerNumber;
 import com.freightos.fms.domain.common.vo.Quantity;
 import com.freightos.fms.domain.common.vo.Volume;
@@ -118,5 +120,30 @@ class SeaHouseDetailProjectionTest {
 
         assertThat(result.seaDetail()).isNotNull();
         assertThat(result.seaDetail().desc()).isNull();
+    }
+
+    @Test
+    @DisplayName("incoterms·salesClass 설정 시 DetailResult에 enum name()으로 노출된다")
+    void toDetailResult_withIncotermsAndSalesClass_exposedAsEnumName() {
+        HouseBlSea sea = HouseBlSea.create(Bound.EXP);
+        sea.updateTradeInfo(Incoterms.FOB, SalesClass.S, null, null);
+        sea.initContainers(List.of());
+
+        HouseBlDetailResult result = sut.toDetailResult(sea);
+
+        assertThat(result.incoterms()).isEqualTo(Incoterms.FOB.name());
+        assertThat(result.salesClass()).isEqualTo(SalesClass.S.name());
+    }
+
+    @Test
+    @DisplayName("incoterms·salesClass null 시 DetailResult에 null로 노출된다")
+    void toDetailResult_withNullIncotermsAndSalesClass_exposedAsNull() {
+        HouseBlSea sea = HouseBlSea.create(Bound.EXP);
+        sea.initContainers(List.of());
+
+        HouseBlDetailResult result = sut.toDetailResult(sea);
+
+        assertThat(result.incoterms()).isNull();
+        assertThat(result.salesClass()).isNull();
     }
 }

@@ -40,6 +40,10 @@ public record HouseBlDetailResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
 
+        // 거래 조건
+        String incoterms,
+        String salesClass,
+
         // Non B/L 전용 필드
         String originalBlRef,
         String workDivision,
@@ -96,6 +100,8 @@ public record HouseBlDetailResponse(
                 result.masterBlId(),
                 result.createdAt(),
                 result.updatedAt(),
+                result.incoterms(),
+                result.salesClass(),
                 result.originalBlRef(),
                 result.workDivision(),
                 result.linerCode(),

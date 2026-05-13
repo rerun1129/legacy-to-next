@@ -50,8 +50,14 @@ public enum ContainerType {
     public String getCode() { return code; }
     public String getDescription() { return description; }
 
+    /**
+     * 입력 문자열을 ContainerType으로 변환.
+     * - 1차: enum name() 매칭 (예: "T20GP") — BE 응답·DB 저장값과 정합 (SSOT)
+     * - 2차: getCode() 매칭 (예: "20GP") — 외부 시스템/legacy 호환
+     */
     public static ContainerType fromCode(String code) {
         if (code == null || code.isBlank()) return null;
+        try { return ContainerType.valueOf(code); } catch (IllegalArgumentException ignored) {}
         for (ContainerType t : values()) {
             if (t.code.equals(code)) return t;
         }

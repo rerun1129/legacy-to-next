@@ -26,7 +26,7 @@ export function ContainerGridPanel() {
   const { control, register } = useFormContext<HouseBlFormValues>();
   const { options: rawContainerTypeOptions } = useEnumOptions("ContainerType");
   const containerTypeOptions = useMemo(
-    () => rawContainerTypeOptions.map(o => ({ value: o.value, label: o.value })),
+    () => rawContainerTypeOptions.map(o => ({ value: o.value, label: o.label })),
     [rawContainerTypeOptions]
   );
   const { fields, append, remove } = useFieldArray({ control, name: "containers" });

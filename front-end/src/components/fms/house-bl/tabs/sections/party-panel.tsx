@@ -20,9 +20,9 @@ const ROLE_FIELDS: Record<
   PartyRole,
   [keyof HouseBlFormValues, keyof HouseBlFormValues, keyof HouseBlFormValues]
 > = {
-  "SHIPPER":     ["shipperCode",    "shipperName",    "shipperAddr"],
-  "CONSIGNEE":   ["consigneeCode",  "consigneeName",  "consigneeAddr"],
-  "NOTIFY":      ["notifyCode",     "notifyName",     "notifyAddr"],
+  "SHIPPER":     ["shipperCode",    "shipperName",    "shipperAddress"],
+  "CONSIGNEE":   ["consigneeCode",  "consigneeName",  "consigneeAddress"],
+  "NOTIFY":      ["notifyCode",     "notifyName",     "notifyAddress"],
   "DOC PARTNER": ["docPartnerCode", "docPartnerName", "docPartnerAddress"],
 };
 
