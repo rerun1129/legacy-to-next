@@ -103,6 +103,8 @@ export interface HouseBlDetail extends HouseBlRow {
   remark?: string;
   incoterms?: string;
   salesClass?: string;
+  mblNo?: string;
+  settlePartnerCode?: string;
 }
 
 export interface HouseBlFilter {

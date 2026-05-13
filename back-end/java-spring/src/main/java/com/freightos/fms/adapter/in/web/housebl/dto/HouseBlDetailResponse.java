@@ -37,6 +37,8 @@ public record HouseBlDetailResponse(
         String teamCode,
         String salesManCode,
         Long masterBlId,
+        String mblNo,
+        String settlePartnerCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
 
@@ -98,6 +100,8 @@ public record HouseBlDetailResponse(
                 result.teamCode(),
                 result.salesManCode(),
                 result.masterBlId(),
+                result.mblNo(),
+                result.settlePartnerCode(),
                 result.createdAt(),
                 result.updatedAt(),
                 result.incoterms(),

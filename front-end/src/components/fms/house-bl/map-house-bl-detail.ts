@@ -8,7 +8,8 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     ...createEmptyHouseBlFormValues(),
     // toolbar
     hbl:         detail.hblNo ?? "",
-    mbl:         detail.masterBlId != null ? String(detail.masterBlId) : "",
+    mbl:         detail.mblNo ?? "",
+    masterBlId:  detail.masterBlId != null ? String(detail.masterBlId) : "",
     sType:       detail.shipmentType ?? "",
     lType:       detail.loadType ?? "",
     etd:         detail.etd ?? "",
@@ -38,6 +39,7 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     operatorCode:        detail.operatorCode  ?? "",
     teamCode:            detail.teamCode      ?? "",
     salesManCode:        detail.salesManCode  ?? "",
+    settlePartnerCode:   detail.settlePartnerCode ?? "",
     // schedule — linerCode/linerName은 toolbar 표시용 본체 필드 (SEA: seaDetail에도 중복 있음)
     linerCode:  detail.linerCode  ?? "",
     linerName:  detail.linerName  ?? "",

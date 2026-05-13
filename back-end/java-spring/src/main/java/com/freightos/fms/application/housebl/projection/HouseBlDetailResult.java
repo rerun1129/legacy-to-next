@@ -39,6 +39,8 @@ public record HouseBlDetailResult(
         String teamCode,
         String salesManCode,
         Long masterBlId,
+        String mblNo,
+        String settlePartnerCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
 

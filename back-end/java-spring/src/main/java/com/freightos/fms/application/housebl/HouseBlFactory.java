@@ -316,6 +316,8 @@ public class HouseBlFactory {
                 VoMapper.mapOrNull(entity.getTeamCode(), TeamCode::value),
                 VoMapper.mapOrNull(entity.getSalesManCode(), EmployeeCode::value),
                 entity.getMasterBlId(),
+                VoMapper.mapOrNull(entity.getMblNo(), MblNo::value),
+                VoMapper.mapOrNull(entity.getSettlePartnerCode(), CustomerCode::value),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 Nullables.mapOrNull(entity.getIncoterms(), Incoterms::name),
