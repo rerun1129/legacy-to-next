@@ -31,6 +31,8 @@ export interface HouseBlDetail extends HouseBlRow {
   salesManCode: string | null;
   masterBlId: number | null;
   updatedAt: string | null;
+  docPartnerCode: string | null;
+  actualCustomerCode: string | null;
   // §6.48 ⑧ — BE 860abfb에서 노출된 party address 4필드
   shipperAddress: string | null;
   consigneeAddress: string | null;

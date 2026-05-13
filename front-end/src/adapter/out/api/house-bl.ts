@@ -37,6 +37,8 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   salesManCode: z.string().nullable(),
   masterBlId: z.number().nullable(),
   updatedAt: z.string().nullable(),
+  docPartnerCode: z.string().nullable(),
+  actualCustomerCode: z.string().nullable(),
   // §6.48 ⑧ / §6.29 — BE 860abfb에서 노출된 party address 4필드
   shipperAddress: z.string().nullable(),
   consigneeAddress: z.string().nullable(),
