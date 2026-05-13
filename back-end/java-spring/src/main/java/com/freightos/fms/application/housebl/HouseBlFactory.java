@@ -10,6 +10,7 @@ import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
 import com.freightos.fms.domain.common.enums.ShipmentType;
@@ -207,6 +208,11 @@ public class HouseBlFactory {
     public HouseBlDetailResult toDetailResult(HouseBl entity) {
         HouseBlNonBl nonBl = entity instanceof HouseBlNonBl n ? n : null;
         BlType seaBlType = entity instanceof HouseBlSea sea ? sea.getBlType() : null;
+        LoadType loadType = switch (entity) {
+            case HouseBlSea sea -> sea.getLoadType();
+            case HouseBlTruck truck -> truck.getLoadType();
+            default -> null;
+        };
         String remark = switch (entity) {
             case HouseBlSea sea -> sea.getRemark();
             case HouseBlAir air -> air.getRemark();
@@ -257,6 +263,7 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(nonBl, HouseBlNonBl::getFinalEta),
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getVolumeWtKg(), Weight::kg)),
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getRton(), Rton::ton)),
+                Nullables.mapOrNull(loadType, LoadType::name),
                 remark
         );
     }

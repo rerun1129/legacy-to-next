@@ -55,6 +55,9 @@ public record HouseBlDetailResult(
         BigDecimal volumeWeightKg,
         BigDecimal rton,
 
+        // SEA/TRUCK 본체 loadType (AIR/Non B/L은 null)
+        String loadType,
+
         // SEA/AIR/TRUCK 본체 remark
         String remark
 ) {
