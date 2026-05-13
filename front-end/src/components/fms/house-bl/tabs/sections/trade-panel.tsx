@@ -81,7 +81,7 @@ export function TradePanel({ variant }: { variant?: AnyVariantConfig }) {
 
   const tradeTermItems: FieldItemDef[] = [
     { key: "incoterms",    render: () => <LiField label="Incoterms"    name="incoterms" req /> },
-    { key: "freight-term", render: () => <PaymentTypeField inputProps={register("paymentType")} /> },
+    { key: "freight-term", render: () => <PaymentTypeField inputProps={register("freightTerm")} /> },
     { key: "payable-at",   render: () => <PaymentPlaceField inputProps={register("paymentPlace")} /> },
     { key: "co-load",      render: () => <LiField label="Co-Load"      name="coLoad" /> },
   ];

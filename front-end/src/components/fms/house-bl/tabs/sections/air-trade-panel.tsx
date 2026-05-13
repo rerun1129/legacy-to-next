@@ -46,7 +46,7 @@ export function AirTradePanel({ variant }: Props) {
   const baseItems: FieldItemDef[] = [
     { key: "currency",     render: () => <LiField label="Currency"     name="currency"   /> },
     { key: "incoterms",    render: () => <LiField label="Incoterms"    name="incoterms"  /> },
-    { key: "freight-term", render: () => <FreightTermField inputProps={register("paymentType")} /> },
+    { key: "freight-term", render: () => <FreightTermField inputProps={register("freightTerm")} /> },
     { key: "other-term",   render: () => <LiField label="Other Term"   name="otherTerm"  /> },
     { key: "dv-carriage",  render: () => <LiField label="D.V Carriage" name="dvCarriage" /> },
     { key: "insurance",    render: () => <LiField label="Insurance"    name="insurance"  /> },

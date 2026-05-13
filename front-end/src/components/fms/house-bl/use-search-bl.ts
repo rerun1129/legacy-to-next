@@ -41,7 +41,7 @@ export function useSearchBl(form: UseFormReturn<HouseBlFormValues>, variant: BLV
             eta:         detail.eta ?? '',
             pol:         detail.polCode ?? '',
             pod:         detail.podCode ?? '',
-            settle:      (detail.freightTerm ?? '') as '' | 'PREPAID' | 'COLLECT',
+            freightTerm: (detail.freightTerm ?? '') as '' | 'PREPAID' | 'COLLECT',
             expImp:      detail.bound,
             shipperCode:        detail.shipperCode       ?? '',
             shipperAddress:     detail.shipperAddress    ?? '',

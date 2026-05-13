@@ -30,7 +30,7 @@ export function SeaTradePanel() {
           <span className="li__label is-required">Freight Term</span>
           <div className="li__input">
             <Controller
-              name="paymentType"
+              name="freightTerm"
               control={control}
               render={({ field }) => (
                 <ComboBox

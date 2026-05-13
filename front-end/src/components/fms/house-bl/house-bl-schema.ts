@@ -166,7 +166,6 @@ export const HOUSE_BL_SCHEMA = z.object({
   eta:    z.string().regex(/^\d{8}$/).or(z.literal('')).optional(),
   pol:    z.string().max(5).optional(),
   pod:    z.string().max(5).optional(),
-  settle: z.enum(['', 'PREPAID', 'COLLECT']),
   expImp: z.enum(['EXP', 'IMP']).nullable(),
 
   // party fields (Coder: name/addr 추가)
@@ -207,13 +206,13 @@ export const HOUSE_BL_SCHEMA = z.object({
   salesManCode:       z.string().optional(),
   salesManName:       z.string().optional(),
 
-  // trade (Coder: paymentType/paymentPlace 추가)
+  // trade
   masterBlId:   z.string().optional(),
   incoterms:    z.string().optional(),
   salesClass:   z.string().optional(),
   mainItemName: z.string().optional(),
   hsCode:       z.string().optional(),
-  paymentType:  z.string().optional(),
+  freightTerm:  z.enum(['', 'PREPAID', 'COLLECT']),
   paymentPlace: z.string().optional(),
   currency:     z.string().optional(),
   otherTerm:    z.string().optional(),

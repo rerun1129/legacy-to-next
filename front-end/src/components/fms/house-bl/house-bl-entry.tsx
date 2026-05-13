@@ -32,10 +32,10 @@ const TOOLBAR_FIELDS_AIR = [
   "Shipment Type", "HAWB No", "MAWB No", "Master Ref",
 ] as const;
 const TOOLBAR_FIELDS_TRUCK = [
-  "Truck B/L No", "Settle",
+  "Truck B/L No",
 ] as const;
 const TOOLBAR_FIELDS_NON_BL = [
-  "Non B/L No", "Settle",
+  "Non B/L No",
 ] as const;
 
 const DEFAULTS_SEA: Record<string, string> = {
@@ -48,10 +48,10 @@ const DEFAULTS_AIR: Record<string, string> = {
   "MAWB No": "", "Master Ref": "",
 };
 const DEFAULTS_TRUCK: Record<string, string> = {
-  "Truck B/L No": "", "Settle": "",
+  "Truck B/L No": "",
 };
 const DEFAULTS_NON_BL: Record<string, string> = {
-  "Non B/L No": "", "Settle": "",
+  "Non B/L No": "",
 };
 
 function getToolbarFields(variant: BLVariantConfig) {
@@ -82,14 +82,13 @@ const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
   "MBL No":         "mbl",
   "MAWB No":        "mbl",
   "Load Type":      "lType",
-  "Settle":         "settle",
   "Shipment Type":  "sType",
   "Service Term":   "seaDetail.serviceTerm",
   "B/L Type":       "seaDetail.blType",
   "Master Ref":     "masterRefNo",
 };
 
-const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type", "Settle"]);
+const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type"]);
 
 interface Props {
   variant: BLVariantConfig;
@@ -164,7 +163,7 @@ export function HouseBLEntry({ variant }: Props) {
       eta:         detail.eta ?? "",
       pol:         detail.polCode ?? "",
       pod:         detail.podCode ?? "",
-      settle:      (detail.freightTerm ?? "") as "" | "PREPAID" | "COLLECT",
+      freightTerm: (detail.freightTerm ?? "") as "" | "PREPAID" | "COLLECT",
       expImp:      detail.bound,
       // party
       shipperCode:        detail.shipperCode    ?? "",

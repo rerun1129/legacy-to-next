@@ -28,7 +28,7 @@ export function buildHouseBlRequest(
     bound,
     hblNo: toStr(values.hbl),
     shipmentType:     (values.sType as 'HOUSE' | 'DIRECT') || 'HOUSE',
-    freightTerm:      (values.settle as 'PREPAID' | 'COLLECT') || 'PREPAID',
+    freightTerm:      (values.freightTerm as 'PREPAID' | 'COLLECT') || 'PREPAID',
     shipperCode:      toStr(values.shipperCode),
     shipperAddress:   toStr(values.shipperAddress),
     consigneeCode:    toStr(values.consigneeCode),
