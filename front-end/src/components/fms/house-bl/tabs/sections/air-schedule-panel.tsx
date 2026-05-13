@@ -1,5 +1,4 @@
-import type React from "react";
-import { useFormContext, useFieldArray, Controller, type FieldPath } from "react-hook-form";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList } from "@/components/shared/grid-list";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
@@ -11,15 +10,6 @@ import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/a
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
-
-const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
-
-// 라벨 → RHF 필드명 매핑 (Air Issue Information 섹션)
-const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
-  "Issue Date":  "seaDetail.issueDate",
-  "Issue Place": "seaDetail.issuePlace",
-  "Signature":   "seaDetail.signature",
-};
 
 export function AirSchedulePanel({ variant }: Props) {
   const { register, control } = useFormContext<HouseBlFormValues>();
@@ -57,36 +47,6 @@ export function AirSchedulePanel({ variant }: Props) {
       ),
     },
   ];
-
-  const issueItems: FieldItemDef[] = variant.issueFields.map(f => {
-    const fieldName = AIR_ISSUE_LABEL_TO_FIELD[f];
-    return {
-      key:    f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
-      render: () => (
-        <div className="li">
-          <span className="li__label">{f}</span>
-          <div className="li__input">
-            {f.includes("Date")
-              ? fieldName
-                ? <Controller
-                    control={control}
-                    name={fieldName}
-                    render={({ field }) => (
-                      <PanelDateInput
-                        value={field.value as string}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        ref={field.ref}
-                      />
-                    )}
-                  />
-                : <PanelDateInput />
-              : <input style={LI_ST} {...(fieldName ? register(fieldName) : {})} />}
-          </div>
-        </div>
-      ),
-    };
-  });
 
   const widgetFields: FieldWidgetDef[] = [
     {
@@ -214,18 +174,6 @@ export function AirSchedulePanel({ variant }: Props) {
         />
       ),
     },
-    ...(variant.issueFields.length > 0
-      ? [{
-          key:   "issue",
-          label: "Issue Information",
-          render: () => (
-            <>
-              <div className="subhead"><div className="subhead__bar" />Issue Information</div>
-              <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} cols={1} shouldShowRowControls={false} />
-            </>
-          ),
-        }]
-      : []),
   ];
 
   return (
