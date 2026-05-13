@@ -113,15 +113,17 @@ export function HouseBLEntry({ variant }: Props) {
     defaultValues: createEmptyHouseBlFormValues(),
   });
 
-  const { options: loadTypeOptions, placeholder: loadTypePh }       = useEnumOptions("LoadType");
-  const { options: serviceTermOptions, placeholder: serviceTermPh } = useEnumOptions("ServiceTerm");
-  const { options: blTypeOptions, placeholder: blTypePh }           = useEnumOptions("BlType");
+  const { options: loadTypeOptions,     placeholder: loadTypePh }     = useEnumOptions("LoadType");
+  const { options: serviceTermOptions,  placeholder: serviceTermPh }  = useEnumOptions("ServiceTerm");
+  const { options: blTypeOptions,       placeholder: blTypePh }       = useEnumOptions("BlType");
+  const { options: shipmentTypeOptions, placeholder: shipmentTypePh } = useEnumOptions("ShipmentType");
 
-  // LoadType / ServiceTerm / BlType 은 모두 e.name() 기반 등록이므로 §6.45 재매핑 불필요
+  // LoadType / ServiceTerm / BlType / ShipmentType 은 모두 e.name() 기반 등록이므로 §6.45 재매핑 불필요
   const TOOLBAR_ENUM: Record<string, { options: typeof loadTypeOptions; placeholder: string | undefined }> = {
-    "Load Type":    { options: loadTypeOptions,    placeholder: loadTypePh },
-    "Service Term": { options: serviceTermOptions, placeholder: serviceTermPh },
-    "B/L Type":     { options: blTypeOptions,      placeholder: blTypePh },
+    "Load Type":     { options: loadTypeOptions,     placeholder: loadTypePh },
+    "Service Term":  { options: serviceTermOptions,  placeholder: serviceTermPh },
+    "B/L Type":      { options: blTypeOptions,       placeholder: blTypePh },
+    "Shipment Type": { options: shipmentTypeOptions, placeholder: shipmentTypePh },
   };
 
   useBlDraftSync(form, `house:${variant.key}:${id ?? "new"}`);
@@ -157,7 +159,7 @@ export function HouseBLEntry({ variant }: Props) {
       hbl:         detail.hblNo ?? "",
       mbl:         detail.masterBlId != null ? String(detail.masterBlId) : "",
       sType:       detail.shipmentType ?? "",
-      lType:       detail.blType ?? "",
+      lType:       detail.loadType ?? "",
       etd:         detail.etd ?? "",
       eta:         detail.eta ?? "",
       pol:         detail.polCode ?? "",

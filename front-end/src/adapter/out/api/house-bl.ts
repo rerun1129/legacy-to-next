@@ -44,6 +44,7 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   consigneeAddress: z.string().nullable(),
   notifyAddress: z.string().nullable(),
   docPartnerAddress: z.string().nullable(),
+  loadType: z.string().nullable().optional().transform((v) => v ?? undefined),
   linerCode: z.string().optional(),
   linerName: z.string().optional(),
   vesselName: z.string().optional(),

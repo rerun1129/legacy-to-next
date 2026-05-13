@@ -36,7 +36,7 @@ export function useSearchBl(form: UseFormReturn<HouseBlFormValues>, variant: BLV
             hbl:         detail.hblNo ?? '',
             mbl:         detail.masterBlId != null ? String(detail.masterBlId) : '',
             sType:       detail.shipmentType ?? '',
-            lType:       detail.blType ?? '',
+            lType:       detail.loadType ?? '',
             etd:         detail.etd ?? '',
             eta:         detail.eta ?? '',
             pol:         detail.polCode ?? '',

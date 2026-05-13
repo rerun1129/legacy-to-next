@@ -21,6 +21,7 @@ export interface HouseBlRow {
 export interface HouseBlDetail extends HouseBlRow {
   shipmentType: 'HOUSE' | 'DIRECT' | null;
   blType: 'OBL' | 'SWB' | 'SURRENDER' | null;
+  loadType?: string;
   freightTerm: 'PREPAID' | 'COLLECT' | null;
   notifyCode: string | null;
   deliveryCode: string | null;
