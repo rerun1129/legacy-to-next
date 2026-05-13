@@ -1014,6 +1014,28 @@ const rowVirtualizer = useVirtualizer({
 
 row identity가 바뀌면 React가 element를 unmount/remount → register는 mount 시 RHF의 latest value를 input.defaultValue로 적용 → 정상 표시. GridList에 적용 완료 — 모든 호출처 자동 정상화. 사례: 12e3047.
 
+#### 6.41-보강 (호출처) `rowKey/onRowClick/rowClassName` — 인덱스 기반 콜백 안티패턴 금지
+
+GridList 내부의 `getItemKey`는 `try/catch`로 stale index 호출을 방어하지만, **호출처(product 컴포넌트)의 `rowKey` 콜백이 throw하는 패턴은 catch 밖에서 호출되는 `onRowClick`/`rowClassName` 등에서 그대로 런타임 에러로 노출**된다. RHF `useFieldArray`의 `append`/`remove` 직후 한 frame 동안 GridList의 `data` prop과 useVirtualizer 캐시가 sync되기 전 stale index로 콜백이 발화되면 `fields[i]`가 `undefined` → `.id` 접근에서 `Cannot read properties of undefined (reading 'id')` throw.
+
+```tsx
+// ❌ 안티패턴 — append 직후 fields[i] undefined throw
+rowKey={(_, i) => fields[i].id}
+onRowClick={(_, i) => setSelectedKey(fields[i].id)}
+rowClassName={(_, i) => fields[i]?.id === selectedKey ? "is-selected" : undefined}
+
+// ✅ 올바른 패턴 — row 객체에서 직접 추출 + String() 변환(§6.9)
+rowKey={(r) => String(r.id)}
+onRowClick={(r) => setSelectedKey(String(r.id))}
+rowClassName={(r) => String(r.id) === selectedKey ? "is-selected" : undefined}
+```
+
+**Truck B/L 모범**: `truck-order-grid-panel.tsx:105-107`, `truck-dimension-panel.tsx:89-91` — 모두 row 객체 기반 + `String()` 변환.
+
+**점검 의무**: 신규/기존 그리드 패널 마이그레이션 시 `rowKey={(_, i) => ...}` / `onRowClick={(_, i) => ...}` / `rowClassName={(_, i) => ...}` 형태 발견 시 즉시 row 객체 기반으로 정정. lint로 잡히지 않으므로 grep 의무.
+
+사례: Sea House Entry container-grid/item-hs/dimension/air-charge-info 4개 패널에서 본 안티패턴이 잔존해 행 추가 시 동일 에러 발생. Truck B/L 마이그레이션 시 이미 모범으로 row 객체 기반을 채택했으나 본 절(§6.41-보강) 명시가 없어 후속 도메인에 답습됨.
+
 ### 6.42 `.li__input--tight` 자식 width 고정 — inline `flex: "0 0 80px"` 덮어쓰기
 
 `forms.css`의 `.li__input--tight > * { flex: 1 1 0; min-width: 0; }`이 자식 모두에 동일 비율을 강제. 특정 자식만 width 80px 고정하려면 인라인 `flex: "0 0 80px"`로 덮어써야 함.

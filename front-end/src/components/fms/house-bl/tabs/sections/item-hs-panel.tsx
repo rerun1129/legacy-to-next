@@ -16,7 +16,7 @@ const EMPTY_ITEM_HS_ROW: Omit<ItemRow, "id"> = {
 export function ItemHsPanel() {
   const { control, register } = useFormContext<HouseBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "itemHs", keyName: "fieldId" });
-  const [selectedKey, setSelectedKey] = useState<number | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
   const columns = useMemo<GridColumn<ItemRow>[]>(() => [
     { key: "_no",   label: "#",           width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
@@ -29,7 +29,7 @@ export function ItemHsPanel() {
   ], [register]);
 
   const selectedIdx = selectedKey !== null
-    ? fields.findIndex(f => f.id === selectedKey)
+    ? fields.findIndex(f => String((f as unknown as { fieldId: string }).fieldId) === selectedKey)
     : -1;
 
   function captureFocusedRow() {
@@ -39,8 +39,7 @@ export function ItemHsPanel() {
   }
 
   function handleAdd() {
-    const nextId = fields.length > 0 ? Math.max(...fields.map(f => f.id ?? 0)) + 1 : 1;
-    append({ ...EMPTY_ITEM_HS_ROW, id: nextId });
+    append({ ...EMPTY_ITEM_HS_ROW, id: 0 });
     setSelectedKey(null);
   }
 
@@ -49,7 +48,7 @@ export function ItemHsPanel() {
     const focused = focusedRowKeyRef.current;
     let targetIdx = -1;
     if (focused !== null) {
-      targetIdx = fields.findIndex(f => (f as unknown as { fieldId: string }).fieldId === focused);
+      targetIdx = fields.findIndex(f => String((f as unknown as { fieldId: string }).fieldId) === focused);
     }
     if (targetIdx === -1 && selectedKey !== null && selectedIdx !== -1) {
       targetIdx = selectedIdx;
@@ -74,9 +73,9 @@ export function ItemHsPanel() {
       <GridList
         columns={columns}
         data={fields as unknown as ItemRow[]}
-        rowKey={(_, i) => fields[i].fieldId}
-        onRowClick={(row) => setSelectedKey(row.id)}
-        rowClassName={(row) => row.id === selectedKey ? "is-selected" : undefined}
+        rowKey={(row) => String((row as unknown as { fieldId: string }).fieldId)}
+        onRowClick={(row) => setSelectedKey(String((row as unknown as { fieldId: string }).fieldId))}
+        rowClassName={(row) => String((row as unknown as { fieldId: string }).fieldId) === selectedKey ? "is-selected" : undefined}
         onClearRow={() => setSelectedKey(null)}
         style={{ flex: 1, minHeight: 0 }}
       />

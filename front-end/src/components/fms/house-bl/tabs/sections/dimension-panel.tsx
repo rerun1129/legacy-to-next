@@ -78,9 +78,10 @@ export function DimensionPanel() {
       <GridList
         columns={columns}
         data={fields as unknown as DimRow[]}
-        rowKey={(_, i) => fields[i].id}
-        onRowClick={(_, i) => setSelectedKey(fields[i].id)}
-        rowClassName={(_, i) => fields[i]?.id === selectedKey ? "is-selected" : undefined}
+        rowKey={(row) => (row as unknown as { id: string }).id}
+        onRowClick={(row) => setSelectedKey((row as unknown as { id: string }).id)}
+        rowClassName={(row) => (row as unknown as { id: string }).id === selectedKey ? "is-selected" : undefined}
+        onClearRow={() => setSelectedKey(null)}
         style={{ flex: 1, minHeight: 0 }}
       />
     </div>
