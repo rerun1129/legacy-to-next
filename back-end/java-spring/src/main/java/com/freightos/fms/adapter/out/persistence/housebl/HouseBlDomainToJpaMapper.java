@@ -61,8 +61,9 @@ public class HouseBlDomainToJpaMapper {
 
     /**
      * Truck 전용 공통 필드 적용.
-     * applyCommonFields와 달리 Truck form 미보유 필드(masterBlId, mblNo, masterRefNo)는
-     * SET하지 않아 DB 기존 값을 보호한다.
+     * applyCommonFields와 달리 masterBlId는 setter를 두지 않아 DB 기존 값을 보호한다.
+     * mblNo/masterRefNo는 도메인 값이 null이면 skip하여 DB 기존 값을 보호한다
+     * (toolbar에서 편집한 경우 도메인에 값이 있으므로 dirty 발생 → UPDATE 반영).
      */
     public void applyTruckCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
@@ -97,13 +98,17 @@ public class HouseBlDomainToJpaMapper {
         jpa.setSalesClass(domain.getSalesClass());
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
+        if (domain.getMblNo() != null) jpa.setMblNo(mapOrNull(domain.getMblNo(), MblNo::value));
+        if (domain.getMasterRefNo() != null) jpa.setMasterRefNo(domain.getMasterRefNo());
     }
 
     /**
      * NonBl 전용 공통 필드 적용.
      * applyCommonFields와 거의 동일하나, NonBl form이 보내지 않는 필드는 SET하지 않아
      * DB 기존 값을 보호한다: shipperAddress, consigneeAddress, notifyAddress,
-     * docPartnerAddress, incoterms, mblNo, masterRefNo, masterBlId.
+     * docPartnerAddress, incoterms, masterBlId.
+     * mblNo/masterRefNo는 도메인 값이 null이면 skip하여 DB 기존 값을 보호한다
+     * (toolbar에서 편집한 경우 도메인에 값이 있으므로 dirty 발생 → UPDATE 반영).
      */
     public void applyNonBlCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
@@ -133,6 +138,8 @@ public class HouseBlDomainToJpaMapper {
         jpa.setSalesClass(domain.getSalesClass());
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
+        if (domain.getMblNo() != null) jpa.setMblNo(mapOrNull(domain.getMblNo(), MblNo::value));
+        if (domain.getMasterRefNo() != null) jpa.setMasterRefNo(domain.getMasterRefNo());
     }
 
     public void applySeaFields(HouseBlSea domain, HouseBlSeaJpaEntity jpa) {
@@ -166,8 +173,9 @@ public class HouseBlDomainToJpaMapper {
 
     /**
      * Sea 전용 공통 필드 적용 (Update 경로 전용).
-     * SEA form에서 직접 편집 경로가 없는 masterBlId/mblNo/masterRefNo는
-     * setter를 두지 않아 DB 기존 값을 보호한다 (§6.37 sub-set — Truck·NonBl 선례 동일 패턴).
+     * masterBlId는 setter를 두지 않아 DB 기존 값을 보호한다 (§6.37 sub-set — Truck·NonBl 선례 동일 패턴).
+     * mblNo/masterRefNo는 도메인 값이 null이면 skip하여 DB 기존 값을 보호한다
+     * (toolbar에서 편집한 경우 도메인에 값이 있으므로 dirty 발생 → UPDATE 반영).
      */
     public void applySeaCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
@@ -202,6 +210,8 @@ public class HouseBlDomainToJpaMapper {
         jpa.setSalesClass(domain.getSalesClass());
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
+        if (domain.getMblNo() != null) jpa.setMblNo(mapOrNull(domain.getMblNo(), MblNo::value));
+        if (domain.getMasterRefNo() != null) jpa.setMasterRefNo(domain.getMasterRefNo());
     }
 
     /**
@@ -214,8 +224,9 @@ public class HouseBlDomainToJpaMapper {
 
     /**
      * AIR 전용 공통 필드 적용 (Update 경로 전용).
-     * AIR form에서 직접 편집 경로가 없는 masterBlId/mblNo/masterRefNo는
-     * setter를 두지 않아 DB 기존 값을 보호한다 (§6.37 sub-set — Sea/Truck/NonBl 선례 동일 패턴).
+     * masterBlId는 setter를 두지 않아 DB 기존 값을 보호한다 (§6.37 sub-set — Sea/Truck/NonBl 선례 동일 패턴).
+     * mblNo/masterRefNo는 도메인 값이 null이면 skip하여 DB 기존 값을 보호한다
+     * (toolbar에서 편집한 경우 도메인에 값이 있으므로 dirty 발생 → UPDATE 반영).
      */
     public void applyAirCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
@@ -250,6 +261,8 @@ public class HouseBlDomainToJpaMapper {
         jpa.setSalesClass(domain.getSalesClass());
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
+        if (domain.getMblNo() != null) jpa.setMblNo(mapOrNull(domain.getMblNo(), MblNo::value));
+        if (domain.getMasterRefNo() != null) jpa.setMasterRefNo(domain.getMasterRefNo());
     }
 
     /**

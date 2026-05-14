@@ -2,21 +2,23 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.common.vo.MblNo;
 import com.freightos.fms.domain.housebl.entity.HouseBlSea;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
- * HouseBlDomainToJpaMapper.applySeaCommonFields — SEA form 미보유 필드 setter 미호출 검증.
+ * HouseBlDomainToJpaMapper.applySeaCommonFields — conditional setter(PATCH 의미론) 검증.
  *
- * SEA form에서 masterBlId/mblNo/masterRefNo를 직접 편집하는 경로가 없으므로,
- * applySeaCommonFields 호출 시 해당 setter가 JPA 엔티티에 절대 호출되지 않음을 보장한다.
- * setter 호출 시 DB 기존 값을 null로 덮어써 dirty-check이 발생하는 회귀(§6.37)를 방지.
+ * masterBlId: SEA form 미보유 필드 — setter를 두지 않아 DB 기존 값을 항상 보호한다 (§6.37).
+ * mblNo/masterRefNo: 도메인 값이 null이면 setter skip(DB 기존 값 보호),
+ *                    값이 있으면 setter 호출하여 UPDATE 반영한다 (toolbar 편집 경로).
  */
 class HouseBlDomainToJpaMapperSeaTest {
 
@@ -40,22 +42,44 @@ class HouseBlDomainToJpaMapperSeaTest {
     }
 
     @Test
-    @DisplayName("applySeaCommonFields: mblNo setter 미호출 — DB 기존 값 보호")
-    void applySeaCommonFields_doesNotCallSetMblNo() {
+    @DisplayName("applySeaCommonFields: mblNo null → setMblNo skip (DB 기존 값 보호 — PATCH 의미론)")
+    void applySeaCommonFields_whenDomainMblNoNull_skipsSetMblNo() {
         HouseBlSea domain = HouseBlSea.create(Bound.EXP);
 
         mapper.applySeaCommonFields(domain, spyJpa);
 
-        verify(spyJpa, never()).setMblNo(Mockito.any());
+        verify(spyJpa, never()).setMblNo(any());
     }
 
     @Test
-    @DisplayName("applySeaCommonFields: masterRefNo setter 미호출 — DB 기존 값 보호")
-    void applySeaCommonFields_doesNotCallSetMasterRefNo() {
+    @DisplayName("applySeaCommonFields: mblNo 있음 → setMblNo(값) 호출")
+    void applySeaCommonFields_whenDomainMblNoPresent_callsSetMblNoWithValue() {
+        HouseBlSea domain = HouseBlSea.create(Bound.EXP);
+        domain.assignMasterReference(MblNo.of("MBL12345"), null);
+
+        mapper.applySeaCommonFields(domain, spyJpa);
+
+        verify(spyJpa).setMblNo("MBL12345");
+    }
+
+    @Test
+    @DisplayName("applySeaCommonFields: masterRefNo null → setMasterRefNo skip (DB 기존 값 보호 — PATCH 의미론)")
+    void applySeaCommonFields_whenDomainMasterRefNoNull_skipsSetMasterRefNo() {
         HouseBlSea domain = HouseBlSea.create(Bound.EXP);
 
         mapper.applySeaCommonFields(domain, spyJpa);
 
-        verify(spyJpa, never()).setMasterRefNo(Mockito.any());
+        verify(spyJpa, never()).setMasterRefNo(any());
+    }
+
+    @Test
+    @DisplayName("applySeaCommonFields: masterRefNo 있음 → setMasterRefNo(값) 호출")
+    void applySeaCommonFields_whenDomainMasterRefNoPresent_callsSetMasterRefNoWithValue() {
+        HouseBlSea domain = HouseBlSea.create(Bound.EXP);
+        domain.assignMasterReference(null, "REF98765");
+
+        mapper.applySeaCommonFields(domain, spyJpa);
+
+        verify(spyJpa).setMasterRefNo("REF98765");
     }
 }
