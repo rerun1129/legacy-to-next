@@ -29,7 +29,7 @@ class HouseBlSeaSubFactory {
                 VesselVoyage.of(s.vesselCode(), s.vesselName(), s.voyageNo()), BlDate.of(s.onboardDate()));
         sea.updateSeaRouteAndFlags(new HouseBlSea.SeaRouteAndFlags(
                 PortCode.of(s.porCode()), PortCode.of(s.finalDestCode()),
-                BlDate.of(s.issueDate()), NoOfBl.fromNumber(s.noOfBl()),
+                BlDate.of(s.issueDate()), Nullables.mapOrNull(s.noOfBl(), NoOfBl::valueOf),
                 PortCode.of(s.issuePlace()), BlDate.of(s.doDate()), PortCode.of(s.payableAt()),
                 Boolean.TRUE.equals(s.triangle()), Nullables.mapOrNull(s.loadType(), LoadType::valueOf)));
         applySeaCargoTerms(sea, s.serviceTerm(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
@@ -55,7 +55,7 @@ class HouseBlSeaSubFactory {
                     Nullables.mapOrElse(s.porCode(),       PortCode::of,          sea::getPorCode),
                     Nullables.mapOrElse(s.finalDestCode(), PortCode::of,          sea::getFinalDestCode),
                     Nullables.mapOrElse(s.issueDate(),     BlDate::of,            sea::getIssueDate),
-                    Nullables.mapOrElse(s.noOfBl(),        NoOfBl::fromNumber,    sea::getNoOfBl),
+                    Nullables.mapOrElse(s.noOfBl(),        NoOfBl::valueOf,       sea::getNoOfBl),
                     Nullables.mapOrElse(s.issuePlace(),    PortCode::of,          sea::getIssuePlace),
                     Nullables.mapOrElse(s.doDate(),        BlDate::of,            sea::getDoDate),
                     Nullables.mapOrElse(s.payableAt(),     PortCode::of,          sea::getPayableAt),

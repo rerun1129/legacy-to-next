@@ -83,7 +83,7 @@ public record UpdateHouseBlCommand(
             String porCode,
             String finalDestCode,
             String issueDate,
-            Integer noOfBl,
+            String noOfBl,
             String issuePlace,
             String doDate,
             String payableAt,

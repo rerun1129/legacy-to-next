@@ -881,4 +881,58 @@ public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolati
 
 **잔여 점검 권장**: Air/Truck House Entry, Sea/Air Master Entry에 동일 패턴(`AirGroup`/`AirImpGroup`, `TruckGroup`, `MasterSeaGroup` 등) 적용은 별도 작업. 신규 도메인 마이그레이션 시 본 절을 SSOT로 인용.
 
+### 6.54 BE POST 응답 ID-only 컨벤션 (UseCase SRP 정렬) — detail 재조회 안티패턴 금지
+
+`<Domain>Controller.create<Domain>`이 응답을 만들기 위해 `findXxxById(id)`/`assembler.toDetail(useCase.find...)`를 호출하면 POST 트랜잭션 내부에서 detail SELECT N건이 추가 발사된다. 직후 FE `mutation.onSuccess`가 `setFocus(newId)`로 useQuery를 마운트하면 GET detail로 같은 SELECT N건이 또 발사되어 **사용자 관점 "SELECT 2세트(N×2)"** 회귀를 만든다. 메모리 [feedback_usecase_srp] SSOT — `createXxx`는 ID만 반환, 도메인 객체는 컨트롤러에 노출 금지.
+
+**안티패턴 (BE)**
+
+```java
+// ❌ 응답 빌드 중 detail 재조회
+@PostMapping
+public ResponseEntity<ApiResponse<XxxDetailResponse>> createXxx(@RequestBody CreateXxxRequest req) {
+    Long id = useCase.createXxx(assembler.toCreateCommand(req));
+    URI location = uriBuilder.path("/api/xxx/{id}").buildAndExpand(id).toUri();
+    return ResponseEntity.created(location)
+            .body(ApiResponse.of(assembler.toDetail(useCase.findXxxById(id)), MessageCode.XXX_CREATED.message()));
+}
+```
+
+**SSOT — NonBl/TruckBl 모범 (`NonBlController:62-69` · `TruckBlController:67-77`)**
+
+```java
+// ✅ ID-only 응답
+@PostMapping
+public ResponseEntity<ApiResponse<Map<String, Long>>> createXxx(@RequestBody CreateXxxRequest req, UriComponentsBuilder uriBuilder) {
+    Long id = useCase.createXxx(assembler.toCreateCommand(req));
+    URI location = uriBuilder.path("/api/xxx/{id}").buildAndExpand(id).toUri();
+    return ResponseEntity.created(location)
+            .body(ApiResponse.of(Map.of("id", id), MessageCode.XXX_CREATED.message()));
+}
+```
+
+**FE 동시 정합 4축**
+
+- `application/<domain>/ports.ts` — `create(req): Promise<{id: number}>` (기존 `Promise<<XxxDetail>>` 폐기)
+- `adapter/out/api/<domain>.ts` — `create` 응답 zod schema `apiResponse(z.object({ id: z.number() }))`
+- `adapter/out/mock/<domain>.ts` — `create` 반환 `{ id: 1 }` (정확한 SSOT 시그니처)
+- `<domain>-entry.tsx` `mutation.onSuccess(saved)` — `saved.id` 접근 그대로 동작 (saved 타입 `{id: number}`로 자동 정합)
+
+**FE invalidate cascade 동시 점검**
+
+본 안티패턴 제거 후에도 FE `mutation.onSuccess`의 `queryClient.invalidateQueries({queryKey: ["<domain>","detail", newId]})` + `setFocus(newId)` cascade가 잔존하면 GET 1회 + invalidate refetch 1회 = 여전히 2회. **newId 키 useQuery는 setFocus 직후 마운트 자체로 자동 fetch가 트리거되므로 CREATE 분기의 invalidate 호출 불필요** — 1줄 제거 의무. UPDATE 분기의 invalidate는 active query 대상이라 유지(refetch 정상).
+
+**관련 회귀 테스트 영향**
+
+`<Domain>ControllerWebMvcTest`의 `createXxx_happyPath_returns201WithLocation` 같은 테스트가 `then(useCase).should().findXxxById(id)` 검증을 갖고 있다면 컨트롤러 변경 후 `WantedButNotInvoked`로 즉시 깨진다 — 메모리 [feedback_test_policy] 정책상 기존 테스트 수정은 사용자 명시 승인 후, 죽은 stub/검증 제거 + `.andExpect(jsonPath("$.data.id").value(...))` 응답 본문 검증 추가로 갱신.
+
+**사례**
+
+- 2026-05-10 (608d0df·1be98fb·7e5e41d) — NonBl `createNonBl` 응답 시그니처 축소 + FE adapter 정합. BE 응답 SELECT 3건 절감.
+- 2026-05-14 본 세션 — HouseBl `createHouseBl`도 같은 패턴으로 정렬. SEA Entry 기준 INSERT 후 사용자 관점 SELECT 8건(2세트) → 4건(1세트) 절감. 메모리 [feedback_get_dup_diagnosis] 신설 — 진단 시 BE controller 1순위 grep 의무.
+
+**잔여 점검 권장**
+
+`MasterBlController.createMasterBl`·기타 `<Domain>Controller.create<Domain>` 메서드 응답 시그니처 grep 의무. `ApiResponse<<XxxDetail>Response>` 잔존 시 동일 정렬. 신규 도메인 마이그레이션 시 본 절을 SSOT로 인용 + plan 단계 체크리스트 17 적용.
+
 사례: bab177f — Truck/Non/House/Master 4 도메인 list grid 더블클릭 + search 훅 동시 적용.

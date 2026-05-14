@@ -81,7 +81,7 @@ public record CreateHouseBlRequest(
             @Size(max = 5) String porCode,
             @Size(max = 5) String finalDestCode,
             @Pattern(regexp = "\\d{8}") String issueDate,
-            Integer noOfBl,
+            String noOfBl,
             @Size(max = 5) String issuePlace,
             @Pattern(regexp = "\\d{8}") String doDate,
             @Size(max = 5) String payableAt,

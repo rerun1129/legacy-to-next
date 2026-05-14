@@ -44,8 +44,8 @@ export const mockHouseBlPort: HouseBlPort = {
   async save(data: unknown): Promise<HouseBlDetail> {
     return { ...MOCK_ROWS[0], ...(data as Record<string, unknown>) } as unknown as HouseBlDetail;
   },
-  async create(req: CreateHouseBlRequest): Promise<HouseBlDetail> {
-    return { ...MOCK_ROWS[0], ...(req as unknown as Record<string, unknown>) } as unknown as HouseBlDetail;
+  async create(_req: CreateHouseBlRequest): Promise<{ id: number }> {
+    return { id: 1 };
   },
   async update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail> {
     const row = MOCK_ROWS.find(r => r.id === id) ?? MOCK_ROWS[0];

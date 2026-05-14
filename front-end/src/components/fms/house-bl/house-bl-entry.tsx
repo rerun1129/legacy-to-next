@@ -84,7 +84,7 @@ const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
   "Non B/L No":     "hbl",
   "MBL No":         "mbl",
   "MAWB No":        "mbl",
-  "Load Type":      "lType",
+  "Load Type":      "seaDetail.loadType",
   "Shipment Type":  "sType",
   "Service Term":   "seaDetail.serviceTerm",
   "B/L Type":       "seaDetail.blType",
@@ -171,8 +171,6 @@ export function HouseBLEntry({ variant }: Props) {
         // isEdit=false 분기에서만 saved.id에 접근해 타입 안전성 보장.
         const newId = saved?.id;
         if (newId != null) {
-          // List 자동 invalidate 금지 (§6.21) — detail만 갱신
-          queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", newId] });
           // hot-marker: List 화면 진입 시 하이라이트에 사용 (§6.16, Truck 정합)
           sessionStorage.setItem(`house-bl-entry:hot:${newId}`, "1");
           useEntryFocusStore.getState().setFocus(entryFocusKeys.houseBl(variant.key), newId);

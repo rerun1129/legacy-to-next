@@ -145,7 +145,7 @@ class HouseBlSeaSubFactoryTest {
                 "KRPUS",        // porCode
                 "USNYC",        // finalDestCode
                 "20250102",     // issueDate
-                3,              // noOfBl
+                "THREE",        // noOfBl
                 "KRPUS",        // issuePlace
                 "20250103",     // doDate
                 "USNYC",        // payableAt

@@ -172,12 +172,8 @@ class HouseBlControllerWebMvcTest {
     void createHouseBl_happyPath_returns201WithLocation() throws Exception {
         Long id = 1L;
         CreateHouseBlCommand mockCommand = mock(CreateHouseBlCommand.class);
-        HouseBlDetailResult mockSavedResult = mock(HouseBlDetailResult.class);
-        HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
         given(houseBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
         given(houseBlUseCase.createHouseBl(any(CreateHouseBlCommand.class))).willReturn(id);
-        given(houseBlUseCase.findHouseBlById(id)).willReturn(mockSavedResult);
-        given(houseBlAssembler.toDetail(mockSavedResult)).willReturn(mockResponse);
 
         mockMvc.perform(post("/api/house-bl")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,10 +189,10 @@ class HouseBlControllerWebMvcTest {
                                 ",\"docPartnerCode\":\"DOC001\"" +
                                 "}"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/house-bl/1")));
+                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/house-bl/1")))
+                .andExpect(jsonPath("$.data.id").value(1));
 
         then(houseBlUseCase).should().createHouseBl(any(CreateHouseBlCommand.class));
-        then(houseBlUseCase).should().findHouseBlById(id);
     }
 
     @Test

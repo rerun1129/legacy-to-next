@@ -135,7 +135,7 @@ export interface SeaDetailRequest {
   porCode?: string;
   finalDestCode?: string;
   issueDate?: string;
-  noOfBl?: number;
+  noOfBl?: string;
   issuePlace?: string;
   doDate?: string;
   payableAt?: string;

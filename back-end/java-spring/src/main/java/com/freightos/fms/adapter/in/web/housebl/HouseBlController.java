@@ -31,6 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -63,7 +64,7 @@ public class HouseBlController {
 
     @Operation(summary = "House B/L 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse<HouseBlDetailResponse>> createHouseBl(
+    public ResponseEntity<ApiResponse<Map<String, Long>>> createHouseBl(
             @Valid @RequestBody CreateHouseBlRequest request,
             UriComponentsBuilder uriBuilder) {
         if ("SEA".equals(request.jobDiv())) {
@@ -74,7 +75,7 @@ public class HouseBlController {
         Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toCreateCommand(request));
         URI location = uriBuilder.path("/api/house-bl/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location)
-                .body(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.findHouseBlById(id)), MessageCode.HOUSE_BL_CREATED.message()));
+                .body(ApiResponse.of(Map.of("id", id), MessageCode.HOUSE_BL_CREATED.message()));
     }
 
     @Operation(summary = "House B/L 단건 조회")

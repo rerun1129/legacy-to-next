@@ -75,7 +75,7 @@ export function buildHouseBlRequest(
       porCode:                 toStr(sd.porCode),
       finalDestCode:           toStr(sd.finalDestCode),
       issueDate:               toStr(sd.issueDate),
-      noOfBl:                  toNum(sd.noOfBl),
+      noOfBl:                  toStr(sd.noOfBl),
       issuePlace:              toStr(sd.issuePlace),
       doDate:                  toStr(sd.doDate),
       payableAt:               toStr(sd.payableAt),
