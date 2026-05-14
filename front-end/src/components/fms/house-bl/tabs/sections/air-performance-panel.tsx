@@ -24,18 +24,6 @@ export function AirPerformancePanel() {
       ),
     },
     {
-      key: "customer-pic",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          variant="panel"
-          label="Customer PIC"
-          codeProps={{ ...register("customerPic") }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-      ),
-    },
-    {
       key: "settle-partner",
       render: () => (
         <CodeBox
