@@ -28,9 +28,9 @@ export function AirSchedulePanel({ variant }: Props) {
           <span className="li__label is-required">{isExp ? "Airline" : "Carrier"}</span>
           <div className="li__input" style={{ gap: 4 }}>
             <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
-              {...register("airlineCode")} />
+              {...register("airDetail.airlineCode")} />
             <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}
-              {...register("airlineName")} />
+              {...register("airDetail.airlineName")} />
           </div>
         </div>
       ),

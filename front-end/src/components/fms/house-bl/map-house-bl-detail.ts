@@ -1,4 +1,4 @@
-import type { HouseBlDetail } from "@/domain/house-bl";
+import type { HouseBlDetail, HouseBlAirScheduleLegView, HouseBlAirChargeView, HouseBlAirDimView } from "@/domain/house-bl";
 import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import type { HouseBlFormValues } from "./house-bl-schema";
 
@@ -109,5 +109,57 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       // remark는 본체 필드 — desc에는 저장하지 않으므로 빈 문자열 유지
       remark:       "",
     },
+    // AIR nested detail — BE Phase 2에서 추가된 airDetail 서브 엔티티 매핑 (§6.49 ⑯)
+    // root에 산재되었던 airlineCode/airlineName/flightNo/flightDate → nested airDetail로 이전
+    airDetail: {
+      airlineCode:           detail.airDetail?.airlineCode            ?? "",
+      airlineName:           "",
+      chargeWeightKg:        detail.airDetail?.chargeWeightKg         != null ? String(detail.airDetail.chargeWeightKg) : "",
+      volumeWeightKg:        detail.airDetail?.volumeWeightKg         != null ? String(detail.airDetail.volumeWeightKg) : "",
+      rateClass:             detail.airDetail?.rateClass              ?? "",
+      currencyCode:          detail.airDetail?.currencyCode           ?? "",
+      declaredValueCarriage: detail.airDetail?.declaredValueCarriage  ?? "",
+      declaredValueCustoms:  detail.airDetail?.declaredValueCustoms   ?? "",
+      insurance:             detail.airDetail?.insurance              ?? "",
+      accountInformation:    detail.airDetail?.accountInformation     ?? "",
+      otherTerm:             detail.airDetail?.otherTerm              ?? "",
+      issueDate:             detail.airDetail?.issueDate              ?? "",
+      issuePlace:            detail.airDetail?.issuePlace             ?? "",
+      signature:             detail.airDetail?.signature              ?? "",
+      fhd:                   detail.airDetail?.fhd                   ?? "",
+      handlingInformationCode: detail.airDetail?.handlingInformationCode ?? "",
+      handlingInformationDesc: detail.airDetail?.handlingInformationDesc ?? "",
+      originOfGoods:         detail.airDetail?.originOfGoods          ?? "",
+      cargoType:             detail.airDetail?.cargoType              ?? "",
+    },
+    // §BE-sync — AirDetailResponse.scheduleLegs / .airCharges / .dims (airDetail nested 경로)
+    scheduleLegs: detail.airDetail?.scheduleLegs?.map((s: HouseBlAirScheduleLegView) => ({
+      id:        s.id,
+      toCode:    s.toCode    ?? "",
+      byCarrier: s.byCarrier ?? "",
+      flightNo:  s.flightNo  ?? "",
+      onBoardDt: s.onBoardDt ?? "",
+      onBoardTm: s.onBoardTm ?? "",
+      arrivalDt: s.arrivalDt ?? "",
+      arrivalTm: s.arrivalTm ?? "",
+    })) ?? [],
+    airCharges: detail.airDetail?.airCharges?.map((a: HouseBlAirChargeView) => ({
+      freightCode:    a.freightCode    ?? "",
+      currencyCode:   a.currencyCode   ?? "",
+      per:            a.per            ?? "",
+      freightTerm:    a.freightTerm    ?? "",
+      grossWeightKg:  a.grossWeightKg  != null ? String(a.grossWeightKg)  : "",
+      rateClass:      a.rateClass      ?? "",
+      chargeWeightKg: a.chargeWeightKg != null ? String(a.chargeWeightKg) : "",
+      rate:           a.rate           != null ? String(a.rate)           : "",
+    })) ?? [],
+    dims: detail.airDetail?.dims?.map((d: HouseBlAirDimView) => ({
+      lengthCm:       d.lengthCm       != null ? String(d.lengthCm)       : "",
+      widthCm:        d.widthCm        != null ? String(d.widthCm)        : "",
+      heightCm:       d.heightCm       != null ? String(d.heightCm)       : "",
+      quantity:       d.quantity       != null ? String(d.quantity)       : "",
+      cbm:            d.cbm            != null ? String(d.cbm)            : "",
+      volumeWeightKg: d.volumeWeightKg != null ? String(d.volumeWeightKg) : "",
+    })) ?? [],
   };
 }

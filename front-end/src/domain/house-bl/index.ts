@@ -47,6 +47,47 @@ export interface HouseBlSeaDescView {
   descClause2?: string;
 }
 
+// §BE-sync — AirScheduleLegView / AirChargeView / AirDimView / AirDescView (BE AirDetailResponse nested)
+export interface HouseBlAirScheduleLegView {
+  id?: number;
+  toCode?: string;
+  byCarrier?: string;
+  flightNo?: string;
+  onBoardDt?: string;
+  onBoardTm?: string;
+  arrivalDt?: string;
+  arrivalTm?: string;
+}
+
+export interface HouseBlAirChargeView {
+  id?: number;
+  freightCode?: string;
+  currencyCode?: string;
+  per?: string;
+  freightTerm?: string;
+  grossWeightKg?: number;
+  rateClass?: string;
+  chargeWeightKg?: number;
+  rate?: number;
+}
+
+export interface HouseBlAirDimView {
+  id?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  quantity?: number;
+  cbm?: number;
+  volumeWeightKg?: number;
+}
+
+export interface HouseBlAirDescView {
+  marks?: string;
+  description?: string;
+  descClause1?: string;
+  descClause2?: string;
+}
+
 export interface HouseBlDetail extends HouseBlRow {
   shipmentType: 'HOUSE' | 'DIRECT' | null;
   blType: string | null;
@@ -73,6 +114,31 @@ export interface HouseBlDetail extends HouseBlRow {
     // §BE-sync — BE SeaDetailResponse.containers / .desc (seaDetail nested)
     containers?: HouseBlSeaContainerView[];
     desc?: HouseBlSeaDescView;
+  } | null;
+  // §BE-sync — BE AirDetailResponse (airDetail nested). §6.49 ⑰: AIR 확장 필드는 FE string 완화(BE에서 enum 검증)
+  airDetail?: {
+    airlineCode?: string;
+    chargeWeightKg?: number;
+    volumeWeightKg?: number;
+    rateClass?: string;
+    currencyCode?: string;
+    declaredValueCarriage?: string;
+    declaredValueCustoms?: string;
+    insurance?: string;
+    accountInformation?: string;
+    otherTerm?: string;
+    issueDate?: string;
+    issuePlace?: string;
+    signature?: string;
+    fhd?: string;
+    handlingInformationCode?: string;
+    handlingInformationDesc?: string;
+    originOfGoods?: string;
+    cargoType?: string;
+    scheduleLegs?: HouseBlAirScheduleLegView[];
+    airCharges?: HouseBlAirChargeView[];
+    dims?: HouseBlAirDimView[];
+    desc?: HouseBlAirDescView;
   } | null;
   freightTerm: 'PREPAID' | 'COLLECT' | null;
   notifyCode: string | null;
@@ -227,6 +293,27 @@ export interface AirChargeRequest {
   rate?: number;
 }
 
+// §6.49 ⑰ — AIR 확장 필드는 FE string 완화(enum 검증은 BE 일원화)
+export interface AirDetailRequest {
+  airlineCode?: string;
+  chargeWeightKg?: number;
+  volumeWeightKg?: number;
+  rateClass?: string;
+  currencyCode?: string;
+  declaredValueCarriage?: string;
+  declaredValueCustoms?: string;
+  insurance?: string;
+  accountInformation?: string;
+  otherTerm?: string;
+  issueDate?: string;
+  issuePlace?: string;
+  signature?: string;
+  fhd?: string;
+  handlingInformation?: string;
+  originOfGoods?: string;
+  cargoType?: string;
+}
+
 // ── Create / Update request ────────────────────────────────
 
 export interface CreateHouseBlRequest {
@@ -266,6 +353,7 @@ export interface CreateHouseBlRequest {
   masterRefNo?: string;
   remark?: string;
   seaDetail?: SeaDetailRequest;
+  airDetail?: AirDetailRequest;
   desc?: DescRequest;
   dims?: DimRequest[];
   containers?: ContainerRequest[];

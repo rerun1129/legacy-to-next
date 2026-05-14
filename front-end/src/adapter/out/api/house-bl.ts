@@ -77,6 +77,73 @@ const SEA_DETAIL_SCHEMA = z.object({
   desc: SEA_DESC_VIEW_SCHEMA.optional(),
 });
 
+// §BE-sync — AirScheduleLegView / AirChargeView / AirDimView / AirDescView / AirDetailResponse (BE AirDetailResponse nested)
+const AIR_SCHEDULE_LEG_VIEW_SCHEMA = z.object({
+  id:        z.number().nullable().optional().transform((v) => v ?? undefined),
+  toCode:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  byCarrier: z.string().nullable().optional().transform((v) => v ?? undefined),
+  flightNo:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  onBoardDt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  onBoardTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  arrivalDt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  arrivalTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const AIR_CHARGE_VIEW_SCHEMA = z.object({
+  id:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  freightCode:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  currencyCode:   z.string().nullable().optional().transform((v) => v ?? undefined),
+  per:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  freightTerm:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg:  z.number().nullable().optional().transform((v) => v ?? undefined),
+  rateClass:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  chargeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  rate:           z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const AIR_DIM_VIEW_SCHEMA = z.object({
+  id:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  lengthCm:       z.number().nullable().optional().transform((v) => v ?? undefined),
+  widthCm:        z.number().nullable().optional().transform((v) => v ?? undefined),
+  heightCm:       z.number().nullable().optional().transform((v) => v ?? undefined),
+  quantity:       z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const AIR_DESC_VIEW_SCHEMA = z.object({
+  marks:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  description: z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause1: z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause2: z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const AIR_DETAIL_SCHEMA = z.object({
+  airlineCode:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  chargeWeightKg:           z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg:           z.number().nullable().optional().transform((v) => v ?? undefined),
+  rateClass:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  currencyCode:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  declaredValueCarriage:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  declaredValueCustoms:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  insurance:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  accountInformation:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  otherTerm:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  issueDate:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  issuePlace:               z.string().nullable().optional().transform((v) => v ?? undefined),
+  signature:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  fhd:                      z.string().nullable().optional().transform((v) => v ?? undefined),
+  handlingInformationCode:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  handlingInformationDesc:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  originOfGoods:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  cargoType:                z.string().nullable().optional().transform((v) => v ?? undefined),
+  // §BE-sync — AirDetailResponse.scheduleLegs / .airCharges / .dims / .desc (airDetail nested)
+  scheduleLegs: z.array(AIR_SCHEDULE_LEG_VIEW_SCHEMA).optional(),
+  airCharges:   z.array(AIR_CHARGE_VIEW_SCHEMA).optional(),
+  dims:         z.array(AIR_DIM_VIEW_SCHEMA).optional(),
+  desc:         AIR_DESC_VIEW_SCHEMA.optional(),
+});
+
 const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   shipmentType: z.enum(['HOUSE', 'DIRECT']).nullable(),
   blType: z.string().nullable(),
@@ -113,7 +180,8 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   mblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
   masterRefNo: z.string().nullable().optional().transform((v) => v ?? undefined),
   settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
-  seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
+  seaDetail:  SEA_DETAIL_SCHEMA.nullable().optional(),
+  airDetail: AIR_DETAIL_SCHEMA.nullable().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

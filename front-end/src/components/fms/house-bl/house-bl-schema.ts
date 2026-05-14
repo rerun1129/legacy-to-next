@@ -110,6 +110,28 @@ export const FREIGHT_ROW_SCHEMA = z.object({
 
 export type FreightRow = z.infer<typeof FREIGHT_ROW_SCHEMA>;
 
+export const AIR_DETAIL_SCHEMA = z.object({
+  airlineCode:             z.string().optional(),
+  airlineName:             z.string().optional(),
+  chargeWeightKg:          z.string().optional(),
+  volumeWeightKg:          z.string().optional(),
+  rateClass:               z.string().optional(),
+  currencyCode:            z.string().optional(),
+  declaredValueCarriage:   z.string().optional(),
+  declaredValueCustoms:    z.string().optional(),
+  insurance:               z.string().optional(),
+  accountInformation:      z.string().optional(),
+  otherTerm:               z.string().optional(),
+  issueDate:               DATE8,
+  issuePlace:              z.string().max(5).optional(),
+  signature:               z.string().optional(),
+  fhd:                     z.string().optional(),
+  handlingInformationCode: z.string().optional(),
+  handlingInformationDesc: z.string().max(500).optional(),
+  originOfGoods:           z.string().optional(),
+  cargoType:               z.string().optional(),
+});
+
 export const SEA_DETAIL_SCHEMA = z.object({
   loadType:                z.string().optional(),
   linerCode:               z.string().optional(),
@@ -239,17 +261,14 @@ export const HOUSE_BL_SCHEMA = z.object({
   // SEA detail
   seaDetail: SEA_DETAIL_SCHEMA.optional(),
 
+  // AIR detail
+  airDetail: AIR_DETAIL_SCHEMA.optional(),
+
   // schedule fields — NonBl/Truck 전용 본체 필드 (SEA는 seaDetail nested 사용)
   linerCode:   z.string().optional(),
   linerName:   z.string().optional(),
   vesselCode:  z.string().optional(),
   onboardDate: z.string().optional(),
-
-  // air schedule fields (Coder)
-  airlineCode: z.string().optional(),
-  airlineName: z.string().optional(),
-  flightNo:    z.string().optional(),
-  flightDate:  z.string().optional(),
 
   // marks & description — desc nested로 통합됨. natureOfGoods는 향후 용도 대기
   natureOfGoods: z.string().optional(),

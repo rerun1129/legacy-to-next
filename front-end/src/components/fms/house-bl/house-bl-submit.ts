@@ -1,5 +1,5 @@
 import type { BLVariantConfig } from '@/lib/bl-variants';
-import type { CreateHouseBlRequest, UpdateHouseBlRequest } from '@/domain/house-bl';
+import type { CreateHouseBlRequest, UpdateHouseBlRequest, AirDetailRequest } from '@/domain/house-bl';
 import type { HouseBlFormValues } from './house-bl-schema';
 
 /** 문자열 → number 변환. 빈 문자열이면 undefined 반환. */
@@ -113,6 +113,31 @@ export function buildHouseBlRequest(
       soc:           c.soc,
       seq:           toNum(c.seq),
     }));
+  }
+
+  // AIR 전용 확장 필드
+  if (jobDiv === 'AIR' && values.airDetail) {
+    const ad = values.airDetail;
+    const airDetailReq: AirDetailRequest = {
+      airlineCode:           toStr(ad.airlineCode),
+      chargeWeightKg:        toNum(ad.chargeWeightKg),
+      volumeWeightKg:        toNum(ad.volumeWeightKg),
+      rateClass:             toStr(ad.rateClass),
+      currencyCode:          toStr(ad.currencyCode),
+      declaredValueCarriage: toStr(ad.declaredValueCarriage),
+      declaredValueCustoms:  toStr(ad.declaredValueCustoms),
+      insurance:             toStr(ad.insurance),
+      accountInformation:    toStr(ad.accountInformation),
+      otherTerm:             toStr(ad.otherTerm),
+      issueDate:             toStr(ad.issueDate),
+      issuePlace:            toStr(ad.issuePlace),
+      signature:             toStr(ad.signature),
+      fhd:                   toStr(ad.fhd),
+      handlingInformation:   toStr(ad.handlingInformationCode),
+      originOfGoods:         toStr(ad.originOfGoods),
+      cargoType:             toStr(ad.cargoType),
+    };
+    base.airDetail = airDetailReq;
   }
 
   // AIR 전용 — scheduleLegs, airCharges, dims
