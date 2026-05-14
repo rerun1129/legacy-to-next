@@ -685,7 +685,11 @@ public record UpdateXxxRequest(String shipperCode, ...) {}
 
 사례: f15736e — NonBl Entry 컨테이너 8필드(`lengthFeet, sealNo4-6, netWeightKg, vgmKg, isSoc, seq`) + 메인 11필드(`jobDiv, shipmentType, freightTerm, docPartner*, address×3, incoterms, mbl*×3`) sub-set화 + `applyNonBlCommonFields` 신설 (12 files, 75+/177-).
 
-**다른 도메인 적용 권장**: Master B/L, Truck B/L 등 form에서 address 명시 매핑이 빠진 화면 점검. 같은 데이터 손실 패턴 발생 가능.
+사례: 8c54dd9 / 23852d8 — Truck B/L `applyTruckCommonFields`/`applyTruckBlFields` 신설(form 미보유 필드 `masterBlId`/`mblNo`/`masterRefNo`/`address 4종`/`pickupTm` setter 제외) + 후속 정규화.
+
+사례: 2026-05-14 — Sea House 적용. `applySeaCommonFields` 내 master 참조 setter 3건(`setMasterBlId`/`setMblNo`/`setMasterRefNo`) 라인 제거 + `HouseBlFactory.applyToEntity`의 `assignMasterReference` 호출 앞에 `cmd.mblNo() != null || cmd.masterRefNo() != null` null 가드 추가. SEA form은 master 참조를 직접 편집하지 않으므로 (Master B/L Entry에서만 관리) update 경로에서 setter 호출 자체 차단. 회귀 테스트 `HouseBlDomainToJpaMapperSeaTest` 신설(3 케이스 `never()` verify).
+
+**다른 도메인 적용 권장**: Master B/L · Air House 등 form에서 address/master 참조 명시 매핑이 빠진 화면 점검. 같은 데이터 손실 패턴 발생 가능. (Non B/L · Truck B/L · Sea House 적용 완료)
 
 ### 6.47 List → Entry 진입 시 detail 쿼리 invalidate + draft clear 필수 (SSOT)
 

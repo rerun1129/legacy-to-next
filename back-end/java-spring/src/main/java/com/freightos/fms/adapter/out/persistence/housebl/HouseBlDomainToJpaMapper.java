@@ -166,8 +166,8 @@ public class HouseBlDomainToJpaMapper {
 
     /**
      * Sea 전용 공통 필드 적용 (Update 경로 전용).
-     * applyCommonFields와 동일하되 SEA jobDiv 고정 설정.
-     * Sea form이 address·mblNo·masterRefNo 등을 전송하므로 setter를 보존한다 (§6.37 보수적 보존).
+     * SEA form에서 직접 편집 경로가 없는 masterBlId/mblNo/masterRefNo는
+     * setter를 두지 않아 DB 기존 값을 보호한다 (§6.37 sub-set — Truck·NonBl 선례 동일 패턴).
      */
     public void applySeaCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
         if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
@@ -182,7 +182,6 @@ public class HouseBlDomainToJpaMapper {
         jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
         jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
         jpa.setSalesManCode(mapOrNull(domain.getSalesManCode(), EmployeeCode::value));
-        jpa.setMasterBlId(domain.getMasterBlId());
         jpa.setShipmentType(domain.getShipmentType());
         jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
@@ -203,8 +202,6 @@ public class HouseBlDomainToJpaMapper {
         jpa.setSalesClass(domain.getSalesClass());
         jpa.setMainItemName(domain.getMainItemName());
         jpa.setHsCode(domain.getHsCode());
-        jpa.setMblNo(mapOrNull(domain.getMblNo(), MblNo::value));
-        jpa.setMasterRefNo(domain.getMasterRefNo());
     }
 
     /**

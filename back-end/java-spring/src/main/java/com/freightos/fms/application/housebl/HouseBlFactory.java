@@ -92,7 +92,11 @@ public class HouseBlFactory {
 
     public void applyToEntity(UpdateHouseBlCommand cmd, HouseBl entity) {
         entity.update(toUpdateFields(cmd));
-        entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
+        // cmd.mblNo()/masterRefNo() 둘 다 null이면 도메인에 null 할당을 skip하여
+        // DB 기존 값을 보호한다 — SEA form에서 master 필드를 직접 편집하지 않는 경로 전용 (§6.37).
+        if (cmd.mblNo() != null || cmd.masterRefNo() != null) {
+            entity.assignMasterReference(MblNo.of(cmd.mblNo()), cmd.masterRefNo());
+        }
         seaSubFactory.applySeaUpdate(entity, cmd.seaDetail());
         seaSubFactory.applySeaRemark(entity, cmd.remark());
         nonBlSubFactory.applyNonBlUpdate(entity, cmd);
