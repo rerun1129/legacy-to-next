@@ -223,11 +223,6 @@ export function HouseBLEntry({ variant }: Props) {
   }
 
   async function handleSubmit(raw: HouseBlFormValues) {
-    // 수정 모드에서 실제 변경 없이 Save 클릭 시 의미 없는 UPDATE 차단
-    if (isEdit && !form.formState.isDirty) {
-      toast.info("변경된 내용이 없습니다.");
-      return;
-    }
     const ok = await confirm({
       title: "저장하시겠습니까?",
       variant: "default",
