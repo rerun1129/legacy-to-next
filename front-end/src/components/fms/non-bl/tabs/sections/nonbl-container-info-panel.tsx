@@ -27,7 +27,7 @@ export function NonBLContainerInfoPanel() {
   const { control, register } = useFormContext<NonBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "containers" });
   const { options: rawOptions } = useEnumOptions("ContainerType");
-  const contTypeOptions = useMemo(() => rawOptions.map(o => ({ value: o.value, label: o.value })), [rawOptions]);
+  const contTypeOptions = useMemo(() => rawOptions.map(o => ({ value: o.value, label: o.label })), [rawOptions]);
 
   const cols = useMemo<GridColumn<ContainerInfoRow>[]>(() => [
     { key: "_no",      width: 50, label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
