@@ -224,7 +224,12 @@ export function HouseBLEntry({ variant }: Props) {
     formRef.current?.reset();
   }
 
-  function handleSubmit(raw: HouseBlFormValues) {
+  async function handleSubmit(raw: HouseBlFormValues) {
+    const ok = await confirm({
+      title: "저장하시겠습니까?",
+      variant: "default",
+    });
+    if (!ok) return;
     mutation.mutate(raw);
   }
 
