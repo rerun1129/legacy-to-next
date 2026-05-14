@@ -49,10 +49,13 @@ export function useNonBlEntryMutations(args: {
     mutationFn: () => nonBlPort.delete(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["non-bl", "list"] });
+      // detail cache 제거 + ref 해제 (Delete→Cargo 클리어 race 차단, Truck 패턴 정합)
+      queryClient.removeQueries({ queryKey: ["non-bl", "detail", id] });
       methods.reset(createEmptyNonBlFormValues());
       // hook 인자로 받은 id를 캡처 — hook 재호출 시점의 최신 값 사용
       clearDraft(`non::${id}`);
       clearDraft("non::new");
+      detailLoadedRef.current = false;
       useEntryFocusStore.getState().clearFocus("nonBl");
     },
   });

@@ -191,7 +191,12 @@ export function HouseBLEntry({ variant }: Props) {
     mutationFn: () => houseBlPort.delete(id!),
     onSuccess: () => {
       // List 자동 invalidate 금지 (§6.21) — 사용자가 List에서 Search로 직접 재조회
+      // detail cache 제거 + draft 정리 + ref 해제 (Delete→Cargo 클리어 race 차단, Truck 패턴 정합)
+      queryClient.removeQueries({ queryKey: ["house-bl", "detail", id] });
       form.reset(createEmptyHouseBlFormValues());
+      clearDraft(`house:${variant.key}:${id ?? "new"}`);
+      clearDraft(`house:${variant.key}:new`);
+      detailLoadedRef.current = false;
       useEntryFocusStore.getState().clearFocus(entryFocusKeys.houseBl(variant.key));
     },
   });
@@ -219,6 +224,9 @@ export function HouseBLEntry({ variant }: Props) {
   function handleResetEntry() {
     form.reset(createEmptyHouseBlFormValues());
     clearDraft(`house:${variant.key}:${id ?? "new"}`);
+    clearDraft(`house:${variant.key}:new`);
+    detailLoadedRef.current = false;
+    useEntryFocusStore.getState().clearFocus(entryFocusKeys.houseBl(variant.key));
     formRef.current?.reset();
   }
 
