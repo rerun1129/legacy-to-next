@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirChargeJpaEntity;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirDimJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
@@ -11,6 +12,7 @@ import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.out.AirBlPersistencePort;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
+import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,7 @@ public class AirBlUpdatePersistenceAdapter implements AirBlPersistencePort {
 
     private final HouseBlRepository houseBlRepository;
     private final HouseBlAirRepository houseBlAirRepository;
+    private final HouseBlAirDescRepository houseBlAirDescRepository;
     private final HouseBlJpaToDomainMapper jpaToDomainMapper;
     private final HouseBlDomainToJpaMapper domainToJpaMapper;
     private final HouseBlCargoMapper houseBlCargoMapper;
@@ -47,8 +50,11 @@ public class AirBlUpdatePersistenceAdapter implements AirBlPersistencePort {
         HouseBlAirJpaEntity airJpa = houseBlAirRepository.findByHouseBlHouseBlId(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.AIR_HBL_NOT_FOUND));
 
+        HouseBlAirDescJpaEntity descJpa = houseBlAirDescRepository
+                .findByAir_HouseBlAirId(airJpa.getHouseBlAirId()).orElse(null);
+
         // 도메인 변환 — dims/scheduleLegs/airCharges 컬렉션까지 LAZY 트리거
-        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, airJpa, null);
+        HouseBlAir domain = jpaToDomainMapper.toAirDomain(parentJpa, airJpa, descJpa);
 
         // 팩토리가 도메인 검증(etd≤eta 등) 포함 모든 필드를 도메인에 적용
         houseBlFactory.applyToEntity(command, domain);
@@ -56,6 +62,9 @@ public class AirBlUpdatePersistenceAdapter implements AirBlPersistencePort {
         // 도메인 → JPA dirty-check 기반 필드 반영 (§6.37 sub-set 매퍼)
         domainToJpaMapper.applyAirCommonFields(domain, parentJpa);
         domainToJpaMapper.applyAirBlFields(domain, airJpa);
+
+        // Desc 동기화 — 1:1 관계
+        applyDescSync(domain, airJpa, descJpa);
 
         // 자식 컬렉션 merge — orphanRemoval이 DELETE, 신규 진입이 INSERT를 처리 (§6.28)
         List<HouseBlAirDimJpaEntity> incomingDims = domain.getDims().stream()
@@ -73,5 +82,19 @@ public class AirBlUpdatePersistenceAdapter implements AirBlPersistencePort {
                 .toList();
         airJpa.mergeAirCharges(incomingCharges);
         // 트랜잭션 커밋 시 dirty-checking으로 parentJpa·airJpa UPDATE 자동 발생
+    }
+
+    private void applyDescSync(HouseBlAir domain, HouseBlAirJpaEntity airJpa,
+                               HouseBlAirDescJpaEntity existingDescJpa) {
+        HouseBlDesc domainDesc = domain.getDesc();
+        if (domainDesc == null) return;
+
+        HouseBlAirDescJpaEntity targetJpa = existingDescJpa != null
+                ? existingDescJpa
+                : new HouseBlAirDescJpaEntity();
+        houseBlDocMapper.applyAirDescFields(domainDesc, targetJpa, airJpa);
+        if (existingDescJpa == null) {
+            houseBlAirDescRepository.save(targetJpa);
+        }
     }
 }

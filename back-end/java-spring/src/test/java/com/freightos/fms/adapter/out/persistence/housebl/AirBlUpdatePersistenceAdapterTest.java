@@ -1,12 +1,14 @@
 package com.freightos.fms.adapter.out.persistence.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirDescJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlAirJpaEntity;
 import com.freightos.fms.adapter.out.persistence.housebl.entity.HouseBlJpaEntity;
 import com.freightos.fms.application.housebl.HouseBlFactory;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
+import com.freightos.fms.domain.housebl.entity.HouseBlDesc;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,7 @@ class AirBlUpdatePersistenceAdapterTest {
 
     @Mock private HouseBlRepository houseBlRepository;
     @Mock private HouseBlAirRepository houseBlAirRepository;
+    @Mock private HouseBlAirDescRepository houseBlAirDescRepository;
     @Mock private HouseBlJpaToDomainMapper jpaToDomainMapper;
     @Mock private HouseBlDomainToJpaMapper domainToJpaMapper;
     @Mock private HouseBlCargoMapper houseBlCargoMapper;
@@ -123,5 +126,56 @@ class AirBlUpdatePersistenceAdapterTest {
 
         then(jpaToDomainMapper).should(never()).toAirDomain(any(), any(), any());
         then(houseBlFactory).should(never()).applyToEntity(any(), any());
+    }
+
+    @Test
+    @DisplayName("update: 기존 descJpa가 있으면 applyAirDescFields 호출, save 미호출")
+    void update_existingDesc_appliesFieldsWithoutSave() {
+        Long id = 40L;
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setHouseBlId(id);
+        parentJpa.setJobDiv(JobDiv.AIR);
+        HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
+        HouseBlAirDescJpaEntity descJpa = new HouseBlAirDescJpaEntity();
+        HouseBlAir domain = HouseBlAir.create(Bound.EXP);
+        domain.assignIdentity(id, null, null, null, null);
+        HouseBlDesc domainDesc = HouseBlDesc.create(id);
+        domain.initDesc(domainDesc);
+
+        given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
+        given(houseBlAirRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(airJpa));
+        given(houseBlAirDescRepository.findByAir_HouseBlAirId(airJpa.getHouseBlAirId()))
+                .willReturn(Optional.of(descJpa));
+        given(jpaToDomainMapper.toAirDomain(parentJpa, airJpa, descJpa)).willReturn(domain);
+
+        adapter.update(id, emptyCommand());
+
+        then(houseBlDocMapper).should().applyAirDescFields(domainDesc, descJpa, airJpa);
+        then(houseBlAirDescRepository).should(never()).save(any());
+    }
+
+    @Test
+    @DisplayName("update: descJpa가 없으면 신규 HouseBlAirDescJpaEntity 생성 후 save 호출")
+    void update_noExistingDesc_createsAndSavesNewDescJpa() {
+        Long id = 50L;
+        HouseBlJpaEntity parentJpa = new HouseBlJpaEntity();
+        parentJpa.setHouseBlId(id);
+        parentJpa.setJobDiv(JobDiv.AIR);
+        HouseBlAirJpaEntity airJpa = new HouseBlAirJpaEntity();
+        HouseBlAir domain = HouseBlAir.create(Bound.EXP);
+        domain.assignIdentity(id, null, null, null, null);
+        HouseBlDesc domainDesc = HouseBlDesc.create(id);
+        domain.initDesc(domainDesc);
+
+        given(houseBlRepository.findById(id)).willReturn(Optional.of(parentJpa));
+        given(houseBlAirRepository.findByHouseBlHouseBlId(id)).willReturn(Optional.of(airJpa));
+        given(houseBlAirDescRepository.findByAir_HouseBlAirId(airJpa.getHouseBlAirId()))
+                .willReturn(Optional.empty());
+        given(jpaToDomainMapper.toAirDomain(parentJpa, airJpa, null)).willReturn(domain);
+
+        adapter.update(id, emptyCommand());
+
+        then(houseBlDocMapper).should().applyAirDescFields(any(HouseBlDesc.class), any(HouseBlAirDescJpaEntity.class), any(HouseBlAirJpaEntity.class));
+        then(houseBlAirDescRepository).should().save(any(HouseBlAirDescJpaEntity.class));
     }
 }
