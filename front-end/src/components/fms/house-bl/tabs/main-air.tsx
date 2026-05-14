@@ -18,11 +18,11 @@ import { AirChargeInfoPanel }  from "./sections/air-charge-info-panel";
 interface Props { variant: BLVariantConfig; active?: boolean }
 
 export const HOUSE_BL_AIR_EXP_REGISTRY: WidgetDef[] = [
-  { key: "party-air",    label: "Party",             component: PartyPanel,           defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 5 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "party-air",    label: "Party",             component: PartyPanel,           defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
   { key: "schedule-air", label: "Schedule",          component: AirSchedulePanel,     defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
   { key: "document-air", label: "Document",          component: AirDocumentPanel,     defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "trade-air",    label: "Trade",             component: AirTradePanel,        defaultPosition: { col: 2, row: 2, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "perf-air",     label: "Performance",       component: AirPerformancePanel,  defaultPosition: { col: 4, row: 2, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
+  { key: "perf-air",     label: "Performance",       component: AirPerformancePanel,  defaultPosition: { col: 4, row: 2, colSpan: 2, rowSpan: 1 }, minColSpan: 1, minRowSpan: 1 },
   { key: "issue-air",    label: "Issue Information", component: AirIssuePanel,        defaultPosition: { col: 4, row: 4, colSpan: 2, rowSpan: 1 }, minColSpan: 1, minRowSpan: 1 },
   { key: "cargo-air",    label: "Cargo",             component: AirCargoPanel,        defaultPosition: { col: 3, row: 7, colSpan: 3, rowSpan: 2 }, minColSpan: 2, minRowSpan: 1 },
   { key: "handling-air", label: "Handling Information", component: AirHandlingInfoPanel, defaultPosition: { col: 0, row: 7, colSpan: 3, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
