@@ -14,7 +14,9 @@ import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JPA ORM 엔티티 — House B/L 항공 확장.
@@ -156,5 +158,107 @@ public class HouseBlAirJpaEntity extends BaseJpaEntity {
     public void syncAirCharges(List<HouseBlAirChargeJpaEntity> newCharges) {
         this.airCharges.clear();
         this.airCharges.addAll(newCharges);
+    }
+
+    /**
+     * AIR DIM merge-by-id (§6.28 자식 row PUT + merge-by-id).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeDims(List<HouseBlAirDimJpaEntity> incoming) {
+        Map<Long, HouseBlAirDimJpaEntity> existingById = new HashMap<>();
+        for (HouseBlAirDimJpaEntity e : this.dims) {
+            if (e.getHouseBlAirDimId() != null) existingById.put(e.getHouseBlAirDimId(), e);
+        }
+        List<HouseBlAirDimJpaEntity> merged = new ArrayList<>();
+        for (HouseBlAirDimJpaEntity inc : incoming) {
+            if (inc.getHouseBlAirDimId() != null && existingById.containsKey(inc.getHouseBlAirDimId())) {
+                HouseBlAirDimJpaEntity existing = existingById.get(inc.getHouseBlAirDimId());
+                copyAirDimFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.dims.clear();
+        this.dims.addAll(merged);
+    }
+
+    /**
+     * AIR ScheduleLeg merge-by-id (§6.28 자식 row PUT + merge-by-id).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeScheduleLegs(List<HouseBlScheduleLegJpaEntity> incoming) {
+        Map<Long, HouseBlScheduleLegJpaEntity> existingById = new HashMap<>();
+        for (HouseBlScheduleLegJpaEntity e : this.scheduleLegs) {
+            if (e.getHouseBlScheduleLegId() != null) existingById.put(e.getHouseBlScheduleLegId(), e);
+        }
+        List<HouseBlScheduleLegJpaEntity> merged = new ArrayList<>();
+        for (HouseBlScheduleLegJpaEntity inc : incoming) {
+            if (inc.getHouseBlScheduleLegId() != null && existingById.containsKey(inc.getHouseBlScheduleLegId())) {
+                HouseBlScheduleLegJpaEntity existing = existingById.get(inc.getHouseBlScheduleLegId());
+                copyScheduleLegFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.scheduleLegs.clear();
+        this.scheduleLegs.addAll(merged);
+    }
+
+    /**
+     * AIR AirCharge merge-by-id (§6.28 자식 row PUT + merge-by-id).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeAirCharges(List<HouseBlAirChargeJpaEntity> incoming) {
+        Map<Long, HouseBlAirChargeJpaEntity> existingById = new HashMap<>();
+        for (HouseBlAirChargeJpaEntity e : this.airCharges) {
+            if (e.getHouseBlAirChargeId() != null) existingById.put(e.getHouseBlAirChargeId(), e);
+        }
+        List<HouseBlAirChargeJpaEntity> merged = new ArrayList<>();
+        for (HouseBlAirChargeJpaEntity inc : incoming) {
+            if (inc.getHouseBlAirChargeId() != null && existingById.containsKey(inc.getHouseBlAirChargeId())) {
+                HouseBlAirChargeJpaEntity existing = existingById.get(inc.getHouseBlAirChargeId());
+                copyAirChargeFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
+        this.airCharges.clear();
+        this.airCharges.addAll(merged);
+    }
+
+    private void copyAirDimFields(HouseBlAirDimJpaEntity src, HouseBlAirDimJpaEntity dst) {
+        dst.setLengthCm(src.getLengthCm());
+        dst.setWidthCm(src.getWidthCm());
+        dst.setHeightCm(src.getHeightCm());
+        dst.setQuantity(src.getQuantity());
+        dst.setCbm(src.getCbm());
+        dst.setVolumeWeightKg(src.getVolumeWeightKg());
+    }
+
+    private void copyScheduleLegFields(HouseBlScheduleLegJpaEntity src, HouseBlScheduleLegJpaEntity dst) {
+        dst.setToCode(src.getToCode());
+        dst.setByCarrier(src.getByCarrier());
+        dst.setFlightNo(src.getFlightNo());
+        dst.setOnBoardDt(src.getOnBoardDt());
+        dst.setOnBoardTm(src.getOnBoardTm());
+        dst.setArrivalDt(src.getArrivalDt());
+        dst.setArrivalTm(src.getArrivalTm());
+    }
+
+    private void copyAirChargeFields(HouseBlAirChargeJpaEntity src, HouseBlAirChargeJpaEntity dst) {
+        dst.setFreightCode(src.getFreightCode());
+        dst.setCurrencyCode(src.getCurrencyCode());
+        dst.setPer(src.getPer());
+        dst.setFreightTerm(src.getFreightTerm());
+        dst.setGrossWeightKg(src.getGrossWeightKg());
+        dst.setRateClass(src.getRateClass());
+        dst.setChargeWeightKg(src.getChargeWeightKg());
+        dst.setRate(src.getRate());
     }
 }

@@ -19,6 +19,8 @@ public interface HouseBlUseCase {
     HouseBlDetailResult updateHouseBl(Long id, UpdateHouseBlCommand command);
     /** Sea House B/L 전용 update — §6.35 Port+Adapter 패턴. void 반환으로 Controller ApiResponse<Void>화. */
     void updateSeaHbl(Long id, UpdateHouseBlCommand command);
+    /** Air House B/L 전용 update — §6.35 Port+Adapter 패턴. void 반환으로 Controller ApiResponse<Void>화. */
+    void updateAirHbl(Long id, UpdateHouseBlCommand command);
     void deleteHouseBlById(Long id);
     void changeHblNo(Long id, ChangeHouseBlNoCommand command);
     /** hbl_no EXACT 매칭으로 house_bl_id PK 목록 조회 (최대 2건). jobDiv로 도메인 격리. */

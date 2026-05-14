@@ -92,7 +92,8 @@ public class HouseBlFactory {
         truckSubFactory.applyTruckCreate(entity, cmd.truckDetail());
         truckSubFactory.applyTruckVolumeDivisor(entity, cmd.volumeDivisor());
         truckSubFactory.applyTruckRemark(entity, cmd.remark());
-        airSubFactory.applyAirCreate(entity, cmd);
+        airSubFactory.applyAirCreate(entity, cmd.airDetail());
+        airSubFactory.applyAirRemark(entity, cmd.remark());
         applySubCreate(entity, cmd);
         return entity;
     }
@@ -112,7 +113,8 @@ public class HouseBlFactory {
         truckSubFactory.applyTruckUpdate(entity, cmd.truckDetail());
         truckSubFactory.applyTruckVolumeDivisor(entity, cmd.volumeDivisor());
         truckSubFactory.applyTruckRemark(entity, cmd.remark());
-        airSubFactory.applyAirUpdate(entity, cmd);
+        airSubFactory.applyAirUpdate(entity, cmd.airDetail());
+        airSubFactory.applyAirRemark(entity, cmd.remark());
         applySubUpdate(entity, cmd);
     }
 

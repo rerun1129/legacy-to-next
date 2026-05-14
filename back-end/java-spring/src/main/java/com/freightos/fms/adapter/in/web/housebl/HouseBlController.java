@@ -102,6 +102,11 @@ public class HouseBlController {
             houseBlUseCase.updateSeaHbl(id, cmd);
             return ResponseEntity.ok(ApiResponse.ok(MessageCode.SEA_HBL_UPDATED.message()));
         }
+        // Air jobDiv는 §6.35 전용 Port+Adapter — void 반환
+        if (Objects.equals("AIR", req.jobDiv())) {
+            houseBlUseCase.updateAirHbl(id, cmd);
+            return ResponseEntity.ok(ApiResponse.ok(MessageCode.AIR_HBL_UPDATED.message()));
+        }
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.updateHouseBl(id, cmd))));
     }
 

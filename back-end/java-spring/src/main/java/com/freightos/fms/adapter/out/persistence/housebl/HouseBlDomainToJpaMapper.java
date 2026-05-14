@@ -212,6 +212,54 @@ public class HouseBlDomainToJpaMapper {
         applySeaFields(domain, jpa);
     }
 
+    /**
+     * AIR 전용 공통 필드 적용 (Update 경로 전용).
+     * AIR form에서 직접 편집 경로가 없는 masterBlId/mblNo/masterRefNo는
+     * setter를 두지 않아 DB 기존 값을 보호한다 (§6.37 sub-set — Sea/Truck/NonBl 선례 동일 패턴).
+     */
+    public void applyAirCommonFields(HouseBl domain, HouseBlJpaEntity jpa) {
+        if (domain.getId() != null) jpa.setHouseBlId(domain.getId());
+        jpa.setBound(domain.getBound());
+        jpa.setJobDiv(JobDiv.AIR);
+        jpa.setHblNo(mapOrNull(domain.getHblNo(), BlNumber::value));
+        jpa.setPolCode(mapOrNull(domain.getPolCode(), PortCode::value));
+        jpa.setPodCode(mapOrNull(domain.getPodCode(), PortCode::value));
+        jpa.setEtd(mapOrNull(domain.getEtd(), BlDate::asString));
+        jpa.setEta(mapOrNull(domain.getEta(), BlDate::asString));
+        jpa.setActualCustomerCode(mapOrNull(domain.getActualCustomerCode(), CustomerCode::value));
+        jpa.setOperatorCode(mapOrNull(domain.getOperatorCode(), EmployeeCode::value));
+        jpa.setTeamCode(mapOrNull(domain.getTeamCode(), TeamCode::value));
+        jpa.setSalesManCode(mapOrNull(domain.getSalesManCode(), EmployeeCode::value));
+        jpa.setShipmentType(domain.getShipmentType());
+        jpa.setFreightTerm(domain.getFreightTerm());
+        jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
+        jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
+        jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+        jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
+        jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+        jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
+        jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
+        jpa.setDocPartnerAddress(mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
+        jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
+        jpa.setPkgUnit(domain.getPkgUnit());
+        jpa.setWeightUnit(domain.getWeightUnit());
+        jpa.setGrossWeightKg(mapOrNull(domain.getGrossWeightKg(), Weight::kg));
+        jpa.setCbm(mapOrNull(domain.getCbm(), Volume::cbm));
+        jpa.setSettlePartnerCode(mapOrNull(domain.getSettlePartnerCode(), CustomerCode::value));
+        jpa.setIncoterms(domain.getIncoterms());
+        jpa.setSalesClass(domain.getSalesClass());
+        jpa.setMainItemName(domain.getMainItemName());
+        jpa.setHsCode(domain.getHsCode());
+    }
+
+    /**
+     * AIR 전용 ext 필드 적용 (Update 경로 전용).
+     * applyAirFields와 동일 내용 — UPDATE 어댑터 전용 명명으로 책임을 분리한다 (§6.37).
+     */
+    public void applyAirBlFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
+        applyAirFields(domain, jpa);
+    }
+
     public void applyAirFields(HouseBlAir domain, HouseBlAirJpaEntity jpa) {
         jpa.setAirlineCode(mapOrNull(domain.getAirlineCode(), AirlineCode::value));
         jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));

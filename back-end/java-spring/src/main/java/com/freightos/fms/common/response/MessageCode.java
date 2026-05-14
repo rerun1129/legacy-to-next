@@ -26,7 +26,9 @@ public enum MessageCode {
     TRUCK_BL_DELETED("삭제되었습니다."),
     TRUCK_BL_NOT_FOUND("Truck B/L을 찾을 수 없습니다."),
     SEA_HBL_UPDATED("수정되었습니다."),
-    SEA_HBL_NOT_FOUND("Sea House B/L을 찾을 수 없습니다.");
+    SEA_HBL_NOT_FOUND("Sea House B/L을 찾을 수 없습니다."),
+    AIR_HBL_UPDATED("수정되었습니다."),
+    AIR_HBL_NOT_FOUND("Air House B/L을 찾을 수 없습니다.");
 
     private final String message;
 
