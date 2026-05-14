@@ -349,6 +349,7 @@
 .field-widget-item.is-dragging { opacity: 0.35; }
 .truck-party-panel .field-widget-item + .field-widget-item { padding-top: 4px; }
 .truck-cargo-panel .li__input--tight > div > .lcn { display: block; width: 100%; padding: 0; gap: 0; }
+.air-cargo-panel .li__input--tight > div > .lcn { display: block; width: 100%; padding: 0; gap: 0; }
 
 .field-widget-container.is-edit {
   outline: 1px dashed color-mix(in srgb, var(--tab-accent) 35%, transparent);

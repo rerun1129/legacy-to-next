@@ -114,7 +114,7 @@ export function AirCargoPanel({ variant }: Props) {
   ];
 
   return (
-    <div className="panel panel--col-flex">
+    <div className="panel panel--col-flex air-cargo-panel">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Cargo</span>
