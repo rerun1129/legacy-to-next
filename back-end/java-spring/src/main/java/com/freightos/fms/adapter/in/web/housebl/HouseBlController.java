@@ -7,6 +7,8 @@ import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlDetailResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.HouseBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.housebl.dto.SearchHouseBlRequest;
 import com.freightos.fms.adapter.in.web.housebl.dto.UpdateHouseBlRequest;
+import com.freightos.fms.adapter.in.web.validation.AirGroup;
+import com.freightos.fms.adapter.in.web.validation.AirImpGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaImpGroup;
 import com.freightos.common.response.ApiResponse;
@@ -69,6 +71,11 @@ public class HouseBlController {
             UriComponentsBuilder uriBuilder) {
         if ("SEA".equals(request.jobDiv())) {
             Class<?> group = "IMP".equals(request.bound()) ? SeaImpGroup.class : SeaGroup.class;
+            Set<ConstraintViolation<CreateHouseBlRequest>> violations = validator.validate(request, group);
+            if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        }
+        if ("AIR".equals(request.jobDiv())) {
+            Class<?> group = "IMP".equals(request.bound()) ? AirImpGroup.class : AirGroup.class;
             Set<ConstraintViolation<CreateHouseBlRequest>> violations = validator.validate(request, group);
             if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         }

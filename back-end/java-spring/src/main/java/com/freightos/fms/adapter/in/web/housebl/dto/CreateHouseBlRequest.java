@@ -1,39 +1,42 @@
 package com.freightos.fms.adapter.in.web.housebl.dto;
 
+import com.freightos.fms.adapter.in.web.validation.AirGroup;
+import com.freightos.fms.adapter.in.web.validation.AirImpGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaImpGroup;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateHouseBlRequest(
         @NotNull String jobDiv,
-        @NotNull @NotBlank(groups = SeaGroup.class) String bound,
-        @Size(max = 35) @NotBlank(groups = SeaGroup.class) String hblNo,
-        @NotNull @NotBlank(groups = SeaGroup.class) String shipmentType,
+        @NotNull @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String bound,
+        @Size(max = 35) @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String hblNo,
+        @NotNull @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String shipmentType,
         @NotNull String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
-        @Size(max = 20) @NotBlank(groups = SeaImpGroup.class) String consigneeCode,
+        @Size(max = 20) @NotBlank(groups = {SeaImpGroup.class, AirImpGroup.class}) String consigneeCode,
         String consigneeAddress,
         @Size(max = 20) String notifyCode,
         String notifyAddress,
-        @Size(max = 20) @NotBlank(groups = SeaGroup.class) String docPartnerCode,
+        @Size(max = 20) @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String docPartnerCode,
         String docPartnerAddress,
         @Size(max = 20) String settlePartnerCode,
-        @Size(max = 5) @NotBlank(groups = SeaGroup.class) String polCode,
-        @Size(max = 5) @NotBlank(groups = SeaGroup.class) String podCode,
-        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaGroup.class) String etd,
-        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaGroup.class) String eta,
+        @Size(max = 5) @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String polCode,
+        @Size(max = 5) @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String podCode,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String etd,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String eta,
         @Min(0) Integer pkgQty,
         String pkgUnit,
         String weightUnit,
         @DecimalMin("0") BigDecimal grossWeightKg,
         @DecimalMin("0") BigDecimal cbm,
-        @Size(max = 20) @NotBlank(groups = SeaGroup.class) String actualCustomerCode,
-        @NotBlank(groups = SeaGroup.class) String operatorCode,
-        @NotBlank(groups = SeaGroup.class) String teamCode,
-        String salesManCode,
+        @Size(max = 20) @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String actualCustomerCode,
+        @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String operatorCode,
+        @NotBlank(groups = {SeaGroup.class, AirGroup.class}) String teamCode,
+        @NotBlank(groups = AirGroup.class) String salesManCode,
         Long masterBlId,
         String incoterms,
         String salesClass,
@@ -62,7 +65,7 @@ public record CreateHouseBlRequest(
         SeaDetailRequest seaDetail,
 
         // AIR 확장 필드
-        AirDetailRequest airDetail,
+        @Valid AirDetailRequest airDetail,
 
         // Sub 엔티티
         DescRequest desc,
@@ -101,7 +104,7 @@ public record CreateHouseBlRequest(
 
     /** AIR 모드 확장 필드. */
     public record AirDetailRequest(
-            String airlineCode,
+            @NotBlank(groups = AirGroup.class) String airlineCode,
             @DecimalMin("0") BigDecimal chargeWeightKg,
             @DecimalMin("0") BigDecimal volumeWeightKg,
             String rateClass,
