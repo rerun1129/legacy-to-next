@@ -35,7 +35,6 @@ export function createEmptyTruckBlFormValues(): TruckBlFormValues {
 
     // Performance
     actualCustomerCode: "", actualCustomerName: "",
-    customerPic:        "",
     settlePartnerCode:  "", settlePartnerName:  "",
     salesManCode:       "", salesManName:       "",
     operatorCode:       "", operatorName:       "",

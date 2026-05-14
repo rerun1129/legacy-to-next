@@ -81,7 +81,6 @@ export const TRUCK_BL_SCHEMA = z.object({
   // Performance
   actualCustomerCode: z.string().optional(),
   actualCustomerName: z.string().optional(),
-  customerPic:        z.string().optional(),
   settlePartnerCode:  z.string().optional(),
   settlePartnerName:  z.string().optional(),
   salesManCode:       z.string().optional(),

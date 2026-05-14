@@ -23,17 +23,6 @@ export function TruckPerformancePanel() {
       ),
     },
     {
-      key: "customer-pic",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          label="Customer PIC"
-          codeProps={{ ...register("customerPic") }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-      ),
-    },
-    {
       key: "settle-partner",
       render: () => (
         <CodeBox
