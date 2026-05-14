@@ -6,8 +6,8 @@ import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-
 import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
-function TruckScheduleVesselDates() {
-  const { register, control } = useFormContext<TruckBlFormValues>();
+function TruckScheduleVessel() {
+  const { register } = useFormContext<TruckBlFormValues>();
   const ITEMS: FieldItemDef[] = [
     {
       key: "vessel",
@@ -20,6 +20,13 @@ function TruckScheduleVesselDates() {
         </div>
       ),
     },
+  ];
+  return <FieldItemGrid itemScope="truck-schedule-panel.vessel" items={ITEMS} shouldShowRowControls={false} />;
+}
+
+function TruckScheduleDates() {
+  const { control } = useFormContext<TruckBlFormValues>();
+  const ITEMS: FieldItemDef[] = [
     {
       key: "etd",
       render: () => (
@@ -69,10 +76,10 @@ function TruckScheduleVesselDates() {
       ),
     },
   ];
-  return <FieldItemGrid itemScope="truck-schedule-panel.vessel-dates" items={ITEMS} />;
+  return <FieldItemGrid itemScope="truck-schedule-panel.dates" items={ITEMS} shouldShowRowControls={false} />;
 }
 
-function TruckSchedulePorts() {
+function TruckSchedulePol() {
   const { register } = useFormContext<TruckBlFormValues>();
   const ITEMS: FieldItemDef[] = [
     {
@@ -88,6 +95,13 @@ function TruckSchedulePorts() {
         />
       ),
     },
+  ];
+  return <FieldItemGrid itemScope="truck-schedule-panel.pol" items={ITEMS} cols={1} shouldShowRowControls={false} />;
+}
+
+function TruckSchedulePod() {
+  const { register } = useFormContext<TruckBlFormValues>();
+  const ITEMS: FieldItemDef[] = [
     {
       key: "pod",
       render: () => (
@@ -102,13 +116,15 @@ function TruckSchedulePorts() {
       ),
     },
   ];
-  return <FieldItemGrid itemScope="truck-schedule-panel.ports" items={ITEMS} shouldShowRowControls={false} />;
+  return <FieldItemGrid itemScope="truck-schedule-panel.pod" items={ITEMS} cols={1} shouldShowRowControls={false} />;
 }
 
 export function TruckSchedulePanel() {
   const fields: FieldWidgetDef[] = [
-    { key: "vessel-dates", label: "Vessel & Dates", render: () => <TruckScheduleVesselDates /> },
-    { key: "ports",        label: "Ports",          render: () => <TruckSchedulePorts /> },
+    { key: "vessel", label: "Vessel", render: () => <TruckScheduleVessel /> },
+    { key: "dates",  label: "Dates",  render: () => <TruckScheduleDates /> },
+    { key: "pol",    label: "POL",    render: () => <TruckSchedulePol /> },
+    { key: "pod",    label: "POD",    render: () => <TruckSchedulePod /> },
   ];
 
   return (
