@@ -139,7 +139,7 @@ public class TruckBlFactory {
     }
 
     private TruckBlDetailResult.DescView toDescView(HouseBlDesc desc) {
-        if (desc == null) return null;
+        if (desc == null) return TruckBlDetailResult.DescView.empty();
         return new TruckBlDetailResult.DescView(
                 desc.getMarks(),
                 desc.getDescription(),

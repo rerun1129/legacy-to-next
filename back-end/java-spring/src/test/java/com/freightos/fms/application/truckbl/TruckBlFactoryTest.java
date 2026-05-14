@@ -50,13 +50,13 @@ class TruckBlFactoryTest {
     }
 
     @Test
-    @DisplayName("toDetailResult: desc가 null이면 DescView도 null을 반환한다")
-    void toDetailResult_nullDesc_returnsNullDescView() {
+    @DisplayName("toDetailResult: desc가 null이면 모든 필드가 null인 빈 DescView를 반환한다")
+    void toDetailResult_nullDesc_returnsEmptyDescView() {
         HouseBlTruck truck = HouseBlTruck.create(Bound.EXP);
 
         TruckBlDetailResult result = truckBlFactory.toDetailResult(truck);
 
-        assertThat(result.desc()).isNull();
+        assertThat(result.desc()).isEqualTo(TruckBlDetailResult.DescView.empty());
     }
 
     @Test

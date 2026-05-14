@@ -87,7 +87,12 @@ public record TruckBlDetailResponse(
     public record DescView(
             String marks, String description,
             String descClause1, String descClause2
-    ) {}
+    ) {
+        /** desc 행이 아직 없을 때 FE zod object 스키마 통과용 빈 인스턴스를 반환한다. */
+        public static DescView empty() {
+            return new DescView(null, null, null, null);
+        }
+    }
 
     public static TruckBlDetailResponse from(TruckBlDetailResult result) {
         List<TruckOrderView> truckOrderViews = result.truckOrders() == null ? null
@@ -99,7 +104,7 @@ public record TruckBlDetailResponse(
                                 o.containerNo(), o.containerType(),
                                 o.sealNo1(), o.sealNo2(), o.sealNo3()))
                         .toList();
-        DescView descView = result.desc() == null ? null
+        DescView descView = result.desc() == null ? DescView.empty()
                 : new DescView(
                         result.desc().marks(), result.desc().description(),
                         result.desc().descClause1(), result.desc().descClause2());

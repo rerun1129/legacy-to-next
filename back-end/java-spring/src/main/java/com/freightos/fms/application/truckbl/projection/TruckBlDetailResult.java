@@ -89,5 +89,10 @@ public record TruckBlDetailResult(
     public record DescView(
             String marks, String description,
             String descClause1, String descClause2
-    ) {}
+    ) {
+        /** desc 행이 아직 없을 때 FE zod object 스키마 통과용 빈 인스턴스를 반환한다. */
+        public static DescView empty() {
+            return new DescView(null, null, null, null);
+        }
+    }
 }
