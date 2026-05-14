@@ -133,7 +133,7 @@ public record NonBlDetailResult(
             return new NonBlContainerView(
                     c.getId(),
                     VoMapper.mapOrNull(c.getContainerNo(), ContainerNumber::value),
-                    Nullables.mapOrNull(c.getContainerType(), ContainerType::getCode),
+                    Nullables.mapOrNull(c.getContainerType(), ContainerType::name),
                     VoMapper.mapOrNull(c.getSealNo1(), SealNumber::value),
                     VoMapper.mapOrNull(c.getSealNo2(), SealNumber::value),
                     VoMapper.mapOrNull(c.getSealNo3(), SealNumber::value),
