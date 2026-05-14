@@ -56,7 +56,7 @@ export function buildHouseBlRequest(
     salesClass:       toStr(values.salesClass),
     mainItemName:     toStr(values.mainItemName),
     hsCode:           toStr(values.hsCode),
-    mblNo:            toStr(values.mblNo),
+    mblNo:            toStr(values.mbl),
     masterRefNo:      toStr(values.masterRefNo),
     remark:           toStr(values.remark),
     desc:             values.desc,

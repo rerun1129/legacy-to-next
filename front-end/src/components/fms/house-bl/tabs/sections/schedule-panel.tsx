@@ -185,7 +185,7 @@ export function SchedulePanel({ variant }: Props) {
           kind="lcn"
           variant="panel"
           label="Liner"
-          codeProps={{ ...register("linerCode"), placeholder: "UNLOC" }}
+          codeProps={{ ...register("seaDetail.linerCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("linerName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
         />

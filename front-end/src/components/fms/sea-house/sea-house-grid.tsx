@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { Ship } from "lucide-react";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
@@ -22,6 +24,9 @@ interface Props {
 
 export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll, bound }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const setFocus = useEntryFocusStore((s) => s.setFocus);
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
@@ -40,6 +45,18 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
   const rows = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
 
+  function handleHblDoubleClick(row: SeaHouseRow) {
+    const variantKey = bound === "EXP" ? "sea-exp" : "sea-imp";
+    const path = `/fms/house-bl/${variantKey}/entry`;
+    // 프레시 조회: stale 캐시·draft 제거 후 Entry 진입
+    queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", row.id] });
+    clearDraft(`house:${variantKey}:${row.id}`);
+    setFocus(entryFocusKeys.houseBl(variantKey), row.id);
+    // hot-marker: Entry 진입 시 하이라이트(§6.16)
+    sessionStorage.setItem(`house-bl-entry:hot:${row.id}`, "1");
+    router.push(path);
+  }
+
   const columns: GridColumn<SeaHouseRow>[] = [
     {
       key: "hblNo",
@@ -47,9 +64,7 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
       minWidth: 160,
       render: (v, row) => (
         <div
-          onDoubleClick={() => router.push(
-            `${bound === "EXP" ? "/fms/house-bl/sea-exp/entry" : "/fms/house-bl/sea-imp/entry"}?id=${row.id}`
-          )}
+          onDoubleClick={() => handleHblDoubleClick(row)}
           style={{ cursor: "pointer" }}
         >
           {String(v ?? "")}

@@ -117,6 +117,21 @@ class HouseBlSeaSubFactoryTest {
         assertThat(sea.getVesselNationality()).isNull();
     }
 
+    @Test
+    @DisplayName("applySeaUpdate: deliveryCode 비null이면 entity.assignDeliveryCode 반영")
+    void applySeaUpdate_deliveryCode_patches() {
+        HouseBlSea sea = HouseBlSea.create(Bound.EXP);
+        UpdateHouseBlCommand.SeaDetailCommand cmd = new UpdateHouseBlCommand.SeaDetailCommand(
+                null, null, null, null, null, null,
+                null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null,
+                "KRPUS"   // deliveryCode
+        );
+        sut.applySeaUpdate(sea, cmd);
+        assertThat(sea.getDeliveryCode()).isNotNull();
+        assertThat(sea.getDeliveryCode().value()).isEqualTo("KRPUS");
+    }
+
     // ── 헬퍼 ─────────────────────────────────────────────────────────
 
     private CreateHouseBlCommand.SeaDetailCommand createSeaDetailCommand() {

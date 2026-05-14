@@ -65,6 +65,7 @@ class HouseBlSeaSubFactory {
         applySeaCargoTerms(sea, s.serviceTerm(), s.rton(), s.sayInformation(), s.noOfContainerOrPackages());
         if (s.blType() != null) sea.updateBlType(BlType.valueOf(s.blType()));
         if (s.vesselNationality() != null) sea.updateVesselNationality(s.vesselNationality());
+        if (s.deliveryCode() != null) entity.assignDeliveryCode(PortCode.of(s.deliveryCode()));
     }
 
     private void applySeaCargoTerms(HouseBlSea sea, String serviceTerm,
