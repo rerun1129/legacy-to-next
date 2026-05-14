@@ -140,6 +140,20 @@ export const PAGE_BUNDLES: PageBundle[] = [
     ],
   },
   {
+    pageId: "air-house-bl-entry",
+    pageLabel: "Air House B/L Entry",
+    sourceFile: "components/fms/house-bl/house-bl-entry.tsx",
+    buttons: [
+      { id: "new",          label: "New",          icon: FilePlus,       initialVariant: "normal",      type: "button", confirmMessage: "New 버튼이 클릭되었습니다." },
+      { id: "search-bl",    label: "Search B/L",   icon: Search,         initialVariant: "search",      type: "button", confirmMessage: "Search B/L 버튼이 클릭되었습니다." },
+      { id: "save",         label: "Save",         icon: Save,           initialVariant: "transaction", type: "submit", confirmMessage: "Save 버튼이 클릭되었습니다." },
+      { id: "delete",       label: "Delete",       icon: Trash2,         initialVariant: "danger",      type: "button", confirmMessage: "Delete 버튼이 클릭되었습니다." },
+      { id: "print",        label: "Print",        icon: Printer,        initialVariant: "normal",      type: "button", confirmMessage: "Print 버튼이 클릭되었습니다." },
+      { id: "switch-bl",    label: "Switch B/L",   icon: ArrowLeftRight, initialVariant: "transaction", type: "button", confirmMessage: "Switch B/L 버튼이 클릭되었습니다." },
+      { id: "change-bl-no", label: "Change B/L No.", icon: RefreshCw,   initialVariant: "transaction", type: "button", confirmMessage: "Change B/L No. 버튼이 클릭되었습니다." },
+    ],
+  },
+  {
     pageId: "non-bl-entry",
     pageLabel: "Non B/L Entry",
     sourceFile: "components/fms/non-bl/non-bl-entry.tsx",
