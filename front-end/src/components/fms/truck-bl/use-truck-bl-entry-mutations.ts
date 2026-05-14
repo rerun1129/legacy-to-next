@@ -14,6 +14,7 @@ export function useTruckBlEntryMutations(args: {
   form: UseFormReturn<TruckBlFormValues>;
   detailLoadedRef: MutableRefObject<boolean>;
   clearDraft: (key: string) => void;
+  bumpResetVersion: () => void;
 }): {
   createMutation: UseMutationResult<{ id: number }, Error, TruckBlFormValues>;
   updateMutation: UseMutationResult<void, Error, TruckBlFormValues>;
@@ -22,7 +23,7 @@ export function useTruckBlEntryMutations(args: {
   handleSubmit: (data: TruckBlFormValues) => Promise<void>;
   handleDelete: () => Promise<void>;
 } {
-  const { id, form, detailLoadedRef, clearDraft } = args;
+  const { id, form, detailLoadedRef, clearDraft, bumpResetVersion } = args;
   const queryClient = useQueryClient();
   const isEdit = Boolean(id);
 
@@ -61,6 +62,7 @@ export function useTruckBlEntryMutations(args: {
       clearDraft(`truck::${id}`);
       clearDraft("truck::new");
       detailLoadedRef.current = false;
+      bumpResetVersion();
     },
   });
 

@@ -17,6 +17,8 @@ import { useSearchTruckBl }                      from "./use-search-truck-bl";
 export function useTruckBlEntry() {
   const [tab, setTab] = useState("main");
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
+  const [resetVersion, setResetVersion] = useState(0);
+  const bumpResetVersion = useCallback(() => setResetVersion(v => v + 1), []);
   const id = useEntryFocusStore((s) => s.focus.truckBl);
   const isEdit = Boolean(id);
   const detailLoadedRef = useRef<boolean>(false);
@@ -136,6 +138,7 @@ export function useTruckBlEntry() {
     form,
     detailLoadedRef,
     clearDraft,
+    bumpResetVersion,
   });
 
   const resetDetailLoaded = useCallback(() => {
@@ -150,6 +153,7 @@ export function useTruckBlEntry() {
     clearDraft("truck::new");
     detailLoadedRef.current = false;
     useEntryFocusStore.getState().clearFocus("truckBl");
+    bumpResetVersion();
   }
 
   function handleChangeBlNo() {
@@ -176,6 +180,7 @@ export function useTruckBlEntry() {
     isSavePending,
     tab,
     setTab,
+    resetVersion,
     isChangeBlNoModalOpen,
     setIsChangeBlNoModalOpen,
     resetDetailLoaded,

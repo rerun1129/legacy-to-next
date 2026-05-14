@@ -14,6 +14,7 @@ export function useNonBlEntryMutations(args: {
   methods: UseFormReturn<NonBlFormValues>;
   detailLoadedRef: MutableRefObject<boolean>;
   clearDraft: (key: string) => void;
+  bumpResetVersion: () => void;
 }): {
   createMutation: UseMutationResult<{ id: number }, Error, NonBlFormValues>;
   updateMutation: UseMutationResult<void, Error, NonBlFormValues>;
@@ -22,7 +23,7 @@ export function useNonBlEntryMutations(args: {
   handleSubmit: (data: NonBlFormValues) => Promise<void>;
   handleDelete: () => Promise<void>;
 } {
-  const { id, methods, detailLoadedRef, clearDraft } = args;
+  const { id, methods, detailLoadedRef, clearDraft, bumpResetVersion } = args;
   const queryClient = useQueryClient();
   const isEdit = Boolean(id);
 
@@ -57,6 +58,7 @@ export function useNonBlEntryMutations(args: {
       clearDraft("non::new");
       detailLoadedRef.current = false;
       useEntryFocusStore.getState().clearFocus("nonBl");
+      bumpResetVersion();
     },
   });
 

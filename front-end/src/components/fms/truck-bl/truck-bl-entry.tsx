@@ -118,8 +118,8 @@ export function TruckBLEntry() {
       </div>
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
-      <div style={{ display: entry.tab === "main"    ? "contents" : "none" }}><MainTruck   active={entry.tab === "main"}    /></div>
-      <div style={{ display: entry.tab === "freight" ? "contents" : "none" }}><FreightTab active={entry.tab === "freight"} /></div>
+      <div style={{ display: entry.tab === "main"    ? "contents" : "none" }}><MainTruck   key={entry.resetVersion} active={entry.tab === "main"}    /></div>
+      <div style={{ display: entry.tab === "freight" ? "contents" : "none" }}><FreightTab key={entry.resetVersion} active={entry.tab === "freight"} /></div>
     </form>
     {entry.isEdit && entry.id && (
       <TruckChangeBlNoModal

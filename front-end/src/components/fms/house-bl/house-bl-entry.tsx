@@ -71,10 +71,10 @@ function getToolbarDefaults(variant: BLVariantConfig) {
   return DEFAULTS_NON_BL;
 }
 
-function renderMainTab(variant: BLVariantConfig, active: boolean) {
-  if (variant.mode === "SEA")  return <MainTabSea variant={variant} active={active} />;
-  if (variant.mode === "AIR")  return <MainTabAir variant={variant} active={active} />;
-  return <MainTabSea variant={variant} active={active} />;
+function renderMainTab(variant: BLVariantConfig, active: boolean, resetVersion: number) {
+  if (variant.mode === "SEA")  return <MainTabSea key={resetVersion} variant={variant} active={active} />;
+  if (variant.mode === "AIR")  return <MainTabAir key={resetVersion} variant={variant} active={active} />;
+  return <MainTabSea key={resetVersion} variant={variant} active={active} />;
 }
 
 const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
@@ -101,6 +101,7 @@ export function HouseBLEntry({ variant }: Props) {
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
+  const [resetVersion, setResetVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.houseBl(variant.key)]);
@@ -198,6 +199,7 @@ export function HouseBLEntry({ variant }: Props) {
       clearDraft(`house:${variant.key}:new`);
       detailLoadedRef.current = false;
       useEntryFocusStore.getState().clearFocus(entryFocusKeys.houseBl(variant.key));
+      setResetVersion(v => v + 1);
     },
   });
 
@@ -228,6 +230,7 @@ export function HouseBLEntry({ variant }: Props) {
     detailLoadedRef.current = false;
     useEntryFocusStore.getState().clearFocus(entryFocusKeys.houseBl(variant.key));
     formRef.current?.reset();
+    setResetVersion(v => v + 1);
   }
 
   async function handleSubmit(raw: HouseBlFormValues) {
@@ -377,8 +380,8 @@ export function HouseBLEntry({ variant }: Props) {
           </div>
         </div>
 
-        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main")}</div>
-        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab active={tab === "freight"} /></div>
+        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion)}</div>
+        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
       </form>
       </FormProvider>
 

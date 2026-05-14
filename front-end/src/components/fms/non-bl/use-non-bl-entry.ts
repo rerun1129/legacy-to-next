@@ -18,6 +18,8 @@ import { useNonBlEntryMutations }                from "./use-non-bl-entry-mutati
 export function useNonBlEntry() {
   const [tab, setTab] = useState("main");
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
+  const [resetVersion, setResetVersion] = useState(0);
+  const bumpResetVersion = useCallback(() => setResetVersion(v => v + 1), []);
   const id = useEntryFocusStore((s) => s.focus.nonBl);
   const isEdit = Boolean(id);
   const detailLoadedRef = useRef<boolean>(false);
@@ -77,6 +79,7 @@ export function useNonBlEntry() {
     methods,
     detailLoadedRef,
     clearDraft,
+    bumpResetVersion,
   });
 
   function handleResetEntry() {
@@ -85,6 +88,7 @@ export function useNonBlEntry() {
     clearDraft("non::new");
     detailLoadedRef.current = false;
     useEntryFocusStore.getState().clearFocus("nonBl");
+    bumpResetVersion();
   }
 
   function handleChangeBlNo() {
@@ -111,6 +115,7 @@ export function useNonBlEntry() {
     isSavePending,
     tab,
     setTab,
+    resetVersion,
     isChangeBlNoModalOpen,
     setIsChangeBlNoModalOpen,
     resetDetailLoaded,
