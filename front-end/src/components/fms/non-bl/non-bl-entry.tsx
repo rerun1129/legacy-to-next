@@ -6,7 +6,6 @@ import { MainNonBL }     from "./tabs/main-non-bl";
 import { TextBox, ComboBox }                      from "@/components/shared/inputs";
 import { ScreenGuard }                            from "@/components/shared/screen-guard";
 import { ChangeBlNoModal }                        from "./change-bl-no-modal";
-import { toast }                                  from "@/lib/toast-store";
 import { useNonBlEntry }                          from "./use-non-bl-entry";
 import { NonBlEntryHeader }                       from "./non-bl-entry-header";
 
@@ -33,10 +32,6 @@ export function NonBLEntry() {
         onNew={entry.handleResetEntry}
         onSearch={entry.handleSearch}
         onSave={() => {
-          if (!entry.isEdit) {
-            toast.info("먼저 Non B/L을 조회해주세요.");
-            return;
-          }
           entry.methods.handleSubmit(entry.handleSubmit)();
         }}
         onDelete={entry.handleDelete}
