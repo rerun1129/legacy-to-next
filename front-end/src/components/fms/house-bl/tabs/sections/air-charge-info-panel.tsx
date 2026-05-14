@@ -90,7 +90,7 @@ export function AirChargeInfoPanel() {
       className: "is-num",
       width: 70,
       render: (_, __, i) => (
-        <NumberBox variant="cell" name={`airCharges.${i}.grossWeightKg`} valueAsNumber={false} />
+        <NumberBox variant="cell" name={`airCharges.${i}.grossWeightKg`} valueAsNumber={false} decimalPlaces={3} />
       ),
     },
     {
@@ -119,7 +119,7 @@ export function AirChargeInfoPanel() {
       className: "is-num",
       width: 70,
       render: (_, __, i) => (
-        <NumberBox variant="cell" name={`airCharges.${i}.chargeWeightKg`} valueAsNumber={false} />
+        <NumberBox variant="cell" name={`airCharges.${i}.chargeWeightKg`} valueAsNumber={false} decimalPlaces={3} />
       ),
     },
     {
@@ -128,7 +128,7 @@ export function AirChargeInfoPanel() {
       className: "is-num",
       width: 70,
       render: (_, __, i) => (
-        <NumberBox variant="cell" name={`airCharges.${i}.rate`} valueAsNumber={false} />
+        <NumberBox variant="cell" name={`airCharges.${i}.rate`} valueAsNumber={false} decimalPlaces={2} />
       ),
     },
     {
