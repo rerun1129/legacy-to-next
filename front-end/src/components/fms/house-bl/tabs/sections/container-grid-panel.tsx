@@ -15,6 +15,8 @@ const EMPTY_CONTAINER_ROW: ContainerRow = {
   containerNo: "",
   containerType: "",
   sealNo1: "",
+  sealNo2: "",
+  sealNo3: "",
   pkgQty: "",
   pkgUnit: "",
   grossWeightKg: "",
@@ -44,7 +46,9 @@ export function ContainerGridPanel() {
         )}
       />
     ) },
-    { key: "sealNo1",      label: "Seal No",      width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo1",      label: "SEAL NO. 1",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo2",      label: "SEAL NO. 2",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo3",      label: "SEAL NO. 3",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "pkgQty",       label: "Pkg",          width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
     { key: "pkgUnit",      label: "Unit",         width: 60,  render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.pkgUnit`)} /> },
     { key: "grossWeightKg", label: "G/W",         width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
