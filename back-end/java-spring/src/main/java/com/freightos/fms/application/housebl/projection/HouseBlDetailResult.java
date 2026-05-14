@@ -69,6 +69,9 @@ public record HouseBlDetailResult(
         String remark,
 
         // SEA 본체 상세 (AIR/TRUCK/NON_BL은 null)
-        SeaDetailProjection seaDetail
+        SeaDetailProjection seaDetail,
+
+        // AIR 본체 상세 (SEA/TRUCK/NON_BL은 null)
+        AirDetailProjection airDetail
 ) {
 }

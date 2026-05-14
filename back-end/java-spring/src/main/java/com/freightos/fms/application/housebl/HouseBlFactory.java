@@ -3,6 +3,11 @@ package com.freightos.fms.application.housebl;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
+import com.freightos.fms.application.housebl.projection.AirChargeProjection;
+import com.freightos.fms.application.housebl.projection.AirDescProjection;
+import com.freightos.fms.application.housebl.projection.AirDetailProjection;
+import com.freightos.fms.application.housebl.projection.AirDimProjection;
+import com.freightos.fms.application.housebl.projection.AirScheduleLegProjection;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
 import com.freightos.fms.application.housebl.projection.SeaContainerProjection;
 import com.freightos.fms.application.housebl.projection.SeaDescProjection;
@@ -16,6 +21,8 @@ import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.Incoterms;
+import com.freightos.fms.domain.common.enums.Per;
+import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.common.util.Nullables;
@@ -24,7 +31,9 @@ import com.freightos.fms.domain.common.vo.*;
 import com.freightos.fms.domain.housebl.entity.*;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl.WorkDivision;
+import com.freightos.fms.domain.housebl.enums.CargoType;
 import com.freightos.fms.domain.housebl.enums.ContainerType;
+import com.freightos.fms.domain.housebl.enums.Fhd;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.NoOfBl;
 import com.freightos.fms.domain.housebl.enums.SalesClass;
@@ -231,6 +240,60 @@ public class HouseBlFactory {
         );
     }
 
+    // ── AIR 자식 projection 변환 헬퍼 ────────────────────────────────
+
+    private List<AirScheduleLegProjection> toAirScheduleLegProjections(List<HouseBlScheduleLeg> legs) {
+        if (legs == null) return List.of();
+        return legs.stream().map(s -> new AirScheduleLegProjection(
+                s.getId(),
+                s.getToCode(),
+                s.getByCarrier(),
+                s.getFlightNo(),
+                s.getOnBoardDt(),
+                s.getOnBoardTm(),
+                s.getArrivalDt(),
+                s.getArrivalTm()
+        )).toList();
+    }
+
+    private List<AirChargeProjection> toAirChargeProjections(List<HouseBlAirCharge> charges) {
+        if (charges == null) return List.of();
+        return charges.stream().map(c -> new AirChargeProjection(
+                c.getId(),
+                c.getFreightCode(),
+                VoMapper.mapOrNull(c.getCurrencyCode(), CurrencyCode::value),
+                Nullables.mapOrNull(c.getPer(), Per::getCode),
+                Nullables.mapOrNull(c.getFreightTerm(), FreightTerm::name),
+                VoMapper.mapOrNull(c.getGrossWeightKg(), Weight::kg),
+                Nullables.mapOrNull(c.getRateClass(), RateClass::name),
+                VoMapper.mapOrNull(c.getChargeWeightKg(), Weight::kg),
+                c.getRate()
+        )).toList();
+    }
+
+    private List<AirDimProjection> toAirDimProjections(List<HouseBlDim> dims) {
+        if (dims == null) return List.of();
+        return dims.stream().map(d -> new AirDimProjection(
+                d.getId(),
+                d.getLengthCm(),
+                d.getWidthCm(),
+                d.getHeightCm(),
+                d.getQuantity(),
+                d.getCbm(),
+                d.getVolumeWeightKg()
+        )).toList();
+    }
+
+    private AirDescProjection toAirDescProjection(HouseBlDesc desc) {
+        if (desc == null) return AirDescProjection.empty();
+        return new AirDescProjection(
+                desc.getMarks(),
+                desc.getDescription(),
+                Nullables.mapOrNull(desc.getDescClause1(), Enum::name),
+                Nullables.mapOrNull(desc.getDescClause2(), Enum::name)
+        );
+    }
+
     // ── SearchCommand → Domain Filter 변환 ───────────────────────────
 
     public HouseBlFilter toFilter(SearchHouseBlCommand cmd) {
@@ -289,6 +352,30 @@ public class HouseBlFactory {
                 toSeaContainerProjections(sea.getContainers()),
                 toSeaDescProjection(sea.getDesc())
         ) : null;
+        AirDetailProjection airDetail = (entity instanceof HouseBlAir air) ? new AirDetailProjection(
+                VoMapper.mapOrNull(air.getAirlineCode(), AirlineCode::value),
+                VoMapper.mapOrNull(air.getChargeWeightKg(), Weight::kg),
+                VoMapper.mapOrNull(air.getVolumeWeightKg(), Weight::kg),
+                Nullables.mapOrNull(air.getRateClass(), RateClass::name),
+                VoMapper.mapOrNull(air.getCurrencyCode(), CurrencyCode::value),
+                air.getDeclaredValueCarriage(),
+                air.getDeclaredValueCustoms(),
+                air.getInsurance(),
+                air.getAccountInformation(),
+                Nullables.mapOrNull(air.getOtherTerm(), FreightTerm::name),
+                VoMapper.mapOrNull(air.getIssueDate(), BlDate::asString),
+                VoMapper.mapOrNull(air.getIssuePlace(), PortCode::value),
+                air.getSignature(),
+                Nullables.mapOrNull(air.getFhd(), Fhd::name),
+                Nullables.mapOrNull(air.getHandlingInformation(), hi -> Nullables.mapOrNull(hi.code(), Enum::name)),
+                Nullables.mapOrNull(air.getHandlingInformation(), HandlingInformation::description),
+                air.getOriginOfGoods(),
+                Nullables.mapOrNull(air.getCargoType(), CargoType::getCode),
+                toAirScheduleLegProjections(air.getScheduleLegs()),
+                toAirChargeProjections(air.getAirCharges()),
+                toAirDimProjections(air.getDims()),
+                toAirDescProjection(air.getDesc())
+        ) : null;
         return new HouseBlDetailResult(
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getHblNo(), BlNumber::value),
@@ -340,7 +427,8 @@ public class HouseBlFactory {
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getRton(), Rton::ton)),
                 Nullables.mapOrNull(loadType, LoadType::name),
                 remark,
-                seaDetail
+                seaDetail,
+                airDetail
         );
     }
 }
