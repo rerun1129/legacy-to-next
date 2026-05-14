@@ -48,48 +48,6 @@ export function AirPerformancePanel() {
         />
       ),
     },
-    {
-      key: "sales-man",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          variant="panel"
-          label="Sales Man"
-          required
-          codeProps={{ ...register("salesManCode") }}
-          nameProps={{ ...register("salesManName") }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-      ),
-    },
-    {
-      key: "operator",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          variant="panel"
-          label="Operator"
-          required
-          codeProps={{ ...register("operatorCode") }}
-          nameProps={{ ...register("operatorName") }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-      ),
-    },
-    {
-      key: "team",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          variant="panel"
-          label="Team"
-          required
-          codeProps={{ ...register("teamCode") }}
-          nameProps={{ ...register("teamName") }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-      ),
-    },
   ];
 
   return (
