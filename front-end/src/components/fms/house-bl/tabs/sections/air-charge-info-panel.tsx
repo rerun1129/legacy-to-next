@@ -26,7 +26,7 @@ function TotalAmountCell({ control, index }: { control: Control<HouseBlFormValue
   const rate   = useWatch({ control, name: `airCharges.${index}.rate` });
   const chgWt  = useWatch({ control, name: `airCharges.${index}.chargeWeightKg` });
   const total  = (Number(rate) || 0) * (Number(chgWt) || 0);
-  return <NumberBox variant="cell" readOnly value={total ? total.toString() : ""} />;
+  return <NumberBox variant="cell" readOnly value={total ? total.toFixed(2) : ""} />;
 }
 
 export function AirChargeInfoPanel() {
