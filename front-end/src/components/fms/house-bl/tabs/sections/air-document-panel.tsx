@@ -12,23 +12,6 @@ export function AirDocumentPanel() {
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
     {
-      key: "sales-class",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Sales Class</span>
-          <div className="li__input">
-            <Controller
-              name="salesClass"
-              control={control}
-              render={({ field }) => (
-                <ComboBox variant="panel" options={salesClassOptions} placeholder={salesClassPlaceholder} value={field.value} onChange={field.onChange} />
-              )}
-            />
-          </div>
-        </div>
-      ),
-    },
-    {
       key: "sales-man",
       render: () => (
         <CodeBox
@@ -69,6 +52,23 @@ export function AirDocumentPanel() {
         />
       ),
     },
+    {
+      key: "sales-class",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Sales Class</span>
+          <div className="li__input">
+            <Controller
+              name="salesClass"
+              control={control}
+              render={({ field }) => (
+                <ComboBox variant="panel" options={salesClassOptions} placeholder={salesClassPlaceholder} value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -78,7 +78,7 @@ export function AirDocumentPanel() {
         <span className="panel__title">Document</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
-        <FieldItemGrid itemScope="air-document-panel" items={DOCUMENT_ITEMS} />
+        <FieldItemGrid itemScope="air-document-panel" items={DOCUMENT_ITEMS} cols={1} />
       </div>
     </div>
   );

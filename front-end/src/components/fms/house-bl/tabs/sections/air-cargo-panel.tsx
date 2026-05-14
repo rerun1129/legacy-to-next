@@ -120,7 +120,7 @@ export function AirCargoPanel({ variant }: Props) {
         <span className="panel__title">Cargo</span>
       </div>
       <div className="panel__body panel__body--scroll">
-        <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} cols={1} shouldShowRowControls={false} />
+        <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} cols={2} shouldShowRowControls={false} />
       </div>
     </div>
   );
