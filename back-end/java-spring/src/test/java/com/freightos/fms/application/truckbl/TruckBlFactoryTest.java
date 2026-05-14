@@ -100,7 +100,7 @@ class TruckBlFactoryTest {
         assertThat(view.driver()).isEqualTo("홍길동");
         assertThat(view.mobileNo()).isEqualTo("010-1234-5678");
         assertThat(view.containerNo()).isEqualTo("ABCD1234567");
-        assertThat(view.containerType()).isEqualTo("20GP");
+        assertThat(view.containerType()).isEqualTo("T20GP");
         assertThat(view.sealNo1()).isEqualTo("SEAL-1");
         assertThat(view.sealNo2()).isEqualTo("SEAL-2");
         assertThat(view.sealNo3()).isEqualTo("SEAL-3");

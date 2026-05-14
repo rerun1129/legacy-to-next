@@ -124,7 +124,7 @@ public class TruckBlFactory {
                 order.getDriver(),
                 order.getMobileNo(),
                 VoMapper.mapOrNull(order.getContainerNo(), ContainerNumber::value),
-                Nullables.mapOrNull(order.getContainerType(), ContainerType::getCode),  // FE 옵션 value와 정합 (§6.45)
+                Nullables.mapOrNull(order.getContainerType(), ContainerType::name),  // EnumRegistry value=name SSOT (§6.45 후행 e0d13c4 정합)
                 VoMapper.mapOrNull(order.getSealNo1(), SealNumber::value),
                 VoMapper.mapOrNull(order.getSealNo2(), SealNumber::value),
                 VoMapper.mapOrNull(order.getSealNo3(), SealNumber::value)
