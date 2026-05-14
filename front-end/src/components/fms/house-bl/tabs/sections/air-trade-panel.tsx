@@ -14,6 +14,7 @@ export function AirTradePanel({ variant }: Props) {
   const { register, control } = useFormContext<HouseBlFormValues>();
   const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
   const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
+  const { options: fhdOptions, placeholder: fhdPlaceholder } = useEnumOptions("Fhd");
 
   if (!variant) return null;
   const panelScope = `air-trade-panel.${variant.key}`;
@@ -83,7 +84,19 @@ export function AirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Other Term</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("otherTerm")} />
+            <Controller
+              name="otherTerm"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={freightTermOptions}
+                  placeholder={freightTermPlaceholder}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       ),
@@ -140,7 +153,19 @@ export function AirTradePanel({ variant }: Props) {
       <div className="li">
         <span className="li__label">F.H.D</span>
         <div className="li__input">
-          <TextBox variant="panel" {...register("fhd")} />
+          <Controller
+            name="fhd"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={fhdOptions}
+                placeholder={fhdPlaceholder}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
       </div>
     ),
