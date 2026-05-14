@@ -154,7 +154,7 @@ function AirLegsWidget({
         </div>
         <div style={{ overflow: "auto" }}>
           <GridList
-            columns={buildAirScheduleLegCols(register, "scheduleLegs")}
+            columns={buildAirScheduleLegCols(register, control, "scheduleLegs")}
             data={fields as unknown as LegRow[]}
             rowKey={(row) => row.id ?? ""}
           />
