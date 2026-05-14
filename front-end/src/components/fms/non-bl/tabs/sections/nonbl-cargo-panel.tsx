@@ -45,7 +45,9 @@ export function NonBLCargoPanel() {
               decimalPlaces={0}
               placeholder="0"
             />
-            <CodeBox kind="code-only" variant="panel" codeProps={register("pkgUnit")} onLookup={() => {}} />
+            <div style={{ flex: "0 0 80px" }}>
+              <CodeBox kind="code-only" variant="panel" codeProps={register("pkgUnit")} onLookup={() => {}} />
+            </div>
           </div>
         </div>
       ),
@@ -104,7 +106,7 @@ export function NonBLCargoPanel() {
   ];
 
   return (
-    <div className="panel panel--col-flex">
+    <div className="panel panel--col-flex nonbl-cargo-panel">
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Cargo</span>
