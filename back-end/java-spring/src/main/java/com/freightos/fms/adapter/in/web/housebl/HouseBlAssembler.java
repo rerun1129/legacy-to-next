@@ -99,6 +99,7 @@ public class HouseBlAssembler {
                 req.rton(),
                 req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
+                toAirDetailCommand(req.airDetail()),
                 toDescCommand(req.desc()),
                 toDimCommands(req.dims()),
                 toContainerCommands(req.containers()),
@@ -159,6 +160,7 @@ public class HouseBlAssembler {
                 req.rton(),
                 req.remark(),
                 toSeaDetailCommandU(req.seaDetail()),
+                toAirDetailCommandU(req.airDetail()),
                 toDescCommandU(req.desc()),
                 toDimCommandsU(req.dims()),
                 toContainerCommandsU(req.containers()),
@@ -179,6 +181,18 @@ public class HouseBlAssembler {
                 s.issuePlace(), s.doDate(), s.payableAt(), s.triangle(), s.serviceTerm(),
                 s.vesselCode2(), s.vesselNationality(), s.rton(),
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
+    }
+
+    private CreateHouseBlCommand.AirDetailCommand toAirDetailCommand(CreateHouseBlRequest.AirDetailRequest a) {
+        if (a == null) return null;
+        return new CreateHouseBlCommand.AirDetailCommand(
+                a.airlineCode(), a.chargeWeightKg(), a.volumeWeightKg(),
+                a.rateClass(), a.currencyCode(),
+                a.declaredValueCarriage(), a.declaredValueCustoms(),
+                a.insurance(), a.accountInformation(), a.otherTerm(),
+                a.issueDate(), a.issuePlace(), a.signature(),
+                a.fhd(), a.handlingInformation(),
+                a.originOfGoods(), a.cargoType());
     }
 
     private CreateHouseBlCommand.DescCommand toDescCommand(CreateHouseBlRequest.DescRequest r) {
@@ -232,6 +246,18 @@ public class HouseBlAssembler {
                 s.issuePlace(), s.doDate(), s.payableAt(), s.triangle(), s.serviceTerm(),
                 s.vesselNationality(), s.rton(),
                 s.sayInformation(), s.noOfContainerOrPackages(), s.blType(), s.deliveryCode());
+    }
+
+    private UpdateHouseBlCommand.AirDetailCommand toAirDetailCommandU(UpdateHouseBlRequest.AirDetailRequest a) {
+        if (a == null) return null;
+        return new UpdateHouseBlCommand.AirDetailCommand(
+                a.airlineCode(), a.chargeWeightKg(), a.volumeWeightKg(),
+                a.rateClass(), a.currencyCode(),
+                a.declaredValueCarriage(), a.declaredValueCustoms(),
+                a.insurance(), a.accountInformation(), a.otherTerm(),
+                a.issueDate(), a.issuePlace(), a.signature(),
+                a.fhd(), a.handlingInformation(),
+                a.originOfGoods(), a.cargoType());
     }
 
     private UpdateHouseBlCommand.DescCommand toDescCommandU(UpdateHouseBlRequest.DescRequest r) {

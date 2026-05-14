@@ -58,6 +58,9 @@ public record UpdateHouseBlRequest(
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
 
+        // AIR 확장 필드
+        AirDetailRequest airDetail,
+
         // Sub 엔티티
         DescRequest desc,
         List<DimRequest> dims,
@@ -90,6 +93,27 @@ public record UpdateHouseBlRequest(
             String noOfContainerOrPackages,
             String blType,
             String deliveryCode
+    ) {}
+
+    /** AIR 모드 확장 필드. PATCH 의미론 — 모든 필드 nullable. */
+    public record AirDetailRequest(
+            String airlineCode,
+            BigDecimal chargeWeightKg,
+            BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String otherTerm,
+            String issueDate,
+            String issuePlace,
+            String signature,
+            String fhd,
+            String handlingInformation,
+            String originOfGoods,
+            String cargoType
     ) {}
 
     /** 화물 표시 및 명세. HouseBl당 1건. */

@@ -61,6 +61,9 @@ public record CreateHouseBlRequest(
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
 
+        // AIR 확장 필드
+        AirDetailRequest airDetail,
+
         // Sub 엔티티
         DescRequest desc,
         List<DimRequest> dims,
@@ -94,6 +97,27 @@ public record CreateHouseBlRequest(
             String noOfContainerOrPackages,
             String blType,
             @Size(max = 5) String deliveryCode
+    ) {}
+
+    /** AIR 모드 확장 필드. */
+    public record AirDetailRequest(
+            String airlineCode,
+            @DecimalMin("0") BigDecimal chargeWeightKg,
+            @DecimalMin("0") BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String otherTerm,
+            @Pattern(regexp = "\\d{8}") String issueDate,
+            @Size(max = 5) String issuePlace,
+            String signature,
+            String fhd,
+            String handlingInformation,
+            String originOfGoods,
+            String cargoType
     ) {}
 
     /** 화물 표시 및 명세. HouseBl당 1건. */

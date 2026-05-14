@@ -94,6 +94,7 @@ public class TruckBlAssembler {
                 null, // rton
                 req.remark(),
                 null, // seaDetail — TRUCK 미사용
+                null, // airDetail — TRUCK 미사용
                 toDescCommand(req.desc()),
                 toDimCommands(req.dims()),
                 null, // containers
@@ -154,6 +155,7 @@ public class TruckBlAssembler {
                 null, // rton
                 req.remark(),
                 null, // seaDetail
+                null, // airDetail — TRUCK 미사용
                 toDescCommandU(req.desc()),
                 toDimCommandsU(req.dims()),
                 null, // containers

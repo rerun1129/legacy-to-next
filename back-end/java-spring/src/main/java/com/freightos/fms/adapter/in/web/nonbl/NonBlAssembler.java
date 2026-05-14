@@ -97,6 +97,7 @@ public class NonBlAssembler {
                 req.rton(),
                 req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
+                null, // airDetail — NON_BL 미사용
                 null,
                 toDimCommands(req.dims()),
                 toContainerCommands(req.containers()),
@@ -156,6 +157,7 @@ public class NonBlAssembler {
                 req.rton(),
                 req.remark(),
                 toSeaDetailCommandU(req.seaDetail()),
+                null, // airDetail — NON_BL 미사용
                 null,
                 toDimCommandsU(req.dims()),
                 toContainerCommandsU(req.containers()),

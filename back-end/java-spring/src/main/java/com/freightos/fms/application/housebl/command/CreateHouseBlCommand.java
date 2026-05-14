@@ -61,6 +61,9 @@ public record CreateHouseBlCommand(
         // SEA 확장 필드
         SeaDetailCommand seaDetail,
 
+        // AIR 확장 필드
+        AirDetailCommand airDetail,
+
         // Sub 엔티티
         DescCommand desc,
         List<DimCommand> dims,
@@ -96,6 +99,26 @@ public record CreateHouseBlCommand(
             String noOfContainerOrPackages,
             String blType,
             String deliveryCode
+    ) {}
+
+    public record AirDetailCommand(
+            String airlineCode,
+            BigDecimal chargeWeightKg,
+            BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String otherTerm,
+            String issueDate,
+            String issuePlace,
+            String signature,
+            String fhd,
+            String handlingInformation,
+            String originOfGoods,
+            String cargoType
     ) {}
 
     public record DescCommand(

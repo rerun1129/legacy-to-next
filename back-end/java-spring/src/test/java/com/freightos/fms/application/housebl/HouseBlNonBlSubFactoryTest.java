@@ -116,8 +116,8 @@ class HouseBlNonBlSubFactoryTest {
         // mainItemName(31) hsCode(32) mblNo(33) masterRefNo(34)
         // workDivision(35) originalBlRef(36) volumeDivisor(37) linerCode(38) linerName(39)
         // vesselName(40) voyageNo(41) finalDestCode(42) finalDestName(43) finalEta(44)
-        // volumeWeightKg(45) rton(46) remark(47) seaDetail(48)
-        // desc(49) dims(50) containers(51) scheduleLegs(52) truckOrders(53) airCharges(54) truckDetail(55)
+        // volumeWeightKg(45) rton(46) remark(47) seaDetail(48) airDetail(49)
+        // desc(50) dims(51) containers(52) scheduleLegs(53) truckOrders(54) airCharges(55) truckDetail(56)
         return new CreateHouseBlCommand(
                 "NON_BL", "EXP",                                                // 1-2
                 null, null, null,                                                // 3-5
@@ -132,13 +132,14 @@ class HouseBlNonBlSubFactoryTest {
                 BigDecimal.valueOf(1000.0), BigDecimal.valueOf(2.5),             // 45-46 volumeWeightKg, rton
                 "Test remark",                                                   // 47 remark
                 null,                                                            // 48 seaDetail
-                null, null, null, null, null, null,                              // 49-54 sub 엔티티
-                null                                                             // 55 truckDetail
+                null,                                                            // 49 airDetail
+                null, null, null, null, null, null,                              // 50-55 sub 엔티티
+                null                                                             // 56 truckDetail
         );
     }
 
     private UpdateHouseBlCommand updateCommand() {
-        // UpdateHouseBlCommand: 54개 파라미터 (hblNo 없음)
+        // UpdateHouseBlCommand: 55개 파라미터 (hblNo 없음)
         // jobDiv(1) bound(2) shipmentType(3) freightTerm(4)
         // shipperCode(5) shipperAddress(6) consigneeCode(7) consigneeAddress(8) notifyCode(9)
         // notifyAddress(10) docPartnerCode(11) docPartnerAddress(12) settlePartnerCode(13)
@@ -148,8 +149,8 @@ class HouseBlNonBlSubFactoryTest {
         // mainItemName(30) hsCode(31) mblNo(32) masterRefNo(33)
         // workDivision(34) originalBlRef(35) volumeDivisor(36) linerCode(37) linerName(38)
         // vesselName(39) voyageNo(40) finalDestCode(41) finalDestName(42) finalEta(43)
-        // volumeWeightKg(44) rton(45) remark(46) seaDetail(47)
-        // desc(48) dims(49) containers(50) scheduleLegs(51) truckOrders(52) airCharges(53) truckDetail(54)
+        // volumeWeightKg(44) rton(45) remark(46) seaDetail(47) airDetail(48)
+        // desc(49) dims(50) containers(51) scheduleLegs(52) truckOrders(53) airCharges(54) truckDetail(55)
         return new UpdateHouseBlCommand(
                 "NON_BL", "EXP", null, null,                             // 1-4
                 null, null, null, null, null,                            // 5-9
@@ -163,8 +164,9 @@ class HouseBlNonBlSubFactoryTest {
                 BigDecimal.valueOf(1200.0), BigDecimal.valueOf(3.0),     // 44-45 volumeWeightKg, rton
                 "Updated remark",                                        // 46 remark
                 null,                                                    // 47 seaDetail
-                null, null, null, null, null, null,                      // 48-53 sub 엔티티
-                null                                                     // 54 truckDetail
+                null,                                                    // 48 airDetail
+                null, null, null, null, null, null,                      // 49-54 sub 엔티티
+                null                                                     // 55 truckDetail
         );
     }
 
@@ -180,8 +182,9 @@ class HouseBlNonBlSubFactoryTest {
                 null, null, null, null, null, null, null, null, null,   // 35-43
                 null, null, null,                                        // 44-46
                 null,                                                    // 47 seaDetail
-                null, null, null, null, null, null,                      // 48-53 sub 엔티티
-                null                                                     // 54 truckDetail
+                null,                                                    // 48 airDetail
+                null, null, null, null, null, null,                      // 49-54 sub 엔티티
+                null                                                     // 55 truckDetail
         );
     }
 }

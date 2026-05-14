@@ -52,14 +52,14 @@ class SeaHblUpdatePersistenceAdapterTest {
     private SeaHblUpdatePersistenceAdapter adapter;
 
     private static UpdateHouseBlCommand emptyCommand() {
-        // 54 파라미터 — 모두 null (PATCH 의미론, TruckBlUpdatePersistenceAdapterTest 동등)
+        // 55 파라미터 — 모두 null (PATCH 의미론, TruckBlUpdatePersistenceAdapterTest 동등)
         return new UpdateHouseBlCommand(
                 null, null, null, null, null, null, null, null, null, null,  // 1~10
                 null, null, null, null, null, null, null, null, null, null,  // 11~20
                 null, null, null, null, null, null, null, null, null, null,  // 21~30
                 null, null, null, null, null, null, null, null, null, null,  // 31~40
                 null, null, null, null, null, null, null, null, null, null,  // 41~50
-                null, null, null, null                                        // 51~54
+                null, null, null, null, null                                  // 51~55
         );
     }
 
