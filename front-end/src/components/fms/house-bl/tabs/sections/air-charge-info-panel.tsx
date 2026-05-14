@@ -55,7 +55,7 @@ export function AirChargeInfoPanel() {
     {
       key: "_freightName",
       label: "Freight Name",
-      width: 110,
+      width: 160,
       render: () => <TextBox variant="cell" readOnly value="" />,
     },
     {
@@ -67,7 +67,7 @@ export function AirChargeInfoPanel() {
     {
       key: "per",
       label: "Per",
-      width: 50,
+      width: 70,
       render: (_, __, i) => (
         <Controller
           name={`airCharges.${i}.per`}
