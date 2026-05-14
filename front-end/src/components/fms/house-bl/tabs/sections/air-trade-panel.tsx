@@ -27,7 +27,7 @@ export function AirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Currency</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("currency")} />
+            <TextBox variant="panel" {...register("airDetail.currencyCode")} />
           </div>
         </div>
       ),
@@ -85,7 +85,7 @@ export function AirTradePanel({ variant }: Props) {
           <span className="li__label">Other Term</span>
           <div className="li__input">
             <Controller
-              name="otherTerm"
+              name="airDetail.otherTerm"
               control={control}
               render={({ field }) => (
                 <ComboBox
@@ -107,7 +107,7 @@ export function AirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">D.V Carriage</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("dvCarriage")} />
+            <TextBox variant="panel" {...register("airDetail.declaredValueCarriage")} />
           </div>
         </div>
       ),
@@ -118,7 +118,7 @@ export function AirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Insurance</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("insurance")} />
+            <TextBox variant="panel" {...register("airDetail.insurance")} />
           </div>
         </div>
       ),
@@ -129,7 +129,7 @@ export function AirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">D.V Customs</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("dvCustoms")} />
+            <TextBox variant="panel" {...register("airDetail.declaredValueCustoms")} />
           </div>
         </div>
       ),
@@ -140,7 +140,7 @@ export function AirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Account Info</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("accountInfo")} />
+            <TextBox variant="panel" {...register("airDetail.accountInformation")} />
           </div>
         </div>
       ),
@@ -154,7 +154,7 @@ export function AirTradePanel({ variant }: Props) {
         <span className="li__label">F.H.D</span>
         <div className="li__input">
           <Controller
-            name="fhd"
+            name="airDetail.fhd"
             control={control}
             render={({ field }) => (
               <ComboBox

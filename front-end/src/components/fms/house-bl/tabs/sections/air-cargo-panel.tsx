@@ -61,7 +61,7 @@ export function AirCargoPanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Volume W/T</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} {...register("volumeWeightKg")} />
+            <NumberBox variant="panel" decimalPlaces={3} {...register("airDetail.volumeWeightKg")} />
           </div>
         </div>
       ),
@@ -72,7 +72,7 @@ export function AirCargoPanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Charge W/T</span>
           <div className="li__input">
-            <NumberBox variant="panel" decimalPlaces={3} {...register("chargeWeightKg")} />
+            <NumberBox variant="panel" decimalPlaces={3} {...register("airDetail.chargeWeightKg")} />
           </div>
         </div>
       ),
@@ -84,7 +84,7 @@ export function AirCargoPanel({ variant }: Props) {
           <span className="li__label">Rate Class</span>
           <div className="li__input">
             <Controller
-              name="rateClass"
+              name="airDetail.rateClass"
               control={control}
               render={({ field }) => (
                 <ComboBox

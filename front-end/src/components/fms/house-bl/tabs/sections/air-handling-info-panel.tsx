@@ -18,14 +18,14 @@ export function AirHandlingInfoPanel() {
       </div>
       <div className="panel__body panel__body--scroll-flex2" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <Controller
-          name="handlingInfoCode"
+          name="airDetail.handlingInformationCode"
           control={control}
           render={({ field }) => (
             <ComboBox variant="panel" options={options} placeholder={placeholder} value={field.value} onChange={field.onChange} />
           )}
         />
         <Controller
-          name="handlingInfoText"
+          name="airDetail.handlingInformationDesc"
           control={control}
           render={({ field }) => (
             <LineNumberTextarea
