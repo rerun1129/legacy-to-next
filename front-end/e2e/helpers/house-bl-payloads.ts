@@ -59,6 +59,56 @@ export interface AirPayload {
   }>;
 }
 
+// E2E 회귀 4종 전용 — airDetail nested + 자식 컬렉션 전수 포함 페이로드
+export interface AirHouseFullPayload {
+  jobDiv: 'AIR';
+  bound: 'EXP' | 'IMP';
+  hblNo: string;
+  shipmentType: 'HOUSE';
+  freightTerm: 'PREPAID';
+  polCode: string;
+  podCode: string;
+  airDetail?: {
+    airlineCode?: string;
+    chargeWeightKg?: number;
+    volumeWeightKg?: number;
+    rateClass?: string;
+    currencyCode?: string;
+    issueDate?: string;
+    issuePlace?: string;
+    signature?: string;
+    cargoType?: string;
+    originOfGoods?: string;
+  };
+  scheduleLegs?: Array<{
+    toCode: string;
+    byCarrier: string;
+    flightNo: string;
+    onBoardDt: string;
+  }>;
+  airCharges?: Array<{
+    freightCode: string;
+    currencyCode: string;
+    rateClass: string;
+    chargeWeightKg: number;
+    rate: number;
+  }>;
+  dims?: Array<{
+    lengthCm: number;
+    widthCm: number;
+    heightCm: number;
+    quantity: number;
+    cbm: number;
+    volumeWeightKg: number;
+  }>;
+  desc?: {
+    marks?: string;
+    description?: string;
+    descClause1?: string;
+    descClause2?: string;
+  };
+}
+
 export interface TruckPayload {
   jobDiv: 'TRUCK';
   bound: 'EXP';
@@ -174,5 +224,84 @@ export function buildNonBlPayload(ts: string): NonBlPayload {
     jobDiv: 'NON_BL', bound: 'EXP',
     hblNo: `NONBL${ts}`,
     freightTerm: 'PREPAID',
+  };
+}
+
+// ── AIR House E2E 회귀 4종 전용 헬퍼 ───────────────────────────────────────
+// airDetail nested + 자식 컬렉션 전수 포함. INSERT/enum round-trip/자식 row 수정 검증용.
+
+export function buildAirExpHousePayload(ts: string): AirHouseFullPayload {
+  return {
+    jobDiv: 'AIR', bound: 'EXP',
+    hblNo: `HAWB${ts}`,
+    shipmentType: 'HOUSE', freightTerm: 'PREPAID',
+    polCode: 'KRICN', podCode: 'USLAX',
+    airDetail: {
+      airlineCode: 'KE',
+      chargeWeightKg: 50,
+      volumeWeightKg: 45,
+      rateClass: 'Q',
+      currencyCode: 'USD',
+      issueDate: '20260601',
+      issuePlace: 'SEL',
+      signature: 'AGENT',
+      cargoType: 'GENERAL',
+      originOfGoods: 'KR',
+    },
+    scheduleLegs: [
+      { toCode: 'PVG', byCarrier: 'KE', flightNo: 'KE851', onBoardDt: '20260601' },
+      { toCode: 'LAX', byCarrier: 'KE', flightNo: 'KE017', onBoardDt: '20260602' },
+    ],
+    airCharges: [
+      { freightCode: 'Q', currencyCode: 'USD', rateClass: 'Q', chargeWeightKg: 50, rate: 3.5 },
+      { freightCode: 'FS', currencyCode: 'USD', rateClass: 'S', chargeWeightKg: 50, rate: 1.2 },
+    ],
+    dims: [
+      { lengthCm: 60, widthCm: 40, heightCm: 30, quantity: 2, cbm: 0.144, volumeWeightKg: 24 },
+    ],
+    desc: {
+      marks: 'MARK-EXP-001',
+      description: 'ELECTRONIC COMPONENTS',
+      descClause1: 'CLAUSE1',
+      descClause2: 'CLAUSE2',
+    },
+  };
+}
+
+export function buildAirImpHousePayload(ts: string): AirHouseFullPayload {
+  return {
+    jobDiv: 'AIR', bound: 'IMP',
+    hblNo: `HAWB${ts}`,
+    shipmentType: 'HOUSE', freightTerm: 'PREPAID',
+    polCode: 'USLAX', podCode: 'KRICN',
+    airDetail: {
+      airlineCode: 'OZ',
+      chargeWeightKg: 80,
+      volumeWeightKg: 72,
+      rateClass: 'M',
+      currencyCode: 'KRW',
+      issueDate: '20260610',
+      issuePlace: 'LAX',
+      signature: 'CARRIER',
+      cargoType: 'GENERAL',
+      originOfGoods: 'US',
+    },
+    scheduleLegs: [
+      { toCode: 'ICN', byCarrier: 'OZ', flightNo: 'OZ201', onBoardDt: '20260610' },
+      { toCode: 'GMP', byCarrier: 'OZ', flightNo: 'OZ202', onBoardDt: '20260611' },
+    ],
+    airCharges: [
+      { freightCode: 'Q', currencyCode: 'KRW', rateClass: 'Q', chargeWeightKg: 80, rate: 4500 },
+      { freightCode: 'SS', currencyCode: 'KRW', rateClass: 'S', chargeWeightKg: 80, rate: 1500 },
+    ],
+    dims: [
+      { lengthCm: 80, widthCm: 50, heightCm: 40, quantity: 3, cbm: 0.48, volumeWeightKg: 80 },
+    ],
+    desc: {
+      marks: 'MARK-IMP-001',
+      description: 'CLOTHING ACCESSORIES',
+      descClause1: 'IMP-CLAUSE1',
+      descClause2: 'IMP-CLAUSE2',
+    },
   };
 }
