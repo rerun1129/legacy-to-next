@@ -19,7 +19,6 @@ export function AirSchedulePanel({ variant }: Props) {
   const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
 
   if (!variant) return null;
-  const isExp      = variant.direction === "EXP";
   const panelScope = `air-schedule-panel.${variant.key}`;
 
   const airlineItems: FieldItemDef[] = [
@@ -27,7 +26,7 @@ export function AirSchedulePanel({ variant }: Props) {
       key: "airline",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">{isExp ? "Airline" : "Carrier"}</span>
+          <span className="li__label is-required">Airline</span>
           <div className="li__input li__input--tight">
             <div style={{ flex: "0 0 60px" }}>
               <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("airDetail.airlineCode")} />
@@ -56,7 +55,7 @@ export function AirSchedulePanel({ variant }: Props) {
   const widgetFields: FieldWidgetDef[] = [
     {
       key:   "airline",
-      label: isExp ? "Airline" : "Carrier",
+      label: "Airline",
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.airline`}
