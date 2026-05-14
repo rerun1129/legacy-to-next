@@ -940,3 +940,142 @@ public ResponseEntity<ApiResponse<Map<String, Long>>> createXxx(@RequestBody Cre
 `MasterBlController.createMasterBl`·기타 `<Domain>Controller.create<Domain>` 메서드 응답 시그니처 grep 의무. `ApiResponse<<XxxDetail>Response>` 잔존 시 동일 정렬. 신규 도메인 마이그레이션 시 본 절을 SSOT로 인용 + plan 단계 체크리스트 17 적용.
 
 사례: bab177f — Truck/Non/House/Master 4 도메인 list grid 더블클릭 + search 훅 동시 적용.
+
+---
+
+### 6.55 BE Detail 응답 nested object 필드 — null 직렬화 금지, 빈 객체(empty) 정적 팩토리 SSOT
+
+Detail 응답의 nested object 필드(예: `desc`/`marks`/`freight`)가 BE에서 `null`로 직렬화되면 FE zod object 스키마가 `Invalid input: expected object, received null` 토출. FE `.nullable()` 우회 가능하지만 **객체 모델은 항상 객체로 존재**한다는 의미론적 정합을 위해 BE에서 빈 객체로 응답하는 패턴을 SSOT로 채택.
+
+**증상**
+
+```
+Invalid <domain> detail response: [
+  { "expected": "object", "code": "invalid_type", "path": ["data", "desc"],
+    "message": "Invalid input: expected object, received null" }
+]
+```
+
+**원인 — 양 경로 동시 null 반환**
+
+- `<Domain>Factory.toXxxView(entity)` — entity null 시 null 반환
+- `<Domain>DetailResponse.from(result)` — `result.xxx()` null 시 nested View null 세팅
+- 결과: `data.xxx: null` 직렬화 → FE zod object 거부
+
+**SSOT 패턴 (Truck B/L `DescView` 모범, 2026-05-14 1cc4375)**
+
+1. `application/<domain>/projection/<Domain>DetailResult` record의 nested record(예: `DescView`)에 `empty()` 정적 팩토리 추가 — 모든 필드 null로 채운 인스턴스 반환
+2. `<Domain>Factory.toXxxView()`: `entity == null ? <Result>.XxxView.empty() : 매핑` 분기
+3. `adapter/in/web/<domain>/dto/<Domain>DetailResponse` record의 nested record에도 `empty()` 정적 팩토리 추가
+4. `<Domain>DetailResponse.from()`: `result.xxx() == null ? DTO.XxxView.empty() : DTO.XxxView.from(result.xxx())` 분기
+
+**FE 측**
+
+zod object 스키마는 `.nullable()` 추가 금지(BE가 항상 객체 보장). 기존 도메인이 `.nullable()`로 우회 중이면 단계적 정렬 권장.
+
+**테스트 갱신 동반**
+
+`toDetailResult_nullDesc_returnsNullDescView` 류 단언(`isNull()`)이 깨짐 → 사용자 명시 승인 후 메서드명/`@DisplayName`/단언을 `*_returnsEmptyDescView` + `isEqualTo(DescView.empty())`로 일괄 갱신.
+
+**사례**: 1cc4375 — Truck B/L `desc`(`marks`/`description`/`descClause1`/`descClause2`). `TruckBlFactory.toDescView` + `TruckBlDetailResponse.from` 양 경로 `DescView.empty()` 적용. `TruckBlFactoryTest`도 동기 갱신.
+
+**잔여 점검 권장**
+
+`HouseBlDesc`를 공유하는 Air House 응답 매핑(`AirHouseDetailResponse.from` + `HouseBlFactory.toAirDescView`/`toSeaDescView` 검토). Master/SeaHouse desc도 동일 패턴으로 단계적 정렬. 신규 도메인 마이그레이션 시 Detail 응답의 모든 nested object 필드(desc/marks/freight/issue 등)에 empty() 정적 팩토리 도입 의무.
+
+---
+
+### 6.56 useFieldArray race swipe — resetVersion key prop 버저닝 SSOT
+
+자식 패널/그리드가 `useFieldArray`로 RHF field state를 들고 있는 동안 부모가 `form.reset(newDefaults)`/`replace([])`를 호출하면, fieldArray internal id 캐시와 React reconciler 사이의 race로 **삭제된 행이 화면에 잠깐 남거나 신규 행이 stale 표시**되는 swipe가 발생.
+
+**증상**
+
+Delete/New/Save 직후 Cargo/Container/Charge 패널이 이전 데이터를 짧게 표시한 뒤 비동기 갱신.
+
+**SSOT 패턴 (2026-05-14 66d47b6, 3도메인 동시 적용)**
+
+- 부모 entry 컴포넌트: `const [resetVersion, setResetVersion] = useState(0);`
+- 자식 컴포넌트에 `resetVersion` prop 전달 + 자식 root element `<CargoPanel key={resetVersion} ... />` 패턴
+- Delete/New/Save 트리거 핸들러에서 `setResetVersion(v => v + 1)` 호출 → 자식 강제 unmount/remount → useFieldArray 내부 캐시 완전 폐기
+
+**적용 도메인 (2026-05-14 기준)**
+
+- Sea House Cargo · Non B/L Cargo · Truck B/L Cargo — `key={resetVersion}` 정합 완료
+- 그 외 useFieldArray 사용 패널은 마이그레이션 시 동일 패턴 적용 의무
+
+**사례**: 66d47b6 — Cargo 패널 useFieldArray race swipe 3도메인 동시 정합.
+
+**잔여 점검 권장**
+
+Air House Cargo + Sea/Air Master 자식 그리드 — 마이그레이션 시 `resetVersion` prop chain 의무. List 그리드는 useFieldArray 미사용이므로 비대상.
+
+---
+
+### 6.57 Entry Delete/New 후 자식 탭 stale 표시 race 차단 SSOT
+
+§6.56의 useFieldArray race와 별개로, Cargo/Container 같은 **자식 탭이 별도 useQuery로 조회**되는 구조(detail 응답에 미포함, 별도 endpoint 호출)에서는 Delete/New 트리거 후 invalidate-refetch 사이클 동안 이전 row가 표시되는 또 다른 race 발생.
+
+**증상**
+
+Sea House/Non B/L Entry에서 Delete 또는 New 클릭 직후 Cargo 탭이 한 박자 늦게 비어짐.
+
+**SSOT 패턴 (2026-05-14 5b36ea6)**
+
+1. Delete/New 핸들러에서 자식 그리드 local state 즉시 초기화 (`setCargoRows([])` 등)
+2. `form.reset(emptyDefaults)` 동시 호출 (toolbar/패널 동기)
+3. (선택) `queryClient.removeQueries({queryKey: ["<domain>","cargo", deletedId]})` — invalidate가 아닌 removeQueries로 캐시 자체 제거
+
+**사례**: 5b36ea6 — Sea House + Non B/L Cargo 탭 race 동시 차단.
+
+**잔여 점검 권장**
+
+Air House Entry Cargo/Container 탭 마이그레이션 시 — detail 응답에 cargo가 포함되어 있으면 §6.56 resetVersion만으로 충분, 별도 useQuery 구조면 본 §6.57 추가 적용.
+
+---
+
+### 6.58 Entry onSave 가드 `!isEdit` 신규 저장 차단 안티패턴
+
+Entry 컴포넌트 onSave 핸들러에 `if (!isEdit) return;` 또는 `if (mode !== "edit") return;` 같은 가드가 잘못 들어가면 **신규 모드에서 Save 버튼 클릭 시 `create<Domain>` mutation 자체가 호출되지 않음** (UI 무반응, Network 무송신).
+
+**원인**
+
+Edit 전용 후처리 로직(예: `setFocus(updatedId)`, `closeModal()`)을 가드로 감싸려다 onSave 함수 시작부 전체를 가드로 감싸는 실수. 종종 toolbar 식별 필드(`xxxNo`) 기준 mode 분기 코드와 함께 회귀.
+
+**해결**
+
+- 가드는 **edit 전용 후처리 블록**에만 적용 (예: `if (isEdit) { setFocus(updatedId); }`)
+- create/update 분기는 onSave 본문 진입 후 `isEdit ? update.mutate(...) : create.mutate(...)` 패턴으로 명확히 분리
+
+**사례**: 41198a4 — Non B/L Entry onSave에 `!isEdit` 가드 잔존으로 신규 저장 차단 회귀. 가드 제거 후 정상.
+
+**잔여 점검 권장**
+
+모든 Entry 컴포넌트 onSave 함수 시작부에 `!isEdit`/`mode !== "edit"` 패턴 grep 의무. Air House/Master 마이그레이션 시 plan 단계 체크리스트로 포함.
+
+---
+
+### 6.59 Entry ComboBox label 매핑 정합 — useEnumOptions value/label 시각 검증 의무
+
+`useEnumOptions(name)` 훅이 반환하는 `{value, label}` 매핑에서 label이 잘못 설정되면 ComboBox 드롭다운에 enum **code/name**(예: `LCL`)이 그대로 노출되거나 value/label이 swap된 채 표시.
+
+**원인**
+
+1. BE `EnumRegistryFactory` 등록 시 `new EnumOption(name, code, description)` SSOT 위반 (인자 순서 swap, 메모리 [feedback_enum_db_value])
+2. FE 호출처에서 `{value: o.label, label: o.value}` 등 명시적 swap
+3. FE 호출처에서 `useEnumOptions` 반환을 가공 후 `placeholder` 누락 → 빈 옵션 표시
+
+**해결**
+
+- BE: `EnumRegistryFactory`의 모든 enum 등록을 `new EnumOption(e.name(), e.getCode(), e.getDescription())` SSOT로 정합
+- FE: `useEnumOptions(name)` 반환은 그대로 ComboBox `options` prop에 전달, `placeholder={enumPlaceholder}` 동반
+
+**검증 의무**
+
+`lint`/`build` PASS만으로는 enum 라벨 mismatch를 검출 불가 — 메모리 [feedback_fe_verify_before_commit] 적용. **dev preview catalog 페이지**(`app/(dev)/preview/sections/inputs-section.tsx`)에서 enum ComboBox 시각 확인 후 commit.
+
+**사례**: 204ac4c — Non B/L Container Information ComboBox label 매핑 정정.
+
+**잔여 점검 권장**
+
+Air House/Master Entry의 모든 ComboBox — 마이그레이션 시 dev preview catalog에 enum 옵션을 추가하여 시각 확인 의무.
