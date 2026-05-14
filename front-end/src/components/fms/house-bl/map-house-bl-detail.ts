@@ -144,6 +144,7 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       arrivalTm: s.arrivalTm ?? "",
     })) ?? [],
     airCharges: detail.airDetail?.airCharges?.map((a: HouseBlAirChargeView) => ({
+      id:             a.id,
       freightCode:    a.freightCode    ?? "",
       currencyCode:   a.currencyCode   ?? "",
       per:            a.per            ?? "",
@@ -154,6 +155,7 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       rate:           a.rate           != null ? String(a.rate)           : "",
     })) ?? [],
     dims: detail.airDetail?.dims?.map((d: HouseBlAirDimView) => ({
+      id:             d.id,
       lengthCm:       d.lengthCm       != null ? String(d.lengthCm)       : "",
       widthCm:        d.widthCm        != null ? String(d.widthCm)        : "",
       heightCm:       d.heightCm       != null ? String(d.heightCm)       : "",

@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * HouseBlAssembler AIR 확장 필드 wiring 검증.
- * toCreateCommand / toUpdateCommand 호출 시 AirDetailRequest → AirDetailCommand 17개 필드 1:1 매핑 확인.
+ * toCreateCommand / toUpdateCommand 호출 시 AirDetailRequest → AirDetailCommand 18개 필드 1:1 매핑 확인.
  */
 class HouseBlAssemblerAirTest {
 
@@ -21,7 +21,7 @@ class HouseBlAssemblerAirTest {
     // ── CREATE ────────────────────────────────────────────────────────
 
     @Test
-    void toCreateCommand_airDetail_필드_17개_1대1_매핑() {
+    void toCreateCommand_airDetail_필드_18개_1대1_매핑() {
         CreateHouseBlRequest.AirDetailRequest airDetail = new CreateHouseBlRequest.AirDetailRequest(
                 "KE",
                 new BigDecimal("100.5"),
@@ -37,6 +37,7 @@ class HouseBlAssemblerAirTest {
                 "ICN",
                 "SIGNATURE",
                 "FHD-CODE",
+                "A",
                 "HANDLING INFO",
                 "KR",
                 "GEN"
@@ -61,7 +62,8 @@ class HouseBlAssemblerAirTest {
         assertThat(a.issuePlace()).isEqualTo("ICN");
         assertThat(a.signature()).isEqualTo("SIGNATURE");
         assertThat(a.fhd()).isEqualTo("FHD-CODE");
-        assertThat(a.handlingInformation()).isEqualTo("HANDLING INFO");
+        assertThat(a.handlingInformationCode()).isEqualTo("A");
+        assertThat(a.handlingInformationDesc()).isEqualTo("HANDLING INFO");
         assertThat(a.originOfGoods()).isEqualTo("KR");
         assertThat(a.cargoType()).isEqualTo("GEN");
     }
@@ -78,7 +80,7 @@ class HouseBlAssemblerAirTest {
     // ── UPDATE ────────────────────────────────────────────────────────
 
     @Test
-    void toUpdateCommand_airDetail_필드_17개_1대1_매핑() {
+    void toUpdateCommand_airDetail_필드_18개_1대1_매핑() {
         UpdateHouseBlRequest.AirDetailRequest airDetail = new UpdateHouseBlRequest.AirDetailRequest(
                 "OZ",
                 new BigDecimal("200.0"),
@@ -94,6 +96,7 @@ class HouseBlAssemblerAirTest {
                 "GMP",
                 "SIG2",
                 "FHD2",
+                "A",
                 "HAND2",
                 "US",
                 "DGR"
@@ -118,7 +121,8 @@ class HouseBlAssemblerAirTest {
         assertThat(a.issuePlace()).isEqualTo("GMP");
         assertThat(a.signature()).isEqualTo("SIG2");
         assertThat(a.fhd()).isEqualTo("FHD2");
-        assertThat(a.handlingInformation()).isEqualTo("HAND2");
+        assertThat(a.handlingInformationCode()).isEqualTo("A");
+        assertThat(a.handlingInformationDesc()).isEqualTo("HAND2");
         assertThat(a.originOfGoods()).isEqualTo("US");
         assertThat(a.cargoType()).isEqualTo("DGR");
     }

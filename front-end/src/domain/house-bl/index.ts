@@ -223,6 +223,8 @@ export interface DescRequest {
 }
 
 export interface DimRequest {
+  // §6.28 — UPDATE 분기에서 row id 포함 필수 (신규 생성 시 undefined)
+  id?: number;
   lengthCm?: number;
   widthCm?: number;
   heightCm?: number;
@@ -283,6 +285,8 @@ export interface TruckOrderRequest {
 }
 
 export interface AirChargeRequest {
+  // §6.28 — UPDATE 분기에서 row id 포함 필수 (신규 생성 시 undefined)
+  id?: number;
   freightCode?: string;
   currencyCode?: string;
   per?: string;
@@ -309,7 +313,8 @@ export interface AirDetailRequest {
   issuePlace?: string;
   signature?: string;
   fhd?: string;
-  handlingInformation?: string;
+  handlingInformationCode?: string;
+  handlingInformationDesc?: string;
   originOfGoods?: string;
   cargoType?: string;
 }

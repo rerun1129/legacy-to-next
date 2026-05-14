@@ -133,7 +133,8 @@ export function buildHouseBlRequest(
       issuePlace:            toStr(ad.issuePlace),
       signature:             toStr(ad.signature),
       fhd:                   toStr(ad.fhd),
-      handlingInformation:   toStr(ad.handlingInformationCode),
+      handlingInformationCode: toStr(ad.handlingInformationCode),
+      handlingInformationDesc: toStr(ad.handlingInformationDesc),
       originOfGoods:         toStr(ad.originOfGoods),
       cargoType:             toStr(ad.cargoType),
     };
@@ -155,6 +156,8 @@ export function buildHouseBlRequest(
     }));
 
     base.airCharges = values.airCharges?.map(a => ({
+      // §6.28 — id가 있으면 그대로 포함(UPDATE merge-by-id), 없으면 undefined(신규 INSERT)
+      id:             a.id,
       freightCode:    toStr(a.freightCode),
       currencyCode:   toStr(a.currencyCode),
       per:            toStr(a.per),
@@ -166,6 +169,8 @@ export function buildHouseBlRequest(
     }));
 
     base.dims = values.dims?.map(d => ({
+      // §6.28 — id가 있으면 그대로 포함(UPDATE merge-by-id), 없으면 undefined(신규 INSERT)
+      id:             d.id,
       lengthCm:       toNum(d.lengthCm),
       widthCm:        toNum(d.widthCm),
       heightCm:       toNum(d.heightCm),

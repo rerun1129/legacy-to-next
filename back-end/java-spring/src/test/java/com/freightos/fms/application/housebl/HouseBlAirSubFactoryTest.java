@@ -13,6 +13,7 @@ import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
 import com.freightos.fms.domain.housebl.enums.CargoType;
 import com.freightos.fms.domain.housebl.enums.Fhd;
+import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class HouseBlAirSubFactoryTest {
     // ── applyAirCreate ───────────────────────────────────────────────
 
     @Test
-    @DisplayName("applyAirCreate: 17개 AIR 확장 필드 전부 매핑된다")
+    @DisplayName("applyAirCreate: 18개 AIR 확장 필드 전부 매핑된다")
     void applyAirCreate_allFields_mappedCorrectly() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         CreateHouseBlCommand.AirDetailCommand detail = new CreateHouseBlCommand.AirDetailCommand(
@@ -45,7 +46,7 @@ class HouseBlAirSubFactoryTest {
                 "N.V.D.", "N.C.V.", "NIL", "ACCT",
                 "PREPAID",
                 "20250101", "ICN", "PILOT",
-                "F", "CARGO_TEXT",
+                "F", "A", "CARGO_TEXT",
                 "KOREA", "DG"
         );
 
@@ -66,6 +67,7 @@ class HouseBlAirSubFactoryTest {
         assertThat(air.getSignature()).isEqualTo("PILOT");
         assertThat(air.getFhd()).isEqualTo(Fhd.F);
         assertThat(air.getHandlingInformation()).isNotNull();
+        assertThat(air.getHandlingInformation().code()).isEqualTo(HandlingInfoCode.A);
         assertThat(air.getHandlingInformation().description()).isEqualTo("CARGO_TEXT");
         assertThat(air.getOriginOfGoods()).isEqualTo("KOREA");
         assertThat(air.getCargoType()).isEqualTo(CargoType.DG);
@@ -85,7 +87,7 @@ class HouseBlAirSubFactoryTest {
     // ── applyAirUpdate PATCH 의미론 ──────────────────────────────────
 
     @Test
-    @DisplayName("applyAirUpdate: 17개 AIR 확장 필드 전부 매핑된다")
+    @DisplayName("applyAirUpdate: 18개 AIR 확장 필드 전부 매핑된다")
     void applyAirUpdate_allFields_mappedCorrectly() {
         HouseBlAir air = HouseBlAir.create(Bound.EXP);
         UpdateHouseBlCommand.AirDetailCommand detail = new UpdateHouseBlCommand.AirDetailCommand(
@@ -94,7 +96,7 @@ class HouseBlAirSubFactoryTest {
                 "DECLARED", "CUSTOMS_VAL", "INSURANCE_VAL", "ACCT2",
                 "COLLECT",
                 "20250201", "GMP", "CAPTAIN",
-                "D", "HANDLING_DESC",
+                "D", "D", "HANDLING_DESC",
                 "JAPAN", "KC"
         );
 
@@ -114,6 +116,8 @@ class HouseBlAirSubFactoryTest {
         assertThat(air.getIssuePlace()).isEqualTo(PortCode.of("GMP"));
         assertThat(air.getSignature()).isEqualTo("CAPTAIN");
         assertThat(air.getFhd()).isEqualTo(Fhd.D);
+        assertThat(air.getHandlingInformation()).isNotNull();
+        assertThat(air.getHandlingInformation().code()).isEqualTo(HandlingInfoCode.D);
         assertThat(air.getHandlingInformation().description()).isEqualTo("HANDLING_DESC");
         assertThat(air.getOriginOfGoods()).isEqualTo("JAPAN");
         assertThat(air.getCargoType()).isEqualTo(CargoType.KC);
@@ -139,7 +143,7 @@ class HouseBlAirSubFactoryTest {
         // airlineCode만 변경, 나머지 null (기존 값 유지)
         UpdateHouseBlCommand.AirDetailCommand partial = new UpdateHouseBlCommand.AirDetailCommand(
                 "OZ", null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
 
         sut.applyAirUpdate(air, partial);

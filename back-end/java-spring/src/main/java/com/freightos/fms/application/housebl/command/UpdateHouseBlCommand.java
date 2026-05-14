@@ -115,7 +115,8 @@ public record UpdateHouseBlCommand(
             String issuePlace,
             String signature,
             String fhd,
-            String handlingInformation,
+            String handlingInformationCode,
+            String handlingInformationDesc,
             String originOfGoods,
             String cargoType
     ) {}
@@ -189,6 +190,7 @@ public record UpdateHouseBlCommand(
     ) {}
 
     public record AirChargeCommand(
+            Long id,
             String freightCode,
             String currencyCode,
             String per,

@@ -111,7 +111,8 @@ public record UpdateHouseBlRequest(
             String issuePlace,
             String signature,
             String fhd,
-            String handlingInformation,
+            String handlingInformationCode,
+            String handlingInformationDesc,
             String originOfGoods,
             String cargoType
     ) {}
@@ -124,8 +125,9 @@ public record UpdateHouseBlRequest(
             String descClause2
     ) {}
 
-    /** 포장 치수 명세 1행. */
+    /** 포장 치수 명세 1행. UPDATE 전용 — 기존 행 식별을 위한 id 포함. */
     public record DimRequest(
+            Long id,
             BigDecimal lengthCm,
             BigDecimal widthCm,
             BigDecimal heightCm,
@@ -186,8 +188,9 @@ public record UpdateHouseBlRequest(
             String sealNo3
     ) {}
 
-    /** AIR Charge 1행. */
+    /** AIR Charge 1행. UPDATE 전용 — 기존 행 식별을 위한 id 포함. */
     public record AirChargeRequest(
+            Long id,
             String freightCode,
             String currencyCode,
             String per,

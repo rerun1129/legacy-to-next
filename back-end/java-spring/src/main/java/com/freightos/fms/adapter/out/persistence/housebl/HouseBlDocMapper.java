@@ -103,6 +103,7 @@ public class HouseBlDocMapper {
     /** FK(house_bl_air_id)는 HouseBlAirJpaEntity.syncScheduleLegs(@JoinColumn)이 설정 — airJpa 인자 불필요 */
     public HouseBlScheduleLegJpaEntity toScheduleLegJpa(HouseBlScheduleLeg leg) {
         HouseBlScheduleLegJpaEntity jpa = new HouseBlScheduleLegJpaEntity();
+        if (leg.getId() != null) jpa.setHouseBlScheduleLegId(leg.getId());
         applyScheduleLegFields(leg, jpa);
         return jpa;
     }
@@ -185,6 +186,7 @@ public class HouseBlDocMapper {
     /** FK(house_bl_air_id)는 HouseBlAirJpaEntity.syncAirCharges(@JoinColumn)이 설정 — airJpa 인자 불필요 */
     public HouseBlAirChargeJpaEntity toAirChargeJpa(HouseBlAirCharge c) {
         HouseBlAirChargeJpaEntity jpa = new HouseBlAirChargeJpaEntity();
+        if (c.getId() != null) jpa.setHouseBlAirChargeId(c.getId());
         applyAirChargeFields(c, jpa);
         return jpa;
     }

@@ -187,6 +187,7 @@ class HouseBlSubFactory {
         if (cmds == null || cmds.isEmpty()) return;
         entity.initAirCharges(cmds.stream().map(c -> {
             HouseBlAirCharge charge = HouseBlAirCharge.create(null);
+            if (c.id() != null) charge.assignIdentity(c.id(), null, null, null, null);
             charge.updateDetails(new HouseBlAirCharge.Details(
                     c.freightCode(), CurrencyCode.of(c.currencyCode()), Per.fromCode(c.per()),
                     Nullables.mapOrNull(c.freightTerm(), FreightTerm::valueOf),

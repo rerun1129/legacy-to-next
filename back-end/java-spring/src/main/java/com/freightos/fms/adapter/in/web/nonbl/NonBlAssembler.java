@@ -266,7 +266,7 @@ public class NonBlAssembler {
     private List<UpdateHouseBlCommand.AirChargeCommand> toAirChargeCommandsU(List<CreateHouseBlRequest.AirChargeRequest> reqs) {
         if (reqs == null) return null;
         return reqs.stream().map(r -> new UpdateHouseBlCommand.AirChargeCommand(
-                r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(),
+                null, r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(),
                 r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
     }
 }

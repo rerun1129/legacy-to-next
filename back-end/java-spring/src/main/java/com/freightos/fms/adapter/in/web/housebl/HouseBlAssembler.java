@@ -191,7 +191,7 @@ public class HouseBlAssembler {
                 a.declaredValueCarriage(), a.declaredValueCustoms(),
                 a.insurance(), a.accountInformation(), a.otherTerm(),
                 a.issueDate(), a.issuePlace(), a.signature(),
-                a.fhd(), a.handlingInformation(),
+                a.fhd(), a.handlingInformationCode(), a.handlingInformationDesc(),
                 a.originOfGoods(), a.cargoType());
     }
 
@@ -256,7 +256,7 @@ public class HouseBlAssembler {
                 a.declaredValueCarriage(), a.declaredValueCustoms(),
                 a.insurance(), a.accountInformation(), a.otherTerm(),
                 a.issueDate(), a.issuePlace(), a.signature(),
-                a.fhd(), a.handlingInformation(),
+                a.fhd(), a.handlingInformationCode(), a.handlingInformationDesc(),
                 a.originOfGoods(), a.cargoType());
     }
 
@@ -268,9 +268,8 @@ public class HouseBlAssembler {
 
     private List<UpdateHouseBlCommand.DimCommand> toDimCommandsU(List<UpdateHouseBlRequest.DimRequest> reqs) {
         if (reqs == null) return null;
-        // Sea/Air/Truck UPDATE는 sync 방식이므로 id null 허용
         return reqs.stream().map(r -> new UpdateHouseBlCommand.DimCommand(
-                null, r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+                r.id(), r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
     }
 
     private List<UpdateHouseBlCommand.ContainerCommand> toContainerCommandsU(List<UpdateHouseBlRequest.ContainerRequest> reqs) {
@@ -300,7 +299,7 @@ public class HouseBlAssembler {
     private List<UpdateHouseBlCommand.AirChargeCommand> toAirChargeCommandsU(List<UpdateHouseBlRequest.AirChargeRequest> reqs) {
         if (reqs == null) return null;
         return reqs.stream().map(r -> new UpdateHouseBlCommand.AirChargeCommand(
-                r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(),
+                r.id(), r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(),
                 r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
     }
 }

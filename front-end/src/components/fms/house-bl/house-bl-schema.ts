@@ -13,6 +13,8 @@ export const DESC_SCHEMA = z.object({
 });
 
 export const DIM_SCHEMA = z.object({
+  // DB 식별자 — Update 시 BE mergeDims id 매칭에 사용 (§6.28)
+  id:            z.number().optional(),
   lengthCm:      z.string().optional(),
   widthCm:       z.string().optional(),
   heightCm:      z.string().optional(),
@@ -73,6 +75,8 @@ export const TRUCK_ORDER_SCHEMA = z.object({
 });
 
 export const AIR_CHARGE_SCHEMA = z.object({
+  // DB 식별자 — Update 시 BE mergeAirCharges id 매칭에 사용 (§6.28)
+  id:             z.number().optional(),
   freightCode:    z.string().optional(),
   currencyCode:   z.string().optional(),
   per:            z.string().optional(),

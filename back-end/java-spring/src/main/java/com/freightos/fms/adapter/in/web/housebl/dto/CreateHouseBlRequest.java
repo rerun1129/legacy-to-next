@@ -118,7 +118,8 @@ public record CreateHouseBlRequest(
             @Size(max = 5) String issuePlace,
             String signature,
             String fhd,
-            String handlingInformation,
+            String handlingInformationCode,
+            String handlingInformationDesc,
             String originOfGoods,
             String cargoType
     ) {}

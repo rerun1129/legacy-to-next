@@ -55,6 +55,7 @@ public class HouseBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "rate", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal rate;
 
+    public void setHouseBlAirChargeId(Long v)          { this.houseBlAirChargeId = v; }
     public void setFreightCode(String v)              { this.freightCode   = v; }
     public void setCurrencyCode(String v)             { this.currencyCode  = v; }
     public void setPer(Per v)                         { this.per           = v; }

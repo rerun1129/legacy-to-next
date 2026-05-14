@@ -14,6 +14,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.entity.HouseBlAir;
 import com.freightos.fms.domain.housebl.enums.CargoType;
 import com.freightos.fms.domain.housebl.enums.Fhd;
+import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import com.freightos.common.util.Nullables;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +42,7 @@ class HouseBlAirSubFactory {
                 PortCode.of(airDetail.issuePlace()),
                 airDetail.signature(),
                 Nullables.mapOrNull(airDetail.fhd(), Fhd::valueOf),
-                HandlingInformation.of(null, airDetail.handlingInformation()),
+                HandlingInformation.of(Nullables.mapOrNull(airDetail.handlingInformationCode(), HandlingInfoCode::fromCode), airDetail.handlingInformationDesc()),
                 airDetail.originOfGoods(),
                 Nullables.mapOrNull(airDetail.cargoType(), CargoType::fromCode)));
     }
@@ -63,9 +64,7 @@ class HouseBlAirSubFactory {
                 Nullables.mapOrElse(airDetail.issuePlace(),     PortCode::of,                                  air::getIssuePlace),
                 Nullables.firstNonNull(airDetail.signature(),                                                   air::getSignature),
                 Nullables.mapOrElse(airDetail.fhd(),            Fhd::valueOf,                                  air::getFhd),
-                Nullables.mapOrElse(airDetail.handlingInformation(),
-                        text -> HandlingInformation.of(null, text),
-                        air::getHandlingInformation),
+                buildHandlingInformation(air.getHandlingInformation(), airDetail.handlingInformationCode(), airDetail.handlingInformationDesc()),
                 Nullables.firstNonNull(airDetail.originOfGoods(),                                               air::getOriginOfGoods),
                 Nullables.mapOrElse(airDetail.cargoType(),      CargoType::fromCode,                           air::getCargoType)));
     }
@@ -73,5 +72,16 @@ class HouseBlAirSubFactory {
     void applyAirRemark(HouseBl entity, String remark) {
         if (!(entity instanceof HouseBlAir air)) return;
         air.updateRemark(remark);
+    }
+
+    // PATCH 의미론: 두 필드 모두 null이면 기존 값 유지, 일부만 들어오면 들어온 값과 기존 값 결합.
+    private HandlingInformation buildHandlingInformation(HandlingInformation existing, String codeStr, String descStr) {
+        HandlingInfoCode code = codeStr != null
+                ? HandlingInfoCode.fromCode(codeStr)
+                : (existing != null ? existing.code() : null);
+        String desc = descStr != null
+                ? descStr
+                : (existing != null ? existing.description() : null);
+        return HandlingInformation.of(code, desc);
     }
 }

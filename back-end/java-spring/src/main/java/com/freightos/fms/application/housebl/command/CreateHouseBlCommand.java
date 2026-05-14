@@ -116,7 +116,8 @@ public record CreateHouseBlCommand(
             String issuePlace,
             String signature,
             String fhd,
-            String handlingInformation,
+            String handlingInformationCode,
+            String handlingInformationDesc,
             String originOfGoods,
             String cargoType
     ) {}
