@@ -78,7 +78,7 @@ export function SeaDocumentPanel() {
         <span className="panel__title">Document</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
-        <FieldItemGrid itemScope="sea-document-panel" items={DOCUMENT_ITEMS} />
+        <FieldItemGrid itemScope="sea-document-panel" items={DOCUMENT_ITEMS} cols={1} />
       </div>
     </div>
   );

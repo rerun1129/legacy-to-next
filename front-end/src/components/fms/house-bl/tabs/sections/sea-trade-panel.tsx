@@ -12,67 +12,67 @@ export function SeaTradePanel() {
   const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
   const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
 
-  const tradeTermItems: FieldItemDef[] = [
-    {
-      key: "incoterms",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Incoterms</span>
-          <div className="li__input">
-            <Controller
-              name="incoterms"
-              control={control}
-              render={({ field }) => (
-                <ComboBox
-                  variant="panel"
-                  options={incotermsOptions}
-                  placeholder={incotermPlaceholder}
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </div>
+  const incotermsItem: FieldItemDef = {
+    key: "incoterms",
+    render: () => (
+      <div className="li">
+        <span className="li__label">Incoterms</span>
+        <div className="li__input">
+          <Controller
+            name="incoterms"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={incotermsOptions}
+                placeholder={incotermPlaceholder}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
-      ),
-    },
-    {
-      key: "freight-term",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Freight Term</span>
-          <div className="li__input">
-            <Controller
-              name="freightTerm"
-              control={control}
-              render={({ field }) => (
-                <ComboBox
-                  variant="panel"
-                  options={freightTermOptions}
-                  placeholder={freightTermPlaceholder}
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </div>
+      </div>
+    ),
+  };
+
+  const freightTermItem: FieldItemDef = {
+    key: "freight-term",
+    render: () => (
+      <div className="li">
+        <span className="li__label">Freight Term</span>
+        <div className="li__input">
+          <Controller
+            name="freightTerm"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                variant="panel"
+                options={freightTermOptions}
+                placeholder={freightTermPlaceholder}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
-      ),
-    },
-    {
-      key: "payable-at",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          variant="panel"
-          label="Payable At"
-          codeProps={{ ...register("seaDetail.payableAt") }}
-          nameProps={{ ...register("seaDetail.payableAtName") }}
-          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-        />
-      ),
-    },
-  ];
+      </div>
+    ),
+  };
+
+  const payableAtItem: FieldItemDef = {
+    key: "payable-at",
+    render: () => (
+      <CodeBox
+        kind="lcn"
+        variant="panel"
+        label="Payable At"
+        codeProps={{ ...register("seaDetail.payableAt") }}
+        nameProps={{ ...register("seaDetail.payableAtName") }}
+        onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      />
+    ),
+  };
 
   const perfItems: FieldItemDef[] = [
     {
@@ -109,7 +109,12 @@ export function SeaTradePanel() {
     {
       key:   "trade-terms",
       label: "Trade Terms",
-      render: () => <FieldItemGrid itemScope="sea-trade-panel.trade-terms" items={tradeTermItems} />,
+      render: () => (
+        <>
+          <FieldItemGrid itemScope="sea-trade-panel.trade-terms.terms"   items={[incotermsItem, freightTermItem]} cols={2} />
+          <FieldItemGrid itemScope="sea-trade-panel.trade-terms.payable" items={[payableAtItem]}                  cols={1} />
+        </>
+      ),
     },
     {
       key:   "performance",
@@ -117,7 +122,7 @@ export function SeaTradePanel() {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />Performance</div>
-          <FieldItemGrid itemScope="sea-trade-panel.performance" items={perfItems} />
+          <FieldItemGrid itemScope="sea-trade-panel.performance" items={perfItems} cols={1} />
         </>
       ),
     },

@@ -177,123 +177,133 @@ export function SchedulePanel({ variant }: Props) {
     },
   ];
 
-  const linerItems: FieldItemDef[] = [
-    {
-      key: "liner",
-      render: () => (
-        <CodeBox
-          kind="lcn"
-          variant="panel"
-          label="Liner"
-          codeProps={{ ...register("seaDetail.linerCode"), placeholder: "UNLOC" }}
-          nameProps={{ ...register("linerName") }}
-          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
-        />
-      ),
-    },
-    {
-      key: "vessel",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Vessel</span>
-          <div className="li__input">
-            <TextBox variant="panel" {...register("seaDetail.vesselName")} />
-          </div>
+  const linerItem: FieldItemDef = {
+    key: "liner",
+    render: () => (
+      <CodeBox
+        kind="lcn"
+        variant="panel"
+        label="Liner"
+        codeProps={{ ...register("seaDetail.linerCode"), placeholder: "UNLOC" }}
+        nameProps={{ ...register("linerName") }}
+        onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+      />
+    ),
+  };
+
+  const vesselItem: FieldItemDef = {
+    key: "vessel",
+    render: () => (
+      <div className="li">
+        <span className="li__label">Vessel</span>
+        <div className="li__input">
+          <TextBox variant="panel" {...register("seaDetail.vesselName")} />
         </div>
-      ),
-    },
-    {
-      key: "voyage",
-      render: () => (
-        <div className="li">
-          <span className="li__label">Voyage</span>
-          <div className="li__input">
-            <TextBox variant="panel" {...register("seaDetail.voyageNo")} />
-          </div>
+      </div>
+    ),
+  };
+
+  const voyageItem: FieldItemDef = {
+    key: "voyage",
+    render: () => (
+      <div className="li">
+        <span className="li__label">Voyage</span>
+        <div className="li__input">
+          <TextBox variant="panel" {...register("seaDetail.voyageNo")} />
         </div>
-      ),
-    },
-    {
-      key: "etd",
-      render: () => (
-        <div className="li">
-          <span className="li__label is-required">ETD</span>
-          <div className="li__input">
-            <Controller
-              control={control}
-              name="etd"
-              render={({ field }) => (
-                <DateBox
-                  variant="panel"
-                  required
-                  ref={field.ref}
-                  name={field.name}
-                  value={field.value as string}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                />
-              )}
-            />
-          </div>
+      </div>
+    ),
+  };
+
+  const etdItem: FieldItemDef = {
+    key: "etd",
+    render: () => (
+      <div className="li">
+        <span className="li__label is-required">ETD</span>
+        <div className="li__input">
+          <Controller
+            control={control}
+            name="etd"
+            render={({ field }) => (
+              <DateBox
+                variant="panel"
+                required
+                ref={field.ref}
+                name={field.name}
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
         </div>
-      ),
-    },
-    {
-      key: "eta",
-      render: () => (
-        <div className="li">
-          <span className="li__label is-required">ETA</span>
-          <div className="li__input">
-            <Controller
-              control={control}
-              name="eta"
-              render={({ field }) => (
-                <DateBox
-                  variant="panel"
-                  required
-                  ref={field.ref}
-                  name={field.name}
-                  value={field.value as string}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                />
-              )}
-            />
-          </div>
+      </div>
+    ),
+  };
+
+  const etaItem: FieldItemDef = {
+    key: "eta",
+    render: () => (
+      <div className="li">
+        <span className="li__label is-required">ETA</span>
+        <div className="li__input">
+          <Controller
+            control={control}
+            name="eta"
+            render={({ field }) => (
+              <DateBox
+                variant="panel"
+                required
+                ref={field.ref}
+                name={field.name}
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
         </div>
-      ),
-    },
-    {
-      key: "on-board",
-      render: () => (
-        <div className="li">
-          <span className="li__label">On Board</span>
-          <div className="li__input">
-            <Controller
-              control={control}
-              name="seaDetail.onboardDate"
-              render={({ field }) => (
-                <DateBox
-                  variant="panel"
-                  ref={field.ref}
-                  name={field.name}
-                  value={field.value as string}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                />
-              )}
-            />
-          </div>
+      </div>
+    ),
+  };
+
+  const onBoardItem: FieldItemDef = {
+    key: "on-board",
+    render: () => (
+      <div className="li">
+        <span className="li__label">On Board</span>
+        <div className="li__input">
+          <Controller
+            control={control}
+            name="seaDetail.onboardDate"
+            render={({ field }) => (
+              <DateBox
+                variant="panel"
+                ref={field.ref}
+                name={field.name}
+                value={field.value as string}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
         </div>
-      ),
-    },
-  ];
+      </div>
+    ),
+  };
 
   const fields: FieldWidgetDef[] = [
     {
       key:   "liner",
       label: "Liner & Vessel",
-      render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={linerItems} />,
+      render: () => (
+        <>
+          <FieldItemGrid itemScope={`${panelScope}.liner.solo`}         items={[linerItem]}              cols={1} />
+          <FieldItemGrid itemScope={`${panelScope}.liner.vessel-voyage`} items={[vesselItem, voyageItem]} cols={2} />
+          <FieldItemGrid itemScope={`${panelScope}.liner.etd-eta`}      items={[etdItem, etaItem]}       cols={2} />
+          <FieldItemGrid itemScope={`${panelScope}.liner.onboard`}      items={[onBoardItem]}            cols={2} />
+        </>
+      ),
     },
     {
       key:   "ports",
@@ -301,7 +311,7 @@ export function SchedulePanel({ variant }: Props) {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />Ports</div>
-          <FieldItemGrid itemScope={`${panelScope}.ports`} items={PORT_ITEMS} />
+          <FieldItemGrid itemScope={`${panelScope}.ports`} items={PORT_ITEMS} cols={1} />
         </>
       ),
     },
