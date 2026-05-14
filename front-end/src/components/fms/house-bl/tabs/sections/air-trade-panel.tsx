@@ -1,53 +1,36 @@
-import type React from "react";
-import { useFormContext, Controller, type FieldPath } from "react-hook-form";
+"use client";
+
+import { useFormContext, Controller } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
-import { ComboBox } from "@/components/shared/inputs";
+import { TextBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
-
-const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
-
-function LiField({
-  label,
-  name,
-}: {
-  label: string;
-  name?: FieldPath<HouseBlFormValues>;
-}) {
-  const { register } = useFormContext<HouseBlFormValues>();
-  const registerProps = name ? register(name) : {};
-  return (
-    <div className="li">
-      <span className="li__label">{label}</span>
-      <div className="li__input"><input style={LI_ST} {...registerProps} /></div>
-    </div>
-  );
-}
-
-function FreightTermField({ inputProps }: { inputProps: React.InputHTMLAttributes<HTMLInputElement> }) {
-  return (
-    <div className="li">
-      <span className="li__label">Freight Term</span>
-      <div className="li__input"><input style={LI_ST} {...inputProps} /></div>
-    </div>
-  );
-}
 
 export function AirTradePanel({ variant }: Props) {
   const { register, control } = useFormContext<HouseBlFormValues>();
   const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
+  const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
 
   if (!variant) return null;
   const panelScope = `air-trade-panel.${variant.key}`;
   const isImp      = variant.direction === "IMP";
 
   const baseItems: FieldItemDef[] = [
-    { key: "currency",     render: () => <LiField label="Currency"     name="currency"   /> },
+    {
+      key: "currency",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Currency</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("currency")} />
+          </div>
+        </div>
+      ),
+    },
     {
       key: "incoterms",
       render: () => (
@@ -71,15 +54,97 @@ export function AirTradePanel({ variant }: Props) {
         </div>
       ),
     },
-    { key: "freight-term", render: () => <FreightTermField inputProps={register("freightTerm")} /> },
-    { key: "other-term",   render: () => <LiField label="Other Term"   name="otherTerm"  /> },
-    { key: "dv-carriage",  render: () => <LiField label="D.V Carriage" name="dvCarriage" /> },
-    { key: "insurance",    render: () => <LiField label="Insurance"    name="insurance"  /> },
-    { key: "dv-customs",   render: () => <LiField label="D.V Customs"  name="dvCustoms"  /> },
-    { key: "account-info", render: () => <LiField label="Account Info" name="accountInfo" /> },
+    {
+      key: "freight-term",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Freight Term</span>
+          <div className="li__input">
+            <Controller
+              name="freightTerm"
+              control={control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={freightTermOptions}
+                  placeholder={freightTermPlaceholder}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "other-term",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Other Term</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("otherTerm")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "dv-carriage",
+      render: () => (
+        <div className="li">
+          <span className="li__label">D.V Carriage</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("dvCarriage")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "insurance",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Insurance</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("insurance")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "dv-customs",
+      render: () => (
+        <div className="li">
+          <span className="li__label">D.V Customs</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("dvCustoms")} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "account-info",
+      render: () => (
+        <div className="li">
+          <span className="li__label">Account Info</span>
+          <div className="li__input">
+            <TextBox variant="panel" {...register("accountInfo")} />
+          </div>
+        </div>
+      ),
+    },
   ];
 
-  const fhdItem: FieldItemDef = { key: "fhd", render: () => <LiField label="F.H.D" name="fhd" /> };
+  const fhdItem: FieldItemDef = {
+    key: "fhd",
+    render: () => (
+      <div className="li">
+        <span className="li__label">F.H.D</span>
+        <div className="li__input">
+          <TextBox variant="panel" {...register("fhd")} />
+        </div>
+      </div>
+    ),
+  };
 
   const tradeItems: FieldItemDef[] = isImp ? [...baseItems, fhdItem] : baseItems;
 

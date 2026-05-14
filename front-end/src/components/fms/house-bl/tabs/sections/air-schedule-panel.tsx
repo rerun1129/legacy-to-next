@@ -1,14 +1,16 @@
+"use client";
+
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList } from "@/components/shared/grid-list";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { TextBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/air-schedule-legs-cols";
 import { Button } from "@/components/shared/button";
-// TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 interface Props { variant?: AnyVariantConfig }
 
@@ -26,11 +28,11 @@ export function AirSchedulePanel({ variant }: Props) {
       render: () => (
         <div className="li">
           <span className="li__label is-required">{isExp ? "Airline" : "Carrier"}</span>
-          <div className="li__input" style={{ gap: 4 }}>
-            <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
-              {...register("airDetail.airlineCode")} />
-            <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}
-              {...register("airDetail.airlineName")} />
+          <div className="li__input li__input--tight">
+            <div style={{ flex: "0 0 60px" }}>
+              <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("airDetail.airlineCode")} />
+            </div>
+            <TextBox variant="panel" {...register("airDetail.airlineName")} />
           </div>
         </div>
       ),
@@ -40,9 +42,11 @@ export function AirSchedulePanel({ variant }: Props) {
       render: () => (
         <div className="li">
           <span className="li__label is-required">Departure</span>
-          <div className="li__input" style={{ gap: 4 }}>
-            <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} {...register("pol")} />
-            <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }} {...register("polName")} />
+          <div className="li__input li__input--tight">
+            <div style={{ flex: "0 0 60px" }}>
+              <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("pol")} />
+            </div>
+            <TextBox variant="panel" {...register("polName")} />
           </div>
         </div>
       ),
@@ -85,7 +89,7 @@ export function AirSchedulePanel({ variant }: Props) {
               <GridList
                 columns={buildAirScheduleLegCols(register, "scheduleLegs")}
                 data={fields as unknown as LegRow[]}
-                rowKey={(row) => row.id ?? ""}
+                rowKey={(r) => String(r.id)}
               />
             </div>
           </div>
@@ -103,12 +107,11 @@ export function AirSchedulePanel({ variant }: Props) {
             render: () => (
               <div className="li">
                 <span className="li__label">Destination</span>
-                <div className="li__input" style={{ gap: 4 }}>
-                  <input style={{ width: 60, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }}
-                    {...register("pod")} />
-                  <input style={{ flex: 1, height: 22, padding: "0 8px", fontSize: 10 }}
-                    placeholder="(미구현)"
-                    {...register("podName")} />
+                <div className="li__input li__input--tight">
+                  <div style={{ flex: "0 0 60px" }}>
+                    <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("pod")} />
+                  </div>
+                  <TextBox variant="panel" {...register("podName")} />
                 </div>
               </div>
             ),

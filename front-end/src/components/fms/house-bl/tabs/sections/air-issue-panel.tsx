@@ -1,6 +1,7 @@
-import type React from "react";
+"use client";
+
 import { useFormContext, Controller, type FieldPath } from "react-hook-form";
-import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
+import { TextBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
@@ -8,13 +9,11 @@ import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schem
 
 interface Props { variant?: AnyVariantConfig }
 
-const LI_ST: React.CSSProperties = { width: "100%", height: 22, padding: "0 8px", fontSize: 10 };
-
-// air-schedule-panel에서 이전 — Air Issue Information 섹션 라벨 → RHF 필드명 매핑
+// §6.49 ⑯ — airDetail nested 경로 정합 (seaDetail 경로 오기입 교정)
 const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
-  "Issue Date":  "seaDetail.issueDate",
-  "Issue Place": "seaDetail.issuePlace",
-  "Signature":   "seaDetail.signature",
+  "Issue Date":  "airDetail.issueDate",
+  "Issue Place": "airDetail.issuePlace",
+  "Signature":   "airDetail.signature",
 };
 
 export function AirIssuePanel({ variant }: Props) {
@@ -37,7 +36,9 @@ export function AirIssuePanel({ variant }: Props) {
                     control={control}
                     name={fieldName}
                     render={({ field }) => (
-                      <PanelDateInput
+                      <DateBox
+                        variant="panel"
+                        name={field.name}
                         value={field.value as string}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -45,8 +46,8 @@ export function AirIssuePanel({ variant }: Props) {
                       />
                     )}
                   />
-                : <PanelDateInput />
-              : <input style={LI_ST} {...(fieldName ? register(fieldName) : {})} />}
+                : <DateBox variant="panel" />
+              : <TextBox variant="panel" {...(fieldName ? register(fieldName) : {})} />}
           </div>
         </div>
       ),

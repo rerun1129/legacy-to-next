@@ -14,6 +14,7 @@ export function AirPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
+          variant="panel"
           label="Actual Customer"
           required
           codeProps={{ ...register("actualCustomerCode") }}
@@ -27,6 +28,7 @@ export function AirPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
+          variant="panel"
           label="Customer PIC"
           codeProps={{ ...register("customerPic") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -38,6 +40,7 @@ export function AirPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
+          variant="panel"
           label="Settle Partner"
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
@@ -50,6 +53,7 @@ export function AirPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
+          variant="panel"
           label="Sales Man"
           required
           codeProps={{ ...register("salesManCode") }}
@@ -63,6 +67,7 @@ export function AirPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
+          variant="panel"
           label="Operator"
           required
           codeProps={{ ...register("operatorCode") }}
@@ -76,6 +81,7 @@ export function AirPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
+          variant="panel"
           label="Team"
           required
           codeProps={{ ...register("teamCode") }}
@@ -87,9 +93,12 @@ export function AirPerformancePanel() {
   ];
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Performance</span></div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
+    <div className="panel panel--col-flex">
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Performance</span>
+      </div>
+      <div className="panel__body panel__body--scroll-flex2">
         <FieldItemGrid itemScope="air-performance-panel" items={PERF_ITEMS} />
       </div>
     </div>

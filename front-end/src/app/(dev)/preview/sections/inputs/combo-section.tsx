@@ -41,6 +41,34 @@ function ComboBoxEnumDemo({
   );
 }
 
+// §6.59 — Air House Entry enum ComboBox 시각 카탈로그
+function AirEnumComboRow({
+  label,
+  enumName,
+  variant,
+  disabled,
+}: {
+  label: string;
+  enumName: string;
+  variant: BoxVariant;
+  disabled: boolean;
+}) {
+  const { options, placeholder, isLoading } = useEnumOptions(enumName);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+      <span style={{ width: 120, fontSize: 10, color: "#555", flexShrink: 0 }}>{label}</span>
+      <div style={{ flex: 1 }}>
+        <ComboBox
+          variant={variant}
+          disabled={disabled || isLoading}
+          options={options}
+          placeholder={placeholder ?? `${label} 선택`}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** 표준 입력 컴포넌트는 autoComplete="off"가 기본 적용됩니다. */
 export function ComboSection({ form, variant, required, readOnly, disabled }: SectionProps) {
   const { register } = form;
@@ -86,6 +114,16 @@ export function ComboSection({ form, variant, required, readOnly, disabled }: Se
       <div style={sectionStyle}>
         <div style={{ fontWeight: 600, marginBottom: 6 }}>ComboBox — useEnumOptions (ENUM 바인딩)</div>
         <ComboBoxEnumDemo variant={variant} required={required} readOnly={readOnly} disabled={disabled} />
+      </div>
+
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>ComboBox — Air House Entry ENUMs (§6.59 시각 검증)</div>
+        <AirEnumComboRow label="WeightUnit"       enumName="WeightUnit"       variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="FreightTerm"      enumName="FreightTerm"      variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="Per"              enumName="Per"              variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="RateClass"        enumName="RateClass"        variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="HandlingInfoCode" enumName="HandlingInfoCode" variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="SalesClass"       enumName="SalesClass"       variant={variant} disabled={disabled} />
       </div>
     </>
   );

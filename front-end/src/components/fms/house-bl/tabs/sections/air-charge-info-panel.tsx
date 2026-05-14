@@ -185,9 +185,9 @@ export function AirChargeInfoPanel() {
       <GridList
         columns={columns}
         data={fields as unknown as ChargeRow[]}
-        rowKey={(row) => (row as unknown as { id: string }).id}
-        onRowClick={(row) => setSelectedKey((row as unknown as { id: string }).id)}
-        rowClassName={(row) => (row as unknown as { id: string }).id === selectedKey ? "is-selected" : undefined}
+        rowKey={(r) => String((r as unknown as { id: string }).id)}
+        onRowClick={(r) => setSelectedKey((r as unknown as { id: string }).id)}
+        rowClassName={(r) => (r as unknown as { id: string }).id === selectedKey ? "is-selected" : undefined}
         onClearRow={() => setSelectedKey(null)}
         style={{ flex: 1, minHeight: 0 }}
       />
