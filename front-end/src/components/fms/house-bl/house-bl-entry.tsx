@@ -374,10 +374,6 @@ export function HouseBLEntry({ variant }: Props) {
               {t.label}
             </button>
           ))}
-          <div className="tabbar__spacer" />
-          <div className="tabbar__meta">
-            <span>Last saved: 10 min ago</span>
-          </div>
         </div>
 
         <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion)}</div>
