@@ -534,11 +534,13 @@ FE가 PUT 응답을 받고 `invalidateQueries` + GET refetch 패턴이면 응답
 4. UseCase 반환 `void`로 변경 + Controller 응답 `ApiResponse<Void>`
 5. FE adapter `Promise<void>` 정합 — `xxxPort` 인터페이스 + api client + 응답 schema 검증 제거
 6. 기존 `HouseBlPort.saveHouseBl`은 다른 호출자(create 등) 호환 위해 유지 — update만 새 Port로 전환
-7. 테스트:
+7. **1:1 sub-entity (desc/note/spec 등) sync 동반 의무** — `<Domain>JpaEntity` 또는 `<Domain>DescJpaEntity` 같은 1:1 sub-entity가 있고 Strategy가 `saveOrDelete<Sub>` 메서드를 보유하면 UPDATE 경로에서도 sync 호출 필수. `toXxxDomain(parentJpa, extJpa, subJpa)` 시그니처의 3번째 인자에 `null` 전달 발견 시 결함 — `houseBl<Domain>DescRepository.findBy<Ext>_HouseBl<Ext>Id(extJpa.getHouseBl<Ext>Id()).orElse(null)`로 fetch + `apply<Domain>BlFields` 직후 `applyDescSync(domain, extJpa, descJpa)` 호출 + private `applyDescSync` 추가(desc null no-op / 기존 row mutate / 없으면 신규 save). SEA `SeaHblUpdatePersistenceAdapter.applyDescSync` / Truck `TruckBlUpdatePersistenceAdapter.applyDescSync` 패턴 동일 복사. INSERT 경로(`Strategy.saveExt`)는 보통 이미 desc 처리 중이라 미변경. (사례: 2026-05-14 d92525e — `AirBlUpdatePersistenceAdapter`에 desc sync 누락이 마이그레이션 후 사용자 화면 검수에서 표면화)
+8. 테스트:
    - 신규 Adapter 단위 테스트: happy path(factory·applyCommonFields·applyNonBlFields·mergeContainers·mergeDims 호출 검증), notFound, wrong jobDiv
+   - **desc/sub-entity sync 케이스 2종**: `existing<Sub>_appliesFieldsWithoutSave` + `noExisting<Sub>_createsAndSavesNewJpa` (1:1 sub-entity 보유 도메인 한정)
    - Adapter 테스트의 mock stub은 실제 호출 경로와 정확히 일치(Mockito strict mode `UnnecessaryStubbingException` 회피)
    - Command 레코드 파라미터 수 정확히 일치(인수 누락 시 컴파일 실패)
-8. p6spy 실측으로 SELECT 절감 확인
+9. p6spy 실측으로 SELECT 절감 확인
 
 **리스크 — adapter→application/factory 의존**:
 정통 헥사고널은 adapter→application 의존 금지지만, factory가 stateless command→도메인 mutator 호출 헬퍼라 실용적으로 허용. 의존 회피하려면 service에서 command→fields 변환 후 fields만 port에 전달하는 패턴(분량 더 큼).
@@ -551,7 +553,7 @@ FE가 PUT 응답을 받고 `invalidateQueries` + GET refetch 패턴이면 응답
 
 **후속 정규화 (2026-05-12 후속)** — sub-set 매퍼 도입(8c54dd9) + address 4필드 보강(41205f8) 이후에도 무수정 조회→저장이 여전히 `house_bl` + `house_bl_truck` 두 테이블에 UPDATE를 발사하는 케이스 발견. 원인은 **디폴트 주입 비대칭** 두 군데. (1) FE `use-truck-bl-entry.ts`의 `dimensionDivisor: detail.volumeDivisor ?? "CM6000"` — DB NULL → form "CM6000" 정규화 → payload "CM6000" → entity dirty. (2) BE `applyTruckBlFields`의 `setVesselName(vv != null ? vv.vesselName() : "TRUCK")` — form 미보유인데 vv null일 때 "TRUCK" 강제 set → DB NULL → "TRUCK" dirty. 해결: FE는 `?? ""`로 디폴트 주입 제거(정규화 정렬), BE는 vv null이면 vesselName/voyageNo setter skip(sub-set). 신규 INSERT 경로(`applyTruckFields`)는 그대로 "TRUCK" 고정값 유지 — Update 경로 전용 분기.
 
-**HouseBl Sea/Air · MasterBl · SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행.
+**MasterBl · SwitchBl 적용 권장** — 본 SSOT를 그대로 따라 별도 작업으로 진행. HouseBl Sea/Air 적용 완료(2026-05-14: SeaHblUpdatePersistenceAdapter / AirBlUpdatePersistenceAdapter — Air는 `d92525e`로 desc sync 추가).
 
 ### 6.36 Entry detail useQuery — 화면 재진입 시 자동 refetch 차단
 
@@ -689,7 +691,19 @@ public record UpdateXxxRequest(String shipperCode, ...) {}
 
 사례: 2026-05-14 — Sea House 적용. `applySeaCommonFields` 내 master 참조 setter 3건(`setMasterBlId`/`setMblNo`/`setMasterRefNo`) 라인 제거 + `HouseBlFactory.applyToEntity`의 `assignMasterReference` 호출 앞에 `cmd.mblNo() != null || cmd.masterRefNo() != null` null 가드 추가. SEA form은 master 참조를 직접 편집하지 않으므로 (Master B/L Entry에서만 관리) update 경로에서 setter 호출 자체 차단. 회귀 테스트 `HouseBlDomainToJpaMapperSeaTest` 신설(3 케이스 `never()` verify).
 
-**다른 도메인 적용 권장**: Master B/L · Air House 등 form에서 address/master 참조 명시 매핑이 빠진 화면 점검. 같은 데이터 손실 패턴 발생 가능. (Non B/L · Truck B/L · Sea House 적용 완료)
+**다른 도메인 적용 권장**: Master B/L · Air House 등 form에서 address/master 참조 명시 매핑이 빠진 화면 점검. 같은 데이터 손실 패턴 발생 가능. (Non B/L · Truck B/L · Sea House · Air House 적용 완료)
+
+**sub-set 매퍼 setter 처리 3분기 SSOT (2026-05-14 정밀화, §6.49 ㉓)**: 본 §6.37 초기 SSOT는 "form 미보유 필드는 setter 라인 제거"였으나 form 편집 가능한 필드(예: 모든 House B/L 변형의 `mblNo`/`masterRefNo`)에 setter 제거를 적용하면 form 변경값이 도메인까지 들어가지만 JPA에 미반영 → dirty 미발생 → UPDATE 쿼리 자체 미발사. 사용자가 두 필드만 수정해 저장하면 "성공" 토스트만 뜨고 DB는 그대로. 따라서 sub-set 매퍼의 setter는 3분기 분류:
+
+| 분기 | 처리 | 예시 |
+|---|---|---|
+| (a) form 미보유 + DB 보호 필수 | setter 라인 영구 제거 | `setShipperAddress` (NonBl form 미보유 address) |
+| (b) form 편집 가능 | conditional setter `if (domain.getXxx() != null) jpa.setXxx(...)` | 모든 House B/L의 `setMblNo`/`setMasterRefNo` |
+| (c) 별도 흐름 경유 | setter 라인 영구 제거 | `setMasterBlId` (← `linkToMaster` 별도 경로) |
+
+conditional setter는 PATCH 의미론(domain null = DB 기존 값 유지)을 유지하면서도 form 변경 반영. Factory도 `if (cmd.mblNo() != null || cmd.masterRefNo() != null) entity.assignMasterReference(...)` 같은 null 가드 동반 의무. 회귀 테스트는 단순 `never()` verify가 아니라 `whenDomainXxxNull_skipsSetXxx` + `whenDomainXxxPresent_callsSetXxxWithValue` 두 케이스 동반.
+
+사례: 2026-05-14 6a9f7c7 — Air/Sea/Truck/NonBl 4개 sub-set 매퍼(`applyAirCommonFields`/`applySeaCommonFields`/`applyTruckCommonFields`/`applyNonBlCommonFields`) 끝에 `setMblNo`/`setMasterRefNo` conditional setter 추가. `HouseBlDomainToJpaMapperSeaTest`의 setter "절대 미호출" 검증 2 케이스를 conditional 검증 4 케이스로 재작성(사용자 명시 승인).
 
 ### 6.47 List → Entry 진입 시 detail 쿼리 invalidate + draft clear 필수 (SSOT)
 
