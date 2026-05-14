@@ -3,8 +3,7 @@
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList } from "@/components/shared/grid-list";
-import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
-import { TextBox } from "@/components/shared/inputs";
+import { CodeBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
@@ -25,29 +24,29 @@ export function AirSchedulePanel({ variant }: Props) {
     {
       key: "airline",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Airline</span>
-          <div className="li__input li__input--tight">
-            <div style={{ flex: "0 0 60px" }}>
-              <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("airDetail.airlineCode")} />
-            </div>
-            <TextBox variant="panel" {...register("airDetail.airlineName")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="Airline"
+          required
+          codeProps={{ ...register("airDetail.airlineCode"), placeholder: "IATA" }}
+          nameProps={{ ...register("airDetail.airlineName"), placeholder: "Airline Name" }}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        />
       ),
     },
     {
       key: "departure",
       render: () => (
-        <div className="li">
-          <span className="li__label is-required">Departure</span>
-          <div className="li__input li__input--tight">
-            <div style={{ flex: "0 0 60px" }}>
-              <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("pol")} />
-            </div>
-            <TextBox variant="panel" {...register("polName")} />
-          </div>
-        </div>
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="Departure"
+          required
+          codeProps={{ ...register("pol"), placeholder: "UNLOC" }}
+          nameProps={{ ...register("polName"), placeholder: "Port Name" }}
+          onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        />
       ),
     },
   ];
@@ -104,15 +103,15 @@ export function AirSchedulePanel({ variant }: Props) {
           items={[{
             key: "destination",
             render: () => (
-              <div className="li">
-                <span className="li__label">Destination</span>
-                <div className="li__input li__input--tight">
-                  <div style={{ flex: "0 0 60px" }}>
-                    <TextBox variant="panel" style={{ fontFamily: "var(--font-mono)" }} {...register("pod")} />
-                  </div>
-                  <TextBox variant="panel" {...register("podName")} />
-                </div>
-              </div>
+              <CodeBox
+                kind="lcn"
+                variant="panel"
+                label="Destination"
+                required
+                codeProps={{ ...register("pod"), placeholder: "UNLOC" }}
+                nameProps={{ ...register("podName"), placeholder: "Port Name" }}
+                onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+              />
             ),
           }]}
           cols={1}
@@ -131,17 +130,20 @@ export function AirSchedulePanel({ variant }: Props) {
               key: "onboard",
               render: () => (
                 <div className="li">
-                  <span className="li__label">On board</span>
+                  <span className="li__label is-required">On board</span>
                   <div className="li__input">
                     <Controller
                       control={control}
                       name="etd"
                       render={({ field }) => (
-                        <PanelDateInput
+                        <DateBox
+                          variant="panel"
+                          required
+                          ref={field.ref}
+                          name={field.name}
                           value={field.value as string}
                           onChange={field.onChange}
                           onBlur={field.onBlur}
-                          ref={field.ref}
                         />
                       )}
                     />
@@ -153,17 +155,20 @@ export function AirSchedulePanel({ variant }: Props) {
               key: "arrival",
               render: () => (
                 <div className="li">
-                  <span className="li__label">Arrival</span>
+                  <span className="li__label is-required">Arrival</span>
                   <div className="li__input">
                     <Controller
                       control={control}
                       name="eta"
                       render={({ field }) => (
-                        <PanelDateInput
+                        <DateBox
+                          variant="panel"
+                          required
+                          ref={field.ref}
+                          name={field.name}
                           value={field.value as string}
                           onChange={field.onChange}
                           onBlur={field.onBlur}
-                          ref={field.ref}
                         />
                       )}
                     />
