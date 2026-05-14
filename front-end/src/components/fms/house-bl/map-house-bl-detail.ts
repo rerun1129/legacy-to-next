@@ -102,10 +102,10 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       seq:           c.seq           != null ? String(c.seq)           : "",
     })) ?? [],
     desc: {
-      marks:        detail.seaDetail?.desc?.marks        ?? "",
-      description:  detail.seaDetail?.desc?.description  ?? "",
-      descClause1:  detail.seaDetail?.desc?.descClause1  ?? "",
-      descClause2:  detail.seaDetail?.desc?.descClause2  ?? "",
+      marks:        detail.airDetail?.desc?.marks       ?? detail.seaDetail?.desc?.marks       ?? "",
+      description:  detail.airDetail?.desc?.description ?? detail.seaDetail?.desc?.description ?? "",
+      descClause1:  detail.airDetail?.desc?.descClause1 ?? detail.seaDetail?.desc?.descClause1 ?? "",
+      descClause2:  detail.airDetail?.desc?.descClause2 ?? detail.seaDetail?.desc?.descClause2 ?? "",
       // remark는 본체 필드 — desc에는 저장하지 않으므로 빈 문자열 유지
       remark:       "",
     },
