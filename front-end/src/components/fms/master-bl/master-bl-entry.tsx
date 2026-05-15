@@ -4,14 +4,13 @@ import { useRef, useState, useEffect } from "react";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { confirm } from "@/components/confirm";
 import { TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
 import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
 import { mapMasterBlDetailToForm } from "./map-master-bl-detail";
-import { buildCreateMasterBlPayload, buildUpdateMasterBlPayload } from "./master-bl-submit";
 import { Save, Copy, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ComboBox, TextBox } from "@/components/shared/inputs";
@@ -19,8 +18,8 @@ import { useEnumOptions } from "@/application/enums/use-enum";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
-import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import type { ConsolidatedHouseBlSummary } from "@/domain/master-bl";
+import { useMasterBlEntryMutations } from "./use-master-bl-entry-mutations";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { ScreenGuard }   from "@/components/shared/screen-guard";
@@ -109,51 +108,13 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     form.reset(mapMasterBlDetailToForm(detail));
   }, [detail, form, didRestoreFromDraftRef]);
 
-  // §6.49 ⑩ — mutation onSuccess SSOT 5요소
-  const mutation = useMutation<{ id: number } | void, Error, MasterBlFormValues>({
-    mutationFn: (data: MasterBlFormValues) => {
-      return isEdit
-        ? masterBlPort.update(id!, buildUpdateMasterBlPayload(id!, data, variant))
-        : masterBlPort.create(buildCreateMasterBlPayload(data, variant));
-    },
-    onSuccess: (result) => {
-      if (!isEdit) {
-        // create: result는 { id: number }
-        const newId = (result && typeof result === "object" && "id" in result) ? (result as { id: number }).id : undefined;
-        if (newId != null) {
-          queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", newId] });
-          sessionStorage.setItem(`master-bl-entry:hot:${newId}`, "1");
-          useEntryFocusStore.getState().setFocus(entryFocusKeys.masterBl(variantKey), newId);
-          clearDraft(`master:${variantKey}:new`);
-          detailLoadedRef.current = false;
-        }
-      } else {
-        // update: List 자동 invalidate 금지 (§6.21, memory [feedback_list_entry_invalidate])
-        // update 시 router.push 자동 이동 금지
-        queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", id] });
-        sessionStorage.setItem(`master-bl-entry:hot:${id}`, "1");
-        useEntryFocusStore.getState().setFocus(entryFocusKeys.masterBl(variantKey), id!);
-        clearDraft(`master:${variantKey}:${id}`);
-        detailLoadedRef.current = false;
-      }
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => masterBlPort.delete(id!),
-    onSuccess: () => {
-      // List 자동 invalidate 금지 (§6.21) — detail cache 제거 + draft 정리 + ref 해제
-      queryClient.removeQueries({ queryKey: ["master-bl", "detail", id] });
-      form.reset({
-        ...createEmptyMasterBlFormValues(),
-        jobDiv: variant.mode,
-        bound: variant.direction ?? "EXP",
-      });
-      clearDraft(`master:${variantKey}:${id ?? "new"}`);
-      clearDraft(`master:${variantKey}:new`);
-      detailLoadedRef.current = false;
-      setResetVersion(v => v + 1);
-    },
+  const { mutation, deleteMutation } = useMasterBlEntryMutations({
+    id,
+    variantKey,
+    variant,
+    form,
+    detailLoadedRef,
+    setResetVersion,
   });
 
   function handleSearchBl() {
@@ -221,9 +182,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     { key: "main",    label: "Main"    },
     { key: "freight", label: "Freight" },
   ];
-
-  const bottomActionsLeft  = variant.bottomActions.filter(a => ["Profit/Loss", "House B/L Load"].includes(a));
-  const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
 
   const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
   const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";

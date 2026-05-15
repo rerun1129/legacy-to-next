@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormContext, Controller, type UseFormReturn } from "react-hook-form";
+import { useFormContext, type UseFormReturn } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
@@ -60,7 +60,7 @@ function PackageField() {
   );
 }
 
-export function MasterCargoDocPanel({ variant, form }: Props) {
+export function MasterCargoDocPanel({ variant }: Props) {
   if (!variant) return null;
   const isSea      = variant.mode === "SEA";
   const panelScope = `master-cargo-doc.${variant.key}`;

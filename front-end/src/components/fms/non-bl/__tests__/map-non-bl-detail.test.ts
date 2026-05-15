@@ -5,7 +5,6 @@ import { mapNonBlDetailToFormValues } from "../map-non-bl-detail";
 const BASE_DETAIL: NonBlDetail = {
   id: 1,
   hblNo: "HBLTEST001",
-  jobDiv: "SEA",
   bound: "EXP",
   workDivision: "Sea",
   originalBlRef: "REF001",
