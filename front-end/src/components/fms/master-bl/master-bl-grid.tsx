@@ -159,6 +159,7 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="master-bl"
           isLoading={isFetching}
+          scrollPositionKey={`list-scroll:master-bl:${variantKey}`}
         />
       </div>
     </div>

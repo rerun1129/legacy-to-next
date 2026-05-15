@@ -114,6 +114,7 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="sea-master"
           isLoading={extraFilter !== null && isFetching}
+          scrollPositionKey="list-scroll:sea-master"
         />
       </div>
       <Pagination

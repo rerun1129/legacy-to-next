@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useScrollRestore } from "@/lib/use-scroll-restore";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { GridListProps, ROW_HEIGHT_PX } from "./grid-list";
 import { GridRow } from "./grid-list-row";
@@ -60,12 +61,15 @@ export function PlainGridList<T>({
   onClearRow,
   isLoading = false,
   skeletonRowCount = 12,
+  scrollPositionKey,
 }: Omit<GridListProps<T>, "gridId">) {
   const { colWidths, handleResizePointerDown } = useColResize();
   const scrollRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const selectionOverlayRef = useRef<HTMLDivElement>(null);
   const copiedOverlayRef = useRef<HTMLDivElement>(null);
+
+  useScrollRestore(scrollRef, scrollPositionKey, !isLoading);
 
   // list-wrap(부모)의 높이를 매 렌더마다 직접 읽는다.
   // ResizeObserver 콜백은 비동기라 초기 렌더에서 높이가 0으로 잡히는 문제가 있어 교체.

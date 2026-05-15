@@ -30,12 +30,13 @@ export interface GridListProps<T> {
   onClearRow?: () => void;
   isLoading?: boolean;
   skeletonRowCount?: number;
+  scrollPositionKey?: string;
 }
 
 // --row-h 기본값 24px — tokens.css:21 정의 기준
 export const ROW_HEIGHT_PX = 24;
 
-export function GridList<T>({ gridId, ...rest }: GridListProps<T>) {
-  if (gridId) return <ManagedGridList<T> gridId={gridId} {...rest} />;
-  return <PlainGridList<T> {...rest} />;
+export function GridList<T>({ gridId, scrollPositionKey, ...rest }: GridListProps<T>) {
+  if (gridId) return <ManagedGridList<T> gridId={gridId} scrollPositionKey={scrollPositionKey} {...rest} />;
+  return <PlainGridList<T> scrollPositionKey={scrollPositionKey} {...rest} />;
 }

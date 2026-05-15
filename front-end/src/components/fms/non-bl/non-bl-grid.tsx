@@ -129,6 +129,7 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="non-bl"
           isLoading={extraFilter !== null && isFetching}
+          scrollPositionKey="list-scroll:non-bl"
         />
       </div>
       <Pagination

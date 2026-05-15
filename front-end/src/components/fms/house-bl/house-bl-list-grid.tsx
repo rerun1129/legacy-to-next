@@ -175,6 +175,7 @@ export function HouseBLListGrid({ variantKey, extraFilter = {} }: Props) {
             rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
             gridId="house-bl-list"
             isLoading={isFetching}
+            scrollPositionKey={`list-scroll:house-bl:${variantKey}`}
           />
         </div>
       </div>

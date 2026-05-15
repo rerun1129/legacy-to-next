@@ -112,6 +112,7 @@ export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="air-master"
           isLoading={extraFilter !== null && isFetching}
+          scrollPositionKey="list-scroll:air-master"
         />
       </div>
       <Pagination

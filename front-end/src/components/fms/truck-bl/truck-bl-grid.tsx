@@ -127,6 +127,7 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="truck-bl"
           isLoading={extraFilter !== null && isFetching}
+          scrollPositionKey="list-scroll:truck-bl"
         />
       </div>
       <Pagination

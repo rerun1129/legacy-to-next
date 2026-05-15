@@ -142,6 +142,7 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           gridId="sea-house"
           isLoading={extraFilter !== null && isFetching}
+          scrollPositionKey="list-scroll:sea-house"
         />
       </div>
       <Pagination
