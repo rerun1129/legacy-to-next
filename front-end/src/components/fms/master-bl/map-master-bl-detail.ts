@@ -65,7 +65,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     },
     // §BE-sync — consolidatedHouseBls → houseBls (ConsoledHouseBlSummaryView 전체 필드 매핑)
     houseBls: (detail.consolidatedHouseBls ?? []).map((hbl) => ({
-      id:             hbl.id,
+      houseBlId:      hbl.houseBlId,
       hblNo:          hbl.hblNo,
       shipperCode:    hbl.shipperCode,
       consigneeCode:  hbl.consigneeCode,

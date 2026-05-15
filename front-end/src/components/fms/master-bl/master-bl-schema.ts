@@ -49,6 +49,7 @@ const AIR_CHARGE_SCHEMA = z.object({
 });
 
 // §BE-sync — ConsoledSeaContainerView 전체 필드 정합 (표시 전용, zodResolver 미사용 — BE SSOT)
+// BigDecimal(grossWeightKg/cbm/vgmKg)은 BE Jackson 기본 직렬화 → number
 const CONSOLED_SEA_CONTAINER_SCHEMA = z.object({
   houseBlId:     z.number(),
   containerNo:   z.string().nullable().optional(),
@@ -58,23 +59,24 @@ const CONSOLED_SEA_CONTAINER_SCHEMA = z.object({
   sealNo3:       z.string().nullable().optional(),
   pkgQty:        z.number().nullable().optional(),
   pkgUnit:       z.string().nullable().optional(),
-  grossWeightKg: z.string().nullable().optional(),
-  cbm:           z.string().nullable().optional(),
-  vgmKg:         z.string().nullable().optional(),
+  grossWeightKg: z.number().nullable().optional(),
+  cbm:           z.number().nullable().optional(),
+  vgmKg:         z.number().nullable().optional(),
 });
 
-// §BE-sync — ConsoledHouseBlSummaryView 전체 필드 정합 (shipperCode/consigneeCode/pkgQty/grossWeightKg로 통일)
+// §BE-sync — ConsoledHouseBlSummaryView 전체 필드 정합 (houseBlId 키 통일, pkgQty=number)
+// BigDecimal(grossWeightKg/cbm)은 BE Jackson 기본 직렬화 → number
 const HOUSE_BL_REF_SCHEMA = z.object({
-  id:             z.number(),
+  houseBlId:      z.number(),
   hblNo:          z.string().nullable().optional(),
   shipperCode:    z.string().nullable().optional(),
   consigneeCode:  z.string().nullable().optional(),
   docPartnerCode: z.string().nullable().optional(),
-  pkgQty:         z.string().nullable().optional(),
+  pkgQty:         z.number().nullable().optional(),
   pkgUnit:        z.string().nullable().optional(),
   weightUnit:     z.string().nullable().optional(),
-  grossWeightKg:  z.string().nullable().optional(),
-  cbm:            z.string().nullable().optional(),
+  grossWeightKg:  z.number().nullable().optional(),
+  cbm:            z.number().nullable().optional(),
   etd:            z.string().nullable().optional(),
   eta:            z.string().nullable().optional(),
   vesselName:     z.string().nullable().optional(),

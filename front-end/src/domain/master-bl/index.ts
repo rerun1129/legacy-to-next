@@ -73,6 +73,7 @@ export interface MasterBlDetail extends MasterBlRow {
 
 // §BE-sync — ConsoledSeaContainerView (BE consoledSeaContainers 전체 필드 정합)
 // SEA Master에 콘솔된 모든 컨테이너를 row 단위로 그대로 반환, 표시 전용
+// BigDecimal(grossWeightKg/cbm/vgmKg)은 BE Jackson 기본 직렬화 → number
 export interface ConsoledSeaContainer {
   houseBlId: number;
   containerNo: string | null;
@@ -82,30 +83,32 @@ export interface ConsoledSeaContainer {
   sealNo3: string | null;
   pkgQty: number | null;
   pkgUnit: string | null;
-  grossWeightKg: string | null;
-  cbm: string | null;
-  vgmKg: string | null;
+  grossWeightKg: number | null;
+  cbm: number | null;
+  vgmKg: number | null;
 }
 
 // §BE-sync — ConsoledHouseBlSummaryView (BE consolidatedHouseBls 전체 필드 정합)
+// houseBlId 키 통일 (BE Integer → number, BigDecimal → number)
 // AIR 전용 필드(chargeWeightKg)는 SEA에서 null 반환 — FE 표시 제외 가능
 export interface ConsolidatedHouseBlSummary {
-  id: number;
+  houseBlId: number;
   hblNo: string | null;
   shipperCode: string | null;
   consigneeCode: string | null;
   docPartnerCode: string | null;
-  pkgQty: string | null;
+  pkgQty: number | null;
   pkgUnit: string | null;
   weightUnit: string | null;
-  grossWeightKg: string | null;
-  cbm: string | null;
+  grossWeightKg: number | null;
+  cbm: number | null;
   etd: string | null;
   eta: string | null;
   vesselName: string | null;
   voyageNo: string | null;
   polCode: string | null;
   podCode: string | null;
+  chargeWeightKg?: number | null;
 }
 
 export interface MasterBlFilter {

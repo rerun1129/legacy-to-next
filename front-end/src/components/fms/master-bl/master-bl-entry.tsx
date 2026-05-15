@@ -271,7 +271,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       {isEdit && detail?.consolidatedHouseBls && detail.consolidatedHouseBls.length > 0 && (
         <div className="consolidated-hbl-list" aria-label="Consolidated House B/L list (read-only)">
           {detail.consolidatedHouseBls.map((hbl: ConsolidatedHouseBlSummary) => (
-            <span key={hbl.id} className="badge">{hbl.hblNo ?? `HBL#${hbl.id}`}</span>
+            <span key={hbl.houseBlId} className="badge">{hbl.hblNo ?? `HBL#${hbl.houseBlId}`}</span>
           ))}
         </div>
       )}

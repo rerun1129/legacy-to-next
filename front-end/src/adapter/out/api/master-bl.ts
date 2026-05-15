@@ -22,11 +22,42 @@ const MASTER_BL_ROW_SCHEMA = z.object({
   createdAt: z.string(),
 });
 
+// §BE-sync — ConsoledHouseBlSummaryView 17 필드 (houseBlId 키 정합, AIR 전용 chargeWeightKg optional)
+// BigDecimal 필드(grossWeightKg/cbm/chargeWeightKg)는 BE Jackson 기본 직렬화 → JSON number
 const CONSOLIDATED_HBL_SCHEMA = z.object({
-  id: z.number(),
-  hblNo: z.string().nullable(),
-  shipperCode: z.string().nullable(),
-  consigneeCode: z.string().nullable(),
+  houseBlId:      z.number(),
+  hblNo:          z.string().nullable(),
+  shipperCode:    z.string().nullable(),
+  consigneeCode:  z.string().nullable(),
+  docPartnerCode: z.string().nullable(),
+  pkgQty:         z.number().nullable(),
+  pkgUnit:        z.string().nullable(),
+  weightUnit:     z.string().nullable(),
+  grossWeightKg:  z.number().nullable(),
+  cbm:            z.number().nullable(),
+  etd:            z.string().nullable(),
+  eta:            z.string().nullable(),
+  vesselName:     z.string().nullable(),
+  voyageNo:       z.string().nullable(),
+  polCode:        z.string().nullable(),
+  podCode:        z.string().nullable(),
+  chargeWeightKg: z.number().nullable().optional(),
+});
+
+// §BE-sync — ConsoledSeaContainerView 11 필드 (houseBlId + BigDecimal→number)
+// BigDecimal 필드(grossWeightKg/cbm/vgmKg)는 BE Jackson 기본 직렬화 → JSON number
+const CONSOLED_SEA_CONTAINER_API_SCHEMA = z.object({
+  houseBlId:     z.number(),
+  containerNo:   z.string().nullable(),
+  containerType: z.string().nullable(),
+  sealNo1:       z.string().nullable(),
+  sealNo2:       z.string().nullable(),
+  sealNo3:       z.string().nullable(),
+  pkgQty:        z.number().nullable(),
+  pkgUnit:       z.string().nullable(),
+  grossWeightKg: z.number().nullable(),
+  cbm:           z.number().nullable(),
+  vgmKg:         z.number().nullable(),
 });
 
 // §BE-sync — SeaDetailResponse.SeaDescView (BE Phase 2 nested)
@@ -67,6 +98,7 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   grossWeightKg: z.number().nullable(),
   cbm: z.number().nullable(),
   consolidatedHouseBls: z.array(CONSOLIDATED_HBL_SCHEMA),
+  consoledSeaContainers: z.array(CONSOLED_SEA_CONTAINER_API_SCHEMA),
   updatedAt: z.string().nullable(),
   teamCode: z.string().nullable(),
   // §BE Phase 2 — party address 3 필드
