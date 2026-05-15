@@ -19,7 +19,6 @@ import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
-import type { ConsolidatedHouseBlSummary } from "@/domain/master-bl";
 import { useMasterBlEntryMutations } from "./use-master-bl-entry-mutations";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
@@ -277,15 +276,6 @@ export function MasterBLEntry({ variantKey }: Props) {
           </button>
         ))}
       </div>
-
-      {/* consolidatedHouseBls: detail fetch 시 읽기 전용 표시 전용, submit body에 미포함 */}
-      {isEdit && detail?.consolidatedHouseBls && detail.consolidatedHouseBls.length > 0 && (
-        <div className="consolidated-hbl-list" aria-label="Consolidated House B/L list (read-only)">
-          {detail.consolidatedHouseBls.map((hbl: ConsolidatedHouseBlSummary) => (
-            <span key={hbl.houseBlId} className="badge">{hbl.hblNo ?? `HBL#${hbl.houseBlId}`}</span>
-          ))}
-        </div>
-      )}
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={resetVersion} variant={variant} form={form} active={tab === "main"} /></div>
