@@ -30,7 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Truck B/L hblNo EXACT 매칭 단건 PK 조회 통합 테스트.
- * findTruckBlKeysByHblNoExact 사용 시 부분 매칭·대소문자·jobDiv 차단, 중복 한도(limit=2) 동작을 검증한다.
+ * jobDiv 격리(TRUCK 필터) 동작 및 adapter 라우팅을 검증한다.
+ * EXACT 매칭 규칙(부분/limit) SSOT는 HouseBlFindByHblNoIntegrationTest.
  */
 @DataJpaTest
 @ActiveProfiles("test")
@@ -73,13 +74,6 @@ class TruckBlFindByHblNoIntegrationTest {
         return house;
     }
 
-    private HouseBlJpaEntity persistTruckAndFlush(String hblNo) {
-        HouseBlJpaEntity house = persistTruck(hblNo);
-        em.flush();
-        em.clear();
-        return em.find(HouseBlJpaEntity.class, house.getHouseBlId());
-    }
-
     private HouseBlJpaEntity persistSea(String hblNo) {
         HouseBlJpaEntity house = new HouseBlJpaEntity();
         house.setJobDiv(JobDiv.SEA);
@@ -114,45 +108,6 @@ class TruckBlFindByHblNoIntegrationTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(house.getHouseBlId());
-    }
-
-    @Test
-    @DisplayName("부분 매칭 거부: row='TRK-2026-001', 입력='TRK' → 빈 리스트")
-    void findTruckBlKeysByHblNoExact_partialInput_returnsEmpty() {
-        persistTruck("TRK-2026-001");
-        em.flush();
-        em.clear();
-
-        List<Long> result = truckBlPersistenceAdapter.findTruckBlKeysByHblNoExact("TRK");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @DisplayName("우연 중복 2건(hbl_no='TRK-DUP') → size=2, createdAt desc 정렬로 나중 생성된 row가 앞에 위치")
-    void findTruckBlKeysByHblNoExact_twoDuplicates_returnsTwo_orderedByCreatedAtDesc() {
-        HouseBlJpaEntity first = persistTruckAndFlush("TRK-DUP");
-        HouseBlJpaEntity second = persistTruckAndFlush("TRK-DUP");
-
-        List<Long> result = truckBlPersistenceAdapter.findTruckBlKeysByHblNoExact("TRK-DUP");
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(second.getHouseBlId());
-        assertThat(result.get(1)).isEqualTo(first.getHouseBlId());
-    }
-
-    @Test
-    @DisplayName("우연 중복 3건(hbl_no='TRK-TRI') → limit=2이므로 size=2")
-    void findTruckBlKeysByHblNoExact_threeDuplicates_returnsLimitTwo() {
-        persistTruck("TRK-TRI");
-        persistTruck("TRK-TRI");
-        persistTruck("TRK-TRI");
-        em.flush();
-        em.clear();
-
-        List<Long> result = truckBlPersistenceAdapter.findTruckBlKeysByHblNoExact("TRK-TRI");
-
-        assertThat(result).hasSize(2);
     }
 
     @Test

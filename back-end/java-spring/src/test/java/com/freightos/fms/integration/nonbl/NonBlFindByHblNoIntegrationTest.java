@@ -31,8 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Non B/L hblNo EXACT 매칭 단건 PK 조회 통합 테스트.
- * searchNonBlSummaries(LIKE+JOIN) 대신 findNonBlKeysByHblNoExact 사용 시
- * 부분 매칭·대소문자·jobDiv 차단, 중복 한도(limit=2) 동작을 검증한다.
+ * jobDiv 격리(NON_BL 필터) 동작 및 adapter 라우팅을 검증한다.
+ * EXACT 매칭 규칙(부분/대소문자/limit) SSOT는 HouseBlFindByHblNoIntegrationTest.
  */
 @DataJpaTest
 @ActiveProfiles("test")
@@ -75,13 +75,6 @@ class NonBlFindByHblNoIntegrationTest {
         return house;
     }
 
-    private HouseBlJpaEntity persistNonBlAndFlush(String hblNo) {
-        HouseBlJpaEntity house = persistNonBl(hblNo);
-        em.flush();
-        em.clear();
-        return em.find(HouseBlJpaEntity.class, house.getHouseBlId());
-    }
-
     private HouseBlJpaEntity persistSea(String hblNo) {
         HouseBlJpaEntity house = new HouseBlJpaEntity();
         house.setJobDiv(JobDiv.SEA);
@@ -116,59 +109,6 @@ class NonBlFindByHblNoIntegrationTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(house.getHouseBlId());
-    }
-
-    @Test
-    @DisplayName("부분 매칭 거부: row='HBL-2026-001', 입력='HBL' → 빈 리스트")
-    void findNonBlKeysByHblNoExact_partialInput_returnsEmpty() {
-        persistNonBl("HBL-2026-001");
-        em.flush();
-        em.clear();
-
-        List<Long> result = nonBlPersistenceAdapter.findNonBlKeysByHblNoExact("HBL");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @DisplayName("대소문자 거부: row='HBL-A', 입력='hbl-a' → 빈 리스트")
-    void findNonBlKeysByHblNoExact_caseInsensitiveInput_returnsEmpty() {
-        persistNonBl("HBL-A");
-        em.flush();
-        em.clear();
-
-        List<Long> result = nonBlPersistenceAdapter.findNonBlKeysByHblNoExact("hbl-a");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @DisplayName("우연 중복 2건(hbl_no='HBL-DUP') → size=2, createdAt desc 정렬로 나중 생성된 row가 앞에 위치")
-    void findNonBlKeysByHblNoExact_twoDuplicates_returnsTwo_orderedByCreatedAtDesc() {
-        // 첫 번째 row를 먼저 flush하여 createdAt이 더 이른 시간으로 설정
-        HouseBlJpaEntity first = persistNonBlAndFlush("HBL-DUP");
-        HouseBlJpaEntity second = persistNonBlAndFlush("HBL-DUP");
-
-        List<Long> result = nonBlPersistenceAdapter.findNonBlKeysByHblNoExact("HBL-DUP");
-
-        assertThat(result).hasSize(2);
-        // createdAt desc → 나중에 생성된 second가 먼저 위치
-        assertThat(result.get(0)).isEqualTo(second.getHouseBlId());
-        assertThat(result.get(1)).isEqualTo(first.getHouseBlId());
-    }
-
-    @Test
-    @DisplayName("우연 중복 3건(hbl_no='HBL-TRI') → limit=2이므로 size=2")
-    void findNonBlKeysByHblNoExact_threeDuplicates_returnsLimitTwo() {
-        persistNonBl("HBL-TRI");
-        persistNonBl("HBL-TRI");
-        persistNonBl("HBL-TRI");
-        em.flush();
-        em.clear();
-
-        List<Long> result = nonBlPersistenceAdapter.findNonBlKeysByHblNoExact("HBL-TRI");
-
-        assertThat(result).hasSize(2);
     }
 
     @Test
