@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Minus } from "lucide-react";
 import { getModeLabels } from "@/lib/bl-mode-labels";
+import { formatDateDisplay } from "@/lib/date";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 
@@ -119,20 +120,20 @@ export function MasterHouseBLGrid({ variant }: Props) {
                 style={{ cursor: "pointer" }}
               >
                 <td className="row-num">{idx + 1}</td>
-                <td className="cell-hbl">{field.hblNo}</td>
-                <td>{field.shipper}</td>
-                <td>{field.consignee}</td>
-                <td></td>
-                <td className="is-num cell-mono">{field.pkg}</td>
-                <td></td>
-                <td className="is-num cell-mono">{field.gw}</td>
-                <td className="is-num cell-mono">{field.cbm}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td className="cell-hbl">{field.hblNo ?? ""}</td>
+                <td>{field.shipperCode ?? ""}</td>
+                <td>{field.consigneeCode ?? ""}</td>
+                <td>{field.docPartnerCode ?? ""}</td>
+                <td className="is-num cell-mono">{field.pkgQty ?? ""}</td>
+                <td>{field.pkgUnit ?? ""}</td>
+                <td className="is-num cell-mono">{field.grossWeightKg ?? ""}</td>
+                <td className="is-num cell-mono">{field.cbm ?? ""}</td>
+                <td>{formatDateDisplay(field.etd)}</td>
+                <td>{formatDateDisplay(field.eta)}</td>
+                <td>{field.vesselName ?? ""}</td>
+                <td>{field.voyageNo ?? ""}</td>
+                <td>{field.polCode ?? ""}</td>
+                <td>{field.podCode ?? ""}</td>
               </tr>
             ))}
           </tbody>

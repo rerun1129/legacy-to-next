@@ -70,11 +70,25 @@ export interface MasterBlDetail extends MasterBlRow {
   seaDetail: MasterBlSeaDetail | null;
 }
 
+// §BE-sync — ConsoledHouseBlSummaryView (BE consolidatedHouseBls 전체 필드 정합)
+// AIR 전용 필드(chargeWeightKg)는 SEA에서 null 반환 — FE 표시 제외 가능
 export interface ConsolidatedHouseBlSummary {
   id: number;
   hblNo: string | null;
   shipperCode: string | null;
   consigneeCode: string | null;
+  docPartnerCode: string | null;
+  pkgQty: string | null;
+  pkgUnit: string | null;
+  weightUnit: string | null;
+  grossWeightKg: string | null;
+  cbm: string | null;
+  etd: string | null;
+  eta: string | null;
+  vesselName: string | null;
+  voyageNo: string | null;
+  polCode: string | null;
+  podCode: string | null;
 }
 
 export interface MasterBlFilter {

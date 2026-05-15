@@ -63,5 +63,24 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
       },
       remark: detail.seaDetail?.remark ?? undefined,
     },
+    // §BE-sync — consolidatedHouseBls → houseBls (ConsoledHouseBlSummaryView 전체 필드 매핑)
+    houseBls: (detail.consolidatedHouseBls ?? []).map((hbl) => ({
+      id:             hbl.id,
+      hblNo:          hbl.hblNo,
+      shipperCode:    hbl.shipperCode,
+      consigneeCode:  hbl.consigneeCode,
+      docPartnerCode: hbl.docPartnerCode,
+      pkgQty:         hbl.pkgQty,
+      pkgUnit:        hbl.pkgUnit,
+      weightUnit:     hbl.weightUnit,
+      grossWeightKg:  hbl.grossWeightKg,
+      cbm:            hbl.cbm,
+      etd:            hbl.etd,
+      eta:            hbl.eta,
+      vesselName:     hbl.vesselName,
+      voyageNo:       hbl.voyageNo,
+      polCode:        hbl.polCode,
+      podCode:        hbl.podCode,
+    })),
   };
 }

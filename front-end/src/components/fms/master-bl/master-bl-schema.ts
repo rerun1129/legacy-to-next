@@ -48,14 +48,24 @@ const AIR_CHARGE_SCHEMA = z.object({
   rate:           z.number().min(0).optional(),
 });
 
+// §BE-sync — ConsoledHouseBlSummaryView 전체 필드 정합 (shipperCode/consigneeCode/pkgQty/grossWeightKg로 통일)
 const HOUSE_BL_REF_SCHEMA = z.object({
-  id:        z.number(),
-  hblNo:     z.string().optional(),
-  shipper:   z.string().optional(),
-  consignee: z.string().optional(),
-  pkg:       z.string().optional(),
-  gw:        z.string().optional(),
-  cbm:       z.string().optional(),
+  id:             z.number(),
+  hblNo:          z.string().nullable().optional(),
+  shipperCode:    z.string().nullable().optional(),
+  consigneeCode:  z.string().nullable().optional(),
+  docPartnerCode: z.string().nullable().optional(),
+  pkgQty:         z.string().nullable().optional(),
+  pkgUnit:        z.string().nullable().optional(),
+  weightUnit:     z.string().nullable().optional(),
+  grossWeightKg:  z.string().nullable().optional(),
+  cbm:            z.string().nullable().optional(),
+  etd:            z.string().nullable().optional(),
+  eta:            z.string().nullable().optional(),
+  vesselName:     z.string().nullable().optional(),
+  voyageNo:       z.string().nullable().optional(),
+  polCode:        z.string().nullable().optional(),
+  podCode:        z.string().nullable().optional(),
 });
 
 // §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 정합)
