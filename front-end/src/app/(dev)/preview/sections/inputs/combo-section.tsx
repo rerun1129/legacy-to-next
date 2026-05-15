@@ -125,6 +125,14 @@ export function ComboSection({ form, variant, required, readOnly, disabled }: Se
         <AirEnumComboRow label="HandlingInfoCode" enumName="HandlingInfoCode" variant={variant} disabled={disabled} />
         <AirEnumComboRow label="SalesClass"       enumName="SalesClass"       variant={variant} disabled={disabled} />
       </div>
+
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>ComboBox — Sea Master Entry ENUMs (Phase 6 시각 검증)</div>
+        <AirEnumComboRow label="LoadType"    enumName="LoadType"    variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="ServiceTerm" enumName="ServiceTerm" variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="BlType"      enumName="BlType"      variant={variant} disabled={disabled} />
+        <AirEnumComboRow label="PackType"    enumName="PackType"    variant={variant} disabled={disabled} />
+      </div>
     </>
   );
 }

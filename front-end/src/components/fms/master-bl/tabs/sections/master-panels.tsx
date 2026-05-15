@@ -1,9 +1,10 @@
 "use client";
 
-import { Search } from "lucide-react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { CodeBox }            from "@/components/shared/inputs/code-box";
+import { ComboBox }           from "@/components/shared/inputs/combo-box";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 
@@ -12,13 +13,9 @@ interface Props {
   form?:    UseFormReturn<MasterBlFormValues>;
 }
 
+// ── Party ──────────────────────────────────────────────────────────────────
 const PARTIES = ["SHIPPER", "CONSIGNEE", "NOTIFY"] as const;
 type PartyRole = typeof PARTIES[number];
-
-const PARTY_BTNS: Partial<Record<PartyRole, string>> = {
-  CONSIGNEE: "To Order",
-  NOTIFY:    "Same as Cne.",
-};
 
 const PARTY_CODE_FIELD: Record<PartyRole, "shipperCode" | "consigneeCode" | "notifyCode"> = {
   SHIPPER:   "shipperCode",
@@ -32,43 +29,74 @@ const PARTY_ADDR_FIELD: Record<PartyRole, "shipperAddress" | "consigneeAddress" 
   NOTIFY:    "notifyAddress",
 };
 
-function PartyBlock({ role, form }: { role: PartyRole; form?: UseFormReturn<MasterBlFormValues> }) {
+const PARTY_BTNS: Partial<Record<PartyRole, string>> = {
+  CONSIGNEE: "To Order",
+  NOTIFY:    "Same as Cne.",
+};
+
+function PartyBlockConnected({
+  role,
+  form,
+}: {
+  role: PartyRole;
+  form: UseFormReturn<MasterBlFormValues>;
+}) {
   const codeField = PARTY_CODE_FIELD[role];
   const addrField = PARTY_ADDR_FIELD[role];
 
   return (
     <div className="party-block">
-      <div className="party-block__head">
-        <span style={{ fontSize: 11, minWidth: 90, flexShrink: 0 }}>{role}</span>
-        <div className="party-cn">
-          <div className="party-cn__code">
-            {form
-              ? <input className="text-mono" placeholder="Code" {...form.register(codeField)} />
-              : <input className="text-mono" placeholder="Code" />
-            }
-            <Search size={12} className="party-cn__icon" />
-          </div>
-        </div>
-        <div className="party-block__head-actions">
-          {PARTY_BTNS[role] && <button type="button" className="party-block__head-btn">{PARTY_BTNS[role]}</button>}
-          <button type="button" className="party-block__head-btn">Clear</button>
-        </div>
-      </div>
-      {form
-        ? <Controller
-            control={form.control}
-            name={addrField}
-            render={({ field }) => (
-              <LineNumberTextarea
-                placeholder="Address (free text)"
-                style={{ height: 108 }}
-                value={field.value ?? ""}
-                onChange={field.onChange}
-              />
-            )}
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <CodeBox
+            kind="party-cn"
+            variant="panel"
+            label={role}
+            codeProps={{ ...form.register(codeField) }}
+            onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
           />
-        : <LineNumberTextarea placeholder="Address (free text)" style={{ height: 108 }} />
-      }
+        </div>
+        {PARTY_BTNS[role] && (
+          <button type="button" className="party-block__head-btn">{PARTY_BTNS[role]}</button>
+        )}
+        <button type="button" className="party-block__head-btn">Clear</button>
+      </div>
+      <Controller
+        control={form.control}
+        name={addrField}
+        render={({ field }) => (
+          <LineNumberTextarea
+            placeholder="Address (free text)"
+            style={{ height: 108 }}
+            value={field.value ?? ""}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+          />
+        )}
+      />
+    </div>
+  );
+}
+
+function PartyBlockStub({ role }: { role: PartyRole }) {
+  return (
+    <div className="party-block">
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <CodeBox
+            kind="party-cn"
+            variant="panel"
+            label={role}
+            codeProps={{}}
+            onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          />
+        </div>
+        {PARTY_BTNS[role] && (
+          <button type="button" className="party-block__head-btn">{PARTY_BTNS[role]}</button>
+        )}
+        <button type="button" className="party-block__head-btn">Clear</button>
+      </div>
+      <LineNumberTextarea placeholder="Address (free text)" style={{ height: 108 }} />
     </div>
   );
 }
@@ -77,12 +105,17 @@ export function MasterPartyPanel({ form }: Props) {
   const fields: FieldWidgetDef[] = PARTIES.map(role => ({
     key:    role.toLowerCase(),
     label:  role,
-    render: () => <PartyBlock role={role} form={form} />,
+    render: () => form
+      ? <PartyBlockConnected role={role} form={form} />
+      : <PartyBlockStub role={role} />,
   }));
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Party</span></div>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Party</span>
+      </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope="master-party-panel" fields={fields} />
       </div>
@@ -90,11 +123,14 @@ export function MasterPartyPanel({ form }: Props) {
   );
 }
 
-// ── Marks ──────────────────────────────────────────────────
+// ── Marks ──────────────────────────────────────────────────────────────────
 export function MasterMarksPanel({ form }: Props) {
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Marks &amp; Numbers</span></div>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Marks &amp; Numbers</span>
+      </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {form
           ? <Controller
@@ -105,6 +141,7 @@ export function MasterMarksPanel({ form }: Props) {
                   style={{ flex: 1, minHeight: 0 }}
                   value={field.value ?? ""}
                   onChange={field.onChange}
+                  onBlur={field.onBlur}
                 />
               )}
             />
@@ -115,7 +152,12 @@ export function MasterMarksPanel({ form }: Props) {
   );
 }
 
-// ── Goods Description ──────────────────────────────────────
+// ── Goods Description ──────────────────────────────────────────────────────
+const CLAUSE_OPTIONS = [
+  { value: "", label: "-- 부지약관 --" },
+  { value: "SAID TO CONTAIN", label: "SAID TO CONTAIN" },
+];
+
 export function MasterGoodsDescPanel({ variant, form }: Props) {
   if (!variant) return null;
   const isSea = variant.mode === "SEA";
@@ -123,21 +165,31 @@ export function MasterGoodsDescPanel({ variant, form }: Props) {
 
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{title}</span></div>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">{title}</span>
+      </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {isSea && (
           <div className="li" style={{ marginBottom: 8, flexShrink: 0 }}>
             <span className="li__label">Clause</span>
             <div className="li__input">
               {form
-                ? <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }} {...form.register("desc.descClause1")}>
-                    <option value="">-- 부지약관 --</option>
-                    <option value="SAID TO CONTAIN">SAID TO CONTAIN</option>
-                  </select>
-                : <select style={{ width: "100%", height: 22, padding: "0 8px", fontSize: 10 }}>
-                    <option>-- 부지약관 --</option>
-                    <option>SAID TO CONTAIN</option>
-                  </select>
+                ? <Controller
+                    control={form.control}
+                    name="desc.descClause1"
+                    render={({ field }) => (
+                      <ComboBox
+                        variant="panel"
+                        options={CLAUSE_OPTIONS}
+                        placeholder="-- 부지약관 --"
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
+                    )}
+                  />
+                : <ComboBox variant="panel" options={CLAUSE_OPTIONS} placeholder="-- 부지약관 --" />
               }
             </div>
           </div>
@@ -151,24 +203,25 @@ export function MasterGoodsDescPanel({ variant, form }: Props) {
                   style={{ flex: 1, minHeight: 0 }}
                   value={field.value ?? ""}
                   onChange={field.onChange}
+                  onBlur={field.onBlur}
                 />
               )}
             />
-          : <LineNumberTextarea
-              defaultValue=""
-              style={{ flex: 1, minHeight: 0 }}
-            />
+          : <LineNumberTextarea defaultValue="" style={{ flex: 1, minHeight: 0 }} />
         }
       </div>
     </div>
   );
 }
 
-// ── Remark ─────────────────────────────────────────────────
+// ── Remark ─────────────────────────────────────────────────────────────────
 export function MasterRemarkPanel({ form }: Props) {
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Remark</span></div>
+      <div className="panel__head">
+        <div className="panel__title-accent" />
+        <span className="panel__title">Remark</span>
+      </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {form
           ? <Controller
@@ -179,6 +232,7 @@ export function MasterRemarkPanel({ form }: Props) {
                   style={{ flex: 1, minHeight: 0 }}
                   value={field.value ?? ""}
                   onChange={field.onChange}
+                  onBlur={field.onBlur}
                 />
               )}
             />
