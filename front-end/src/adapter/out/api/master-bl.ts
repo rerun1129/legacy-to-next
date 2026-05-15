@@ -29,15 +29,54 @@ const CONSOLIDATED_HBL_SCHEMA = z.object({
   consigneeCode: z.string().nullable(),
 });
 
+// §BE-sync — SeaDetailResponse.SeaDescView (BE Phase 2 nested)
+const SEA_DESC_VIEW_SCHEMA = z.object({
+  marks:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  description:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause1:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  descClause2:  z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+// §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 1:1 정합)
+// §6.49 ⑮ — 모든 nullable 필드 .nullable().optional().transform(v => v ?? undefined) 통일
+const SEA_DETAIL_SCHEMA = z.object({
+  loadType:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  linerCode:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselCode:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselName:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  voyageNo:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  onboardDate:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselNationality: z.string().nullable().optional().transform((v) => v ?? undefined),
+  serviceTerm:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  blType:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  porCode:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  finalDestCode:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  rton:              z.number().nullable().optional().transform((v) => v ?? undefined),
+  lineBkgNo:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  issueDate:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  desc:              SEA_DESC_VIEW_SCHEMA.nullable().optional(),
+  remark:            z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
 const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
-  freightTerm: z.enum(['PREPAID', 'COLLECT']).nullable(),
+  shipmentType: z.string().nullable(),
+  // §6.49 ⑰ — freightTerm enum literal → string nullable 완화
+  freightTerm: z.string().nullable(),
   pkgQty: z.number().nullable(),
   weightUnit: z.string().nullable().optional().transform((v) => v ?? ''),
   grossWeightKg: z.number().nullable(),
   cbm: z.number().nullable(),
   consolidatedHouseBls: z.array(CONSOLIDATED_HBL_SCHEMA),
   updatedAt: z.string().nullable(),
+  teamCode: z.string().nullable(),
+  // §BE Phase 2 — party address 3 필드
+  shipperAddress: z.string().nullable(),
+  consigneeAddress: z.string().nullable(),
+  notifyAddress: z.string().nullable(),
+  notifyCode: z.string().nullable(),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
+  // §BE Phase 2 — seaDetail nested
+  seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
@@ -59,26 +98,36 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
     if (!parsed.success) throw new ResponseParseError(`Invalid list response: ${parsed.error.message}`);
     return parsed.data.data.content as unknown as MasterBlRow[];
   },
+
   async getById(id: number): Promise<MasterBlDetail> {
     const json = await fetchJson(`${MASTER_BL_BASE}/${id}`);
     const parsed = apiResponse(MASTER_BL_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid detail response: ${parsed.error.message}`);
     return parsed.data.data as unknown as MasterBlDetail;
   },
-  async create(req: CreateMasterBlRequest) {
+
+  // §6.54 — create는 ID-only 반환 (BE Phase 3 Map<"id", Long> 정합)
+  async create(req: CreateMasterBlRequest): Promise<{ id: number }> {
     const json = await fetchJson(MASTER_BL_BASE, {
       method: 'POST',
       body: JSON.stringify(req),
     });
-    return apiResponse(MASTER_BL_DETAIL_SCHEMA).parse(json).data;
+    const parsed = apiResponse(z.object({ id: z.number() })).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid create response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
-  async update(id: number, req: UpdateMasterBlRequest) {
+
+  // §BE Phase 4 — update는 void 응답 (House dd76d64 패턴)
+  async update(id: number, req: UpdateMasterBlRequest): Promise<void> {
     const json = await fetchJson(`${MASTER_BL_BASE}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(req),
     });
-    return apiResponse(MASTER_BL_DETAIL_SCHEMA).parse(json).data;
+    const j = (json ?? {}) as { data?: unknown };
+    if (j.data == null) return;
+    // data가 있는 경우도 void로 처리 (BE ApiResponse<Void> 변환 과도기 대응)
   },
+
   async delete(id: number): Promise<void> {
     await fetchJson(`${MASTER_BL_BASE}/${id}`, { method: 'DELETE' });
   },

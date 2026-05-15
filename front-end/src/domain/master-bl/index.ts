@@ -1,5 +1,7 @@
 import type { JobDiv, Bound } from '@/domain/house-bl';
 
+export type { JobDiv, Bound };
+
 export interface MasterBlRow {
   id: number;
   mblNo: string | null;
@@ -16,8 +18,39 @@ export interface MasterBlRow {
   createdAt: string;
 }
 
+// §BE-sync — SeaDescView (BE SeaDetailResponse.SeaDescView nested)
+export interface MasterBlSeaDescView {
+  marks?: string;
+  description?: string;
+  descClause1?: string;
+  descClause2?: string;
+}
+
+// §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 1:1 정합)
+// §6.49 ⑰ — enum 필드는 string | null로 완화 (BE 검증 일원화, FE는 ComboBox useEnumOptions로 동적 fetch)
+export interface MasterBlSeaDetail {
+  loadType: string | null;
+  linerCode: string | null;
+  vesselCode: string | null;
+  vesselName: string | null;
+  voyageNo: string | null;
+  onboardDate: string | null;
+  vesselNationality: string | null;
+  serviceTerm: string | null;
+  blType: string | null;
+  porCode: string | null;
+  finalDestCode: string | null;
+  rton: number | null;
+  lineBkgNo: string | null;
+  issueDate: string | null;
+  desc: MasterBlSeaDescView | null;
+  remark: string | null;
+}
+
 export interface MasterBlDetail extends MasterBlRow {
-  freightTerm: 'PREPAID' | 'COLLECT' | null;
+  shipmentType: string | null;
+  // §6.49 ⑰ — freightTerm enum literal → string | null 완화 (BE 검증 일원화)
+  freightTerm: string | null;
   pkgQty: number | null;
   weightUnit?: string;
   grossWeightKg: number | null;
@@ -25,6 +58,16 @@ export interface MasterBlDetail extends MasterBlRow {
   consolidatedHouseBls: ConsolidatedHouseBlSummary[];
   updatedAt: string | null;
   remark?: string;
+  teamCode: string | null;
+  // party code + address (§BE Phase 2 — CustomerCode VO 기반 노출)
+  shipperCode: string | null;
+  shipperAddress: string | null;
+  consigneeCode: string | null;
+  consigneeAddress: string | null;
+  notifyCode: string | null;
+  notifyAddress: string | null;
+  // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 정합)
+  seaDetail: MasterBlSeaDetail | null;
 }
 
 export interface ConsolidatedHouseBlSummary {
@@ -48,6 +91,7 @@ export interface MasterBlFilter {
   size?: number;
 }
 
+// §BE-sync — CreateMasterBlRequest.SeaDetailRequest (BE Phase 3 정합)
 export interface SeaDetailRequest {
   loadType?: string;
   linerCode?: string;
@@ -63,6 +107,7 @@ export interface SeaDetailRequest {
   rton?: number;
   lineBkgNo?: string;
   issueDate?: string;
+  desc?: DescRequest;
 }
 
 export interface DescRequest {
@@ -107,7 +152,9 @@ export interface CreateMasterBlRequest {
   bound: Bound;
   mblNo?: string;
   masterRefNo?: string;
-  freightTerm: 'PREPAID' | 'COLLECT';
+  shipmentType?: string;
+  // §6.49 ⑰ — freightTerm은 BE 검증 일원화, FE는 string으로 완화
+  freightTerm?: string;
   shipperCode?: string;
   shipperAddress?: string;
   consigneeCode?: string;
@@ -127,6 +174,8 @@ export interface CreateMasterBlRequest {
   mainItemName?: string;
   settlePartnerCode?: string;
   operatorCode?: string;
+  teamCode?: string;
+  remark?: string;
   seaDetail?: SeaDetailRequest;
   desc?: DescRequest;
   dims?: DimRequest[];

@@ -10,7 +10,7 @@ import type { MasterBlFormValues } from "../../master-bl-schema";
 interface Props { variant?: AnyVariantConfig }
 
 const EMPTY_HBL_ROW = {
-  hblNo: "", shipper: "", consignee: "", pkg: "", gw: "", cbm: "", status: "",
+  hblNo: "", shipper: "", consignee: "", pkg: "", gw: "", cbm: "",
 };
 
 export function MasterHouseBLGrid({ variant }: Props) {
@@ -117,7 +117,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
                 <td className="is-num cell-mono">{field.pkg}</td>
                 <td className="is-num cell-mono">{field.gw}</td>
                 <td className="is-num cell-mono">{field.cbm}</td>
-                <td>{field.status}</td>
+                <td></td>
                 {isSea && <><td className="cell-mono"></td><td className="cell-mono"></td></>}
               </tr>
             ))}

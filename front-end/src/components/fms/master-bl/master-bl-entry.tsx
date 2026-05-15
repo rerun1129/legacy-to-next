@@ -7,14 +7,17 @@ import { useForm, FormProvider } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { createEmptyMasterBlFormValues, TOOLBAR_TO_FIELD } from "./master-bl-schema";
+import { TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
+import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
+import { mapMasterBlDetailToForm } from "./map-master-bl-detail";
+import { buildCreateMasterBlPayload, buildUpdateMasterBlPayload } from "./master-bl-submit";
 import { Save, Copy, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
-import type { CreateMasterBlRequest, UpdateMasterBlRequest, ConsolidatedHouseBlSummary } from "@/domain/master-bl";
+import type { ConsolidatedHouseBlSummary } from "@/domain/master-bl";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { ScreenGuard }   from "@/components/shared/screen-guard";
@@ -24,8 +27,8 @@ interface Props {
   id?: number;
 }
 
-const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type", "Status"] as const;
-const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "Status", "", "", "", ""] as const;
+const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type"] as const;
+const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "", "", "", ""] as const;
 
 function getToolbarFields(mode: string) {
   return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
@@ -72,63 +75,14 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     if (detailLoadedRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
-    form.reset({
-      ...createEmptyMasterBlFormValues(),
-      jobDiv: detail.jobDiv,
-      bound: detail.bound,
-      // detail.freightTerm이 null이면 기본값 유지 (DB 레거시 데이터 대응)
-      freightTerm: detail.freightTerm ?? "",
-      mblNo: detail.mblNo ?? "",
-      masterRefNo: detail.masterRefNo ?? "",
-      shipperCode: detail.shipperCode ?? "",
-      consigneeCode: detail.consigneeCode ?? "",
-      polCode: detail.polCode ?? "",
-      podCode: detail.podCode ?? "",
-      etd: detail.etd ?? "",
-      eta: detail.eta ?? "",
-      pkgQty: detail.pkgQty ?? undefined,
-      grossWeightKg: detail.grossWeightKg ?? undefined,
-      cbm: detail.cbm ?? undefined,
-      operatorCode: detail.operatorCode ?? "",
-    });
+    form.reset(mapMasterBlDetailToForm(detail));
   }, [detail, form]);
 
-  const mutation = useMutation({
+  const mutation = useMutation<{ id: number } | void, Error, MasterBlFormValues>({
     mutationFn: (data: MasterBlFormValues) => {
-      const req: CreateMasterBlRequest = {
-        jobDiv:       data.jobDiv,
-        bound:        data.bound,
-        freightTerm:  (data.freightTerm as 'PREPAID' | 'COLLECT') || 'PREPAID',
-        mblNo:        data.mblNo || undefined,
-        masterRefNo:  data.masterRefNo || undefined,
-        shipperCode:      data.shipperCode || undefined,
-        shipperAddress:   data.shipperAddress || undefined,
-        consigneeCode:    data.consigneeCode || undefined,
-        consigneeAddress: data.consigneeAddress || undefined,
-        notifyCode:       data.notifyCode || undefined,
-        notifyAddress:    data.notifyAddress || undefined,
-        polCode:  data.polCode || undefined,
-        podCode:  data.podCode || undefined,
-        etd:      data.etd || undefined,
-        eta:      data.eta || undefined,
-        pkgQty:        data.pkgQty,
-        pkgUnit:       data.pkgUnit || undefined,
-        weightUnit:    data.weightUnit || undefined,
-        grossWeightKg: data.grossWeightKg,
-        cbm:           data.cbm,
-        hsCode:        data.hsCode || undefined,
-        mainItemName:  data.mainItemName || undefined,
-        settlePartnerCode: data.settlePartnerCode || undefined,
-        operatorCode:  data.operatorCode || undefined,
-        seaDetail:    data.seaDetail,
-        desc:         data.desc,
-        dims:         data.dims && data.dims.length > 0 ? data.dims : undefined,
-        scheduleLegs: data.scheduleLegs && data.scheduleLegs.length > 0 ? data.scheduleLegs : undefined,
-        airCharges:   data.airCharges && data.airCharges.length > 0 ? data.airCharges : undefined,
-      };
       return isEdit
-        ? masterBlPort.update(id!, req as UpdateMasterBlRequest)
-        : masterBlPort.create(req);
+        ? masterBlPort.update(id!, buildUpdateMasterBlPayload(id!, data, variant))
+        : masterBlPort.create(buildCreateMasterBlPayload(data, variant));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
@@ -163,28 +117,10 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           alert('해당 B/L을 찾을 수 없습니다.');
           return;
         }
-        // 프레시 조회: stale 캐시·draft 제거
         queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', rows[0].id] });
         clearDraft(`master:${variantKey}:${rows[0].id}`);
-        return masterBlPort.getById(rows[0].id).then((detail) => {
-          form.reset({
-            ...createEmptyMasterBlFormValues(),
-            jobDiv: detail.jobDiv,
-            bound: detail.bound,
-            freightTerm: detail.freightTerm ?? '',
-            mblNo: detail.mblNo ?? '',
-            masterRefNo: detail.masterRefNo ?? '',
-            shipperCode: detail.shipperCode ?? '',
-            consigneeCode: detail.consigneeCode ?? '',
-            polCode: detail.polCode ?? '',
-            podCode: detail.podCode ?? '',
-            etd: detail.etd ?? '',
-            eta: detail.eta ?? '',
-            pkgQty: detail.pkgQty ?? undefined,
-            grossWeightKg: detail.grossWeightKg ?? undefined,
-            cbm: detail.cbm ?? undefined,
-            operatorCode: detail.operatorCode ?? '',
-          });
+        return masterBlPort.getById(rows[0].id).then((foundDetail) => {
+          form.reset(mapMasterBlDetailToForm(foundDetail));
         });
       })
       .catch((err: unknown) => {
@@ -213,7 +149,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   ];
 
   const { register } = form;
-  const isExp = variant.direction === "EXP";
   const bottomActionsLeft  = variant.bottomActions.filter(a => ["Profit/Loss", "House B/L Load"].includes(a));
   const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
 

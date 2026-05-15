@@ -2,6 +2,14 @@ import { z } from "zod";
 
 const DATE8 = z.string().regex(/^\d{8}$/).optional().or(z.literal(""));
 
+// §BE-sync — SeaDetailResponse.SeaDescView (BE Phase 2 nested)
+const SEA_DESC_SCHEMA = z.object({
+  marks:        z.string().optional(),
+  description:  z.string().optional(),
+  descClause1:  z.string().optional(),
+  descClause2:  z.string().optional(),
+}).optional();
+
 const DESC_SCHEMA = z.object({
   marks:        z.string().optional(),
   description:  z.string().optional(),
@@ -41,23 +49,45 @@ const AIR_CHARGE_SCHEMA = z.object({
 });
 
 const HOUSE_BL_REF_SCHEMA = z.object({
-  id:         z.number(),
-  hblNo:      z.string().optional(),
-  shipper:    z.string().optional(),
-  consignee:  z.string().optional(),
-  pkg:        z.string().optional(),
-  gw:         z.string().optional(),
-  cbm:        z.string().optional(),
-  status:     z.string().optional(),
+  id:        z.number(),
+  hblNo:     z.string().optional(),
+  shipper:   z.string().optional(),
+  consignee: z.string().optional(),
+  pkg:       z.string().optional(),
+  gw:        z.string().optional(),
+  cbm:       z.string().optional(),
+});
+
+// §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 정합)
+// §6.49 ⑰ — enum 필드(loadType/serviceTerm/blType)는 z.string().nullable()로 완화 (BE 검증 일원화)
+// seaDetail.deliveryCode 자연 제거 (Master 도메인 미보유 — Phase 0/1 사용자 결정)
+export const SEA_DETAIL_FORM_SCHEMA = z.object({
+  loadType:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  linerCode:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselCode:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  vesselName:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  voyageNo:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  onboardDate:       DATE8,
+  vesselNationality: z.string().nullable().optional().transform((v) => v ?? undefined),
+  serviceTerm:       z.string().nullable().optional().transform((v) => v ?? undefined),
+  blType:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  porCode:           z.string().max(5).nullable().optional().transform((v) => v ?? undefined),
+  finalDestCode:     z.string().max(5).nullable().optional().transform((v) => v ?? undefined),
+  rton:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  lineBkgNo:         z.string().max(35).nullable().optional().transform((v) => v ?? undefined),
+  issueDate:         DATE8,
+  desc:              SEA_DESC_SCHEMA,
+  remark:            z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
 // freightTerm 값이 null일 수 있으므로 detail reset 시 기본값 fallback 처리
+// §6.49 ⑰ — freightTerm enum literal → z.string().nullable() 완화 (BE 검증 일원화)
 export const MASTER_BL_SCHEMA = z.object({
   jobDiv:       z.enum(["SEA", "AIR", "TRUCK", "NON_BL"]),
   bound:        z.enum(["EXP", "IMP"]),
   mblNo:        z.string().max(35).optional(),
   masterRefNo:  z.string().max(35).optional(),
-  freightTerm:  z.enum(["", "PREPAID", "COLLECT"]),
+  freightTerm:  z.string().nullable().optional().transform((v) => v ?? undefined),
 
   shipperCode:      z.string().max(20).optional(),
   shipperAddress:   z.string().optional(),
@@ -71,19 +101,17 @@ export const MASTER_BL_SCHEMA = z.object({
   etd:     DATE8,
   eta:     DATE8,
 
-  pkgQty:           z.number().min(0).optional(),
-  pkgUnit:          z.string().optional(),
-  weightUnit:       z.string().optional(),
-  grossWeightKg:    z.number().min(0).optional(),
-  cbm:              z.number().min(0).optional(),
-  hsCode:           z.string().optional(),
-  mainItemName:     z.string().optional(),
+  pkgQty:            z.number().min(0).optional(),
+  pkgUnit:           z.string().optional(),
+  weightUnit:        z.string().optional(),
+  grossWeightKg:     z.number().min(0).optional(),
+  cbm:               z.number().min(0).optional(),
+  hsCode:            z.string().optional(),
+  mainItemName:      z.string().optional(),
   settlePartnerCode: z.string().optional(),
-  operatorCode:     z.string().optional(),
+  operatorCode:      z.string().optional(),
 
-  // Coder 추가 필드
   shipmentType:   z.string().optional(),
-  mblStatus:      z.string().optional(),
   cargoMainItem:  z.string().optional(),
   cargoHsCode:    z.string().optional(),
   rTon:           z.number().min(0).optional(),
@@ -96,31 +124,10 @@ export const MASTER_BL_SCHEMA = z.object({
   flightType:     z.string().optional(),
   securityStatus: z.string().optional(),
   teamCode:       z.string().optional(),
+  remark:         z.string().optional(),
 
-  seaDetail: z.object({
-    loadType:          z.string().optional(),
-    linerCode:         z.string().optional(),
-    linerName:         z.string().optional(),
-    vesselCode:        z.string().optional(),
-    vesselName:        z.string().optional(),
-    voyageNo:          z.string().optional(),
-    onboardDate:       DATE8,
-    vesselNationality: z.string().optional(),
-    serviceTerm:       z.string().optional(),
-    blType:            z.string().optional(),
-    porCode:           z.string().max(5).optional(),
-    finalDestCode:     z.string().max(5).optional(),
-    rton:              z.number().min(0).optional(),
-    lineBkgNo:         z.string().max(35).optional(),
-    issueDate:         DATE8,
-    freightTermDetail: z.string().optional(),
-    polName:           z.string().optional(),
-    podName:           z.string().optional(),
-    deliveryCode:      z.string().optional(),
-    deliveryName:      z.string().optional(),
-    signature:         z.string().optional(),
-    issuePlace:        z.string().optional(),
-  }).optional(),
+  // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 16 필드 정합)
+  seaDetail: SEA_DETAIL_FORM_SCHEMA.optional(),
 
   desc:         DESC_SCHEMA,
   dims:         z.array(DIM_SCHEMA).optional(),
@@ -132,6 +139,7 @@ export const MASTER_BL_SCHEMA = z.object({
 export type MasterBlFormValues = z.infer<typeof MASTER_BL_SCHEMA>;
 
 // toolbar 라벨 → RHF field path 매핑
+// Status 필드 제거 (BE 미지원, 사용자 결정 2026-05-15)
 export const TOOLBAR_TO_FIELD: Partial<Record<string, string>> = {
   "Master Ref":    "masterRefNo",
   "MBL No":        "mblNo",
@@ -141,78 +149,4 @@ export const TOOLBAR_TO_FIELD: Partial<Record<string, string>> = {
   "Service Term":  "seaDetail.serviceTerm",
   "B/L Type":      "seaDetail.blType",
   "Shipment Type": "shipmentType",
-  "Status":        "mblStatus",
 };
-
-export function createEmptyMasterBlFormValues(): MasterBlFormValues {
-  return {
-  jobDiv: "SEA",
-  bound: "EXP",
-  freightTerm: "",
-  mblNo: "",
-  masterRefNo: "",
-  shipperCode: "",
-  shipperAddress: "",
-  consigneeCode: "",
-  consigneeAddress: "",
-  notifyCode: "",
-  notifyAddress: "",
-  polCode: "",
-  podCode: "",
-  etd: "",
-  eta: "",
-  pkgUnit: "",
-  weightUnit: "",
-  hsCode: "",
-  mainItemName: "",
-  settlePartnerCode: "",
-  operatorCode: "",
-  shipmentType: "",
-  mblStatus: "",
-  cargoMainItem: "",
-  cargoHsCode: "",
-  rateClass: "",
-  settlePartner: "",
-  coLoadAgent: "",
-  coLoadType: "",
-  flightType: "",
-  securityStatus: "",
-  teamCode: "",
-  seaDetail: {
-    loadType: "",
-    linerCode: "",
-    linerName: "",
-    vesselCode: "",
-    vesselName: "",
-    voyageNo: "",
-    onboardDate: "",
-    vesselNationality: "",
-    serviceTerm: "",
-    blType: "",
-    porCode: "",
-    finalDestCode: "",
-    lineBkgNo: "",
-    issueDate: "",
-    freightTermDetail: "",
-    polName: "",
-    podName: "",
-    deliveryCode: "",
-    deliveryName: "",
-    signature: "",
-    issuePlace: "",
-  },
-  desc: {
-    marks: "",
-    description: "",
-    descClause1: "",
-    descClause2: "",
-    remark: "",
-  },
-  dims: [],
-  scheduleLegs: [],
-  airCharges: [],
-  houseBls: [],
-  };
-}
-
-export const MASTER_BL_DEFAULT_VALUES: MasterBlFormValues = createEmptyMasterBlFormValues();

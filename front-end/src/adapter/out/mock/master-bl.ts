@@ -4,10 +4,35 @@ import { NotFoundError } from '@/adapter/out/api/errors';
 
 // Master B/L fixture data: basic rows for filter/search smoke test
 const masterBlRows: MasterBlRow[] = [
-  { id: 1, mblNo: 'MBLKR24041956', masterRefNo: null, jobDiv: 'SEA', bound: 'EXP', shipperCode: 'HANJIN', consigneeCode: 'SHANGHAI_TRADING', polCode: 'KRBSAN', podCode: 'CNSHA', etd: '2024-04-20', eta: null, operatorCode: null, createdAt: '2024-04-20' },
-  { id: 2, mblNo: 'MBLKR24041901', masterRefNo: null, jobDiv: 'SEA', bound: 'EXP', shipperCode: 'SAMSUNG',  consigneeCode: 'SAMSUNG_EU',        polCode: 'KRICN',  podCode: 'DEHAM', etd: '2024-04-19', eta: null, operatorCode: null, createdAt: '2024-04-19' },
-  { id: 3, mblNo: 'MBLKR24041623', masterRefNo: null, jobDiv: 'SEA', bound: 'IMP', shipperCode: 'NINGBO',   consigneeCode: 'KR_IMPORT',          polCode: 'CNNGB',  podCode: 'KRICN', etd: '2024-04-16', eta: null, operatorCode: null, createdAt: '2024-04-16' },
+  { id: 1, mblNo: 'MBLKR24041956', masterRefNo: null, jobDiv: 'SEA', bound: 'EXP', shipperCode: 'HANJIN', consigneeCode: 'SHANGHAI_TRADING', polCode: 'KRBSAN', podCode: 'CNSHA', etd: '20240420', eta: null, operatorCode: null, createdAt: '2024-04-20' },
+  { id: 2, mblNo: 'MBLKR24041901', masterRefNo: null, jobDiv: 'SEA', bound: 'EXP', shipperCode: 'SAMSUNG',  consigneeCode: 'SAMSUNG_EU',        polCode: 'KRICN',  podCode: 'DEHAM', etd: '20240419', eta: null, operatorCode: null, createdAt: '2024-04-19' },
+  { id: 3, mblNo: 'MBLKR24041623', masterRefNo: null, jobDiv: 'SEA', bound: 'IMP', shipperCode: 'NINGBO',   consigneeCode: 'KR_IMPORT',          polCode: 'CNNGB',  podCode: 'KRICN', etd: '20240416', eta: null, operatorCode: null, createdAt: '2024-04-16' },
 ];
+
+// SEA detail 샘플 (§BE-sync — SeaDetailProjection 16 필드 정합)
+const seaDetailSample = {
+  loadType: 'FCL',
+  linerCode: 'HMM',
+  vesselCode: 'HANJIN001',
+  vesselName: 'HANJIN BUSAN',
+  voyageNo: '024E',
+  onboardDate: '20240420',
+  vesselNationality: 'KR',
+  serviceTerm: 'CY/CY',
+  blType: 'OBL',
+  porCode: 'KRBSAN',
+  finalDestCode: 'CNSHA',
+  rton: null,
+  lineBkgNo: 'BKG240419001',
+  issueDate: '20240421',
+  desc: {
+    marks: 'MARKS AND NUMBERS',
+    description: 'FREIGHT ALL KINDS',
+    descClause1: undefined,
+    descClause2: undefined,
+  },
+  remark: 'SEA remark sample',
+};
 
 export const mockMasterBlPort: MasterBlPort = {
   async list(filter: MasterBlFilter): Promise<MasterBlRow[]> {
@@ -37,48 +62,41 @@ export const mockMasterBlPort: MasterBlPort = {
     }
     return rows;
   },
+
   async getById(id: number): Promise<MasterBlDetail> {
-    const row = masterBlRows.find((r) => r.id === id);
-    if (!row) throw new NotFoundError('MasterBl', String(id));
-    return row as unknown as MasterBlDetail;
-  },
-  async create(req: CreateMasterBlRequest): Promise<MasterBlDetail> {
-    return {
-      id: 0,
-      mblNo: req.mblNo ?? null,
-      masterRefNo: req.masterRefNo ?? null,
-      jobDiv: req.jobDiv,
-      bound: req.bound,
-      freightTerm: req.freightTerm,
-      shipperCode: req.shipperCode ?? null,
-      consigneeCode: req.consigneeCode ?? null,
-      polCode: req.polCode ?? null,
-      podCode: req.podCode ?? null,
-      etd: req.etd ?? null,
-      eta: req.eta ?? null,
-      pkgQty: req.pkgQty ?? null,
-      grossWeightKg: req.grossWeightKg ?? null,
-      cbm: req.cbm ?? null,
-      operatorCode: req.operatorCode ?? null,
-      consolidatedHouseBls: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: null,
-    };
-  },
-  async update(id: number, req: UpdateMasterBlRequest): Promise<MasterBlDetail> {
     const row = masterBlRows.find((r) => r.id === id);
     if (!row) throw new NotFoundError('MasterBl', String(id));
     return {
       ...row,
-      freightTerm: req.freightTerm ?? null,
-      pkgQty: req.pkgQty ?? null,
-      grossWeightKg: req.grossWeightKg ?? null,
-      cbm: req.cbm ?? null,
+      shipmentType: 'HOUSE',
+      freightTerm: 'PREPAID',
+      pkgQty: 10,
+      weightUnit: 'KG',
+      grossWeightKg: 1000,
+      cbm: 5,
       consolidatedHouseBls: [],
-      updatedAt: new Date().toISOString(),
-      ...req,
+      updatedAt: null,
+      remark: undefined,
+      teamCode: null,
+      shipperAddress: 'BUSAN, KOREA',
+      consigneeAddress: 'SHANGHAI, CHINA',
+      notifyCode: null,
+      notifyAddress: null,
+      seaDetail: row.jobDiv === 'SEA' ? seaDetailSample : null,
     };
   },
+
+  // §6.54 — create는 ID-only 반환 (BE Phase 3 정합)
+  async create(_req: CreateMasterBlRequest): Promise<{ id: number }> {
+    return { id: 9999 };
+  },
+
+  async update(id: number, _req: UpdateMasterBlRequest): Promise<void> {
+    const row = masterBlRows.find((r) => r.id === id);
+    if (!row) throw new NotFoundError('MasterBl', String(id));
+    // mock: no-op (void)
+  },
+
   async delete(_id: number): Promise<void> {
     // mock: no-op
   },
