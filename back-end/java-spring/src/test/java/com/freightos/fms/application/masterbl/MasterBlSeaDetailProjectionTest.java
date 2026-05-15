@@ -60,7 +60,7 @@ class MasterBlSeaDetailProjectionTest {
         desc.updateContent("MARKS TEXT", "DESC TEXT", DescClause1.A, DescClause2.A);
         sea.initDesc(desc);
 
-        MasterBlDetailResult result = factory.toDetailResult(sea, List.of());
+        MasterBlDetailResult result = factory.toDetailResult(sea, List.of(), List.of());
 
         SeaDetailProjection seaDetail = result.seaDetail();
         assertThat(seaDetail).isNotNull();
@@ -96,7 +96,7 @@ class MasterBlSeaDetailProjectionTest {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         // desc 미설정 — sea.getDesc() == null
 
-        MasterBlDetailResult result = factory.toDetailResult(sea, List.of());
+        MasterBlDetailResult result = factory.toDetailResult(sea, List.of(), List.of());
 
         SeaDetailProjection seaDetail = result.seaDetail();
         assertThat(seaDetail).isNotNull();
@@ -120,7 +120,7 @@ class MasterBlSeaDetailProjectionTest {
                 CustomerCode.of("NOTI01", "NOTIFY ADDRESS LINE")
         );
 
-        MasterBlDetailResult result = factory.toDetailResult(sea, List.of());
+        MasterBlDetailResult result = factory.toDetailResult(sea, List.of(), List.of());
 
         assertThat(result.shipperCode()).isEqualTo("SHIP01");
         assertThat(result.shipperAddress()).isEqualTo("SHIPPER ADDRESS LINE");
@@ -137,7 +137,7 @@ class MasterBlSeaDetailProjectionTest {
     void toDetailResult_airMasterBl_hasNullSeaDetail() {
         MasterBlAir air = MasterBlAir.create(Bound.EXP);
 
-        MasterBlDetailResult result = factory.toDetailResult(air, List.of());
+        MasterBlDetailResult result = factory.toDetailResult(air, List.of(), List.of());
 
         assertThat(result.seaDetail()).isNull();
     }

@@ -9,6 +9,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public interface HouseBlPort {
     Optional<JobDiv> findJobDivById(Long id);
     void deleteByIdAndJobDiv(Long id, JobDiv jobDiv);
     List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId);
+    List<ConsoledSeaContainer> findConsoledSeaContainersByMasterBlId(Long masterBlId);
     List<ConsoledHouseBlAirSummary> findConsoledAirSummariesByMasterBlId(Long masterBlId);
     /**
      * hbl_no 단일 컬럼을 부분 UPDATE한다. SELECT 없이 직접 DB 갱신.

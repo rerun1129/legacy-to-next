@@ -48,6 +48,21 @@ const AIR_CHARGE_SCHEMA = z.object({
   rate:           z.number().min(0).optional(),
 });
 
+// §BE-sync — ConsoledSeaContainerView 전체 필드 정합 (표시 전용, zodResolver 미사용 — BE SSOT)
+const CONSOLED_SEA_CONTAINER_SCHEMA = z.object({
+  houseBlId:     z.number(),
+  containerNo:   z.string().nullable().optional(),
+  containerType: z.string().nullable().optional(),
+  sealNo1:       z.string().nullable().optional(),
+  sealNo2:       z.string().nullable().optional(),
+  sealNo3:       z.string().nullable().optional(),
+  pkgQty:        z.number().nullable().optional(),
+  pkgUnit:       z.string().nullable().optional(),
+  grossWeightKg: z.string().nullable().optional(),
+  cbm:           z.string().nullable().optional(),
+  vgmKg:         z.string().nullable().optional(),
+});
+
 // §BE-sync — ConsoledHouseBlSummaryView 전체 필드 정합 (shipperCode/consigneeCode/pkgQty/grossWeightKg로 통일)
 const HOUSE_BL_REF_SCHEMA = z.object({
   id:             z.number(),
@@ -143,7 +158,8 @@ export const MASTER_BL_SCHEMA = z.object({
   dims:         z.array(DIM_SCHEMA).optional(),
   scheduleLegs: z.array(SCHEDULE_LEG_SCHEMA).optional(),
   airCharges:   z.array(AIR_CHARGE_SCHEMA).optional(),
-  houseBls:     z.array(HOUSE_BL_REF_SCHEMA).optional(),
+  houseBls:              z.array(HOUSE_BL_REF_SCHEMA).optional(),
+  consoledSeaContainers: z.array(CONSOLED_SEA_CONTAINER_SCHEMA).default([]),
 });
 
 export type MasterBlFormValues = z.infer<typeof MASTER_BL_SCHEMA>;

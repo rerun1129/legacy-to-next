@@ -70,5 +70,6 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
     scheduleLegs: [],
     airCharges: [],
     houseBls: [],
+    consoledSeaContainers: [],
   };
 }

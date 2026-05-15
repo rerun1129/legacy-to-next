@@ -4,6 +4,7 @@ import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlAirJpaEn
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.nonbl.entity.QHouseBlNonBlJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaJpaEntity; // Q-class: 첫 compileJava 후 생성됨
+import com.freightos.fms.adapter.out.persistence.housebl.entity.QHouseBlSeaContainerJpaEntity; // Q-class: 첫 compileJava 후 생성됨
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.domain.housebl.HouseBlFilter;
@@ -14,6 +15,7 @@ import com.freightos.fms.domain.housebl.enums.PortKind;
 import com.querydsl.core.types.dsl.StringPath;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -148,6 +150,34 @@ public class HouseBlRepositoryImpl implements HouseBlRepositoryCustom {
             .innerJoin(sea).on(sea.houseBl.houseBlId.eq(h.houseBlId))
             .where(h.masterBlId.eq(masterBlId))
             .orderBy(h.createdAt.desc())
+            .fetch();
+    }
+
+    @Override
+    public List<ConsoledSeaContainer> findConsoledSeaContainersByMasterBlId(Long masterBlId) {
+        QHouseBlJpaEntity h = QHouseBlJpaEntity.houseBlJpaEntity;
+        QHouseBlSeaJpaEntity sea = QHouseBlSeaJpaEntity.houseBlSeaJpaEntity;
+        QHouseBlSeaContainerJpaEntity container = QHouseBlSeaContainerJpaEntity.houseBlSeaContainerJpaEntity;
+
+        return queryFactory
+            .select(Projections.constructor(ConsoledSeaContainer.class,
+                h.houseBlId,
+                container.containerNo,
+                container.containerType.stringValue(),
+                container.sealNo1,
+                container.sealNo2,
+                container.sealNo3,
+                container.pkgQty,
+                container.pkgUnit,
+                container.grossWeightKg,
+                container.cbm,
+                container.vgmKg
+            ))
+            .from(h)
+            .innerJoin(sea).on(sea.houseBl.houseBlId.eq(h.houseBlId))
+            .innerJoin(container).on(container.houseBlSeaId.eq(sea.houseBlSeaId))
+            .where(h.masterBlId.eq(masterBlId))
+            .orderBy(h.createdAt.desc(), container.seq.asc())
             .fetch();
     }
 

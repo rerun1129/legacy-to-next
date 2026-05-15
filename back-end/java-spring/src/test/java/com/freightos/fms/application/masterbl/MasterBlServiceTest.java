@@ -59,7 +59,7 @@ class MasterBlServiceTest {
         MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlPort.findConsoledSeaSummariesByMasterBlId(id)).willReturn(List.of());
-        given(masterBlFactory.toDetailResult(mockEntity, List.of())).willReturn(mockResult);
+        given(masterBlFactory.toDetailResult(mockEntity, List.of(), List.of())).willReturn(mockResult);
 
         MasterBlDetailResult result = masterBlService.findMasterBlById(id);
 
@@ -100,7 +100,7 @@ class MasterBlServiceTest {
         ConsoledHouseBlSeaSummary s1 = new ConsoledHouseBlSeaSummary(1L, "HBL-001", "SHIP01", "CONS01", "DOC01", 10, "CTN", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1), "20251130", "20251201", "VESSEL A", "V001", "KRPUS", "USNYC");
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
         given(houseBlPort.findConsoledSeaSummariesByMasterBlId(id)).willReturn(List.of(s1));
-        given(masterBlFactory.toDetailResult(any(), any())).willReturn(mock(MasterBlDetailResult.class));
+        given(masterBlFactory.toDetailResult(any(), any(), any())).willReturn(mock(MasterBlDetailResult.class));
 
         masterBlService.findMasterBlById(id);
 
@@ -116,7 +116,7 @@ class MasterBlServiceTest {
         ConsoledHouseBlAirSummary a1 = new ConsoledHouseBlAirSummary(10L, "HBL-A01", "SHIP01", "CONS01", "DOC01", 3, "PKG", null, BigDecimal.valueOf(30), BigDecimal.valueOf(0.3), BigDecimal.valueOf(45));
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
         given(houseBlPort.findConsoledAirSummariesByMasterBlId(id)).willReturn(List.of(a1));
-        given(masterBlFactory.toDetailResult(any(), any())).willReturn(mock(MasterBlDetailResult.class));
+        given(masterBlFactory.toDetailResult(any(), any(), any())).willReturn(mock(MasterBlDetailResult.class));
 
         masterBlService.findMasterBlById(id);
 

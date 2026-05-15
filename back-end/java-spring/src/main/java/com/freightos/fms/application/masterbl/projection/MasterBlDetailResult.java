@@ -37,6 +37,7 @@ public record MasterBlDetailResult(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
+        List<ConsoledSeaContainerView> consoledSeaContainers,
         String remark,
         SeaDetailProjection seaDetail
 ) {}

@@ -56,6 +56,7 @@ export interface MasterBlDetail extends MasterBlRow {
   grossWeightKg: number | null;
   cbm: number | null;
   consolidatedHouseBls: ConsolidatedHouseBlSummary[];
+  consoledSeaContainers: ConsoledSeaContainer[];
   updatedAt: string | null;
   remark?: string;
   teamCode: string | null;
@@ -68,6 +69,22 @@ export interface MasterBlDetail extends MasterBlRow {
   notifyAddress: string | null;
   // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 정합)
   seaDetail: MasterBlSeaDetail | null;
+}
+
+// §BE-sync — ConsoledSeaContainerView (BE consoledSeaContainers 전체 필드 정합)
+// SEA Master에 콘솔된 모든 컨테이너를 row 단위로 그대로 반환, 표시 전용
+export interface ConsoledSeaContainer {
+  houseBlId: number;
+  containerNo: string | null;
+  containerType: string | null;
+  sealNo1: string | null;
+  sealNo2: string | null;
+  sealNo3: string | null;
+  pkgQty: number | null;
+  pkgUnit: string | null;
+  grossWeightKg: string | null;
+  cbm: string | null;
+  vgmKg: string | null;
 }
 
 // §BE-sync — ConsoledHouseBlSummaryView (BE consolidatedHouseBls 전체 필드 정합)

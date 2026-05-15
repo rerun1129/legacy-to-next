@@ -4,6 +4,7 @@ import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
+import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.application.masterbl.projection.SeaDescProjection;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
@@ -36,6 +37,7 @@ import com.freightos.fms.domain.common.vo.Weight;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAirCharge;
@@ -144,7 +146,7 @@ public class MasterBlFactory {
 
     // ── Entity → Projection 변환 ─────────────────────────────────────
 
-    public MasterBlDetailResult toDetailResult(MasterBl entity, List<ConsoledHouseBlSummary> consolidatedHouseBls) {
+    public MasterBlDetailResult toDetailResult(MasterBl entity, List<ConsoledHouseBlSummary> consolidatedHouseBls, List<ConsoledSeaContainer> containers) {
         String remark = switch (entity) {
             case MasterBlSea sea -> sea.getRemark();
             case MasterBlAir air -> air.getRemark();
@@ -182,6 +184,7 @@ public class MasterBlFactory {
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 toConsoledViews(consolidatedHouseBls),
+                toConsoledSeaContainerViews(containers),
                 remark,
                 seaDetail
         );
@@ -268,6 +271,15 @@ public class MasterBlFactory {
     private List<ConsoledHouseBlSummaryView> toConsoledViews(List<ConsoledHouseBlSummary> sources) {
         if (sources == null) return List.of();
         return sources.stream().map(this::toConsoledView).toList();
+    }
+
+    private List<ConsoledSeaContainerView> toConsoledSeaContainerViews(List<ConsoledSeaContainer> sources) {
+        if (sources == null) return List.of();
+        return sources.stream().map(this::toConsoledSeaContainerView).toList();
+    }
+
+    private ConsoledSeaContainerView toConsoledSeaContainerView(ConsoledSeaContainer c) {
+        return new ConsoledSeaContainerView(c.houseBlId(), c.containerNo(), c.containerType(), c.sealNo1(), c.sealNo2(), c.sealNo3(), c.pkgQty(), c.pkgUnit(), c.grossWeightKg(), c.cbm(), c.vgmKg());
     }
 
     private ConsoledHouseBlSummaryView toConsoledView(ConsoledHouseBlSummary summary) {

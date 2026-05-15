@@ -82,5 +82,19 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
       polCode:        hbl.polCode,
       podCode:        hbl.podCode,
     })),
+    // §BE-sync — consoledSeaContainers (ConsoledSeaContainerView 전체 필드 매핑, 표시 전용)
+    consoledSeaContainers: (detail.consoledSeaContainers ?? []).map((c) => ({
+      houseBlId:     c.houseBlId,
+      containerNo:   c.containerNo,
+      containerType: c.containerType,
+      sealNo1:       c.sealNo1,
+      sealNo2:       c.sealNo2,
+      sealNo3:       c.sealNo3,
+      pkgQty:        c.pkgQty,
+      pkgUnit:       c.pkgUnit,
+      grossWeightKg: c.grossWeightKg,
+      cbm:           c.cbm,
+      vgmKg:         c.vgmKg,
+    })),
   };
 }

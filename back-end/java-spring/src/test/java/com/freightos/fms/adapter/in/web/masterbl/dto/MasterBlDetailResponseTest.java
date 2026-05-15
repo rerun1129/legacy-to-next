@@ -20,7 +20,7 @@ class MasterBlDetailResponseTest {
     void recordComponents_haveExactlyTwentyNineFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(29);
+        assertThat(components).hasSize(30);
         assertThat(components[26].getName()).isEqualTo("consolidatedHouseBls");
         assertThat(components[26].getType()).isEqualTo(List.class);
     }
@@ -46,6 +46,7 @@ class MasterBlDetailResponseTest {
                 10, "KGS", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
                 null, null,
                 List.of(seaSummary),
+                List.of(),
                 "REMARK-SAMPLE",
                 null
         );
@@ -69,6 +70,7 @@ class MasterBlDetailResponseTest {
                 "PREPAID", null, null,
                 null, null, null, null, null,
                 null, null,
+                List.of(),
                 List.of(),
                 null,
                 null

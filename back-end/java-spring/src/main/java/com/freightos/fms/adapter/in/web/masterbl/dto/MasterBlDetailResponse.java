@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
+import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 
@@ -37,6 +38,7 @@ public record MasterBlDetailResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
+        List<ConsoledSeaContainerView> consoledSeaContainers,
         String remark,
         SeaDetailResponse seaDetail
 ) {
@@ -70,6 +72,7 @@ public record MasterBlDetailResponse(
                 result.createdAt(),
                 result.updatedAt(),
                 result.consolidatedHouseBls(),
+                result.consoledSeaContainers(),
                 result.remark(),
                 seaDetailProjection != null ? SeaDetailResponse.from(seaDetailProjection) : null
         );

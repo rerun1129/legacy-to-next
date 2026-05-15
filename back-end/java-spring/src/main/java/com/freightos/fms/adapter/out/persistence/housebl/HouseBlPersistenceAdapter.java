@@ -17,6 +17,7 @@ import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlAirSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSeaSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
@@ -129,6 +130,11 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     @Override
     public List<ConsoledHouseBlSeaSummary> findConsoledSeaSummariesByMasterBlId(Long masterBlId) {
         return houseBlRepository.findConsoledSeaSummariesByMasterBlId(masterBlId);
+    }
+
+    @Override
+    public List<ConsoledSeaContainer> findConsoledSeaContainersByMasterBlId(Long masterBlId) {
+        return houseBlRepository.findConsoledSeaContainersByMasterBlId(masterBlId);
     }
 
     @Override

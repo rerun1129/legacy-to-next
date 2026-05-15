@@ -75,6 +75,7 @@ export const mockMasterBlPort: MasterBlPort = {
       grossWeightKg: 1000,
       cbm: 5,
       consolidatedHouseBls: [],
+      consoledSeaContainers: [],
       updatedAt: null,
       remark: undefined,
       teamCode: null,

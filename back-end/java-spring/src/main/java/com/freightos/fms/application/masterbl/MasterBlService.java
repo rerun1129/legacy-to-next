@@ -12,6 +12,7 @@ import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
+import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
@@ -45,7 +46,9 @@ public class MasterBlService implements MasterBlUseCase {
     @Override
     public MasterBlDetailResult findMasterBlById(Long id) {
         MasterBl entity = findEntityById(id);
-        return masterBlFactory.toDetailResult(entity, loadConsolidatedHouseBls(id, entity));
+        List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, entity);
+        List<ConsoledSeaContainer> containers = loadConsoledSeaContainers(id, entity);
+        return masterBlFactory.toDetailResult(entity, consoled, containers);
     }
 
     @Override
@@ -83,7 +86,9 @@ public class MasterBlService implements MasterBlUseCase {
         }
         log.info("Updated MasterBl id={}", id);
         MasterBl updated = findEntityById(id);
-        return masterBlFactory.toDetailResult(updated, loadConsolidatedHouseBls(id, updated));
+        List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, updated);
+        List<ConsoledSeaContainer> containers = loadConsoledSeaContainers(id, updated);
+        return masterBlFactory.toDetailResult(updated, consoled, containers);
     }
 
     @Override
@@ -104,6 +109,13 @@ public class MasterBlService implements MasterBlUseCase {
         return switch (entity) {
             case MasterBlSea ignored -> new java.util.ArrayList<>(houseBlPort.findConsoledSeaSummariesByMasterBlId(id));
             case MasterBlAir ignored -> new java.util.ArrayList<>(houseBlPort.findConsoledAirSummariesByMasterBlId(id));
+            default -> List.of();
+        };
+    }
+
+    private List<ConsoledSeaContainer> loadConsoledSeaContainers(Long id, MasterBl entity) {
+        return switch (entity) {
+            case MasterBlSea ignored -> houseBlPort.findConsoledSeaContainersByMasterBlId(id);
             default -> List.of();
         };
     }
