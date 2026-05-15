@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,13 +16,13 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 25개이고, 24번째는 consolidatedHouseBls이다")
-    void recordComponents_haveExactlyTwentyThreeFields() {
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 29개이고, address/seaDetail 포함하며 consolidatedHouseBls 위치 정합")
+    void recordComponents_haveExactlyTwentyNineFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(25);
-        assertThat(components[23].getName()).isEqualTo("consolidatedHouseBls");
-        assertThat(components[23].getType()).isEqualTo(List.class);
+        assertThat(components).hasSize(29);
+        assertThat(components[26].getName()).isEqualTo("consolidatedHouseBls");
+        assertThat(components[26].getType()).isEqualTo(List.class);
     }
 
     // ── from(MasterBlDetailResult) 매핑 검증 ─────────────────────────
@@ -39,12 +40,14 @@ class MasterBlDetailResponseTest {
                 1L, "MBL-001", "REF-001",
                 "SEA", "EXP", "HOUSE",
                 "SHIP01", "CONS01", "NOTIFY01",
+                null, null, null,
                 "KRPUS", "USNYC", "20251130", "20251201",
                 "PREPAID", "OPR01", "TEAM01",
                 10, "KGS", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
                 null, null,
                 List.of(seaSummary),
-                "REMARK-SAMPLE"
+                "REMARK-SAMPLE",
+                null
         );
 
         MasterBlDetailResponse response = MasterBlDetailResponse.from(result);
@@ -61,11 +64,13 @@ class MasterBlDetailResponseTest {
                 2L, "MBL-002", null,
                 "SEA", "EXP", "HOUSE",
                 null, null, null,
+                null, null, null,
                 null, null, null, null,
                 "PREPAID", null, null,
                 null, null, null, null, null,
                 null, null,
                 List.of(),
+                null,
                 null
         );
 

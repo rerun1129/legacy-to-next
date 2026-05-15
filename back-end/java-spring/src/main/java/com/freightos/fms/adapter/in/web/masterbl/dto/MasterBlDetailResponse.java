@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,6 +19,9 @@ public record MasterBlDetailResponse(
         String shipperCode,
         String consigneeCode,
         String notifyCode,
+        String shipperAddress,
+        String consigneeAddress,
+        String notifyAddress,
         String polCode,
         String podCode,
         String etd,
@@ -33,9 +37,11 @@ public record MasterBlDetailResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
-        String remark
+        String remark,
+        SeaDetailResponse seaDetail
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailResult result) {
+        SeaDetailProjection seaDetailProjection = result.seaDetail();
         return new MasterBlDetailResponse(
                 result.id(),
                 result.mblNo(),
@@ -46,6 +52,9 @@ public record MasterBlDetailResponse(
                 result.shipperCode(),
                 result.consigneeCode(),
                 result.notifyCode(),
+                result.shipperAddress(),
+                result.consigneeAddress(),
+                result.notifyAddress(),
                 result.polCode(),
                 result.podCode(),
                 result.etd(),
@@ -61,7 +70,8 @@ public record MasterBlDetailResponse(
                 result.createdAt(),
                 result.updatedAt(),
                 result.consolidatedHouseBls(),
-                result.remark()
+                result.remark(),
+                seaDetailProjection != null ? SeaDetailResponse.from(seaDetailProjection) : null
         );
     }
 }

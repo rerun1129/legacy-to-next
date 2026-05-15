@@ -19,6 +19,9 @@ public record MasterBlDetailResult(
         String shipperCode,
         String consigneeCode,
         String notifyCode,
+        String shipperAddress,
+        String consigneeAddress,
+        String notifyAddress,
         String polCode,
         String podCode,
         String etd,
@@ -34,5 +37,6 @@ public record MasterBlDetailResult(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
-        String remark
+        String remark,
+        SeaDetailProjection seaDetail
 ) {}

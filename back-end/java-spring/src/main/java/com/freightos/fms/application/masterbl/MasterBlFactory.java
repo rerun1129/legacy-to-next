@@ -5,6 +5,8 @@ import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.SeaDescProjection;
+import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
@@ -142,6 +144,10 @@ public class MasterBlFactory {
             case MasterBlAir air -> air.getRemark();
             default -> null;
         };
+        SeaDetailProjection seaDetail = switch (entity) {
+            case MasterBlSea sea -> toSeaDetailProjection(sea);
+            default -> null;
+        };
         return new MasterBlDetailResult(
                 entity.getId(),
                 VoMapper.mapOrNull(entity.getMblNo(), BlNumber::value),
@@ -152,6 +158,9 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getConsigneeCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getNotifyCode(), CustomerCode::value),
+                Nullables.mapOrNull(entity.getShipperCode(), CustomerCode::address),
+                Nullables.mapOrNull(entity.getConsigneeCode(), CustomerCode::address),
+                Nullables.mapOrNull(entity.getNotifyCode(), CustomerCode::address),
                 VoMapper.mapOrNull(entity.getPolCode(), PortCode::value),
                 VoMapper.mapOrNull(entity.getPodCode(), PortCode::value),
                 VoMapper.mapOrNull(entity.getEtd(), BlDate::asString),
@@ -167,7 +176,39 @@ public class MasterBlFactory {
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 toConsoledViews(consolidatedHouseBls),
-                remark
+                remark,
+                seaDetail
+        );
+    }
+
+    private SeaDetailProjection toSeaDetailProjection(MasterBlSea sea) {
+        return new SeaDetailProjection(
+                Nullables.mapOrNull(sea.getLoadType(), LoadType::name),
+                VoMapper.mapOrNull(sea.getLinerCode(), LinerCode::value),
+                sea.getVesselVoyage() != null ? sea.getVesselVoyage().vesselCode() : null,
+                sea.getVesselVoyage() != null ? sea.getVesselVoyage().vesselName() : null,
+                sea.getVesselVoyage() != null ? sea.getVesselVoyage().voyageNo() : null,
+                VoMapper.mapOrNull(sea.getOnboardDate(), BlDate::asString),
+                sea.getVesselNationality(),
+                Nullables.mapOrNull(sea.getServiceTerm(), ServiceTerm::name),
+                Nullables.mapOrNull(sea.getBlType(), BlType::name),
+                VoMapper.mapOrNull(sea.getPorCode(), PortCode::value),
+                VoMapper.mapOrNull(sea.getFinalDestCode(), PortCode::value),
+                VoMapper.mapOrNull(sea.getRton(), Rton::ton),
+                VoMapper.mapOrNull(sea.getLineBkgNo(), BlNumber::value),
+                VoMapper.mapOrNull(sea.getIssueDate(), BlDate::asString),
+                toSeaDescProjection(sea.getDesc()),
+                sea.getRemark()
+        );
+    }
+
+    private SeaDescProjection toSeaDescProjection(MasterBlDesc desc) {
+        if (desc == null) return SeaDescProjection.empty();
+        return new SeaDescProjection(
+                desc.getMarks(),
+                desc.getDescription(),
+                Nullables.mapOrNull(desc.getDescClause1(), DescClause1::name),
+                Nullables.mapOrNull(desc.getDescClause2(), DescClause2::name)
         );
     }
 
