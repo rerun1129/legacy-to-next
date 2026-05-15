@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
+import { getPageTitle } from "@/lib/bl-variants";
 import { masterBlPort } from "@/lib/ports";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useTabs } from "@/lib/use-tabs";
 import type { MasterBlRow, MasterBlFilter } from "@/domain/master-bl";
 import type { Bound } from "@/domain/house-bl";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
@@ -22,6 +25,8 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const clearDraft = useBLDraftStore((s) => s.clearDraft);
+  const setFocus = useEntryFocusStore((s) => s.setFocus);
+  const addTab = useTabs((s) => s.addTab);
   const [selected, setSelected] = useState<number | null>(null);
   const modeLabels = getModeLabels(variant.mode);
 
@@ -41,10 +46,14 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
         <span
           className="cell-hbl"
           onDoubleClick={() => {
+            const path = `/fms/master-bl/${variantKey}/entry`;
             // 프레시 조회: stale 캐시·draft 제거 후 Entry 진입
             queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", row.id] });
             clearDraft(`master:${variantKey}:${row.id}`);
-            router.push(`/fms/master-bl/${variantKey}/entry?id=${row.id}`);
+            setFocus(entryFocusKeys.masterBl(variantKey), row.id);
+            sessionStorage.setItem(`master-bl-entry:hot:${row.id}`, "1");
+            addTab(getPageTitle(variant, "Master", "Entry"), path);
+            router.push(path);
           }}
           style={{ cursor: "pointer" }}
           title="더블클릭하여 Entry 열기"

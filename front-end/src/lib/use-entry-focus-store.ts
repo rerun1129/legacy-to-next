@@ -35,5 +35,7 @@ export function domainFromPath(href: string): EntryDomain | null {
   if (href.startsWith("/fms/truck-bl/entry")) return "truckBl";
   const m = href.match(/^\/fms\/house-bl\/([^/]+)\/entry/);
   if (m) return `houseBl:${m[1]}`;
+  const mm = href.match(/^\/fms\/master-bl\/([^/]+)\/entry/);
+  if (mm) return `masterBl:${mm[1]}`;
   return null;
 }

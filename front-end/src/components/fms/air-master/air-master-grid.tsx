@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
+import { useTabs } from "@/lib/use-tabs";
 import { Plane } from "lucide-react";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
@@ -22,6 +25,10 @@ interface Props {
 
 export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll, bound }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const setFocus = useEntryFocusStore((s) => s.setFocus);
+  const clearDraft = useBLDraftStore((s) => s.clearDraft);
+  const addTab = useTabs((s) => s.addTab);
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
@@ -47,9 +54,17 @@ export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
       minWidth: 160,
       render: (v, row) => (
         <div
-          onDoubleClick={() => router.push(
-            `${bound === "EXP" ? "/fms/master-bl/air-exp/entry" : "/fms/master-bl/air-imp/entry"}?id=${row.id}`
-          )}
+          onDoubleClick={() => {
+            const variantKey = bound === "EXP" ? "air-exp" : "air-imp";
+            const path = `/fms/master-bl/${variantKey}/entry`;
+            // 프레시 조회: stale 캐시·draft 제거 후 Entry 진입
+            queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", row.id] });
+            clearDraft(`master:${variantKey}:${row.id}`);
+            setFocus(entryFocusKeys.masterBl(variantKey), row.id);
+            sessionStorage.setItem(`master-bl-entry:hot:${row.id}`, "1");
+            addTab(`Master B/L Air ${bound === "EXP" ? "Export" : "Import"} Entry`, path);
+            router.push(path);
+          }}
           style={{ cursor: "pointer" }}
         >
           {String(v ?? "")}

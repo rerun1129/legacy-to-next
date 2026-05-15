@@ -72,6 +72,7 @@ export function useMasterBlEntryMutations(args: {
       clearDraft(`master:${variantKey}:${id ?? "new"}`);
       clearDraft(`master:${variantKey}:new`);
       detailLoadedRef.current = false;
+      useEntryFocusStore.getState().clearFocus(entryFocusKeys.masterBl(variantKey));
       setResetVersion((v) => v + 1);
     },
   });

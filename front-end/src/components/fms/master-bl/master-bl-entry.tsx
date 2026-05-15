@@ -16,6 +16,7 @@ import { Button } from "@/components/shared/button";
 import { ComboBox, TextBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
 import type { ConsolidatedHouseBlSummary } from "@/domain/master-bl";
@@ -26,7 +27,6 @@ import { ScreenGuard }   from "@/components/shared/screen-guard";
 
 interface Props {
   variantKey: string;
-  id?: number;
 }
 
 const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type"] as const;
@@ -39,7 +39,7 @@ function getToolbarFields(mode: string) {
   return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
 }
 
-export function MasterBLEntry({ variantKey, id }: Props) {
+export function MasterBLEntry({ variantKey }: Props) {
   const [tab, setTab] = useState("main");
   const [resetVersion, setResetVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
@@ -47,6 +47,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const queryClient = useQueryClient();
 
   const variant = getMasterVariant(variantKey);
+  const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.masterBl(variantKey)]);
   const isEdit = Boolean(id);
   const modeLabels = getModeLabels(variant.mode);
   const toolbarFields = getToolbarFields(variant.mode);
@@ -131,11 +132,19 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           alert('해당 B/L을 찾을 수 없습니다.');
           return;
         }
-        queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', rows[0].id] });
-        clearDraft(`master:${variantKey}:${rows[0].id}`);
-        return masterBlPort.getById(rows[0].id).then((foundDetail) => {
-          form.reset(mapMasterBlDetailToForm(foundDetail));
-        });
+        const targetId = rows[0].id;
+        if (targetId === id) {
+          // 동일 id 재조회: detail cache invalidate 후 useEffect가 form.reset을 다시 실행
+          queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', id] });
+          clearDraft(`master:${variantKey}:${id}`);
+          detailLoadedRef.current = false;
+        } else {
+          // 다른 id: focus 변경 → useQuery 자동 트리거 → useEffect에서 form.reset
+          queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', targetId] });
+          clearDraft(`master:${variantKey}:${targetId}`);
+          sessionStorage.setItem(`master-bl-entry:hot:${targetId}`, "1");
+          useEntryFocusStore.getState().setFocus(entryFocusKeys.masterBl(variantKey), targetId);
+        }
       })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
@@ -152,6 +161,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     clearDraft(`master:${variantKey}:${id ?? "new"}`);
     clearDraft(`master:${variantKey}:new`);
     detailLoadedRef.current = false;
+    useEntryFocusStore.getState().clearFocus(entryFocusKeys.masterBl(variantKey));
     formRef.current?.reset();
     setResetVersion(v => v + 1);
   }
