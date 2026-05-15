@@ -36,6 +36,7 @@ function getToolbarFields(mode: string) {
 
 export function MasterBLEntry({ variantKey, id }: Props) {
   const [tab, setTab] = useState("main");
+  const [resetVersion, setResetVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const router = useRouter();
@@ -94,11 +95,17 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
+      // detail cache 제거 + draft 정리 + ref 해제 (Delete→Cargo 클리어 race 차단, House 패턴 정합)
+      queryClient.removeQueries({ queryKey: ["master-bl", "detail", id] });
       form.reset({
         ...createEmptyMasterBlFormValues(),
         jobDiv: variant.mode,
         bound: variant.direction ?? "EXP",
       });
+      clearDraft(`master:${variantKey}:${id ?? "new"}`);
+      clearDraft(`master:${variantKey}:new`);
+      detailLoadedRef.current = false;
+      setResetVersion(v => v + 1);
       router.replace(`/fms/master-bl/${variantKey}/entry`);
     },
   });
@@ -136,7 +143,9 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       bound: variant.direction ?? "EXP",
     });
     clearDraft(`master:${variantKey}:${id ?? "new"}`);
+    detailLoadedRef.current = false;
     formRef.current?.reset();
+    setResetVersion(v => v + 1);
   }
 
   function handleSave(raw: MasterBlFormValues) {
@@ -240,8 +249,8 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       )}
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
-      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab variant={variant} form={form} active={tab === "main"} /></div>
-      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab active={tab === "freight"} /></div>
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={resetVersion} variant={variant} form={form} active={tab === "main"} /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
     </form>
     </FormProvider>
   );
