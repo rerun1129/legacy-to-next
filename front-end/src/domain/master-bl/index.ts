@@ -18,15 +18,15 @@ export interface MasterBlRow {
   createdAt: string;
 }
 
-// §BE-sync — SeaDescView (BE SeaDetailResponse.SeaDescView nested)
-export interface MasterBlSeaDescView {
-  marks?: string;
-  description?: string;
-  descClause1?: string;
-  descClause2?: string;
+// §BE-sync — MasterBlDetailResponse.DescView (root desc nested, BE 보강 완료)
+export interface MasterBlDescView {
+  marks: string | null;
+  description: string | null;
+  descClause1: string | null;
+  descClause2: string | null;
 }
 
-// §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 1:1 정합)
+// §BE-sync — SeaDetailResponse 15 필드 (desc root 승격으로 제거됨)
 // §6.49 ⑰ — enum 필드는 string | null로 완화 (BE 검증 일원화, FE는 ComboBox useEnumOptions로 동적 fetch)
 export interface MasterBlSeaDetail {
   loadType: string | null;
@@ -43,7 +43,6 @@ export interface MasterBlSeaDetail {
   rton: number | null;
   lineBkgNo: string | null;
   issueDate: string | null;
-  desc: MasterBlSeaDescView | null;
   remark: string | null;
 }
 
@@ -52,9 +51,15 @@ export interface MasterBlDetail extends MasterBlRow {
   // §6.49 ⑰ — freightTerm enum literal → string | null 완화 (BE 검증 일원화)
   freightTerm: string | null;
   pkgQty: number | null;
+  pkgUnit?: string;
   weightUnit?: string;
   grossWeightKg: number | null;
   cbm: number | null;
+  // §BE 보강 — root 승격 cargo 식별 필드
+  mainItemName: string | null;
+  hsCode: string | null;
+  settlePartnerCode: string | null;
+  desc: MasterBlDescView | null;
   consolidatedHouseBls: ConsolidatedHouseBlSummary[];
   consoledSeaContainers: ConsoledSeaContainer[];
   updatedAt: string | null;
@@ -67,7 +72,7 @@ export interface MasterBlDetail extends MasterBlRow {
   consigneeAddress: string | null;
   notifyCode: string | null;
   notifyAddress: string | null;
-  // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 정합)
+  // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 정합, desc root 승격)
   seaDetail: MasterBlSeaDetail | null;
 }
 
@@ -125,7 +130,7 @@ export interface MasterBlFilter {
   size?: number;
 }
 
-// §BE-sync — CreateMasterBlRequest.SeaDetailRequest (BE Phase 3 정합)
+// §BE-sync — CreateMasterBlRequest.SeaDetailRequest (BE Phase 3 정합, desc root 승격으로 제거됨)
 export interface SeaDetailRequest {
   loadType?: string;
   linerCode?: string;
@@ -141,7 +146,6 @@ export interface SeaDetailRequest {
   rton?: number;
   lineBkgNo?: string;
   issueDate?: string;
-  desc?: DescRequest;
 }
 
 export interface DescRequest {

@@ -38,7 +38,7 @@ function SettlePartnerLcnField() {
       kind="lcn"
       variant="panel"
       label="Settle Partner"
-      codeProps={{ ...register("settlePartner"), placeholder: "Code" }}
+      codeProps={{ ...register("settlePartnerCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Partner Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
     />
@@ -119,8 +119,8 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const panelScope = `master-cargo-doc.${variant.key}`;
 
   const cargoBase: FieldItemDef[] = [
-    { key: "main-item", render: () => <LiText label="Main Item" name="cargoMainItem" /> },
-    { key: "hs-code",   render: () => <LiText label="HS Code"   name="cargoHsCode" /> },
+    { key: "main-item", render: () => <LiText label="Main Item" name="mainItemName" /> },
+    { key: "hs-code",   render: () => <LiText label="HS Code"   name="hsCode" /> },
     { key: "package",   render: () => <PackageField /> },
     { key: "gw",        render: () => <GWField /> },
     { key: "cbm",       render: () => (
@@ -170,7 +170,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
     ? [{ key: "security", render: () => <LiText label="Security Status" name="securityStatus" /> }]
     : [];
   const airDocTail: FieldItemDef[] = [
-    { key: "settle",   render: () => <LiText label="Settle Partner" name="settlePartner" /> },
+    { key: "settle",   render: () => <LiText label="Settle Partner" name="settlePartnerCode" /> },
     { key: "operator", render: () => <LiText label="Operator"       name="operatorCode" /> },
     { key: "team",     render: () => <LiText label="Team"           name="teamCode" /> },
   ];

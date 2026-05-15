@@ -9,7 +9,7 @@ const masterBlRows: MasterBlRow[] = [
   { id: 3, mblNo: 'MBLKR24041623', masterRefNo: null, jobDiv: 'SEA', bound: 'IMP', shipperCode: 'NINGBO',   consigneeCode: 'KR_IMPORT',          polCode: 'CNNGB',  podCode: 'KRICN', etd: '20240416', eta: null, operatorCode: null, createdAt: '2024-04-16' },
 ];
 
-// SEA detail 샘플 (§BE-sync — SeaDetailProjection 16 필드 정합)
+// SEA detail 샘플 (§BE-sync — SeaDetailProjection 15 필드, desc root 승격으로 제거됨)
 const seaDetailSample = {
   loadType: 'FCL',
   linerCode: 'HMM',
@@ -25,12 +25,6 @@ const seaDetailSample = {
   rton: null,
   lineBkgNo: 'BKG240419001',
   issueDate: '20240421',
-  desc: {
-    marks: 'MARKS AND NUMBERS',
-    description: 'FREIGHT ALL KINDS',
-    descClause1: undefined,
-    descClause2: undefined,
-  },
   remark: 'SEA remark sample',
 };
 
@@ -76,6 +70,10 @@ export const mockMasterBlPort: MasterBlPort = {
       cbm: 5,
       consolidatedHouseBls: [],
       consoledSeaContainers: [],
+      mainItemName: null,
+      hsCode: null,
+      settlePartnerCode: null,
+      desc: null,
       updatedAt: null,
       remark: undefined,
       teamCode: null,

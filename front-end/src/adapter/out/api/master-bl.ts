@@ -60,15 +60,15 @@ const CONSOLED_SEA_CONTAINER_API_SCHEMA = z.object({
   vgmKg:         z.number().nullable(),
 });
 
-// §BE-sync — SeaDetailResponse.SeaDescView (BE Phase 2 nested)
-const SEA_DESC_VIEW_SCHEMA = z.object({
+// §BE 보강 — MasterBlDetailResponse.DescView (root desc nested, seaDetail.desc 제거)
+const MASTER_BL_DESC_VIEW_SCHEMA = z.object({
   marks:        z.string().nullable().optional().transform((v) => v ?? undefined),
   description:  z.string().nullable().optional().transform((v) => v ?? undefined),
   descClause1:  z.string().nullable().optional().transform((v) => v ?? undefined),
   descClause2:  z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
-// §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 1:1 정합)
+// §BE-sync — SeaDetailResponse 15 필드 (desc root 승격으로 제거됨)
 // §6.49 ⑮ — 모든 nullable 필드 .nullable().optional().transform(v => v ?? undefined) 통일
 const SEA_DETAIL_SCHEMA = z.object({
   loadType:          z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -85,7 +85,6 @@ const SEA_DETAIL_SCHEMA = z.object({
   rton:              z.number().nullable().optional().transform((v) => v ?? undefined),
   lineBkgNo:         z.string().nullable().optional().transform((v) => v ?? undefined),
   issueDate:         z.string().nullable().optional().transform((v) => v ?? undefined),
-  desc:              SEA_DESC_VIEW_SCHEMA.nullable().optional(),
   remark:            z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
@@ -94,9 +93,15 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   // §6.49 ⑰ — freightTerm enum literal → string nullable 완화
   freightTerm: z.string().nullable(),
   pkgQty: z.number().nullable(),
+  pkgUnit: z.string().nullable().optional().transform((v) => v ?? ''),
   weightUnit: z.string().nullable().optional().transform((v) => v ?? ''),
   grossWeightKg: z.number().nullable(),
   cbm: z.number().nullable(),
+  // §BE 보강 — root 승격 cargo 식별 필드
+  mainItemName:      z.string().nullable().optional().transform((v) => v ?? null),
+  hsCode:            z.string().nullable().optional().transform((v) => v ?? null),
+  settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? null),
+  desc:              MASTER_BL_DESC_VIEW_SCHEMA.nullable().optional(),
   consolidatedHouseBls: z.array(CONSOLIDATED_HBL_SCHEMA),
   consoledSeaContainers: z.array(CONSOLED_SEA_CONTAINER_API_SCHEMA),
   updatedAt: z.string().nullable(),
@@ -107,7 +112,7 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   notifyAddress: z.string().nullable(),
   notifyCode: z.string().nullable(),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
-  // §BE Phase 2 — seaDetail nested
+  // §BE Phase 2 — seaDetail nested (desc root 승격)
   seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
 });
 

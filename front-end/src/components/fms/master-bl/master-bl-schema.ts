@@ -2,14 +2,7 @@ import { z } from "zod";
 
 const DATE8 = z.string().regex(/^\d{8}$/).optional().or(z.literal(""));
 
-// §BE-sync — SeaDetailResponse.SeaDescView (BE Phase 2 nested)
-const SEA_DESC_SCHEMA = z.object({
-  marks:        z.string().optional(),
-  description:  z.string().optional(),
-  descClause1:  z.string().optional(),
-  descClause2:  z.string().optional(),
-}).optional();
-
+// §BE 보강 — desc root 승격 (seaDetail.desc 제거, root desc로 통일)
 const DESC_SCHEMA = z.object({
   marks:        z.string().optional(),
   description:  z.string().optional(),
@@ -103,7 +96,6 @@ export const SEA_DETAIL_FORM_SCHEMA = z.object({
   rton:              z.string().nullable().optional().transform((v) => v ?? undefined),
   lineBkgNo:         z.string().max(35).nullable().optional().transform((v) => v ?? undefined),
   issueDate:         DATE8,
-  desc:              SEA_DESC_SCHEMA,
   remark:            z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
@@ -139,13 +131,10 @@ export const MASTER_BL_SCHEMA = z.object({
   operatorCode:      z.string().optional(),
 
   shipmentType:   z.string().optional(),
-  cargoMainItem:  z.string().optional(),
-  cargoHsCode:    z.string().optional(),
   rTon:           z.number().min(0).optional(),
   volWeight:      z.number().min(0).optional(),
   chargeWeight:   z.number().min(0).optional(),
   rateClass:      z.string().optional(),
-  settlePartner:  z.string().optional(),
   coLoadAgent:    z.string().optional(),
   coLoadType:     z.string().optional(),
   flightType:     z.string().optional(),

@@ -31,14 +31,27 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     eta:     detail.eta     ?? "",
     // cargo summary
     pkgQty:        detail.pkgQty        != null ? detail.pkgQty : undefined,
+    pkgUnit:       detail.pkgUnit       ?? "",
     grossWeightKg: detail.grossWeightKg != null ? detail.grossWeightKg : undefined,
     cbm:           detail.cbm           != null ? detail.cbm : undefined,
     weightUnit:    detail.weightUnit    ?? "",
+    // §BE 보강 — root 승격 cargo 식별 필드
+    mainItemName:      detail.mainItemName      ?? "",
+    hsCode:            detail.hsCode            ?? "",
+    settlePartnerCode: detail.settlePartnerCode ?? "",
     // performance
     operatorCode: detail.operatorCode ?? "",
     teamCode:     detail.teamCode      ?? "",
     // remark (root 본체)
     remark: detail.remark ?? "",
+    // §BE 보강 — root desc (marks/description/descClause1/descClause2 + remark panel 표시)
+    desc: {
+      marks:        detail.desc?.marks        ?? "",
+      description:  detail.desc?.description  ?? "",
+      descClause1:  detail.desc?.descClause1  ?? "",
+      descClause2:  detail.desc?.descClause2  ?? "",
+      remark:       detail.remark             ?? "",
+    },
     // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailProjection 16 필드 매핑)
     seaDetail: {
       loadType:          detail.seaDetail?.loadType          ?? undefined,
@@ -55,12 +68,6 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
       rton:              detail.seaDetail?.rton != null ? String(detail.seaDetail.rton) : undefined,
       lineBkgNo:         detail.seaDetail?.lineBkgNo         ?? undefined,
       issueDate:         detail.seaDetail?.issueDate          ?? "",
-      desc: {
-        marks:        detail.seaDetail?.desc?.marks        ?? "",
-        description:  detail.seaDetail?.desc?.description  ?? "",
-        descClause1:  detail.seaDetail?.desc?.descClause1  ?? "",
-        descClause2:  detail.seaDetail?.desc?.descClause2  ?? "",
-      },
       remark: detail.seaDetail?.remark ?? undefined,
     },
     // §BE-sync — consolidatedHouseBls → houseBls (ConsoledHouseBlSummaryView 전체 필드 매핑)

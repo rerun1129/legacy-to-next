@@ -25,17 +25,14 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
     settlePartnerCode: "",
     operatorCode: "",
     shipmentType: "",
-    cargoMainItem: "",
-    cargoHsCode: "",
     rateClass: "",
-    settlePartner: "",
     coLoadAgent: "",
     coLoadType: "",
     flightType: "",
     securityStatus: "",
     teamCode: "",
     remark: "",
-    // §BE-sync — seaDetail nested 빈 객체 (16 필드 + desc nested)
+    // §BE-sync — seaDetail nested 빈 객체 (15 필드, desc root 승격)
     seaDetail: {
       loadType: undefined,
       linerCode: undefined,
@@ -51,12 +48,6 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
       rton: undefined,
       lineBkgNo: undefined,
       issueDate: "",
-      desc: {
-        marks: "",
-        description: "",
-        descClause1: "",
-        descClause2: "",
-      },
       remark: undefined,
     },
     desc: {

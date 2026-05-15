@@ -1,5 +1,5 @@
 import type { BLVariantConfig } from '@/lib/bl-variants';
-import type { CreateMasterBlRequest, UpdateMasterBlRequest, SeaDetailRequest, DescRequest } from '@/domain/master-bl';
+import type { CreateMasterBlRequest, UpdateMasterBlRequest, SeaDetailRequest } from '@/domain/master-bl';
 import type { MasterBlFormValues } from './master-bl-schema';
 
 /** 문자열 → number 변환. 빈 문자열이면 undefined 반환. */
@@ -16,20 +16,10 @@ function toStr(v: string | undefined | null): string | undefined {
   return v?.trim() || undefined;
 }
 
-/** form seaDetail → BE SeaDetailRequest 변환. Status 필드 미포함 (BE 미지원). */
+/** form seaDetail → BE SeaDetailRequest 변환. desc는 root 승격으로 seaDetail에서 제거됨 (§BE 보강). */
 function buildSeaDetailRequest(
   sd: NonNullable<MasterBlFormValues['seaDetail']>,
 ): SeaDetailRequest {
-  const desc: DescRequest | undefined =
-    sd.desc && (sd.desc.marks || sd.desc.description || sd.desc.descClause1 || sd.desc.descClause2)
-      ? {
-          marks:        toStr(sd.desc.marks),
-          description:  toStr(sd.desc.description),
-          descClause1:  toStr(sd.desc.descClause1),
-          descClause2:  toStr(sd.desc.descClause2),
-        }
-      : undefined;
-
   return {
     loadType:          toStr(sd.loadType),
     linerCode:         toStr(sd.linerCode),
@@ -45,7 +35,6 @@ function buildSeaDetailRequest(
     rton:              toNum(sd.rton),
     lineBkgNo:         toStr(sd.lineBkgNo),
     issueDate:         toStr(sd.issueDate),
-    desc,
   };
 }
 
