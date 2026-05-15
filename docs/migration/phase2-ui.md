@@ -389,7 +389,7 @@ rowClassName={(r) => String(r.id) === selectedKey ? "is-selected" : undefined}
 .truck-cargo-panel .li__input--tight > div > .lcn { display: block; width: 100%; padding: 0; gap: 0; }
 ```
 
-사례: 0710cb7.
+사례: 0710cb7 (truck-cargo-panel), `a551176f` (master-cargo-doc-panel scope class + `.master-cargo-doc-panel .li__input--tight > div > .lcn { display: block; ... }` override).
 
 ### 6.44 CodeBox kind 명칭 컨벤션 — LCN / code-only / party-cn
 

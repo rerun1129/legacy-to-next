@@ -48,6 +48,16 @@ npm --prefix front-end run build
 
 이미 마이그레이션 완료된 sea-house / air-house Entry와 토큰 일관성 비교.
 
+### 트러블슈팅 — localStorage layout state stale
+
+widget 구조 변경(예: `MASTER_BL_SEA_REGISTRY`의 widget key/defaultPosition 수정, `buildSeaFields`의 widget 분할 재구성) 시 `useFieldLayout`/`useWidgetLayout`이 저장한 localStorage 키(`fms.fieldLayouts.v1`, 위젯 layout 키)의 stale state로 빈 행 또는 잘못된 위치 잔여 가능.
+
+- 증상: 코드 변경 후 화면이 새 구조 미반영, 빈 행 추가 노출, 사라진 widget이 hidden bar로 잔여
+- 우선 진단: DevTools → Application → Local Storage → 해당 키 삭제 또는 시크릿 창에서 재확인
+- 후속 phase: `defaultOrder` 변경 감지 시 자동 invalidate 또는 version bump(`v1` → `v2`)로 강제 리셋 검토 (`OPEN_ITEMS.md` §1.6)
+
+사례: `2a86c919` (Container 패널 신규 + main-sea layout 재배치 시 사용자 캐시 클리어 안내 필요).
+
 ---
 
 ## 9. 커밋 메시지 작성 시
