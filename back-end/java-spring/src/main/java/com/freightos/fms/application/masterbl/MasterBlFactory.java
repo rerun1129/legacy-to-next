@@ -5,8 +5,8 @@ import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
+import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
-import com.freightos.fms.application.masterbl.projection.SeaDescProjection;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
@@ -182,11 +182,15 @@ public class MasterBlFactory {
                 Nullables.mapOrNull(entity.getWeightUnit(), WeightUnit::name),
                 VoMapper.mapOrNull(entity.getGrossWeightKg(), Weight::kg),
                 VoMapper.mapOrNull(entity.getCbm(), Volume::cbm),
+                entity.getMainItemName(),
+                entity.getHsCode(),
+                VoMapper.mapOrNull(entity.getSettlePartnerCode(), CustomerCode::value),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 toConsoledViews(consolidatedHouseBls),
                 toConsoledSeaContainerViews(containers),
                 remark,
+                toDescProjection(entity.getDesc()),
                 seaDetail
         );
     }
@@ -207,14 +211,13 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(sea.getRton(), Rton::ton),
                 VoMapper.mapOrNull(sea.getLineBkgNo(), BlNumber::value),
                 VoMapper.mapOrNull(sea.getIssueDate(), BlDate::asString),
-                toSeaDescProjection(sea.getDesc()),
                 sea.getRemark()
         );
     }
 
-    private SeaDescProjection toSeaDescProjection(MasterBlDesc desc) {
-        if (desc == null) return SeaDescProjection.empty();
-        return new SeaDescProjection(
+    private DescProjection toDescProjection(MasterBlDesc desc) {
+        if (desc == null) return DescProjection.empty();
+        return new DescProjection(
                 desc.getMarks(),
                 desc.getDescription(),
                 Nullables.mapOrNull(desc.getDescClause1(), DescClause1::name),

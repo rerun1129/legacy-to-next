@@ -34,10 +34,14 @@ public record MasterBlDetailResult(
         String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
+        String mainItemName,
+        String hsCode,
+        String settlePartnerCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
         List<ConsoledSeaContainerView> consoledSeaContainers,
         String remark,
+        DescProjection desc,
         SeaDetailProjection seaDetail
 ) {}

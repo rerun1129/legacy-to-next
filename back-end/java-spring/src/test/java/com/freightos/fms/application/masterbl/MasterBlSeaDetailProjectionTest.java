@@ -1,7 +1,7 @@
 package com.freightos.fms.application.masterbl;
 
+import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
-import com.freightos.fms.application.masterbl.projection.SeaDescProjection;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
@@ -28,7 +28,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * MasterBlFactory.toDetailResult SEA 분기 — SeaDetailProjection·SeaDescProjection 매핑 검증.
+ * MasterBlFactory.toDetailResult SEA 분기 — SeaDetailProjection·DescProjection 매핑 검증.
  * 격리 원칙: AIR 분기 seaDetail=null 포함 4 케이스.
  */
 class MasterBlSeaDetailProjectionTest {
@@ -38,8 +38,8 @@ class MasterBlSeaDetailProjectionTest {
     // ── 케이스 1: SEA + desc 정상 detail happy path ───────────────────
 
     @Test
-    @DisplayName("toDetailResult: SEA + desc 정상 → SeaDetailProjection 전 필드 매핑")
-    void toDetailResult_seaWithDesc_mapsAllSeaDetailFields() {
+    @DisplayName("toDetailResult: SEA + desc 정상 → SeaDetailProjection 전 필드 매핑, root desc 노출")
+    void toDetailResult_seaWithDesc_mapsAllSeaDetailFieldsAndRootDesc() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         sea.updateSeaFields(
                 LoadType.FCL,
@@ -80,7 +80,8 @@ class MasterBlSeaDetailProjectionTest {
         assertThat(seaDetail.issueDate()).isEqualTo("20260105");
         assertThat(seaDetail.remark()).isEqualTo("SEA REMARK");
 
-        SeaDescProjection descProjection = seaDetail.desc();
+        // desc는 root result에 노출된다 (seaDetail.desc 제거)
+        DescProjection descProjection = result.desc();
         assertThat(descProjection).isNotNull();
         assertThat(descProjection.marks()).isEqualTo("MARKS TEXT");
         assertThat(descProjection.description()).isEqualTo("DESC TEXT");
@@ -88,11 +89,11 @@ class MasterBlSeaDetailProjectionTest {
         assertThat(descProjection.descClause2()).isEqualTo("A");
     }
 
-    // ── 케이스 2: desc null → SeaDescProjection.empty() 분기 ─────────
+    // ── 케이스 2: desc null → DescProjection.empty() 분기 ────────────
 
     @Test
-    @DisplayName("toDetailResult: SEA + desc=null → SeaDescProjection.empty() 반환")
-    void toDetailResult_seaWithNullDesc_returnsEmptySeaDescProjection() {
+    @DisplayName("toDetailResult: SEA + desc=null → root DescProjection.empty() 반환")
+    void toDetailResult_seaWithNullDesc_returnsEmptyDescProjectionAtRoot() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         // desc 미설정 — sea.getDesc() == null
 
@@ -100,7 +101,9 @@ class MasterBlSeaDetailProjectionTest {
 
         SeaDetailProjection seaDetail = result.seaDetail();
         assertThat(seaDetail).isNotNull();
-        SeaDescProjection descProjection = seaDetail.desc();
+
+        // desc는 root result에서 확인
+        DescProjection descProjection = result.desc();
         assertThat(descProjection).isNotNull();
         assertThat(descProjection.marks()).isNull();
         assertThat(descProjection.description()).isNull();
@@ -140,5 +143,21 @@ class MasterBlSeaDetailProjectionTest {
         MasterBlDetailResult result = factory.toDetailResult(air, List.of(), List.of());
 
         assertThat(result.seaDetail()).isNull();
+    }
+
+    // ── 케이스 5: mainItemName / hsCode / settlePartnerCode root 매핑 ─
+
+    @Test
+    @DisplayName("toDetailResult: mainItemName·hsCode·settlePartnerCode root 필드 매핑")
+    void toDetailResult_tradeInfoAndSettlePartner_mappedToRoot() {
+        MasterBlSea sea = MasterBlSea.create(Bound.EXP);
+        sea.updateTradeInfo("ELECTRONIC PARTS", "8542.31");
+        sea.assignSettlePartner(com.freightos.fms.domain.common.vo.CustomerCode.of("SETTLE01"));
+
+        MasterBlDetailResult result = factory.toDetailResult(sea, List.of(), List.of());
+
+        assertThat(result.mainItemName()).isEqualTo("ELECTRONIC PARTS");
+        assertThat(result.hsCode()).isEqualTo("8542.31");
+        assertThat(result.settlePartnerCode()).isEqualTo("SETTLE01");
     }
 }

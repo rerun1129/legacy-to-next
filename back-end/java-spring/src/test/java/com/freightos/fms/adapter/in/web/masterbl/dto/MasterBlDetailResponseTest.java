@@ -1,8 +1,8 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
+import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
-import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,13 +16,13 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 29개이고, address/seaDetail 포함하며 consolidatedHouseBls 위치 정합")
-    void recordComponents_haveExactlyTwentyNineFields() {
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 34개이고, consolidatedHouseBls 위치 정합")
+    void recordComponents_haveExactlyThirtyFourFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(30);
-        assertThat(components[26].getName()).isEqualTo("consolidatedHouseBls");
-        assertThat(components[26].getType()).isEqualTo(List.class);
+        assertThat(components).hasSize(34);
+        assertThat(components[29].getName()).isEqualTo("consolidatedHouseBls");
+        assertThat(components[29].getType()).isEqualTo(List.class);
     }
 
     // ── from(MasterBlDetailResult) 매핑 검증 ─────────────────────────
@@ -44,10 +44,12 @@ class MasterBlDetailResponseTest {
                 "KRPUS", "USNYC", "20251130", "20251201",
                 "PREPAID", "OPR01", "TEAM01",
                 10, "KGS", null, BigDecimal.valueOf(100), BigDecimal.valueOf(1),
+                "MAIN ITEM", "1234.56", "SETTLE01",
                 null, null,
                 List.of(seaSummary),
                 List.of(),
                 "REMARK-SAMPLE",
+                new DescProjection("MARKS", "DESC", null, null),
                 null
         );
 
@@ -56,6 +58,11 @@ class MasterBlDetailResponseTest {
         assertThat(response).isNotNull();
         assertThat(response.consolidatedHouseBls()).hasSize(1);
         assertThat(response.consolidatedHouseBls().get(0)).isEqualTo(seaSummary);
+        assertThat(response.mainItemName()).isEqualTo("MAIN ITEM");
+        assertThat(response.hsCode()).isEqualTo("1234.56");
+        assertThat(response.settlePartnerCode()).isEqualTo("SETTLE01");
+        assertThat(response.desc()).isNotNull();
+        assertThat(response.desc().marks()).isEqualTo("MARKS");
     }
 
     @Test
@@ -69,9 +76,11 @@ class MasterBlDetailResponseTest {
                 null, null, null, null,
                 "PREPAID", null, null,
                 null, null, null, null, null,
+                null, null, null,
                 null, null,
                 List.of(),
                 List.of(),
+                null,
                 null,
                 null
         );

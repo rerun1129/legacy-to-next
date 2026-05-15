@@ -6,6 +6,7 @@ import java.math.BigDecimal;
  * SEA 본체(MasterBlSea) 상세 필드의 application-layer projection.
  * enum/VO는 String/primitive로 평탄화하여 Adapter(in) 계층 의존을 차단한다.
  * Master Sea는 container 미사용, incoterms/deliveryCode 미보유 (Master 도메인 사양).
+ * desc는 SEA/AIR 공통 필드로 root MasterBlDetailResult.desc에서 노출된다.
  */
 public record SeaDetailProjection(
         String loadType,
@@ -22,6 +23,5 @@ public record SeaDetailProjection(
         BigDecimal rton,
         String lineBkgNo,
         String issueDate,
-        SeaDescProjection desc,
         String remark
 ) {}

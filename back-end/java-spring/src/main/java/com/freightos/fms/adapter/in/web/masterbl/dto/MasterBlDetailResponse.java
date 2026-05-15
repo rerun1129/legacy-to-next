@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
+import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 
@@ -35,11 +36,15 @@ public record MasterBlDetailResponse(
         String weightUnit,
         BigDecimal grossWeightKg,
         BigDecimal cbm,
+        String mainItemName,
+        String hsCode,
+        String settlePartnerCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<ConsoledHouseBlSummaryView> consolidatedHouseBls,
         List<ConsoledSeaContainerView> consoledSeaContainers,
         String remark,
+        DescView desc,
         SeaDetailResponse seaDetail
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailResult result) {
@@ -69,12 +74,29 @@ public record MasterBlDetailResponse(
                 result.weightUnit(),
                 result.grossWeightKg(),
                 result.cbm(),
+                result.mainItemName(),
+                result.hsCode(),
+                result.settlePartnerCode(),
                 result.createdAt(),
                 result.updatedAt(),
                 result.consolidatedHouseBls(),
                 result.consoledSeaContainers(),
                 result.remark(),
+                DescView.from(result.desc()),
                 seaDetailProjection != null ? SeaDetailResponse.from(seaDetailProjection) : null
         );
+    }
+
+    /** desc(master_bl_desc) 응답 뷰. SEA/AIR 공통으로 root 레벨에 노출된다. */
+    public record DescView(
+            String marks,
+            String description,
+            String descClause1,
+            String descClause2
+    ) {
+        public static DescView from(DescProjection p) {
+            if (p == null) return null;
+            return new DescView(p.marks(), p.description(), p.descClause1(), p.descClause2());
+        }
     }
 }
