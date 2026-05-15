@@ -1,12 +1,13 @@
 "use client";
 
-import { useFormContext, type UseFormReturn } from "react-hook-form";
+import { useFormContext, Controller, type UseFormReturn } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { TextBox }    from "@/components/shared/inputs/text-box";
 import { NumberBox }  from "@/components/shared/inputs/number-box";
+import { CodeBox }    from "@/components/shared/inputs/code-box";
 import { ComboBox }   from "@/components/shared/inputs/combo-box";
 import { useEnumOptions } from "@/application/enums/use-enum";
 
@@ -28,13 +29,22 @@ function LiText({ label, name }: { label: string; name: string }) {
   );
 }
 
-// ── G/W 필드 (숫자 + 단위 미지원 — 단위는 Phase 8 toolbar 범위) ──────────
+// ── G/W 필드 ───────────────────────────────────────────────────────────────
 function GWField() {
+  const { register, control } = useFormContext<MasterBlFormValues>();
+  const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
   return (
     <div className="li">
       <span className="li__label">G/W</span>
-      <div className="li__input">
-        <NumberBox variant="panel" name="grossWeightKg" decimalPlaces={3} />
+      <div className="li__input li__input--tight">
+        <NumberBox variant="panel" decimalPlaces={3} {...register("grossWeightKg")} />
+        <Controller
+          name="weightUnit"
+          control={control}
+          render={({ field }) => (
+            <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} style={{ flex: "0 0 60px" }} />
+          )}
+        />
       </div>
     </div>
   );
@@ -42,18 +52,15 @@ function GWField() {
 
 // ── Package Qty 필드 ────────────────────────────────────────────────────────
 function PackageField() {
-  const { options: pkgOptions, placeholder: pkgPlaceholder } = useEnumOptions("PackType");
+  const { register } = useFormContext<MasterBlFormValues>();
   return (
     <div className="li">
       <span className="li__label">Package</span>
-      <div className="li__input" style={{ display: "flex", gap: 4 }}>
-        <NumberBox variant="panel" name="pkgQty" style={{ flex: 1 }} />
-        <div style={{ flexShrink: 0, width: 64 }}>
-          <ComboBox
-            variant="panel"
-            options={pkgOptions}
-            placeholder={pkgPlaceholder ?? "Unit"}
-          />
+      <div className="li__input li__input--tight">
+        <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
+        {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능) */}
+        <div style={{ flex: "0 0 60px" }}>
+          <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
         </div>
       </div>
     </div>
@@ -105,15 +112,13 @@ export function MasterCargoDocPanel({ variant }: Props) {
 
   const seaDoc: FieldItemDef[] = [
     { key: "settle",   render: () => <LiText label="Settle Partner" name="settlePartner" /> },
-    { key: "co-load",  render: () => <LiText label="Co-Load Agent"  name="coLoadAgent" /> },
     { key: "operator", render: () => <LiText label="Operator"       name="operatorCode" /> },
     { key: "team",     render: () => <LiText label="Team"           name="teamCode" /> },
   ];
 
   const airDocBase: FieldItemDef[] = [
-    { key: "co-load-type",  render: () => <LiText label="Co-Load Type"  name="coLoadType" /> },
-    { key: "co-load-agent", render: () => <LiText label="Co-Load Agent" name="coLoadAgent" /> },
-    { key: "flight-type",   render: () => <LiText label="Flight Type"   name="flightType" /> },
+    { key: "co-load-type", render: () => <LiText label="Co-Load Type" name="coLoadType" /> },
+    { key: "flight-type",  render: () => <LiText label="Flight Type"  name="flightType" /> },
   ];
   const airDocSec: FieldItemDef[] = variant.direction === "EXP"
     ? [{ key: "security", render: () => <LiText label="Security Status" name="securityStatus" /> }]
@@ -148,7 +153,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
   ];
 
   return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="panel master-cargo-doc-panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Cargo &amp; Document</span>

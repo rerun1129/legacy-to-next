@@ -27,6 +27,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       required,
       readOnly,
       disabled,
+      style,
       codeProps,
       nameProps,
       onLookup,
@@ -43,7 +44,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       const baseCodeCn = codeCn ?? (mono ? "text-mono" : undefined);
       const mergedCodeCn = [baseCodeCn, required ? "is-required" : undefined].filter(Boolean).join(" ") || undefined;
       return (
-        <div className="lcn">
+        <div className="lcn" style={style}>
           {(label || labelOptions) && (
             <LcnLabel
               options={labelOptions}
