@@ -1,5 +1,8 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.adapter.in.web.validation.SeaImpMasterGroup;
+import com.freightos.fms.adapter.in.web.validation.SeaMasterGroup;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -9,19 +12,19 @@ import java.util.List;
 public record CreateMasterBlRequest(
         @NotNull String jobDiv,
         @NotNull String bound,
-        @Size(max = 35) String mblNo,
-        @Size(max = 35) String masterRefNo,
+        @Size(max = 35) @NotBlank(groups = SeaMasterGroup.class) String mblNo,
+        @Size(max = 35) @NotBlank(groups = SeaMasterGroup.class) String masterRefNo,
         @NotNull String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
-        @Size(max = 20) String consigneeCode,
+        @Size(max = 20) @NotBlank(groups = SeaImpMasterGroup.class) String consigneeCode,
         String consigneeAddress,
         @Size(max = 20) String notifyCode,
         String notifyAddress,
-        @Size(max = 5)  String polCode,
-        @Size(max = 5)  String podCode,
-        @Pattern(regexp = "\\d{8}") String etd,
-        @Pattern(regexp = "\\d{8}") String eta,
+        @Size(max = 5)  @NotBlank(groups = SeaMasterGroup.class) String polCode,
+        @Size(max = 5)  @NotBlank(groups = SeaMasterGroup.class) String podCode,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaMasterGroup.class) String etd,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaMasterGroup.class) String eta,
         @Min(0) Integer pkgQty,
         String pkgUnit,
         String weightUnit,
@@ -31,10 +34,12 @@ public record CreateMasterBlRequest(
         String mainItemName,
         @Size(max = 20) String settlePartnerCode,
         String operatorCode,
+        @NotBlank(groups = SeaMasterGroup.class) String teamCode,
+        @NotNull @NotBlank(groups = SeaMasterGroup.class) String shipmentType,
         String remark,
 
         // SEA 확장 필드
-        SeaDetailRequest seaDetail,
+        @Valid SeaDetailRequest seaDetail,
 
         // Sub 엔티티
         DescRequest desc,
@@ -46,10 +51,10 @@ public record CreateMasterBlRequest(
     /** SEA 모드 확장 필드. */
     public record SeaDetailRequest(
             String loadType,
-            String linerCode,
+            @NotBlank(groups = SeaMasterGroup.class) String linerCode,
             String vesselCode,
-            String vesselName,
-            String voyageNo,
+            @NotBlank(groups = SeaMasterGroup.class) String vesselName,
+            @NotBlank(groups = SeaMasterGroup.class) String voyageNo,
             @Pattern(regexp = "\\d{8}") String onboardDate,
             String vesselNationality,
             String serviceTerm,

@@ -151,22 +151,19 @@ class MasterBlControllerWebMvcTest {
     // ── POST /api/master-bl ───────────────────────────────────────────
 
     @Test
-    @DisplayName("POST /api/master-bl: jobDiv=SEA, bound=EXP happy path → 201 + Location 헤더")
+    @DisplayName("POST /api/master-bl: jobDiv=AIR, bound=EXP happy path → 201 + Location 헤더 + data.id 검증")
     void createMasterBl_happyPath_returns201WithLocation() throws Exception {
         Long id = 1L;
         CreateMasterBlCommand mockCommand = mock(CreateMasterBlCommand.class);
-        MasterBlDetailResult mockSavedResult = mock(MasterBlDetailResult.class);
-        MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
-        given(mockSavedResult.id()).willReturn(id);
         given(masterBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
-        given(masterBlUseCase.createMasterBl(any(CreateMasterBlCommand.class))).willReturn(mockSavedResult);
-        given(masterBlAssembler.toDetail(mockSavedResult)).willReturn(mockResponse);
+        given(masterBlUseCase.createMasterBl(any(CreateMasterBlCommand.class))).willReturn(id);
 
         mockMvc.perform(post("/api/master-bl")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"jobDiv\":\"SEA\",\"bound\":\"EXP\",\"freightTerm\":\"PREPAID\"}"))
+                        .content("{\"jobDiv\":\"AIR\",\"bound\":\"EXP\",\"freightTerm\":\"PREPAID\",\"shipmentType\":\"DIRECT\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/master-bl/1")));
+                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/master-bl/1")))
+                .andExpect(jsonPath("$.data.id").value(1L));
 
         then(masterBlUseCase).should().createMasterBl(any(CreateMasterBlCommand.class));
     }

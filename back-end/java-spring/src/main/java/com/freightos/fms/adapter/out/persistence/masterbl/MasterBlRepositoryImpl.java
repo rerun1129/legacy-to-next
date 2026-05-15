@@ -77,6 +77,18 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
         return PagedResult.of(content, total, totalPages, pageRequest.getPage(), pageRequest.getSize());
     }
 
+    @Override
+    public List<Long> findMasterBlKeysByMblNoExact(String mblNo) {
+        QMasterBlJpaEntity m = QMasterBlJpaEntity.masterBlJpaEntity;
+        return queryFactory
+                .select(m.masterBlId)
+                .from(m)
+                .where(m.mblNo.eq(mblNo))
+                .orderBy(m.createdAt.desc(), m.masterBlId.desc())
+                .limit(2)
+                .fetch();
+    }
+
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {
         return Nullables.mapIfHasText(v, col::containsIgnoreCase);
     }

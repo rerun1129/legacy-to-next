@@ -134,6 +134,11 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
     }
 
     @Override
+    public List<Long> findMasterBlKeysByMblNoExact(String mblNo) {
+        return masterBlRepository.findMasterBlKeysByMblNoExact(mblNo);
+    }
+
+    @Override
     @Transactional
     public void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv) {
         switch (jobDiv) {

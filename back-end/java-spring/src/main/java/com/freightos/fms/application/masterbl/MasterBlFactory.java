@@ -16,6 +16,7 @@ import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.Per;
 import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
+import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.common.vo.BlDate;
@@ -67,7 +68,8 @@ public class MasterBlFactory {
         entity.assignMblNo(BlNumber.of(cmd.mblNo()), BlNumber.of(cmd.masterRefNo()));
         entity.assignParties(CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()), CustomerCode.of(cmd.notifyCode()));
         entity.updateSchedule(PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()), BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
-        entity.updateFreightAndOperator(Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf), EmployeeCode.of(cmd.operatorCode()), null);
+        entity.updateFreightAndOperator(Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf), EmployeeCode.of(cmd.operatorCode()), TeamCode.of(cmd.teamCode()));
+        if (cmd.shipmentType() != null) entity.updateShipmentType(Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf));
         entity.updateCargoSummary(new CargoSummary(Quantity.of(cmd.pkgQty()), cmd.pkgUnit(), Nullables.mapOrNull(cmd.weightUnit(), WeightUnit::fromCode), Weight.of(cmd.grossWeightKg()), Volume.of(cmd.cbm())));
         if (cmd.mainItemName() != null || cmd.hsCode() != null) entity.updateTradeInfo(cmd.mainItemName(), cmd.hsCode());
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
@@ -99,8 +101,9 @@ public class MasterBlFactory {
         entity.updateFreightAndOperator(
                 Nullables.mapOrElse(cmd.freightTerm(), FreightTerm::valueOf, entity::getFreightTerm),
                 Nullables.mapOrElse(cmd.operatorCode(), EmployeeCode::of, entity::getOperatorCode),
-                entity.getTeamCode()
+                Nullables.mapOrElse(cmd.teamCode(), TeamCode::of, entity::getTeamCode)
         );
+        if (cmd.shipmentType() != null) entity.updateShipmentType(Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf));
         entity.updateCargoSummary(new CargoSummary(
                 Nullables.mapOrElse(cmd.pkgQty(), Quantity::of, entity::getPkgQty),
                 Nullables.firstNonNull(cmd.pkgUnit(), entity::getPkgUnit),

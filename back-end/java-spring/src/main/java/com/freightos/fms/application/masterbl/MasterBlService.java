@@ -48,13 +48,18 @@ public class MasterBlService implements MasterBlUseCase {
 
     @Override
     @Transactional
-    public MasterBlDetailResult createMasterBl(CreateMasterBlCommand command) {
+    public Long createMasterBl(CreateMasterBlCommand command) {
         if (command.mblNo() != null && masterBlPort.existsByMblNo(command.mblNo())) {
             throw FmsException.conflict("DUPLICATE_MBL_NO", "MBL No already exists: " + command.mblNo());
         }
         MasterBl saved = masterBlPort.saveMasterBl(masterBlFactory.toEntity(command));
         log.info("Created MasterBl id={}", saved.getId());
-        return masterBlFactory.toDetailResult(saved, loadConsolidatedHouseBls(saved.getId(), saved));
+        return saved.getId();
+    }
+
+    @Override
+    public List<Long> findMasterBlKeysByMblNoExact(String mblNo) {
+        return masterBlPort.findMasterBlKeysByMblNoExact(mblNo);
     }
 
     @Override

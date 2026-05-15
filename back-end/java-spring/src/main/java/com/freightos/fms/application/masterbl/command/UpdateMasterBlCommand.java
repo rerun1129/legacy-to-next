@@ -31,6 +31,8 @@ public record UpdateMasterBlCommand(
         String mainItemName,
         String settlePartnerCode,
         String operatorCode,
+        String teamCode,
+        String shipmentType,
         String remark,
 
         // SEA 확장 필드

@@ -21,7 +21,7 @@ class MasterBlAssemblerTest {
                 "PREPAID",
                 null, null, null, null,
                 null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         CreateMasterBlCommand result = assembler.toCreateCommand(request);
@@ -39,7 +39,7 @@ class MasterBlAssemblerTest {
                 "PREPAID",
                 null, null, null, null,
                 null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         CreateMasterBlCommand result = assembler.toCreateCommand(request);
@@ -57,7 +57,7 @@ class MasterBlAssemblerTest {
                 "PREPAID",
                 null, null, null, null,
                 null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         CreateMasterBlCommand result = assembler.toCreateCommand(request);
@@ -74,7 +74,7 @@ class MasterBlAssemblerTest {
                 "PREPAID",
                 null, null, null, null,
                 null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
         );
 
         CreateMasterBlCommand result = assembler.toCreateCommand(request);

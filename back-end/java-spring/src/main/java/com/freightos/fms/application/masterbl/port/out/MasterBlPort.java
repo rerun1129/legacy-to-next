@@ -8,6 +8,7 @@ import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MasterBlPort {
@@ -19,4 +20,5 @@ public interface MasterBlPort {
     MasterBl saveMasterBl(MasterBl domain);
     Optional<MasterBlJobDiv> findJobDivById(Long id);
     void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv);
+    List<Long> findMasterBlKeysByMblNoExact(String mblNo);
 }
