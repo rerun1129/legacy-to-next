@@ -163,4 +163,15 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
   async delete(id: number): Promise<void> {
     await fetchJson(`${MASTER_BL_BASE}/${id}`, { method: 'DELETE' });
   },
+
+  async findByMblNo(mblNo: string): Promise<number[]> {
+    const json = await fetchJson(`${MASTER_BL_BASE}/find-by-mbl-no`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mblNo }),
+    });
+    const parsed = apiResponse(z.array(z.number())).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid find-by-mbl-no response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
 };

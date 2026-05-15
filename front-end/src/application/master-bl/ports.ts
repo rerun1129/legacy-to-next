@@ -7,4 +7,6 @@ export interface MasterBlPort {
   create(req: CreateMasterBlRequest): Promise<{ id: number }>;
   update(id: number, req: UpdateMasterBlRequest): Promise<void>;
   delete(id: number): Promise<void>;
+  // EXACT 매칭 — POST /api/master-bl/find-by-mbl-no
+  findByMblNo(mblNo: string): Promise<number[]>;
 }

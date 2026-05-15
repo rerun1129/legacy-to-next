@@ -119,20 +119,21 @@ export function MasterBLEntry({ variantKey }: Props) {
   });
 
   function handleSearchBl() {
-    const mblValue = form.getValues('mblNo');
-    if (!mblValue?.trim()) return;
+    const mblValue = form.getValues('mblNo')?.trim();
+    if (!mblValue) return;
 
     masterBlPort
-      .list({
-        bound: variant.direction as 'EXP' | 'IMP',
-        mblNo: mblValue.trim(),
-      })
-      .then((rows) => {
-        if (rows.length === 0) {
+      .findByMblNo(mblValue)
+      .then((ids) => {
+        if (ids.length === 0) {
           alert('해당 B/L을 찾을 수 없습니다.');
           return;
         }
-        const targetId = rows[0].id;
+        if (ids.length > 1) {
+          alert('동일 MBL No. 다건 발견 — List 화면에서 선택해주세요.');
+          return;
+        }
+        const targetId = ids[0];
         if (targetId === id) {
           // 동일 id 재조회: detail cache invalidate 후 useEffect가 form.reset을 다시 실행
           queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', id] });

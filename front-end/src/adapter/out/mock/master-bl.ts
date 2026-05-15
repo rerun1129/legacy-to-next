@@ -101,4 +101,8 @@ export const mockMasterBlPort: MasterBlPort = {
   async delete(_id: number): Promise<void> {
     // mock: no-op
   },
+
+  async findByMblNo(mblNo: string): Promise<number[]> {
+    return masterBlRows.filter((r) => r.mblNo === mblNo).map((r) => r.id);
+  },
 };
