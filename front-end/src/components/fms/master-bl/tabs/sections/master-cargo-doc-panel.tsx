@@ -29,6 +29,50 @@ function LiText({ label, name }: { label: string; name: string }) {
   );
 }
 
+// ── SEA Document LCN 필드 ──────────────────────────────────────────────────
+// schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
+function SettlePartnerLcnField() {
+  const { register } = useFormContext<MasterBlFormValues>();
+  return (
+    <CodeBox
+      kind="lcn"
+      variant="panel"
+      label="Settle Partner"
+      codeProps={{ ...register("settlePartner"), placeholder: "Code" }}
+      nameProps={{ placeholder: "Partner Name" }}
+      onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+    />
+  );
+}
+
+function OperatorLcnField() {
+  const { register } = useFormContext<MasterBlFormValues>();
+  return (
+    <CodeBox
+      kind="lcn"
+      variant="panel"
+      label="Operator"
+      codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
+      nameProps={{ placeholder: "Operator Name" }}
+      onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+    />
+  );
+}
+
+function TeamLcnField() {
+  const { register } = useFormContext<MasterBlFormValues>();
+  return (
+    <CodeBox
+      kind="lcn"
+      variant="panel"
+      label="Team"
+      codeProps={{ ...register("teamCode"), placeholder: "Code" }}
+      nameProps={{ placeholder: "Team Name" }}
+      onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+    />
+  );
+}
+
 // ── G/W 필드 ───────────────────────────────────────────────────────────────
 function GWField() {
   const { register, control } = useFormContext<MasterBlFormValues>();
@@ -111,9 +155,9 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const cargoItems = [...cargoBase, ...cargoExtras];
 
   const seaDoc: FieldItemDef[] = [
-    { key: "settle",   render: () => <LiText label="Settle Partner" name="settlePartner" /> },
-    { key: "operator", render: () => <LiText label="Operator"       name="operatorCode" /> },
-    { key: "team",     render: () => <LiText label="Team"           name="teamCode" /> },
+    { key: "settle",   render: () => <SettlePartnerLcnField /> },
+    { key: "operator", render: () => <OperatorLcnField /> },
+    { key: "team",     render: () => <TeamLcnField /> },
   ];
 
   const airDocBase: FieldItemDef[] = [
@@ -146,7 +190,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />Document</div>
-          <FieldItemGrid itemScope={`${panelScope}.document`} items={docItems} />
+          <FieldItemGrid itemScope={`${panelScope}.document`} items={docItems} cols={1} />
         </>
       ),
     },

@@ -2,21 +2,17 @@
 
 import { useRef, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
-import { Plus, Minus } from "lucide-react";
+import { Minus } from "lucide-react";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 
 interface Props { variant?: AnyVariantConfig }
 
-const EMPTY_HBL_ROW = {
-  hblNo: "", shipper: "", consignee: "", pkg: "", gw: "", cbm: "",
-};
-
 export function MasterHouseBLGrid({ variant }: Props) {
   const { control } = useFormContext<MasterBlFormValues>();
   // keyName을 "rhfKey"로 분리해 field.id(=스키마 숫자 id)와 RHF 내부 UUID를 구분
-  const { fields, append, remove } = useFieldArray({
+  const { fields, remove } = useFieldArray({
     control,
     name: "houseBls",
     keyName: "rhfKey",
@@ -32,15 +28,6 @@ export function MasterHouseBLGrid({ variant }: Props) {
     const activeEl = document.activeElement as HTMLElement | null;
     const tr = activeEl?.closest("tr[data-row-key]") as HTMLElement | null;
     focusedRowKeyRef.current = tr?.dataset.rowKey ?? null;
-  }
-
-  function handleAdd() {
-    // field.id는 스키마의 숫자 ID; 신규 행에 현재 max+1 할당
-    const nextId = fields.length > 0
-      ? Math.max(...fields.map(f => f.id)) + 1
-      : 1;
-    append({ ...EMPTY_HBL_ROW, id: nextId });
-    setSelectedIdx(null);
   }
 
   function handleRemove() {
@@ -66,9 +53,6 @@ export function MasterHouseBLGrid({ variant }: Props) {
         <span className="panel__title">{ml.hblList}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <button type="button" className="btn btn--sm" onClick={handleAdd}>
-            <Plus size={12} />{ml.newHbl}
-          </button>
           <button
             type="button"
             className="btn btn--sm"

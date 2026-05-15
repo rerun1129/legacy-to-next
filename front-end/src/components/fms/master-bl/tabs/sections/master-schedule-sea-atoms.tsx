@@ -125,41 +125,32 @@ export function IssueDateField() {
   );
 }
 
-export function OnboardDateField() {
-  const { control } = useFormContext<MasterBlFormValues>();
+// ── Port lcn 필드 (POR/POL/POD/FinalDest) ─────────────────────────────────
+// schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
+export function PorField() {
+  const { register } = useFormContext<MasterBlFormValues>();
   return (
-    <div className="li">
-      <span className="li__label">On Board</span>
-      <div className="li__input">
-        <Controller
-          control={control}
-          name="seaDetail.onboardDate"
-          render={({ field }) => (
-            <DateBox
-              variant="panel"
-              ref={field.ref}
-              name={field.name}
-              value={field.value as string}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
-          )}
-        />
-      </div>
-    </div>
+    <CodeBox
+      kind="lcn"
+      variant="panel"
+      label="POR"
+      codeProps={{ ...register("seaDetail.porCode"), placeholder: "UNLOC" }}
+      nameProps={{ placeholder: "Port Name" }}
+      onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+    />
   );
 }
 
-// ── Port code-only 필드 ────────────────────────────────────────────────────
 export function PolField() {
   const { register } = useFormContext<MasterBlFormValues>();
   return (
     <CodeBox
-      kind="code-only"
+      kind="lcn"
       variant="panel"
       label="POL"
       required
       codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
+      nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
     />
   );
@@ -169,24 +160,12 @@ export function PodField() {
   const { register } = useFormContext<MasterBlFormValues>();
   return (
     <CodeBox
-      kind="code-only"
+      kind="lcn"
       variant="panel"
       label="POD"
       required
       codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
-      onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
-    />
-  );
-}
-
-export function PorField() {
-  const { register } = useFormContext<MasterBlFormValues>();
-  return (
-    <CodeBox
-      kind="code-only"
-      variant="panel"
-      label="POR"
-      codeProps={{ ...register("seaDetail.porCode"), placeholder: "UNLOC" }}
+      nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
     />
   );
@@ -196,10 +175,11 @@ export function FinalDestField() {
   const { register } = useFormContext<MasterBlFormValues>();
   return (
     <CodeBox
-      kind="code-only"
+      kind="lcn"
       variant="panel"
-      label="Final Dest"
+      label="Final Dest."
       codeProps={{ ...register("seaDetail.finalDestCode"), placeholder: "UNLOC" }}
+      nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
     />
   );

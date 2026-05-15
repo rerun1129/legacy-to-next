@@ -7,6 +7,7 @@ import { CodeBox }            from "@/components/shared/inputs/code-box";
 import { ComboBox }           from "@/components/shared/inputs/combo-box";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
+import { useEnumOptions } from "@/application/enums/use-enum";
 
 interface Props {
   variant?: AnyVariantConfig;
@@ -59,7 +60,6 @@ function PartyBlockConnected({
         {PARTY_BTNS[role] && (
           <button type="button" className="party-block__head-btn">{PARTY_BTNS[role]}</button>
         )}
-        <button type="button" className="party-block__head-btn">Clear</button>
       </div>
       <Controller
         control={form.control}
@@ -94,7 +94,6 @@ function PartyBlockStub({ role }: { role: PartyRole }) {
         {PARTY_BTNS[role] && (
           <button type="button" className="party-block__head-btn">{PARTY_BTNS[role]}</button>
         )}
-        <button type="button" className="party-block__head-btn">Clear</button>
       </div>
       <LineNumberTextarea placeholder="Address (free text)" style={{ height: 108 }} />
     </div>
@@ -153,12 +152,10 @@ export function MasterMarksPanel({ form }: Props) {
 }
 
 // ── Goods Description ──────────────────────────────────────────────────────
-const CLAUSE_OPTIONS = [
-  { value: "", label: "-- 부지약관 --" },
-  { value: "SAID TO CONTAIN", label: "SAID TO CONTAIN" },
-];
-
 export function MasterGoodsDescPanel({ variant, form }: Props) {
+  const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
+  const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
+
   if (!variant) return null;
   const isSea = variant.mode === "SEA";
   const title = isSea ? "Description of Goods" : "Nature of Goods";
@@ -171,27 +168,21 @@ export function MasterGoodsDescPanel({ variant, form }: Props) {
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {isSea && (
-          <div className="li" style={{ marginBottom: 8, flexShrink: 0 }}>
-            <span className="li__label">Clause</span>
-            <div className="li__input">
-              {form
-                ? <Controller
-                    control={form.control}
-                    name="desc.descClause1"
-                    render={({ field }) => (
-                      <ComboBox
-                        variant="panel"
-                        options={CLAUSE_OPTIONS}
-                        placeholder="-- 부지약관 --"
-                        value={field.value ?? ""}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                      />
-                    )}
-                  />
-                : <ComboBox variant="panel" options={CLAUSE_OPTIONS} placeholder="-- 부지약관 --" />
-              }
-            </div>
+          <div style={{ display: "flex", gap: 4, marginBottom: 8, flexShrink: 0 }}>
+            {form
+              ? <>
+                  <Controller name="desc.descClause1" control={form.control} render={({ field }) => (
+                    <ComboBox variant="panel" options={clause1Options} placeholder={clause1Placeholder ?? "-- 부지약관 --"} value={field.value ?? ""} onChange={field.onChange} onBlur={field.onBlur} style={{ flex: 1 }} />
+                  )} />
+                  <Controller name="desc.descClause2" control={form.control} render={({ field }) => (
+                    <ComboBox variant="panel" options={clause2Options} placeholder={clause2Placeholder ?? "-- 부지약관 --"} value={field.value ?? ""} onChange={field.onChange} onBlur={field.onBlur} style={{ flex: 1 }} />
+                  )} />
+                </>
+              : <>
+                  <ComboBox variant="panel" options={clause1Options} placeholder={clause1Placeholder ?? "-- 부지약관 --"} style={{ flex: 1 }} />
+                  <ComboBox variant="panel" options={clause2Options} placeholder={clause2Placeholder ?? "-- 부지약관 --"} style={{ flex: 1 }} />
+                </>
+            }
           </div>
         )}
         {form

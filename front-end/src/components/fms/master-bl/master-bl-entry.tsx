@@ -11,7 +11,7 @@ import { TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
 import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
 import { mapMasterBlDetailToForm } from "./map-master-bl-detail";
-import { Save, Copy, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
+import { Save, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ComboBox, TextBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
@@ -201,16 +201,7 @@ export function MasterBLEntry({ variantKey, id }: Props) {
         </div>
         <div className="page-head__actions">
           <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
-          <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearchBl}>Search B/L</Button>
-          <Button
-            size="sm"
-            variant="danger"
-            leftIcon={<Trash2 size={12} />}
-            onClick={handleDelete}
-            disabled={!isEdit || deleteMutation.isPending}
-          >Delete</Button>
-          <Button size="sm" variant="normal" leftIcon={<Copy size={12} />}>Copy</Button>
-          <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />}>{modeLabels.changeBLNo}</Button>
+          <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearchBl}>Search</Button>
           <Button
             type="submit"
             size="sm"
@@ -218,6 +209,14 @@ export function MasterBLEntry({ variantKey, id }: Props) {
             leftIcon={<Save size={12} />}
             loading={mutation.isPending}
           >{mutation.isPending ? "Saving..." : "Save"}</Button>
+          <Button
+            size="sm"
+            variant="danger"
+            leftIcon={<Trash2 size={12} />}
+            onClick={handleDelete}
+            disabled={!isEdit || deleteMutation.isPending}
+          >Delete</Button>
+          <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />}>{modeLabels.changeBLNo}</Button>
         </div>
       </div>
 
@@ -266,10 +265,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
             {t.label}
           </button>
         ))}
-        <div className="tabbar__spacer" />
-        <div className="tabbar__meta">
-          <span>Last saved: 10 min ago</span>
-        </div>
       </div>
 
       {/* consolidatedHouseBls: detail fetch 시 읽기 전용 표시 전용, submit body에 미포함 */}

@@ -124,7 +124,6 @@ export function MasterSchedulePanel({ variant }: Props) {
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Schedule</span>
-        <div className="panel__actions"><button type="button" className="btn btn--sm">Reset</button></div>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />
