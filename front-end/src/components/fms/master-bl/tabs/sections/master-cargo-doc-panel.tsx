@@ -52,6 +52,7 @@ function OperatorLcnField() {
       kind="lcn"
       variant="panel"
       label="Operator"
+      required
       codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Operator Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -66,6 +67,7 @@ function TeamLcnField() {
       kind="lcn"
       variant="panel"
       label="Team"
+      required
       codeProps={{ ...register("teamCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Team Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}

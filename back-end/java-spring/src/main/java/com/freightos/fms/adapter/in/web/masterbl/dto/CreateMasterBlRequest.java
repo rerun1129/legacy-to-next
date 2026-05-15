@@ -33,7 +33,7 @@ public record CreateMasterBlRequest(
         String hsCode,
         String mainItemName,
         @Size(max = 20) String settlePartnerCode,
-        String operatorCode,
+        @NotBlank(groups = SeaMasterGroup.class) String operatorCode,
         @NotBlank(groups = SeaMasterGroup.class) String teamCode,
         @NotNull @NotBlank(groups = SeaMasterGroup.class) String shipmentType,
         String remark,

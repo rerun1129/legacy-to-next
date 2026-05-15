@@ -16,6 +16,7 @@ export function LinerLcnField() {
       kind="lcn"
       variant="panel"
       label="Liner"
+      required
       codeProps={{ ...register("seaDetail.linerCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Liner Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
