@@ -3,10 +3,10 @@
 import { useRef, useState, useEffect } from "react";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { confirm } from "@/components/confirm";
 import { TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
 import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
@@ -14,9 +14,12 @@ import { mapMasterBlDetailToForm } from "./map-master-bl-detail";
 import { buildCreateMasterBlPayload, buildUpdateMasterBlPayload } from "./master-bl-submit";
 import { Save, Copy, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { ComboBox, TextBox } from "@/components/shared/inputs";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import type { ConsolidatedHouseBlSummary } from "@/domain/master-bl";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
@@ -30,6 +33,9 @@ interface Props {
 const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type"] as const;
 const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "", "", "", ""] as const;
 
+// ComboBox로 렌더링할 enum 라벨 목록
+const TOOLBAR_ENUM_LABELS = new Set(["Load Type", "Service Term", "B/L Type", "Shipment Type"]);
+
 function getToolbarFields(mode: string) {
   return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
 }
@@ -39,7 +45,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
   const [resetVersion, setResetVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const variant = getMasterVariant(variantKey);
@@ -56,6 +61,10 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     queryKey: ["master-bl", "detail", id],
     queryFn: () => masterBlPort.getById(id!),
     enabled: isEdit,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    structuralSharing: false,
   });
 
   const clearDraft = useBLDraftStore(state => state.clearDraft);
@@ -68,34 +77,72 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     },
   });
 
-  useBlDraftSync(form, `master:${variantKey}:${id ?? "new"}`);
+  // §6.49 ⑰ — enum 옵션은 useEnumOptions로 동적 fetch (BE SSOT)
+  const { options: loadTypeOptions,     placeholder: loadTypePh }     = useEnumOptions("LoadType");
+  const { options: serviceTermOptions,  placeholder: serviceTermPh }  = useEnumOptions("ServiceTerm");
+  const { options: blTypeOptions,       placeholder: blTypePh }       = useEnumOptions("BlType");
+  const { options: shipmentTypeOptions, placeholder: shipmentTypePh } = useEnumOptions("ShipmentType");
+
+  const TOOLBAR_ENUM: Record<string, { options: typeof loadTypeOptions; placeholder: string | undefined }> = {
+    "Load Type":     { options: loadTypeOptions,     placeholder: loadTypePh },
+    "Service Term":  { options: serviceTermOptions,  placeholder: serviceTermPh },
+    "B/L Type":      { options: blTypeOptions,       placeholder: blTypePh },
+    "Shipment Type": { options: shipmentTypeOptions, placeholder: shipmentTypePh },
+  };
+
+  // §6.49 ⑨ — didRestoreFromDraftRef 수신하여 form.reset 시 draft 복원 시 덮어쓰기 방지
+  const { didRestoreFromDraftRef } = useBlDraftSync(form, `master:${variantKey}:${id ?? "new"}`);
 
   const detailLoadedRef = useRef<boolean>(false);
 
+  // id 변경 시 form.reset 재트리거를 위해 ref 초기화
+  useEffect(() => {
+    detailLoadedRef.current = false;
+  }, [id]);
+
+  // §6.49 ⑨ — draft 복원 시 detail로 덮어쓰지 않음 (House 패턴 정합)
   useEffect(() => {
     if (detailLoadedRef.current) return;
+    if (didRestoreFromDraftRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
     form.reset(mapMasterBlDetailToForm(detail));
-  }, [detail, form]);
+  }, [detail, form, didRestoreFromDraftRef]);
 
+  // §6.49 ⑩ — mutation onSuccess SSOT 5요소
   const mutation = useMutation<{ id: number } | void, Error, MasterBlFormValues>({
     mutationFn: (data: MasterBlFormValues) => {
       return isEdit
         ? masterBlPort.update(id!, buildUpdateMasterBlPayload(id!, data, variant))
         : masterBlPort.create(buildCreateMasterBlPayload(data, variant));
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["master-bl", "list"] });
-      router.push(`/fms/master-bl/${variantKey}/list`);
+    onSuccess: (result) => {
+      if (!isEdit) {
+        // create: result는 { id: number }
+        const newId = (result && typeof result === "object" && "id" in result) ? (result as { id: number }).id : undefined;
+        if (newId != null) {
+          queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", newId] });
+          sessionStorage.setItem(`master-bl-entry:hot:${newId}`, "1");
+          useEntryFocusStore.getState().setFocus(entryFocusKeys.masterBl(variantKey), newId);
+          clearDraft(`master:${variantKey}:new`);
+          detailLoadedRef.current = false;
+        }
+      } else {
+        // update: List 자동 invalidate 금지 (§6.21, memory [feedback_list_entry_invalidate])
+        // update 시 router.push 자동 이동 금지
+        queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", id] });
+        sessionStorage.setItem(`master-bl-entry:hot:${id}`, "1");
+        useEntryFocusStore.getState().setFocus(entryFocusKeys.masterBl(variantKey), id!);
+        clearDraft(`master:${variantKey}:${id}`);
+        detailLoadedRef.current = false;
+      }
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => masterBlPort.delete(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-bl', 'list'] });
-      // detail cache 제거 + draft 정리 + ref 해제 (Delete→Cargo 클리어 race 차단, House 패턴 정합)
+      // List 자동 invalidate 금지 (§6.21) — detail cache 제거 + draft 정리 + ref 해제
       queryClient.removeQueries({ queryKey: ["master-bl", "detail", id] });
       form.reset({
         ...createEmptyMasterBlFormValues(),
@@ -106,7 +153,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       clearDraft(`master:${variantKey}:new`);
       detailLoadedRef.current = false;
       setResetVersion(v => v + 1);
-      router.replace(`/fms/master-bl/${variantKey}/entry`);
     },
   });
 
@@ -143,13 +189,32 @@ export function MasterBLEntry({ variantKey, id }: Props) {
       bound: variant.direction ?? "EXP",
     });
     clearDraft(`master:${variantKey}:${id ?? "new"}`);
+    clearDraft(`master:${variantKey}:new`);
     detailLoadedRef.current = false;
     formRef.current?.reset();
     setResetVersion(v => v + 1);
   }
 
-  function handleSave(raw: MasterBlFormValues) {
+  // Save confirm 모달 (House 패턴 정합 — Non B/L 16dbc0b 패턴)
+  async function handleSave(raw: MasterBlFormValues) {
+    const ok = await confirm({
+      title: "저장하시겠습니까?",
+      variant: "default",
+    });
+    if (!ok) return;
     mutation.mutate(raw);
+  }
+
+  async function handleDelete() {
+    if (!isEdit) return;
+    const ok = await confirm({
+      title: "삭제하시겠습니까?",
+      description: "삭제된 데이터는 복구할 수 없습니다.",
+      variant: "destructive",
+      confirmText: "삭제",
+    });
+    if (!ok) return;
+    deleteMutation.mutate();
   }
 
   const tabs = [
@@ -157,7 +222,6 @@ export function MasterBLEntry({ variantKey, id }: Props) {
     { key: "freight", label: "Freight" },
   ];
 
-  const { register } = form;
   const bottomActionsLeft  = variant.bottomActions.filter(a => ["Profit/Loss", "House B/L Load"].includes(a));
   const bottomActionsRight = variant.bottomActions.filter(a => !["Profit/Loss", "House B/L Load"].includes(a));
 
@@ -178,48 +242,59 @@ export function MasterBLEntry({ variantKey, id }: Props) {
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
-          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <FilePlus size={12} />New
-          </button>
-          <button type="button" className="btn btn--sm" onClick={handleSearchBl}>
-            <Search size={12} />Search B/L
-          </button>
+          <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
+          <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearchBl}>Search B/L</Button>
           <Button
-            variant="danger"
             size="sm"
-            onClick={() => {
-              if (!isEdit) return;
-              if (window.confirm('삭제하시겠습니까?')) deleteMutation.mutate();
-            }}
+            variant="danger"
+            leftIcon={<Trash2 size={12} />}
+            onClick={handleDelete}
             disabled={!isEdit || deleteMutation.isPending}
-          >
-            <Trash2 size={12} />Delete
-          </Button>
-          <button type="button" className="btn btn--sm"><Copy size={12} />Copy</button>
-          <button type="button" className="btn btn--sm">
-            <RefreshCw size={12} />{modeLabels.changeBLNo}
-          </button>
-          <button type="button" className="btn btn--sm" onClick={handleResetEntry}>
-            <FilePlus size={12} />New
-          </button>
-          <button type="submit" className="btn btn--sm btn--primary" disabled={mutation.isPending}>
-            <Save size={12} />{mutation.isPending ? "Saving..." : "Save"}
-          </button>
+          >Delete</Button>
+          <Button size="sm" variant="normal" leftIcon={<Copy size={12} />}>Copy</Button>
+          <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />}>{modeLabels.changeBLNo}</Button>
+          <Button
+            type="submit"
+            size="sm"
+            variant="transaction"
+            leftIcon={<Save size={12} />}
+            loading={mutation.isPending}
+          >{mutation.isPending ? "Saving..." : "Save"}</Button>
         </div>
       </div>
 
-      {/* Toolbar */}
+      {/* Toolbar — SEA 7 필드: TextBox(3) + ComboBox+useEnumOptions(4 enum) */}
       <div className="toolbar" style={{ gridTemplateColumns: `repeat(${variant.toolbarColumnCount}, 1fr)` }}>
         {toolbarFields.map((f) => {
           const fieldPath = TOOLBAR_TO_FIELD[f];
+          const isRequired = ["MBL No", "MAWB No", "Master Ref"].includes(f);
           return (
-            <div key={f} className={`field${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>
-              <div className={`field__label${["MBL No","MAWB No","Master Ref"].includes(f) ? " is-required" : ""}`}>{f}</div>
+            <div key={f} className={`field${isRequired ? " is-required" : ""}`}>
+              <div className={`field__label${isRequired ? " is-required" : ""}`}>{f}</div>
               <div className="field__input">
-                {fieldPath
-                  ? <input placeholder={f || ""} {...(register as (name: string) => object)(fieldPath)} />
-                  : <input placeholder={f || ""} />
-                }
+                {fieldPath ? (
+                  TOOLBAR_ENUM_LABELS.has(f) ? (
+                    <Controller
+                      name={fieldPath as keyof MasterBlFormValues}
+                      control={form.control}
+                      render={({ field }) => (
+                        <ComboBox
+                          options={TOOLBAR_ENUM[f].options}
+                          placeholder={TOOLBAR_ENUM[f].placeholder}
+                          value={(field.value as string) ?? ""}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <TextBox
+                      placeholder={f}
+                      {...(form.register as (n: string) => object)(fieldPath)}
+                    />
+                  )
+                ) : (
+                  <input placeholder={f || ""} />
+                )}
               </div>
             </div>
           );

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type EntryDomain = "nonBl" | "truckBl" | `houseBl:${string}`;
+type EntryDomain = "nonBl" | "truckBl" | `houseBl:${string}` | `masterBl:${string}`;
 
 interface EntryFocusState {
   focus: Partial<Record<EntryDomain, number>>;
@@ -26,6 +26,7 @@ export const entryFocusKeys = {
   nonBl: "nonBl" as const,
   truckBl: "truckBl" as const,
   houseBl: (variantKey: string): EntryDomain => `houseBl:${variantKey}`,
+  masterBl: (variantKey: string): EntryDomain => `masterBl:${variantKey}`,
 };
 
 /** sidebar navigate href → EntryDomain 매핑. entry path가 아니면 null 반환 */
