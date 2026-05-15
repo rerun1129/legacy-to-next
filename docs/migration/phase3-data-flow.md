@@ -1123,3 +1123,38 @@ root→nested 이전 직후, 변경 도메인과 **다른 도메인 namespace**(
 **잔여 점검 권장**
 
 Sea Master / Air Master Entry 마이그레이션 시 — 매핑 상수 객체 내 `seaDetail.*`/`airDetail.*` namespace grep 의무.
+
+---
+
+### 6.61 WebMvcTest 동적 Validator 빈 mock 금지 — `@Validated` + `MethodValidationInterceptor` NPE 회귀
+
+Controller에 `jakarta.validation.Validator` 빈을 주입하여 jobDiv별 동적 그룹 검증을 수행하는 경우(§6.53 패턴), WebMvcTest 슬라이스에서 `@MockitoBean Validator validator`로 mock 주입을 추가하면 `@Valid` 본문 검증이 우회되거나 `MethodValidationInterceptor`가 NPE를 토출한다.
+
+**원인**
+
+`@Validated`(클래스 레벨, Spring AOP) + `@Valid`(메서드 파라미터, MVC 본문 검증)가 함께 적용된 Controller에서, `MethodValidationInterceptor`는 `LocalValidatorFactoryBean`의 실 인스턴스를 기대한다. WebMvcTest에서 `@MockitoBean Validator`로 spring 컨텍스트에 등록된 빈을 mock으로 교체하면:
+- `MethodValidationInterceptor`가 mock의 `validate()`를 호출할 때 stub 미설정으로 빈 결과 반환 → 위반 검출 0건 → 검증 우회 (1차 회귀)
+- 또는 `BeanValidationPostProcessor`/`MethodValidationPostProcessor` 의존 chain에서 mock의 `getConstraintsForClass()` 등 메서드가 null 반환 → NPE (2차 회귀)
+
+**사례**: `adc2f3d` (Sea Master Phase 3) — `MasterBlControllerWebMvcTest` happyPath 14 케이스가 1차 라운드에서 NPE 14건 FAIL. `@MockitoBean Validator validator` 추가가 원인. House Sea/Air WebMvcTest 패턴 정합 (mock 추가 없음) 확인 후 제거하니 검증 우회 3건으로 변경 (2차 라운드). `@Validated` 클래스 레벨 유지 + mock 제거 + happyPath request body에 그룹별 `@NotBlank` 필수 필드 더미 값 보강 후 3차 라운드 PASS.
+
+**검출 방법**
+
+```bash
+# WebMvcTest에서 Validator mock 사용 여부 grep
+grep -rn "@MockitoBean.*Validator\|@MockBean.*Validator" back-end/java-spring/src/test/
+
+# House SSOT 정합 확인 — 다음 패턴 0건 의무
+# 1. WebMvcTest에 @MockitoBean Validator 추가 0건
+# 2. happyPath request body에 그룹별 @NotBlank 필수 필드 더미 값 빠짐 0건
+```
+
+**해결**
+
+1. **WebMvcTest에서 `@MockitoBean Validator validator` 절대 추가 금지** — House Sea/Air SSOT 정합
+2. **Controller `@Validated` 클래스 레벨 유지 의무** — `MethodValidationInterceptor`가 실제 `LocalValidatorFactoryBean`을 사용하도록 보장
+3. **happyPath request body 그룹별 `@NotBlank` 필수 필드 더미 값 보강 의무** — 동적 그룹 검증(`SeaGroup`/`SeaImpGroup`/`AirGroup`/`AirImpGroup`/`SeaMasterGroup`/`SeaImpMasterGroup` 등)이 활성화된 jobDiv 분기에서 본문 모든 필수 필드를 더미 값으로 채워 위반 0건 보장
+
+**잔여 점검 권장**
+
+Air Master Entry 마이그레이션 시 — 동적 Validator 패턴 적용 시 본 §6.61 체크리스트 의무 grep. 차기 도메인에서 동일 회귀 재발 방지.
