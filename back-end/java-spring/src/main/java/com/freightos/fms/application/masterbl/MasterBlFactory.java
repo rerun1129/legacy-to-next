@@ -14,8 +14,6 @@ import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.LoadType;
-import com.freightos.fms.domain.common.enums.Per;
-import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
@@ -23,7 +21,6 @@ import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.CargoSummary;
-import com.freightos.fms.domain.common.vo.CurrencyCode;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
 import com.freightos.fms.domain.common.vo.LinerCode;
@@ -40,25 +37,29 @@ import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
-import com.freightos.fms.domain.masterbl.entity.MasterBlAirCharge;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
-import com.freightos.fms.domain.masterbl.entity.MasterBlDim;
-import com.freightos.fms.domain.masterbl.entity.MasterBlScheduleLeg;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.common.util.Nullables;
 import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Command → 도메인 Entity 변환 팩토리.
- * Adapter(in)에서 분리된 VO/Entity 생성 로직을 이 계층에 집중한다.
+ * Command → 도메인 Entity 변환 팩토리 (dispatcher).
+ * Sea 확장 필드 매핑은 MasterBlSeaSubFactory, sub 엔티티 변환은 MasterBlSubFactory에 위임한다.
  */
 @Component
 public class MasterBlFactory {
+
+    private final MasterBlSubFactory sub;
+    private final MasterBlSeaSubFactory seaSubFactory;
+
+    public MasterBlFactory(MasterBlSubFactory sub, MasterBlSeaSubFactory seaSubFactory) {
+        this.sub = sub;
+        this.seaSubFactory = seaSubFactory;
+    }
 
     // ── CREATE ────────────────────────────────────────────────────────
 
@@ -76,9 +77,9 @@ public class MasterBlFactory {
         if (cmd.mainItemName() != null || cmd.hsCode() != null) entity.updateTradeInfo(cmd.mainItemName(), cmd.hsCode());
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
-        if (cmd.seaDetail() != null) applySeaCreate(entity, cmd.seaDetail());
+        if (cmd.seaDetail() != null) seaSubFactory.applySeaCreate(entity, cmd.seaDetail());
         applyRemark(entity, cmd.remark());
-        applySubEntities(entity, toDescParams(cmd.desc()), toDimParamsFromCreate(cmd.dims()), toLegParamsFromCreate(cmd.scheduleLegs()), toChargeParamsFromCreate(cmd.airCharges()));
+        sub.applySubEntities(entity, sub.toDescParams(cmd.desc()), sub.toDimParamsFromCreate(cmd.dims()), sub.toLegParamsFromCreate(cmd.scheduleLegs()), sub.toChargeParamsFromCreate(cmd.airCharges()));
         return entity;
     }
 
@@ -124,9 +125,9 @@ public class MasterBlFactory {
         }
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
-        if (cmd.seaDetail() != null) applySeaUpdate(entity, cmd.seaDetail());
+        if (cmd.seaDetail() != null) seaSubFactory.applySeaUpdate(entity, cmd.seaDetail());
         applyRemark(entity, cmd.remark());
-        applySubEntities(entity, toDescParams(cmd.desc()), toDimParams(cmd.dims()), toLegParams(cmd.scheduleLegs()), toChargeParams(cmd.airCharges()));
+        sub.applySubEntities(entity, sub.toDescParams(cmd.desc()), sub.toDimParams(cmd.dims()), sub.toLegParams(cmd.scheduleLegs()), sub.toChargeParams(cmd.airCharges()));
     }
 
     // ── SearchCommand → Domain Filter 변환 ───────────────────────────
@@ -221,41 +222,6 @@ public class MasterBlFactory {
         );
     }
 
-    // ── SEA 확장 필드 매핑 ────────────────────────────────────────────
-
-    private void applySeaCreate(MasterBl entity, CreateMasterBlCommand.SeaDetailCommand s) {
-        if (!(entity instanceof MasterBlSea sea)) return;
-        sea.updateSeaFields(
-                Nullables.mapOrNull(s.loadType(), LoadType::valueOf),
-                LinerCode.of(s.linerCode()),
-                VesselVoyage.of(s.vesselCode(), s.vesselName(), s.voyageNo()),
-                BlDate.of(s.onboardDate()), BlNumber.of(s.lineBkgNo()), BlDate.of(s.issueDate())
-        );
-        applySeaCommon(sea, s.vesselNationality(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
-    }
-
-    private void applySeaUpdate(MasterBl entity, UpdateMasterBlCommand.SeaDetailCommand s) {
-        if (!(entity instanceof MasterBlSea sea)) return;
-        sea.updateSeaFields(
-                Nullables.mapOrElse(s.loadType(),    LoadType::valueOf,                                        sea::getLoadType),
-                Nullables.mapOrElse(s.linerCode(),   LinerCode::of,                                            sea::getLinerCode),
-                Nullables.mapOrElse(s.vesselName(),  v -> VesselVoyage.of(s.vesselCode(), v, s.voyageNo()),    sea::getVesselVoyage),
-                Nullables.mapOrElse(s.onboardDate(), BlDate::of,                                               sea::getOnboardDate),
-                Nullables.mapOrElse(s.lineBkgNo(),   BlNumber::of,                                             sea::getLineBkgNo),
-                Nullables.mapOrElse(s.issueDate(),   BlDate::of,                                               sea::getIssueDate)
-        );
-        applySeaCommon(sea, s.vesselNationality(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
-    }
-
-    private void applySeaCommon(MasterBlSea sea, String vesselNationality,
-                                String serviceTerm, String blType, String porCode, String finalDestCode, BigDecimal rton) {
-        if (vesselNationality != null) sea.updateVesselNationality(vesselNationality);
-        if (serviceTerm != null)       sea.updateServiceTerm(ServiceTerm.valueOf(serviceTerm));
-        if (blType != null)            sea.updateBlType(BlType.valueOf(blType));
-        if (porCode != null || finalDestCode != null) sea.updateRoute(PortCode.of(porCode), PortCode.of(finalDestCode));
-        if (rton != null)              sea.updateRton(Rton.of(rton));
-    }
-
     // ── remark 매핑 ───────────────────────────────────────────────────
 
     private void applyRemark(MasterBl entity, String remark) {
@@ -296,87 +262,4 @@ public class MasterBlFactory {
             );
         };
     }
-
-    // ── Sub 엔티티 파라미터 변환 ──────────────────────────────────────
-
-    private String[] toDescParams(CreateMasterBlCommand.DescCommand r) {
-        if (r == null) return null;
-        return new String[]{ r.marks(), r.description(), r.descClause1(), r.descClause2() };
-    }
-
-    private String[] toDescParams(UpdateMasterBlCommand.DescCommand r) {
-        if (r == null) return null;
-        return new String[]{ r.marks(), r.description(), r.descClause1(), r.descClause2() };
-    }
-
-    private List<DimParams> toDimParamsFromCreate(List<CreateMasterBlCommand.DimCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new DimParams(r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
-    }
-
-    private List<DimParams> toDimParams(List<UpdateMasterBlCommand.DimCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new DimParams(r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
-    }
-
-    private List<LegParams> toLegParamsFromCreate(List<CreateMasterBlCommand.ScheduleLegCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new LegParams(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
-    }
-
-    private List<LegParams> toLegParams(List<UpdateMasterBlCommand.ScheduleLegCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new LegParams(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
-    }
-
-    private List<ChargeParams> toChargeParamsFromCreate(List<CreateMasterBlCommand.AirChargeCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new ChargeParams(r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
-    }
-
-    private List<ChargeParams> toChargeParams(List<UpdateMasterBlCommand.AirChargeCommand> cmds) {
-        if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new ChargeParams(r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
-    }
-
-    // ── Sub 엔티티 실제 생성 ──────────────────────────────────────────
-
-    private void applySubEntities(MasterBl entity, String[] descParams,
-                                  List<DimParams> dimParams, List<LegParams> legParams,
-                                  List<ChargeParams> chargeParams) {
-        if (descParams != null) {
-            MasterBlDesc desc = MasterBlDesc.create(null);
-            desc.updateContent(descParams[0], descParams[1],
-                    DescClause1.fromCode(descParams[2]), DescClause2.fromCode(descParams[3]));
-            entity.initDesc(desc);
-        }
-        if (!dimParams.isEmpty()) {
-            entity.initDims(dimParams.stream()
-                    .map(r -> MasterBlDim.create(null, r.l(), r.w(), r.h(), r.qty(), r.cbm(), r.vwKg())).toList());
-        }
-        if (!legParams.isEmpty()) {
-            entity.initScheduleLegs(legParams.stream().map(r -> {
-                MasterBlScheduleLeg leg = MasterBlScheduleLeg.create(null, r.toCode(), r.onBoardDt(), r.arrivalDt());
-                leg.updateDetails(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm());
-                return leg;
-            }).toList());
-        }
-        if (!chargeParams.isEmpty()) {
-            entity.initAirCharges(chargeParams.stream().map(r -> {
-                MasterBlAirCharge charge = MasterBlAirCharge.create(null);
-                charge.updateDetails(new MasterBlAirCharge.Details(
-                        r.freightCode(), CurrencyCode.of(r.currencyCode()), Per.fromCode(r.per()),
-                        Nullables.mapOrNull(r.freightTerm(), FreightTerm::valueOf),
-                        Weight.of(r.grossWt()), RateClass.fromCode(r.rateClass()), Weight.of(r.chargeWt()), r.rate()
-                ));
-                return charge;
-            }).toList());
-        }
-    }
-
-    // ── 내부 파라미터 record ─────────────────────────────────────────
-
-    private record DimParams(BigDecimal l, BigDecimal w, BigDecimal h, Integer qty, BigDecimal cbm, BigDecimal vwKg) {}
-    private record LegParams(String toCode, String byCarrier, String flightNo, String onBoardDt, String onBoardTm, String arrivalDt, String arrivalTm) {}
-    private record ChargeParams(String freightCode, String currencyCode, String per, String freightTerm, BigDecimal grossWt, String rateClass, BigDecimal chargeWt, BigDecimal rate) {}
 }
