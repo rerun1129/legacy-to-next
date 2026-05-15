@@ -87,11 +87,14 @@ public class MasterBlFactory {
                 Nullables.mapOrElse(cmd.mblNo(), BlNumber::of, entity::getMblNo),
                 Nullables.mapOrElse(cmd.masterRefNo(), BlNumber::of, entity::getMasterRefNo)
         );
-        entity.assignParties(
-                Nullables.mapOrElse(cmd.shipperCode(), CustomerCode::of, entity::getShipperCode),
-                Nullables.mapOrElse(cmd.consigneeCode(), CustomerCode::of, entity::getConsigneeCode),
-                Nullables.mapOrElse(cmd.notifyCode(), CustomerCode::of, entity::getNotifyCode)
-        );
+        // §6.37 PATCH 의미론: null이면 기존 값 보존, non-null만 update
+        if (cmd.shipperCode() != null || cmd.consigneeCode() != null || cmd.notifyCode() != null) {
+            entity.assignParties(
+                    Nullables.mapOrElse(cmd.shipperCode(), CustomerCode::of, entity::getShipperCode),
+                    Nullables.mapOrElse(cmd.consigneeCode(), CustomerCode::of, entity::getConsigneeCode),
+                    Nullables.mapOrElse(cmd.notifyCode(), CustomerCode::of, entity::getNotifyCode)
+            );
+        }
         entity.updateSchedule(
                 Nullables.mapOrElse(cmd.polCode(), PortCode::of, entity::getPolCode),
                 Nullables.mapOrElse(cmd.podCode(), PortCode::of, entity::getPodCode),

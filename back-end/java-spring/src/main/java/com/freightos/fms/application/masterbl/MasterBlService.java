@@ -18,6 +18,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
+import com.freightos.fms.application.masterbl.port.out.SeaMasterPersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.List;
 public class MasterBlService implements MasterBlUseCase {
 
     private final MasterBlPort masterBlPort;
+    private final SeaMasterPersistencePort seaMasterPersistencePort;
     private final HouseBlPort houseBlPort;
     private final MasterBlFactory masterBlFactory;
 
@@ -66,10 +68,22 @@ public class MasterBlService implements MasterBlUseCase {
     @Transactional
     public MasterBlDetailResult updateMasterBl(Long id, UpdateMasterBlCommand command) {
         MasterBl entity = findEntityById(id);
-        masterBlFactory.applyToEntity(command, entity);
-        MasterBl saved = masterBlPort.saveMasterBl(entity);
-        log.info("Updated MasterBl id={}", saved.getId());
-        return masterBlFactory.toDetailResult(saved, loadConsolidatedHouseBls(id, saved));
+        switch (entity) {
+            case MasterBlSea ignored -> {
+                // SEA: dirty-checking 어댑터로 위임 — saveMasterBl 미호출 (§6.35)
+                seaMasterPersistencePort.update(id, command);
+            }
+            case MasterBlAir ignored -> {
+                // AIR: 기존 경로 유지 (AIR 격리 원칙)
+                masterBlFactory.applyToEntity(command, entity);
+                masterBlPort.saveMasterBl(entity);
+            }
+            default -> throw new IllegalStateException(
+                    "Unsupported MasterBl type: " + entity.getClass().getSimpleName());
+        }
+        log.info("Updated MasterBl id={}", id);
+        MasterBl updated = findEntityById(id);
+        return masterBlFactory.toDetailResult(updated, loadConsolidatedHouseBls(id, updated));
     }
 
     @Override
