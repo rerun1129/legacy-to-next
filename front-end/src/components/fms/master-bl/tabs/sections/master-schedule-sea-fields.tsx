@@ -7,7 +7,6 @@ import type { FieldWidgetDef } from "@/components/widget/field-widget-list";
 import {
   LinerLcnField, VesselField, VoyageField, EtdField, EtaField, IssueDateField, OnboardDateField,
   PolField, PodField, PorField, FinalDestField,
-  LoadTypeField, ServiceTermField, BlTypeField,
 } from "./master-schedule-sea-atoms";
 
 // ── SEA schedule FieldWidgetDef 배열 빌더 ───────────────────────────────────
@@ -32,16 +31,9 @@ export function buildSeaFields(panelScope: string, isExp: boolean): FieldWidgetD
     { key: "onboard-date", render: () => <OnboardDateField /> },
   ];
 
-  const loadTypeItems: FieldItemDef[] = [
-    { key: "load-type",    render: () => <LoadTypeField /> },
-    { key: "service-term", render: () => <ServiceTermField /> },
-    { key: "bl-type",      render: () => <BlTypeField /> },
-  ];
-
   return [
     { key: "liner-vessel", label: "Liner & Vessel", render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={linerItems} /> },
     { key: "ports",        label: "Ports",          render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} shouldShowRowControls={false} /> },
-    { key: "terms",        label: "Terms",          render: () => <FieldItemGrid itemScope={`${panelScope}.terms`} items={loadTypeItems} /> },
     ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
   ];
 }

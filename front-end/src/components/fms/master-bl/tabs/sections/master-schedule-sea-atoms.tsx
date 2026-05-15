@@ -6,8 +6,6 @@ import { useFormContext, Controller } from "react-hook-form";
 import { TextBox }  from "@/components/shared/inputs/text-box";
 import { CodeBox }  from "@/components/shared/inputs/code-box";
 import { DateBox }  from "@/components/shared/inputs/date-box";
-import { ComboBox } from "@/components/shared/inputs/combo-box";
-import { useEnumOptions } from "@/application/enums/use-enum";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 
 // ── Liner / Vessel / Voyage ─────────────────────────────────────────────────
@@ -207,84 +205,3 @@ export function FinalDestField() {
   );
 }
 
-// ── Enum ComboBox 필드 ─────────────────────────────────────────────────────
-export function LoadTypeField() {
-  const { control } = useFormContext<MasterBlFormValues>();
-  const { options, placeholder, isLoading } = useEnumOptions("LoadType");
-  return (
-    <div className="li">
-      <span className="li__label">Load Type</span>
-      <div className="li__input">
-        <Controller
-          control={control}
-          name="seaDetail.loadType"
-          render={({ field }) => (
-            <ComboBox
-              variant="panel"
-              options={options}
-              placeholder={placeholder ?? "Load Type"}
-              disabled={isLoading}
-              value={field.value ?? ""}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
-          )}
-        />
-      </div>
-    </div>
-  );
-}
-
-export function ServiceTermField() {
-  const { control } = useFormContext<MasterBlFormValues>();
-  const { options, placeholder, isLoading } = useEnumOptions("ServiceTerm");
-  return (
-    <div className="li">
-      <span className="li__label">Service Term</span>
-      <div className="li__input">
-        <Controller
-          control={control}
-          name="seaDetail.serviceTerm"
-          render={({ field }) => (
-            <ComboBox
-              variant="panel"
-              options={options}
-              placeholder={placeholder ?? "Service Term"}
-              disabled={isLoading}
-              value={field.value ?? ""}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
-          )}
-        />
-      </div>
-    </div>
-  );
-}
-
-export function BlTypeField() {
-  const { control } = useFormContext<MasterBlFormValues>();
-  const { options, placeholder, isLoading } = useEnumOptions("BlType");
-  return (
-    <div className="li">
-      <span className="li__label">B/L Type</span>
-      <div className="li__input">
-        <Controller
-          control={control}
-          name="seaDetail.blType"
-          render={({ field }) => (
-            <ComboBox
-              variant="panel"
-              options={options}
-              placeholder={placeholder ?? "B/L Type"}
-              disabled={isLoading}
-              value={field.value ?? ""}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
-          )}
-        />
-      </div>
-    </div>
-  );
-}
