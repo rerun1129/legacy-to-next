@@ -21,8 +21,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
   const focusedRowKeyRef = useRef<string | null>(null);
 
   if (!variant) return null;
-  const isSea = variant.mode === "SEA";
-  const ml    = getModeLabels(variant.mode);
+  const ml = getModeLabels(variant.mode);
 
   function captureFocusedRow() {
     const activeEl = document.activeElement as HTMLElement | null;
@@ -67,21 +66,46 @@ export function MasterHouseBLGrid({ variant }: Props) {
       </div>
       <div style={{ overflow: "auto", flex: 1 }}>
         <table className="grid--list">
+          <colgroup>
+            <col style={{ width: "40px" }} />
+            <col style={{ width: "120px" }} />
+            <col style={{ width: "160px" }} />
+            <col style={{ width: "160px" }} />
+            <col style={{ width: "160px" }} />
+            <col style={{ width: "80px" }} />
+            <col style={{ width: "80px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "120px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "100px" }} />
+            <col style={{ width: "100px" }} />
+          </colgroup>
           <thead>
             <tr>
               <th className="row-num">#</th>
               <th>{ml.hblNo}</th>
-              <th>Shipper</th><th>Consignee</th>
+              <th>Shipper</th>
+              <th>Consignee</th>
+              <th>DOC Partner</th>
               <th className="is-num">Package</th>
-              <th className="is-num">G/W</th><th className="is-num">CBM</th>
-              <th>Status</th>
-              {isSea && <><th>ETD</th><th>POL</th></>}
+              <th>Unit</th>
+              <th className="is-num">Gross W/T</th>
+              <th className="is-num">CBM</th>
+              <th>ETD</th>
+              <th>ETA</th>
+              <th>Vessel</th>
+              <th>Voyage</th>
+              <th>POL</th>
+              <th>POD</th>
             </tr>
           </thead>
           <tbody>
             {fields.length === 0 && (
               <tr>
-                <td colSpan={isSea ? 10 : 8} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
+                <td colSpan={15} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
                   No rows.
                 </td>
               </tr>
@@ -98,11 +122,17 @@ export function MasterHouseBLGrid({ variant }: Props) {
                 <td className="cell-hbl">{field.hblNo}</td>
                 <td>{field.shipper}</td>
                 <td>{field.consignee}</td>
+                <td></td>
                 <td className="is-num cell-mono">{field.pkg}</td>
+                <td></td>
                 <td className="is-num cell-mono">{field.gw}</td>
                 <td className="is-num cell-mono">{field.cbm}</td>
                 <td></td>
-                {isSea && <><td className="cell-mono"></td><td className="cell-mono"></td></>}
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
               </tr>
             ))}
           </tbody>

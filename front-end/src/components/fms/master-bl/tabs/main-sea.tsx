@@ -7,6 +7,7 @@ import { MasterHouseBLGrid }        from "./sections/master-house-bl-grid";
 import { MasterPartyPanel, MasterMarksPanel, MasterGoodsDescPanel, MasterRemarkPanel } from "./sections/master-panels";
 import { MasterSchedulePanel }      from "./sections/master-schedule-panel";
 import { MasterCargoDocPanel }      from "./sections/master-cargo-doc-panel";
+import { MasterContainerGrid }      from "./sections/master-container-grid";
 
 interface Props {
   variant: MasterVariantConfig;
@@ -20,8 +21,9 @@ export const MASTER_BL_SEA_REGISTRY = (
 ): WidgetDef[] => [
   { key: "house-bl-grid",  label: "House B/L List",     component: MasterHouseBLGrid,                                                   defaultPosition: { col: 0, row: 0, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
   { key: "party-master",   label: "Party",              component: (p) => <MasterPartyPanel {...p} form={form} />,                      defaultPosition: { col: 0, row: 2, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "schedule-master",label: "Schedule",           component: (p) => <MasterSchedulePanel {...p} form={form} />,                   defaultPosition: { col: 2, row: 2, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "cargo-doc",      label: "Cargo & Document",   component: (p) => <MasterCargoDocPanel {...p} form={form} />,                   defaultPosition: { col: 4, row: 2, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "schedule-master",label: "Schedule",           component: (p) => <MasterSchedulePanel {...p} form={form} />,                   defaultPosition: { col: 2, row: 2, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "cargo-doc",      label: "Cargo & Document",   component: (p) => <MasterCargoDocPanel {...p} form={form} />,                   defaultPosition: { col: 4, row: 2, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "container-master", label: "Container",          component: MasterContainerGrid,                                               defaultPosition: { col: 2, row: 4, colSpan: 4, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
   { key: "marks-master",   label: "Marks & Numbers",    component: (p) => <MasterMarksPanel {...p} form={form} />,                     defaultPosition: { col: 0, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "goods-desc",     label: "Goods Description",  component: (p) => <MasterGoodsDescPanel {...p} form={form} />,                 defaultPosition: { col: 2, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "remark",         label: "Remark",             component: (p) => <MasterRemarkPanel {...p} form={form} />,                    defaultPosition: { col: 4, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
