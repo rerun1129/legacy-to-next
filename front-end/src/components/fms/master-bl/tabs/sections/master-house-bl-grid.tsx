@@ -1,10 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { Minus } from "lucide-react";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { formatDateDisplay } from "@/lib/date";
+import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useBLDraftStore } from "@/lib/use-bl-draft-store";
+import { useTabs } from "@/lib/use-tabs";
+import { getPageTitle } from "@/lib/bl-variants";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 
@@ -20,6 +26,11 @@ export function MasterHouseBLGrid({ variant }: Props) {
   });
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
+  const router      = useRouter();
+  const queryClient = useQueryClient();
+  const setFocus    = useEntryFocusStore((s) => s.setFocus);
+  const clearDraft  = useBLDraftStore((s) => s.clearDraft);
+  const addTab      = useTabs((s) => s.addTab);
 
   if (!variant) return null;
   const ml = getModeLabels(variant.mode);
@@ -28,6 +39,20 @@ export function MasterHouseBLGrid({ variant }: Props) {
     const activeEl = document.activeElement as HTMLElement | null;
     const tr = activeEl?.closest("tr[data-row-key]") as HTMLElement | null;
     focusedRowKeyRef.current = tr?.dataset.rowKey ?? null;
+  }
+
+  function handleHblDoubleClick(houseBlId: number) {
+    if (!variant) return;
+    const variantKey = variant.key;
+    const path = `/fms/house-bl/${variantKey}/entry`;
+    // 프레시 조회: stale 캐시·draft 제거 후 House Entry 진입
+    queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", houseBlId] });
+    clearDraft(`house:${variantKey}:${houseBlId}`);
+    setFocus(entryFocusKeys.houseBl(variantKey), houseBlId);
+    // hot-marker: Entry 진입 시 하이라이트 (§6.16)
+    sessionStorage.setItem(`house-bl-entry:hot:${houseBlId}`, "1");
+    addTab(getPageTitle(variant, "House", "Entry"), path);
+    router.push(path);
   }
 
   function handleRemove() {
@@ -120,7 +145,15 @@ export function MasterHouseBLGrid({ variant }: Props) {
                 style={{ cursor: "pointer" }}
               >
                 <td className="row-num">{idx + 1}</td>
-                <td className="cell-hbl">{field.hblNo ?? ""}</td>
+                <td className="cell-hbl">
+                  <span
+                    onDoubleClick={(e) => { e.stopPropagation(); handleHblDoubleClick(field.houseBlId); }}
+                    style={{ cursor: "pointer" }}
+                    title="더블클릭하여 House B/L Entry 열기"
+                  >
+                    {field.hblNo ?? ""}
+                  </span>
+                </td>
                 <td>{field.shipperCode ?? ""}</td>
                 <td>{field.consigneeCode ?? ""}</td>
                 <td>{field.docPartnerCode ?? ""}</td>
