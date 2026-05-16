@@ -57,9 +57,9 @@ public class MasterBlService implements MasterBlUseCase {
         if (command.mblNo() != null && masterBlPort.existsByMblNo(command.mblNo())) {
             throw FmsException.conflict("DUPLICATE_MBL_NO", "MBL No already exists: " + command.mblNo());
         }
-        MasterBl saved = masterBlPort.saveMasterBl(masterBlFactory.toEntity(command));
-        log.info("Created MasterBl id={}", saved.getId());
-        return saved.getId();
+        Long id = masterBlPort.createMasterBl(masterBlFactory.toEntity(command));
+        log.info("Created MasterBl id={}", id);
+        return id;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MasterBlService implements MasterBlUseCase {
                 // AIR: 기존 경로 유지 (AIR 격리 원칙) — Air Master 마이그레이션 시 동일 패턴 적용 (§6.63 잔여)
                 MasterBl entity = findEntityById(id);
                 masterBlFactory.applyToEntity(command, entity);
-                masterBlPort.saveMasterBl(entity);
+                masterBlPort.updateMasterBl(entity);
                 yield findEntityById(id);
             }
         };

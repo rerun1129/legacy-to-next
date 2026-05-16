@@ -17,7 +17,18 @@ public interface MasterBlPort {
     PagedResult<MasterBlSummaryResult> searchMasterBls(MasterBlFilter filter, PageRequest pageRequest);
     Optional<MasterBl> findMasterBlByMblNo(String mblNo);
     boolean existsByMblNo(String mblNo);
-    MasterBl saveMasterBl(MasterBl domain);
+    /**
+     * 신규 MasterBl을 영속화하고 master_bl_id를 반환한다.
+     * domain에 포함된 desc는 null이 아닌 경우에만 함께 insert된다.
+     */
+    Long createMasterBl(MasterBl domain);
+
+    /**
+     * 기존 master_bl_id row를 update한다.
+     * 호출 전 domain.getId()가 non-null임을 보장해야 한다.
+     * 응답 데이터가 필요하면 호출자가 findMasterBlById로 재조회한다.
+     */
+    void updateMasterBl(MasterBl domain);
     Optional<MasterBlJobDiv> findJobDivById(Long id);
     void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv);
     List<Long> findMasterBlKeysByMblNoExact(String mblNo);

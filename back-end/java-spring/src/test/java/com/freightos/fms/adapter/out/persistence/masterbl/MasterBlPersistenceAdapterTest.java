@@ -53,64 +53,59 @@ class MasterBlPersistenceAdapterTest {
     @InjectMocks
     private MasterBlPersistenceAdapter adapter;
 
-    // ── saveMasterBl(SEA) ─────────────────────────────────────────────
+    // ── createMasterBl(SEA) ──────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(SEA): seaRepository.save 후 saveOrDeleteSeaDesc 호출 순서 보장")
-    void saveMasterBl_sea_savesSeaExtThenDesc() {
+    @DisplayName("createMasterBl(SEA): seaRepository.save 호출, desc pre-SELECT 미호출")
+    void createMasterBl_sea_savesSeaExtAndSkipsDescPreSelect() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         MasterBlJpaEntity savedJpa = new MasterBlJpaEntity();
         savedJpa.setJobDiv(MasterBlJobDiv.SEA);
         MasterBlSeaJpaEntity savedSeaJpa = new MasterBlSeaJpaEntity();
         given(masterBlRepository.save(any())).willReturn(savedJpa);
-        given(masterBlSeaRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
         given(masterBlSeaRepository.save(any())).willReturn(savedSeaJpa);
-        given(masterBlSeaDescRepository.findBySea_MasterBlSeaId(any())).willReturn(Optional.empty());
-        given(masterBlMapper.toSeaDomain(eq(savedJpa), any(), any())).willReturn(sea);
 
-        adapter.saveMasterBl(sea);
+        adapter.createMasterBl(sea);
 
-        org.mockito.InOrder order = inOrder(masterBlSeaRepository, masterBlSeaDescRepository);
+        // Create 흐름(isNew=true) — desc SELECT 미발생 회귀 방지
+        org.mockito.InOrder order = inOrder(masterBlSeaRepository);
         order.verify(masterBlSeaRepository).save(any());
-        // desc가 null이면 findBySea 호출 후 삭제 시도 — null desc 케이스에서는 delete 경로
-        order.verify(masterBlSeaDescRepository).findBySea_MasterBlSeaId(any());
+        verify(masterBlSeaDescRepository, never()).findBySea_MasterBlSeaId(any());
     }
 
-    // ── saveMasterBl(AIR) ─────────────────────────────────────────────
+    // ── createMasterBl(AIR) ──────────────────────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl(AIR): airRepository.save→syncDims→syncScheduleLegs→syncAirCharges→saveOrDeleteAirDesc 순서")
-    void saveMasterBl_air_callsSyncMethodsInOrder() {
+    @DisplayName("createMasterBl(AIR): airRepository.save→syncDims→syncScheduleLegs→syncAirCharges 순서, desc pre-SELECT 미호출")
+    void createMasterBl_air_callsSyncMethodsInOrderAndSkipsDescPreSelect() {
         MasterBlAir air = MasterBlAir.create(Bound.EXP);
         MasterBlJpaEntity savedJpa = spy(new MasterBlJpaEntity());
         savedJpa.setJobDiv(MasterBlJobDiv.AIR);
         MasterBlAirJpaEntity savedAirJpa = spy(new MasterBlAirJpaEntity());
         given(masterBlRepository.save(any())).willReturn(savedJpa);
-        given(masterBlAirRepository.findByMasterBlMasterBlId(any())).willReturn(Optional.empty());
         given(masterBlAirRepository.save(any())).willReturn(savedAirJpa);
-        given(masterBlAirDescRepository.findByAir_MasterBlAirId(any())).willReturn(Optional.empty());
-        given(masterBlMapper.toAirDomain(eq(savedJpa), any(), any(), any())).willReturn(air);
 
-        adapter.saveMasterBl(air);
+        adapter.createMasterBl(air);
 
-        org.mockito.InOrder order = inOrder(masterBlAirRepository, savedAirJpa, masterBlAirDescRepository);
+        // Create 흐름(isNew=true) — desc SELECT 미발생 회귀 방지
+        org.mockito.InOrder order = inOrder(masterBlAirRepository, savedAirJpa);
         order.verify(masterBlAirRepository).save(any());
         order.verify(savedAirJpa).syncDims(any());
         order.verify(savedAirJpa).syncScheduleLegs(any());
         order.verify(savedAirJpa).syncAirCharges(any());
-        order.verify(masterBlAirDescRepository).findByAir_MasterBlAirId(any());
+        verify(masterBlAirDescRepository, never()).findByAir_MasterBlAirId(any());
     }
 
-    // ── saveMasterBl — 기존 ID 없을 때 예외 ─────────────────────────
+    // ── updateMasterBl — 기존 ID 없을 때 예외 ─────────────────────────
 
     @Test
-    @DisplayName("saveMasterBl: domain.getId() != null이고 repository가 empty → ResourceNotFoundException")
-    void saveMasterBl_withExistingId_whenNotFound_throwsResourceNotFound() {
+    @DisplayName("updateMasterBl: domain.getId() != null이고 repository가 empty → ResourceNotFoundException")
+    void updateMasterBl_whenNotFound_throwsResourceNotFound() {
         MasterBlSea sea = MasterBlSea.create(Bound.EXP);
         sea.assignIdentity(99L, null, null, null, null);
         given(masterBlRepository.findById(99L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adapter.saveMasterBl(sea))
+        assertThatThrownBy(() -> adapter.updateMasterBl(sea))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
