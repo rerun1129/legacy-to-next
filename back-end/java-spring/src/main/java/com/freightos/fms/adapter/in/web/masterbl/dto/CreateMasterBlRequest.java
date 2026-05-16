@@ -14,7 +14,7 @@ public record CreateMasterBlRequest(
         @NotNull String bound,
         @Size(max = 35) @NotBlank(groups = SeaMasterGroup.class) String mblNo,
         @Size(max = 35) @NotBlank(groups = SeaMasterGroup.class) String masterRefNo,
-        @NotNull String freightTerm,
+        String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
         @Size(max = 20) @NotBlank(groups = SeaImpMasterGroup.class) String consigneeCode,
@@ -35,7 +35,7 @@ public record CreateMasterBlRequest(
         @Size(max = 20) String settlePartnerCode,
         @NotBlank(groups = SeaMasterGroup.class) String operatorCode,
         @NotBlank(groups = SeaMasterGroup.class) String teamCode,
-        @NotNull @NotBlank(groups = SeaMasterGroup.class) String shipmentType,
+        String shipmentType,
         String remark,
 
         // SEA 확장 필드
