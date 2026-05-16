@@ -143,6 +143,7 @@ export function MasterBLEntry({ variantKey }: Props) {
           queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', id] });
           clearDraft(`master:${variantKey}:${id}`);
           detailLoadedRef.current = false;
+          didRestoreFromDraftRef.current = false;
         } else {
           // 다른 id: focus 변경 → useQuery 자동 트리거 → useEffect에서 form.reset
           queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', targetId] });
@@ -311,7 +312,11 @@ export function MasterBLEntry({ variantKey }: Props) {
         blNoLabel={modeLabels.blNo}
         isOpen={isChangeBlNoModalOpen}
         onClose={() => setIsChangeBlNoModalOpen(false)}
-        onChanged={() => { detailLoadedRef.current = false; }}
+        onChanged={() => {
+          detailLoadedRef.current = false;
+          didRestoreFromDraftRef.current = false;
+          clearDraft(`master:${variantKey}:${id}`);
+        }}
       />
     )}
     </FormProvider>

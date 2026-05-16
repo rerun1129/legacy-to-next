@@ -220,6 +220,7 @@ export function HouseBLEntry({ variant }: Props) {
     onAfterFound: (_targetId, _sameAsCurrent) => {
       // useSearchBl은 외부 ref를 직접 mutate할 수 없으므로 콜백으로 위임
       detailLoadedRef.current = false;
+      didRestoreFromDraftRef.current = false;
     },
   });
 
@@ -396,6 +397,8 @@ export function HouseBLEntry({ variant }: Props) {
           onClose={() => setIsChangeBlNoModalOpen(false)}
           onChanged={() => {
             detailLoadedRef.current = false;
+            didRestoreFromDraftRef.current = false;
+            clearDraft(`house:${variant.key}:${id}`);
           }}
         />
       )}
