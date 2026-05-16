@@ -9,6 +9,10 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.common.util.Nullables;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import static com.freightos.common.util.VoMapper.mapOrNull;
 
 @Component
@@ -193,13 +197,14 @@ public class HouseBlDomainToJpaMapper {
         jpa.setShipmentType(domain.getShipmentType());
         jpa.setFreightTerm(domain.getFreightTerm());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
-        jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
+        // address 4종: trim-aware compare로 DB의 trailing whitespace 가짜 dirty 차단 (§6.63)
+        setAddressIfChangedTrim(jpa::getShipperAddress,    jpa::setShipperAddress,    mapOrNull(domain.getShipperCode(), CustomerCode::address));
         jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
-        jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
+        setAddressIfChangedTrim(jpa::getConsigneeAddress,  jpa::setConsigneeAddress,  mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
         jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
-        jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
+        setAddressIfChangedTrim(jpa::getNotifyAddress,     jpa::setNotifyAddress,     mapOrNull(domain.getNotifyCode(), CustomerCode::address));
         jpa.setDocPartnerCode(mapOrNull(domain.getDocPartnerCode(), CustomerCode::value));
-        jpa.setDocPartnerAddress(mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
+        setAddressIfChangedTrim(jpa::getDocPartnerAddress, jpa::setDocPartnerAddress, mapOrNull(domain.getDocPartnerCode(), CustomerCode::address));
         jpa.setPkgQty(mapOrNull(domain.getPkgQty(), Quantity::count));
         jpa.setPkgUnit(domain.getPkgUnit());
         jpa.setWeightUnit(domain.getWeightUnit());
@@ -353,5 +358,22 @@ public class HouseBlDomainToJpaMapper {
         jpa.setFinalEta(domain.getFinalEta());
         jpa.setVolumeDivisor(domain.getVolumeDivisor());
         jpa.setRemark(domain.getRemark());
+    }
+
+    /**
+     * Address 류 (free-text) 컬럼 전용 — trim-aware compare. DB의 trailing/leading whitespace가
+     * 남아 있을 때 FE submit의 trim과 round-trip 차이로 발생하던 가짜 dirty를 차단 (§6.63).
+     * blank/whitespace-only는 null과 동등 처리.
+     */
+    private static void setAddressIfChangedTrim(Supplier<String> getter, Consumer<String> setter, String newValue) {
+        String current = normalizeTrim(getter.get());
+        String next    = normalizeTrim(newValue);
+        if (!Objects.equals(current, next)) setter.accept(newValue);
+    }
+
+    private static String normalizeTrim(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 }

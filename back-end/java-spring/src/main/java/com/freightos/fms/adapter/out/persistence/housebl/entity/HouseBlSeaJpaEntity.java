@@ -14,6 +14,7 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * JPA ORM 엔티티 — House B/L 해상 확장.
@@ -23,6 +24,7 @@ import org.hibernate.annotations.BatchSize;
 @Table(schema = "fms", name = "house_bl_sea")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class HouseBlSeaJpaEntity extends BaseJpaEntity {
 
     @Id

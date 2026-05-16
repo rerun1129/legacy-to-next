@@ -7,6 +7,7 @@ import com.freightos.fms.domain.common.enums.ServiceTerm;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Table(schema = "fms", name = "master_bl_sea")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class MasterBlSeaJpaEntity extends BaseJpaEntity {
 
     @Id

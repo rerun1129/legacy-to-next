@@ -98,7 +98,7 @@ class MasterBlSeaSubMapperTest {
     }
 
     @Test
-    @DisplayName("applyMasterSeaCommonFields: shipperCode 있음 → setShipperCode·setShipperAddress 호출")
+    @DisplayName("applyMasterSeaCommonFields: shipperCode 있음 → setShipperCode 호출, address는 round-trip 동등 시 setter skip (§6.63)")
     void applyMasterSeaCommonFields_whenShipperCodePresent_callsShipperFields() {
         MasterBlSea domain = MasterBlSea.create(Bound.EXP);
         domain.assignParties(CustomerCode.of("SHIPPER01"), null, null);
@@ -106,7 +106,9 @@ class MasterBlSeaSubMapperTest {
         mapper.applyMasterSeaCommonFields(domain, spyParentJpa);
 
         verify(spyParentJpa).setShipperCode("SHIPPER01");
-        verify(spyParentJpa).setShipperAddress(null); // address 없으면 null 전달
+        // §6.63 — address 무수정(null↔null) 시 trim-aware compare가 setter skip하여 가짜 dirty 차단.
+        // 본 단위는 spy JPA의 기존 shipperAddress가 null이므로 신규 null과 정규화 일치 → setter 미호출.
+        verify(spyParentJpa, never()).setShipperAddress(any());
     }
 
     // ── applyMasterSeaFields: loadType conditional setter 검증 ───────

@@ -10,7 +10,10 @@ public record CustomerCode(String value, String address) {
      * 기존 invariant 보존: value 단독 null/blank이면 NPE/IAE.
      * 신규 허용: value가 null/blank이어도 address가 있으면 VO 생성(legacy free-text address 지원).
      *
-     * 결과 정규화: blank value/address는 null로 통일하여 .value()/.address() 반환 일관성 유지.
+     * 결과 정규화:
+     *  - blank value/address는 null로 통일하여 .value()/.address() 반환 일관성 유지
+     *  - non-blank value/address는 trim 적용하여 round-trip 동등성 보장 (§6.63 — DB의
+     *    trailing/leading whitespace로 인해 무수정 저장 시 dirty가 잡혀 UPDATE가 발사되는 회귀 차단)
      */
     public CustomerCode {
         boolean addressBlank = address == null || address.isBlank();
@@ -24,9 +27,11 @@ public record CustomerCode(String value, String address) {
             throw new IllegalArgumentException("CustomerCode value must not be blank");
         }
 
-        // blank → null 정규화
-        if (value   != null && value.isBlank())   value   = null;
-        if (addressBlank)                          address = null;
+        // blank → null 정규화, non-blank → trim 정규화 (§6.63)
+        if (value == null || value.isBlank())       value   = null;
+        else                                         value   = value.trim();
+        if (addressBlank)                            address = null;
+        else                                         address = address.trim();
     }
 
     public static CustomerCode of(String value) {

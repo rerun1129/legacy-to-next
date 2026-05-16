@@ -5,6 +5,7 @@ import com.freightos.fms.domain.housebl.enums.ContainerType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 @Table(schema = "fms", name = "house_bl_sea_container")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class HouseBlSeaContainerJpaEntity extends BaseJpaEntity {
 
     @Id

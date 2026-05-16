@@ -19,6 +19,10 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import static com.freightos.common.util.VoMapper.mapOrNull;
 
 /**
@@ -51,17 +55,18 @@ public class MasterBlSeaSubMapper {
         if (domain.getMblNo() != null) jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
         if (domain.getMasterRefNo() != null) jpa.setMasterRefNo(mapOrNull(domain.getMasterRefNo(), BlNumber::value));
         // shipper/consignee/notify: null이면 DB 기존 값 보호 (§6.37 PATCH)
+        // address는 trim-aware compare로 DB의 trailing whitespace로 인한 가짜 dirty 차단 (§6.63)
         if (domain.getShipperCode() != null) {
-            jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
-            jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
+            setStringIfChanged(jpa::getShipperCode,    jpa::setShipperCode,    mapOrNull(domain.getShipperCode(), CustomerCode::value));
+            setAddressIfChangedTrim(jpa::getShipperAddress, jpa::setShipperAddress, mapOrNull(domain.getShipperCode(), CustomerCode::address));
         }
         if (domain.getConsigneeCode() != null) {
-            jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
-            jpa.setConsigneeAddress(mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
+            setStringIfChanged(jpa::getConsigneeCode,    jpa::setConsigneeCode,    mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
+            setAddressIfChangedTrim(jpa::getConsigneeAddress, jpa::setConsigneeAddress, mapOrNull(domain.getConsigneeCode(), CustomerCode::address));
         }
         if (domain.getNotifyCode() != null) {
-            jpa.setNotifyCode(mapOrNull(domain.getNotifyCode(), CustomerCode::value));
-            jpa.setNotifyAddress(mapOrNull(domain.getNotifyCode(), CustomerCode::address));
+            setStringIfChanged(jpa::getNotifyCode,    jpa::setNotifyCode,    mapOrNull(domain.getNotifyCode(), CustomerCode::value));
+            setAddressIfChangedTrim(jpa::getNotifyAddress, jpa::setNotifyAddress, mapOrNull(domain.getNotifyCode(), CustomerCode::address));
         }
         if (domain.getPolCode() != null) jpa.setPolCode(mapOrNull(domain.getPolCode(), PortCode::value));
         if (domain.getPodCode() != null) jpa.setPodCode(mapOrNull(domain.getPodCode(), PortCode::value));
@@ -121,5 +126,30 @@ public class MasterBlSeaSubMapper {
         jpa.setDescription(domain.getDescription());
         jpa.setDescClause1(domain.getDescClause1());
         jpa.setDescClause2(domain.getDescClause2());
+    }
+
+    /**
+     * 값이 다를 때만 setter 호출 — Hibernate dirty-checking이 같은 값에 대해 dirty 표기하지 않도록
+     * 명시적으로 비교. 일반 String 비교 (trim 없음).
+     */
+    private static void setStringIfChanged(Supplier<String> getter, Consumer<String> setter, String newValue) {
+        if (!Objects.equals(getter.get(), newValue)) setter.accept(newValue);
+    }
+
+    /**
+     * Address 류 (free-text) 컬럼 전용 — trim-aware compare. DB의 trailing/leading whitespace가
+     * 남아 있을 때 FE submit의 trim과 round-trip 차이로 발생하던 가짜 dirty를 차단 (§6.63).
+     * blank/whitespace-only는 null과 동등 처리.
+     */
+    private static void setAddressIfChangedTrim(Supplier<String> getter, Consumer<String> setter, String newValue) {
+        String current = normalizeTrim(getter.get());
+        String next    = normalizeTrim(newValue);
+        if (!Objects.equals(current, next)) setter.accept(newValue);
+    }
+
+    private static String normalizeTrim(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 }

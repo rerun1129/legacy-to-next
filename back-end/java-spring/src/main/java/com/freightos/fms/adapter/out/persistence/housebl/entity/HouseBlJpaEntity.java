@@ -11,6 +11,7 @@ import com.freightos.fms.domain.common.enums.WeightUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 @Table(schema = "fms", name = "house_bl")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class HouseBlJpaEntity extends BaseJpaEntity {
 
     @Id
