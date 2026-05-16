@@ -180,7 +180,6 @@ class HouseBlServiceTest {
         HouseBl mockEntity = mock(HouseBl.class);
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
-        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mock(HouseBlDetailResult.class));
 
         houseBlService.updateHouseBl(id, mockCommand);
 
@@ -188,21 +187,17 @@ class HouseBlServiceTest {
     }
 
     @Test
-    @DisplayName("updateHouseBl - factory 적용 후 port.saveHouseBl 위임 및 HouseBlDetailResult 반환 검증")
+    @DisplayName("updateHouseBl - factory 적용 후 port.saveHouseBl 위임 검증")
     void updateHouseBl_delegatesToPortSave() {
         Long id = 1L;
         UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
         HouseBl mockEntity = mock(HouseBl.class);
-        HouseBlDetailResult mockResult = mock(HouseBlDetailResult.class);
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlPort.saveHouseBl(mockEntity)).willReturn(mockEntity);
-        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mockResult);
 
-        HouseBlDetailResult result = houseBlService.updateHouseBl(id, mockCommand);
+        houseBlService.updateHouseBl(id, mockCommand);
 
-        assertThat(result).isEqualTo(mockResult);
         then(houseBlPort).should().saveHouseBl(mockEntity);
-        then(houseBlFactory).should().toDetailResult(mockEntity);
     }
 
     // ── changeHblNo ──────────────────────────────────────────────────

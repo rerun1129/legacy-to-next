@@ -207,20 +207,18 @@ class HouseBlControllerWebMvcTest {
     // ── PUT /api/house-bl/{id} ────────────────────────────────────────
 
     @Test
-    @DisplayName("PUT /api/house-bl/1: happy path → 200")
+    @DisplayName("PUT /api/house-bl/1: happy path → 200 + HOUSE_BL_UPDATED 메시지")
     void updateHouseBl_happyPath_returns200() throws Exception {
         Long id = 1L;
         UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
-        HouseBlDetailResult mockResult = mock(HouseBlDetailResult.class);
-        HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
         given(houseBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
-        given(houseBlUseCase.updateHouseBl(eq(id), eq(mockCommand))).willReturn(mockResult);
-        given(houseBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
+        willDoNothing().given(houseBlUseCase).updateHouseBl(eq(id), eq(mockCommand));
 
         mockMvc.perform(put("/api/house-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(MessageCode.HOUSE_BL_UPDATED.message()));
 
         then(houseBlUseCase).should().updateHouseBl(eq(id), any(UpdateHouseBlCommand.class));
     }
@@ -231,8 +229,8 @@ class HouseBlControllerWebMvcTest {
         Long id = 999L;
         UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
         given(houseBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
-        given(houseBlUseCase.updateHouseBl(eq(id), eq(mockCommand)))
-                .willThrow(new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
+        willThrow(new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND))
+                .given(houseBlUseCase).updateHouseBl(eq(id), eq(mockCommand));
 
         mockMvc.perform(put("/api/house-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,7 +1,6 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { UseFormReturn }    from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
-import type { HouseBlDetail }    from "@/domain/house-bl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { houseBlPort }           from "@/lib/ports";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
@@ -18,8 +17,8 @@ export function useHouseBlEntryMutations(args: {
   detailLoadedRef: MutableRefObject<boolean>;
   setResetVersion: Dispatch<SetStateAction<number>>;
 }): {
-  // §6.29 — create: { id: number }, update: HouseBlDetail | null (SEA jobDiv 분기 → null)
-  mutation: UseMutationResult<{ id: number } | HouseBlDetail | null, Error, HouseBlFormValues>;
+  // update: void, create: { id: number }
+  mutation: UseMutationResult<{ id: number } | void, Error, HouseBlFormValues>;
   deleteMutation: UseMutationResult<void, Error, void>;
 } {
   const { id, variant, form, detailLoadedRef, setResetVersion } = args;
@@ -27,7 +26,7 @@ export function useHouseBlEntryMutations(args: {
   const clearDraft = useBLDraftStore((state) => state.clearDraft);
   const isEdit = Boolean(id);
 
-  const mutation = useMutation({
+  const mutation = useMutation<{ id: number } | void, Error, HouseBlFormValues>({
     mutationFn: (data: HouseBlFormValues) => {
       return isEdit
         ? houseBlPort.update(id!, buildHouseBlUpdateRequest(data, variant))
@@ -35,9 +34,10 @@ export function useHouseBlEntryMutations(args: {
     },
     onSuccess: (saved) => {
       if (!isEdit) {
-        // create 시: saved는 HouseBlDetail (non-null). §6.29 — SEA update는 null 반환이므로
-        // isEdit=false 분기에서만 saved.id에 접근해 타입 안전성 보장.
-        const newId = saved?.id;
+        // create 시: saved는 { id: number }. update(void)와 분기가 달라 안전.
+        const newId = saved && typeof saved === "object" && "id" in saved
+          ? (saved as { id: number }).id
+          : undefined;
         if (newId != null) {
           // hot-marker: List 화면 진입 시 하이라이트에 사용 (§6.16, Truck 정합)
           sessionStorage.setItem(`house-bl-entry:hot:${newId}`, "1");

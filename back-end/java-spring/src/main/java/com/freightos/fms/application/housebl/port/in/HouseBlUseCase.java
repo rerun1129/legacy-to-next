@@ -16,7 +16,8 @@ public interface HouseBlUseCase {
     PagedResult<HouseBlSummary> searchHouseBls(SearchHouseBlCommand cmd, PageRequest pageRequest);
     HouseBlDetailResult findHouseBlById(Long id);
     Long createHouseBl(CreateHouseBlCommand command);
-    HouseBlDetailResult updateHouseBl(Long id, UpdateHouseBlCommand command);
+    /** TRUCK/NON_BL House B/L update. SEA/AIR는 각각 updateSeaHbl/updateAirHbl 사용. */
+    void updateHouseBl(Long id, UpdateHouseBlCommand command);
     /** Sea House B/L 전용 update — §6.35 Port+Adapter 패턴. void 반환으로 Controller ApiResponse<Void>화. */
     void updateSeaHbl(Long id, UpdateHouseBlCommand command);
     /** Air House B/L 전용 update — §6.35 Port+Adapter 패턴. void 반환으로 Controller ApiResponse<Void>화. */

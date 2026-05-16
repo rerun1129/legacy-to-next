@@ -8,7 +8,6 @@ import com.freightos.fms.application.masterbl.MasterBlFactory;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.port.out.SeaMasterPersistencePort;
 import com.freightos.fms.common.response.MessageCode;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
@@ -37,7 +36,7 @@ public class SeaMasterUpdatePersistenceAdapter implements SeaMasterPersistencePo
 
     @Override
     @Transactional
-    public MasterBl update(Long id, UpdateMasterBlCommand command) {
+    public void update(Long id, UpdateMasterBlCommand command) {
         MasterBlJpaEntity parentJpa = masterBlRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
         if (parentJpa.getJobDiv() != MasterBlJobDiv.SEA) {
@@ -51,19 +50,16 @@ public class SeaMasterUpdatePersistenceAdapter implements SeaMasterPersistencePo
                 .findBySea_MasterBlSeaId(seaJpa.getMasterBlSeaId()).orElse(null);
 
         // 도메인 변환 — factory가 도메인 검증 포함 모든 필드를 도메인에 적용
-        MasterBl domain = masterBlMapper.toSeaDomain(parentJpa, seaJpa, descJpa);
+        MasterBlSea domain = (MasterBlSea) masterBlMapper.toSeaDomain(parentJpa, seaJpa, descJpa);
         masterBlFactory.applyToEntity(command, domain);
 
         // 도메인 → JPA dirty-check 기반 필드 반영 (§6.37 sub-set 매퍼)
         masterBlSeaSubMapper.applyMasterSeaCommonFields(domain, parentJpa);
-        masterBlSeaSubMapper.applyMasterSeaFields((MasterBlSea) domain, seaJpa);
+        masterBlSeaSubMapper.applyMasterSeaFields(domain, seaJpa);
 
         // Desc 동기화 — 1:1 관계
-        applyDescSync((MasterBlSea) domain, seaJpa, descJpa);
+        applyDescSync(domain, seaJpa, descJpa);
         // 트랜잭션 커밋 시 dirty-checking으로 parentJpa·seaJpa UPDATE 자동 발생
-
-        // domain은 applyToEntity로 cmd 반영 + applyDescSync로 desc 동기화 후 상태 — 응답용 reload SELECT 회피 (§6.63)
-        return domain;
     }
 
     /**

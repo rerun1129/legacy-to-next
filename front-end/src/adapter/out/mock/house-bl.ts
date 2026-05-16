@@ -47,9 +47,9 @@ export const mockHouseBlPort: HouseBlPort = {
   async create(_req: CreateHouseBlRequest): Promise<{ id: number }> {
     return { id: 1 };
   },
-  async update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail> {
+  async update(id: number, req: UpdateHouseBlRequest): Promise<void> {
     const row = MOCK_ROWS.find(r => r.id === id) ?? MOCK_ROWS[0];
-    return { ...row, ...(req as Record<string, unknown>) } as unknown as HouseBlDetail;
+    Object.assign(row, req);
   },
   async delete(_id: number): Promise<void> {
     // mock: no-op

@@ -241,20 +241,13 @@ export const API_HOUSE_BL_PORT: HouseBlPort = {
     return parsed.data.data;
   },
 
-  async update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail | null> {
-    const json = await fetchJson(`${HOUSE_BL_BASE}/${id}`, {
+  // §BE 통일 — 모든 jobDiv에서 ApiResponse<Void> 응답
+  async update(id: number, req: UpdateHouseBlRequest): Promise<void> {
+    await fetchJson(`${HOUSE_BL_BASE}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
     });
-    // §6.29 — SEA jobDiv 분기에서 BE가 ApiResponse<Void> 반환.
-    // BE ApiResponse는 @JsonInclude(NON_NULL)로 data=null 필드가 직렬화에서 제거되므로
-    // 응답 JSON에 data 키 자체가 없을 수 있음. null/undefined 모두 void로 간주.
-    const j = (json ?? {}) as { data?: unknown };
-    if (j.data == null) return null;
-    const parsed = apiResponse(HOUSE_BL_DETAIL_SCHEMA).safeParse(json);
-    if (!parsed.success) throw new ResponseParseError(`Invalid update response: ${parsed.error.message}`);
-    return parsed.data.data;
   },
 
   async delete(id: number): Promise<void> {

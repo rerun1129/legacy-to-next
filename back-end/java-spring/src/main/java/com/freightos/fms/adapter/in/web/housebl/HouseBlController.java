@@ -91,23 +91,24 @@ public class HouseBlController {
         return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.findHouseBlById(id))));
     }
 
-    @Operation(summary = "House B/L 수정 (SEA: ApiResponse<Void>, 기타 jobDiv: ApiResponse<HouseBlDetailResponse>)")
+    @Operation(summary = "House B/L 수정 (모든 jobDiv: ApiResponse<Void>)")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateHouseBl(
+    public ResponseEntity<ApiResponse<Void>> updateHouseBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateHouseBlRequest req) {
         UpdateHouseBlCommand cmd = houseBlAssembler.toUpdateCommand(req);
-        // Sea jobDiv는 §6.35 전용 Port+Adapter — void 반환으로 Assembler.toDetail 호출 생략
+        // Sea jobDiv는 §6.35 전용 Port+Adapter
         if (Objects.equals("SEA", req.jobDiv())) {
             houseBlUseCase.updateSeaHbl(id, cmd);
             return ResponseEntity.ok(ApiResponse.ok(MessageCode.SEA_HBL_UPDATED.message()));
         }
-        // Air jobDiv는 §6.35 전용 Port+Adapter — void 반환
+        // Air jobDiv는 §6.35 전용 Port+Adapter
         if (Objects.equals("AIR", req.jobDiv())) {
             houseBlUseCase.updateAirHbl(id, cmd);
             return ResponseEntity.ok(ApiResponse.ok(MessageCode.AIR_HBL_UPDATED.message()));
         }
-        return ResponseEntity.ok(ApiResponse.of(houseBlAssembler.toDetail(houseBlUseCase.updateHouseBl(id, cmd))));
+        houseBlUseCase.updateHouseBl(id, cmd);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.HOUSE_BL_UPDATED.message()));
     }
 
     @Operation(summary = "House B/L 번호 변경 (전용 엔드포인트)")

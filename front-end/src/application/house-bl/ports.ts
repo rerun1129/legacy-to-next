@@ -5,8 +5,8 @@ export interface HouseBlPort {
   getById(id: number): Promise<HouseBlDetail>;
   save(data: unknown): Promise<HouseBlDetail>;
   create(req: CreateHouseBlRequest): Promise<{ id: number }>;
-  // §6.29 — SEA jobDiv 분기에서 BE가 ApiResponse<Void> 반환 → null, 그 외 HouseBlDetail 반환
-  update(id: number, req: UpdateHouseBlRequest): Promise<HouseBlDetail | null>;
+  // §BE 통일 — 모든 jobDiv에서 ApiResponse<Void> 반환
+  update(id: number, req: UpdateHouseBlRequest): Promise<void>;
   delete(id: number): Promise<void>;
   changeHblNo(id: number, hblNo: string): Promise<void>;
   // EXACT 매칭 — POST /api/house-bl/find-by-hbl-no

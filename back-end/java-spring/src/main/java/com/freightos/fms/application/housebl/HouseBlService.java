@@ -55,10 +55,10 @@ public class HouseBlService implements HouseBlUseCase {
 
     @Override
     @Transactional
-    public HouseBlDetailResult updateHouseBl(Long id, UpdateHouseBlCommand command) {
+    public void updateHouseBl(Long id, UpdateHouseBlCommand command) {
         HouseBl existing = findEntityById(id);
         houseBlFactory.applyToEntity(command, existing);
-        return houseBlFactory.toDetailResult(houseBlPort.saveHouseBl(existing));
+        houseBlPort.saveHouseBl(existing);
     }
 
     @Override
