@@ -13,7 +13,7 @@ interface Props {
 
 export function MasterMainTab({ variant, form, active }: Props) {
   if (variant.mode === "AIR") {
-    return <MasterMainTabAir variant={variant} form={form} active={active} />;
+    return <MasterMainTabAir variant={variant} active={active} />;
   }
   return <MasterMainTabSea variant={variant} form={form} active={active} />;
 }
