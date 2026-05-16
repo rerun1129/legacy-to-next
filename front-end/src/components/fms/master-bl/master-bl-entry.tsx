@@ -256,9 +256,18 @@ export function MasterBLEntry({ variantKey }: Props) {
                       )}
                     />
                   ) : (
-                    <TextBox
-                      placeholder={f}
-                      {...(form.register as (n: string) => object)(fieldPath)}
+                    // register(uncontrolled)는 nested path reset 시 input.ref 갱신 미보장 — Controller로 통일
+                    <Controller
+                      name={fieldPath as keyof MasterBlFormValues}
+                      control={form.control}
+                      render={({ field }) => (
+                        <TextBox
+                          placeholder={f}
+                          value={(field.value as string | undefined) ?? ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                      )}
                     />
                   )
                 ) : (
