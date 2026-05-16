@@ -43,6 +43,7 @@ npm --prefix front-end run build
   - 그리드: 셀 클릭 → overlay/행 강조 → 다른 그리드 클릭 → 해제 확인
   - 그리드: 컬럼 헤더 경계 드래그 → 너비 조정 → 셀 overlay 추적 확인
   - Form submit 시 모든 필드 값 도달 확인 (개발자 도구 Network)
+  - **무수정 조회→저장 시 p6spy update 미발사 확인** — List 더블클릭 → Entry → 수정 없이 Save → BE p6spy 로그에 UPDATE 0건 (§6.62). dirty 있으면 BE Factory 복합 VO method reference 1-arg 안티패턴 또는 FE Entry detail/draft race 점검
 
 ### 시각 회귀
 

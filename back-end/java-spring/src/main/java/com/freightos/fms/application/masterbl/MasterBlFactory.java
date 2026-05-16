@@ -69,7 +69,12 @@ public class MasterBlFactory {
                 : MasterBlAir.create(Bound.valueOf(cmd.bound()));
 
         entity.assignMblNo(BlNumber.of(cmd.mblNo()), BlNumber.of(cmd.masterRefNo()));
-        entity.assignParties(CustomerCode.of(cmd.shipperCode()), CustomerCode.of(cmd.consigneeCode()), CustomerCode.of(cmd.notifyCode()));
+        // CustomerCode.of(value, address) 2-arg로 address도 함께 반영 (1-arg는 address 누락 버그).
+        entity.assignParties(
+                CustomerCode.of(cmd.shipperCode(),   cmd.shipperAddress()),
+                CustomerCode.of(cmd.consigneeCode(), cmd.consigneeAddress()),
+                CustomerCode.of(cmd.notifyCode(),    cmd.notifyAddress())
+        );
         entity.updateSchedule(PortCode.of(cmd.polCode()), PortCode.of(cmd.podCode()), BlDate.of(cmd.etd()), BlDate.of(cmd.eta()));
         entity.updateFreightAndOperator(Nullables.mapOrNull(cmd.freightTerm(), FreightTerm::valueOf), EmployeeCode.of(cmd.operatorCode()), TeamCode.of(cmd.teamCode()));
         if (cmd.shipmentType() != null) entity.updateShipmentType(Nullables.mapOrNull(cmd.shipmentType(), ShipmentType::valueOf));
@@ -90,12 +95,23 @@ public class MasterBlFactory {
                 Nullables.mapOrElse(cmd.mblNo(), BlNumber::of, entity::getMblNo),
                 Nullables.mapOrElse(cmd.masterRefNo(), BlNumber::of, entity::getMasterRefNo)
         );
-        // §6.37 PATCH 의미론: null이면 기존 값 보존, non-null만 update
-        if (cmd.shipperCode() != null || cmd.consigneeCode() != null || cmd.notifyCode() != null) {
+        // §6.37 PATCH 의미론: code/address 중 하나라도 non-null이면 update, 둘 다 null이면 기존 값 보존.
+        // CustomerCode.of(value, address) 2-arg 사용으로 address도 함께 도메인에 반영한다.
+        // (1-arg method reference는 address를 항상 null로 덮어쓰는 버그가 있다.)
+        boolean shipperTouched   = cmd.shipperCode()   != null || cmd.shipperAddress()   != null;
+        boolean consigneeTouched = cmd.consigneeCode() != null || cmd.consigneeAddress() != null;
+        boolean notifyTouched    = cmd.notifyCode()    != null || cmd.notifyAddress()    != null;
+        if (shipperTouched || consigneeTouched || notifyTouched) {
             entity.assignParties(
-                    Nullables.mapOrElse(cmd.shipperCode(), CustomerCode::of, entity::getShipperCode),
-                    Nullables.mapOrElse(cmd.consigneeCode(), CustomerCode::of, entity::getConsigneeCode),
-                    Nullables.mapOrElse(cmd.notifyCode(), CustomerCode::of, entity::getNotifyCode)
+                    shipperTouched
+                            ? CustomerCode.of(cmd.shipperCode(),   cmd.shipperAddress())
+                            : entity.getShipperCode(),
+                    consigneeTouched
+                            ? CustomerCode.of(cmd.consigneeCode(), cmd.consigneeAddress())
+                            : entity.getConsigneeCode(),
+                    notifyTouched
+                            ? CustomerCode.of(cmd.notifyCode(),    cmd.notifyAddress())
+                            : entity.getNotifyCode()
             );
         }
         entity.updateSchedule(

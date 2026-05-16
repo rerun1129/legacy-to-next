@@ -1158,3 +1158,99 @@ grep -rn "@MockitoBean.*Validator\|@MockBean.*Validator" back-end/java-spring/sr
 **잔여 점검 권장**
 
 Air Master Entry 마이그레이션 시 — 동적 Validator 패턴 적용 시 본 §6.61 체크리스트 의무 grep. 차기 도메인에서 동일 회귀 재발 방지.
+
+### 6.62 무수정 저장 시 UPDATE 발사 회귀 — VO 2-arg 매핑 + Entry detail/draft race 차단
+
+List 더블클릭 → Entry → 무수정 저장 시 BE에서 address 컬럼만 NULL로 덮어쓰는 UPDATE가 발사되는 회귀. 원인이 BE·FE 두 곳에 동시에 존재하므로 한쪽만 fix하면 잔존한다.
+
+**증상**
+
+p6spy `@DynamicUpdate` 진단 로그에서:
+```
+update fms.master_bl set consignee_address=NULL, notify_address=NULL, shipper_address=NULL, updated_at=..., updated_by='SYSTEM' where master_bl_id=...
+```
+DB의 address 3컬럼은 이미 NULL인데도 dirty로 잡혀 update가 나간다. 다른 nullable 컬럼은 동일값이면 dirty 미발생.
+
+**원인 1 — BE Factory의 `CustomerCode::of` 1-arg method reference (address 누락)**
+
+`MasterBlFactory.applyToEntity`의 다음 패턴은 **address가 항상 무시**된다:
+
+```java
+// 안티패턴
+entity.assignParties(
+    Nullables.mapOrElse(cmd.shipperCode(), CustomerCode::of, entity::getShipperCode),
+    ...);
+```
+
+`CustomerCode`에 `of(String value)`와 `of(String value, String address)` 두 정적 팩토리가 있는데, `Function<T,R>` signature의 mapper로 사용하면 **1-arg `of(value)`로 resolve**되어 address가 null로 고정된다. cmd.shipperAddress에 form 값이 정상 도달해도 무시.
+
+**해결 1** — 2-arg explicit call + touched 분기로 PATCH 의미론 유지:
+
+```java
+boolean shipperTouched = cmd.shipperCode() != null || cmd.shipperAddress() != null;
+boolean consigneeTouched = cmd.consigneeCode() != null || cmd.consigneeAddress() != null;
+boolean notifyTouched = cmd.notifyCode() != null || cmd.notifyAddress() != null;
+if (shipperTouched || consigneeTouched || notifyTouched) {
+    entity.assignParties(
+        shipperTouched ? CustomerCode.of(cmd.shipperCode(), cmd.shipperAddress()) : entity.getShipperCode(),
+        consigneeTouched ? CustomerCode.of(cmd.consigneeCode(), cmd.consigneeAddress()) : entity.getConsigneeCode(),
+        notifyTouched ? CustomerCode.of(cmd.notifyCode(), cmd.notifyAddress()) : entity.getNotifyCode()
+    );
+}
+```
+
+Create 경로(`toEntity`)도 동일하게 `CustomerCode.of(value, address)` 2-arg 호출 의무.
+
+**원인 2 — FE Entry useEffect의 `detailLoadedRef.current = true` 잠금 순서 (draft↔detail race)**
+
+`master-bl-entry.tsx`의 다음 순서는 cache 잔류 상태에서 잔류 draft가 form에 들어올 race를 허용한다:
+
+```ts
+// 안티패턴 (Master만 발생 가능)
+useEffect(() => {
+  if (detailLoadedRef.current) return;
+  if (didRestoreFromDraftRef.current) return;  // ← draft 가드가 ref true보다 먼저
+  if (!detail) return;
+  detailLoadedRef.current = true;
+  form.reset(...)
+}, ...);
+```
+
+draft 복원이 한 번 발생하면 `return`되면서 `detailLoadedRef`가 false 그대로. 이후 useEffect가 재실행(dep 변경)되면 다시 처음부터 진행되어 draft store에 다른 form values가 잔류하던 시점의 값으로 form이 reset될 수 있다.
+
+**해결 2** — House 패턴(`house-bl-entry.tsx:154-161`)과 동일하게 `detailLoadedRef = true`를 detail 도착 직후, draft 가드 **이전**에 set:
+
+```ts
+useEffect(() => {
+  if (detailLoadedRef.current) return;
+  if (!detail) return;
+  detailLoadedRef.current = true;          // ← detail 있으면 무조건 잠금
+  if (didRestoreFromDraftRef.current) return;
+  form.reset(...)
+}, ...);
+```
+
+**검출 방법**
+
+```bash
+# BE — Factory.applyToEntity/toEntity에서 복합 VO method reference 사용 grep
+grep -rn "Nullables.mapOrElse.*CustomerCode::of\|, CustomerCode::of," back-end/java-spring/src/main/java/
+
+# FE — Entry useEffect detailLoadedRef 잠금 순서 점검
+grep -A 6 "detailLoadedRef.current = true" front-end/src/components/fms/*/entry.tsx
+# House 패턴: `if (!detail) return; detailLoadedRef.current = true; if (didRestoreFromDraftRef.current) return;`
+```
+
+**진단 도구**
+
+- BE entity에 임시 `@DynamicUpdate` + import 추가 → set절에 dirty 컬럼만 출력 → 진단 후 revert
+- FE `master-bl-entry.tsx`/`use-bl-draft-sync.ts`에 `console.log` 임시 추가 → detail 응답값·form value·draft store 비교 → 진단 후 revert
+
+**잔여 점검 권장**
+
+Air Master / 차기 Entry 마이그레이션 시:
+1. 모든 Factory의 복합 VO (CustomerCode 외에 PartnerCode, VesselVoyage 등 multi-field VO) method reference 1-arg resolve 안티패턴 grep
+2. 새 Entry 컴포넌트의 `detail/draft useEffect`는 House 패턴 정합 의무
+3. 무수정 조회→저장 회귀 테스트 — p6spy update SQL 발사 0건 확인
+
+**사례**: `<commit-hash>` (2026-05-16) — Master B/L Sea Entry 무수정 저장 시 address 3컬럼 NULL UPDATE 발사. BE Factory 2-arg fix + FE useEffect ref-set 순서 House 패턴 정합 fix 후 p6spy 0건 확인.

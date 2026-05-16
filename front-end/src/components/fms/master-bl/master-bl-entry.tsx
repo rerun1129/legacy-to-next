@@ -100,11 +100,13 @@ export function MasterBLEntry({ variantKey }: Props) {
   }, [id]);
 
   // §6.49 ⑨ — draft 복원 시 detail로 덮어쓰지 않음 (House 패턴 정합)
+  // detailLoadedRef는 detail 도착 시 즉시 true로 잠가 draft↔detail race에서
+  // 두 번째 trigger의 추가 form.reset을 차단한다 (House 패턴 정합).
   useEffect(() => {
     if (detailLoadedRef.current) return;
-    if (didRestoreFromDraftRef.current) return;
     if (!detail) return;
     detailLoadedRef.current = true;
+    if (didRestoreFromDraftRef.current) return;
     form.reset(mapMasterBlDetailToForm(detail));
   }, [detail, form, didRestoreFromDraftRef]);
 
