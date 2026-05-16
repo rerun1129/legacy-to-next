@@ -49,7 +49,7 @@ class SeaMasterUpdatePersistenceAdapterTest {
                 null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
-                null, null
+                null, null, null
         );
     }
 

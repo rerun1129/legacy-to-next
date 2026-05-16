@@ -20,6 +20,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
+import com.freightos.fms.application.masterbl.port.out.AirMasterPersistencePort;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
 import com.freightos.fms.application.masterbl.port.out.SeaMasterPersistencePort;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class MasterBlService implements MasterBlUseCase {
 
     private final MasterBlPort masterBlPort;
     private final SeaMasterPersistencePort seaMasterPersistencePort;
+    private final AirMasterPersistencePort airMasterPersistencePort;
     private final HouseBlPort houseBlPort;
     private final MasterBlFactory masterBlFactory;
 
@@ -79,13 +81,9 @@ public class MasterBlService implements MasterBlUseCase {
             case SEA ->
                     // SEA: 어댑터가 dirty-checking 반영 후 attached entity로 도메인 재구성 반환 — 응답 reload 회피 (§6.63)
                     seaMasterPersistencePort.update(id, command);
-            case AIR -> {
-                // AIR: 기존 경로 유지 (AIR 격리 원칙) — Air Master 마이그레이션 시 동일 패턴 적용 (§6.63 잔여)
-                MasterBl entity = findEntityById(id);
-                masterBlFactory.applyToEntity(command, entity);
-                masterBlPort.updateMasterBl(entity);
-                yield findEntityById(id);
-            }
+            case AIR ->
+                    // AIR: 어댑터가 dirty-checking 반영 후 attached entity로 도메인 재구성 반환 — 응답 reload 회피 (§6.63)
+                    airMasterPersistencePort.update(id, command);
         };
         log.info("Updated MasterBl id={}", id);
         List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, updated);

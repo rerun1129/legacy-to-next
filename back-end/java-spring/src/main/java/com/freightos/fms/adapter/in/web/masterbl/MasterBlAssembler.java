@@ -69,6 +69,7 @@ public class MasterBlAssembler {
                 req.shipmentType(),
                 req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
+                toAirDetailCommand(req.airDetail()),
                 toDescCommand(req.desc()),
                 toDimCommands(req.dims()),
                 toLegCommands(req.scheduleLegs()),
@@ -104,6 +105,7 @@ public class MasterBlAssembler {
                 req.shipmentType(),
                 req.remark(),
                 toSeaDetailCommand(req.seaDetail()),
+                toAirDetailCommandU(req.airDetail()),
                 toDescCommand(req.desc()),
                 toDimCommandsU(req.dims()),
                 toLegCommandsU(req.scheduleLegs()),
@@ -112,6 +114,16 @@ public class MasterBlAssembler {
     }
 
     // ── 중첩 record 변환 ──────────────────────────────────────────────
+
+    private CreateMasterBlCommand.AirDetailCommand toAirDetailCommand(CreateMasterBlRequest.AirDetailRequest r) {
+        if (r == null) return null;
+        return new CreateMasterBlCommand.AirDetailCommand(r.airlineCode(), r.chargeWeightKg(), r.volumeWeightKg(), r.rateClass(), r.currencyCode(), r.declaredValueCarriage(), r.declaredValueCustoms(), r.insurance(), r.accountInformation(), r.securityStatus(), r.flightType(), r.issueDate(), r.issuePlace(), r.signature(), r.otherTerm(), r.handlingInfoCode(), r.handlingInfoText(), r.remark());
+    }
+
+    private UpdateMasterBlCommand.AirDetailCommand toAirDetailCommandU(UpdateMasterBlRequest.AirDetailRequest r) {
+        if (r == null) return null;
+        return new UpdateMasterBlCommand.AirDetailCommand(r.airlineCode(), r.chargeWeightKg(), r.volumeWeightKg(), r.rateClass(), r.currencyCode(), r.declaredValueCarriage(), r.declaredValueCustoms(), r.insurance(), r.accountInformation(), r.securityStatus(), r.flightType(), r.issueDate(), r.issuePlace(), r.signature(), r.otherTerm(), r.handlingInfoCode(), r.handlingInfoText(), r.remark());
+    }
 
     private CreateMasterBlCommand.SeaDetailCommand toSeaDetailCommand(CreateMasterBlRequest.SeaDetailRequest r) {
         if (r == null) return null;

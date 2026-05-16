@@ -16,11 +16,11 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 34개이고, consolidatedHouseBls 위치 정합")
-    void recordComponents_haveExactlyThirtyFourFields() {
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 35개이고, consolidatedHouseBls 위치 정합")
+    void recordComponents_haveExactlyThirtyFiveFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(34);
+        assertThat(components).hasSize(35);
         assertThat(components[29].getName()).isEqualTo("consolidatedHouseBls");
         assertThat(components[29].getType()).isEqualTo(List.class);
     }
@@ -50,6 +50,7 @@ class MasterBlDetailResponseTest {
                 List.of(),
                 "REMARK-SAMPLE",
                 new DescProjection("MARKS", "DESC", null, null),
+                null,
                 null
         );
 
@@ -80,6 +81,7 @@ class MasterBlDetailResponseTest {
                 null, null,
                 List.of(),
                 List.of(),
+                null,
                 null,
                 null,
                 null

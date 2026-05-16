@@ -37,6 +37,9 @@ public record UpdateMasterBlCommand(
         // SEA 확장 필드
         SeaDetailCommand seaDetail,
 
+        // AIR 확장 필드
+        AirDetailCommand airDetail,
+
         // Sub 엔티티
         DescCommand desc,
         List<DimCommand> dims,
@@ -59,6 +62,27 @@ public record UpdateMasterBlCommand(
             BigDecimal rton,
             String lineBkgNo,
             String issueDate
+    ) {}
+
+    public record AirDetailCommand(
+            String airlineCode,
+            BigDecimal chargeWeightKg,
+            BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String securityStatus,
+            String flightType,
+            String issueDate,
+            String issuePlace,
+            String signature,
+            String otherTerm,
+            String handlingInfoCode,
+            String handlingInfoText,
+            String remark
     ) {}
 
     public record DescCommand(

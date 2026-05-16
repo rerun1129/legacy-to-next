@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.application.masterbl.projection.AirDetailProjection;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
 import com.freightos.fms.application.masterbl.projection.DescProjection;
@@ -45,10 +46,12 @@ public record MasterBlDetailResponse(
         List<ConsoledSeaContainerView> consoledSeaContainers,
         String remark,
         DescView desc,
-        SeaDetailResponse seaDetail
+        SeaDetailResponse seaDetail,
+        AirDetailResponse airDetail
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailResult result) {
         SeaDetailProjection seaDetailProjection = result.seaDetail();
+        AirDetailProjection airDetailProjection = result.airDetail();
         return new MasterBlDetailResponse(
                 result.id(),
                 result.mblNo(),
@@ -83,8 +86,50 @@ public record MasterBlDetailResponse(
                 result.consoledSeaContainers(),
                 result.remark(),
                 DescView.from(result.desc()),
-                seaDetailProjection != null ? SeaDetailResponse.from(seaDetailProjection) : null
+                seaDetailProjection != null ? SeaDetailResponse.from(seaDetailProjection) : null,
+                airDetailProjection != null ? AirDetailResponse.from(airDetailProjection) : null
         );
+    }
+
+    /**
+     * AIR 본체 상세 응답 뷰. AirDetailProjection을 1:1 매핑한다.
+     * desc는 root MasterBlDetailResponse.DescView로 통합되어 이 뷰에서 제외된다 (§6.49 ㉕).
+     * AIR은 container 미사용 — container 필드 없음 (§13.9).
+     */
+    public record AirDetailResponse(
+            String airlineCode,
+            BigDecimal chargeWeightKg,
+            BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String securityStatus,
+            String flightType,
+            String issueDate,
+            String issuePlace,
+            String signature,
+            String otherTerm,
+            String handlingInfoCode,
+            String handlingInfoText,
+            String remark
+    ) {
+        /** §6.55 — nested object null 방지용 empty 팩토리. */
+        public static AirDetailResponse empty() {
+            return new AirDetailResponse(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        }
+
+        public static AirDetailResponse from(AirDetailProjection p) {
+            return new AirDetailResponse(
+                    p.airlineCode(), p.chargeWeightKg(), p.volumeWeightKg(), p.rateClass(),
+                    p.currencyCode(), p.declaredValueCarriage(), p.declaredValueCustoms(),
+                    p.insurance(), p.accountInformation(), p.securityStatus(), p.flightType(),
+                    p.issueDate(), p.issuePlace(), p.signature(), p.otherTerm(),
+                    p.handlingInfoCode(), p.handlingInfoText(), p.remark()
+            );
+        }
     }
 
     /** desc(master_bl_desc) 응답 뷰. SEA/AIR 공통으로 root 레벨에 노출된다. */

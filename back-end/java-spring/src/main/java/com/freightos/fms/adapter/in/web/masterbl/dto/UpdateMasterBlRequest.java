@@ -1,5 +1,7 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -39,6 +41,9 @@ public record UpdateMasterBlRequest(
         // SEA 확장 필드
         SeaDetailRequest seaDetail,
 
+        // AIR 확장 필드
+        AirDetailRequest airDetail,
+
         // Sub 엔티티
         DescRequest desc,
         List<DimRequest> dims,
@@ -62,6 +67,31 @@ public record UpdateMasterBlRequest(
             BigDecimal rton,
             String lineBkgNo,
             String issueDate
+    ) {}
+
+    /**
+     * AIR 모드 확장 필드.
+     * 모든 필드 nullable — null은 기존 값 유지(PATCH 의미론).
+     */
+    public record AirDetailRequest(
+            String airlineCode,
+            @DecimalMin("0") BigDecimal chargeWeightKg,
+            @DecimalMin("0") BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String securityStatus,
+            String flightType,
+            @Pattern(regexp = "\\d{8}") String issueDate,
+            String issuePlace,
+            String signature,
+            String otherTerm,
+            String handlingInfoCode,
+            String handlingInfoText,
+            String remark
     ) {}
 
     /** 화물 표시 및 명세. MasterBl당 1건. */

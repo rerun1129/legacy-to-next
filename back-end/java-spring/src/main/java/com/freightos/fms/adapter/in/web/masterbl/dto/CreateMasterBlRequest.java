@@ -1,5 +1,7 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.adapter.in.web.validation.AirImpMasterGroup;
+import com.freightos.fms.adapter.in.web.validation.AirMasterGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaImpMasterGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaMasterGroup;
 import jakarta.validation.Valid;
@@ -12,19 +14,19 @@ import java.util.List;
 public record CreateMasterBlRequest(
         @NotNull String jobDiv,
         @NotNull String bound,
-        @Size(max = 35) @NotBlank(groups = SeaMasterGroup.class) String mblNo,
-        @Size(max = 35) @NotBlank(groups = SeaMasterGroup.class) String masterRefNo,
+        @Size(max = 35) @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String mblNo,
+        @Size(max = 35) @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String masterRefNo,
         String freightTerm,
         @Size(max = 20) String shipperCode,
         String shipperAddress,
-        @Size(max = 20) @NotBlank(groups = SeaImpMasterGroup.class) String consigneeCode,
+        @Size(max = 20) @NotBlank(groups = {SeaImpMasterGroup.class, AirImpMasterGroup.class}) String consigneeCode,
         String consigneeAddress,
         @Size(max = 20) String notifyCode,
         String notifyAddress,
-        @Size(max = 5)  @NotBlank(groups = SeaMasterGroup.class) String polCode,
-        @Size(max = 5)  @NotBlank(groups = SeaMasterGroup.class) String podCode,
-        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaMasterGroup.class) String etd,
-        @Pattern(regexp = "\\d{8}") @NotBlank(groups = SeaMasterGroup.class) String eta,
+        @Size(max = 5)  @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String polCode,
+        @Size(max = 5)  @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String podCode,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String etd,
+        @Pattern(regexp = "\\d{8}") @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String eta,
         @Min(0) Integer pkgQty,
         String pkgUnit,
         String weightUnit,
@@ -33,13 +35,16 @@ public record CreateMasterBlRequest(
         String hsCode,
         String mainItemName,
         @Size(max = 20) String settlePartnerCode,
-        @NotBlank(groups = SeaMasterGroup.class) String operatorCode,
-        @NotBlank(groups = SeaMasterGroup.class) String teamCode,
+        @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String operatorCode,
+        @NotBlank(groups = {SeaMasterGroup.class, AirMasterGroup.class}) String teamCode,
         String shipmentType,
         String remark,
 
         // SEA 확장 필드
         @Valid SeaDetailRequest seaDetail,
+
+        // AIR 확장 필드
+        @Valid AirDetailRequest airDetail,
 
         // Sub 엔티티
         DescRequest desc,
@@ -64,6 +69,28 @@ public record CreateMasterBlRequest(
             @DecimalMin("0") BigDecimal rton,
             @Size(max = 35) String lineBkgNo,
             @Pattern(regexp = "\\d{8}") String issueDate
+    ) {}
+
+    /** AIR 모드 확장 필드. */
+    public record AirDetailRequest(
+            @NotBlank(groups = AirMasterGroup.class) String airlineCode,
+            @DecimalMin("0") BigDecimal chargeWeightKg,
+            @DecimalMin("0") BigDecimal volumeWeightKg,
+            String rateClass,
+            String currencyCode,
+            String declaredValueCarriage,
+            String declaredValueCustoms,
+            String insurance,
+            String accountInformation,
+            String securityStatus,
+            String flightType,
+            @Pattern(regexp = "\\d{8}") @NotBlank(groups = AirMasterGroup.class) String issueDate,
+            @NotBlank(groups = AirMasterGroup.class) String issuePlace,
+            @NotBlank(groups = AirMasterGroup.class) String signature,
+            String otherTerm,
+            String handlingInfoCode,
+            String handlingInfoText,
+            String remark
     ) {}
 
     /** 화물 표시 및 명세. MasterBl당 1건. */

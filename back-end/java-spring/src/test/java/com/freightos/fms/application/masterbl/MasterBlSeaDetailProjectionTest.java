@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MasterBlSeaDetailProjectionTest {
 
-    private final MasterBlFactory factory = new MasterBlFactory(new MasterBlSubFactory(), new MasterBlSeaSubFactory());
+    private final MasterBlFactory factory = new MasterBlFactory(new MasterBlSubFactory(), new MasterBlSeaSubFactory(), new MasterBlAirSubFactory());
 
     // ── 케이스 1: SEA + desc 정상 detail happy path ───────────────────
 

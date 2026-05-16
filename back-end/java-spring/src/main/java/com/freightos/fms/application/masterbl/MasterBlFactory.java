@@ -3,6 +3,7 @@ package com.freightos.fms.application.masterbl;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.projection.AirDetailProjection;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
 import com.freightos.fms.application.masterbl.projection.DescProjection;
@@ -12,17 +13,23 @@ import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
+import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.LoadType;
+import com.freightos.fms.domain.common.enums.RateClass;
+import com.freightos.fms.domain.common.enums.SecurityStatus;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
+import com.freightos.fms.domain.common.vo.AirlineCode;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.CargoSummary;
+import com.freightos.fms.domain.common.vo.CurrencyCode;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
+import com.freightos.fms.domain.common.vo.HandlingInformation;
 import com.freightos.fms.domain.common.vo.LinerCode;
 import com.freightos.fms.domain.common.vo.PortCode;
 import com.freightos.fms.domain.common.vo.Quantity;
@@ -55,10 +62,12 @@ public class MasterBlFactory {
 
     private final MasterBlSubFactory sub;
     private final MasterBlSeaSubFactory seaSubFactory;
+    private final MasterBlAirSubFactory airSubFactory;
 
-    public MasterBlFactory(MasterBlSubFactory sub, MasterBlSeaSubFactory seaSubFactory) {
+    public MasterBlFactory(MasterBlSubFactory sub, MasterBlSeaSubFactory seaSubFactory, MasterBlAirSubFactory airSubFactory) {
         this.sub = sub;
         this.seaSubFactory = seaSubFactory;
+        this.airSubFactory = airSubFactory;
     }
 
     // ── CREATE ────────────────────────────────────────────────────────
@@ -83,7 +92,10 @@ public class MasterBlFactory {
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
         if (cmd.seaDetail() != null) seaSubFactory.applySeaCreate(entity, cmd.seaDetail());
-        applyRemark(entity, cmd.remark());
+        if (cmd.airDetail() != null) airSubFactory.applyAirCreate(entity, cmd.airDetail());
+        // airDetail.remark()가 AIR 전용 채널로 올 때를 대비한 fallback (공통 remark 우선)
+        String effectiveRemark = cmd.remark() != null ? cmd.remark() : (cmd.airDetail() != null ? cmd.airDetail().remark() : null);
+        applyRemark(entity, effectiveRemark);
         sub.applySubEntities(entity, sub.toDescParams(cmd.desc()), sub.toDimParamsFromCreate(cmd.dims()), sub.toLegParamsFromCreate(cmd.scheduleLegs()), sub.toChargeParamsFromCreate(cmd.airCharges()));
         return entity;
     }
@@ -139,7 +151,10 @@ public class MasterBlFactory {
         if (cmd.settlePartnerCode() != null) entity.assignSettlePartner(CustomerCode.of(cmd.settlePartnerCode()));
 
         if (cmd.seaDetail() != null) seaSubFactory.applySeaUpdate(entity, cmd.seaDetail());
-        applyRemark(entity, cmd.remark());
+        if (cmd.airDetail() != null) airSubFactory.applyAirUpdate(entity, cmd.airDetail());
+        // airDetail.remark()가 AIR 전용 채널로 올 때를 대비한 fallback (공통 remark 우선)
+        String effectiveRemark = cmd.remark() != null ? cmd.remark() : (cmd.airDetail() != null ? cmd.airDetail().remark() : null);
+        applyRemark(entity, effectiveRemark);
         sub.applySubEntities(entity, sub.toDescParams(cmd.desc()), sub.toDimParams(cmd.dims()), sub.toLegParams(cmd.scheduleLegs()), sub.toChargeParams(cmd.airCharges()));
     }
 
@@ -168,6 +183,10 @@ public class MasterBlFactory {
         };
         SeaDetailProjection seaDetail = switch (entity) {
             case MasterBlSea sea -> toSeaDetailProjection(sea);
+            default -> null;
+        };
+        AirDetailProjection airDetail = switch (entity) {
+            case MasterBlAir air -> toAirDetailProjection(air);
             default -> null;
         };
         return new MasterBlDetailResult(
@@ -204,7 +223,8 @@ public class MasterBlFactory {
                 toConsoledSeaContainerViews(containers),
                 remark,
                 toDescProjection(entity.getDesc()),
-                seaDetail
+                seaDetail,
+                airDetail
         );
     }
 
@@ -225,6 +245,30 @@ public class MasterBlFactory {
                 VoMapper.mapOrNull(sea.getLineBkgNo(), BlNumber::value),
                 VoMapper.mapOrNull(sea.getIssueDate(), BlDate::asString),
                 sea.getRemark()
+        );
+    }
+
+    private AirDetailProjection toAirDetailProjection(MasterBlAir air) {
+        HandlingInformation hi = air.getHandlingInformation();
+        return new AirDetailProjection(
+                VoMapper.mapOrNull(air.getAirlineCode(), AirlineCode::value),
+                VoMapper.mapOrNull(air.getChargeWeightKg(), Weight::kg),
+                VoMapper.mapOrNull(air.getVolumeWeightKg(), Weight::kg),
+                Nullables.mapOrNull(air.getRateClass(), RateClass::name),
+                VoMapper.mapOrNull(air.getCurrencyCode(), CurrencyCode::value),
+                air.getDeclaredValueCarriage(),
+                air.getDeclaredValueCustoms(),
+                air.getInsurance(),
+                air.getAccountInformation(),
+                Nullables.mapOrNull(air.getSecurityStatus(), SecurityStatus::name),
+                Nullables.mapOrNull(air.getFlightType(), FlightType::name),
+                VoMapper.mapOrNull(air.getIssueDate(), BlDate::asString),
+                VoMapper.mapOrNull(air.getIssuePlace(), PortCode::value),
+                air.getSignature(),
+                Nullables.mapOrNull(air.getOtherTerm(), FreightTerm::name),
+                hi != null && hi.code() != null ? hi.code().name() : null,
+                hi != null ? hi.description() : null,
+                air.getRemark()
         );
     }
 

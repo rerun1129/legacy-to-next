@@ -43,5 +43,6 @@ public record MasterBlDetailResult(
         List<ConsoledSeaContainerView> consoledSeaContainers,
         String remark,
         DescProjection desc,
-        SeaDetailProjection seaDetail
+        SeaDetailProjection seaDetail,
+        AirDetailProjection airDetail
 ) {}

@@ -7,6 +7,8 @@ import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.SearchMasterBlRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.UpdateMasterBlRequest;
+import com.freightos.fms.adapter.in.web.validation.AirImpMasterGroup;
+import com.freightos.fms.adapter.in.web.validation.AirMasterGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaImpMasterGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaMasterGroup;
 import com.freightos.common.response.ApiResponse;
@@ -60,6 +62,10 @@ public class MasterBlController {
             Class<?> group = "IMP".equals(request.bound()) ? SeaImpMasterGroup.class : SeaMasterGroup.class;
             Set<ConstraintViolation<CreateMasterBlRequest>> violations = validator.validate(request, group);
             if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        } else if ("AIR".equals(request.jobDiv())) {
+            Class<?> group = "IMP".equals(request.bound()) ? AirImpMasterGroup.class : AirMasterGroup.class;
+            Set<ConstraintViolation<CreateMasterBlRequest>> violations = validator.validate(request, group);
+            if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         }
         Long id = masterBlUseCase.createMasterBl(masterBlAssembler.toCreateCommand(request));
         URI location = uriBuilder.path("/api/master-bl/{id}").buildAndExpand(id).toUri();
@@ -78,6 +84,15 @@ public class MasterBlController {
     public ResponseEntity<ApiResponse<MasterBlDetailResponse>> updateMasterBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateMasterBlRequest req) {
+        if ("SEA".equals(req.jobDiv())) {
+            Class<?> group = "IMP".equals(req.bound()) ? SeaImpMasterGroup.class : SeaMasterGroup.class;
+            Set<ConstraintViolation<UpdateMasterBlRequest>> violations = validator.validate(req, group);
+            if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        } else if ("AIR".equals(req.jobDiv())) {
+            Class<?> group = "IMP".equals(req.bound()) ? AirImpMasterGroup.class : AirMasterGroup.class;
+            Set<ConstraintViolation<UpdateMasterBlRequest>> violations = validator.validate(req, group);
+            if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        }
         return ResponseEntity.ok(ApiResponse.of(
                 masterBlAssembler.toDetail(masterBlUseCase.updateMasterBl(id, masterBlAssembler.toUpdateCommand(req))),
                 MessageCode.MASTER_BL_UPDATED.message()));
