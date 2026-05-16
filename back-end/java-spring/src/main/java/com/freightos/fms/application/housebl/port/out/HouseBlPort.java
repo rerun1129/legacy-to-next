@@ -33,6 +33,13 @@ public interface HouseBlPort {
      */
     long updateHblNoById(Long id, BlNumber newHblNo, JobDiv expectedJobDiv);
 
+    /**
+     * masterBlId 참조 House B/L의 master_bl_id·mbl_no·master_ref_no 일괄 NULL화.
+     * House B/L 행은 유지. SEA/AIR 무관.
+     * @return affected rows.
+     */
+    int nullifyMasterRefByMasterBlId(Long masterBlId);
+
     /** hbl_no EXACT 매칭으로 house_bl_id PK 목록 조회 (최대 2건). jobDiv로 도메인 격리. */
     List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv);
 }

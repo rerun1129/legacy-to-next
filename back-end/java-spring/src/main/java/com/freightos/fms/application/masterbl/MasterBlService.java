@@ -96,8 +96,9 @@ public class MasterBlService implements MasterBlUseCase {
     public void deleteMasterBlById(Long id) {
         MasterBlJobDiv jobDiv = masterBlPort.findJobDivById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
+        int unlinked = houseBlPort.nullifyMasterRefByMasterBlId(id);
         masterBlPort.deleteByIdAndJobDiv(id, jobDiv);
-        log.info("Deleted MasterBl id={}", id);
+        log.info("Deleted MasterBl id={} (unlinked {} house_bl rows)", id, unlinked);
     }
 
     private MasterBl findEntityById(Long id) {

@@ -118,6 +118,12 @@ public class HouseBlPersistenceAdapter implements HouseBlPort {
     }
 
     @Override
+    @Transactional
+    public int nullifyMasterRefByMasterBlId(Long masterBlId) {
+        return houseBlRepository.nullifyMasterRefByMasterBlId(masterBlId);
+    }
+
+    @Override
     public List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv) {
         return houseBlRepository.findHouseBlKeysByHblNoExact(hblNo, jobDiv);
     }
