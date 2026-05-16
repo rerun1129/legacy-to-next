@@ -9,4 +9,5 @@ export interface MasterBlPort {
   delete(id: number): Promise<void>;
   // EXACT 매칭 — POST /api/master-bl/find-by-mbl-no
   findByMblNo(mblNo: string): Promise<number[]>;
+  changeMblNo(id: number, mblNo: string, masterRefNo: string): Promise<void>;
 }

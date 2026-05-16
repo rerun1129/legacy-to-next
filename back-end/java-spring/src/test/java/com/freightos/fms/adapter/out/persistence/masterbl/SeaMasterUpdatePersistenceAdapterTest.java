@@ -46,7 +46,7 @@ class SeaMasterUpdatePersistenceAdapterTest {
     /** 모든 필드 null — PATCH 의미론 */
     private static UpdateMasterBlCommand emptyCommand() {
         return new UpdateMasterBlCommand(
-                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, null,
                 null, null

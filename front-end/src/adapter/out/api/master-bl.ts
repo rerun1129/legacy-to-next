@@ -179,4 +179,12 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
     if (!parsed.success) throw new ResponseParseError(`Invalid find-by-mbl-no response: ${parsed.error.message}`);
     return parsed.data.data;
   },
+
+  async changeMblNo(id: number, mblNo: string, masterRefNo: string): Promise<void> {
+    await fetchJson(`${MASTER_BL_BASE}/${id}/mbl-no`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mblNo, masterRefNo }),
+    });
+  },
 };

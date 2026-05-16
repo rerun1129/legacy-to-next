@@ -151,6 +151,12 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
 
     @Override
     @Transactional
+    public long updateMblNoAndMasterRefById(Long id, String newMblNo, String newMasterRefNo) {
+        return masterBlRepository.updateMblNoAndMasterRefById(id, newMblNo, newMasterRefNo);
+    }
+
+    @Override
+    @Transactional
     public void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv) {
         switch (jobDiv) {
             case SEA -> {

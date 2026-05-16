@@ -80,8 +80,6 @@ public class MasterBlAssembler {
         return new UpdateMasterBlCommand(
                 req.jobDiv(),
                 req.bound(),
-                req.mblNo(),
-                req.masterRefNo(),
                 req.freightTerm(),
                 req.shipperCode(),
                 req.shipperAddress(),

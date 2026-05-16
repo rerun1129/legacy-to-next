@@ -45,15 +45,15 @@ public class MasterBlSeaSubMapper {
      * <p>분기:
      * <ul>
      *   <li>form 미보유(DB 보호): masterBlId(자기 PK) — setter 없음 (attached entity PK 변경 불가)
-     *   <li>form 편집 가능: mblNo·masterRefNo·bound·jobDiv 외 모든 toolbar+panel 필드
+     *   <li>mblNo·masterRefNo — setter 제거: ChangeMasterBlNoCommand 전용 경로로만 변경 가능
+     *   <li>form 편집 가능: bound·jobDiv 제외한 모든 toolbar+panel 필드
      *       — {@code if (domain.getXxx() != null) jpa.setXxx(...)} conditional setter
      *   <li>shipperCode·consigneeCode·notifyCode: null이면 skip (§6.37 PATCH — assignParties null 가드와 연동)
      * </ul>
      */
     public void applyMasterSeaCommonFields(MasterBl domain, MasterBlJpaEntity jpa) {
         // jobDiv·bound: 본체 식별자, UPDATE 경로에서 변경 불가 → setter 제거
-        if (domain.getMblNo() != null) jpa.setMblNo(mapOrNull(domain.getMblNo(), BlNumber::value));
-        if (domain.getMasterRefNo() != null) jpa.setMasterRefNo(mapOrNull(domain.getMasterRefNo(), BlNumber::value));
+        // mblNo·masterRefNo: PUT /{id}/mbl-no 전용 경로(ChangeMasterBlNoCommand)로만 변경 → setter 제거
         // shipper/consignee/notify: null이면 DB 기존 값 보호 (§6.37 PATCH)
         // address는 trim-aware compare로 DB의 trailing whitespace로 인한 가짜 dirty 차단 (§6.63)
         if (domain.getShipperCode() != null) {

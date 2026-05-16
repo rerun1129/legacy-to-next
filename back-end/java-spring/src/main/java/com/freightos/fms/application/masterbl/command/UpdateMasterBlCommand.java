@@ -5,12 +5,11 @@ import java.util.List;
 
 /**
  * Master B/L 수정 커맨드. null 필드는 기존 값 유지(PATCH 의미론).
+ * mblNo·masterRefNo는 제외 — ChangeMasterBlNoCommand 전용 경로로만 변경 가능.
  */
 public record UpdateMasterBlCommand(
         String jobDiv,
         String bound,
-        String mblNo,
-        String masterRefNo,
         String freightTerm,
         String shipperCode,
         String shipperAddress,

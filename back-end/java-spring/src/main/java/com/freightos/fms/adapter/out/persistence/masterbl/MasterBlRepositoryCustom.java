@@ -10,4 +10,5 @@ import java.util.List;
 public interface MasterBlRepositoryCustom {
     PagedResult<MasterBlSummaryResult> searchByFilter(MasterBlFilter filter, PageRequest pageRequest);
     List<Long> findMasterBlKeysByMblNoExact(String mblNo);
+    long updateMblNoAndMasterRefById(Long id, String newMblNo, String newMasterRefNo);
 }

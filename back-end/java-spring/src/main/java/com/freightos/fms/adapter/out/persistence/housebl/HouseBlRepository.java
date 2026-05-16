@@ -50,4 +50,10 @@ public interface HouseBlRepository extends JpaRepository<HouseBlJpaEntity, Long>
     @Modifying(flushAutomatically = true)
     @Query("update HouseBlJpaEntity h set h.masterBlId = null, h.mblNo = null, h.masterRefNo = null where h.masterBlId = :masterBlId")
     int nullifyMasterRefByMasterBlId(@Param("masterBlId") Long masterBlId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("update HouseBlJpaEntity h set h.mblNo = :mblNo, h.masterRefNo = :masterRefNo where h.masterBlId = :masterBlId")
+    int updateMasterRefByMasterBlId(@Param("masterBlId") Long masterBlId,
+                                    @Param("mblNo") String mblNo,
+                                    @Param("masterRefNo") String masterRefNo);
 }

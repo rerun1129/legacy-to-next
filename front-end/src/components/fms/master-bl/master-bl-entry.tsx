@@ -19,10 +19,12 @@ import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { masterBlPort } from "@/lib/ports";
+import { toast } from "@/lib/toast-store";
 import { useMasterBlEntryMutations } from "./use-master-bl-entry-mutations";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { ScreenGuard }   from "@/components/shared/screen-guard";
+import { MasterChangeBlNoModal } from "./master-change-bl-no-modal";
 
 interface Props {
   variantKey: string;
@@ -41,6 +43,7 @@ function getToolbarFields(mode: string) {
 export function MasterBLEntry({ variantKey }: Props) {
   const [tab, setTab] = useState("main");
   const [resetVersion, setResetVersion] = useState(0);
+  const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const queryClient = useQueryClient();
@@ -168,6 +171,14 @@ export function MasterBLEntry({ variantKey }: Props) {
     setResetVersion(v => v + 1);
   }
 
+  function handleChangeBlNo() {
+    if (!isEdit || !id) {
+      toast.info("먼저 Master B/L을 조회해주세요.");
+      return;
+    }
+    setIsChangeBlNoModalOpen(true);
+  }
+
   // Save confirm 모달 (House 패턴 정합 — Non B/L 16dbc0b 패턴)
   async function handleSave(raw: MasterBlFormValues) {
     const ok = await confirm({
@@ -228,7 +239,7 @@ export function MasterBLEntry({ variantKey }: Props) {
             onClick={handleDelete}
             disabled={!isEdit || deleteMutation.isPending}
           >Delete</Button>
-          <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />}>{modeLabels.changeBLNo}</Button>
+          <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />} onClick={handleChangeBlNo} disabled={!isEdit}>{modeLabels.changeBLNo}</Button>
         </div>
       </div>
 
@@ -292,6 +303,17 @@ export function MasterBLEntry({ variantKey }: Props) {
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={resetVersion} variant={variant} form={form} active={tab === "main"} /></div>
       <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
     </form>
+    {isEdit && id && (
+      <MasterChangeBlNoModal
+        masterBlId={id}
+        currentMblNo={detail?.mblNo ?? ""}
+        currentMasterRefNo={detail?.masterRefNo ?? ""}
+        blNoLabel={modeLabels.blNo}
+        isOpen={isChangeBlNoModalOpen}
+        onClose={() => setIsChangeBlNoModalOpen(false)}
+        onChanged={() => { detailLoadedRef.current = false; }}
+      />
+    )}
     </FormProvider>
   );
 }

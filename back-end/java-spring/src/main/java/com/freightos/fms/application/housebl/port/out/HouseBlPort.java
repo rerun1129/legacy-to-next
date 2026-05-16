@@ -40,6 +40,13 @@ public interface HouseBlPort {
      */
     int nullifyMasterRefByMasterBlId(Long masterBlId);
 
+    /**
+     * masterBlId 참조 House B/L의 mbl_no·master_ref_no를 일괄 UPDATE.
+     * master_bl_id·jobDiv 등은 건드리지 않는다.
+     * @return affected rows (0이면 해당 masterBlId를 가진 house_bl 없음).
+     */
+    int updateMasterRefByMasterBlId(Long masterBlId, String newMblNo, String newMasterRefNo);
+
     /** hbl_no EXACT 매칭으로 house_bl_id PK 목록 조회 (최대 2건). jobDiv로 도메인 격리. */
     List<Long> findHouseBlKeysByHblNoExact(String hblNo, JobDiv jobDiv);
 }

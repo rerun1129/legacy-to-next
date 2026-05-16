@@ -100,6 +100,10 @@ export const mockMasterBlPort: MasterBlPort = {
     // mock: no-op
   },
 
+  async changeMblNo(_id: number, _mblNo: string, _masterRefNo: string): Promise<void> {
+    // mock no-op (BE SSOT — 실제 동작은 API adapter에서)
+  },
+
   async findByMblNo(mblNo: string): Promise<number[]> {
     return masterBlRows.filter((r) => r.mblNo === mblNo).map((r) => r.id);
   },

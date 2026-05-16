@@ -2,6 +2,7 @@ package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.FmsException;
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.masterbl.command.ChangeMasterBlNoCommand;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
@@ -11,6 +12,7 @@ import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
+import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.projection.ConsoledHouseBlSummary;
 import com.freightos.fms.domain.housebl.projection.ConsoledSeaContainer;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
@@ -89,6 +91,19 @@ public class MasterBlService implements MasterBlUseCase {
         List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, updated);
         List<ConsoledSeaContainer> containers = loadConsoledSeaContainers(id, updated);
         return masterBlFactory.toDetailResult(updated, consoled, containers);
+    }
+
+    @Override
+    @Transactional
+    public void changeMblNo(Long id, ChangeMasterBlNoCommand command) {
+        BlNumber newMbl = BlNumber.of(command.mblNo());
+        BlNumber newRef = BlNumber.of(command.masterRefNo());
+        if (newMbl == null) throw new IllegalArgumentException("mblNo must not be null or blank");
+        if (newRef == null) throw new IllegalArgumentException("masterRefNo must not be null or blank");
+        int hblAffected = houseBlPort.updateMasterRefByMasterBlId(id, newMbl.value(), newRef.value());
+        long mblAffected = masterBlPort.updateMblNoAndMasterRefById(id, newMbl.value(), newRef.value());
+        if (mblAffected == 0) throw new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND);
+        log.info("Changed MasterBl mblNo/masterRefNo: id={} (consoled {} house_bl rows)", id, hblAffected);
     }
 
     @Override

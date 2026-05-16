@@ -91,10 +91,7 @@ public class MasterBlFactory {
     // ── UPDATE ────────────────────────────────────────────────────────
 
     public void applyToEntity(UpdateMasterBlCommand cmd, MasterBl entity) {
-        entity.assignMblNo(
-                Nullables.mapOrElse(cmd.mblNo(), BlNumber::of, entity::getMblNo),
-                Nullables.mapOrElse(cmd.masterRefNo(), BlNumber::of, entity::getMasterRefNo)
-        );
+        // mblNo·masterRefNo는 ChangeMasterBlNoCommand 전용 경로로만 변경 — 일반 UPDATE에서 제외.
         // §6.37 PATCH 의미론: code/address 중 하나라도 non-null이면 update, 둘 다 null이면 기존 값 보존.
         // CustomerCode.of(value, address) 2-arg 사용으로 address도 함께 도메인에 반영한다.
         // (1-arg method reference는 address를 항상 null로 덮어쓰는 버그가 있다.)

@@ -6,13 +6,12 @@ import java.util.List;
 /**
  * Master B/L 수정 요청 DTO.
  * 모든 필드는 nullable — null 은 기존 값 유지(PATCH 의미론).
+ * mblNo·masterRefNo는 이 DTO에서 제외 — ChangeMasterBlNoCommand 전용 경로(PUT /{id}/mbl-no)로만 변경 가능.
  * 내부 record는 CreateMasterBlRequest와 구조 동일, import 사이클 방지를 위해 별도 정의.
  */
 public record UpdateMasterBlRequest(
         String jobDiv,
         String bound,
-        String mblNo,
-        String masterRefNo,
         String freightTerm,
         String shipperCode,
         String shipperAddress,

@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.masterbl;
 
+import com.freightos.fms.adapter.in.web.masterbl.dto.ChangeMasterBlNoRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.CreateMasterBlRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.FindMasterBlByMblNoRequest;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
@@ -9,6 +10,7 @@ import com.freightos.fms.adapter.in.web.masterbl.dto.UpdateMasterBlRequest;
 import com.freightos.fms.adapter.in.web.validation.SeaImpMasterGroup;
 import com.freightos.fms.adapter.in.web.validation.SeaMasterGroup;
 import com.freightos.common.response.ApiResponse;
+import com.freightos.fms.application.masterbl.command.ChangeMasterBlNoCommand;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
@@ -79,6 +81,15 @@ public class MasterBlController {
         return ResponseEntity.ok(ApiResponse.of(
                 masterBlAssembler.toDetail(masterBlUseCase.updateMasterBl(id, masterBlAssembler.toUpdateCommand(req))),
                 MessageCode.MASTER_BL_UPDATED.message()));
+    }
+
+    @Operation(summary = "Master B/L 번호 변경 (전용 엔드포인트)")
+    @PutMapping("/{id}/mbl-no")
+    public ResponseEntity<ApiResponse<Void>> changeMblNo(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangeMasterBlNoRequest req) {
+        masterBlUseCase.changeMblNo(id, new ChangeMasterBlNoCommand(req.mblNo(), req.masterRefNo()));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.MASTER_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Master B/L 삭제")

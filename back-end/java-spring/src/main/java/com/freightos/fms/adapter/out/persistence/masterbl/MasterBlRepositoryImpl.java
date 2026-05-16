@@ -10,6 +10,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.freightos.common.util.Nullables;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -20,6 +22,9 @@ import java.util.List;
 public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public PagedResult<MasterBlSummaryResult> searchByFilter(MasterBlFilter filter, PageRequest pageRequest) {
@@ -87,6 +92,19 @@ public class MasterBlRepositoryImpl implements MasterBlRepositoryCustom {
                 .orderBy(m.createdAt.desc(), m.masterBlId.desc())
                 .limit(2)
                 .fetch();
+    }
+
+    @Override
+    public long updateMblNoAndMasterRefById(Long id, String newMblNo, String newMasterRefNo) {
+        QMasterBlJpaEntity m = QMasterBlJpaEntity.masterBlJpaEntity;
+        long affected = queryFactory.update(m)
+                .set(m.mblNo, newMblNo)
+                .set(m.masterRefNo, newMasterRefNo)
+                .where(m.masterBlId.eq(id))
+                .execute();
+        em.flush();
+        em.clear();
+        return affected;
     }
 
     private static BooleanExpression containsIgnoreCase(StringPath col, String v) {

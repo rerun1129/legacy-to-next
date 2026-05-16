@@ -32,4 +32,10 @@ public interface MasterBlPort {
     Optional<MasterBlJobDiv> findJobDivById(Long id);
     void deleteByIdAndJobDiv(Long id, MasterBlJobDiv jobDiv);
     List<Long> findMasterBlKeysByMblNoExact(String mblNo);
+
+    /**
+     * master_bl의 mbl_no·master_ref_no를 부분 UPDATE (SELECT 없이 직접 DB 갱신).
+     * @return affected row 수 (0이면 id 미존재)
+     */
+    long updateMblNoAndMasterRefById(Long id, String newMblNo, String newMasterRefNo);
 }

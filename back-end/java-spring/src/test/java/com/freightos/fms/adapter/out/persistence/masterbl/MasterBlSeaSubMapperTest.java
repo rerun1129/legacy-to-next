@@ -3,7 +3,6 @@ package com.freightos.fms.adapter.out.persistence.masterbl;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlJpaEntity;
 import com.freightos.fms.adapter.out.persistence.masterbl.entity.MasterBlSeaJpaEntity;
 import com.freightos.fms.domain.common.enums.Bound;
-import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,17 +49,6 @@ class MasterBlSeaSubMapperTest {
         verify(spyParentJpa, never()).setMblNo(any());
     }
 
-    @Test
-    @DisplayName("applyMasterSeaCommonFields: mblNo 있음 → setMblNo(값) 호출")
-    void applyMasterSeaCommonFields_whenMblNoPresent_callsSetMblNo() {
-        MasterBlSea domain = MasterBlSea.create(Bound.EXP);
-        domain.assignMblNo(BlNumber.of("MBL12345"), null);
-
-        mapper.applyMasterSeaCommonFields(domain, spyParentJpa);
-
-        verify(spyParentJpa).setMblNo("MBL12345");
-    }
-
     // ── applyMasterSeaCommonFields: masterRefNo conditional setter 검증 ─
 
     @Test
@@ -71,17 +59,6 @@ class MasterBlSeaSubMapperTest {
         mapper.applyMasterSeaCommonFields(domain, spyParentJpa);
 
         verify(spyParentJpa, never()).setMasterRefNo(any());
-    }
-
-    @Test
-    @DisplayName("applyMasterSeaCommonFields: masterRefNo 있음 → setMasterRefNo(값) 호출")
-    void applyMasterSeaCommonFields_whenMasterRefNoPresent_callsSetMasterRefNo() {
-        MasterBlSea domain = MasterBlSea.create(Bound.EXP);
-        domain.assignMblNo(null, BlNumber.of("REF98765"));
-
-        mapper.applyMasterSeaCommonFields(domain, spyParentJpa);
-
-        verify(spyParentJpa).setMasterRefNo("REF98765");
     }
 
     // ── applyMasterSeaCommonFields: shipperCode null → setShipperCode skip ─
