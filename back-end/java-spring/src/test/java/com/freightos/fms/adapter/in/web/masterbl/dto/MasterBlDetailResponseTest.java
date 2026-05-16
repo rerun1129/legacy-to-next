@@ -20,7 +20,7 @@ class MasterBlDetailResponseTest {
     void recordComponents_haveExactlyThirtyFiveFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(35);
+        assertThat(components).hasSize(38);
         assertThat(components[29].getName()).isEqualTo("consolidatedHouseBls");
         assertThat(components[29].getType()).isEqualTo(List.class);
     }
@@ -51,7 +51,8 @@ class MasterBlDetailResponseTest {
                 "REMARK-SAMPLE",
                 new DescProjection("MARKS", "DESC", null, null),
                 null,
-                null
+                null,
+                List.of(), List.of(), List.of()
         );
 
         MasterBlDetailResponse response = MasterBlDetailResponse.from(result);
@@ -84,7 +85,8 @@ class MasterBlDetailResponseTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                List.of(), List.of(), List.of()
         );
 
         MasterBlDetailResponse response = MasterBlDetailResponse.from(result);

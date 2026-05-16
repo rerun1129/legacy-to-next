@@ -1,10 +1,13 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.application.masterbl.projection.AirChargeProjection;
 import com.freightos.fms.application.masterbl.projection.AirDetailProjection;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
 import com.freightos.fms.application.masterbl.projection.DescProjection;
+import com.freightos.fms.application.masterbl.projection.DimProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.ScheduleLegProjection;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 
 import java.math.BigDecimal;
@@ -47,7 +50,10 @@ public record MasterBlDetailResponse(
         String remark,
         DescView desc,
         SeaDetailResponse seaDetail,
-        AirDetailResponse airDetail
+        AirDetailResponse airDetail,
+        List<DimView> dims,
+        List<ScheduleLegView> scheduleLegs,
+        List<AirChargeView> airCharges
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailResult result) {
         SeaDetailProjection seaDetailProjection = result.seaDetail();
@@ -87,7 +93,10 @@ public record MasterBlDetailResponse(
                 result.remark(),
                 DescView.from(result.desc()),
                 seaDetailProjection != null ? SeaDetailResponse.from(seaDetailProjection) : null,
-                airDetailProjection != null ? AirDetailResponse.from(airDetailProjection) : null
+                airDetailProjection != null ? AirDetailResponse.from(airDetailProjection) : null,
+                result.dims() == null ? List.of() : result.dims().stream().map(DimView::from).toList(),
+                result.scheduleLegs() == null ? List.of() : result.scheduleLegs().stream().map(ScheduleLegView::from).toList(),
+                result.airCharges() == null ? List.of() : result.airCharges().stream().map(AirChargeView::from).toList()
         );
     }
 
@@ -142,6 +151,51 @@ public record MasterBlDetailResponse(
         public static DescView from(DescProjection p) {
             if (p == null) return null;
             return new DescView(p.marks(), p.description(), p.descClause1(), p.descClause2());
+        }
+    }
+
+    /** AIR Dim(치수) 행 응답 뷰. */
+    public record DimView(
+            BigDecimal lengthCm,
+            BigDecimal widthCm,
+            BigDecimal heightCm,
+            Integer quantity,
+            BigDecimal cbm,
+            BigDecimal volumeWeightKg
+    ) {
+        public static DimView from(DimProjection p) {
+            return new DimView(p.lengthCm(), p.widthCm(), p.heightCm(), p.quantity(), p.cbm(), p.volumeWeightKg());
+        }
+    }
+
+    /** AIR Schedule Leg(구간 일정) 행 응답 뷰. */
+    public record ScheduleLegView(
+            String toCode,
+            String byCarrier,
+            String flightNo,
+            String onBoardDt,
+            String onBoardTm,
+            String arrivalDt,
+            String arrivalTm
+    ) {
+        public static ScheduleLegView from(ScheduleLegProjection p) {
+            return new ScheduleLegView(p.toCode(), p.byCarrier(), p.flightNo(), p.onBoardDt(), p.onBoardTm(), p.arrivalDt(), p.arrivalTm());
+        }
+    }
+
+    /** AIR Charge 행 응답 뷰. */
+    public record AirChargeView(
+            String freightCode,
+            String currencyCode,
+            String per,
+            String freightTerm,
+            BigDecimal grossWeightKg,
+            String rateClass,
+            BigDecimal chargeWeightKg,
+            BigDecimal rate
+    ) {
+        public static AirChargeView from(AirChargeProjection p) {
+            return new AirChargeView(p.freightCode(), p.currencyCode(), p.per(), p.freightTerm(), p.grossWeightKg(), p.rateClass(), p.chargeWeightKg(), p.rate());
         }
     }
 }

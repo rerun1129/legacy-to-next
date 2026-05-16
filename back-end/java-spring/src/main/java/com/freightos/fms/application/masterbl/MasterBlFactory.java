@@ -3,22 +3,28 @@ package com.freightos.fms.application.masterbl;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.projection.AirChargeProjection;
 import com.freightos.fms.application.masterbl.projection.AirDetailProjection;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerView;
 import com.freightos.fms.application.masterbl.projection.DescProjection;
+import com.freightos.fms.application.masterbl.projection.DimProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.ScheduleLegProjection;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
 import com.freightos.fms.domain.common.enums.FreightTerm;
+import com.freightos.fms.domain.common.enums.Per;
+import com.freightos.fms.domain.common.enums.RateClass;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.CargoSummary;
+import com.freightos.fms.domain.common.vo.CurrencyCode;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
 import com.freightos.fms.domain.common.vo.PortCode;
@@ -212,7 +218,10 @@ public class MasterBlFactory {
                 remark,
                 toDescProjection(entity.getDesc()),
                 seaDetail,
-                airDetail
+                airDetail,
+                toDimProjections(entity),
+                toScheduleLegProjections(entity),
+                toAirChargeProjections(entity)
         );
     }
 
@@ -224,6 +233,42 @@ public class MasterBlFactory {
                 Nullables.mapOrNull(desc.getDescClause1(), DescClause1::name),
                 Nullables.mapOrNull(desc.getDescClause2(), DescClause2::name)
         );
+    }
+
+    private List<DimProjection> toDimProjections(MasterBl entity) {
+        return switch (entity) {
+            case MasterBlAir ignored -> entity.getDims().stream()
+                    .map(d -> new DimProjection(d.getLengthCm(), d.getWidthCm(), d.getHeightCm(), d.getQuantity(), d.getCbm(), d.getVolumeWeightKg()))
+                    .toList();
+            default -> List.of();
+        };
+    }
+
+    private List<ScheduleLegProjection> toScheduleLegProjections(MasterBl entity) {
+        return switch (entity) {
+            case MasterBlAir ignored -> entity.getScheduleLegs().stream()
+                    .map(l -> new ScheduleLegProjection(l.getToCode(), l.getByCarrier(), l.getFlightNo(), l.getOnBoardDt(), l.getOnBoardTm(), l.getArrivalDt(), l.getArrivalTm()))
+                    .toList();
+            default -> List.of();
+        };
+    }
+
+    private List<AirChargeProjection> toAirChargeProjections(MasterBl entity) {
+        return switch (entity) {
+            case MasterBlAir ignored -> entity.getAirCharges().stream()
+                    .map(c -> new AirChargeProjection(
+                            c.getFreightCode(),
+                            VoMapper.mapOrNull(c.getCurrencyCode(), CurrencyCode::value),
+                            Nullables.mapOrNull(c.getPer(), Per::name),
+                            Nullables.mapOrNull(c.getFreightTerm(), FreightTerm::name),
+                            VoMapper.mapOrNull(c.getGrossWeightKg(), Weight::kg),
+                            Nullables.mapOrNull(c.getRateClass(), RateClass::name),
+                            VoMapper.mapOrNull(c.getChargeWeightKg(), Weight::kg),
+                            c.getRate()
+                    ))
+                    .toList();
+            default -> List.of();
+        };
     }
 
     // ── remark 매핑 ───────────────────────────────────────────────────

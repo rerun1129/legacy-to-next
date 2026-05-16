@@ -43,7 +43,9 @@ class HouseBlFactoryAirTest {
                 new HouseBlSeaSubFactory(),
                 new HouseBlTruckSubFactory(),
                 new HouseBlNonBlSubFactory(),
-                new HouseBlAirSubFactory()
+                new HouseBlAirSubFactory(),
+                new HouseBlSeaDetailSubFactory(),
+                new HouseBlAirDetailSubFactory()
         );
     }
 

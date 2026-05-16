@@ -44,5 +44,8 @@ public record MasterBlDetailResult(
         String remark,
         DescProjection desc,
         SeaDetailProjection seaDetail,
-        AirDetailProjection airDetail
+        AirDetailProjection airDetail,
+        List<DimProjection> dims,
+        List<ScheduleLegProjection> scheduleLegs,
+        List<AirChargeProjection> airCharges
 ) {}
