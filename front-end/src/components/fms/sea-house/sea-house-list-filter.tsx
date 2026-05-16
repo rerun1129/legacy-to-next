@@ -7,31 +7,16 @@ import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { LcnLabel } from "@/components/shared/inputs/lcn-label";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
-import { useEnumOptions } from "@/application/enums/use-enum";
+import { useSeaHouseEnums } from "@/lib/use-sea-house-enums";
 import type { SeaHouseFilter } from "@/domain/sea-house";
 import { usePathname } from "next/navigation";
-
-const DATE_KIND_OPTIONS = [
-  { value: "ETD", label: "ETD" },
-  { value: "ETA", label: "ETA" },
-];
-const MASTER_BL_KIND_OPTIONS = [
-  { value: "MBL", label: "Master B/L No" },
-  { value: "REF", label: "Master Reference No." },
-];
-const PARTY_KIND_OPTIONS = [
-  { value: "SHIPPER", label: "Shipper" },
-  { value: "CONSIGNEE", label: "Consignee" },
-  { value: "NOTIFY", label: "Notify" },
-];
-const PARTNER_KIND_OPTIONS = [
-  { value: "SETTLE_PARTNER", label: "Settle Partner" },
-  { value: "DOC_PARTNER", label: "Doc Partner" },
-];
-const PORT_KIND_OPTIONS = [
-  { value: "POL", label: "POL" },
-  { value: "POD", label: "POD" },
-];
+import {
+  DATE_KIND_OPTIONS,
+  MASTER_BL_KIND_OPTIONS,
+  PARTY_KIND_OPTIONS,
+  PARTNER_KIND_OPTIONS,
+  PORT_KIND_OPTIONS,
+} from "./sea-house-list-filter-options";
 
 interface Props {
   form: UseFormReturn<SeaHouseFilter>;
@@ -42,17 +27,11 @@ export function SeaHouseListFilter({ form }: Props) {
   useListFilterSync(form, pathname);
   const { register } = form;
 
-  const { options: shipmentTypeOptions, isLoading: shipmentTypeLoading, placeholder: shipmentTypePlaceholder } = useEnumOptions("ShipmentType");
-  const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentTypeOptions];
-
-  const { options: salesClassOptions, isLoading: salesClassLoading, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
-  const salesClassOptionsWithAll = [{ value: "", label: "ALL" }, ...salesClassOptions];
-
-  const { options: incotermsOptions, isLoading: incotermsLoading, placeholder: incotermsPlateholder } = useEnumOptions("Incoterms");
-  const incotermsOptionsWithAll = [{ value: "", label: "ALL" }, ...incotermsOptions];
-
-  const { options: loadTypeOptions, isLoading: loadTypeLoading, placeholder: loadTypePlaceholder } = useEnumOptions("LoadType");
-  const loadTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...loadTypeOptions];
+  const { shipmentType, salesClass, incoterms, loadType } = useSeaHouseEnums();
+  const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentType.options];
+  const salesClassOptionsWithAll   = [{ value: "", label: "ALL" }, ...salesClass.options];
+  const incotermsOptionsWithAll    = [{ value: "", label: "ALL" }, ...incoterms.options];
+  const loadTypeOptionsWithAll     = [{ value: "", label: "ALL" }, ...loadType.options];
 
   return (
     <div className="search-card">
@@ -230,8 +209,8 @@ export function SeaHouseListFilter({ form }: Props) {
                 <ComboBox
                   variant="panel"
                   options={shipmentTypeOptionsWithAll}
-                  disabled={shipmentTypeLoading}
-                  placeholder={shipmentTypePlaceholder}
+                  disabled={shipmentType.isLoading}
+                  placeholder={shipmentType.placeholder}
                   style={{ gridColumn: "2 / span 2" }}
                   value={field.value}
                   onChange={field.onChange}
@@ -270,8 +249,8 @@ export function SeaHouseListFilter({ form }: Props) {
                 <ComboBox
                   variant="panel"
                   options={salesClassOptionsWithAll}
-                  disabled={salesClassLoading}
-                  placeholder={salesClassPlaceholder}
+                  disabled={salesClass.isLoading}
+                  placeholder={salesClass.placeholder}
                   style={{ gridColumn: "2 / span 2" }}
                   value={field.value}
                   onChange={field.onChange}
@@ -301,8 +280,8 @@ export function SeaHouseListFilter({ form }: Props) {
                 <ComboBox
                   variant="panel"
                   options={incotermsOptionsWithAll}
-                  disabled={incotermsLoading}
-                  placeholder={incotermsPlateholder}
+                  disabled={incoterms.isLoading}
+                  placeholder={incoterms.placeholder}
                   style={{ gridColumn: "2 / span 2" }}
                   value={field.value}
                   onChange={field.onChange}
@@ -323,8 +302,8 @@ export function SeaHouseListFilter({ form }: Props) {
                 <ComboBox
                   variant="panel"
                   options={loadTypeOptionsWithAll}
-                  disabled={loadTypeLoading}
-                  placeholder={loadTypePlaceholder}
+                  disabled={loadType.isLoading}
+                  placeholder={loadType.placeholder}
                   style={{ gridColumn: "2 / span 2" }}
                   value={field.value}
                   onChange={field.onChange}
