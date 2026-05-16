@@ -93,6 +93,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     },
     // §BE Phase 2 — dims 배열 매핑 (default [])
     dims: (detail.dims ?? []).map((d) => ({
+      id:             d.id             ?? undefined,
       lengthCm:       d.lengthCm       ?? undefined,
       widthCm:        d.widthCm        ?? undefined,
       heightCm:       d.heightCm       ?? undefined,
@@ -102,6 +103,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     })),
     // §BE Phase 2 — scheduleLegs 배열 매핑 (default [])
     scheduleLegs: (detail.scheduleLegs ?? []).map((leg) => ({
+      id:        leg.id        ?? undefined,
       toCode:    leg.toCode    ?? "",
       byCarrier: leg.byCarrier ?? undefined,
       flightNo:  leg.flightNo  ?? undefined,
@@ -112,6 +114,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     })),
     // §BE Phase 2 — airCharges 배열 매핑 (default [])
     airCharges: (detail.airCharges ?? []).map((c) => ({
+      id:             c.id             ?? undefined,
       freightCode:    c.freightCode    ?? undefined,
       currencyCode:   c.currencyCode   ?? undefined,
       per:            c.per            ?? undefined,

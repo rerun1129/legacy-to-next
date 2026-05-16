@@ -93,6 +93,7 @@ public record UpdateMasterBlCommand(
     ) {}
 
     public record DimCommand(
+            Long id,
             BigDecimal lengthCm,
             BigDecimal widthCm,
             BigDecimal heightCm,
@@ -102,6 +103,7 @@ public record UpdateMasterBlCommand(
     ) {}
 
     public record ScheduleLegCommand(
+            Long id,
             String toCode,
             String byCarrier,
             String flightNo,
@@ -112,6 +114,7 @@ public record UpdateMasterBlCommand(
     ) {}
 
     public record AirChargeCommand(
+            Long id,
             String freightCode,
             String currencyCode,
             String per,

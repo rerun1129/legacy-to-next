@@ -156,6 +156,7 @@ public record MasterBlDetailResponse(
 
     /** AIR Dim(치수) 행 응답 뷰. */
     public record DimView(
+            Long id,
             BigDecimal lengthCm,
             BigDecimal widthCm,
             BigDecimal heightCm,
@@ -164,12 +165,13 @@ public record MasterBlDetailResponse(
             BigDecimal volumeWeightKg
     ) {
         public static DimView from(DimProjection p) {
-            return new DimView(p.lengthCm(), p.widthCm(), p.heightCm(), p.quantity(), p.cbm(), p.volumeWeightKg());
+            return new DimView(p.id(), p.lengthCm(), p.widthCm(), p.heightCm(), p.quantity(), p.cbm(), p.volumeWeightKg());
         }
     }
 
     /** AIR Schedule Leg(구간 일정) 행 응답 뷰. */
     public record ScheduleLegView(
+            Long id,
             String toCode,
             String byCarrier,
             String flightNo,
@@ -179,12 +181,13 @@ public record MasterBlDetailResponse(
             String arrivalTm
     ) {
         public static ScheduleLegView from(ScheduleLegProjection p) {
-            return new ScheduleLegView(p.toCode(), p.byCarrier(), p.flightNo(), p.onBoardDt(), p.onBoardTm(), p.arrivalDt(), p.arrivalTm());
+            return new ScheduleLegView(p.id(), p.toCode(), p.byCarrier(), p.flightNo(), p.onBoardDt(), p.onBoardTm(), p.arrivalDt(), p.arrivalTm());
         }
     }
 
     /** AIR Charge 행 응답 뷰. */
     public record AirChargeView(
+            Long id,
             String freightCode,
             String currencyCode,
             String per,
@@ -195,7 +198,7 @@ public record MasterBlDetailResponse(
             BigDecimal rate
     ) {
         public static AirChargeView from(AirChargeProjection p) {
-            return new AirChargeView(p.freightCode(), p.currencyCode(), p.per(), p.freightTerm(), p.grossWeightKg(), p.rateClass(), p.chargeWeightKg(), p.rate());
+            return new AirChargeView(p.id(), p.freightCode(), p.currencyCode(), p.per(), p.freightTerm(), p.grossWeightKg(), p.rateClass(), p.chargeWeightKg(), p.rate());
         }
     }
 }

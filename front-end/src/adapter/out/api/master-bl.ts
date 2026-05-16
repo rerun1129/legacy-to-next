@@ -112,8 +112,9 @@ const AIR_DETAIL_SCHEMA = z.object({
   remark:                z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
-// §BE-sync — DimView 6 필드 (포장 치수, BigDecimal → number)
+// §BE-sync — DimView 7 필드 (id merge-by-id, 포장 치수, BigDecimal → number)
 const DIM_API_SCHEMA = z.object({
+  id:             z.number().nullable().optional().transform((v) => v ?? undefined),
   lengthCm:       z.number().nullable().optional().transform((v) => v ?? undefined),
   widthCm:        z.number().nullable().optional().transform((v) => v ?? undefined),
   heightCm:       z.number().nullable().optional().transform((v) => v ?? undefined),
@@ -122,8 +123,9 @@ const DIM_API_SCHEMA = z.object({
   volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
 });
 
-// §BE-sync — ScheduleLegView 7 필드 (구간 스케줄)
+// §BE-sync — ScheduleLegView 8 필드 (id merge-by-id, 구간 스케줄)
 const SCHEDULE_LEG_API_SCHEMA = z.object({
+  id:        z.number().nullable().optional().transform((v) => v ?? undefined),
   toCode:    z.string().nullable().optional().transform((v) => v ?? undefined),
   byCarrier: z.string().nullable().optional().transform((v) => v ?? undefined),
   flightNo:  z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -133,8 +135,9 @@ const SCHEDULE_LEG_API_SCHEMA = z.object({
   arrivalTm: z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
-// §BE-sync — AirChargeView 8 필드 (AIR Charge, BigDecimal → number)
+// §BE-sync — AirChargeView 9 필드 (id merge-by-id, AIR Charge, BigDecimal → number)
 const AIR_CHARGE_API_SCHEMA = z.object({
+  id:             z.number().nullable().optional().transform((v) => v ?? undefined),
   freightCode:    z.string().nullable().optional().transform((v) => v ?? undefined),
   currencyCode:   z.string().nullable().optional().transform((v) => v ?? undefined),
   per:            z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -217,15 +220,12 @@ export const API_MASTER_BL_PORT: MasterBlPort = {
     return parsed.data.data;
   },
 
-  // §BE Phase 4 — update는 void 응답 (House dd76d64 패턴)
+  // §BE 통일 — update는 ApiResponse<Void> 응답
   async update(id: number, req: UpdateMasterBlRequest): Promise<void> {
-    const json = await fetchJson(`${MASTER_BL_BASE}/${id}`, {
+    await fetchJson(`${MASTER_BL_BASE}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(req),
     });
-    const j = (json ?? {}) as { data?: unknown };
-    if (j.data == null) return;
-    // data가 있는 경우도 void로 처리 (BE ApiResponse<Void> 변환 과도기 대응)
   },
 
   async delete(id: number): Promise<void> {

@@ -43,36 +43,36 @@ class MasterBlSubFactory {
 
     List<DimParams> toDimParamsFromCreate(List<CreateMasterBlCommand.DimCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new DimParams(r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+        return cmds.stream().map(r -> new DimParams(null, r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
     }
 
     List<DimParams> toDimParams(List<UpdateMasterBlCommand.DimCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new DimParams(r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+        return cmds.stream().map(r -> new DimParams(r.id(), r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
     }
 
     // ── ScheduleLeg 파라미터 변환 ─────────────────────────────────────
 
     List<LegParams> toLegParamsFromCreate(List<CreateMasterBlCommand.ScheduleLegCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new LegParams(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
+        return cmds.stream().map(r -> new LegParams(null, r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
     }
 
     List<LegParams> toLegParams(List<UpdateMasterBlCommand.ScheduleLegCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new LegParams(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
+        return cmds.stream().map(r -> new LegParams(r.id(), r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
     }
 
     // ── AirCharge 파라미터 변환 ───────────────────────────────────────
 
     List<ChargeParams> toChargeParamsFromCreate(List<CreateMasterBlCommand.AirChargeCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new ChargeParams(r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
+        return cmds.stream().map(r -> new ChargeParams(null, r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
     }
 
     List<ChargeParams> toChargeParams(List<UpdateMasterBlCommand.AirChargeCommand> cmds) {
         if (cmds == null || cmds.isEmpty()) return List.of();
-        return cmds.stream().map(r -> new ChargeParams(r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
+        return cmds.stream().map(r -> new ChargeParams(r.id(), r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
     }
 
     // ── Sub 엔티티 실제 생성 ──────────────────────────────────────────
@@ -87,13 +87,17 @@ class MasterBlSubFactory {
             entity.initDesc(desc);
         }
         if (!dimParams.isEmpty()) {
-            entity.initDims(dimParams.stream()
-                    .map(r -> MasterBlDim.create(null, r.l(), r.w(), r.h(), r.qty(), r.cbm(), r.vwKg())).toList());
+            entity.initDims(dimParams.stream().map(r -> {
+                MasterBlDim dim = MasterBlDim.create(null, r.l(), r.w(), r.h(), r.qty(), r.cbm(), r.vwKg());
+                if (r.id() != null) dim.assignIdentity(r.id(), null, null, null, null);
+                return dim;
+            }).toList());
         }
         if (!legParams.isEmpty()) {
             entity.initScheduleLegs(legParams.stream().map(r -> {
                 MasterBlScheduleLeg leg = MasterBlScheduleLeg.create(null, r.toCode(), r.onBoardDt(), r.arrivalDt());
                 leg.updateDetails(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm());
+                if (r.id() != null) leg.assignIdentity(r.id(), null, null, null, null);
                 return leg;
             }).toList());
         }
@@ -105,6 +109,7 @@ class MasterBlSubFactory {
                         Nullables.mapOrNull(r.freightTerm(), FreightTerm::valueOf),
                         Weight.of(r.grossWt()), RateClass.fromCode(r.rateClass()), Weight.of(r.chargeWt()), r.rate()
                 ));
+                if (r.id() != null) charge.assignIdentity(r.id(), null, null, null, null);
                 return charge;
             }).toList());
         }
@@ -112,7 +117,7 @@ class MasterBlSubFactory {
 
     // ── 내부 파라미터 record ─────────────────────────────────────────
 
-    record DimParams(BigDecimal l, BigDecimal w, BigDecimal h, Integer qty, BigDecimal cbm, BigDecimal vwKg) {}
-    record LegParams(String toCode, String byCarrier, String flightNo, String onBoardDt, String onBoardTm, String arrivalDt, String arrivalTm) {}
-    record ChargeParams(String freightCode, String currencyCode, String per, String freightTerm, BigDecimal grossWt, String rateClass, BigDecimal chargeWt, BigDecimal rate) {}
+    record DimParams(Long id, BigDecimal l, BigDecimal w, BigDecimal h, Integer qty, BigDecimal cbm, BigDecimal vwKg) {}
+    record LegParams(Long id, String toCode, String byCarrier, String flightNo, String onBoardDt, String onBoardTm, String arrivalDt, String arrivalTm) {}
+    record ChargeParams(Long id, String freightCode, String currencyCode, String per, String freightTerm, BigDecimal grossWt, String rateClass, BigDecimal chargeWt, BigDecimal rate) {}
 }

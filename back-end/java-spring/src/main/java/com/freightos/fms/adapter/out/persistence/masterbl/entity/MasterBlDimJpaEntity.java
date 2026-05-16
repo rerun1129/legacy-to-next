@@ -4,6 +4,7 @@ import com.freightos.common.persistence.BaseJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 @Table(schema = "fms", name = "master_bl_dim")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class MasterBlDimJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -43,6 +45,7 @@ public class MasterBlDimJpaEntity extends BaseJpaEntity {
     @Column(name = "volume_weight_kg", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal volumeWeightKg;
 
+    public void setMasterBlDimId(Long v)  { this.masterBlDimId = v; }
     public void setMasterBlAirId(Long v) { this.masterBlAirId = v; }
     public void setLengthCm(BigDecimal v) { this.lengthCm = v; }
     public void setWidthCm(BigDecimal v) { this.widthCm = v; }

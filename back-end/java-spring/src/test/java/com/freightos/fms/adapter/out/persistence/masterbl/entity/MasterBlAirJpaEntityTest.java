@@ -21,7 +21,7 @@ class MasterBlAirJpaEntityTest {
     void syncDims_emptyInput_noException() {
         MasterBlAirJpaEntity entity = new MasterBlAirJpaEntity();
 
-        assertThatCode(() -> entity.syncDims(List.of())).doesNotThrowAnyException();
+        assertThatCode(() -> entity.mergeDims(List.of())).doesNotThrowAnyException();
         assertThat(entity.getDims()).isEmpty();
     }
 
@@ -30,9 +30,9 @@ class MasterBlAirJpaEntityTest {
     void syncDims_emptyList_clearsDims() {
         MasterBlAirJpaEntity entity = new MasterBlAirJpaEntity();
         MasterBlDimJpaEntity dim = new MasterBlDimJpaEntity();
-        entity.syncDims(List.of(dim));
+        entity.mergeDims(List.of(dim));
 
-        entity.syncDims(List.of());
+        entity.mergeDims(List.of());
 
         assertThat(entity.getDims()).isEmpty();
     }
@@ -43,9 +43,9 @@ class MasterBlAirJpaEntityTest {
         MasterBlAirJpaEntity entity = new MasterBlAirJpaEntity();
         MasterBlDimJpaEntity dim1 = new MasterBlDimJpaEntity();
         MasterBlDimJpaEntity dim2 = new MasterBlDimJpaEntity();
-        entity.syncDims(List.of(dim1));
+        entity.mergeDims(List.of(dim1));
 
-        entity.syncDims(List.of(dim1, dim2));
+        entity.mergeDims(List.of(dim1, dim2));
 
         assertThat(entity.getDims()).hasSize(2);
     }

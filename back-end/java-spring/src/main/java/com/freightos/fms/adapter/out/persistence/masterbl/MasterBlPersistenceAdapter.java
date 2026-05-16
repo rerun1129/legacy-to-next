@@ -92,9 +92,9 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                 airJpa.setMasterBl(savedJpa);
                 masterBlMapper.applyAirFields(air, airJpa);
                 MasterBlAirJpaEntity savedAirJpa = masterBlAirRepository.save(airJpa);
-                savedAirJpa.syncDims(air.getDims().stream().map(masterBlMapper::toDimJpa).toList());
-                savedAirJpa.syncScheduleLegs(air.getScheduleLegs().stream().map(masterBlMapper::toScheduleLegJpa).toList());
-                savedAirJpa.syncAirCharges(air.getAirCharges().stream().map(masterBlMapper::toAirChargeJpa).toList());
+                savedAirJpa.mergeDims(air.getDims().stream().map(masterBlMapper::toDimJpa).toList());
+                savedAirJpa.mergeScheduleLegs(air.getScheduleLegs().stream().map(masterBlMapper::toScheduleLegJpa).toList());
+                savedAirJpa.mergeAirCharges(air.getAirCharges().stream().map(masterBlMapper::toAirChargeJpa).toList());
                 createAirDescIfPresent(air.getDesc(), savedAirJpa);
             }
             case MasterBlSea sea -> {
@@ -126,9 +126,9 @@ public class MasterBlPersistenceAdapter implements MasterBlPort {
                 airJpa.setMasterBl(savedJpa);
                 masterBlMapper.applyAirFields(air, airJpa);
                 MasterBlAirJpaEntity savedAirJpa = masterBlAirRepository.save(airJpa);
-                savedAirJpa.syncDims(air.getDims().stream().map(masterBlMapper::toDimJpa).toList());
-                savedAirJpa.syncScheduleLegs(air.getScheduleLegs().stream().map(masterBlMapper::toScheduleLegJpa).toList());
-                savedAirJpa.syncAirCharges(air.getAirCharges().stream().map(masterBlMapper::toAirChargeJpa).toList());
+                savedAirJpa.mergeDims(air.getDims().stream().map(masterBlMapper::toDimJpa).toList());
+                savedAirJpa.mergeScheduleLegs(air.getScheduleLegs().stream().map(masterBlMapper::toScheduleLegJpa).toList());
+                savedAirJpa.mergeAirCharges(air.getAirCharges().stream().map(masterBlMapper::toAirChargeJpa).toList());
                 updateOrDeleteAirDesc(air.getDesc(), savedAirJpa);
             }
             case MasterBlSea sea -> {

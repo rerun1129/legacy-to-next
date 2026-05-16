@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -194,20 +195,18 @@ class MasterBlControllerWebMvcTest {
     // ── PUT /api/master-bl/{id} ───────────────────────────────────────
 
     @Test
-    @DisplayName("PUT /api/master-bl/1: happy path → 200")
+    @DisplayName("PUT /api/master-bl/1: happy path → 200 + MASTER_BL_UPDATED 메시지")
     void updateMasterBl_happyPath_returns200() throws Exception {
         Long id = 1L;
         UpdateMasterBlCommand mockCommand = mock(UpdateMasterBlCommand.class);
-        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
-        MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
         given(masterBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
-        given(masterBlUseCase.updateMasterBl(eq(id), eq(mockCommand))).willReturn(mockResult);
-        given(masterBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
+        willDoNothing().given(masterBlUseCase).updateMasterBl(eq(id), eq(mockCommand));
 
         mockMvc.perform(put("/api/master-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(MessageCode.MASTER_BL_UPDATED.message()));
 
         then(masterBlUseCase).should().updateMasterBl(eq(id), any(UpdateMasterBlCommand.class));
     }
@@ -218,8 +217,8 @@ class MasterBlControllerWebMvcTest {
         Long id = 999L;
         UpdateMasterBlCommand mockCommand = mock(UpdateMasterBlCommand.class);
         given(masterBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
-        given(masterBlUseCase.updateMasterBl(eq(id), eq(mockCommand)))
-                .willThrow(new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
+        willThrow(new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND))
+                .given(masterBlUseCase).updateMasterBl(eq(id), eq(mockCommand));
 
         mockMvc.perform(put("/api/master-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)

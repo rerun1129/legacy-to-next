@@ -152,7 +152,7 @@ public class MasterBlAssembler {
 
     private List<UpdateMasterBlCommand.DimCommand> toDimCommandsU(List<UpdateMasterBlRequest.DimRequest> reqs) {
         if (reqs == null) return null;
-        return reqs.stream().map(r -> new UpdateMasterBlCommand.DimCommand(r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
+        return reqs.stream().map(r -> new UpdateMasterBlCommand.DimCommand(r.id(), r.lengthCm(), r.widthCm(), r.heightCm(), r.quantity(), r.cbm(), r.volumeWeightKg())).toList();
     }
 
     private List<CreateMasterBlCommand.ScheduleLegCommand> toLegCommands(List<CreateMasterBlRequest.ScheduleLegRequest> reqs) {
@@ -162,7 +162,7 @@ public class MasterBlAssembler {
 
     private List<UpdateMasterBlCommand.ScheduleLegCommand> toLegCommandsU(List<UpdateMasterBlRequest.ScheduleLegRequest> reqs) {
         if (reqs == null) return null;
-        return reqs.stream().map(r -> new UpdateMasterBlCommand.ScheduleLegCommand(r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
+        return reqs.stream().map(r -> new UpdateMasterBlCommand.ScheduleLegCommand(r.id(), r.toCode(), r.byCarrier(), r.flightNo(), r.onBoardDt(), r.onBoardTm(), r.arrivalDt(), r.arrivalTm())).toList();
     }
 
     private List<CreateMasterBlCommand.AirChargeCommand> toChargeCommands(List<CreateMasterBlRequest.AirChargeRequest> reqs) {
@@ -172,6 +172,6 @@ public class MasterBlAssembler {
 
     private List<UpdateMasterBlCommand.AirChargeCommand> toChargeCommandsU(List<UpdateMasterBlRequest.AirChargeRequest> reqs) {
         if (reqs == null) return null;
-        return reqs.stream().map(r -> new UpdateMasterBlCommand.AirChargeCommand(r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
+        return reqs.stream().map(r -> new UpdateMasterBlCommand.AirChargeCommand(r.id(), r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(), r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
     }
 }

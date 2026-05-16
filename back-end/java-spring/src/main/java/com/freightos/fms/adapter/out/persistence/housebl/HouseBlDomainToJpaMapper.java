@@ -373,7 +373,7 @@ public class HouseBlDomainToJpaMapper {
 
     private static String normalizeTrim(String s) {
         if (s == null) return null;
-        String t = s.trim();
+        String t = s.strip();
         return t.isEmpty() ? null : t;
     }
 }

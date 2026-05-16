@@ -20,6 +20,7 @@ import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -96,31 +97,34 @@ public class MasterBlAirSubMapper {
      *       ·declaredValueCarriage·declaredValueCustoms·insurance·accountInformation
      *       ·securityStatus·flightType·issueDate·issuePlace·signature
      *       ·otherTerm·handlingInfoCode·handlingInfoText·remark
-     *       — conditional setter {@code if (domain.getXxx() != null)}
+     *       — {@code if (domain.getXxx() != null)} 가드 후 setIfChanged 계열 helper로 같은 값 setter skip
+     *   <li>BigDecimal: compareTo 비교(scale 차이 무시)
+     *   <li>enum: Objects.equals 비교
+     *   <li>free-text: trim-aware compare (DB trailing whitespace 가짜 dirty 차단)
      * </ul>
      */
     public void applyMasterAirFields(MasterBlAir domain, MasterBlAirJpaEntity jpa) {
-        if (domain.getAirlineCode() != null) jpa.setAirlineCode(mapOrNull(domain.getAirlineCode(), AirlineCode::value));
-        if (domain.getChargeWeightKg() != null) jpa.setChargeWeightKg(mapOrNull(domain.getChargeWeightKg(), Weight::kg));
-        if (domain.getVolumeWeightKg() != null) jpa.setVolumeWeightKg(mapOrNull(domain.getVolumeWeightKg(), Weight::kg));
-        if (domain.getRateClass() != null) jpa.setRateClass(domain.getRateClass());
-        if (domain.getCurrencyCode() != null) jpa.setCurrencyCode(mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
-        if (domain.getDeclaredValueCarriage() != null) jpa.setDeclaredValueCarriage(domain.getDeclaredValueCarriage());
-        if (domain.getDeclaredValueCustoms() != null) jpa.setDeclaredValueCustoms(domain.getDeclaredValueCustoms());
-        if (domain.getInsurance() != null) jpa.setInsurance(domain.getInsurance());
-        if (domain.getAccountInformation() != null) jpa.setAccountInformation(domain.getAccountInformation());
-        if (domain.getSecurityStatus() != null) jpa.setSecurityStatus(domain.getSecurityStatus());
-        if (domain.getFlightType() != null) jpa.setFlightType(domain.getFlightType());
-        if (domain.getIssueDate() != null) jpa.setIssueDate(mapOrNull(domain.getIssueDate(), BlDate::asString));
-        if (domain.getIssuePlace() != null) jpa.setIssuePlace(mapOrNull(domain.getIssuePlace(), PortCode::value));
-        if (domain.getSignature() != null) jpa.setSignature(domain.getSignature());
-        if (domain.getOtherTerm() != null) jpa.setOtherTerm(domain.getOtherTerm());
+        if (domain.getAirlineCode() != null) setStringIfChanged(jpa::getAirlineCode, jpa::setAirlineCode, mapOrNull(domain.getAirlineCode(), AirlineCode::value));
+        if (domain.getChargeWeightKg() != null) setBigDecimalIfChangedCompareTo(jpa::getChargeWeightKg, jpa::setChargeWeightKg, mapOrNull(domain.getChargeWeightKg(), Weight::kg));
+        if (domain.getVolumeWeightKg() != null) setBigDecimalIfChangedCompareTo(jpa::getVolumeWeightKg, jpa::setVolumeWeightKg, mapOrNull(domain.getVolumeWeightKg(), Weight::kg));
+        if (domain.getRateClass() != null) setIfChanged(jpa::getRateClass, jpa::setRateClass, domain.getRateClass());
+        if (domain.getCurrencyCode() != null) setStringIfChanged(jpa::getCurrencyCode, jpa::setCurrencyCode, mapOrNull(domain.getCurrencyCode(), CurrencyCode::value));
+        if (domain.getDeclaredValueCarriage() != null) setStringIfChangedTrim(jpa::getDeclaredValueCarriage, jpa::setDeclaredValueCarriage, domain.getDeclaredValueCarriage());
+        if (domain.getDeclaredValueCustoms() != null) setStringIfChangedTrim(jpa::getDeclaredValueCustoms, jpa::setDeclaredValueCustoms, domain.getDeclaredValueCustoms());
+        if (domain.getInsurance() != null) setStringIfChangedTrim(jpa::getInsurance, jpa::setInsurance, domain.getInsurance());
+        if (domain.getAccountInformation() != null) setStringIfChangedTrim(jpa::getAccountInformation, jpa::setAccountInformation, domain.getAccountInformation());
+        if (domain.getSecurityStatus() != null) setIfChanged(jpa::getSecurityStatus, jpa::setSecurityStatus, domain.getSecurityStatus());
+        if (domain.getFlightType() != null) setIfChanged(jpa::getFlightType, jpa::setFlightType, domain.getFlightType());
+        if (domain.getIssueDate() != null) setStringIfChanged(jpa::getIssueDate, jpa::setIssueDate, mapOrNull(domain.getIssueDate(), BlDate::asString));
+        if (domain.getIssuePlace() != null) setStringIfChanged(jpa::getIssuePlace, jpa::setIssuePlace, mapOrNull(domain.getIssuePlace(), PortCode::value));
+        if (domain.getSignature() != null) setStringIfChangedTrim(jpa::getSignature, jpa::setSignature, domain.getSignature());
+        if (domain.getOtherTerm() != null) setIfChanged(jpa::getOtherTerm, jpa::setOtherTerm, domain.getOtherTerm());
         if (domain.getHandlingInformation() != null) {
             HandlingInformation hi = domain.getHandlingInformation();
-            jpa.setHandlingInfoCode(hi.code());
-            jpa.setHandlingInfoText(hi.description());
+            setIfChanged(jpa::getHandlingInfoCode, jpa::setHandlingInfoCode, hi.code());
+            setStringIfChangedTrim(jpa::getHandlingInfoText, jpa::setHandlingInfoText, hi.description());
         }
-        if (domain.getRemark() != null) jpa.setRemark(domain.getRemark());
+        if (domain.getRemark() != null) setStringIfChangedTrim(jpa::getRemark, jpa::setRemark, domain.getRemark());
     }
 
     /**
@@ -154,9 +158,37 @@ public class MasterBlAirSubMapper {
         if (!Objects.equals(current, next)) setter.accept(newValue);
     }
 
+    /**
+     * enum 등 Objects.equals로 비교 가능한 타입 전용 — 같은 값이면 setter skip.
+     */
+    private static <T> void setIfChanged(Supplier<T> getter, Consumer<T> setter, T newValue) {
+        if (!Objects.equals(getter.get(), newValue)) setter.accept(newValue);
+    }
+
+    /**
+     * BigDecimal 전용 — compareTo 비교로 scale 차이(1.0 vs 1.00)를 동등으로 처리.
+     * scale 차이로 인한 가짜 dirty를 차단 (§6.63).
+     */
+    private static void setBigDecimalIfChangedCompareTo(Supplier<BigDecimal> getter, Consumer<BigDecimal> setter, BigDecimal newValue) {
+        BigDecimal current = getter.get();
+        if (current == null && newValue == null) return;
+        if (current == null || newValue == null) { setter.accept(newValue); return; }
+        if (current.compareTo(newValue) != 0) setter.accept(newValue);
+    }
+
+    /**
+     * free-text 컬럼 전용 — trim-aware compare. DB의 trailing/leading whitespace로 인한 가짜 dirty 차단.
+     * blank/whitespace-only는 null과 동등 처리.
+     */
+    private static void setStringIfChangedTrim(Supplier<String> getter, Consumer<String> setter, String newValue) {
+        String current = normalizeTrim(getter.get());
+        String next    = normalizeTrim(newValue);
+        if (!Objects.equals(current, next)) setter.accept(newValue);
+    }
+
     private static String normalizeTrim(String s) {
         if (s == null) return null;
-        String t = s.trim();
+        String t = s.strip();
         return t.isEmpty() ? null : t;
     }
 }

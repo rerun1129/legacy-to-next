@@ -6,6 +6,7 @@ import com.freightos.fms.domain.common.enums.DescClause2;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 /**
  * JPA ORM 엔티티 — Master B/L 항공(AIR) 화물 표시 및 품목 설명.
  * MasterBlAirJpaEntity 와 @OneToOne(FK: master_bl_air_id) 관계.
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Table(schema = "fms", name = "master_bl_air_desc")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class MasterBlAirDescJpaEntity extends BaseJpaEntity {
 
     @Id

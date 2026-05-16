@@ -238,7 +238,7 @@ public class MasterBlFactory {
     private List<DimProjection> toDimProjections(MasterBl entity) {
         return switch (entity) {
             case MasterBlAir ignored -> entity.getDims().stream()
-                    .map(d -> new DimProjection(d.getLengthCm(), d.getWidthCm(), d.getHeightCm(), d.getQuantity(), d.getCbm(), d.getVolumeWeightKg()))
+                    .map(d -> new DimProjection(d.getId(), d.getLengthCm(), d.getWidthCm(), d.getHeightCm(), d.getQuantity(), d.getCbm(), d.getVolumeWeightKg()))
                     .toList();
             default -> List.of();
         };
@@ -247,7 +247,7 @@ public class MasterBlFactory {
     private List<ScheduleLegProjection> toScheduleLegProjections(MasterBl entity) {
         return switch (entity) {
             case MasterBlAir ignored -> entity.getScheduleLegs().stream()
-                    .map(l -> new ScheduleLegProjection(l.getToCode(), l.getByCarrier(), l.getFlightNo(), l.getOnBoardDt(), l.getOnBoardTm(), l.getArrivalDt(), l.getArrivalTm()))
+                    .map(l -> new ScheduleLegProjection(l.getId(), l.getToCode(), l.getByCarrier(), l.getFlightNo(), l.getOnBoardDt(), l.getOnBoardTm(), l.getArrivalDt(), l.getArrivalTm()))
                     .toList();
             default -> List.of();
         };
@@ -257,6 +257,7 @@ public class MasterBlFactory {
         return switch (entity) {
             case MasterBlAir ignored -> entity.getAirCharges().stream()
                     .map(c -> new AirChargeProjection(
+                            c.getId(),
                             c.getFreightCode(),
                             VoMapper.mapOrNull(c.getCurrencyCode(), CurrencyCode::value),
                             Nullables.mapOrNull(c.getPer(), Per::name),

@@ -73,22 +73,15 @@ public class MasterBlService implements MasterBlUseCase {
 
     @Override
     @Transactional
-    public MasterBlDetailResult updateMasterBl(Long id, UpdateMasterBlCommand command) {
+    public void updateMasterBl(Long id, UpdateMasterBlCommand command) {
         // jobDiv 분기는 PUT body 의 cmd.jobDiv() 신뢰 — FE variant 로 이미 결정되어 송신 (§6.63).
         // 변조 시 어댑터(SEA: parentJpa.jobDiv 검증) / saveMasterBl(AIR: switch(domain) default throw) 에서 fail.
         MasterBlJobDiv jobDiv = MasterBlJobDiv.valueOf(command.jobDiv());
-        MasterBl updated = switch (jobDiv) {
-            case SEA ->
-                    // SEA: 어댑터가 dirty-checking 반영 후 attached entity로 도메인 재구성 반환 — 응답 reload 회피 (§6.63)
-                    seaMasterPersistencePort.update(id, command);
-            case AIR ->
-                    // AIR: 어댑터가 dirty-checking 반영 후 attached entity로 도메인 재구성 반환 — 응답 reload 회피 (§6.63)
-                    airMasterPersistencePort.update(id, command);
-        };
+        switch (jobDiv) {
+            case SEA -> seaMasterPersistencePort.update(id, command);
+            case AIR -> airMasterPersistencePort.update(id, command);
+        }
         log.info("Updated MasterBl id={}", id);
-        List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, updated);
-        List<ConsoledSeaContainer> containers = loadConsoledSeaContainers(id, updated);
-        return masterBlFactory.toDetailResult(updated, consoled, containers);
     }
 
     @Override

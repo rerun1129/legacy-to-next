@@ -90,9 +90,9 @@ class MasterBlPersistenceAdapterTest {
         // Create 흐름(isNew=true) — desc SELECT 미발생 회귀 방지
         org.mockito.InOrder order = inOrder(masterBlAirRepository, savedAirJpa);
         order.verify(masterBlAirRepository).save(any());
-        order.verify(savedAirJpa).syncDims(any());
-        order.verify(savedAirJpa).syncScheduleLegs(any());
-        order.verify(savedAirJpa).syncAirCharges(any());
+        order.verify(savedAirJpa).mergeDims(any());
+        order.verify(savedAirJpa).mergeScheduleLegs(any());
+        order.verify(savedAirJpa).mergeAirCharges(any());
         verify(masterBlAirDescRepository, never()).findByAir_MasterBlAirId(any());
     }
 

@@ -70,8 +70,9 @@ export interface MasterBlAirDetail {
   remark: string | null;
 }
 
-// §BE-sync — DimView (포장 치수 응답, BigDecimal → number)
+// §BE-sync — DimView (id merge-by-id, 포장 치수 응답, BigDecimal → number)
 export interface Dim {
+  id?: number | null;
   lengthCm: number | null;
   widthCm: number | null;
   heightCm: number | null;
@@ -80,8 +81,9 @@ export interface Dim {
   volumeWeightKg: number | null;
 }
 
-// §BE-sync — ScheduleLegView (구간 스케줄 응답)
+// §BE-sync — ScheduleLegView (id merge-by-id, 구간 스케줄 응답)
 export interface ScheduleLeg {
+  id?: number | null;
   toCode: string | null;
   byCarrier: string | null;
   flightNo: string | null;
@@ -91,8 +93,9 @@ export interface ScheduleLeg {
   arrivalTm: string | null;
 }
 
-// §BE-sync — AirChargeView (AIR Charge 응답, BigDecimal → number)
+// §BE-sync — AirChargeView (id merge-by-id, AIR Charge 응답, BigDecimal → number)
 export interface AirCharge {
+  id?: number | null;
   freightCode: string | null;
   currencyCode: string | null;
   per: string | null;
@@ -219,6 +222,7 @@ export interface DescRequest {
 }
 
 export interface DimRequest {
+  id?: number;
   lengthCm?: number;
   widthCm?: number;
   heightCm?: number;
@@ -228,6 +232,7 @@ export interface DimRequest {
 }
 
 export interface ScheduleLegRequest {
+  id?: number;
   toCode: string;
   byCarrier?: string;
   flightNo?: string;
@@ -238,6 +243,7 @@ export interface ScheduleLegRequest {
 }
 
 export interface AirChargeRequest {
+  id?: number;
   freightCode?: string;
   currencyCode?: string;
   per?: string;

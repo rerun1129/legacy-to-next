@@ -8,6 +8,7 @@ import java.math.BigDecimal;
  * Adapter(in) 계층의 도메인 타입 의존을 차단한다. (기존 AirDetailProjection 패턴과 동일)
  */
 public record AirChargeProjection(
+        Long id,
         String freightCode,
         String currencyCode,
         String per,

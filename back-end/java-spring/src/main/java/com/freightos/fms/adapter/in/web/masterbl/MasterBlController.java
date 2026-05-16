@@ -79,9 +79,9 @@ public class MasterBlController {
         return ResponseEntity.ok(ApiResponse.of(masterBlAssembler.toDetail(masterBlUseCase.findMasterBlById(id))));
     }
 
-    @Operation(summary = "Master B/L 수정")
+    @Operation(summary = "Master B/L 수정 (ApiResponse<Void>)")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<MasterBlDetailResponse>> updateMasterBl(
+    public ResponseEntity<ApiResponse<Void>> updateMasterBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateMasterBlRequest req) {
         if ("SEA".equals(req.jobDiv())) {
@@ -93,9 +93,8 @@ public class MasterBlController {
             Set<ConstraintViolation<UpdateMasterBlRequest>> violations = validator.validate(req, group);
             if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         }
-        return ResponseEntity.ok(ApiResponse.of(
-                masterBlAssembler.toDetail(masterBlUseCase.updateMasterBl(id, masterBlAssembler.toUpdateCommand(req))),
-                MessageCode.MASTER_BL_UPDATED.message()));
+        masterBlUseCase.updateMasterBl(id, masterBlAssembler.toUpdateCommand(req));
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.MASTER_BL_UPDATED.message()));
     }
 
     @Operation(summary = "Master B/L 번호 변경 (전용 엔드포인트)")

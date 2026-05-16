@@ -4,6 +4,7 @@ import com.freightos.common.persistence.BaseJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * JPA ORM 엔티티 — Master B/L Schedule Leg (구간 일정).
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Table(schema = "fms", name = "master_bl_schedule_leg")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -45,6 +47,7 @@ public class MasterBlScheduleLegJpaEntity extends BaseJpaEntity {
     @Column(name = "arrival_tm", length = 4)
     private String arrivalTm;
 
+    public void setMasterBlScheduleLegId(Long v) { this.masterBlScheduleLegId = v; }
     public void setToCode(String v) { this.toCode = v; }
     public void setByCarrier(String v) { this.byCarrier = v; }
     public void setFlightNo(String v) { this.flightNo = v; }

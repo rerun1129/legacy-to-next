@@ -7,6 +7,7 @@ import java.math.BigDecimal;
  * 도메인 엔티티 MasterBlDim을 Adapter(in) 경계에서 사용할 수 있도록 평탄화한다.
  */
 public record DimProjection(
+        Long id,
         BigDecimal lengthCm,
         BigDecimal widthCm,
         BigDecimal heightCm,

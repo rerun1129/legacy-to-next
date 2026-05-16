@@ -161,9 +161,9 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncDims(List.of(dim()));
-        airExt.syncScheduleLegs(List.of(scheduleLeg("KRPUS")));
-        airExt.syncAirCharges(List.of(airCharge("FUEL")));
+        airExt.mergeDims(List.of(dim()));
+        airExt.mergeScheduleLegs(List.of(scheduleLeg("KRPUS")));
+        airExt.mergeAirCharges(List.of(airCharge("FUEL")));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -208,7 +208,7 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncDims(List.of(dim(), dim()));
+        airExt.mergeDims(List.of(dim(), dim()));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -248,7 +248,7 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncDims(List.of(dim(), dim()));
+        airExt.mergeDims(List.of(dim(), dim()));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -262,7 +262,7 @@ class MasterBlMappingIntegrationTest {
                 .map(MasterBlDimJpaEntity::getMasterBlDimId)
                 .toList();
 
-        loadedAir.syncDims(List.of(dim(), dim(), dim()));
+        loadedAir.mergeDims(List.of(dim(), dim(), dim()));
         em.flush();
         em.clear();
 
@@ -287,7 +287,7 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
+        airExt.mergeScheduleLegs(List.of(scheduleLeg("USNYC")));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -301,7 +301,7 @@ class MasterBlMappingIntegrationTest {
                 .map(MasterBlScheduleLegJpaEntity::getMasterBlScheduleLegId)
                 .toList();
 
-        loadedAir.syncScheduleLegs(List.of(scheduleLeg("KRPUS"), scheduleLeg("JPOSA")));
+        loadedAir.mergeScheduleLegs(List.of(scheduleLeg("KRPUS"), scheduleLeg("JPOSA")));
         em.flush();
         em.clear();
 
@@ -326,7 +326,7 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncAirCharges(List.of(airCharge("FUEL"), airCharge("AWC")));
+        airExt.mergeAirCharges(List.of(airCharge("FUEL"), airCharge("AWC")));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -338,7 +338,7 @@ class MasterBlMappingIntegrationTest {
                 .getSingleResult();
         Long airExtId = loadedAir.getMasterBlAirId();
 
-        loadedAir.syncAirCharges(List.of());
+        loadedAir.mergeAirCharges(List.of());
         em.flush();
         em.clear();
 
@@ -353,9 +353,9 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncDims(List.of(dim()));
-        airExt.syncScheduleLegs(List.of(scheduleLeg("USNYC")));
-        airExt.syncAirCharges(List.of(airCharge("FUEL")));
+        airExt.mergeDims(List.of(dim()));
+        airExt.mergeScheduleLegs(List.of(scheduleLeg("USNYC")));
+        airExt.mergeAirCharges(List.of(airCharge("FUEL")));
         em.persist(airExt);
         em.flush();
         em.clear();
@@ -386,7 +386,7 @@ class MasterBlMappingIntegrationTest {
         em.flush();
 
         MasterBlAirJpaEntity airExt = newAirExt(parent);
-        airExt.syncDims(List.of(dim()));
+        airExt.mergeDims(List.of(dim()));
         em.persist(airExt);
         em.flush();
         em.clear();

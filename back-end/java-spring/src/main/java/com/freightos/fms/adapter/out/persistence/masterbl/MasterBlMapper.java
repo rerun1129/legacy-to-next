@@ -109,6 +109,7 @@ public class MasterBlMapper {
                 BlDate.of(jpa.getIssueDate()), PortCode.of(jpa.getIssuePlace()), jpa.getSignature(),
                 jpa.getOtherTerm(),
                 HandlingInformation.of(jpa.getHandlingInfoCode(), jpa.getHandlingInfoText())));
+        domain.updateRemark(jpa.getRemark());
     }
 
     // ── Domain → JpaEntity (PersistenceAdapter에서 호출) ──────────
@@ -275,16 +276,18 @@ public class MasterBlMapper {
         jpa.setArrivalTm(domain.getArrivalTm());
     }
 
-    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncDims(@JoinColumn)이 설정 — parent 인자 불필요 */
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.mergeXxx(@JoinColumn)이 설정 — parent 인자 불필요 */
     public MasterBlDimJpaEntity toDimJpa(MasterBlDim domain) {
         MasterBlDimJpaEntity jpa = new MasterBlDimJpaEntity();
+        if (domain.getId() != null) jpa.setMasterBlDimId(domain.getId());
         applyDimFields(domain, jpa);
         return jpa;
     }
 
-    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncScheduleLegs(@JoinColumn)이 설정 — airJpa 인자 불필요 */
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.mergeXxx(@JoinColumn)이 설정 — airJpa 인자 불필요 */
     public MasterBlScheduleLegJpaEntity toScheduleLegJpa(MasterBlScheduleLeg domain) {
         MasterBlScheduleLegJpaEntity jpa = new MasterBlScheduleLegJpaEntity();
+        if (domain.getId() != null) jpa.setMasterBlScheduleLegId(domain.getId());
         applyScheduleLegFields(domain, jpa);
         return jpa;
     }
@@ -319,9 +322,10 @@ public class MasterBlMapper {
         jpa.setRate(domain.getRate());
     }
 
-    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.syncAirCharges(@JoinColumn)이 설정 — parent 인자 불필요 */
+    /** FK(master_bl_air_id)는 MasterBlAirJpaEntity.mergeXxx(@JoinColumn)이 설정 — parent 인자 불필요 */
     public MasterBlAirChargeJpaEntity toAirChargeJpa(MasterBlAirCharge c) {
         MasterBlAirChargeJpaEntity jpa = new MasterBlAirChargeJpaEntity();
+        if (c.getId() != null) jpa.setMasterBlAirChargeId(c.getId());
         applyAirChargeFields(c, jpa);
         return jpa;
     }

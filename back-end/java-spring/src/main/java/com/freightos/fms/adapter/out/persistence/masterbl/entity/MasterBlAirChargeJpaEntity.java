@@ -7,6 +7,7 @@ import com.freightos.fms.domain.common.enums.Per;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Table(schema = "fms", name = "master_bl_air_charge")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class MasterBlAirChargeJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -55,6 +57,7 @@ public class MasterBlAirChargeJpaEntity extends BaseJpaEntity {
     @Column(name = "rate", columnDefinition = "NUMERIC(12,3)")
     private BigDecimal rate;
 
+    public void setMasterBlAirChargeId(Long v)          { this.masterBlAirChargeId = v; }
     public void setMasterBlAirId(Long v)               { this.masterBlAirId = v; }
     public void setFreightCode(String v)               { this.freightCode   = v; }
     public void setCurrencyCode(String v)              { this.currencyCode  = v; }

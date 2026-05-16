@@ -131,15 +131,12 @@ class AirMasterBlControllerWebMvcTest {
     // ── PUT /api/master-bl/{id} (AIR) happy path ──────────────────────
 
     @Test
-    @DisplayName("PUT /api/master-bl/10: AIR Update happy path → 200")
+    @DisplayName("PUT /api/master-bl/10: AIR Update happy path → 200 + MASTER_BL_UPDATED 메시지")
     void updateMasterBl_airHappyPath_returns200() throws Exception {
         Long id = 10L;
         UpdateMasterBlCommand mockCommand = mock(UpdateMasterBlCommand.class);
-        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
-        MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
         given(masterBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
-        given(masterBlUseCase.updateMasterBl(eq(id), eq(mockCommand))).willReturn(mockResult);
-        given(masterBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
+        willDoNothing().given(masterBlUseCase).updateMasterBl(eq(id), eq(mockCommand));
 
         mockMvc.perform(put("/api/master-bl/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +146,8 @@ class AirMasterBlControllerWebMvcTest {
                                   "airDetail":{"airlineCode":"KE"}
                                 }
                                 """))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(MessageCode.MASTER_BL_UPDATED.message()));
 
         then(masterBlUseCase).should().updateMasterBl(eq(id), any(UpdateMasterBlCommand.class));
     }

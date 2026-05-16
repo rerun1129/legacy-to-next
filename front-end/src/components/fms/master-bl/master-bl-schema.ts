@@ -12,6 +12,7 @@ const DESC_SCHEMA = z.object({
 }).optional();
 
 const DIM_SCHEMA = z.object({
+  id:             z.number().optional(),
   lengthCm:       z.number().min(0).optional(),
   widthCm:        z.number().min(0).optional(),
   heightCm:       z.number().min(0).optional(),
@@ -21,6 +22,7 @@ const DIM_SCHEMA = z.object({
 });
 
 const SCHEDULE_LEG_SCHEMA = z.object({
+  id:        z.number().optional(),
   toCode:    z.string().min(1),
   byCarrier: z.string().optional(),
   flightNo:  z.string().optional(),
@@ -31,6 +33,7 @@ const SCHEDULE_LEG_SCHEMA = z.object({
 });
 
 const AIR_CHARGE_SCHEMA = z.object({
+  id:             z.number().optional(),
   freightCode:    z.string().optional(),
   currencyCode:   z.string().optional(),
   per:            z.string().optional(),

@@ -8,7 +8,6 @@ import com.freightos.fms.application.masterbl.MasterBlFactory;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.port.out.AirMasterPersistencePort;
 import com.freightos.fms.common.response.MessageCode;
-import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlDesc;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
@@ -37,7 +36,7 @@ public class AirMasterUpdatePersistenceAdapter implements AirMasterPersistencePo
 
     @Override
     @Transactional
-    public MasterBl update(Long id, UpdateMasterBlCommand command) {
+    public void update(Long id, UpdateMasterBlCommand command) {
         MasterBlJpaEntity parentJpa = masterBlRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
         if (parentJpa.getJobDiv() != MasterBlJobDiv.AIR) {
@@ -51,25 +50,21 @@ public class AirMasterUpdatePersistenceAdapter implements AirMasterPersistencePo
                 .findByAir_MasterBlAirId(airJpa.getMasterBlAirId()).orElse(null);
 
         // 도메인 변환 — factory가 도메인 검증 포함 모든 필드를 도메인에 적용
-        MasterBl domain = masterBlMapper.toAirDomain(parentJpa, airJpa, airJpa.getAirCharges(), descJpa);
+        MasterBlAir domain = (MasterBlAir) masterBlMapper.toAirDomain(parentJpa, airJpa, airJpa.getAirCharges(), descJpa);
         masterBlFactory.applyToEntity(command, domain);
 
         // 도메인 → JPA dirty-check 기반 필드 반영 (§6.37 sub-set 매퍼)
         masterBlAirSubMapper.applyMasterAirCommonFields(domain, parentJpa);
-        masterBlAirSubMapper.applyMasterAirFields((MasterBlAir) domain, airJpa);
+        masterBlAirSubMapper.applyMasterAirFields(domain, airJpa);
 
-        // 1:N 자식 동기화 — orphanRemoval 활용
-        MasterBlAir air = (MasterBlAir) domain;
-        airJpa.syncDims(air.getDims().stream().map(masterBlMapper::toDimJpa).toList());
-        airJpa.syncScheduleLegs(air.getScheduleLegs().stream().map(masterBlMapper::toScheduleLegJpa).toList());
-        airJpa.syncAirCharges(air.getAirCharges().stream().map(masterBlMapper::toAirChargeJpa).toList());
+        // 1:N 자식 merge-by-id — orphanRemoval 활용, 기존 row id 매칭으로 무수정 저장 시 INSERT-DELETE 회피
+        airJpa.mergeDims(domain.getDims().stream().map(masterBlMapper::toDimJpa).toList());
+        airJpa.mergeScheduleLegs(domain.getScheduleLegs().stream().map(masterBlMapper::toScheduleLegJpa).toList());
+        airJpa.mergeAirCharges(domain.getAirCharges().stream().map(masterBlMapper::toAirChargeJpa).toList());
 
         // Desc 동기화 — 1:1 관계
-        applyDescSync(air, airJpa, descJpa);
+        applyDescSync(domain, airJpa, descJpa);
         // 트랜잭션 커밋 시 dirty-checking으로 parentJpa·airJpa UPDATE 자동 발생
-
-        // domain은 applyToEntity로 cmd 반영 + applyDescSync로 desc 동기화 후 상태 — 응답용 reload SELECT 회피 (§6.63)
-        return domain;
     }
 
     /**

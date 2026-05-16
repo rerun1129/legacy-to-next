@@ -11,10 +11,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JPA ORM 엔티티 — Master B/L 항공 확장.
@@ -24,6 +27,7 @@ import java.util.List;
 @Table(schema = "fms", name = "master_bl_air")
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 public class MasterBlAirJpaEntity extends BaseJpaEntity {
 
     @Id
@@ -138,18 +142,105 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     public void setVolumeDivisor(VolumeDivisor v) { this.volumeDivisor = v; }
     public void setRemark(String v) { this.remark = v; }
 
-    public void syncDims(List<MasterBlDimJpaEntity> newDims) {
+    /**
+     * AIR DIM merge-by-id (§6.28 자식 row PUT + merge-by-id).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeDims(List<MasterBlDimJpaEntity> incoming) {
+        Map<Long, MasterBlDimJpaEntity> existingById = new HashMap<>();
+        for (MasterBlDimJpaEntity e : this.dims) {
+            if (e.getMasterBlDimId() != null) existingById.put(e.getMasterBlDimId(), e);
+        }
+        List<MasterBlDimJpaEntity> merged = new ArrayList<>();
+        for (MasterBlDimJpaEntity inc : incoming) {
+            if (inc.getMasterBlDimId() != null && existingById.containsKey(inc.getMasterBlDimId())) {
+                MasterBlDimJpaEntity existing = existingById.get(inc.getMasterBlDimId());
+                copyDimFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
         this.dims.clear();
-        this.dims.addAll(newDims);
+        this.dims.addAll(merged);
     }
 
-    public void syncScheduleLegs(List<MasterBlScheduleLegJpaEntity> newLegs) {
+    /**
+     * AIR ScheduleLeg merge-by-id (§6.28 자식 row PUT + merge-by-id).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeScheduleLegs(List<MasterBlScheduleLegJpaEntity> incoming) {
+        Map<Long, MasterBlScheduleLegJpaEntity> existingById = new HashMap<>();
+        for (MasterBlScheduleLegJpaEntity e : this.scheduleLegs) {
+            if (e.getMasterBlScheduleLegId() != null) existingById.put(e.getMasterBlScheduleLegId(), e);
+        }
+        List<MasterBlScheduleLegJpaEntity> merged = new ArrayList<>();
+        for (MasterBlScheduleLegJpaEntity inc : incoming) {
+            if (inc.getMasterBlScheduleLegId() != null && existingById.containsKey(inc.getMasterBlScheduleLegId())) {
+                MasterBlScheduleLegJpaEntity existing = existingById.get(inc.getMasterBlScheduleLegId());
+                copyScheduleLegFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
         this.scheduleLegs.clear();
-        this.scheduleLegs.addAll(newLegs);
+        this.scheduleLegs.addAll(merged);
     }
 
-    public void syncAirCharges(List<MasterBlAirChargeJpaEntity> newCharges) {
+    /**
+     * AIR AirCharge merge-by-id (§6.28 자식 row PUT + merge-by-id).
+     * incoming id가 기존 영속 엔티티와 일치하면 필드 mutate(UPDATE), 없으면 신규 추가(INSERT).
+     * orphanRemoval이 제거된 엔티티를 자동 DELETE한다.
+     */
+    public void mergeAirCharges(List<MasterBlAirChargeJpaEntity> incoming) {
+        Map<Long, MasterBlAirChargeJpaEntity> existingById = new HashMap<>();
+        for (MasterBlAirChargeJpaEntity e : this.airCharges) {
+            if (e.getMasterBlAirChargeId() != null) existingById.put(e.getMasterBlAirChargeId(), e);
+        }
+        List<MasterBlAirChargeJpaEntity> merged = new ArrayList<>();
+        for (MasterBlAirChargeJpaEntity inc : incoming) {
+            if (inc.getMasterBlAirChargeId() != null && existingById.containsKey(inc.getMasterBlAirChargeId())) {
+                MasterBlAirChargeJpaEntity existing = existingById.get(inc.getMasterBlAirChargeId());
+                copyAirChargeFields(inc, existing);
+                merged.add(existing);
+            } else {
+                merged.add(inc);
+            }
+        }
         this.airCharges.clear();
-        this.airCharges.addAll(newCharges);
+        this.airCharges.addAll(merged);
+    }
+
+    private static void copyDimFields(MasterBlDimJpaEntity src, MasterBlDimJpaEntity dst) {
+        dst.setLengthCm(src.getLengthCm());
+        dst.setWidthCm(src.getWidthCm());
+        dst.setHeightCm(src.getHeightCm());
+        dst.setQuantity(src.getQuantity());
+        dst.setCbm(src.getCbm());
+        dst.setVolumeWeightKg(src.getVolumeWeightKg());
+    }
+
+    private static void copyScheduleLegFields(MasterBlScheduleLegJpaEntity src, MasterBlScheduleLegJpaEntity dst) {
+        dst.setToCode(src.getToCode());
+        dst.setByCarrier(src.getByCarrier());
+        dst.setFlightNo(src.getFlightNo());
+        dst.setOnBoardDt(src.getOnBoardDt());
+        dst.setOnBoardTm(src.getOnBoardTm());
+        dst.setArrivalDt(src.getArrivalDt());
+        dst.setArrivalTm(src.getArrivalTm());
+    }
+
+    private static void copyAirChargeFields(MasterBlAirChargeJpaEntity src, MasterBlAirChargeJpaEntity dst) {
+        dst.setFreightCode(src.getFreightCode());
+        dst.setCurrencyCode(src.getCurrencyCode());
+        dst.setPer(src.getPer());
+        dst.setFreightTerm(src.getFreightTerm());
+        dst.setGrossWeightKg(src.getGrossWeightKg());
+        dst.setRateClass(src.getRateClass());
+        dst.setChargeWeightKg(src.getChargeWeightKg());
+        dst.setRate(src.getRate());
     }
 }

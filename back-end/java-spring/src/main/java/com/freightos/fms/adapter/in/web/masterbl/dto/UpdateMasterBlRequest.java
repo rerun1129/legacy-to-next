@@ -104,6 +104,7 @@ public record UpdateMasterBlRequest(
 
     /** 포장 치수 명세 1행. */
     public record DimRequest(
+            Long id,
             BigDecimal lengthCm,
             BigDecimal widthCm,
             BigDecimal heightCm,
@@ -114,6 +115,7 @@ public record UpdateMasterBlRequest(
 
     /** 구간별 운항 스케줄 1행. */
     public record ScheduleLegRequest(
+            Long id,
             String toCode,
             String byCarrier,
             String flightNo,
@@ -125,6 +127,7 @@ public record UpdateMasterBlRequest(
 
     /** AIR Charge 1행. */
     public record AirChargeRequest(
+            Long id,
             String freightCode,
             String currencyCode,
             String per,
