@@ -70,22 +70,22 @@ public class MasterBlService implements MasterBlUseCase {
     @Override
     @Transactional
     public MasterBlDetailResult updateMasterBl(Long id, UpdateMasterBlCommand command) {
-        MasterBl entity = findEntityById(id);
-        switch (entity) {
-            case MasterBlSea ignored -> {
-                // SEA: dirty-checking 어댑터로 위임 — saveMasterBl 미호출 (§6.35)
-                seaMasterPersistencePort.update(id, command);
-            }
-            case MasterBlAir ignored -> {
-                // AIR: 기존 경로 유지 (AIR 격리 원칙)
+        // jobDiv 분기만 필요 — 전체 entity fetch는 jobDiv 결정 후로 미룬다 (§6.63)
+        MasterBlJobDiv jobDiv = masterBlPort.findJobDivById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
+        MasterBl updated = switch (jobDiv) {
+            case SEA ->
+                    // SEA: 어댑터가 dirty-checking 반영 후 attached entity로 도메인 재구성 반환 — 응답 reload 회피 (§6.63)
+                    seaMasterPersistencePort.update(id, command);
+            case AIR -> {
+                // AIR: 기존 경로 유지 (AIR 격리 원칙) — Air Master 마이그레이션 시 동일 패턴 적용 (§6.63 잔여)
+                MasterBl entity = findEntityById(id);
                 masterBlFactory.applyToEntity(command, entity);
                 masterBlPort.saveMasterBl(entity);
+                yield findEntityById(id);
             }
-            default -> throw new IllegalStateException(
-                    "Unsupported MasterBl type: " + entity.getClass().getSimpleName());
-        }
+        };
         log.info("Updated MasterBl id={}", id);
-        MasterBl updated = findEntityById(id);
         List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, updated);
         List<ConsoledSeaContainer> containers = loadConsoledSeaContainers(id, updated);
         return masterBlFactory.toDetailResult(updated, consoled, containers);

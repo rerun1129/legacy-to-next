@@ -1254,3 +1254,97 @@ Air Master / 차기 Entry 마이그레이션 시:
 3. 무수정 조회→저장 회귀 테스트 — p6spy update SQL 발사 0건 확인
 
 **사례**: `<commit-hash>` (2026-05-16) — Master B/L Sea Entry 무수정 저장 시 address 3컬럼 NULL UPDATE 발사. BE Factory 2-arg fix + FE useEffect ref-set 순서 House 패턴 정합 fix 후 p6spy 0건 확인.
+
+### 6.63 Update 흐름 SELECT 쿼리 절감 — jobDiv-only 분기 + attached entity 도메인 반환
+
+Entry update 1회당 SELECT 쿼리가 예상치(10회 정도)를 초과해 발사되던 비효율 패턴. PUT 응답 빌드와 jobDiv 분기에서 불필요한 reload·full fetch가 누적된다.
+
+**증상**
+
+SEA Master `PUT /api/master-bl/{id}` 1회당 SELECT 9회 + FE invalidate 후 GET refetch SELECT 5회 = 총 14회 발사. 사용자 예상치(10회 = PUT 5 + GET 5) 대비 4회 초과.
+
+**원인 — 두 가지 누적 비효율**
+
+1. **첫 `findEntityById` 의 full entity fetch** — Service layer가 jobDiv 분기(SEA/AIR)만 필요한데 entity 전체를 fetch하면서 `master_bl_sea` + `master_bl_sea_desc` 2개 query가 동반 발사된다.
+2. **마지막 `findEntityById` reload** — Update 어댑터가 `void` 반환이라 응답 빌드 시 detail을 재구성하려고 entity를 다시 fetch. `master_bl`은 1차 캐시 hit으로 미발사이지만 `master_bl_sea` + `master_bl_sea_desc`는 query method 사용이라 SQL이 다시 발사 (§6.34 — 1차 캐시는 PK 기반 조회만).
+
+**해결 — 두 곳 동시 fix 의무**
+
+**1. jobDiv 분기 단계는 jobDiv만 조회**
+
+```java
+// 안티패턴 — 전체 entity fetch 후 instanceof 분기
+MasterBl entity = findEntityById(id);
+switch (entity) {
+    case MasterBlSea ignored -> seaMasterPersistencePort.update(id, command);
+    case MasterBlAir ignored -> { ... }
+}
+
+// 권장 — jobDiv만 fetch (1 query) 후 switch
+MasterBlJobDiv jobDiv = masterBlPort.findJobDivById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(...));
+MasterBl updated = switch (jobDiv) {
+    case SEA -> seaMasterPersistencePort.update(id, command);
+    case AIR -> {
+        MasterBl entity = findEntityById(id);   // AIR 분기에서만 fetch
+        masterBlFactory.applyToEntity(command, entity);
+        masterBlPort.saveMasterBl(entity);
+        yield findEntityById(id);
+    }
+};
+```
+
+**2. Update 어댑터가 attached entity 도메인 반환**
+
+```java
+// 안티패턴 — void 반환, Service가 응답 빌드 시 reload
+public interface SeaMasterPersistencePort {
+    void update(Long id, UpdateMasterBlCommand command);
+}
+
+// 권장 — 어댑터 내부에서 이미 가지고 있는 attached entity로 도메인 반환
+public interface SeaMasterPersistencePort {
+    MasterBl update(Long id, UpdateMasterBlCommand command);
+}
+```
+
+어댑터 내부 흐름: `factory.applyToEntity(cmd, domain)` 후 domain은 이미 update 후 상태를 반영한다(JPA dirty-check은 트랜잭션 commit 시 발사, domain의 desc까지 cmd로 동기화 완료). `toSeaDomain`을 재호출하지 말고 **첫 호출의 domain 객체를 그대로 반환**하면 query 0회로 응답 빌드 완료.
+
+```java
+// 어댑터 update() 끝
+applyDescSync((MasterBlSea) domain, seaJpa, descJpa);
+// 트랜잭션 commit 시 dirty-check UPDATE 자동 발사
+return domain;  // ← 첫 toSeaDomain 호출의 domain 그대로 반환
+```
+
+**효과 (사례: SEA Master)**
+
+| 단계 | Before | After |
+|---|---|---|
+| jobDiv 분기 | 3 (master_bl + sea + desc) | 1 (findJobDivById) |
+| 어댑터 fetch | 2 (sea + desc) | 2 (동일) |
+| 응답 reload | 2 (sea + desc) | 0 (domain 재사용) |
+| consoled house 조회 | 2 (hbl summary + container) | 2 (동일) |
+| **PUT 총** | **9** | **5** |
+| GET refetch (FE invalidate) | 5 | 5 |
+| **전체** | **14** | **10** |
+
+**검출 방법**
+
+```bash
+# Update 흐름에서 첫 findEntityById가 분기 결정용으로만 쓰이면서 full fetch 하는 안티패턴
+grep -n "findEntityById\|findMasterBlById" back-end/java-spring/src/main/java/com/freightos/fms/application/*/service/
+
+# Update Persistence Port가 void 반환인지 확인
+grep -n "void update(.*Update.*Command" back-end/java-spring/src/main/java/com/freightos/fms/application/*/port/out/
+```
+
+**잔여 점검 권장**
+
+Air Master / 차기 Entry 마이그레이션 시:
+1. Service.updateXxx의 첫 findEntityById가 단지 jobDiv 분기용이면 `findJobDivById`로 교체
+2. Update Persistence Port 시그니처 `MasterBl/HouseBl/...` 반환 의무 — Service에서 응답 reload 회피
+3. 어댑터 update() 끝에 두 번째 `toXxxDomain` 호출 금지 — 첫 호출의 domain 객체 재사용
+4. p6spy로 PUT 1회당 SELECT 쿼리 수 회귀 검증 — jobDiv 1 + 어댑터 fetch + consoled 조회만 발사
+
+**사례**: `<commit-hash>` (2026-05-16) — Sea Master Update 흐름 PUT 9→5 쿼리 절감. `SeaMasterPersistencePort.update` 시그니처 void→MasterBl, `SeaMasterUpdatePersistenceAdapter.update`가 attached domain 반환, `MasterBlService.updateMasterBl` jobDiv-only 분기로 변경. AIR Master는 기존 흐름 유지 (Air Master 마이그레이션 시 동일 패턴 적용 — §13.9 잔여 항목).

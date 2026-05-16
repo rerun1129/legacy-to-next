@@ -37,7 +37,7 @@ public class SeaMasterUpdatePersistenceAdapter implements SeaMasterPersistencePo
 
     @Override
     @Transactional
-    public void update(Long id, UpdateMasterBlCommand command) {
+    public MasterBl update(Long id, UpdateMasterBlCommand command) {
         MasterBlJpaEntity parentJpa = masterBlRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
         if (parentJpa.getJobDiv() != MasterBlJobDiv.SEA) {
@@ -61,6 +61,9 @@ public class SeaMasterUpdatePersistenceAdapter implements SeaMasterPersistencePo
         // Desc 동기화 — 1:1 관계
         applyDescSync((MasterBlSea) domain, seaJpa, descJpa);
         // 트랜잭션 커밋 시 dirty-checking으로 parentJpa·seaJpa UPDATE 자동 발생
+
+        // domain은 applyToEntity로 cmd 반영 + applyDescSync로 desc 동기화 후 상태 — 응답용 reload SELECT 회피 (§6.63)
+        return domain;
     }
 
     /**
