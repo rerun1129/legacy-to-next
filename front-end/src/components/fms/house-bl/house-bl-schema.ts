@@ -290,3 +290,35 @@ export const HOUSE_BL_SCHEMA = z.object({
 });
 
 export type HouseBlFormValues = z.infer<typeof HOUSE_BL_SCHEMA>;
+
+// ── Toolbar constants ─────────────────────────────────────
+
+export const TOOLBAR_FIELDS_SEA = [
+  "Shipment Type", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
+] as const;
+export const TOOLBAR_FIELDS_AIR = [
+  "Shipment Type", "HAWB No", "MAWB No", "Master Ref",
+] as const;
+export const TOOLBAR_FIELDS_TRUCK = [
+  "Truck B/L No",
+] as const;
+export const TOOLBAR_FIELDS_NON_BL = [
+  "Non B/L No",
+] as const;
+
+// toolbar 라벨 → RHF field path 매핑
+export const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
+  "HBL No":         "hbl",
+  "HAWB No":        "hbl",
+  "Truck B/L No":   "hbl",
+  "Non B/L No":     "hbl",
+  "MBL No":         "mbl",
+  "MAWB No":        "mbl",
+  "Load Type":      "seaDetail.loadType",
+  "Shipment Type":  "sType",
+  "Service Term":   "seaDetail.serviceTerm",
+  "B/L Type":       "seaDetail.blType",
+  "Master Ref":     "masterRefNo",
+};
+
+export const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type"]);
