@@ -1,5 +1,8 @@
 "use client";
 
+// NOTE: Zustand store unified by design — itemRows↔order 동기화/rowIds 중복 감지가
+// getFieldLayout 단일 진입점에 묶여 있어 store/getter 분리 시 정합 깨짐. 분리 보류.
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -13,6 +16,7 @@ export interface FieldLayout {
   cols?:      number;            // FieldItemGrid 전용: 행당 최대 열 수 (기본 2)
 }
 
+// === Helpers ===
 // 모듈-레벨 단조 증가 카운터 — stable React key 생성용 (Math.random/crypto 미사용)
 let _rowSeq = 0;
 function nextRowId() { return `r${++_rowSeq}`; }
@@ -39,6 +43,7 @@ export const useFieldLayout = create<FieldLayoutStore>()(
     (set, get) => ({
       layouts: {},
 
+      // === Read ===
       getFieldLayout(scope, defaults) {
         const layout = get().layouts[scope];
         if (!layout) return { order: defaults, hidden: [] };
@@ -69,6 +74,7 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         return result;
       },
 
+      // === Init ===
       initFieldLayout(scope, defaults) {
         if (get().layouts[scope]) return;
         set(s => ({ layouts: { ...s.layouts, [scope]: { order: defaults, hidden: [] } } }));
@@ -127,6 +133,7 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         });
       },
 
+      // === Reorder ===
       reorderFields(scope, fromIdx, toIdx) {
         set(s => {
           const layout = s.layouts[scope];
@@ -173,6 +180,7 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         });
       },
 
+      // === Rows ===
       addItemRow(scope) {
         set(s => {
           const layout = s.layouts[scope];
@@ -220,6 +228,7 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         });
       },
 
+      // === Visibility ===
       hideField(scope, key) {
         set(s => {
           const layout = s.layouts[scope];
@@ -263,12 +272,14 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         });
       },
 
+      // === Reset ===
       resetFieldLayout(scope, defaults) {
         set(s => ({
           layouts: { ...s.layouts, [scope]: { order: defaults, hidden: [] } },
         }));
       },
 
+      // === Row Mode ===
       setRowMode(scope, rowIdx, mode) {
         set(s => {
           const layout = s.layouts[scope];
