@@ -1,26 +1,24 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
+import { useRef } from "react";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { confirm } from "@/components/confirm";
 import { TOOLBAR_TO_FIELD } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
 import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
-import { mapMasterBlDetailToForm } from "./map-master-bl-detail";
-import { Save, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
-import { Button } from "@/components/shared/button";
 import { ComboBox, TextBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
-import { getMasterVariant, getPageTitle } from "@/lib/bl-variants";
+import { getMasterVariant } from "@/lib/bl-variants";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { getModeLabels } from "@/lib/bl-mode-labels";
-import { masterBlPort } from "@/lib/ports";
-import { toast } from "@/lib/toast-store";
 import { useMasterBlEntryMutations } from "./use-master-bl-entry-mutations";
+import { useMasterBlEntryDetailSync } from "./use-master-bl-entry-detail-sync";
+import { useMasterBlEntryHandlers } from "./use-master-bl-entry-handlers";
+import { MasterBlEntryPageHead } from "./master-bl-entry-page-head";
 import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { ScreenGuard }   from "@/components/shared/screen-guard";
@@ -59,16 +57,6 @@ export function MasterBLEntry({ variantKey }: Props) {
     setTab(key);
   }
 
-  const { data: detail, isFetching: isDetailFetching } = useQuery({
-    queryKey: ["master-bl", "detail", id],
-    queryFn: () => masterBlPort.getById(id!),
-    enabled: isEdit,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnMount: false,
-    structuralSharing: false,
-  });
-
   const clearDraft = useBLDraftStore(state => state.clearDraft);
 
   const form = useForm<MasterBlFormValues>({
@@ -95,23 +83,12 @@ export function MasterBLEntry({ variantKey }: Props) {
   // §6.49 ⑨ — didRestoreFromDraftRef 수신하여 form.reset 시 draft 복원 시 덮어쓰기 방지
   const { didRestoreFromDraftRef } = useBlDraftSync(form, `master:${variantKey}:${id ?? "new"}`);
 
-  const detailLoadedRef = useRef<boolean>(false);
-
-  // id 변경 시 form.reset 재트리거를 위해 ref 초기화
-  useEffect(() => {
-    detailLoadedRef.current = false;
-  }, [id]);
-
-  // §6.49 ⑨ — draft 복원 시 detail로 덮어쓰지 않음 (House 패턴 정합)
-  // detailLoadedRef는 detail 도착 시 즉시 true로 잠가 draft↔detail race에서
-  // 두 번째 trigger의 추가 form.reset을 차단한다 (House 패턴 정합).
-  useEffect(() => {
-    if (detailLoadedRef.current) return;
-    if (!detail) return;
-    detailLoadedRef.current = true;
-    if (didRestoreFromDraftRef.current) return;
-    form.reset(mapMasterBlDetailToForm(detail));
-  }, [detail, form, didRestoreFromDraftRef]);
+  const { detail, isDetailFetching, detailLoadedRef } = useMasterBlEntryDetailSync({
+    id,
+    isEdit,
+    form,
+    didRestoreFromDraftRef,
+  });
 
   const { mutation, deleteMutation } = useMasterBlEntryMutations({
     id,
@@ -122,85 +99,23 @@ export function MasterBLEntry({ variantKey }: Props) {
     setResetVersion,
   });
 
-  function handleSearchBl() {
-    const mblValue = form.getValues('mblNo')?.trim();
-    if (!mblValue) return;
-
-    masterBlPort
-      .findByMblNo(mblValue)
-      .then((ids) => {
-        if (ids.length === 0) {
-          alert('해당 B/L을 찾을 수 없습니다.');
-          return;
-        }
-        if (ids.length > 1) {
-          alert('동일 MBL No. 다건 발견 — List 화면에서 선택해주세요.');
-          return;
-        }
-        const targetId = ids[0];
-        if (targetId === id) {
-          // 동일 id 재조회: detail cache invalidate 후 useEffect가 form.reset을 다시 실행
-          queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', id] });
-          clearDraft(`master:${variantKey}:${id}`);
-          detailLoadedRef.current = false;
-          didRestoreFromDraftRef.current = false;
-        } else {
-          // 다른 id: focus 변경 → useQuery 자동 트리거 → useEffect에서 form.reset
-          queryClient.invalidateQueries({ queryKey: ['master-bl', 'detail', targetId] });
-          clearDraft(`master:${variantKey}:${targetId}`);
-          sessionStorage.setItem(`master-bl-entry:hot:${targetId}`, "1");
-          useEntryFocusStore.getState().setFocus(entryFocusKeys.masterBl(variantKey), targetId);
-        }
-      })
-      .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        alert(`B/L 조회 중 오류가 발생했습니다: ${message}`);
-      });
-  }
-
-  function handleResetEntry() {
-    form.reset({
-      ...createEmptyMasterBlFormValues(),
-      jobDiv: variant.mode,
-      bound: variant.direction ?? "EXP",
+  const { handleSearchBl, handleResetEntry, handleChangeBlNo, handleSave, handleDelete } =
+    useMasterBlEntryHandlers({
+      id,
+      variantKey,
+      variant,
+      form,
+      formRef,
+      detailLoadedRef,
+      didRestoreFromDraftRef,
+      isEdit,
+      mutation,
+      deleteMutation,
+      setResetVersion,
+      setIsChangeBlNoModalOpen,
+      queryClient,
+      clearDraft,
     });
-    clearDraft(`master:${variantKey}:${id ?? "new"}`);
-    clearDraft(`master:${variantKey}:new`);
-    detailLoadedRef.current = false;
-    useEntryFocusStore.getState().clearFocus(entryFocusKeys.masterBl(variantKey));
-    formRef.current?.reset();
-    setResetVersion(v => v + 1);
-  }
-
-  function handleChangeBlNo() {
-    if (!isEdit || !id) {
-      toast.info("먼저 Master B/L을 조회해주세요.");
-      return;
-    }
-    setIsChangeBlNoModalOpen(true);
-  }
-
-  // Save confirm 모달 (House 패턴 정합 — Non B/L 16dbc0b 패턴)
-  async function handleSave(raw: MasterBlFormValues) {
-    const ok = await confirm({
-      title: "저장하시겠습니까?",
-      variant: "default",
-    });
-    if (!ok) return;
-    mutation.mutate(raw);
-  }
-
-  async function handleDelete() {
-    if (!isEdit) return;
-    const ok = await confirm({
-      title: "삭제하시겠습니까?",
-      description: "삭제된 데이터는 복구할 수 없습니다.",
-      variant: "destructive",
-      confirmText: "삭제",
-    });
-    if (!ok) return;
-    deleteMutation.mutate();
-  }
 
   const tabs = [
     { key: "main",    label: "Main"    },
@@ -214,35 +129,17 @@ export function MasterBLEntry({ variantKey }: Props) {
     <FormProvider {...form}>
     <ScreenGuard visible={isLoading} message={loadingMessage} />
     <form ref={formRef} onSubmit={form.handleSubmit(handleSave)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-      {/* Page header — NOTE: No Print button per PRD §S-04 */}
-      <div className="page-head">
-        <div className="page-head__title">
-          <div className="page-head__title-icon"><Layers size={14} /></div>
-          {getPageTitle(variant, "Master", "Entry")}
-        </div>
-        <div className="page-head__meta">
-          <span className="badge badge--draft">DRAFT</span>
-        </div>
-        <div className="page-head__actions">
-          <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={handleResetEntry}>New</Button>
-          <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearchBl}>Search</Button>
-          <Button
-            type="submit"
-            size="sm"
-            variant="transaction"
-            leftIcon={<Save size={12} />}
-            loading={mutation.isPending}
-          >{mutation.isPending ? "Saving..." : "Save"}</Button>
-          <Button
-            size="sm"
-            variant="danger"
-            leftIcon={<Trash2 size={12} />}
-            onClick={handleDelete}
-            disabled={!isEdit || deleteMutation.isPending}
-          >Delete</Button>
-          <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />} onClick={handleChangeBlNo} disabled={!isEdit}>{modeLabels.changeBLNo}</Button>
-        </div>
-      </div>
+      <MasterBlEntryPageHead
+        variant={variant}
+        mutation={mutation}
+        deleteMutation={deleteMutation}
+        isEdit={isEdit}
+        modeLabels={modeLabels}
+        onResetEntry={handleResetEntry}
+        onSearchBl={handleSearchBl}
+        onDelete={handleDelete}
+        onChangeBlNo={handleChangeBlNo}
+      />
 
       {/* Toolbar — SEA 7 필드: TextBox(3) + ComboBox+useEnumOptions(4 enum) */}
       <div className="toolbar" style={{ gridTemplateColumns: `repeat(${variant.toolbarColumnCount}, 1fr)` }}>
@@ -313,6 +210,7 @@ export function MasterBLEntry({ variantKey }: Props) {
         isOpen={isChangeBlNoModalOpen}
         onClose={() => setIsChangeBlNoModalOpen(false)}
         onChanged={() => {
+          // §6.67 draft 가드 3단계: ref 해제 → draft 복원 차단 → draft 삭제 순서 보존
           detailLoadedRef.current = false;
           didRestoreFromDraftRef.current = false;
           clearDraft(`master:${variantKey}:${id}`);
