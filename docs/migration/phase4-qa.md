@@ -44,7 +44,7 @@ npm --prefix front-end run build
   - 그리드: 컬럼 헤더 경계 드래그 → 너비 조정 → 셀 overlay 추적 확인
   - Form submit 시 모든 필드 값 도달 확인 (개발자 도구 Network)
   - **무수정 조회→저장 시 p6spy update 미발사 확인** — List 더블클릭 → Entry → 수정 없이 Save → BE p6spy 로그에 UPDATE 0건 (§6.62). dirty 있으면 BE Factory 복합 VO method reference 1-arg 안티패턴 또는 FE Entry detail/draft race 점검
-  - **Update 흐름 SELECT 쿼리 절감 확인** — PUT 1회당 SELECT는 jobDiv 1 + 어댑터 fetch + consoled 조회만 발사 (§6.63). 마지막 reload 또는 jobDiv 분기용 full entity fetch 안티패턴 grep — `findEntityById`/`findXxxById`가 단지 instanceof 분기용이면 `findJobDivById`로 교체, Update Persistence Port는 도메인 반환 의무
+  - **Update 흐름 SELECT 쿼리 절감 확인** — PUT 1회당 SELECT는 어댑터 fetch + consoled 조회만 발사, jobDiv lookup 0건 (§6.63). jobDiv 분기는 `MasterBlJobDiv.valueOf(cmd.jobDiv())` 로 cmd 신뢰(어댑터/saveMasterBl 자체 검증). 마지막 reload 또는 jobDiv 분기용 full entity fetch 안티패턴 grep — Update Persistence Port는 도메인 반환 의무, `findJobDivById`도 안티패턴(cmd.jobDiv() 신뢰)
 
 ### 시각 회귀
 

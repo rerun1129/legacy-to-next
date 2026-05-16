@@ -70,9 +70,9 @@ public class MasterBlService implements MasterBlUseCase {
     @Override
     @Transactional
     public MasterBlDetailResult updateMasterBl(Long id, UpdateMasterBlCommand command) {
-        // jobDiv 분기만 필요 — 전체 entity fetch는 jobDiv 결정 후로 미룬다 (§6.63)
-        MasterBlJobDiv jobDiv = masterBlPort.findJobDivById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
+        // jobDiv 분기는 PUT body 의 cmd.jobDiv() 신뢰 — FE variant 로 이미 결정되어 송신 (§6.63).
+        // 변조 시 어댑터(SEA: parentJpa.jobDiv 검증) / saveMasterBl(AIR: switch(domain) default throw) 에서 fail.
+        MasterBlJobDiv jobDiv = MasterBlJobDiv.valueOf(command.jobDiv());
         MasterBl updated = switch (jobDiv) {
             case SEA ->
                     // SEA: 어댑터가 dirty-checking 반영 후 attached entity로 도메인 재구성 반환 — 응답 reload 회피 (§6.63)
