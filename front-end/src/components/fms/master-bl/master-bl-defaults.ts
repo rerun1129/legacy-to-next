@@ -32,6 +32,27 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
     securityStatus: "",
     teamCode: "",
     remark: "",
+    // §BE-sync — airDetail nested 빈 객체 (18 필드, BE Phase 2 AirDetailRequest 정합)
+    airDetail: {
+      airlineCode:            undefined,
+      chargeWeightKg:         undefined,
+      volumeWeightKg:         undefined,
+      rateClass:              undefined,
+      currencyCode:           undefined,
+      declaredValueCarriage:  undefined,
+      declaredValueCustoms:   undefined,
+      insurance:              undefined,
+      accountInformation:     undefined,
+      securityStatus:         undefined,
+      flightType:             undefined,
+      issueDate:              "",
+      issuePlace:             undefined,
+      signature:              undefined,
+      otherTerm:              undefined,
+      handlingInformationCode: undefined,
+      handlingInformationText: undefined,
+      remark:                 undefined,
+    },
     // §BE-sync — seaDetail nested 빈 객체 (15 필드, desc root 승격)
     seaDetail: {
       loadType: undefined,

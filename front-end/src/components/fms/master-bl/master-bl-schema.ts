@@ -78,6 +78,30 @@ const HOUSE_BL_REF_SCHEMA = z.object({
   podCode:        z.string().nullable().optional(),
 });
 
+// §BE-sync — AirDetailProjection 18 필드 (BE Phase 2 AirDetailRequest/AirDetailProjection 정합)
+// 모두 nullable optional, null → undefined transform (BE SSOT — zodResolver 미사용)
+// handlingInfoCode/handlingInfoText: BE AirDetailRequest 필드명 그대로 매핑
+export const AIR_DETAIL_FORM_SCHEMA = z.object({
+  airlineCode:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  chargeWeightKg:         z.number().min(0).nullable().optional(),
+  volumeWeightKg:         z.number().min(0).nullable().optional(),
+  rateClass:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  currencyCode:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  declaredValueCarriage:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  declaredValueCustoms:   z.string().nullable().optional().transform((v) => v ?? undefined),
+  insurance:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  accountInformation:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  securityStatus:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  flightType:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  issueDate:              DATE8,
+  issuePlace:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  signature:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  otherTerm:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  handlingInformationCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  handlingInformationText: z.string().nullable().optional().transform((v) => v ?? undefined),
+  remark:                 z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
 // §BE-sync — SeaDetailResponse 16 필드 (BE Phase 2 SeaDetailProjection 정합)
 // §6.49 ⑰ — enum 필드(loadType/serviceTerm/blType)는 z.string().nullable()로 완화 (BE 검증 일원화)
 // seaDetail.deliveryCode 자연 제거 (Master 도메인 미보유 — Phase 0/1 사용자 결정)
@@ -144,6 +168,8 @@ export const MASTER_BL_SCHEMA = z.object({
 
   // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 16 필드 정합)
   seaDetail: SEA_DETAIL_FORM_SCHEMA.optional(),
+  // §BE-sync — airDetail nested (BE Phase 2 AirDetailRequest 18 필드 정합)
+  airDetail: AIR_DETAIL_FORM_SCHEMA.optional(),
 
   desc:         DESC_SCHEMA,
   dims:         z.array(DIM_SCHEMA).optional(),

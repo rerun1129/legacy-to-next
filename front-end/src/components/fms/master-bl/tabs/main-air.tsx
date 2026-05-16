@@ -10,6 +10,7 @@ import { MasterCargoDocPanel }      from "./sections/master-cargo-doc-panel";
 // AIR 전용 패널 — 자체 수정 없이 registry에만 등록 (격리 원칙)
 import { MasterContainerDimPanel }  from "./sections/master-container-dim-panel";
 import { MasterAirChargesPanel }    from "./sections/master-air-charges-panel";
+import { MasterAirIssuePanel }      from "./sections/master-air-issue-panel";
 
 interface Props {
   variant: MasterVariantConfig;
@@ -30,6 +31,7 @@ export const MASTER_BL_AIR_REGISTRY = (
   { key: "goods-desc",     label: "Goods Description",  component: (p) => <MasterGoodsDescPanel {...p} form={form} />,                 defaultPosition: { col: 2, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "remark",         label: "Remark",             component: (p) => <MasterRemarkPanel {...p} form={form} />,                    defaultPosition: { col: 4, row: 8, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "air-charges",    label: "Air Charges",        component: (p) => <MasterAirChargesPanel {...p} form={form} />,                defaultPosition: { col: 0, row: 10, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
+  { key: "air-issue",      label: "Issue Information",  component: (p) => <MasterAirIssuePanel {...p} form={form} />,                   defaultPosition: { col: 0, row: 12, colSpan: 3, rowSpan: 1 }, minColSpan: 1, minRowSpan: 1 },
 ];
 
 export function MasterMainTabAir({ variant, form, active }: Props) {

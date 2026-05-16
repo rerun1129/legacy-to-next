@@ -6,6 +6,7 @@ import { getModeLabels } from "@/lib/bl-mode-labels";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { NumericCell } from "@/components/shared/grid-cell-inputs";
+import { NumberBox } from "@/components/shared/inputs/number-box";
 
 interface Props {
   variant?: AnyVariantConfig;
@@ -52,11 +53,9 @@ function AirDimsGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
               <td className="row-num">{i + 1}</td>
               {(["lengthCm", "widthCm", "heightCm", "quantity", "cbm", "volumeWeightKg"] as const).map(k => (
                 <td key={k} className="is-num">
-                  <input
-                    autoComplete="off"
-                    type="number"
-                    step="any"
-                    className="grid__cell-input"
+                  <NumberBox
+                    variant="cell"
+                    decimalPlaces={3}
                     {...form.register(`dims.${i}.${k}`, { valueAsNumber: true })}
                   />
                 </td>

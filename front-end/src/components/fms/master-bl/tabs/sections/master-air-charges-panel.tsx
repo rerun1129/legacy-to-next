@@ -4,6 +4,8 @@ import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { TextBox }   from "@/components/shared/inputs/text-box";
+import { NumberBox } from "@/components/shared/inputs/number-box";
 
 interface Props {
   variant?: AnyVariantConfig;
@@ -92,16 +94,21 @@ function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
                 <td className="row-num">{i + 1}</td>
                 {AIR_CHARGE_COLS.map(col => (
                   <td key={col.key} className={"numeric" in col && col.numeric ? "is-num" : ""}>
-                    <input
-                      autoComplete="off"
-                      type={"numeric" in col && col.numeric ? "number" : "text"}
-                      step={"numeric" in col && col.numeric ? "any" : undefined}
-                      className="grid__cell-input"
-                      {...form.register(
-                        `airCharges.${i}.${col.key as ColKey}` as const,
-                        "numeric" in col && col.numeric ? { valueAsNumber: true } : undefined,
-                      )}
-                    />
+                    {"numeric" in col && col.numeric ? (
+                      <NumberBox
+                        variant="cell"
+                        decimalPlaces={3}
+                        {...form.register(
+                          `airCharges.${i}.${col.key as ColKey}` as const,
+                          { valueAsNumber: true },
+                        )}
+                      />
+                    ) : (
+                      <TextBox
+                        variant="cell"
+                        {...form.register(`airCharges.${i}.${col.key as ColKey}` as const)}
+                      />
+                    )}
                   </td>
                 ))}
                 <td>
