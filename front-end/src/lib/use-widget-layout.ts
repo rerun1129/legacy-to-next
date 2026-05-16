@@ -20,6 +20,7 @@ export interface PageLayout {
 
 interface LayoutStore {
   layouts:    Record<string, PageLayout>;
+  snapshots:  Record<string, PageLayout>;
   editMode:   boolean;
   canEdit:    boolean;
   setEditMode:   (on: boolean) => void;
@@ -31,14 +32,18 @@ interface LayoutStore {
   hideWidget:    (scope: string, key: WidgetKey) => void;
   showWidget:    (scope: string, key: WidgetKey, col?: number, row?: number) => void;
   resetLayout:   (scope: string, defaults: WidgetPosition[]) => void;
+  beginEdit:     (scope: string) => void;
+  commitEdit:    (scope: string) => void;
+  revertEdit:    (scope: string) => void;
 }
 
 export const useWidgetLayout = create<LayoutStore>()(
   persist(
     (set, get) => ({
-      layouts:  {},
-      editMode: false,
-      canEdit:  true,
+      layouts:   {},
+      snapshots: {},
+      editMode:  false,
+      canEdit:   true,
 
       setEditMode(on) { set({ editMode: on }); },
       setCanEdit(on)  { set({ canEdit: on, ...(!on && { editMode: false }) }); },
@@ -131,7 +136,50 @@ export const useWidgetLayout = create<LayoutStore>()(
           },
         }));
       },
+
+      // React Strict Mode 재마운트 보호: 스냅샷이 이미 있으면 no-op
+      beginEdit(scope) {
+        const { layouts, snapshots } = get();
+        if (snapshots[scope]) return;
+        const current = layouts[scope];
+        if (!current) return;
+        set(s => ({
+          snapshots: { ...s.snapshots, [scope]: structuredClone(current) },
+        }));
+      },
+
+      // 변경 사항 확정 — 스냅샷만 삭제, 레이아웃은 그대로 유지
+      commitEdit(scope) {
+        set(s => {
+          const next = { ...s.snapshots };
+          delete next[scope];
+          return { snapshots: next };
+        });
+      },
+
+      // 편집 취소 — 스냅샷이 있으면 레이아웃을 되돌리고 스냅샷 삭제. 없으면 no-op
+      revertEdit(scope) {
+        const { snapshots } = get();
+        const snap = snapshots[scope];
+        if (!snap) return;
+        set(s => {
+          const nextSnapshots = { ...s.snapshots };
+          delete nextSnapshots[scope];
+          return {
+            layouts:   { ...s.layouts, [scope]: snap },
+            snapshots: nextSnapshots,
+          };
+        });
+      },
     }),
-    { name: "fms.widgetLayouts.v1" }
+    {
+      name: "fms.widgetLayouts.v1",
+      // snapshots는 편집 중 임시 데이터이므로 localStorage에 저장하지 않음
+      partialize: (state) => ({
+        layouts:  state.layouts,
+        editMode: state.editMode,
+        canEdit:  state.canEdit,
+      }),
+    }
   )
 );

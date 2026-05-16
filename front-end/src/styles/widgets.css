@@ -133,6 +133,7 @@
   background: var(--surface-2);
   color: var(--ink-1);
 }
+.widget-palette__icon-btn--primary { color: var(--accent); }
 
 .widget-palette__body {
   padding: 8px;

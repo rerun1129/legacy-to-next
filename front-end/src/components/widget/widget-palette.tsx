@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { RotateCcw, GripHorizontal, ChevronUp, ChevronDown, X } from "lucide-react";
+import { RotateCcw, GripHorizontal, ChevronUp, ChevronDown, X, Save } from "lucide-react";
 import type { WidgetKey } from "@/lib/use-widget-layout";
 import type { WidgetDef }  from "./widget-registry";
 
@@ -13,9 +13,10 @@ interface Props {
   onShow:   (key: WidgetKey) => void;
   onReset:  () => void;
   onClose:  () => void;
+  onSave:   () => void;
 }
 
-export function WidgetPalette({ registry, hidden, onShow, onReset, onClose }: Props) {
+export function WidgetPalette({ registry, hidden, onShow, onReset, onClose, onSave }: Props) {
   const [pos, setPos]           = useState({ x: 24, y: 80 });
   const [collapsed, setCollapsed] = useState(false);
 
@@ -56,6 +57,14 @@ export function WidgetPalette({ registry, hidden, onShow, onReset, onClose }: Pr
           <span className="widget-palette__title">위젯 팔레트</span>
         </div>
         <div style={{ display: "flex", gap: 2 }}>
+          <button
+            className="widget-palette__icon-btn widget-palette__icon-btn--primary"
+            onClick={onSave}
+            title="저장"
+            onMouseDown={e => e.stopPropagation()}
+          >
+            <Save size={12} />
+          </button>
           <button
             className="widget-palette__icon-btn"
             onClick={onReset}

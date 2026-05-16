@@ -50,7 +50,7 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
   const currentUserId = useCurrentUser(s => s.currentUserId);
   const userScope = `${currentUserId}.${scope}`;
 
-  const { editMode, initLayout, getLayout, moveWidget, resizeWidget, hideWidget, showWidget, resetLayout } = useWidgetLayout();
+  const { editMode, initLayout, getLayout, moveWidget, resizeWidget, hideWidget, showWidget, resetLayout, beginEdit, commitEdit, revertEdit } = useWidgetLayout();
 
   const registryMap = buildRegistryMap(registry);
   const defaults    = useMemo(
@@ -73,6 +73,13 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
   useEffect(() => {
     initLayoutRef.current(userScope, defaults);
   }, [userScope, defaults]);
+
+  // 편집 모드 진입 시 스냅샷 저장, 종료 시 revert (저장 버튼은 commitEdit으로 스냅샷을 미리 비워 revert를 no-op으로 만듦)
+  useEffect(() => {
+    if (!editMode || !active) return;
+    beginEdit(userScope);
+    return () => { revertEdit(userScope); };
+  }, [editMode, active, userScope, beginEdit, revertEdit]);
 
   const handleLayoutChange = useCallback((next: Layout) => {
     next.forEach(item => {
@@ -134,6 +141,10 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
           onShow={(key) => showWidget(userScope, key)}
           onReset={() => resetLayout(userScope, defaults)}
           onClose={() => useWidgetLayout.getState().setEditMode(false)}
+          onSave={() => {
+            commitEdit(userScope);
+            useWidgetLayout.getState().setEditMode(false);
+          }}
         />
       )}
     </div>
