@@ -2,6 +2,7 @@ package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.projection.AirDetailProjection;
 import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
 import com.freightos.fms.domain.common.enums.RateClass;
@@ -16,6 +17,7 @@ import com.freightos.fms.domain.housebl.enums.HandlingInfoCode;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.common.util.Nullables;
+import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -69,6 +71,30 @@ class MasterBlAirSubFactory {
                 resolveHandlingInformation(a, air)
         ));
         // remark는 MasterBlFactory.applyRemark에서 공통 처리 — SEA와 동일 패턴
+    }
+
+    public AirDetailProjection toAirDetailProjection(MasterBlAir air) {
+        HandlingInformation hi = air.getHandlingInformation();
+        return new AirDetailProjection(
+                VoMapper.mapOrNull(air.getAirlineCode(), AirlineCode::value),
+                VoMapper.mapOrNull(air.getChargeWeightKg(), Weight::kg),
+                VoMapper.mapOrNull(air.getVolumeWeightKg(), Weight::kg),
+                Nullables.mapOrNull(air.getRateClass(), RateClass::name),
+                VoMapper.mapOrNull(air.getCurrencyCode(), CurrencyCode::value),
+                air.getDeclaredValueCarriage(),
+                air.getDeclaredValueCustoms(),
+                air.getInsurance(),
+                air.getAccountInformation(),
+                Nullables.mapOrNull(air.getSecurityStatus(), SecurityStatus::name),
+                Nullables.mapOrNull(air.getFlightType(), FlightType::name),
+                VoMapper.mapOrNull(air.getIssueDate(), BlDate::asString),
+                VoMapper.mapOrNull(air.getIssuePlace(), PortCode::value),
+                air.getSignature(),
+                Nullables.mapOrNull(air.getOtherTerm(), FreightTerm::name),
+                hi != null && hi.code() != null ? hi.code().name() : null,
+                hi != null ? hi.description() : null,
+                air.getRemark()
+        );
     }
 
     private HandlingInformation resolveHandlingInformation(UpdateMasterBlCommand.AirDetailCommand a, MasterBlAir air) {

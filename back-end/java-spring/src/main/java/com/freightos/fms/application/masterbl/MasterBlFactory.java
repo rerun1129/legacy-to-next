@@ -9,32 +9,20 @@ import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerVie
 import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
-import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.common.enums.DescClause1;
 import com.freightos.fms.domain.common.enums.DescClause2;
-import com.freightos.fms.domain.common.enums.FlightType;
 import com.freightos.fms.domain.common.enums.FreightTerm;
-import com.freightos.fms.domain.common.enums.LoadType;
-import com.freightos.fms.domain.common.enums.RateClass;
-import com.freightos.fms.domain.common.enums.SecurityStatus;
-import com.freightos.fms.domain.common.enums.ServiceTerm;
 import com.freightos.fms.domain.common.enums.ShipmentType;
 import com.freightos.fms.domain.common.enums.WeightUnit;
 import com.freightos.fms.domain.masterbl.MasterBlFilter;
-import com.freightos.fms.domain.common.vo.AirlineCode;
 import com.freightos.fms.domain.common.vo.BlDate;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.common.vo.CargoSummary;
-import com.freightos.fms.domain.common.vo.CurrencyCode;
 import com.freightos.fms.domain.common.vo.CustomerCode;
 import com.freightos.fms.domain.common.vo.EmployeeCode;
-import com.freightos.fms.domain.common.vo.HandlingInformation;
-import com.freightos.fms.domain.common.vo.LinerCode;
 import com.freightos.fms.domain.common.vo.PortCode;
 import com.freightos.fms.domain.common.vo.Quantity;
-import com.freightos.fms.domain.common.vo.Rton;
-import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.common.vo.Volume;
 import com.freightos.fms.domain.common.vo.TeamCode;
 import com.freightos.fms.domain.common.vo.Weight;
@@ -182,11 +170,11 @@ public class MasterBlFactory {
             default -> null;
         };
         SeaDetailProjection seaDetail = switch (entity) {
-            case MasterBlSea sea -> toSeaDetailProjection(sea);
+            case MasterBlSea sea -> seaSubFactory.toSeaDetailProjection(sea);
             default -> null;
         };
         AirDetailProjection airDetail = switch (entity) {
-            case MasterBlAir air -> toAirDetailProjection(air);
+            case MasterBlAir air -> airSubFactory.toAirDetailProjection(air);
             default -> null;
         };
         return new MasterBlDetailResult(
@@ -225,50 +213,6 @@ public class MasterBlFactory {
                 toDescProjection(entity.getDesc()),
                 seaDetail,
                 airDetail
-        );
-    }
-
-    private SeaDetailProjection toSeaDetailProjection(MasterBlSea sea) {
-        return new SeaDetailProjection(
-                Nullables.mapOrNull(sea.getLoadType(), LoadType::name),
-                VoMapper.mapOrNull(sea.getLinerCode(), LinerCode::value),
-                sea.getVesselVoyage() != null ? sea.getVesselVoyage().vesselCode() : null,
-                sea.getVesselVoyage() != null ? sea.getVesselVoyage().vesselName() : null,
-                sea.getVesselVoyage() != null ? sea.getVesselVoyage().voyageNo() : null,
-                VoMapper.mapOrNull(sea.getOnboardDate(), BlDate::asString),
-                sea.getVesselNationality(),
-                Nullables.mapOrNull(sea.getServiceTerm(), ServiceTerm::name),
-                Nullables.mapOrNull(sea.getBlType(), BlType::name),
-                VoMapper.mapOrNull(sea.getPorCode(), PortCode::value),
-                VoMapper.mapOrNull(sea.getFinalDestCode(), PortCode::value),
-                VoMapper.mapOrNull(sea.getRton(), Rton::ton),
-                VoMapper.mapOrNull(sea.getLineBkgNo(), BlNumber::value),
-                VoMapper.mapOrNull(sea.getIssueDate(), BlDate::asString),
-                sea.getRemark()
-        );
-    }
-
-    private AirDetailProjection toAirDetailProjection(MasterBlAir air) {
-        HandlingInformation hi = air.getHandlingInformation();
-        return new AirDetailProjection(
-                VoMapper.mapOrNull(air.getAirlineCode(), AirlineCode::value),
-                VoMapper.mapOrNull(air.getChargeWeightKg(), Weight::kg),
-                VoMapper.mapOrNull(air.getVolumeWeightKg(), Weight::kg),
-                Nullables.mapOrNull(air.getRateClass(), RateClass::name),
-                VoMapper.mapOrNull(air.getCurrencyCode(), CurrencyCode::value),
-                air.getDeclaredValueCarriage(),
-                air.getDeclaredValueCustoms(),
-                air.getInsurance(),
-                air.getAccountInformation(),
-                Nullables.mapOrNull(air.getSecurityStatus(), SecurityStatus::name),
-                Nullables.mapOrNull(air.getFlightType(), FlightType::name),
-                VoMapper.mapOrNull(air.getIssueDate(), BlDate::asString),
-                VoMapper.mapOrNull(air.getIssuePlace(), PortCode::value),
-                air.getSignature(),
-                Nullables.mapOrNull(air.getOtherTerm(), FreightTerm::name),
-                hi != null && hi.code() != null ? hi.code().name() : null,
-                hi != null ? hi.description() : null,
-                air.getRemark()
         );
     }
 

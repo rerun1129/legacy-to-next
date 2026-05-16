@@ -2,6 +2,7 @@ package com.freightos.fms.application.masterbl;
 
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
+import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 import com.freightos.fms.domain.common.enums.BlType;
 import com.freightos.fms.domain.common.enums.LoadType;
 import com.freightos.fms.domain.common.enums.ServiceTerm;
@@ -14,6 +15,7 @@ import com.freightos.fms.domain.common.vo.VesselVoyage;
 import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.common.util.Nullables;
+import com.freightos.common.util.VoMapper;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -47,6 +49,26 @@ class MasterBlSeaSubFactory {
                 Nullables.mapOrElse(s.issueDate(),   BlDate::of,                                               sea::getIssueDate)
         );
         applySeaCommon(sea, s.vesselNationality(), s.serviceTerm(), s.blType(), s.porCode(), s.finalDestCode(), s.rton());
+    }
+
+    public SeaDetailProjection toSeaDetailProjection(MasterBlSea sea) {
+        return new SeaDetailProjection(
+                Nullables.mapOrNull(sea.getLoadType(), LoadType::name),
+                VoMapper.mapOrNull(sea.getLinerCode(), LinerCode::value),
+                sea.getVesselVoyage() != null ? sea.getVesselVoyage().vesselCode() : null,
+                sea.getVesselVoyage() != null ? sea.getVesselVoyage().vesselName() : null,
+                sea.getVesselVoyage() != null ? sea.getVesselVoyage().voyageNo() : null,
+                VoMapper.mapOrNull(sea.getOnboardDate(), BlDate::asString),
+                sea.getVesselNationality(),
+                Nullables.mapOrNull(sea.getServiceTerm(), ServiceTerm::name),
+                Nullables.mapOrNull(sea.getBlType(), BlType::name),
+                VoMapper.mapOrNull(sea.getPorCode(), PortCode::value),
+                VoMapper.mapOrNull(sea.getFinalDestCode(), PortCode::value),
+                VoMapper.mapOrNull(sea.getRton(), Rton::ton),
+                VoMapper.mapOrNull(sea.getLineBkgNo(), BlNumber::value),
+                VoMapper.mapOrNull(sea.getIssueDate(), BlDate::asString),
+                sea.getRemark()
+        );
     }
 
     private void applySeaCommon(MasterBlSea sea, String vesselNationality,
