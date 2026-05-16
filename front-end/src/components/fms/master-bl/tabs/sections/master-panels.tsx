@@ -38,12 +38,16 @@ const PARTY_BTNS: Partial<Record<PartyRole, string>> = {
 function PartyBlockConnected({
   role,
   form,
+  isImp,
 }: {
   role: PartyRole;
   form: UseFormReturn<MasterBlFormValues>;
+  // §누락3 fix: IMP일 때 consigneeCode is-required 표시 — BE @NotBlank(groups={SeaImpMasterGroup,AirImpMasterGroup})
+  isImp: boolean;
 }) {
   const codeField = PARTY_CODE_FIELD[role];
   const addrField = PARTY_ADDR_FIELD[role];
+  const isConsigneeRequired = role === "CONSIGNEE" && isImp;
 
   return (
     <div className="party-block">
@@ -53,6 +57,7 @@ function PartyBlockConnected({
             kind="party-cn"
             variant="panel"
             label={role}
+            required={isConsigneeRequired}
             codeProps={{ ...form.register(codeField) }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
           />
@@ -100,12 +105,13 @@ function PartyBlockStub({ role }: { role: PartyRole }) {
   );
 }
 
-export function MasterPartyPanel({ form }: Props) {
+export function MasterPartyPanel({ variant, form }: Props) {
+  const isImp = variant?.direction === "IMP";
   const fields: FieldWidgetDef[] = PARTIES.map(role => ({
     key:    role.toLowerCase(),
     label:  role,
     render: () => form
-      ? <PartyBlockConnected role={role} form={form} />
+      ? <PartyBlockConnected role={role} form={form} isImp={isImp} />
       : <PartyBlockStub role={role} />,
   }));
 

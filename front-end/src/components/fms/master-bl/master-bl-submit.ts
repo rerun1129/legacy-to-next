@@ -1,5 +1,5 @@
 import type { BLVariantConfig } from '@/lib/bl-variants';
-import type { CreateMasterBlRequest, UpdateMasterBlRequest, SeaDetailRequest } from '@/domain/master-bl';
+import type { CreateMasterBlRequest, UpdateMasterBlRequest, SeaDetailRequest, AirDetailRequest } from '@/domain/master-bl';
 import type { MasterBlFormValues } from './master-bl-schema';
 
 /** 문자열 → number 변환. 빈 문자열이면 undefined 반환. */
@@ -35,6 +35,35 @@ function buildSeaDetailRequest(
     rton:              toNum(sd.rton),
     lineBkgNo:         toStr(sd.lineBkgNo),
     issueDate:         toStr(sd.issueDate),
+  };
+}
+
+/**
+ * form airDetail → BE AirDetailRequest 변환.
+ * form은 handlingInformationCode/Text, BE는 handlingInfoCode/Text 필드명 사용 (§BE Phase 2 정합).
+ */
+function buildAirDetailRequest(
+  ad: NonNullable<MasterBlFormValues['airDetail']>,
+): AirDetailRequest {
+  return {
+    airlineCode:           toStr(ad.airlineCode),
+    chargeWeightKg:        ad.chargeWeightKg ?? undefined,
+    volumeWeightKg:        ad.volumeWeightKg ?? undefined,
+    rateClass:             toStr(ad.rateClass),
+    currencyCode:          toStr(ad.currencyCode),
+    declaredValueCarriage: toStr(ad.declaredValueCarriage),
+    declaredValueCustoms:  toStr(ad.declaredValueCustoms),
+    insurance:             toStr(ad.insurance),
+    accountInformation:    toStr(ad.accountInformation),
+    securityStatus:        toStr(ad.securityStatus),
+    flightType:            toStr(ad.flightType),
+    issueDate:             toStr(ad.issueDate),
+    issuePlace:            toStr(ad.issuePlace),
+    signature:             toStr(ad.signature),
+    otherTerm:             toStr(ad.otherTerm),
+    handlingInfoCode:      toStr(ad.handlingInformationCode),
+    handlingInfoText:      toStr(ad.handlingInformationText),
+    remark:                toStr(ad.remark),
   };
 }
 
@@ -83,6 +112,11 @@ export function buildCreateMasterBlPayload(
   // SEA 전용 — seaDetail nested
   if (jobDiv === 'SEA' && values.seaDetail) {
     base.seaDetail = buildSeaDetailRequest(values.seaDetail);
+  }
+
+  // AIR 전용 — airDetail nested
+  if (jobDiv === 'AIR' && values.airDetail) {
+    base.airDetail = buildAirDetailRequest(values.airDetail);
   }
 
   return base;

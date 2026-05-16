@@ -45,21 +45,22 @@ function AirIssuePanelContent({
 
   // §bl-variants MASTER_VARIANTS air-exp.issueFields: ['Issue Date', 'Signature', 'Issue Place']
   // airDetail.* nested path — BE Phase 2 AirDetailRequest 정합
-  const FIELD_MAP: Record<string, { path: "airDetail.issueDate" | "airDetail.issuePlace" | "airDetail.signature"; isDate: boolean }> = {
-    "Issue Date":  { path: "airDetail.issueDate",  isDate: true  },
-    "Issue Place": { path: "airDetail.issuePlace", isDate: false },
-    "Signature":   { path: "airDetail.signature",  isDate: false },
+  // §BE-sync — issueDate/issuePlace/signature는 @NotBlank(AirMasterGroup) → FE is-required 표시
+  const FIELD_MAP: Record<string, { path: "airDetail.issueDate" | "airDetail.issuePlace" | "airDetail.signature"; isDate: boolean; required: boolean }> = {
+    "Issue Date":  { path: "airDetail.issueDate",  isDate: true,  required: true  },
+    "Issue Place": { path: "airDetail.issuePlace", isDate: false, required: true  },
+    "Signature":   { path: "airDetail.signature",  isDate: false, required: true  },
   };
 
   const issueItems: FieldItemDef[] = variant.issueFields
     .filter((f): f is keyof typeof FIELD_MAP => f in FIELD_MAP)
     .map((f) => {
-      const { path, isDate } = FIELD_MAP[f];
+      const { path, isDate, required } = FIELD_MAP[f];
       return {
         key: f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
         render: () => (
           <div className="li">
-            <span className="li__label">{f}</span>
+            <span className={`li__label${required ? " is-required" : ""}`}>{f}</span>
             <div className="li__input">
               {isDate ? (
                 <Controller

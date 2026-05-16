@@ -11,30 +11,18 @@ import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/a
 import { Button } from "@/components/shared/button";
 import { TextBox } from "@/components/shared/inputs/text-box";
 import { buildSeaFields } from "./master-schedule-sea-fields";
+import { PolField, PodField, EtdField, EtaField } from "./master-schedule-sea-atoms";
 
 interface Props { variant?: AnyVariantConfig; form?: UseFormReturn<MasterBlFormValues> }
 
 // ── AIR schedule 헬퍼 (AIR 코드 격리 원칙 — 자체 수정 없이 재사용) ─────────
-function SchedField({ label, name }: { label: string; name: string }) {
-  const { register } = useFormContext();
-  return (
-    <div className="li">
-      <span className="li__label">{label}</span>
-      <div className="li__input">
-        <TextBox variant="panel" {...register(name)} />
-      </div>
-    </div>
-  );
-}
-
-function CodeNameField({ label, codeField, nameField, req }: { label: string; codeField: string; nameField: string; req?: boolean }) {
+function SchedField({ label, name, req }: { label: string; name: string; req?: boolean }) {
   const { register } = useFormContext();
   return (
     <div className="li">
       <span className={`li__label${req ? " is-required" : ""}`}>{label}</span>
-      <div className="li__input" style={{ gap: 4 }}>
-        <TextBox variant="panel" style={{ width: 70 }} {...register(codeField)} />
-        <TextBox variant="panel" style={{ flex: 1 }} {...register(nameField)} />
+      <div className="li__input">
+        <TextBox variant="panel" {...register(name)} />
       </div>
     </div>
   );
@@ -47,20 +35,40 @@ function buildAirFields(
   register: UseFormRegister<MasterBlFormValues>,
   control: Control<MasterBlFormValues>,
 ): FieldWidgetDef[] {
+  // §누락1 fix: airlineCode는 airDetail.airlineCode (seaDetail.linerCode 오기 수정)
+  // §누락2 fix: polCode/podCode/etd/eta 위젯 추가 — BE @NotBlank 공통 필수 필드
   const carrierItems: FieldItemDef[] = [
-    { key: "carrier",   render: () => <CodeNameField label={isExp ? "Airline" : "Carrier"} codeField="seaDetail.linerCode" nameField="seaDetail.linerName" req /> },
-    { key: "departure", render: () => <CodeNameField label="Departure" codeField="polCode" nameField="seaDetail.polName" req /> },
+    { key: "carrier",   render: () => <SchedField label={isExp ? "Airline" : "Carrier"} name="airDetail.airlineCode" req /> },
+    { key: "departure", render: () => <SchedField label="Departure" name="polCode" req /> },
   ];
+  // §누락1 fix: issueDate/signature/issuePlace도 airDetail path로 수정 (seaDetail은 SEA 전용)
   const issueItems: FieldItemDef[] = [
-    { key: "issue-date",  render: () => <SchedField label="Issue Date"  name="seaDetail.issueDate" /> },
-    { key: "signature",   render: () => <SchedField label="Signature"   name="seaDetail.signature" /> },
-    { key: "issue-place", render: () => <SchedField label="Issue Place" name="seaDetail.issuePlace" /> },
+    { key: "issue-date",  render: () => <SchedField label="Issue Date"  name="airDetail.issueDate" /> },
+    { key: "signature",   render: () => <SchedField label="Signature"   name="airDetail.signature" /> },
+    { key: "issue-place", render: () => <SchedField label="Issue Place" name="airDetail.issuePlace" /> },
+  ];
+  // §누락2 fix: BE @NotBlank 공통 필수 polCode/podCode/etd/eta — SEA atoms 재사용
+  const portItems: FieldItemDef[] = [
+    { key: "pol", render: () => <PolField /> },
+    { key: "pod", render: () => <PodField /> },
+  ];
+  const dateItems: FieldItemDef[] = [
+    { key: "etd", render: () => <EtdField /> },
+    { key: "eta", render: () => <EtaField /> },
   ];
 
   return [
     {
       key: "carrier", label: "Carrier",
       render: () => <FieldItemGrid itemScope={`${panelScope}.carrier`} items={carrierItems} />,
+    },
+    {
+      key: "ports", label: "POL / POD",
+      render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} cols={2} shouldShowRowControls={false} />,
+    },
+    {
+      key: "dates", label: "ETD / ETA",
+      render: () => <FieldItemGrid itemScope={`${panelScope}.dates`} items={dateItems} cols={2} shouldShowRowControls={false} />,
     },
     {
       key: "legs", label: "Schedule Legs",

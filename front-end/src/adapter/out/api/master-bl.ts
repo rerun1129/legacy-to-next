@@ -88,6 +88,63 @@ const SEA_DETAIL_SCHEMA = z.object({
   remark:            z.string().nullable().optional().transform((v) => v ?? undefined),
 });
 
+// §BE-sync — AirDetailResponse 18 필드 (BE Phase 2 AirDetailResponse record mirror)
+// §6.49 ⑮ — 모든 nullable 필드 .nullable().optional().transform(v => v ?? undefined) 통일
+// handlingInfoCode/handlingInfoText: BE 필드명 그대로 파싱
+const AIR_DETAIL_SCHEMA = z.object({
+  airlineCode:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  chargeWeightKg:        z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg:        z.number().nullable().optional().transform((v) => v ?? undefined),
+  rateClass:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  currencyCode:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  declaredValueCarriage: z.string().nullable().optional().transform((v) => v ?? undefined),
+  declaredValueCustoms:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  insurance:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  accountInformation:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  securityStatus:        z.string().nullable().optional().transform((v) => v ?? undefined),
+  flightType:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  issueDate:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  issuePlace:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  signature:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  otherTerm:             z.string().nullable().optional().transform((v) => v ?? undefined),
+  handlingInfoCode:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  handlingInfoText:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  remark:                z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+// §BE-sync — DimView 6 필드 (포장 치수, BigDecimal → number)
+const DIM_API_SCHEMA = z.object({
+  lengthCm:       z.number().nullable().optional().transform((v) => v ?? undefined),
+  widthCm:        z.number().nullable().optional().transform((v) => v ?? undefined),
+  heightCm:       z.number().nullable().optional().transform((v) => v ?? undefined),
+  quantity:       z.number().nullable().optional().transform((v) => v ?? undefined),
+  cbm:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+// §BE-sync — ScheduleLegView 7 필드 (구간 스케줄)
+const SCHEDULE_LEG_API_SCHEMA = z.object({
+  toCode:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  byCarrier: z.string().nullable().optional().transform((v) => v ?? undefined),
+  flightNo:  z.string().nullable().optional().transform((v) => v ?? undefined),
+  onBoardDt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  onBoardTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+  arrivalDt: z.string().nullable().optional().transform((v) => v ?? undefined),
+  arrivalTm: z.string().nullable().optional().transform((v) => v ?? undefined),
+});
+
+// §BE-sync — AirChargeView 8 필드 (AIR Charge, BigDecimal → number)
+const AIR_CHARGE_API_SCHEMA = z.object({
+  freightCode:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  currencyCode:   z.string().nullable().optional().transform((v) => v ?? undefined),
+  per:            z.string().nullable().optional().transform((v) => v ?? undefined),
+  freightTerm:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  grossWeightKg:  z.number().nullable().optional().transform((v) => v ?? undefined),
+  rateClass:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  chargeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
+  rate:           z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
 const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   shipmentType: z.string().nullable(),
   // §6.49 ⑰ — freightTerm enum literal → string nullable 완화
@@ -114,6 +171,12 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
   // §BE Phase 2 — seaDetail nested (desc root 승격)
   seaDetail: SEA_DETAIL_SCHEMA.nullable().optional(),
+  // §BE Phase 2 — airDetail nested (AIR 전용, SEA에서 null)
+  airDetail: AIR_DETAIL_SCHEMA.nullable().optional(),
+  // §BE Phase 2 — dims/scheduleLegs/airCharges (AIR 전용 배열, 미존재 시 빈 배열)
+  dims:         z.array(DIM_API_SCHEMA).optional().default([]),
+  scheduleLegs: z.array(SCHEDULE_LEG_API_SCHEMA).optional().default([]),
+  airCharges:   z.array(AIR_CHARGE_API_SCHEMA).optional().default([]),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

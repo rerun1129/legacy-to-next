@@ -59,7 +59,7 @@ export function MasterChangeBlNoModal({
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="modal">
-        <div className="modal__title">Change B/L No</div>
+        <div className="modal__title">Change {blNoLabel}</div>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="modal__body">
           <div className="field">
             <div className="field__label">현재 {blNoLabel}</div>

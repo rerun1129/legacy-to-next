@@ -46,6 +46,63 @@ export interface MasterBlSeaDetail {
   remark: string | null;
 }
 
+// §BE-sync — AirDetailResponse 18 필드 (BE Phase 2 AirDetailResponse record mirror)
+// BigDecimal(chargeWeightKg/volumeWeightKg)은 BE Jackson → number
+// handlingInfoCode/handlingInfoText: BE 필드명 그대로 (form schema는 handlingInformationCode/Text 사용)
+export interface MasterBlAirDetail {
+  airlineCode: string | null;
+  chargeWeightKg: number | null;
+  volumeWeightKg: number | null;
+  rateClass: string | null;
+  currencyCode: string | null;
+  declaredValueCarriage: string | null;
+  declaredValueCustoms: string | null;
+  insurance: string | null;
+  accountInformation: string | null;
+  securityStatus: string | null;
+  flightType: string | null;
+  issueDate: string | null;
+  issuePlace: string | null;
+  signature: string | null;
+  otherTerm: string | null;
+  handlingInfoCode: string | null;
+  handlingInfoText: string | null;
+  remark: string | null;
+}
+
+// §BE-sync — DimView (포장 치수 응답, BigDecimal → number)
+export interface Dim {
+  lengthCm: number | null;
+  widthCm: number | null;
+  heightCm: number | null;
+  quantity: number | null;
+  cbm: number | null;
+  volumeWeightKg: number | null;
+}
+
+// §BE-sync — ScheduleLegView (구간 스케줄 응답)
+export interface ScheduleLeg {
+  toCode: string | null;
+  byCarrier: string | null;
+  flightNo: string | null;
+  onBoardDt: string | null;
+  onBoardTm: string | null;
+  arrivalDt: string | null;
+  arrivalTm: string | null;
+}
+
+// §BE-sync — AirChargeView (AIR Charge 응답, BigDecimal → number)
+export interface AirCharge {
+  freightCode: string | null;
+  currencyCode: string | null;
+  per: string | null;
+  freightTerm: string | null;
+  grossWeightKg: number | null;
+  rateClass: string | null;
+  chargeWeightKg: number | null;
+  rate: number | null;
+}
+
 export interface MasterBlDetail extends MasterBlRow {
   shipmentType: string | null;
   // §6.49 ⑰ — freightTerm enum literal → string | null 완화 (BE 검증 일원화)
@@ -74,6 +131,12 @@ export interface MasterBlDetail extends MasterBlRow {
   notifyAddress: string | null;
   // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 정합, desc root 승격)
   seaDetail: MasterBlSeaDetail | null;
+  // §BE Phase 2 — airDetail nested (AIR 전용, SEA에서 null)
+  airDetail?: MasterBlAirDetail | null;
+  // §BE Phase 2 — dims/scheduleLegs/airCharges (AIR 전용 배열, 미존재 시 빈 배열)
+  dims?: Dim[];
+  scheduleLegs?: ScheduleLeg[];
+  airCharges?: AirCharge[];
 }
 
 // §BE-sync — ConsoledSeaContainerView (BE consoledSeaContainers 전체 필드 정합)
@@ -185,6 +248,29 @@ export interface AirChargeRequest {
   rate?: number;
 }
 
+// §BE-sync — CreateMasterBlRequest.AirDetailRequest (BE Phase 2 AirDetailRequest record mirror)
+// handlingInfoCode/handlingInfoText: BE 필드명 기준 (§6.49 ⑮)
+export interface AirDetailRequest {
+  airlineCode?: string;
+  chargeWeightKg?: number;
+  volumeWeightKg?: number;
+  rateClass?: string;
+  currencyCode?: string;
+  declaredValueCarriage?: string;
+  declaredValueCustoms?: string;
+  insurance?: string;
+  accountInformation?: string;
+  securityStatus?: string;
+  flightType?: string;
+  issueDate?: string;
+  issuePlace?: string;
+  signature?: string;
+  otherTerm?: string;
+  handlingInfoCode?: string;
+  handlingInfoText?: string;
+  remark?: string;
+}
+
 export interface CreateMasterBlRequest {
   jobDiv: JobDiv;
   bound: Bound;
@@ -215,6 +301,8 @@ export interface CreateMasterBlRequest {
   teamCode?: string;
   remark?: string;
   seaDetail?: SeaDetailRequest;
+  // §BE Phase 2 — AIR 전용 확장 필드
+  airDetail?: AirDetailRequest;
   desc?: DescRequest;
   dims?: DimRequest[];
   scheduleLegs?: ScheduleLegRequest[];

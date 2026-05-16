@@ -70,6 +70,57 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
       issueDate:         detail.seaDetail?.issueDate          ?? "",
       remark: detail.seaDetail?.remark ?? undefined,
     },
+    // §BE Phase 2 — airDetail nested 18 필드 매핑 (BE handlingInfoCode/Text → form handlingInformationCode/Text)
+    airDetail: {
+      airlineCode:            detail.airDetail?.airlineCode            ?? undefined,
+      chargeWeightKg:         detail.airDetail?.chargeWeightKg         ?? undefined,
+      volumeWeightKg:         detail.airDetail?.volumeWeightKg         ?? undefined,
+      rateClass:              detail.airDetail?.rateClass              ?? undefined,
+      currencyCode:           detail.airDetail?.currencyCode           ?? undefined,
+      declaredValueCarriage:  detail.airDetail?.declaredValueCarriage  ?? undefined,
+      declaredValueCustoms:   detail.airDetail?.declaredValueCustoms   ?? undefined,
+      insurance:              detail.airDetail?.insurance              ?? undefined,
+      accountInformation:     detail.airDetail?.accountInformation     ?? undefined,
+      securityStatus:         detail.airDetail?.securityStatus         ?? undefined,
+      flightType:             detail.airDetail?.flightType             ?? undefined,
+      issueDate:              detail.airDetail?.issueDate              ?? "",
+      issuePlace:             detail.airDetail?.issuePlace             ?? undefined,
+      signature:              detail.airDetail?.signature              ?? undefined,
+      otherTerm:              detail.airDetail?.otherTerm              ?? undefined,
+      handlingInformationCode: detail.airDetail?.handlingInfoCode      ?? undefined,
+      handlingInformationText: detail.airDetail?.handlingInfoText      ?? undefined,
+      remark:                 detail.airDetail?.remark                 ?? undefined,
+    },
+    // §BE Phase 2 — dims 배열 매핑 (default [])
+    dims: (detail.dims ?? []).map((d) => ({
+      lengthCm:       d.lengthCm       ?? undefined,
+      widthCm:        d.widthCm        ?? undefined,
+      heightCm:       d.heightCm       ?? undefined,
+      quantity:       d.quantity       ?? undefined,
+      cbm:            d.cbm            ?? undefined,
+      volumeWeightKg: d.volumeWeightKg ?? undefined,
+    })),
+    // §BE Phase 2 — scheduleLegs 배열 매핑 (default [])
+    scheduleLegs: (detail.scheduleLegs ?? []).map((leg) => ({
+      toCode:    leg.toCode    ?? "",
+      byCarrier: leg.byCarrier ?? undefined,
+      flightNo:  leg.flightNo  ?? undefined,
+      onBoardDt: leg.onBoardDt ?? "",
+      onBoardTm: leg.onBoardTm ?? undefined,
+      arrivalDt: leg.arrivalDt ?? "",
+      arrivalTm: leg.arrivalTm ?? undefined,
+    })),
+    // §BE Phase 2 — airCharges 배열 매핑 (default [])
+    airCharges: (detail.airCharges ?? []).map((c) => ({
+      freightCode:    c.freightCode    ?? undefined,
+      currencyCode:   c.currencyCode   ?? undefined,
+      per:            c.per            ?? undefined,
+      freightTerm:    c.freightTerm    ?? undefined,
+      grossWeightKg:  c.grossWeightKg  ?? undefined,
+      rateClass:      c.rateClass      ?? undefined,
+      chargeWeightKg: c.chargeWeightKg ?? undefined,
+      rate:           c.rate           ?? undefined,
+    })),
     // §BE-sync — consolidatedHouseBls → houseBls (ConsoledHouseBlSummaryView 전체 필드 매핑)
     houseBls: (detail.consolidatedHouseBls ?? []).map((hbl) => ({
       houseBlId:      hbl.houseBlId,
