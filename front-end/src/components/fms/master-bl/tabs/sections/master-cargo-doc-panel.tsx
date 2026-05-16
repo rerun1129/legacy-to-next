@@ -135,7 +135,8 @@ export function MasterCargoDocPanel({ variant }: Props) {
     ? [{ key: "r-ton", render: () => (
         <div className="li">
           <span className="li__label">R/Ton</span>
-          <div className="li__input"><NumberBox variant="panel" name="rTon" decimalPlaces={3} /></div>
+          {/* §6.64 — schema는 seaDetail.rton path. 마이그레이션 잔존 'rTon'은 미연결 path였음 */}
+          <div className="li__input"><NumberBox variant="panel" name="seaDetail.rton" decimalPlaces={3} /></div>
         </div>
       )}]
     : [

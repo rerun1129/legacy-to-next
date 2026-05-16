@@ -217,7 +217,10 @@ export function MasterRemarkPanel({ form }: Props) {
         {form
           ? <Controller
               control={form.control}
-              name="desc.remark"
+              // §6.64 — BE UpdateMasterBlRequest.DescRequest에 remark 필드 없음.
+              // master_bl_sea.remark는 root cmd.remark()로 BE에서 처리 (applyRemark).
+              // 마이그레이션 잔존 "desc.remark"는 wire에 누락되어 사용자 입력이 사라지던 경로.
+              name="remark"
               render={({ field }) => (
                 <LineNumberTextarea
                   style={{ flex: 1, minHeight: 0 }}
