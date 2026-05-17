@@ -1,3 +1,5 @@
+import type { Permission } from "@/domain/permission";
+
 export type UserRole = "ADMIN" | "USER";
 
 export interface UserRow {
@@ -19,6 +21,7 @@ export interface UserDetail {
   updatedAt: string;
   createdBy: string | null;
   updatedBy: string | null;
+  permissions: Permission[];
 }
 
 export type ActiveUserFilter = "ALL" | "ACTIVE" | "INACTIVE";
@@ -36,6 +39,7 @@ export interface CreateUserRequestDto {
   password: string;
   role: UserRole;
   active: boolean;
+  permissions: Permission[];
 }
 
 export interface UpdateUserRequestDto {
@@ -43,4 +47,5 @@ export interface UpdateUserRequestDto {
   password: string | null; // null/empty → BE 미갱신
   role: UserRole;
   active: boolean;
+  permissions: Permission[];
 }

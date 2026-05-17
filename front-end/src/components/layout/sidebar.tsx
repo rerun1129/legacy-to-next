@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { getSession, hasPermission } from "@/lib/admin-session";
+import type { Permission } from "@/domain/permission";
 
 
 // ─── Types ──────────────────────────────────────────────────
@@ -16,6 +18,7 @@ interface NavLeaf {
   label: string;
   href: string;
   icon: React.ComponentType<{ size?: number }>;
+  requiredPermission?: Permission;
 }
 
 interface NavSection {
@@ -86,13 +89,13 @@ const NAV_MODULES: NavModule[] = [
       {
         group: "Code Master", icon: KeyRound, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/code/list", icon: List },
+          { label: "List", href: "/admin/code/list", icon: List, requiredPermission: "CODE_MANAGE" },
         ],
       },
       {
         group: "사용자 관리", icon: UserCog, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/user/list", icon: List },
+          { label: "List", href: "/admin/user/list", icon: List, requiredPermission: "USER_MANAGE" },
         ],
       },
     ],
@@ -117,6 +120,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
   const addTab   = useTabs((s) => s.addTab);
+  const [session] = useState(() => getSession());
 
   const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
@@ -207,7 +211,9 @@ export function Sidebar() {
                     />
                   </button>
 
-                  {secOpen && section.children.map((leaf) => {
+                  {secOpen && section.children
+                    .filter((leaf) => !leaf.requiredPermission || hasPermission(session, leaf.requiredPermission))
+                    .map((leaf) => {
                     const active = leafActive(pathname, leaf);
                     return (
                       <button

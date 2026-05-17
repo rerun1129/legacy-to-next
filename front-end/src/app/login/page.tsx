@@ -3,13 +3,21 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { ADMIN_API_URL } from "@/lib/api-base";
-import { setSession } from "@/lib/admin-session";
+import { authUseCases } from "@/application/auth/use-cases";
+import { setSession, hasPermission } from "@/lib/admin-session";
+import type { AdminSession } from "@/lib/admin-session";
 import { toast } from "@/lib/toast-store";
 
 interface LoginForm {
   username: string;
   password: string;
+}
+
+function firstAccessibleRoute(session: AdminSession): string | null {
+  if (session.role === "ADMIN") return "/admin/code/list";
+  if (hasPermission(session, "CODE_MANAGE")) return "/admin/code/list";
+  if (hasPermission(session, "USER_MANAGE")) return "/admin/user/list";
+  return null;
 }
 
 export default function LoginPage() {
@@ -21,28 +29,29 @@ export default function LoginPage() {
     setError(null);
     const authHeader = "Basic " + btoa(`${data.username}:${data.password}`);
     try {
-      const res = await fetch(`${ADMIN_API_URL}/api/admin/code/search`, {
-        method: "POST",
-        headers: {
-          Authorization: authHeader,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ page: 0, size: 1 }),
-      });
-      if (res.status === 401 || res.status === 403) {
+      const me = await authUseCases.me(authHeader);
+      const session: AdminSession = {
+        authHeader,
+        role: me.role,
+        permissions: me.permissions,
+      };
+      const target = firstAccessibleRoute(session);
+      if (!target) {
+        toast.error("접근 가능한 페이지가 없습니다. 관리자에게 문의하세요.");
+        setError("no-access");
+        return;
+      }
+      setSession(session);
+      router.replace(target);
+    } catch (e) {
+      const status = (e as { statusCode?: number })?.statusCode;
+      if (status === 401 || status === 403) {
         toast.error("로그인 실패: 사용자 또는 비밀번호가 올바르지 않습니다.");
         setError("auth");
-        return;
+      } else {
+        console.error(e);
+        toast.error("네트워크 오류");
       }
-      if (!res.ok) {
-        toast.error(`서버 오류 (${res.status})`);
-        return;
-      }
-      setSession({ authHeader, role: "ADMIN" });
-      router.replace("/admin/code/list");
-    } catch (e) {
-      console.error(e);
-      toast.error("네트워크 오류");
     }
   };
 
@@ -102,7 +111,9 @@ export default function LoginPage() {
         >
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
-        {error && <span style={{ color: "var(--danger, #dc2626)", fontSize: 12 }}>로그인에 실패했습니다.</span>}
+        {error && <span style={{ color: "var(--danger, #dc2626)", fontSize: 12 }}>
+          {error === "no-access" ? "접근 가능한 페이지가 없습니다." : "로그인에 실패했습니다."}
+        </span>}
       </form>
     </div>
   );

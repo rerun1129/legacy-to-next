@@ -15,6 +15,8 @@ const BASE = "/api/admin/user";
 
 const USER_ROLE_SCHEMA = z.enum(["ADMIN", "USER"]) satisfies z.ZodType<UserRole>;
 
+const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "PARTNER_MANAGE", "CMS_MANAGE"]);
+
 const USER_ROW_SCHEMA = z.object({
   id: z.number(),
   username: z.string(),
@@ -34,6 +36,7 @@ const USER_DETAIL_SCHEMA = z.object({
   updatedAt: z.string(),
   createdBy: z.string().nullable().optional().transform((v) => v ?? null),
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
+  permissions: z.array(PERMISSION_SCHEMA).default([]),
 }) satisfies z.ZodType<UserDetail>;
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>

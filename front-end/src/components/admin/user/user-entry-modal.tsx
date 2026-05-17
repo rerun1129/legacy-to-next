@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
@@ -9,6 +9,8 @@ import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { userUseCases } from "@/application/user/use-cases";
 import type { CreateUserRequestDto, UpdateUserRequestDto, UserRole } from "@/domain/user";
+import type { Permission } from "@/domain/permission";
+import { ALL_PERMISSIONS, PERMISSION_LABEL } from "@/domain/permission";
 
 export interface EntryModalState {
   mode: "create" | "edit";
@@ -27,6 +29,7 @@ interface UserFormValues {
   password: string; // create 필수, edit 빈 값이면 미갱신
   role: UserRole;
   active: boolean;
+  permissions: Permission[];
 }
 
 const DEFAULT_FORM: UserFormValues = {
@@ -35,6 +38,7 @@ const DEFAULT_FORM: UserFormValues = {
   password: "",
   role: "ADMIN",
   active: true,
+  permissions: [...ALL_PERMISSIONS],
 };
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -47,7 +51,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
   const form = useForm<UserFormValues>({ defaultValues: DEFAULT_FORM });
-  const { register, reset, getValues, formState: { isSubmitting } } = form;
+  const { register, reset, getValues, watch, formState: { isSubmitting } } = form;
 
   // 수정 모드: 상세 조회 후 form.reset
   const { data: detail, isLoading: isDetailLoading } = useQuery({
@@ -67,6 +71,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         password: "", // 응답에 password 없음 — 변경 시에만 입력
         role: detail.role,
         active: detail.active,
+        permissions: detail.permissions,
       });
     }
   }, [detail, reset]);
@@ -77,6 +82,14 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
       reset(DEFAULT_FORM);
     }
   }, [isEdit, reset]);
+
+  // ADMIN role 선택 시 전체 권한 자동 부여
+  const role = watch("role");
+  useEffect(() => {
+    if (role === "ADMIN") {
+      form.setValue("permissions", [...ALL_PERMISSIONS]);
+    }
+  }, [role, form]);
 
   const createMutation = useMutation({
     mutationFn: (req: CreateUserRequestDto) => userUseCases.create(req),
@@ -111,6 +124,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         password: values.password.trim() || null,
         role: values.role,
         active: values.active,
+        permissions: values.permissions,
       };
       updateMutation.mutate({ id: state.id, req });
     } else {
@@ -120,6 +134,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         password: values.password,
         role: values.role,
         active: values.active,
+        permissions: values.permissions,
       };
       createMutation.mutate(req);
     }
@@ -189,6 +204,41 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                 ))}
               </select>
             </div>
+            <Controller
+              name="permissions"
+              control={form.control}
+              render={({ field }) => {
+                const isAdmin = watch("role") === "ADMIN";
+                return (
+                  <div className="lcn" style={{ alignItems: "flex-start" }}>
+                    <span className="lcn__label" style={{ paddingTop: 4 }}>권한</span>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {ALL_PERMISSIONS.map((p) => {
+                        const checked = isAdmin || (field.value ?? []).includes(p);
+                        return (
+                          <label key={p} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              disabled={isAdmin}
+                              onChange={(e) => {
+                                const current = field.value ?? [];
+                                field.onChange(
+                                  e.target.checked
+                                    ? [...current, p]
+                                    : current.filter((v) => v !== p)
+                                );
+                              }}
+                            />
+                            {PERMISSION_LABEL[p]}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }}
+            />
             <div className="lcn">
               <span className="lcn__label">활성</span>
               <label style={{ display: "flex", alignItems: "center", gap: 6 }}>

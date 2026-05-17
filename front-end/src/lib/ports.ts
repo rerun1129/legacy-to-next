@@ -1,3 +1,4 @@
+import { API_AUTH_PORT } from '@/adapter/out/api/auth';
 import { API_AIR_HOUSE_PORT } from '@/adapter/out/api/air-house';
 import { API_SEA_HOUSE_PORT } from '@/adapter/out/api/sea-house';
 import { API_AIR_MASTER_PORT } from '@/adapter/out/api/air-master';
@@ -26,3 +27,4 @@ export const switchBlPort = useMock ? mockSwitchBlPort : API_SWITCH_BL_PORT;
 export const truckBlPort = API_TRUCK_BL_PORT;
 export const codePort = API_CODE_PORT;
 export const userPort = API_USER_PORT;
+export const authPort = API_AUTH_PORT;

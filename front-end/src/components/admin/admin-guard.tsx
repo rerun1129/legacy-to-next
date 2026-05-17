@@ -2,16 +2,33 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSession } from "@/lib/admin-session";
+import { getSession, hasPermission } from "@/lib/admin-session";
+import type { Permission } from "@/domain/permission";
 
-export function AdminGuard({ children }: { children: React.ReactNode }) {
+interface Props {
+  children: React.ReactNode;
+  requiredPermission?: Permission;
+}
+
+export function AdminGuard({ children, requiredPermission }: Props) {
   const router = useRouter();
   const [session] = useState(() => getSession());
-  const authorized = session?.role === "ADMIN";
+
+  const authorized = session !== null && (
+    requiredPermission
+      ? hasPermission(session, requiredPermission)
+      : true
+  );
 
   useEffect(() => {
-    if (!authorized) router.replace("/login");
-  }, [authorized, router]);
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+    if (!authorized) {
+      router.replace("/login");
+    }
+  }, [session, authorized, router]);
 
   if (!authorized) return null;
   return <>{children}</>;
