@@ -10,6 +10,7 @@ import { API_TRUCK_BL_PORT } from '@/adapter/out/api/truck-bl';
 import { mockHouseBlPort } from '@/adapter/out/mock/house-bl';
 import { mockMasterBlPort } from '@/adapter/out/mock/master-bl';
 import { mockSwitchBlPort } from '@/adapter/out/mock/switch-bl';
+import { API_CODE_PORT } from '@/adapter/out/api/code';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -22,3 +23,4 @@ export const masterBlPort = useMock ? mockMasterBlPort : API_MASTER_BL_PORT;
 export const nonBlPort = API_NON_BL_PORT;
 export const switchBlPort = useMock ? mockSwitchBlPort : API_SWITCH_BL_PORT;
 export const truckBlPort = API_TRUCK_BL_PORT;
+export const codePort = API_CODE_PORT;
