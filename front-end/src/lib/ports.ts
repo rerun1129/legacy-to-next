@@ -14,6 +14,7 @@ import { mockSwitchBlPort } from '@/adapter/out/mock/switch-bl';
 import { API_CODE_PORT } from '@/adapter/out/api/code';
 import { API_USER_PORT } from '@/adapter/out/api/user';
 import { API_PARTNER_PORT } from '@/adapter/out/api/partner';
+import { API_NOTICE_PORT } from '@/adapter/out/api/notice';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -29,4 +30,5 @@ export const truckBlPort = API_TRUCK_BL_PORT;
 export const codePort = API_CODE_PORT;
 export const userPort = API_USER_PORT;
 export const partnerPort = API_PARTNER_PORT;
+export const noticePort = API_NOTICE_PORT;
 export const authPort = API_AUTH_PORT;
