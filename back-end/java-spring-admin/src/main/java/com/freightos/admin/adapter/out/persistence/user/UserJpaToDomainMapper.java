@@ -26,6 +26,6 @@ public class UserJpaToDomainMapper {
     }
 
     public UserSummary toSummary(UserJpaEntity e) {
-        return new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getRole(), e.getActive(), e.getUpdatedAt());
+        return new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getRole(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt());
     }
 }

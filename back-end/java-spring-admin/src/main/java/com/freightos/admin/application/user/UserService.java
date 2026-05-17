@@ -12,6 +12,7 @@ import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.user.entity.AdminUser;
 import com.freightos.admin.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,15 +44,22 @@ public class UserService implements UserUseCase {
     @Override
     @Transactional
     public Long createUser(CreateUserCommand command) {
-        Long id = userPort.save(userFactory.from(command));
-        userPort.savePermissions(id, command.permissions());
-        return id;
+        try {
+            Long id = userPort.save(userFactory.from(command));
+            userPort.savePermissions(id, command.permissions());
+            return id;
+        } catch (DataIntegrityViolationException e) {
+            throw ApplicationException.conflict("USER_DUPLICATE_USERNAME", MessageCode.USER_DUPLICATE_USERNAME.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public void updateUser(Long id, UpdateUserCommand command) {
         AdminUser existing = findUserById(id);
+        if (existing.isDeleted()) {
+            throw ApplicationException.conflict("USER_DELETED", MessageCode.USER_ALREADY_DELETED.getMessage());
+        }
         // 마지막 활성 ADMIN 비활성화·역할 강등 방어
         if (existing.getRole() == UserRole.ADMIN && existing.isActive()) {
             boolean demotingOrDeactivating = command.role() != UserRole.ADMIN || !command.active();
@@ -68,6 +76,9 @@ public class UserService implements UserUseCase {
     @Transactional
     public void deleteUser(Long id) {
         AdminUser existing = findUserById(id);
+        if (existing.isDeleted()) {
+            throw ApplicationException.conflict("USER_DELETED", MessageCode.USER_ALREADY_DELETED.getMessage());
+        }
         // 마지막 활성 ADMIN 삭제 방어
         if (existing.getRole() == UserRole.ADMIN && existing.isActive()
                 && userPort.countActiveByRole(UserRole.ADMIN) <= 1) {

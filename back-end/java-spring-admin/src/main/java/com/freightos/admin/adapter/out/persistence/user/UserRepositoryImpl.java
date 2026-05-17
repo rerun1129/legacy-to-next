@@ -1,9 +1,9 @@
 package com.freightos.admin.adapter.out.persistence.user;
 
 import com.freightos.admin.application.user.command.SearchUserCommand;
+import com.freightos.admin.application.user.projection.UserScope;
 import com.freightos.admin.application.user.projection.UserSummary;
 import com.freightos.admin.common.response.PagedResult;
-import com.freightos.admin.domain.user.entity.UserRole;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -45,7 +45,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<UserSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getRole(), e.getActive(), e.getUpdatedAt()))
+                .map(e -> new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getRole(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
@@ -54,16 +54,30 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<UserJpaEntity> root, SearchUserCommand command) {
         List<Predicate> predicates = new ArrayList<>();
-        // soft delete 제외 — 필수 조건
-        predicates.add(cb.isNull(root.get("deletedAt")));
+
+        UserScope scope = command.scope() != null ? command.scope() : UserScope.ALL;
+        switch (scope) {
+            case ALL:
+                predicates.add(cb.isNull(root.get("deletedAt")));
+                break;
+            case ACTIVE:
+                predicates.add(cb.isNull(root.get("deletedAt")));
+                predicates.add(cb.isTrue(root.get("active")));
+                break;
+            case INACTIVE:
+                predicates.add(cb.isNull(root.get("deletedAt")));
+                predicates.add(cb.isFalse(root.get("active")));
+                break;
+            case DELETED:
+                predicates.add(cb.isNotNull(root.get("deletedAt")));
+                break;
+        }
+
         if (StringUtils.hasText(command.username())) {
             predicates.add(cb.like(root.get("username"), command.username() + "%"));
         }
         if (command.role() != null) {
             predicates.add(cb.equal(root.get("role"), command.role()));
-        }
-        if (command.active() != null) {
-            predicates.add(cb.equal(root.get("active"), command.active()));
         }
         return predicates.toArray(Predicate[]::new);
     }

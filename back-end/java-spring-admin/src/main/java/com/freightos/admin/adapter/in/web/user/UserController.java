@@ -52,7 +52,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.of(userAssembler.toDetail(domain)));
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateUserRequest req,
             UriComponentsBuilder uriBuilder) {

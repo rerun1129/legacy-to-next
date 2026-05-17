@@ -34,7 +34,6 @@ public class UserPersistenceAdapter implements UserPort {
     @Override
     public Optional<AdminUser> findById(Long id) {
         return userRepository.findById(id)
-                .filter(e -> e.getDeletedAt() == null)
                 .map(this::loadDomainWithPermissions);
     }
 

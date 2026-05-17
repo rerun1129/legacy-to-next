@@ -13,6 +13,7 @@ public record UserDetailResponse(
         String email,
         UserRole role,
         boolean active,
+        LocalDateTime deletedAt,
         Set<Permission> permissions,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,

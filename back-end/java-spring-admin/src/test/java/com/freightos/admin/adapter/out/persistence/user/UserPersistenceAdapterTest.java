@@ -1,6 +1,7 @@
 package com.freightos.admin.adapter.out.persistence.user;
 
 import com.freightos.admin.application.user.command.SearchUserCommand;
+import com.freightos.admin.application.user.projection.UserScope;
 import com.freightos.admin.application.user.projection.UserSummary;
 import com.freightos.admin.common.config.JpaAuditingConfig;
 import com.freightos.admin.common.response.PagedResult;
@@ -76,17 +77,33 @@ class UserPersistenceAdapterTest {
         assertThat(found).isEmpty();
     }
 
-    // ── softDelete 후 findById/findByUsername empty ───────────────────────────
+    // ── softDelete 후 findByUsername empty (deletedAt IS NULL 필터) ─────────────
 
     @Test
-    void softDelete_thenFindById_returnsEmpty() {
+    void softDelete_thenFindByUsername_returnsEmpty() {
         AdminUser user = AdminUser.create("carol", null, "hashed_pw", UserRole.ADMIN, true, Set.of());
         Long id = adapter.save(user);
 
         adapter.softDelete(id);
 
-        assertThat(adapter.findById(id)).isEmpty();
+        // findByUsername은 deletedAt IS NULL 필터 적용 — 삭제 후 empty
         assertThat(adapter.findByUsername("carol")).isEmpty();
+    }
+
+    // ── softDelete 후 findById는 여전히 도메인 반환 ───────────────────────────
+
+    @Test
+    void findById_softDeletedUser_returnsDomain() {
+        AdminUser user = AdminUser.create("carol2", null, "hashed_pw", UserRole.ADMIN, true, Set.of());
+        Long id = adapter.save(user);
+
+        adapter.softDelete(id);
+
+        // findById는 deletedAt filter 없음 — 삭제된 사용자도 반환
+        Optional<AdminUser> found = adapter.findById(id);
+        assertThat(found).isPresent();
+        assertThat(found.get().isDeleted()).isTrue();
+        assertThat(found.get().isActive()).isFalse();
     }
 
     // ── searchSummaries: 여러 row + filter + page ─────────────────────────────
@@ -98,7 +115,7 @@ class UserPersistenceAdapterTest {
         adapter.save(AdminUser.create("bob", "bob@example.com", "h3", UserRole.USER, false, Set.of()));
 
         // username 앞일치 "a" 필터
-        SearchUserCommand command = new SearchUserCommand("a", null, null, 0, 20);
+        SearchUserCommand command = new SearchUserCommand("a", null, UserScope.ALL, 0, 20);
         PagedResult<UserSummary> result = adapter.searchSummaries(command);
 
         assertThat(result.getTotalElements()).isEqualTo(2L);
@@ -145,5 +162,33 @@ class UserPersistenceAdapterTest {
 
         Set<Permission> found = adapter.findPermissionsByUserId(id);
         assertThat(found).isEmpty();
+    }
+
+    // ── searchSummaries scope=DELETED → 삭제된 사용자만 반환 ─────────────────
+
+    @Test
+    void searchSummaries_scopeDeleted_returnsOnlySoftDeleted() {
+        adapter.save(AdminUser.create("scopeAdmin", "sa@example.com", "h1", UserRole.ADMIN, true, Set.of()));
+        Long testerId = adapter.save(AdminUser.create("scopeTester", "st@example.com", "h2", UserRole.USER, true, Set.of()));
+
+        // tester만 soft delete
+        adapter.softDelete(testerId);
+
+        // DELETED scope → 삭제된 1건만
+        PagedResult<UserSummary> deletedResult = adapter.searchSummaries(new SearchUserCommand(null, null, UserScope.DELETED, 0, 20));
+        assertThat(deletedResult.getContent()).hasSize(1);
+        assertThat(deletedResult.getContent().get(0).username()).isEqualTo("scopeTester");
+        assertThat(deletedResult.getContent().get(0).deletedAt()).isNotNull();
+
+        // ALL scope → 미삭제 1건만 (deletedAt IS NULL)
+        PagedResult<UserSummary> allResult = adapter.searchSummaries(new SearchUserCommand("scope", null, UserScope.ALL, 0, 20));
+        assertThat(allResult.getContent()).hasSize(1);
+        assertThat(allResult.getContent().get(0).username()).isEqualTo("scopeAdmin");
+        assertThat(allResult.getContent().get(0).deletedAt()).isNull();
+
+        // ACTIVE scope → active=true 미삭제만
+        PagedResult<UserSummary> activeResult = adapter.searchSummaries(new SearchUserCommand("scope", null, UserScope.ACTIVE, 0, 20));
+        assertThat(activeResult.getContent()).hasSize(1);
+        assertThat(activeResult.getContent().get(0).username()).isEqualTo("scopeAdmin");
     }
 }

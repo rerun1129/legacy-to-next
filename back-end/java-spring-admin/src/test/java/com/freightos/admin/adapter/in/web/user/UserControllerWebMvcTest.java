@@ -87,7 +87,7 @@ class UserControllerWebMvcTest {
     void search_authenticated_returns200() throws Exception {
         UserSummaryResponse summaryResponse = new UserSummaryResponse(
                 1L, "alice", "alice@example.com", UserRole.USER, true,
-                LocalDateTime.of(2024, 1, 1, 0, 0));
+                null, LocalDateTime.of(2024, 1, 1, 0, 0));
         PagedResult<UserSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<UserSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
 
@@ -116,7 +116,7 @@ class UserControllerWebMvcTest {
 
         CreateUserRequest req = new CreateUserRequest("alice", "alice@example.com", "pass1234", UserRole.USER, Boolean.TRUE, Set.of());
 
-        mockMvc.perform(post("/api/admin/user/")
+        mockMvc.perform(post("/api/admin/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -132,7 +132,7 @@ class UserControllerWebMvcTest {
         String body = """
                 {"username":"","email":"a@b.com","password":"pass1234","role":"USER","active":true,"permissions":[]}
                 """;
-        mockMvc.perform(post("/api/admin/user/")
+        mockMvc.perform(post("/api/admin/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -147,7 +147,7 @@ class UserControllerWebMvcTest {
         String body = """
                 {"username":"alice","email":"a@b.com","password":"short12","role":"USER","active":true,"permissions":[]}
                 """;
-        mockMvc.perform(post("/api/admin/user/")
+        mockMvc.perform(post("/api/admin/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -170,7 +170,7 @@ class UserControllerWebMvcTest {
     @WithMockUser(roles = "ADMIN")
     void getById_returns200WithDetail() throws Exception {
         UserDetailResponse detail = new UserDetailResponse(
-                1L, "alice", "alice@example.com", UserRole.USER, true, Set.of(),
+                1L, "alice", "alice@example.com", UserRole.USER, true, null, Set.of(),
                 LocalDateTime.of(2024, 1, 1, 0, 0),
                 LocalDateTime.of(2024, 1, 2, 0, 0),
                 "admin", "admin");

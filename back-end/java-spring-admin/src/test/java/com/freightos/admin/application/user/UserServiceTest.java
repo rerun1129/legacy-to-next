@@ -12,8 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -170,6 +172,59 @@ class UserServiceTest {
                     ApplicationException appEx = (ApplicationException) ex;
                     assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
                     assertThat(appEx.getErrorCode()).isEqualTo("LAST_ADMIN");
+                });
+    }
+
+    // ── createUser: username 중복 → DataIntegrityViolationException → USER_DUPLICATE_USERNAME 409 ─
+
+    @Test
+    void createUser_duplicateUsername_throwsConflict() {
+        CreateUserCommand command = new CreateUserCommand("alice", "alice@example.com", "pass1234", UserRole.USER, true, Set.of());
+        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", UserRole.USER, true, Set.of());
+        given(userFactory.from(command)).willReturn(domain);
+        given(userPort.save(domain)).willThrow(new DataIntegrityViolationException("uq_admin_user_username"));
+
+        assertThatThrownBy(() -> userService.createUser(command))
+                .isInstanceOf(ApplicationException.class)
+                .satisfies(ex -> {
+                    ApplicationException appEx = (ApplicationException) ex;
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(appEx.getErrorCode()).isEqualTo("USER_DUPLICATE_USERNAME");
+                });
+    }
+
+    // ── updateUser: 이미 삭제된 사용자 → conflict ─────────────────────────────
+
+    @Test
+    void updateUser_deletedUser_throwsConflict() {
+        AdminUser deleted = AdminUser.create("alice", "alice@example.com", "hashed", UserRole.USER, true, Set.of());
+        deleted.assignDeletedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
+        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, UserRole.USER, true, Set.of());
+        given(userPort.findById(1L)).willReturn(Optional.of(deleted));
+
+        assertThatThrownBy(() -> userService.updateUser(1L, command))
+                .isInstanceOf(ApplicationException.class)
+                .satisfies(ex -> {
+                    ApplicationException appEx = (ApplicationException) ex;
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(appEx.getErrorCode()).isEqualTo("USER_DELETED");
+                });
+    }
+
+    // ── deleteUser: 이미 삭제된 사용자 → conflict ─────────────────────────────
+
+    @Test
+    void deleteUser_deletedUser_throwsConflict() {
+        AdminUser deleted = AdminUser.create("alice", "alice@example.com", "hashed", UserRole.USER, true, Set.of());
+        deleted.assignDeletedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
+        given(userPort.findById(5L)).willReturn(Optional.of(deleted));
+
+        assertThatThrownBy(() -> userService.deleteUser(5L))
+                .isInstanceOf(ApplicationException.class)
+                .satisfies(ex -> {
+                    ApplicationException appEx = (ApplicationException) ex;
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(appEx.getErrorCode()).isEqualTo("USER_DELETED");
                 });
     }
 }
