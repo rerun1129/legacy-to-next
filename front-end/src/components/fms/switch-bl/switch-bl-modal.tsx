@@ -200,9 +200,6 @@ function SwitchBlModalInner({ houseBlId, houseBlNo, isExp, onClose, initialFromH
       toast.success("Switch B/L saved.");
       onClose();
     },
-    onError: (e: Error) => {
-      toast.error(`Save failed: ${e.message}`);
-    },
   });
 
   const deleteMutation = useMutation({
@@ -210,9 +207,6 @@ function SwitchBlModalInner({ houseBlId, houseBlNo, isExp, onClose, initialFromH
     onSuccess: () => {
       toast.success("Switch B/L deleted.");
       onClose();
-    },
-    onError: (e: Error) => {
-      toast.error(`Delete failed: ${e.message}`);
     },
   });
 

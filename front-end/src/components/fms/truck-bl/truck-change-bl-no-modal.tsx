@@ -38,7 +38,6 @@ function TruckChangeBlNoModalInner({
       onChanged?.();
       onClose();
     },
-    onError: (e: Error) => toast.error(`변경 실패: ${e.message}`),
   });
 
   function handleSubmit(values: FormValues) { mutation.mutate(values); }
