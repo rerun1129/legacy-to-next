@@ -148,9 +148,22 @@ export function HouseBLEntry({ variant }: Props) {
       {canSwitchBl && (
         <SwitchBlModal
           houseBlId={id!}
+          houseBlNo={form.getValues("hbl") ?? ""}
           isExp={variant.direction === "EXP"}
           isOpen={isSwitchBlModalOpen}
           onClose={() => setIsSwitchBlModalOpen(false)}
+          initialFromHouseBl={{
+            shipperCode:      form.getValues("shipperCode") ?? "",
+            shipperAddress:   form.getValues("shipperAddress") ?? "",
+            consigneeCode:    form.getValues("consigneeCode") ?? "",
+            consigneeAddress: form.getValues("consigneeAddress") ?? "",
+            notifyCode:       form.getValues("notifyCode") ?? "",
+            notifyAddress:    form.getValues("notifyAddress") ?? "",
+            marks:            form.getValues("desc.marks") ?? "",
+            natureQuantity:   form.getValues("desc.description") ?? "",
+            incoterms:        form.getValues("incoterms") ?? "",
+            blType:           form.getValues("seaDetail.blType") ?? "",
+          }}
         />
       )}
       {isEdit && id && (

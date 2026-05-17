@@ -9,6 +9,7 @@ import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.switchbl.entity.SwitchBl;
 import com.freightos.fms.application.switchbl.port.in.SwitchBlUseCase;
 import com.freightos.fms.application.switchbl.port.out.SwitchBlPort;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,8 @@ public class SwitchBlService implements SwitchBlUseCase {
     private final SwitchBlFactory switchBlFactory;
 
     @Override
-    public SwitchBlDetailResult getSwitchBlByHouseBlId(Long houseBlId) {
-        SwitchBl entity = switchBlPort.findSwitchBlByHouseBlId(houseBlId)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageCode.SWITCH_BL_NOT_FOUND));
-        return switchBlFactory.toDetailResult(entity);
+    public Optional<SwitchBlDetailResult> findSwitchBlByHouseBlId(Long houseBlId) {
+        return switchBlPort.findSwitchBlByHouseBlId(houseBlId).map(switchBlFactory::toDetailResult);
     }
 
     @Override

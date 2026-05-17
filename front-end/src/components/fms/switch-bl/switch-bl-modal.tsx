@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useForm, FormProvider, Controller, type UseFormReturn } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Save, Trash2, X } from "lucide-react";
+import { Save, Search, Trash2, X } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ComboBox, TextBox } from "@/components/shared/inputs";
 import { useModalDrag } from "@/components/shared/use-modal-drag";
@@ -28,28 +28,43 @@ export interface SwitchBlFormValues {
   blType: string;
 }
 
+interface InitialFromHouseBl {
+  shipperCode: string;
+  shipperAddress: string;
+  consigneeCode: string;
+  consigneeAddress: string;
+  notifyCode: string;
+  notifyAddress: string;
+  marks: string;
+  natureQuantity: string;
+  incoterms: string;
+  blType: string;
+}
+
 interface SwitchBlModalProps {
   houseBlId: number;
+  houseBlNo: string;
   isExp: boolean;
   isOpen: boolean;
   onClose: () => void;
+  initialFromHouseBl: InitialFromHouseBl;
 }
 
 // ── Toolbar (Switch B/L No | House B/L No | Incoterms | B/L Type) ─────────
 interface ToolbarProps {
-  houseBlId: number;
+  houseBlNo: string;
   form: UseFormReturn<SwitchBlFormValues>;
 }
 
-function SwitchBlToolbar({ houseBlId, form }: ToolbarProps) {
+function SwitchBlToolbar({ houseBlNo, form }: ToolbarProps) {
   const { control } = form;
   const { options: incotermsOptions, placeholder: incotermsPh } = useEnumOptions("Incoterms");
   const { options: blTypeOptions,    placeholder: blTypePh }    = useEnumOptions("BlType");
 
   return (
     <div className="toolbar" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-      <div className="field">
-        <div className="field__label">Switch B/L No</div>
+      <div className="field is-required">
+        <div className="field__label is-required">Switch B/L No</div>
         <div className="field__input">
           <Controller
             name="switchBlNo"
@@ -68,8 +83,7 @@ function SwitchBlToolbar({ houseBlId, form }: ToolbarProps) {
       <div className="field">
         <div className="field__label">House B/L No</div>
         <div className="field__input">
-          {/* read-only: houseBlId 표시 */}
-          <input value={String(houseBlId)} readOnly />
+          <input value={houseBlNo} readOnly />
         </div>
       </div>
       <div className="field">
@@ -111,7 +125,7 @@ function SwitchBlToolbar({ houseBlId, form }: ToolbarProps) {
 }
 
 // ── Modal Inner (항상 mount 상태에서 실행 — outer가 isOpen 가드) ──────────
-function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalProps, "isOpen">) {
+function SwitchBlModalInner({ houseBlId, houseBlNo, isExp, onClose, initialFromHouseBl }: Omit<SwitchBlModalProps, "isOpen">) {
   const { offset, onHeaderMouseDown } = useModalDrag();
 
   const form = useForm<SwitchBlFormValues>({
@@ -130,12 +144,13 @@ function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalPro
     },
   });
 
-  const { data: existing, isLoading } = useQuery({
+  const { data: existing, isLoading, refetch } = useQuery({
     queryKey: ["switch-bl", "byHouseBl", houseBlId],
     queryFn: () => switchBlPort.getByHouseBlId(houseBlId),
   });
 
   // 서버 데이터 로드 시 폼 reset
+  // initialFromHouseBl은 모달 mount 시점 한 번만 바인딩되므로 deps 제외
   useEffect(() => {
     if (existing) {
       form.reset({
@@ -152,9 +167,10 @@ function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalPro
         blType: "",
       });
     } else if (existing === null) {
-      // 미존재 CREATE 모드: 폼 초기화
-      form.reset();
+      // 미존재 CREATE 모드: Switch B/L No만 비우고 나머지는 House B/L 폼 값으로 초기 바인딩
+      form.reset({ switchBlNo: "", ...initialFromHouseBl });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existing, form]);
 
   const isUpdateMode = Boolean(existing);
@@ -228,7 +244,7 @@ function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalPro
           <div className="modal__loading">Loading...</div>
         ) : (
           <FormProvider {...form}>
-            <SwitchBlToolbar houseBlId={houseBlId} form={form} />
+            <SwitchBlToolbar houseBlNo={houseBlNo} form={form} />
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
               className="modal__body modal__body--2col"
@@ -272,6 +288,15 @@ function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalPro
           <Button
             type="button"
             size="sm"
+            leftIcon={<Search size={12} />}
+            onClick={() => refetch()}
+            disabled={isLoading || saveMutation.isPending}
+          >
+            Search
+          </Button>
+          <Button
+            type="button"
+            size="sm"
             leftIcon={<X size={12} />}
             onClick={onClose}
           >
@@ -284,6 +309,7 @@ function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalPro
 }
 
 // ── Modal 본체 (outer — isOpen 가드, mount 시 offset 0,0 reset 보장) ───────
+// isOpen=false 시 unmount로 useQuery 캐시가 초기화되어 재진입 시 재조회됨
 export function SwitchBlModal({ isOpen, ...props }: SwitchBlModalProps) {
   if (!isOpen) return null;
   return <SwitchBlModalInner {...props} />;

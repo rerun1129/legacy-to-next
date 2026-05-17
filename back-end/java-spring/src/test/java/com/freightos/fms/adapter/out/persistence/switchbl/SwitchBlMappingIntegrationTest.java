@@ -41,6 +41,7 @@ class SwitchBlMappingIntegrationTest {
     private SwitchBlJpaEntity newSwitchBl(HouseBlJpaEntity houseBl) {
         SwitchBlJpaEntity s = new SwitchBlJpaEntity();
         s.setHouseBl(houseBl);
+        s.setSwitchBlNo("SBL-TEST");
         s.setShipperCode("SWITCH-SHIPPER");
         return s;
     }

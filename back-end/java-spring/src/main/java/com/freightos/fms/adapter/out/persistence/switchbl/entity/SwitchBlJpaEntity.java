@@ -28,7 +28,7 @@ public class SwitchBlJpaEntity extends BaseJpaEntity {
     @OneToOne(mappedBy = "switchBl", fetch = FetchType.LAZY)
     private SwitchBlDescriptionJpaEntity description;
 
-    @Column(name = "switch_bl_no", length = 50)
+    @Column(name = "switch_bl_no", length = 50, nullable = false)
     private String switchBlNo;
 
     @Column(name = "shipper_code", nullable = false, length = 20)

@@ -812,7 +812,7 @@ CREATE INDEX IF NOT EXISTS idx_house_bl_air_charge_air_id ON house_bl_air_charge
 CREATE TABLE IF NOT EXISTS switch_bl (
     switch_bl_id       BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     house_bl_id        BIGINT       NOT NULL UNIQUE REFERENCES house_bl(house_bl_id),
-    switch_bl_no       VARCHAR(50),
+    switch_bl_no       VARCHAR(50)  NOT NULL,
     bl_type            VARCHAR(15),
     incoterms          VARCHAR(10),
     shipper_code       VARCHAR(20)  NOT NULL,

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Optional;
 
 @Tag(name = "Switch B/L", description = "Switch B/L CRUD — E-21/E-22")
 @RestController
@@ -48,7 +49,10 @@ public class SwitchBlController {
     @Operation(summary = "Switch B/L 조회 by House B/L ID")
     @GetMapping("/by-house-bl/{houseBlId}")
     public ResponseEntity<ApiResponse<SwitchBlResponse>> getSwitchBlByHouseBlId(@PathVariable Long houseBlId) {
-        return ResponseEntity.ok(ApiResponse.of(switchBlAssembler.toResponse(switchBlUseCase.getSwitchBlByHouseBlId(houseBlId))));
+        Optional<SwitchBlDetailResult> found = switchBlUseCase.findSwitchBlByHouseBlId(houseBlId);
+        return found
+                .map(result -> ResponseEntity.ok(ApiResponse.of(switchBlAssembler.toResponse(result))))
+                .orElseGet(() -> ResponseEntity.ok(ApiResponse.of(null)));
     }
 
     @Operation(summary = "Switch B/L 수정")

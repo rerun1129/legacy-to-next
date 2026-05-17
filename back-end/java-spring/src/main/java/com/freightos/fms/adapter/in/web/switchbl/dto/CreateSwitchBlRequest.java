@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 /** Switch B/L 신규 등록 요청 DTO. */
 public record CreateSwitchBlRequest(
         @NotNull Long houseBlId,
-        @Size(max = 50) String switchBlNo,
+        @NotBlank @Size(max = 50) String switchBlNo,
         @NotBlank @Size(max = 20) String shipperCode,
         @Size(max = 500) String shipperAddress,
         @Size(max = 20) String consigneeCode,
