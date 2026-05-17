@@ -10,6 +10,7 @@ import { useModalDrag } from "@/components/shared/use-modal-drag";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { switchBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
+import { confirm } from "@/components/confirm";
 import { SwitchBlPartyPanel } from "./switch-bl-party-panel";
 import { SwitchBlMarksPanel } from "./switch-bl-marks-panel";
 import { SwitchBlDescPanel } from "./switch-bl-desc-panel";
@@ -210,14 +211,24 @@ function SwitchBlModalInner({ houseBlId, houseBlNo, isExp, onClose, initialFromH
     },
   });
 
-  function handleSubmit(values: SwitchBlFormValues) {
+  async function handleSubmit(values: SwitchBlFormValues) {
+    const ok = await confirm({
+      title: "저장하시겠습니까?",
+      variant: "default",
+    });
+    if (!ok) return;
     saveMutation.mutate(values);
   }
 
-  function handleDelete() {
-    if (window.confirm("Switch B/L을 삭제하시겠습니까?")) {
-      deleteMutation.mutate();
-    }
+  async function handleDelete() {
+    const ok = await confirm({
+      variant: "destructive",
+      title: "삭제하시겠습니까?",
+      confirmText: "삭제",
+      description: "삭제된 데이터는 복구할 수 없습니다.",
+    });
+    if (!ok) return;
+    deleteMutation.mutate();
   }
 
   return (
