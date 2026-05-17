@@ -72,6 +72,7 @@ const HOUSE_BL_REF_SCHEMA = z.object({
   pkgUnit:        z.string().nullable().optional(),
   weightUnit:     z.string().nullable().optional(),
   grossWeightKg:  z.number().nullable().optional(),
+  chargeWeightKg: z.number().nullable().optional(),
   cbm:            z.number().nullable().optional(),
   etd:            z.string().nullable().optional(),
   eta:            z.string().nullable().optional(),

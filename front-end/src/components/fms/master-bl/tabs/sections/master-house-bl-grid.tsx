@@ -71,6 +71,8 @@ export function MasterHouseBLGrid({ variant }: Props) {
     focusedRowKeyRef.current = null;
   }
 
+  const isAir = variant.mode === "AIR";
+
   return (
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
@@ -92,46 +94,76 @@ export function MasterHouseBLGrid({ variant }: Props) {
       </div>
       <div style={{ overflow: "auto", flex: 1 }}>
         <table className="grid--list">
-          <colgroup>
-            <col style={{ width: "40px" }} />
-            <col style={{ width: "120px" }} />
-            <col style={{ width: "160px" }} />
-            <col style={{ width: "160px" }} />
-            <col style={{ width: "160px" }} />
-            <col style={{ width: "80px" }} />
-            <col style={{ width: "80px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "120px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "100px" }} />
-            <col style={{ width: "100px" }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th className="row-num">#</th>
-              <th>{ml.hblNo}</th>
-              <th>Shipper</th>
-              <th>Consignee</th>
-              <th>DOC Partner</th>
-              <th className="is-num">Package</th>
-              <th>Unit</th>
-              <th className="is-num">Gross W/T</th>
-              <th className="is-num">CBM</th>
-              <th>ETD</th>
-              <th>ETA</th>
-              <th>Vessel</th>
-              <th>Voyage</th>
-              <th>POL</th>
-              <th>POD</th>
-            </tr>
-          </thead>
+          {isAir ? (
+            <colgroup>
+              <col style={{ width: "40px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "80px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+            </colgroup>
+          ) : (
+            <colgroup>
+              <col style={{ width: "40px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "80px" }} />
+              <col style={{ width: "80px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "100px" }} />
+            </colgroup>
+          )}
+          {isAir ? (
+            <thead>
+              <tr>
+                <th className="row-num">#</th>
+                <th>{ml.hblNo}</th>
+                <th>Shipper</th>
+                <th>Consignee</th>
+                <th>DOC Partner</th>
+                <th className="is-num">Package</th>
+                <th className="is-num">Gross W/T</th>
+                <th className="is-num">Charge W/T</th>
+                <th className="is-num">CBM</th>
+              </tr>
+            </thead>
+          ) : (
+            <thead>
+              <tr>
+                <th className="row-num">#</th>
+                <th>{ml.hblNo}</th>
+                <th>Shipper</th>
+                <th>Consignee</th>
+                <th>DOC Partner</th>
+                <th className="is-num">Package</th>
+                <th>Unit</th>
+                <th className="is-num">Gross W/T</th>
+                <th className="is-num">CBM</th>
+                <th>ETD</th>
+                <th>ETA</th>
+                <th>Vessel</th>
+                <th>Voyage</th>
+                <th>POL</th>
+                <th>POD</th>
+              </tr>
+            </thead>
+          )}
           <tbody>
             {fields.length === 0 && (
               <tr>
-                <td colSpan={15} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
+                <td colSpan={isAir ? 9 : 15} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
                   No rows.
                 </td>
               </tr>
@@ -158,15 +190,25 @@ export function MasterHouseBLGrid({ variant }: Props) {
                 <td>{field.consigneeCode ?? ""}</td>
                 <td>{field.docPartnerCode ?? ""}</td>
                 <td className="is-num cell-mono">{field.pkgQty ?? ""}</td>
-                <td>{field.pkgUnit ?? ""}</td>
-                <td className="is-num cell-mono">{field.grossWeightKg ?? ""}</td>
-                <td className="is-num cell-mono">{field.cbm ?? ""}</td>
-                <td>{formatDateDisplay(field.etd)}</td>
-                <td>{formatDateDisplay(field.eta)}</td>
-                <td>{field.vesselName ?? ""}</td>
-                <td>{field.voyageNo ?? ""}</td>
-                <td>{field.polCode ?? ""}</td>
-                <td>{field.podCode ?? ""}</td>
+                {isAir ? (
+                  <>
+                    <td className="is-num cell-mono">{field.grossWeightKg ?? ""}</td>
+                    <td className="is-num cell-mono">{field.chargeWeightKg ?? ""}</td>
+                    <td className="is-num cell-mono">{field.cbm ?? ""}</td>
+                  </>
+                ) : (
+                  <>
+                    <td>{field.pkgUnit ?? ""}</td>
+                    <td className="is-num cell-mono">{field.grossWeightKg ?? ""}</td>
+                    <td className="is-num cell-mono">{field.cbm ?? ""}</td>
+                    <td>{formatDateDisplay(field.etd)}</td>
+                    <td>{formatDateDisplay(field.eta)}</td>
+                    <td>{field.vesselName ?? ""}</td>
+                    <td>{field.voyageNo ?? ""}</td>
+                    <td>{field.polCode ?? ""}</td>
+                    <td>{field.podCode ?? ""}</td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>

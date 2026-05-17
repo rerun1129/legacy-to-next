@@ -135,6 +135,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
       pkgUnit:        hbl.pkgUnit,
       weightUnit:     hbl.weightUnit,
       grossWeightKg:  hbl.grossWeightKg,
+      chargeWeightKg: hbl.chargeWeightKg ?? undefined,
       cbm:            hbl.cbm,
       etd:            hbl.etd,
       eta:            hbl.eta,
