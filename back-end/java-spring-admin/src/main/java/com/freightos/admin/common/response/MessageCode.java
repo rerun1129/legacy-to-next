@@ -6,7 +6,13 @@ public enum MessageCode {
     CODE_UPDATED("코드가 수정되었습니다."),
     CODE_DELETED("코드가 삭제되었습니다."),
     CODE_NOT_FOUND("코드를 찾을 수 없습니다."),
-    CODE_DUPLICATE_GROUP_VALUE("동일한 codeGroup·codeValue 코드가 이미 존재합니다.");
+    CODE_DUPLICATE_GROUP_VALUE("동일한 codeGroup·codeValue 코드가 이미 존재합니다."),
+    USER_CREATED("사용자가 등록되었습니다."),
+    USER_UPDATED("사용자가 수정되었습니다."),
+    USER_DELETED("사용자가 삭제되었습니다."),
+    USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
+    USER_DUPLICATE_USERNAME("동일한 username 사용자가 이미 존재합니다."),
+    USER_LAST_ADMIN("마지막 활성 관리자는 삭제·비활성화할 수 없습니다.");
 
     private final String message;
 

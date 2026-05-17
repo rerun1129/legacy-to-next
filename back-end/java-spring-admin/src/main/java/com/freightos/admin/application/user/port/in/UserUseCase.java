@@ -1,0 +1,16 @@
+package com.freightos.admin.application.user.port.in;
+
+import com.freightos.admin.application.user.command.CreateUserCommand;
+import com.freightos.admin.application.user.command.SearchUserCommand;
+import com.freightos.admin.application.user.command.UpdateUserCommand;
+import com.freightos.admin.application.user.projection.UserSummary;
+import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.domain.user.entity.AdminUser;
+
+public interface UserUseCase {
+    PagedResult<UserSummary> searchUsers(SearchUserCommand command);
+    AdminUser findUserById(Long id);
+    Long createUser(CreateUserCommand command);
+    void updateUser(Long id, UpdateUserCommand command);
+    void deleteUser(Long id);
+}

@@ -8,7 +8,7 @@ import com.freightos.admin.adapter.in.web.code.dto.SearchCodeRequest;
 import com.freightos.admin.application.code.port.in.CodeUseCase;
 import com.freightos.admin.application.code.projection.CodeSummary;
 import com.freightos.admin.common.response.PagedResult;
-import com.freightos.admin.common.security.AdminUserProperties;
+import com.freightos.admin.common.security.JpaUserDetailsService;
 import com.freightos.admin.common.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,10 +56,7 @@ class CodeControllerWebMvcTest {
     private PasswordEncoder passwordEncoder;
 
     @MockitoBean
-    private InMemoryUserDetailsManager inMemoryUserDetailsManager;
-
-    @MockitoBean
-    private AdminUserProperties adminUserProperties;
+    private JpaUserDetailsService jpaUserDetailsService;
 
     // ── 미인증 → 401 ─────────────────────────────────────────────────────────
 

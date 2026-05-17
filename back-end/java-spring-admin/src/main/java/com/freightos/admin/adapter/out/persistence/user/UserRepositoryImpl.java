@@ -1,0 +1,70 @@
+package com.freightos.admin.adapter.out.persistence.user;
+
+import com.freightos.admin.application.user.command.SearchUserCommand;
+import com.freightos.admin.application.user.projection.UserSummary;
+import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.domain.user.entity.UserRole;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RequiredArgsConstructor
+public class UserRepositoryImpl implements UserRepositoryCustom {
+
+    private final EntityManager em;
+
+    @Override
+    public PagedResult<UserSummary> searchSummaries(SearchUserCommand command) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<UserJpaEntity> countRoot = countQuery.from(UserJpaEntity.class);
+        countQuery.select(cb.count(countRoot)).where(buildPredicates(cb, countRoot, command));
+        long totalElements = em.createQuery(countQuery).getSingleResult();
+
+        if (totalElements == 0) {
+            return PagedResult.of(List.of(), 0L, 0, command.page(), command.size());
+        }
+
+        CriteriaQuery<UserJpaEntity> dataQuery = cb.createQuery(UserJpaEntity.class);
+        Root<UserJpaEntity> dataRoot = dataQuery.from(UserJpaEntity.class);
+        dataQuery.where(buildPredicates(cb, dataRoot, command));
+        // tie-break: username asc, id asc — T1 flaky 방지 (username UNIQUE이므로 id는 보조)
+        dataQuery.orderBy(cb.asc(dataRoot.get("username")), cb.asc(dataRoot.get("id")));
+
+        TypedQuery<UserJpaEntity> typedQuery = em.createQuery(dataQuery);
+        typedQuery.setFirstResult(command.page() * command.size());
+        typedQuery.setMaxResults(command.size());
+
+        List<UserSummary> content = typedQuery.getResultList().stream()
+                .map(e -> new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getRole(), e.getActive(), e.getUpdatedAt()))
+                .toList();
+
+        int totalPages = (int) Math.ceil((double) totalElements / command.size());
+        return PagedResult.of(content, totalElements, totalPages, command.page(), command.size());
+    }
+
+    private Predicate[] buildPredicates(CriteriaBuilder cb, Root<UserJpaEntity> root, SearchUserCommand command) {
+        List<Predicate> predicates = new ArrayList<>();
+        // soft delete 제외 — 필수 조건
+        predicates.add(cb.isNull(root.get("deletedAt")));
+        if (StringUtils.hasText(command.username())) {
+            predicates.add(cb.like(root.get("username"), command.username() + "%"));
+        }
+        if (command.role() != null) {
+            predicates.add(cb.equal(root.get("role"), command.role()));
+        }
+        if (command.active() != null) {
+            predicates.add(cb.equal(root.get("active"), command.active()));
+        }
+        return predicates.toArray(Predicate[]::new);
+    }
+}
