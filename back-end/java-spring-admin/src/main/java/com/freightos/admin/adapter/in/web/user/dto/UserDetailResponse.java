@@ -1,8 +1,10 @@
 package com.freightos.admin.adapter.in.web.user.dto;
 
+import com.freightos.admin.domain.user.entity.Permission;
 import com.freightos.admin.domain.user.entity.UserRole;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /** passwordHash는 절대 포함하지 않는다. */
 public record UserDetailResponse(
@@ -11,6 +13,7 @@ public record UserDetailResponse(
         String email,
         UserRole role,
         boolean active,
+        Set<Permission> permissions,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String createdBy,

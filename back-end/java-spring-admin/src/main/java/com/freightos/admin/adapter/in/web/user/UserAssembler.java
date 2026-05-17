@@ -22,11 +22,11 @@ public class UserAssembler {
     }
 
     public CreateUserCommand toCreateCommand(CreateUserRequest req) {
-        return new CreateUserCommand(req.username(), req.email(), req.password(), req.role(), req.active());
+        return new CreateUserCommand(req.username(), req.email(), req.password(), req.role(), req.active(), req.permissions());
     }
 
     public UpdateUserCommand toUpdateCommand(UpdateUserRequest req) {
-        return new UpdateUserCommand(req.email(), req.password(), req.role(), req.active());
+        return new UpdateUserCommand(req.email(), req.password(), req.role(), req.active(), req.permissions());
     }
 
     public UserSummaryResponse toSummaryResponse(UserSummary p) {
@@ -36,7 +36,7 @@ public class UserAssembler {
     public UserDetailResponse toDetail(AdminUser domain) {
         return new UserDetailResponse(
                 domain.getId(), domain.getUsername(), domain.getEmail(),
-                domain.getRole(), domain.isActive(),
+                domain.getRole(), domain.isActive(), domain.getPermissions(),
                 domain.getCreatedAt(), domain.getUpdatedAt(),
                 domain.getCreatedBy(), domain.getUpdatedBy()
         );

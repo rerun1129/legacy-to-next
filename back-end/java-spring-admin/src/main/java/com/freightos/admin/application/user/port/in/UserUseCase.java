@@ -10,6 +10,7 @@ import com.freightos.admin.domain.user.entity.AdminUser;
 public interface UserUseCase {
     PagedResult<UserSummary> searchUsers(SearchUserCommand command);
     AdminUser findUserById(Long id);
+    AdminUser findUserByUsername(String username);
     Long createUser(CreateUserCommand command);
     void updateUser(Long id, UpdateUserCommand command);
     void deleteUser(Long id);

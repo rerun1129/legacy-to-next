@@ -3,9 +3,9 @@ package com.freightos.admin.adapter.out.persistence.user;
 import com.freightos.admin.application.user.command.SearchUserCommand;
 import com.freightos.admin.application.user.projection.UserSummary;
 import com.freightos.admin.common.config.JpaAuditingConfig;
-import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.user.entity.AdminUser;
+import com.freightos.admin.domain.user.entity.Permission;
 import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,7 +44,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void save_thenFindById_fieldsMatch() {
-        AdminUser user = AdminUser.create("alice", "alice@example.com", "hashed_pw", UserRole.USER, true);
+        AdminUser user = AdminUser.create("alice", "alice@example.com", "hashed_pw", UserRole.USER, true, Set.of());
 
         Long id = adapter.save(user);
 
@@ -64,7 +64,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void findByUsername_deletedUserExcluded() {
-        AdminUser user = AdminUser.create("bob", "bob@example.com", "hashed_pw", UserRole.USER, true);
+        AdminUser user = AdminUser.create("bob", "bob@example.com", "hashed_pw", UserRole.USER, true, Set.of());
         Long id = adapter.save(user);
 
         // soft delete 수행
@@ -79,7 +79,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void softDelete_thenFindById_returnsEmpty() {
-        AdminUser user = AdminUser.create("carol", null, "hashed_pw", UserRole.ADMIN, true);
+        AdminUser user = AdminUser.create("carol", null, "hashed_pw", UserRole.ADMIN, true, Set.of());
         Long id = adapter.save(user);
 
         adapter.softDelete(id);
@@ -92,9 +92,9 @@ class UserPersistenceAdapterTest {
 
     @Test
     void searchSummaries_filterAndPage() {
-        adapter.save(AdminUser.create("alice", "alice@example.com", "h1", UserRole.USER, true));
-        adapter.save(AdminUser.create("adam", "adam@example.com", "h2", UserRole.ADMIN, true));
-        adapter.save(AdminUser.create("bob", "bob@example.com", "h3", UserRole.USER, false));
+        adapter.save(AdminUser.create("alice", "alice@example.com", "h1", UserRole.USER, true, Set.of()));
+        adapter.save(AdminUser.create("adam", "adam@example.com", "h2", UserRole.ADMIN, true, Set.of()));
+        adapter.save(AdminUser.create("bob", "bob@example.com", "h3", UserRole.USER, false, Set.of()));
 
         // username 앞일치 "a" 필터
         SearchUserCommand command = new SearchUserCommand("a", null, null, 0, 20);
@@ -110,14 +110,39 @@ class UserPersistenceAdapterTest {
 
     @Test
     void countActiveByRole_returnsCorrectCount() {
-        adapter.save(AdminUser.create("admin1", null, "h1", UserRole.ADMIN, true));
-        adapter.save(AdminUser.create("admin2", null, "h2", UserRole.ADMIN, true));
-        AdminUser inactiveAdmin = AdminUser.create("admin3", null, "h3", UserRole.ADMIN, false);
-        adapter.save(inactiveAdmin);
+        adapter.save(AdminUser.create("admin1", null, "h1", UserRole.ADMIN, true, Set.of()));
+        adapter.save(AdminUser.create("admin2", null, "h2", UserRole.ADMIN, true, Set.of()));
+        adapter.save(AdminUser.create("admin3", null, "h3", UserRole.ADMIN, false, Set.of()));
 
         long activeCount = adapter.countActiveByRole(UserRole.ADMIN);
 
         // active=true이고 deletedAt IS NULL인 ADMIN만 카운트
         assertThat(activeCount).isEqualTo(2L);
+    }
+
+    // ── savePermissions → findPermissionsByUserId 일치 확인 ──────────────────
+
+    @Test
+    void savePermissions_thenFindPermissions_returnsExpected() {
+        Long id = adapter.save(AdminUser.create("dave", null, "h1", UserRole.USER, true, Set.of()));
+        Set<Permission> perms = Set.of(Permission.CODE_MANAGE, Permission.USER_MANAGE);
+
+        adapter.savePermissions(id, perms);
+
+        Set<Permission> found = adapter.findPermissionsByUserId(id);
+        assertThat(found).containsExactlyInAnyOrderElementsOf(perms);
+    }
+
+    // ── savePermissions 빈 set 재호출 → 기존 row 전부 삭제 ───────────────────
+
+    @Test
+    void savePermissions_emptySet_clearsExistingPermissions() {
+        Long id = adapter.save(AdminUser.create("eve", null, "h1", UserRole.USER, true, Set.of()));
+        adapter.savePermissions(id, Set.of(Permission.CODE_MANAGE));
+
+        adapter.savePermissions(id, Set.of());
+
+        Set<Permission> found = adapter.findPermissionsByUserId(id);
+        assertThat(found).isEmpty();
     }
 }

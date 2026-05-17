@@ -35,9 +35,17 @@ public class UserService implements UserUseCase {
     }
 
     @Override
+    public AdminUser findUserByUsername(String username) {
+        return userPort.findByUsername(username)
+                .orElseThrow(() -> ApplicationException.notFound("USER_NOT_FOUND", MessageCode.USER_NOT_FOUND.getMessage()));
+    }
+
+    @Override
     @Transactional
     public Long createUser(CreateUserCommand command) {
-        return userPort.save(userFactory.from(command));
+        Long id = userPort.save(userFactory.from(command));
+        userPort.savePermissions(id, command.permissions());
+        return id;
     }
 
     @Override
@@ -51,8 +59,9 @@ public class UserService implements UserUseCase {
                 throw ApplicationException.conflict("LAST_ADMIN", MessageCode.USER_LAST_ADMIN.getMessage());
             }
         }
-        existing.applyUpdate(command.email(), userFactory.hashIfPresent(command.rawPasswordOrNull()), command.role(), command.active());
+        existing.applyUpdate(command.email(), userFactory.hashIfPresent(command.rawPasswordOrNull()), command.role(), command.active(), command.permissions());
         userPort.update(id, existing);
+        userPort.savePermissions(id, command.permissions());
     }
 
     @Override

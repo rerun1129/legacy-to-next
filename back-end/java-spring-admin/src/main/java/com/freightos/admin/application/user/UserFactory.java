@@ -18,7 +18,8 @@ public class UserFactory {
                 command.email(),
                 passwordEncoder.encode(command.rawPassword()),
                 command.role(),
-                command.active()
+                command.active(),
+                command.permissions()
         );
     }
 

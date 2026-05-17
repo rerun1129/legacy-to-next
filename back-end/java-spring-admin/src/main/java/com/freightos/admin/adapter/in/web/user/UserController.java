@@ -14,6 +14,7 @@ import com.freightos.admin.domain.user.entity.AdminUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/user")
 @RequiredArgsConstructor
 @Validated
+@PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_MANAGE')")
 public class UserController {
 
     private final UserUseCase userUseCase;

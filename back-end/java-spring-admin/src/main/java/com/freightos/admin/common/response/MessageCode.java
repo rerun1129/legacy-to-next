@@ -12,7 +12,8 @@ public enum MessageCode {
     USER_DELETED("사용자가 삭제되었습니다."),
     USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
     USER_DUPLICATE_USERNAME("동일한 username 사용자가 이미 존재합니다."),
-    USER_LAST_ADMIN("마지막 활성 관리자는 삭제·비활성화할 수 없습니다.");
+    USER_LAST_ADMIN("마지막 활성 관리자는 삭제·비활성화할 수 없습니다."),
+    AUTH_ME_OK("사용자 정보를 조회했습니다.");
 
     private final String message;
 
