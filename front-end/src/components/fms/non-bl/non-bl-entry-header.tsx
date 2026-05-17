@@ -1,6 +1,6 @@
 "use client";
 
-import { Package, FilePlus, Search, Save, Trash2, RefreshCw } from "lucide-react";
+import { Package, FilePlus, Search, Save, Trash2, SquarePen } from "lucide-react";
 import { Button } from "@/components/shared/button";
 
 export function NonBlEntryHeader(props: {
@@ -51,10 +51,10 @@ export function NonBlEntryHeader(props: {
         </Button>
         <button
           type="button"
-          className="btn btn--sm btn--transaction"
+          className="btn btn--sm btn--modal"
           onClick={onChangeBlNo}
         >
-          <RefreshCw size={12} />Change B/L No
+          <SquarePen size={12} />Change B/L No
         </button>
       </div>
     </div>

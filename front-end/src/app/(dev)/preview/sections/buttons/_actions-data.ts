@@ -9,6 +9,7 @@ import {
   Printer,
   ArrowLeftRight,
   FilePlus,
+  SquarePen,
 } from "lucide-react";
 import type { ActionSpecimen } from "./_specimen-types";
 
@@ -66,7 +67,7 @@ export const ACTION_SPECIMENS: ActionSpecimen[] = [
     id: "change-bl",
     label: "Change B/L No",
     icon: RefreshCw,
-    defaultVariant: "transaction",
+    defaultVariant: "modal",
     confirmMessage: "Change B/L No 버튼이 클릭되었습니다.",
   },
   {
@@ -87,7 +88,14 @@ export const ACTION_SPECIMENS: ActionSpecimen[] = [
     id: "switch-bl",
     label: "Switch B/L",
     icon: ArrowLeftRight,
-    defaultVariant: "transaction",
+    defaultVariant: "modal",
     confirmMessage: "Switch B/L 버튼이 클릭되었습니다.",
+  },
+  {
+    id: "open-modal",
+    label: "Open Modal",
+    icon: SquarePen,
+    defaultVariant: "modal",
+    confirmMessage: "Open Modal 버튼이 클릭되었습니다.",
   },
 ];

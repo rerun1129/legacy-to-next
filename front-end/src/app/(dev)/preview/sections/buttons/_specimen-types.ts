@@ -3,7 +3,7 @@ import type { ButtonVariant } from '@/components/shared/button';
 
 export type { ButtonVariant };
 
-export type ToggleableVariant = Extract<ButtonVariant, "search" | "transaction" | "danger" | "normal">;
+export type ToggleableVariant = Extract<ButtonVariant, "search" | "transaction" | "danger" | "normal" | "modal">;
 
 export interface ActionSpecimen {
   id: string;

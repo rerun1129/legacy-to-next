@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, Trash2, Layers, RefreshCw, Search, FilePlus } from "lucide-react";
+import { Save, Trash2, Layers, SquarePen, Search, FilePlus } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { Button } from "@/components/shared/button";
 import { getPageTitle } from "@/lib/bl-variants";
@@ -58,7 +58,7 @@ export function MasterBlEntryPageHead({
           onClick={onDelete}
           disabled={!isEdit || deleteMutation.isPending}
         >Delete</Button>
-        <Button size="sm" variant="transaction" leftIcon={<RefreshCw size={12} />} onClick={onChangeBlNo} disabled={!isEdit}>{modeLabels.changeBLNo}</Button>
+        <Button size="sm" variant="modal" leftIcon={<SquarePen size={12} />} onClick={onChangeBlNo} disabled={!isEdit}>{modeLabels.changeBLNo}</Button>
       </div>
     </div>
   );

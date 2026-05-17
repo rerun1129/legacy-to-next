@@ -2,12 +2,13 @@
 
 import type { ToggleableVariant } from "./_specimen-types";
 
-const VARIANTS: ToggleableVariant[] = ["search", "transaction", "danger", "normal"];
+const VARIANTS: ToggleableVariant[] = ["search", "transaction", "danger", "normal", "modal"];
 const LABELS: Record<ToggleableVariant, string> = {
   search: "Search",
   transaction: "Transaction",
   danger: "Danger",
   normal: "Normal",
+  modal: "Modal",
 };
 
 interface VariantToggleProps {

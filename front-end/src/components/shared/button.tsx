@@ -10,6 +10,7 @@ export type ButtonVariant =
   | "success"
   | "search"
   | "transaction"
+  | "modal"
   | "normal";
 
 export type ButtonSize = "md" | "sm";

@@ -167,6 +167,11 @@
   color: #fff;
 }
 
+.variant-toggle__btn.is-active--modal {
+  background: var(--violet);
+  color: #fff;
+}
+
 /* =========================================================
    Preview: Specimen card & bundle layout
    ========================================================= */

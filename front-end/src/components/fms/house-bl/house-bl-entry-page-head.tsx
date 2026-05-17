@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, Printer, Trash2, FileText, RefreshCw, Search, FilePlus } from "lucide-react";
+import { Save, Printer, Trash2, FileText, SquarePen, Search, FilePlus } from "lucide-react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
@@ -111,16 +111,16 @@ export function HouseBlEntryPageHead({
           {isExp && (
             <Button
               size="sm"
-              variant="transaction"
-              leftIcon={<RefreshCw size={12} />}
+              variant="modal"
+              leftIcon={<SquarePen size={12} />}
               disabled={!canSwitchBl}
               onClick={onOpenSwitchBl}
             >Switch B/L</Button>
           )}
           <Button
             size="sm"
-            variant="transaction"
-            leftIcon={<RefreshCw size={12} />}
+            variant="modal"
+            leftIcon={<SquarePen size={12} />}
             onClick={onChangeBlNo}
             disabled={!isEdit}
           >Change B/L No.</Button>

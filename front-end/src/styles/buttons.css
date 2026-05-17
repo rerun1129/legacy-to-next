@@ -66,6 +66,8 @@
 .btn--search:hover { background: color-mix(in srgb, var(--info) 85%, black); border-color: color-mix(in srgb, var(--info) 85%, black); }
 .btn--transaction { background: var(--success); border-color: var(--success); color: #fff; }
 .btn--transaction:hover { background: color-mix(in srgb, var(--success) 85%, black); border-color: color-mix(in srgb, var(--success) 85%, black); }
+.btn--modal { background: var(--violet); border-color: var(--violet); color: #fff; }
+.btn--modal:hover { background: var(--violet-2); border-color: var(--violet-2); }
 .btn--normal { background: var(--surface); border-color: var(--border); color: var(--ink-2); }
 .btn--normal:hover { background: var(--surface-2); border-color: var(--border-strong); }
 .btn--sm { height: 26px; padding: 0 10px; font-size: var(--fs-xs); }
