@@ -2,7 +2,7 @@ const STORAGE_KEY = "admin.session";
 
 export interface AdminSession {
   authHeader: string; // "Basic xxx"
-  role: "ADMIN";
+  role: "ADMIN" | "USER";
 }
 
 export function getSession(): AdminSession | null {
@@ -11,7 +11,7 @@ export function getSession(): AdminSession | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AdminSession;
-    if (!parsed?.authHeader || parsed.role !== "ADMIN") return null;
+    if (!parsed?.authHeader || (parsed.role !== "ADMIN" && parsed.role !== "USER")) return null;
     return parsed;
   } catch {
     return null;

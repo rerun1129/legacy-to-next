@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid,
-  KeyRound,
+  KeyRound, UserCog,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -87,6 +87,12 @@ const NAV_MODULES: NavModule[] = [
         group: "Code Master", icon: KeyRound, defaultOpen: false,
         children: [
           { label: "List", href: "/admin/code/list", icon: List },
+        ],
+      },
+      {
+        group: "사용자 관리", icon: UserCog, defaultOpen: false,
+        children: [
+          { label: "List", href: "/admin/user/list", icon: List },
         ],
       },
     ],
