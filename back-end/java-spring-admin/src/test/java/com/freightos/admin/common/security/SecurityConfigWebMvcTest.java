@@ -21,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.jpa.properties.hibernate.default_schema=admin",
         "spring.sql.init.mode=never",
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        "jwt.secret=test-secret-key-must-be-at-least-32-chars!!"
 })
 class SecurityConfigWebMvcTest {
 
@@ -29,7 +30,10 @@ class SecurityConfigWebMvcTest {
     private SecurityFilterChain securityFilterChain;
 
     @MockitoBean
-    private com.freightos.admin.common.security.JpaUserDetailsService jpaUserDetailsService;
+    private JpaUserDetailsService jpaUserDetailsService;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     void securityFilterChainBeanIsLoaded() {
