@@ -1,17 +1,56 @@
 import { ADMIN_API_URL } from "@/lib/api-base";
-import { getAuthHeader } from "@/lib/admin-session";
+import { getAuthHeader, getSession, updateTokens, clearSession } from "@/lib/admin-session";
+import { authUseCases } from "@/application/auth/use-cases";
 import { ApiError, NotFoundError, ResponseParseError } from "./errors";
 
-export async function adminFetchJson(path: string, init?: RequestInit): Promise<unknown> {
+// 동시 다발 401 시 refresh 1회만 호출하도록 promise 재사용
+let refreshPromise: Promise<void> | null = null;
+
+async function performRefresh(): Promise<void> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    const session = getSession();
+    if (!session) throw new ApiError("No session", 401);
+    try {
+      const r = await authUseCases.refresh(session.refreshToken);
+      updateTokens(r.accessToken, r.refreshToken);
+    } catch (e) {
+      clearSession();
+      if (typeof window !== "undefined") {
+        window.location.replace("/login");
+      }
+      throw e;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  return refreshPromise;
+}
+
+async function fetchOnce(path: string, init?: RequestInit): Promise<Response> {
   const headers = new Headers(init?.headers);
   if (init?.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   for (const [k, v] of Object.entries(getAuthHeader())) headers.set(k, v);
+  return fetch(`${ADMIN_API_URL}${path}`, { ...init, headers });
+}
 
+export async function adminFetchJson(path: string, init?: RequestInit): Promise<unknown> {
   let res: Response;
   try {
-    res = await fetch(`${ADMIN_API_URL}${path}`, { ...init, headers });
+    res = await fetchOnce(path, init);
   } catch (e) {
     throw new ApiError("Network error", undefined, e);
+  }
+
+  // 401 → refresh 1회 시도 후 재시도
+  if (res.status === 401 && getSession()) {
+    try {
+      await performRefresh();
+      res = await fetchOnce(path, init);
+    } catch {
+      // refresh 실패 → 이미 clearSession + redirect 처리됨
+      throw new ApiError("Authentication failed", 401);
+    }
   }
 
   const isProblem = res.headers.get("content-type")?.includes("application/problem+json");

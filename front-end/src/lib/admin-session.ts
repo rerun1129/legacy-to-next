@@ -3,7 +3,8 @@ import type { Permission } from "@/domain/permission";
 const STORAGE_KEY = "admin.session";
 
 export interface AdminSession {
-  authHeader: string;
+  accessToken: string;
+  refreshToken: string;
   role: "ADMIN" | "USER";
   permissions: Permission[];
 }
@@ -14,7 +15,7 @@ export function getSession(): AdminSession | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AdminSession;
-    if (!parsed?.authHeader) return null;
+    if (!parsed?.accessToken || !parsed?.refreshToken) return null;
     if (parsed.role !== "ADMIN" && parsed.role !== "USER") return null;
     if (!Array.isArray(parsed.permissions)) return null;
     return parsed;
@@ -28,6 +29,12 @@ export function setSession(session: AdminSession): void {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
+export function updateTokens(accessToken: string, refreshToken: string): void {
+  const current = getSession();
+  if (!current) return;
+  setSession({ ...current, accessToken, refreshToken });
+}
+
 export function clearSession(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(STORAGE_KEY);
@@ -35,7 +42,7 @@ export function clearSession(): void {
 
 export function getAuthHeader(): Record<string, string> {
   const s = getSession();
-  return s ? { Authorization: s.authHeader } : {};
+  return s ? { Authorization: `Bearer ${s.accessToken}` } : {};
 }
 
 export function hasPermission(session: AdminSession | null, permission: Permission): boolean {

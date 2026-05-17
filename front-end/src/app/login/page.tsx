@@ -27,13 +27,13 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginForm) => {
     setError(null);
-    const authHeader = "Basic " + btoa(`${data.username}:${data.password}`);
     try {
-      const me = await authUseCases.me(authHeader);
+      const result = await authUseCases.login(data.username, data.password);
       const session: AdminSession = {
-        authHeader,
-        role: me.role,
-        permissions: me.permissions,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        role: result.me.role,
+        permissions: result.me.permissions,
       };
       const target = firstAccessibleRoute(session);
       if (!target) {

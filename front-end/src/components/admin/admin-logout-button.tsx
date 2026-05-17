@@ -2,14 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { clearSession } from "@/lib/admin-session";
+import { authUseCases } from "@/application/auth/use-cases";
+import { clearSession, getSession } from "@/lib/admin-session";
 
 export function AdminLogoutButton() {
   const router = useRouter();
-  const handleClick = () => {
+
+  const handleClick = async () => {
+    const session = getSession();
+    if (session) {
+      try {
+        await authUseCases.logout(session.refreshToken);
+      } catch {
+        // best-effort — 실패해도 로컬 세션 정리
+      }
+    }
     clearSession();
     router.replace("/login");
   };
+
   return (
     <button
       type="button"

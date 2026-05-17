@@ -8,6 +8,20 @@ export interface MeInfo {
   permissions: Permission[];
 }
 
+export interface LoginResult {
+  accessToken: string;
+  refreshToken: string;
+  me: MeInfo;
+}
+
+export interface RefreshResult {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface AuthPort {
-  me(authHeader: string): Promise<MeInfo>;
+  login(username: string, password: string): Promise<LoginResult>;
+  refresh(refreshToken: string): Promise<RefreshResult>;
+  logout(refreshToken: string): Promise<void>;
+  me(): Promise<MeInfo>;
 }
