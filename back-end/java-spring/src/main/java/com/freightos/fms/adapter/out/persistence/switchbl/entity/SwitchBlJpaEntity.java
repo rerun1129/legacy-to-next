@@ -49,6 +49,12 @@ public class SwitchBlJpaEntity extends BaseJpaEntity {
     @Column(name = "notify_address", length = 500)
     private String notifyAddress;
 
+    @Column(name = "bl_type", length = 15)
+    private String blType;
+
+    @Column(name = "incoterms", length = 10)
+    private String incoterms;
+
     public void setHouseBl(HouseBlJpaEntity v)       { this.houseBl          = v; }
     public void setSwitchBlNo(String v)              { this.switchBlNo       = v; }
     public void setShipperCode(String v)             { this.shipperCode      = v; }
@@ -57,4 +63,6 @@ public class SwitchBlJpaEntity extends BaseJpaEntity {
     public void setConsigneeAddress(String v)        { this.consigneeAddress = v; }
     public void setNotifyCode(String v)              { this.notifyCode       = v; }
     public void setNotifyAddress(String v)           { this.notifyAddress    = v; }
+    public void setBlType(String v)                  { this.blType           = v; }
+    public void setIncoterms(String v)               { this.incoterms        = v; }
 }

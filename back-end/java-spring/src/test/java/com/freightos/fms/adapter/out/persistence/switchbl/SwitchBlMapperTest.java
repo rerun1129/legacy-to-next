@@ -22,7 +22,7 @@ class SwitchBlMapperTest {
     @DisplayName("applyFields: 도메인 필수·선택 필드가 모두 JPA 엔티티에 복사된다")
     void applyFields_setsAllMandatoryFields() {
         SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
-        domain.updateDetails("SBL-001",
+        domain.updateDetails("SBL-001", "BL-TYPE-01", "EXW",
                 CustomerCode.of("SHIP01"), CustomerCode.of("CONS01"), CustomerCode.of("NOTIF01"));
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
@@ -43,13 +43,15 @@ class SwitchBlMapperTest {
     @DisplayName("applyFields: consigneeCode/notifyCode/blType/incoterms null 이어도 NPE 없이 동작한다")
     void applyFields_nullOptionalFields_doesNotThrow() {
         SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
-        domain.updateDetails(null, CustomerCode.of("SHIP01"), null, null);
+        domain.updateDetails(null, null, null, CustomerCode.of("SHIP01"), null, null);
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
 
         mapper.applyFields(domain, jpa);
 
         assertThat(jpa.getSwitchBlNo()).isNull();
+        assertThat(jpa.getBlType()).isNull();
+        assertThat(jpa.getIncoterms()).isNull();
         assertThat(jpa.getShipperCode()).isEqualTo("SHIP01");
         assertThat(jpa.getConsigneeCode()).isNull();
         assertThat(jpa.getNotifyCode()).isNull();
@@ -59,7 +61,7 @@ class SwitchBlMapperTest {
     @DisplayName("applyFields: switchBlNo 가 JPA 엔티티에 그대로 세팅된다")
     void applyFields_switchBlNo_copiedToJpa() {
         SwitchBl domain = SwitchBl.create(5L, CustomerCode.of("SHIP05"));
-        domain.updateDetails("SBL-005", CustomerCode.of("SHIP05"), null, null);
+        domain.updateDetails("SBL-005", null, null, CustomerCode.of("SHIP05"), null, null);
 
         SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
 
@@ -173,6 +175,38 @@ class SwitchBlMapperTest {
         assertThat(descJpa.getMarks()).isEqualTo("MARKS-TEXT");
         assertThat(descJpa.getNatureQuantity()).isEqualTo("NATURE-TEXT");
         assertThat(descJpa.getSwitchBl()).isEqualTo(switchBlJpa);
+    }
+
+    @Test
+    @DisplayName("applyFields: blType/incoterms 값이 JPA 엔티티에 복사된다")
+    void applyFields_blTypeAndIncoterms_copiedToJpa() {
+        SwitchBl domain = SwitchBl.create(10L, CustomerCode.of("SHIP01"));
+        domain.updateDetails("SBL-001", "OBL", "FOB",
+                CustomerCode.of("SHIP01"), null, null);
+
+        SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
+        mapper.applyFields(domain, jpa);
+
+        assertThat(jpa.getBlType()).isEqualTo("OBL");
+        assertThat(jpa.getIncoterms()).isEqualTo("FOB");
+    }
+
+    @Test
+    @DisplayName("toDomain: JPA blType/incoterms 값이 도메인 객체에 복사된다")
+    void toDomain_blTypeAndIncoterms_mappedToDomain() {
+        HouseBlJpaEntity houseBlJpa = new HouseBlJpaEntity();
+        houseBlJpa.setHouseBlId(20L);
+
+        SwitchBlJpaEntity jpa = new SwitchBlJpaEntity();
+        jpa.setHouseBl(houseBlJpa);
+        jpa.setShipperCode("SHIP01");
+        jpa.setBlType("OBL");
+        jpa.setIncoterms("CIF");
+
+        SwitchBl domain = mapper.toDomain(jpa);
+
+        assertThat(domain.getBlType()).isEqualTo("OBL");
+        assertThat(domain.getIncoterms()).isEqualTo("CIF");
     }
 
     @Test

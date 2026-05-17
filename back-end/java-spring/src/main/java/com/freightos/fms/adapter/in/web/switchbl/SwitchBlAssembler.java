@@ -22,6 +22,8 @@ public class SwitchBlAssembler {
         return new CreateSwitchBlCommand(
                 req.houseBlId(),
                 req.switchBlNo(),
+                req.blType(),
+                req.incoterms(),
                 req.shipperCode(),
                 req.shipperAddress(),
                 req.consigneeCode(),
@@ -35,6 +37,8 @@ public class SwitchBlAssembler {
     public UpdateSwitchBlCommand toUpdateCommand(UpdateSwitchBlRequest req) {
         return new UpdateSwitchBlCommand(
                 req.switchBlNo(),
+                req.blType(),
+                req.incoterms(),
                 req.shipperCode(),
                 req.shipperAddress(),
                 req.consigneeCode(),

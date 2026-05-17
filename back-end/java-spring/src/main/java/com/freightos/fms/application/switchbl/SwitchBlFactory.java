@@ -21,6 +21,8 @@ public class SwitchBlFactory {
         SwitchBl entity = SwitchBl.create(cmd.houseBlId(), CustomerCode.of(cmd.shipperCode(), cmd.shipperAddress()));
         entity.updateDetails(
                 cmd.switchBlNo(),
+                cmd.blType(),
+                cmd.incoterms(),
                 CustomerCode.of(cmd.shipperCode(), cmd.shipperAddress()),
                 CustomerCode.of(cmd.consigneeCode(), cmd.consigneeAddress()),
                 CustomerCode.of(cmd.notifyCode(), cmd.notifyAddress())
@@ -34,6 +36,8 @@ public class SwitchBlFactory {
     public void applyToEntity(UpdateSwitchBlCommand cmd, SwitchBl entity) {
         entity.updateDetails(
                 Nullables.firstNonNull(cmd.switchBlNo(),  entity::getSwitchBlNo),
+                Nullables.firstNonNull(cmd.blType(),      entity::getBlType),
+                Nullables.firstNonNull(cmd.incoterms(),   entity::getIncoterms),
                 Nullables.mapOrElse(cmd.shipperCode(),   c -> CustomerCode.of(c, cmd.shipperAddress()),   entity::getShipperCode),
                 Nullables.mapOrElse(cmd.consigneeCode(), c -> CustomerCode.of(c, cmd.consigneeAddress()), entity::getConsigneeCode),
                 Nullables.mapOrElse(cmd.notifyCode(),    c -> CustomerCode.of(c, cmd.notifyAddress()),    entity::getNotifyCode)
@@ -50,6 +54,8 @@ public class SwitchBlFactory {
                 entity.getSwitchBlId(),
                 entity.getHouseBlId(),
                 entity.getSwitchBlNo(),
+                entity.getBlType(),
+                entity.getIncoterms(),
                 VoMapper.mapOrNull(entity.getShipperCode(), CustomerCode::value),
                 VoMapper.mapOrNull(entity.getShipperCode(), CustomerCode::address),
                 VoMapper.mapOrNull(entity.getConsigneeCode(), CustomerCode::value),

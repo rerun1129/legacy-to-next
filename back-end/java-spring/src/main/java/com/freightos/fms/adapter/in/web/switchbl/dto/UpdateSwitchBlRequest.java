@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
  */
 public record UpdateSwitchBlRequest(
         @NotBlank @Size(max = 50) String switchBlNo,
+        @Size(max = 15) String blType,
+        @Size(max = 10) String incoterms,
         @Size(max = 20) String shipperCode,
         @Size(max = 500) String shipperAddress,
         @Size(max = 20) String consigneeCode,

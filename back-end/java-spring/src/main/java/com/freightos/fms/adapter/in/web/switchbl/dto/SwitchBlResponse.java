@@ -8,29 +8,34 @@ public record SwitchBlResponse(
         Long switchBlId,
         Long houseBlId,
         String switchBlNo,
+        String blType,
+        String incoterms,
         String shipperCode,
         String shipperAddress,
         String consigneeCode,
         String consigneeAddress,
         String notifyCode,
         String notifyAddress,
-        String marks,
-        String natureQuantity
+        SwitchBlDescriptionDto description
 ) {
     public static SwitchBlResponse from(SwitchBlDetailResult result) {
+        SwitchBlDescriptionDto description = (result.marks() != null || result.natureQuantity() != null)
+                ? new SwitchBlDescriptionDto(result.marks(), result.natureQuantity())
+                : null;
         return new SwitchBlResponse(
                 result.id(),
                 result.switchBlId(),
                 result.houseBlId(),
                 result.switchBlNo(),
+                result.blType(),
+                result.incoterms(),
                 result.shipperCode(),
                 result.shipperAddress(),
                 result.consigneeCode(),
                 result.consigneeAddress(),
                 result.notifyCode(),
                 result.notifyAddress(),
-                result.marks(),
-                result.natureQuantity()
+                description
         );
     }
 }

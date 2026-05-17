@@ -7,6 +7,8 @@ package com.freightos.fms.application.switchbl.command;
 public record CreateSwitchBlCommand(
         Long houseBlId,
         String switchBlNo,
+        String blType,
+        String incoterms,
         String shipperCode,
         String shipperAddress,
         String consigneeCode,

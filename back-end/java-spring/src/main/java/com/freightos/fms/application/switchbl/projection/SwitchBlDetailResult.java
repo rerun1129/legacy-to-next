@@ -10,6 +10,8 @@ public record SwitchBlDetailResult(
         Long switchBlId,
         Long houseBlId,
         String switchBlNo,
+        String blType,
+        String incoterms,
         String shipperCode,
         String shipperAddress,
         String consigneeCode,

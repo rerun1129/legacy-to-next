@@ -10,6 +10,8 @@ const SWITCH_BL_SCHEMA = z.object({
   id: z.number(),
   houseBlId: z.number(),
   switchBlNo: z.string().nullable().optional(),
+  blType:    z.string().nullable().optional(),
+  incoterms: z.string().nullable().optional(),
   shipperCode: z.string(),
   shipperAddress: z.string().nullable().optional(),
   consigneeCode: z.string().nullable().optional(),

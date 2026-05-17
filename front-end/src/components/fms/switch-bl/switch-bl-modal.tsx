@@ -163,8 +163,8 @@ function SwitchBlModalInner({ houseBlId, houseBlNo, isExp, onClose, initialFromH
         notifyAddress: existing.notifyAddress ?? "",
         marks: existing.description?.marks ?? "",
         natureQuantity: existing.description?.natureQuantity ?? "",
-        incoterms: "",
-        blType: "",
+        incoterms: existing.incoterms ?? "",
+        blType: existing.blType ?? "",
       });
     } else if (existing === null) {
       // 미존재 CREATE 모드: Switch B/L No만 비우고 나머지는 House B/L 폼 값으로 초기 바인딩
@@ -180,6 +180,8 @@ function SwitchBlModalInner({ houseBlId, houseBlNo, isExp, onClose, initialFromH
       const body = {
         houseBlId,
         switchBlNo: values.switchBlNo || undefined,
+        blType:     values.blType     || undefined,
+        incoterms:  values.incoterms  || undefined,
         shipperCode: values.shipperCode,
         shipperAddress: values.shipperAddress || undefined,
         consigneeCode: values.consigneeCode || undefined,

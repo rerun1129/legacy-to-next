@@ -119,6 +119,46 @@ class SwitchBlMappingIntegrationTest {
     }
 
     @Test
+    @DisplayName("SwitchBl blType/incoterms 저장 후 flush+clear → 재조회 시 값이 유지된다")
+    void saveSwitchBl_withBlTypeAndIncoterms_roundTrip() {
+        HouseBlJpaEntity houseBl = newHouseBl();
+        em.persist(houseBl);
+        em.flush();
+
+        SwitchBlJpaEntity switchBl = newSwitchBl(houseBl);
+        switchBl.setBlType("OBL");
+        switchBl.setIncoterms("FOB");
+        em.persist(switchBl);
+        em.flush();
+        em.clear();
+
+        SwitchBlJpaEntity loaded = em.find(SwitchBlJpaEntity.class, switchBl.getSwitchBlId());
+
+        assertThat(loaded).isNotNull();
+        assertThat(loaded.getBlType()).isEqualTo("OBL");
+        assertThat(loaded.getIncoterms()).isEqualTo("FOB");
+    }
+
+    @Test
+    @DisplayName("SwitchBl blType/incoterms null 저장 후 flush+clear → 재조회 시 null 이다")
+    void saveSwitchBl_withNullBlTypeAndIncoterms_roundTrip() {
+        HouseBlJpaEntity houseBl = newHouseBl();
+        em.persist(houseBl);
+        em.flush();
+
+        SwitchBlJpaEntity switchBl = newSwitchBl(houseBl);
+        em.persist(switchBl);
+        em.flush();
+        em.clear();
+
+        SwitchBlJpaEntity loaded = em.find(SwitchBlJpaEntity.class, switchBl.getSwitchBlId());
+
+        assertThat(loaded).isNotNull();
+        assertThat(loaded.getBlType()).isNull();
+        assertThat(loaded.getIncoterms()).isNull();
+    }
+
+    @Test
     @DisplayName("SwitchBl em.remove 후 flush → em.find == null")
     void deleteSwitchBl_removesEntityFromDb() {
         HouseBlJpaEntity houseBl = newHouseBl();

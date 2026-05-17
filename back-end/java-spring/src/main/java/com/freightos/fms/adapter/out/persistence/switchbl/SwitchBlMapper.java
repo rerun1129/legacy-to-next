@@ -25,6 +25,8 @@ public class SwitchBlMapper {
                 jpa.getCreatedBy(), jpa.getUpdatedBy());
         domain.assignSwitchBlId(jpa.getSwitchBlId());
         domain.updateDetails(jpa.getSwitchBlNo(),
+                jpa.getBlType(),
+                jpa.getIncoterms(),
                 CustomerCode.of(jpa.getShipperCode(), jpa.getShipperAddress()),
                 CustomerCode.of(jpa.getConsigneeCode(), jpa.getConsigneeAddress()),
                 CustomerCode.of(jpa.getNotifyCode(), jpa.getNotifyAddress()));
@@ -47,6 +49,8 @@ public class SwitchBlMapper {
 
     public void applyFields(SwitchBl domain, SwitchBlJpaEntity jpa) {
         jpa.setSwitchBlNo(domain.getSwitchBlNo());
+        jpa.setBlType(domain.getBlType());
+        jpa.setIncoterms(domain.getIncoterms());
         jpa.setShipperCode(mapOrNull(domain.getShipperCode(), CustomerCode::value));
         jpa.setShipperAddress(mapOrNull(domain.getShipperCode(), CustomerCode::address));
         jpa.setConsigneeCode(mapOrNull(domain.getConsigneeCode(), CustomerCode::value));
