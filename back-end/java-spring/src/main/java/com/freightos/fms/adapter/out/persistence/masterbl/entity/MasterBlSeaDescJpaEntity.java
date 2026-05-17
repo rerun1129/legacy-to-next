@@ -24,7 +24,7 @@ public class MasterBlSeaDescJpaEntity extends BaseJpaEntity {
     private Long masterBlSeaDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_sea_id", nullable = false, unique = true)
+    @JoinColumn(name = "master_bl_sea_id", nullable = false, unique = true, updatable = false)
     private MasterBlSeaJpaEntity sea;
 
     @Column(name = "marks", columnDefinition = "TEXT")

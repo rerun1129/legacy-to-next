@@ -32,7 +32,7 @@ public class HouseBlTruckJpaEntity extends BaseJpaEntity {
     private Long houseBlTruckId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
+    @JoinColumn(name = "house_bl_id", nullable = false, unique = true, updatable = false)
     private HouseBlJpaEntity houseBl;
 
     @Column(name = "vessel_name", length = 10, nullable = false)

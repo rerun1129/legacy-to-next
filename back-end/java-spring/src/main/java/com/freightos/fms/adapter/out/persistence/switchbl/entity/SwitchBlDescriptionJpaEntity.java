@@ -21,7 +21,7 @@ public class SwitchBlDescriptionJpaEntity extends BaseJpaEntity {
     private Long switchBlDescriptionId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "switch_bl_id", nullable = false, unique = true)
+    @JoinColumn(name = "switch_bl_id", nullable = false, unique = true, updatable = false)
     private SwitchBlJpaEntity switchBl;
 
     @Column(name = "marks", columnDefinition = "TEXT")

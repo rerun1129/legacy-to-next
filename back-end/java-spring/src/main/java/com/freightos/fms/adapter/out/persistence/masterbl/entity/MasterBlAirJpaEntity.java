@@ -36,7 +36,7 @@ public class MasterBlAirJpaEntity extends BaseJpaEntity {
     private Long masterBlAirId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_id", nullable = false, unique = true)
+    @JoinColumn(name = "master_bl_id", nullable = false, unique = true, updatable = false)
     private MasterBlJpaEntity masterBl;
 
     @Column(name = "airline_code", length = 10)

@@ -22,7 +22,7 @@ public class SwitchBlJpaEntity extends BaseJpaEntity {
     private Long switchBlId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
+    @JoinColumn(name = "house_bl_id", nullable = false, unique = true, updatable = false)
     private HouseBlJpaEntity houseBl;
 
     @OneToOne(mappedBy = "switchBl", fetch = FetchType.LAZY)

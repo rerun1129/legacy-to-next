@@ -28,7 +28,7 @@ public class MasterBlSeaJpaEntity extends BaseJpaEntity {
     private Long masterBlSeaId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_id", nullable = false, unique = true)
+    @JoinColumn(name = "master_bl_id", nullable = false, unique = true, updatable = false)
     private MasterBlJpaEntity masterBl;
 
     @Column(name = "load_type", length = 10)

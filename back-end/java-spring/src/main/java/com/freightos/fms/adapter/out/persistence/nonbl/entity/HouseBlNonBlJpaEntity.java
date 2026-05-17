@@ -31,7 +31,7 @@ public class HouseBlNonBlJpaEntity extends BaseJpaEntity {
     private Long houseBlNonBlId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_id", nullable = false, unique = true)
+    @JoinColumn(name = "house_bl_id", nullable = false, unique = true, updatable = false)
     private HouseBlJpaEntity houseBl;
 
     @Column(name = "work_division", nullable = false, length = 15)

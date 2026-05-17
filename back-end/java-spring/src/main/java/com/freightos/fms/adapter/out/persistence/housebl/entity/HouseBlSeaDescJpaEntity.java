@@ -24,7 +24,7 @@ public class HouseBlSeaDescJpaEntity extends BaseJpaEntity {
     private Long houseBlSeaDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_sea_id", nullable = false, unique = true)
+    @JoinColumn(name = "house_bl_sea_id", nullable = false, unique = true, updatable = false)
     private HouseBlSeaJpaEntity sea;
 
     @Column(name = "marks", columnDefinition = "TEXT")

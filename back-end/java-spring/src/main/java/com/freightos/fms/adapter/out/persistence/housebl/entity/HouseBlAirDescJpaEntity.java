@@ -22,7 +22,7 @@ public class HouseBlAirDescJpaEntity extends BaseJpaEntity {
     private Long houseBlAirDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_air_id", nullable = false, unique = true)
+    @JoinColumn(name = "house_bl_air_id", nullable = false, unique = true, updatable = false)
     private HouseBlAirJpaEntity air;
 
     @Column(name = "marks", columnDefinition = "TEXT")

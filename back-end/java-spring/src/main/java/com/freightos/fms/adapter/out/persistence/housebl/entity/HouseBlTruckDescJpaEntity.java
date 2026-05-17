@@ -22,7 +22,7 @@ public class HouseBlTruckDescJpaEntity extends BaseJpaEntity {
     private Long houseBlTruckDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "house_bl_truck_id", nullable = false, unique = true)
+    @JoinColumn(name = "house_bl_truck_id", nullable = false, unique = true, updatable = false)
     private HouseBlTruckJpaEntity truck;
 
     @Column(name = "marks", columnDefinition = "TEXT")

@@ -24,7 +24,7 @@ public class MasterBlAirDescJpaEntity extends BaseJpaEntity {
     private Long masterBlAirDescId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "master_bl_air_id", nullable = false, unique = true)
+    @JoinColumn(name = "master_bl_air_id", nullable = false, unique = true, updatable = false)
     private MasterBlAirJpaEntity air;
 
     @Column(name = "marks", columnDefinition = "TEXT")
