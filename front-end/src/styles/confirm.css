@@ -62,6 +62,23 @@
   color: var(--warn);
 }
 
+/* ---------- Header (drag handle + title + optional icon) ---------- */
+.confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: -20px -20px 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* destructive variant: 헤더 내 아이콘 중앙 정렬 해제(헤더 왼쪽 정렬) */
+.confirm-panel--destructive .confirm-header .confirm-icon--danger {
+  margin: 0;
+}
+
 /* ---------- Title / Description ---------- */
 .confirm-title {
   font-size: var(--fs-lg);

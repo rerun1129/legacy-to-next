@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Save, X } from "lucide-react";
 import { truckBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
+import { useModalDrag } from "@/components/shared/use-modal-drag";
 
 interface TruckChangeBlNoModalProps {
   truckBlId: number;
@@ -17,20 +17,17 @@ interface TruckChangeBlNoModalProps {
 
 interface FormValues { newHblNo: string; }
 
-export function TruckChangeBlNoModal({
+// ── Modal Inner (항상 mount 상태에서 실행 — outer가 isOpen 가드) ──────────
+function TruckChangeBlNoModalInner({
   truckBlId,
   currentHblNo,
-  isOpen,
   onClose,
   onChanged,
-}: TruckChangeBlNoModalProps) {
+}: Omit<TruckChangeBlNoModalProps, "isOpen">) {
   const queryClient = useQueryClient();
+  const { offset, onHeaderMouseDown } = useModalDrag();
   // BE SSOT — zodResolver/required/pattern 사용 금지
   const form = useForm<FormValues>({ defaultValues: { newHblNo: "" } });
-
-  useEffect(() => {
-    if (isOpen) form.reset({ newHblNo: "" });
-  }, [isOpen, form]);
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) => truckBlPort.changeHblNo(truckBlId, values.newHblNo),
@@ -44,14 +41,18 @@ export function TruckChangeBlNoModal({
     onError: (e: Error) => toast.error(`변경 실패: ${e.message}`),
   });
 
-  if (!isOpen) return null;
-
   function handleSubmit(values: FormValues) { mutation.mutate(values); }
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal">
-        <div className="modal__title">Change B/L No</div>
+      <div className="modal" style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}>
+        <div
+          className="modal__header"
+          style={{ cursor: "move", userSelect: "none" }}
+          onMouseDown={onHeaderMouseDown}
+        >
+          <span className="modal__title">Change B/L No</span>
+        </div>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="modal__body">
           <div className="field">
             <div className="field__label">현재 B/L No</div>
@@ -82,4 +83,10 @@ export function TruckChangeBlNoModal({
       </div>
     </div>
   );
+}
+
+// ── Modal 본체 (outer — isOpen 가드, mount 시 offset 0,0 reset 보장) ───────
+export function TruckChangeBlNoModal({ isOpen, ...props }: TruckChangeBlNoModalProps) {
+  if (!isOpen) return null;
+  return <TruckChangeBlNoModalInner {...props} />;
 }

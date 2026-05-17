@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/shared/button";
+import { useModalDrag } from "@/components/shared/use-modal-drag";
 import type { ConfirmOptions, ConfirmVariant } from "./confirmStore";
 
 export interface ConfirmModalProps {
@@ -34,6 +35,10 @@ function ConfirmDetails({ details }: { details: NonNullable<ConfirmOptions["deta
   );
 }
 
+interface ContentProps extends Omit<ConfirmModalProps, "open" | "variant"> {
+  onHeaderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+}
+
 function DefaultContent({
   title,
   description,
@@ -44,10 +49,17 @@ function DefaultContent({
   onConfirm,
   onCancel,
   cancelRef,
-}: Omit<ConfirmModalProps, "open" | "variant">) {
+  onHeaderMouseDown,
+}: ContentProps) {
   return (
     <>
-      <Dialog.Title className="confirm-title">{title}</Dialog.Title>
+      <div
+        className="confirm-header"
+        style={{ cursor: "move", userSelect: "none" }}
+        onMouseDown={onHeaderMouseDown}
+      >
+        <Dialog.Title className="confirm-title">{title}</Dialog.Title>
+      </div>
       {description && (
         <Dialog.Description className="confirm-description">
           {description}
@@ -81,13 +93,20 @@ function DestructiveContent({
   onConfirm,
   onCancel,
   cancelRef,
-}: Omit<ConfirmModalProps, "open" | "variant">) {
+  onHeaderMouseDown,
+}: ContentProps) {
   return (
     <>
-      <div className="confirm-icon confirm-icon--danger" aria-hidden>
-        <Trash2 size={20} aria-hidden />
+      <div
+        className="confirm-header"
+        style={{ cursor: "move", userSelect: "none" }}
+        onMouseDown={onHeaderMouseDown}
+      >
+        <div className="confirm-icon confirm-icon--danger" aria-hidden>
+          <Trash2 size={20} aria-hidden />
+        </div>
+        <Dialog.Title className="confirm-title">{title}</Dialog.Title>
       </div>
-      <Dialog.Title className="confirm-title">{title}</Dialog.Title>
       {description && (
         <Dialog.Description className="confirm-description">
           {description}
@@ -121,23 +140,26 @@ function WarningContent({
   onConfirm,
   onCancel,
   cancelRef,
-}: Omit<ConfirmModalProps, "open" | "variant">) {
+  onHeaderMouseDown,
+}: ContentProps) {
   return (
     <>
-      <div className="confirm-row">
+      <div
+        className="confirm-header"
+        style={{ cursor: "move", userSelect: "none" }}
+        onMouseDown={onHeaderMouseDown}
+      >
         <div className="confirm-icon confirm-icon--warn" aria-hidden>
           <AlertTriangle size={20} aria-hidden />
         </div>
-        <div>
-          <Dialog.Title className="confirm-title">{title}</Dialog.Title>
-          {description && (
-            <Dialog.Description className="confirm-description">
-              {description}
-            </Dialog.Description>
-          )}
-          {details && <ConfirmDetails details={details} />}
-        </div>
+        <Dialog.Title className="confirm-title">{title}</Dialog.Title>
       </div>
+      {description && (
+        <Dialog.Description className="confirm-description">
+          {description}
+        </Dialog.Description>
+      )}
+      {details && <ConfirmDetails details={details} />}
       <div className="confirm-actions">
         <button
           ref={cancelRef}
@@ -168,7 +190,9 @@ export function ConfirmModal({
   onCancel,
   cancelRef,
 }: ConfirmModalProps) {
-  const contentProps = {
+  const { offset, onHeaderMouseDown } = useModalDrag();
+
+  const contentProps: ContentProps = {
     title,
     description,
     details,
@@ -178,13 +202,18 @@ export function ConfirmModal({
     onConfirm,
     onCancel,
     cancelRef,
+    onHeaderMouseDown,
   };
+
+  // 기존 confirm.css: transform: translate(-50%, -50%) 에 드래그 offset 합성
+  const transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`;
 
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="confirm-overlay" />
       <Dialog.Content
         className={cn("confirm-panel", `confirm-panel--${variant}`)}
+        style={{ transform }}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
           cancelRef.current?.focus();
