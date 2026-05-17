@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid,
-  KeyRound, UserCog,
+  KeyRound, UserCog, Building2,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -96,6 +96,12 @@ const NAV_MODULES: NavModule[] = [
         group: "사용자 관리", icon: UserCog, defaultOpen: false,
         children: [
           { label: "List", href: "/admin/user/list", icon: List, requiredPermission: "USER_MANAGE" },
+        ],
+      },
+      {
+        group: "Partner", icon: Building2, defaultOpen: false,
+        children: [
+          { label: "List", href: "/admin/partner/list", icon: List, requiredPermission: "PARTNER_MANAGE" },
         ],
       },
     ],
