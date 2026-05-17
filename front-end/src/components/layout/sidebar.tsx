@@ -120,7 +120,14 @@ export function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
   const addTab   = useTabs((s) => s.addTab);
+  // SSR 시 session=null이므로 admin 메뉴가 모두 숨겨진 결과물을 렌더.
+  // mounted 전에는 동일하게 숨겨서 hydration mismatch를 방지.
+  const [mounted, setMounted] = useState(false);
   const [session] = useState(() => getSession());
+
+  // SSR/CSR hydration 일치를 위한 mount gate
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
 
   const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
@@ -212,7 +219,8 @@ export function Sidebar() {
                   </button>
 
                   {secOpen && section.children
-                    .filter((leaf) => !leaf.requiredPermission || hasPermission(session, leaf.requiredPermission))
+                    // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
+                    .filter((leaf) => !leaf.requiredPermission || (mounted && hasPermission(session, leaf.requiredPermission)))
                     .map((leaf) => {
                     const active = leafActive(pathname, leaf);
                     return (

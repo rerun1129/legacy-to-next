@@ -45,6 +45,8 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/fms/truck-bl/entry": "Truck B/L Entry",
   "/fms/non-bl/list":    "Non B/L List",
   "/fms/non-bl/entry":   "Non B/L Entry",
+  "/admin/code/list": "Code Master List",
+  "/admin/user/list": "사용자 관리 List",
 };
 
 export function inferLabelFromPath(pathname: string): string {

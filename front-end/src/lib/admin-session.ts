@@ -50,3 +50,11 @@ export function hasPermission(session: AdminSession | null, permission: Permissi
   if (session.role === "ADMIN") return true;
   return session.permissions.includes(permission);
 }
+
+// login·guard 양측에서 공유하는 "이 세션으로 진입 가능한 첫 번째 라우트" 헬퍼
+export function firstAccessibleRoute(session: AdminSession): string | null {
+  if (session.role === "ADMIN") return "/admin/code/list";
+  if (hasPermission(session, "CODE_MANAGE")) return "/admin/code/list";
+  if (hasPermission(session, "USER_MANAGE")) return "/admin/user/list";
+  return null;
+}

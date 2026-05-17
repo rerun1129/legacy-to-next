@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { authUseCases } from "@/application/auth/use-cases";
-import { setSession, hasPermission } from "@/lib/admin-session";
+import { setSession, firstAccessibleRoute } from "@/lib/admin-session";
 import type { AdminSession } from "@/lib/admin-session";
 import { toast } from "@/lib/toast-store";
 import { useTabs } from "@/lib/use-tabs";
@@ -12,13 +12,6 @@ import { useTabs } from "@/lib/use-tabs";
 interface LoginForm {
   username: string;
   password: string;
-}
-
-function firstAccessibleRoute(session: AdminSession): string | null {
-  if (session.role === "ADMIN") return "/admin/code/list";
-  if (hasPermission(session, "CODE_MANAGE")) return "/admin/code/list";
-  if (hasPermission(session, "USER_MANAGE")) return "/admin/user/list";
-  return null;
 }
 
 export default function LoginPage() {
