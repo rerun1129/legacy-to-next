@@ -16,6 +16,8 @@ import { API_USER_PORT } from '@/adapter/out/api/user';
 import { API_PARTNER_PORT } from '@/adapter/out/api/partner';
 import { API_NOTICE_PORT } from '@/adapter/out/api/notice';
 import { API_TERMS_PORT } from '@/adapter/out/api/terms';
+import { API_FAQ_CATEGORY_PORT } from '@/adapter/out/api/faq-category';
+import { API_FAQ_PORT } from '@/adapter/out/api/faq';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -33,4 +35,6 @@ export const userPort = API_USER_PORT;
 export const partnerPort = API_PARTNER_PORT;
 export const noticePort = API_NOTICE_PORT;
 export const termsPort = API_TERMS_PORT;
+export const faqCategoryPort = API_FAQ_CATEGORY_PORT;
+export const faqPort = API_FAQ_PORT;
 export const authPort = API_AUTH_PORT;

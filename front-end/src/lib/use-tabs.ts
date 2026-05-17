@@ -50,6 +50,7 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/admin/partner/list": "Partner List",
   "/admin/cms/notice/list": "공지사항 List",
   "/admin/cms/terms/list": "약관·정책 List",
+  "/admin/cms/faq": "FAQ",
 };
 
 export function inferLabelFromPath(pathname: string): string {
