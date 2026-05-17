@@ -148,6 +148,7 @@ export function HouseBLEntry({ variant }: Props) {
       {canSwitchBl && (
         <SwitchBlModal
           houseBlId={id!}
+          isExp={variant.direction === "EXP"}
           isOpen={isSwitchBlModalOpen}
           onClose={() => setIsSwitchBlModalOpen(false)}
         />

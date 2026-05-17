@@ -17,6 +17,16 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
+/* ---------- Large modal (Switch B/L 등 2-col entry 폼) ---------- */
+.modal--lg {
+  max-width: 1200px;
+  width: 92vw;
+  max-height: 92vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .modal__title {
   font-weight: 600;
   font-size: var(--fs-lg);
@@ -32,6 +42,81 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* ---------- Modal header / footer (modal--lg 와 함께 사용) ---------- */
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--surface-2);
+  border-radius: 8px 8px 0 0;
+}
+
+.modal__header .modal__title {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--divider);
+  background: var(--surface-2);
+  border-radius: 0 0 8px 8px;
+}
+
+.modal__loading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 40px 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+/* ---------- 헤더를 직계 자식으로 가진 일반 .modal: 상단 밀착 ---------- */
+/* modal__header가 있으면 .modal 자체 패딩을 0으로 두고, 본문/액션에 패딩 재부여 */
+.modal:not(.modal--lg):has(> .modal__header) {
+  padding: 0;
+}
+.modal:not(.modal--lg):has(> .modal__header) > .modal__body {
+  padding: 16px 20px 0;
+}
+.modal:not(.modal--lg):has(> .modal__header) > .modal__actions {
+  padding: 12px 20px 16px;
+}
+
+/* ---------- 2-col body (좌 3 : 우 2) ---------- */
+.modal__body--2col {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 0;
+  overflow: auto;
+}
+
+.modal__col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* =========================================================

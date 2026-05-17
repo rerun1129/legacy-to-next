@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider, Controller, type UseFormReturn } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { ComboBox, TextBox } from "@/components/shared/inputs";
+import { useModalDrag } from "@/components/shared/use-modal-drag";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import { switchBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { SwitchBlPartyPanel } from "./switch-bl-party-panel";
+import { SwitchBlMarksPanel } from "./switch-bl-marks-panel";
+import { SwitchBlDescPanel } from "./switch-bl-desc-panel";
 
 export interface SwitchBlFormValues {
   switchBlNo: string;
@@ -19,28 +24,45 @@ export interface SwitchBlFormValues {
   notifyAddress: string;
   marks: string;
   natureQuantity: string;
+  incoterms: string;
+  blType: string;
 }
 
 interface SwitchBlModalProps {
   houseBlId: number;
+  isExp: boolean;
   isOpen: boolean;
   onClose: () => void;
 }
 
-// ── Toolbar (Switch B/L No, House B/L No) ─────────────────────────────────
+// ── Toolbar (Switch B/L No | House B/L No | Incoterms | B/L Type) ─────────
 interface ToolbarProps {
   houseBlId: number;
-  form: ReturnType<typeof useForm<SwitchBlFormValues>>;
+  form: UseFormReturn<SwitchBlFormValues>;
 }
 
 function SwitchBlToolbar({ houseBlId, form }: ToolbarProps) {
-  const { register } = form;
+  const { control } = form;
+  const { options: incotermsOptions, placeholder: incotermsPh } = useEnumOptions("Incoterms");
+  const { options: blTypeOptions,    placeholder: blTypePh }    = useEnumOptions("BlType");
+
   return (
-    <div className="toolbar">
+    <div className="toolbar" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
       <div className="field">
         <div className="field__label">Switch B/L No</div>
         <div className="field__input">
-          <input {...register("switchBlNo")} placeholder="Switch B/L No" />
+          <Controller
+            name="switchBlNo"
+            control={control}
+            render={({ field }) => (
+              <TextBox
+                placeholder="Switch B/L No"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
         </div>
       </div>
       <div className="field">
@@ -50,43 +72,48 @@ function SwitchBlToolbar({ houseBlId, form }: ToolbarProps) {
           <input value={String(houseBlId)} readOnly />
         </div>
       </div>
+      <div className="field">
+        <div className="field__label">Incoterms</div>
+        <div className="field__input">
+          <Controller
+            name="incoterms"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                options={incotermsOptions}
+                placeholder={incotermsPh}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </div>
+      </div>
+      <div className="field is-required">
+        <div className="field__label is-required">B/L Type</div>
+        <div className="field__input">
+          <Controller
+            name="blType"
+            control={control}
+            render={({ field }) => (
+              <ComboBox
+                options={blTypeOptions}
+                placeholder={blTypePh}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-// ── Marks & Nature 영역 ────────────────────────────────────────────────────
-interface DescPanelProps {
-  form: ReturnType<typeof useForm<SwitchBlFormValues>>;
-}
+// ── Modal Inner (항상 mount 상태에서 실행 — outer가 isOpen 가드) ──────────
+function SwitchBlModalInner({ houseBlId, isExp, onClose }: Omit<SwitchBlModalProps, "isOpen">) {
+  const { offset, onHeaderMouseDown } = useModalDrag();
 
-function SwitchBlDescPanel({ form }: DescPanelProps) {
-  const { register } = form;
-  return (
-    <div className="switch-bl-desc-panel">
-      <div className="panel-section">
-        <div className="panel-section__title">Marks and Numbers</div>
-        <textarea
-          {...register("marks")}
-          className="panel-section__textarea"
-          rows={8}
-          placeholder="Marks and Numbers"
-        />
-      </div>
-      <div className="panel-section">
-        <div className="panel-section__title">Nature &amp; Quantity of Goods</div>
-        <textarea
-          {...register("natureQuantity")}
-          className="panel-section__textarea"
-          rows={8}
-          placeholder="Nature & Quantity of Goods"
-        />
-      </div>
-    </div>
-  );
-}
-
-// ── Modal 본체 ─────────────────────────────────────────────────────────────
-export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps) {
   const form = useForm<SwitchBlFormValues>({
     defaultValues: {
       switchBlNo: "",
@@ -98,13 +125,14 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
       notifyAddress: "",
       marks: "",
       natureQuantity: "",
+      incoterms: "",
+      blType: "",
     },
   });
 
   const { data: existing, isLoading } = useQuery({
     queryKey: ["switch-bl", "byHouseBl", houseBlId],
     queryFn: () => switchBlPort.getByHouseBlId(houseBlId),
-    enabled: isOpen,
   });
 
   // 서버 데이터 로드 시 폼 reset
@@ -120,6 +148,8 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
         notifyAddress: existing.notifyAddress ?? "",
         marks: existing.description?.marks ?? "",
         natureQuantity: existing.description?.natureQuantity ?? "",
+        incoterms: "",
+        blType: "",
       });
     } else if (existing === null) {
       // 미존재 CREATE 모드: 폼 초기화
@@ -168,8 +198,6 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
     },
   });
 
-  if (!isOpen) return null;
-
   function handleSubmit(values: SwitchBlFormValues) {
     saveMutation.mutate(values);
   }
@@ -182,52 +210,81 @@ export function SwitchBlModal({ houseBlId, isOpen, onClose }: SwitchBlModalProps
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal modal--lg">
-        {/* Header */}
-        <div className="modal__header">
+      <div
+        className="modal modal--lg"
+        style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
+      >
+        {/* Header (title only, drag handle) */}
+        <div
+          className="modal__header"
+          style={{ cursor: "move", userSelect: "none" }}
+          onMouseDown={onHeaderMouseDown}
+        >
           <span className="modal__title">SEA Switch B/L Management</span>
-          <div className="modal__header-actions">
-            {isUpdateMode && (
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-              >
-                <Trash2 size={12} />Delete
-              </Button>
-            )}
-            <button
-              type="button"
-              className="btn btn--sm btn--primary"
-              onClick={form.handleSubmit(handleSubmit)}
-              disabled={saveMutation.isPending}
-            >
-              <Save size={12} />{saveMutation.isPending ? "Saving..." : "Save"}
-            </button>
-            <button type="button" className="btn btn--sm" onClick={onClose}>
-              <X size={12} />Close
-            </button>
-          </div>
         </div>
 
         {/* Body */}
         {isLoading ? (
           <div className="modal__loading">Loading...</div>
         ) : (
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="modal__body modal__body--2col">
-            {/* 좌측: Toolbar + Party */}
-            <div className="modal__col">
-              <SwitchBlToolbar houseBlId={houseBlId} form={form} />
-              <SwitchBlPartyPanel form={form} />
-            </div>
-            {/* 우측: Marks & Nature */}
-            <div className="modal__col">
-              <SwitchBlDescPanel form={form} />
-            </div>
-          </form>
+          <FormProvider {...form}>
+            <SwitchBlToolbar houseBlId={houseBlId} form={form} />
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="modal__body modal__body--2col"
+            >
+              {/* 좌측 (3): Party */}
+              <div className="modal__col">
+                <SwitchBlPartyPanel isExp={isExp} />
+              </div>
+              {/* 우측 (2): Marks + Description */}
+              <div className="modal__col">
+                <SwitchBlMarksPanel />
+                <SwitchBlDescPanel />
+              </div>
+            </form>
+          </FormProvider>
         )}
+
+        {/* Footer (Delete / Save / Close) */}
+        <div className="modal__footer">
+          {isUpdateMode && (
+            <Button
+              variant="danger"
+              size="sm"
+              leftIcon={<Trash2 size={12} />}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              Delete
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="transaction"
+            size="sm"
+            leftIcon={<Save size={12} />}
+            onClick={form.handleSubmit(handleSubmit)}
+            disabled={saveMutation.isPending || isLoading}
+          >
+            {saveMutation.isPending ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            leftIcon={<X size={12} />}
+            onClick={onClose}
+          >
+            Close
+          </Button>
+        </div>
       </div>
     </div>
   );
+}
+
+// ── Modal 본체 (outer — isOpen 가드, mount 시 offset 0,0 reset 보장) ───────
+export function SwitchBlModal({ isOpen, ...props }: SwitchBlModalProps) {
+  if (!isOpen) return null;
+  return <SwitchBlModalInner {...props} />;
 }
