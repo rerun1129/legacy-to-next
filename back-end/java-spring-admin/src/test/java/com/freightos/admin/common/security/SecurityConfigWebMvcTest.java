@@ -20,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.jpa.properties.hibernate.default_schema=admin",
-        "spring.sql.init.mode=never"
+        "spring.sql.init.mode=never",
+        "spring.flyway.enabled=false"
 })
 class SecurityConfigWebMvcTest {
 

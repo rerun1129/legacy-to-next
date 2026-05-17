@@ -30,7 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.jpa.properties.hibernate.default_schema=admin"
+        "spring.jpa.properties.hibernate.default_schema=admin",
+        "spring.flyway.enabled=false"
 })
 class UserPersistenceAdapterTest {
 

@@ -1,4 +1,1 @@
-spring:
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
+# G7 Flyway 활성화 이후 local 전용 override 없음. application.yml의 ddl-auto: validate 상속.
