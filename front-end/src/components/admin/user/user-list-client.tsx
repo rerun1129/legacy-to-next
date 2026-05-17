@@ -14,7 +14,7 @@ import type { UserFilter } from "@/domain/user";
 const DEFAULT_VALUES: UserFilter = {
   username: "",
   role: "ALL",
-  active: "ALL",
+  scope: "ALL",
 };
 
 export function UserListClient() {

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { authUseCases } from "@/application/auth/use-cases";
 import { setSession, hasPermission } from "@/lib/admin-session";
 import type { AdminSession } from "@/lib/admin-session";
 import { toast } from "@/lib/toast-store";
+import { useTabs } from "@/lib/use-tabs";
 
 interface LoginForm {
   username: string;
@@ -24,6 +25,11 @@ export default function LoginPage() {
   const router = useRouter();
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<LoginForm>();
   const [error, setError] = useState<string | null>(null);
+
+  // 직접 /login 진입 시(로그아웃 외 경로) 이전 사용자의 탭 잔여 제거
+  useEffect(() => {
+    useTabs.getState().clearTabs();
+  }, []);
 
   const onSubmit = async (data: LoginForm) => {
     setError(null);

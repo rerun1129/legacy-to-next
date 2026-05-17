@@ -7,6 +7,7 @@ import type {
   CreateUserRequestDto,
   UpdateUserRequestDto,
   UserRole,
+  UserScope,
 } from "@/domain/user";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
@@ -23,6 +24,7 @@ const USER_ROW_SCHEMA = z.object({
   email: z.string().nullable().optional().transform((v) => v ?? null),
   role: USER_ROLE_SCHEMA,
   active: z.boolean(),
+  deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),
 }) satisfies z.ZodType<UserRow>;
 
@@ -32,6 +34,7 @@ const USER_DETAIL_SCHEMA = z.object({
   email: z.string().nullable().optional().transform((v) => v ?? null),
   role: USER_ROLE_SCHEMA,
   active: z.boolean(),
+  deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),
   updatedAt: z.string(),
   createdBy: z.string().nullable().optional().transform((v) => v ?? null),
@@ -51,13 +54,13 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     size: z.number(),
   });
 
-function activeForBackend(active: UserFilter["active"]): boolean | null {
-  if (active === "ALL") return null;
-  return active === "ACTIVE";
-}
-
 function roleForBackend(role: UserFilter["role"]): UserRole | null {
   return role === "ALL" ? null : role;
+}
+
+function scopeForBackend(scope: UserScope): UserScope {
+  // ALL을 포함해 항상 명시 전송 — BE가 null→ALL 처리하지만 명시 권장
+  return scope;
 }
 
 export const API_USER_PORT: UserPort = {
@@ -65,12 +68,11 @@ export const API_USER_PORT: UserPort = {
     const body: Record<string, unknown> = {
       page: page - 1,
       size,
+      scope: scopeForBackend(filter.scope),
     };
     if (filter.username) body.username = filter.username;
     const r = roleForBackend(filter.role);
     if (r !== null) body.role = r;
-    const a = activeForBackend(filter.active);
-    if (a !== null) body.active = a;
 
     const json = await adminFetchJson(`${BASE}/search`, {
       method: "POST",

@@ -153,6 +153,8 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
     deleteMutation.mutate(state.id);
   }
 
+  const isReadOnly = isEdit && detail?.deletedAt != null;
+
   const isBusy =
     isDetailLoading ||
     isSubmitting ||
@@ -167,12 +169,24 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
       ) : (
         <form onSubmit={form.handleSubmit(handleSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {isReadOnly && (
+              <div style={{
+                padding: "8px 12px",
+                background: "var(--surface-2, #fef2f2)",
+                border: "1px solid var(--border, #fecaca)",
+                borderRadius: 4,
+                color: "var(--danger, #dc2626)",
+                fontSize: 13,
+              }}>
+                삭제된 사용자입니다 (삭제일시: {detail?.deletedAt ?? "—"}). 조회 전용입니다.
+              </div>
+            )}
             <div className="lcn">
               <span className="lcn__label">사용자명</span>
               <input
                 className="text-box text-box--panel"
                 placeholder="사용자명"
-                readOnly={isEdit}
+                readOnly={isEdit || isReadOnly}
                 style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
                 {...register("username")}
               />
@@ -182,6 +196,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
               <input
                 className="text-box text-box--panel"
                 placeholder="이메일 (선택)"
+                readOnly={isReadOnly}
                 {...register("email")}
               />
             </div>
@@ -191,12 +206,13 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                 type="password"
                 className="text-box text-box--panel"
                 placeholder={isEdit ? "변경 시에만 입력" : "8자 이상 필수"}
+                readOnly={isReadOnly}
                 {...register("password")}
               />
             </div>
             <div className="lcn">
               <span className="lcn__label">역할</span>
-              <select className="text-box text-box--panel" {...register("role")}>
+              <select className="text-box text-box--panel" disabled={isReadOnly} {...register("role")}>
                 {ROLE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
@@ -220,7 +236,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                             <input
                               type="checkbox"
                               checked={checked}
-                              disabled={isAdmin}
+                              disabled={isAdmin || isReadOnly}
                               onChange={(e) => {
                                 const current = field.value ?? [];
                                 field.onChange(
@@ -242,7 +258,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
             <div className="lcn">
               <span className="lcn__label">활성</span>
               <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <input type="checkbox" {...register("active")} />
+                <input type="checkbox" disabled={isReadOnly} {...register("active")} />
                 활성
               </label>
             </div>
@@ -255,7 +271,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
             variant="danger"
             size="sm"
             onClick={handleDelete}
-            disabled={isBusy}
+            disabled={isBusy || isReadOnly}
           >
             삭제
           </Button>
@@ -264,7 +280,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
           variant="modal"
           size="sm"
           onClick={form.handleSubmit(handleSave)}
-          disabled={isBusy}
+          disabled={isBusy || isReadOnly}
           loading={createMutation.isPending || updateMutation.isPending}
         >
           저장

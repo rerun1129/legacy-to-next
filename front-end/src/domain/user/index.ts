@@ -8,6 +8,7 @@ export interface UserRow {
   email: string | null;
   role: UserRole;
   active: boolean;
+  deletedAt: string | null;
   updatedAt: string;
 }
 
@@ -17,6 +18,7 @@ export interface UserDetail {
   email: string | null;
   role: UserRole;
   active: boolean;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   createdBy: string | null;
@@ -24,13 +26,13 @@ export interface UserDetail {
   permissions: Permission[];
 }
 
-export type ActiveUserFilter = "ALL" | "ACTIVE" | "INACTIVE";
+export type UserScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export type RoleUserFilter = "ALL" | "ADMIN" | "USER";
 
 export interface UserFilter {
   username: string;
   role: RoleUserFilter;
-  active: ActiveUserFilter;
+  scope: UserScope;
 }
 
 export interface CreateUserRequestDto {

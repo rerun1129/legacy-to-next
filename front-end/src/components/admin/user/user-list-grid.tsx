@@ -21,10 +21,19 @@ const COLUMNS: GridColumn<UserRow>[] = [
   { key: "role", label: "역할", minWidth: 80, align: "center" },
   {
     key: "active",
-    label: "활성",
-    minWidth: 80,
+    label: "상태",
+    minWidth: 90,
     align: "center",
-    render: (v) => (v ? "활성" : "비활성"),
+    render: (v, row) => {
+      if (row.deletedAt) return "삭제됨";
+      return row.active ? "활성" : "비활성";
+    },
+  },
+  {
+    key: "deletedAt",
+    label: "삭제일시",
+    minWidth: 160,
+    render: (v) => (v ? String(v) : ""),
   },
   { key: "updatedAt", label: "수정일시", minWidth: 160 },
 ];

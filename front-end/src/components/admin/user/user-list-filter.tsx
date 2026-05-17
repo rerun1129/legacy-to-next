@@ -13,10 +13,11 @@ const ROLE_OPTIONS = [
   { value: "USER", label: "USER" },
 ] as const;
 
-const ACTIVE_OPTIONS = [
+const SCOPE_OPTIONS = [
   { value: "ALL", label: "전체" },
   { value: "ACTIVE", label: "활성" },
   { value: "INACTIVE", label: "비활성" },
+  { value: "DELETED", label: "삭제됨" },
 ] as const;
 
 export function UserListFilter({ form }: Props) {
@@ -45,9 +46,9 @@ export function UserListFilter({ form }: Props) {
             </select>
           </div>
           <div className="lcn">
-            <span className="lcn__label">활성 여부</span>
-            <select className="text-box text-box--panel" {...register("active")}>
-              {ACTIVE_OPTIONS.map((o) => (
+            <span className="lcn__label">상태</span>
+            <select className="text-box text-box--panel" {...register("scope")}>
+              {SCOPE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>

@@ -20,6 +20,7 @@ interface TabStore {
   closeOtherTabs: (id: string) => void;
   closeTabsToRight: (id: string) => void;
   closeTabsToLeft: (id: string) => void;
+  clearTabs: () => void;
 }
 
 // ─── Nav label mapping (mirrors sidebar.tsx NAV data) ───────
@@ -128,6 +129,10 @@ export const useTabs = create<TabStore>((set, get) => ({
       if (dom) useEntryFocusStore.getState().clearFocus(dom);
     });
     set({ tabs: tabs.slice(idx) });
+  },
+
+  clearTabs() {
+    set({ tabs: [] });
   },
 
   initFromPath(pathname) {

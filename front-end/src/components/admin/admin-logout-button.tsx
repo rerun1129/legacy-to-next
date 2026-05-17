@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { authUseCases } from "@/application/auth/use-cases";
 import { clearSession, getSession } from "@/lib/admin-session";
+import { useTabs } from "@/lib/use-tabs";
 
 export function AdminLogoutButton() {
   const router = useRouter();
+  const clearTabs = useTabs((s) => s.clearTabs);
 
   const handleClick = async () => {
     const session = getSession();
@@ -17,6 +19,7 @@ export function AdminLogoutButton() {
         // best-effort — 실패해도 로컬 세션 정리
       }
     }
+    clearTabs();
     clearSession();
     router.replace("/login");
   };
