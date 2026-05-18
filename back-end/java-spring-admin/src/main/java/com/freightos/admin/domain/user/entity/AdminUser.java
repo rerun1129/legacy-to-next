@@ -5,6 +5,8 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -17,6 +19,8 @@ public class AdminUser extends BaseEntity {
     private boolean active;
     private LocalDateTime deletedAt;
     private Set<Permission> permissions;
+    /** ABAC 속성 — Phase 3에서 권한 평가에 사용. 현재는 데이터 저장 전용. */
+    private Map<String, List<String>> attributes;
 
     private AdminUser(String username, String email, String passwordHash, UserRole role, boolean active,
                       Set<Permission> permissions) {
@@ -27,6 +31,7 @@ public class AdminUser extends BaseEntity {
         this.active      = active;
         this.deletedAt   = null;
         this.permissions = permissions == null ? Collections.emptySet() : Collections.unmodifiableSet(permissions);
+        this.attributes  = Collections.emptyMap();
     }
 
     public static AdminUser create(String username, String email, String passwordHash,
@@ -73,5 +78,13 @@ public class AdminUser extends BaseEntity {
      */
     public void assignPermissions(Set<Permission> permissions) {
         this.permissions = permissions == null ? Collections.emptySet() : Collections.unmodifiableSet(permissions);
+    }
+
+    /**
+     * 어댑터 계층이 JPA→Domain 변환 시 attributes를 주입할 때 사용한다.
+     * 도메인 외부(어댑터)에서만 호출해야 한다.
+     */
+    public void assignAttributes(Map<String, List<String>> attrs) {
+        this.attributes = attrs == null ? Collections.emptyMap() : Collections.unmodifiableMap(attrs);
     }
 }
