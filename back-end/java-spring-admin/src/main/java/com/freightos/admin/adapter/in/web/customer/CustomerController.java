@@ -33,13 +33,13 @@ import java.util.Map;
 @RequestMapping("/api/admin/customer")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN') or hasAuthority('CUSTOMER_MANAGE')")
 public class CustomerController {
 
     private final CustomerUseCase customerUseCase;
     private final CustomerAssembler customerAssembler;
 
     @PostMapping("/search")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CUSTOMER_LIST')")
     public ResponseEntity<ApiResponse<PagedResult<CustomerSummaryResponse>>> search(
             @Valid @RequestBody SearchCustomerRequest req) {
         PagedResult<CustomerSummary> result = customerUseCase.searchCustomers(customerAssembler.toSearchCommand(req));
@@ -47,12 +47,14 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CUSTOMER_LIST')")
     public ResponseEntity<ApiResponse<CustomerDetailResponse>> getById(@PathVariable Long id) {
         Customer domain = customerUseCase.getCustomerById(id);
         return ResponseEntity.ok(ApiResponse.of(customerAssembler.toDetail(domain)));
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_CREATE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCustomerRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -63,6 +65,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_UPDATE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCustomerRequest req) {
@@ -71,6 +74,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         customerUseCase.deleteCustomer(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CUSTOMER_DELETED.getMessage()));

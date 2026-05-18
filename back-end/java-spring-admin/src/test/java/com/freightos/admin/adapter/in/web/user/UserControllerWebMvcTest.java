@@ -14,7 +14,6 @@ import com.freightos.admin.common.security.JpaUserDetailsService;
 import com.freightos.admin.common.security.JwtAuthenticationFilter;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
-import com.freightos.admin.domain.user.entity.Permission;
 import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -80,10 +78,10 @@ class UserControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── 인증·정상 search → 200 ────────────────────────────────────────────────
+    // ── MENU_ADMIN_USER_LIST authority → 200 ──────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_USER_LIST")
     void search_authenticated_returns200() throws Exception {
         UserSummaryResponse summaryResponse = new UserSummaryResponse(
                 1L, "alice", "alice@example.com", UserRole.USER, true,
@@ -105,10 +103,10 @@ class UserControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].username").value("alice"));
     }
 
-    // ── 인증·create → 201 + Location + data.id ────────────────────────────────
+    // ── BTN_ADMIN_USER_LIST_CREATE authority → 201 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_CREATE")
     void create_returns201WithLocationAndId() throws Exception {
         given(userAssembler.toCreateCommand(any())).willReturn(
                 new CreateUserCommand("alice", "alice@example.com", "pass1234", UserRole.USER, true, Set.of()));
@@ -127,7 +125,7 @@ class UserControllerWebMvcTest {
     // ── username @NotBlank → 400 ──────────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_CREATE")
     void create_blankUsername_returns400() throws Exception {
         String body = """
                 {"username":"","email":"a@b.com","password":"pass1234","role":"USER","active":true,"permissions":[]}
@@ -141,7 +139,7 @@ class UserControllerWebMvcTest {
     // ── password @Size(min=8) → 400 ───────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_CREATE")
     void create_shortPassword_returns400() throws Exception {
         // 7자 비밀번호 → min=8 위반
         String body = """
@@ -153,10 +151,10 @@ class UserControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── delete → 200 ──────────────────────────────────────────────────────────
+    // ── BTN_ADMIN_USER_LIST_DELETE authority → 200 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_DELETE")
     void delete_returns200() throws Exception {
         willDoNothing().given(userUseCase).deleteUser(any());
 
@@ -164,10 +162,10 @@ class UserControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── getById → 200 + detail (passwordHash 미포함 확인) ─────────────────────
+    // ── MENU_ADMIN_USER_LIST authority → getById 200 ─────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_USER_LIST")
     void getById_returns200WithDetail() throws Exception {
         UserDetailResponse detail = new UserDetailResponse(
                 1L, "alice", "alice@example.com", UserRole.USER, true, null, Set.of(),
@@ -186,11 +184,11 @@ class UserControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.passwordHash").doesNotExist());
     }
 
-    // ── @PreAuthorize: USER_MANAGE authority → 200 ───────────────────────────
+    // ── @PreAuthorize: MENU_ADMIN_USER_LIST authority → 200 ──────────────────
 
     @Test
-    @WithMockUser(authorities = {"ROLE_USER", "USER_MANAGE"})
-    void search_withUserManageAuthority_returns200() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_USER_LIST")
+    void search_withUserListMenuAuthority_returns200() throws Exception {
         PagedResult<UserSummary> summaryPage = PagedResult.of(List.of(), 0L, 0, 0, 20);
         PagedResult<UserSummaryResponse> responsePage = PagedResult.of(List.of(), 0L, 0, 0, 20);
 
@@ -206,31 +204,11 @@ class UserControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── @PreAuthorize: ROLE_ADMIN (authorities 없음) → 200 ───────────────────
+    // ── @PreAuthorize: 다른 authority (MENU_ADMIN_CODE_LIST) → 403 ───────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void search_withAdminRole_noAuthority_returns200() throws Exception {
-        PagedResult<UserSummary> summaryPage = PagedResult.of(List.of(), 0L, 0, 0, 20);
-        PagedResult<UserSummaryResponse> responsePage = PagedResult.of(List.of(), 0L, 0, 0, 20);
-
-        given(userAssembler.toSearchCommand(any())).willReturn(new SearchUserCommand(null, null, null, 0, 20));
-        given(userUseCase.searchUsers(any())).willReturn(summaryPage);
-        given(userAssembler.toSummaryPage(any())).willReturn(responsePage);
-
-        SearchUserRequest req = new SearchUserRequest(null, null, null, 0, 20);
-
-        mockMvc.perform(post("/api/admin/user/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk());
-    }
-
-    // ── @PreAuthorize: CODE_MANAGE authority (USER_MANAGE 없음) → 403 ─────────
-
-    @Test
-    @WithMockUser(authorities = {"ROLE_USER", "CODE_MANAGE"})
-    void search_withCodeManageOnly_returns403() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
+    void search_withCodeListMenuOnly_returns403() throws Exception {
         mockMvc.perform(post("/api/admin/user/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"page\":0,\"size\":20}"))

@@ -6,13 +6,17 @@ import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
 import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
+import com.freightos.admin.application.auth.projection.MeProjection;
+import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
+import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
 import com.freightos.admin.application.user.port.in.UserUseCase;
-import com.freightos.admin.application.user.port.out.UserPort;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.security.ButtonEvalRow;
+import com.freightos.admin.common.security.MenuEvalRow;
+import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.Permission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -28,10 +35,12 @@ import java.util.Set;
 public class AuthService implements AuthUseCase {
 
     private final UserUseCase userUseCase;
-    private final UserPort userPort;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenPort refreshTokenPort;
+    private final PolicyEvaluator policyEvaluator;
+    private final MenuPolicyPort menuPolicyPort;
+    private final ButtonPolicyPort buttonPolicyPort;
 
     @Override
     @Transactional
@@ -49,17 +58,20 @@ public class AuthService implements AuthUseCase {
             throw new BadCredentialsException("비활성 사용자입니다.");
         }
 
-        Set<Permission> permissions = userPort.findPermissionsByUserId(user.getId());
-        Set<String> authorities = buildAuthorities(user, permissions);
+        Map<String, List<String>> attrs = user.getAttributes();
+        Set<String> accessibleMenus = evaluateMenus(attrs);
+        Set<String> accessibleButtons = evaluateButtons(attrs);
+        Set<String> authorities = buildAuthorities(user, accessibleMenus, accessibleButtons);
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities);
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
         String refreshRaw = jwtTokenProvider.generateRefreshTokenRaw();
         String refreshHash = jwtTokenProvider.hashRefreshToken(refreshRaw);
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(jwtTokenProvider.refreshTtlDays());
 
         refreshTokenPort.save(RefreshToken.issue(user.getId(), refreshHash, expiresAt));
 
-        return new LoginResult(accessToken, refreshRaw, user, permissions);
+        return new LoginResult(accessToken, refreshRaw, user, attrs,
+                new ArrayList<>(accessibleMenus), new ArrayList<>(accessibleButtons));
     }
 
     @Override
@@ -76,17 +88,20 @@ public class AuthService implements AuthUseCase {
             throw new BadCredentialsException("비활성 사용자입니다.");
         }
 
-        Set<Permission> permissions = userPort.findPermissionsByUserId(user.getId());
-        Set<String> authorities = buildAuthorities(user, permissions);
+        Map<String, List<String>> attrs = user.getAttributes();
+        Set<String> accessibleMenus = evaluateMenus(attrs);
+        Set<String> accessibleButtons = evaluateButtons(attrs);
+        Set<String> authorities = buildAuthorities(user, accessibleMenus, accessibleButtons);
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities);
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
         String newRefreshRaw = jwtTokenProvider.generateRefreshTokenRaw();
         String newRefreshHash = jwtTokenProvider.hashRefreshToken(newRefreshRaw);
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(jwtTokenProvider.refreshTtlDays());
+        LocalDateTime newExpiresAt = LocalDateTime.now().plusDays(jwtTokenProvider.refreshTtlDays());
 
-        refreshTokenPort.save(RefreshToken.issue(user.getId(), newRefreshHash, expiresAt));
+        refreshTokenPort.save(RefreshToken.issue(user.getId(), newRefreshHash, newExpiresAt));
 
-        return new LoginResult(accessToken, newRefreshRaw, user, permissions);
+        return new LoginResult(accessToken, newRefreshRaw, user, attrs,
+                new ArrayList<>(accessibleMenus), new ArrayList<>(accessibleButtons));
     }
 
     @Override
@@ -96,10 +111,38 @@ public class AuthService implements AuthUseCase {
         refreshTokenPort.revokeByTokenHash(hash);
     }
 
-    private Set<String> buildAuthorities(AdminUser user, Set<Permission> permissions) {
+    @Override
+    public MeProjection getMe(String username) {
+        AdminUser user = userUseCase.findUserByUsername(username);
+        Map<String, List<String>> attrs = user.getAttributes();
+        Set<String> accessibleMenus = evaluateMenus(attrs);
+        Set<String> accessibleButtons = evaluateButtons(attrs);
+        return new MeProjection(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                attrs,
+                new ArrayList<>(accessibleMenus),
+                new ArrayList<>(accessibleButtons)
+        );
+    }
+
+    private Set<String> evaluateMenus(Map<String, List<String>> attrs) {
+        List<MenuEvalRow> menuRows = menuPolicyPort.findAllActiveForEvaluation();
+        return policyEvaluator.accessibleMenuCodes(attrs, menuRows);
+    }
+
+    private Set<String> evaluateButtons(Map<String, List<String>> attrs) {
+        List<ButtonEvalRow> buttonRows = buttonPolicyPort.findAllActiveForEvaluation();
+        return policyEvaluator.accessibleButtonCodes(attrs, buttonRows);
+    }
+
+    private Set<String> buildAuthorities(AdminUser user, Set<String> accessibleMenus, Set<String> accessibleButtons) {
         Set<String> authorities = new HashSet<>();
         authorities.add("ROLE_" + user.getRole().name());
-        permissions.forEach(p -> authorities.add(p.name()));
+        accessibleMenus.forEach(code -> authorities.add("MENU_" + code));
+        accessibleButtons.forEach(code -> authorities.add("BTN_" + code));
         return authorities;
     }
 }

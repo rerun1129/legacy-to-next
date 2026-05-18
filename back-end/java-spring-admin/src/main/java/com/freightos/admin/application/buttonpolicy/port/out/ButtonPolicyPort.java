@@ -3,8 +3,10 @@ package com.freightos.admin.application.buttonpolicy.port.out;
 import com.freightos.admin.application.buttonpolicy.command.SearchButtonPolicyCommand;
 import com.freightos.admin.application.buttonpolicy.projection.ButtonPolicySummary;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.security.ButtonEvalRow;
 import com.freightos.admin.domain.buttonpolicy.entity.ButtonPolicy;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ButtonPolicyPort {
@@ -16,4 +18,6 @@ public interface ButtonPolicyPort {
     boolean existsByCompositeKey(Long buttonId, String attributeKey, String requiredValue);
     boolean existsByButtonId(Long buttonId);
     boolean existsByAttributeKey(String attributeKey);
+    /** ABAC 평가용 — active 버튼과 그 정책을 한번에 조회한다. */
+    List<ButtonEvalRow> findAllActiveForEvaluation();
 }

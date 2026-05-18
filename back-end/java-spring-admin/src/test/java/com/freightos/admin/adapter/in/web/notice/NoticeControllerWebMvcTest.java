@@ -73,11 +73,11 @@ class NoticeControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── ADMIN 인증 search → 200 ───────────────────────────────────────────────
+    // ── MENU_ADMIN_CMS_NOTICE_LIST authority → 200 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void search_adminAuthenticated_returns200() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_CMS_NOTICE_LIST")
+    void search_authenticatedWithNoticeMenuAuthority_returns200() throws Exception {
         NoticeSummaryResponse summaryResponse = new NoticeSummaryResponse(1L, "공지 제목", false, true, null, null, null, null);
         PagedResult<NoticeSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<NoticeSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
@@ -96,10 +96,10 @@ class NoticeControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].title").value("공지 제목"));
     }
 
-    // ── ADMIN create → 201 + Location + data.id ───────────────────────────────
+    // ── BTN_ADMIN_CMS_NOTICE_LIST_CREATE authority → 201 ─────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CMS_NOTICE_LIST_CREATE")
     void create_returns201WithLocationAndId() throws Exception {
         given(noticeAssembler.toCreateCommand(any())).willReturn(
                 new CreateNoticeCommand("공지 제목", "공지 내용", false, true, null, null));
@@ -118,7 +118,7 @@ class NoticeControllerWebMvcTest {
     // ── title @NotBlank → 400 ────────────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CMS_NOTICE_LIST_CREATE")
     void create_blankTitle_returns400() throws Exception {
         String body = """
                 {"title":"","content":"내용","pinned":false,"active":true}
@@ -132,7 +132,7 @@ class NoticeControllerWebMvcTest {
     // ── content @NotBlank → 400 ──────────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CMS_NOTICE_LIST_CREATE")
     void create_blankContent_returns400() throws Exception {
         String body = """
                 {"title":"제목","content":"","pinned":false,"active":true}
@@ -143,10 +143,10 @@ class NoticeControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── delete → 200 ─────────────────────────────────────────────────────────
+    // ── BTN_ADMIN_CMS_NOTICE_LIST_DELETE authority → 200 ─────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CMS_NOTICE_LIST_DELETE")
     void delete_returns200() throws Exception {
         willDoNothing().given(noticeUseCase).deleteNotice(any());
 
@@ -154,11 +154,11 @@ class NoticeControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── @PreAuthorize: CMS_MANAGE authority → 200 ────────────────────────────
+    // ── @PreAuthorize: MENU_ADMIN_CMS_NOTICE_LIST authority → 200 ────────────
 
     @Test
-    @WithMockUser(authorities = {"ROLE_USER", "CMS_MANAGE"})
-    void search_withCmsManageAuthority_returns200() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_CMS_NOTICE_LIST")
+    void search_withNoticeListMenuAuthority_returns200() throws Exception {
         PagedResult<NoticeSummary> summaryPage = PagedResult.of(List.of(), 0L, 0, 0, 20);
         PagedResult<NoticeSummaryResponse> responsePage = PagedResult.of(List.of(), 0L, 0, 0, 20);
 
@@ -174,11 +174,11 @@ class NoticeControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── @PreAuthorize: CODE_MANAGE only (CMS_MANAGE 없음) → 403 ─────────────
+    // ── @PreAuthorize: 다른 authority (MENU_ADMIN_CODE_LIST) → 403 ───────────
 
     @Test
-    @WithMockUser(authorities = {"ROLE_USER", "CODE_MANAGE"})
-    void search_withCodeManageOnly_returns403() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
+    void search_withCodeListMenuOnly_returns403() throws Exception {
         mockMvc.perform(post("/api/admin/cms/notice/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"page\":0,\"size\":20}"))

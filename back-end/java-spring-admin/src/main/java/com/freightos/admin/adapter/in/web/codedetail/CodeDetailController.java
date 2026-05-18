@@ -32,13 +32,13 @@ import java.util.Map;
 @RequestMapping("/api/admin/code-detail")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN') or hasAuthority('CODE_MANAGE')")
 public class CodeDetailController {
 
     private final CodeDetailUseCase codeDetailUseCase;
     private final CodeDetailAssembler codeDetailAssembler;
 
     @PostMapping("/search")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_LIST')")
     public ResponseEntity<ApiResponse<PagedResult<CodeDetailSummaryResponse>>> search(
             @Valid @RequestBody SearchCodeDetailRequest req) {
         PagedResult<CodeDetailSummary> result = codeDetailUseCase.searchCodeDetails(codeDetailAssembler.toSearchCommand(req));
@@ -46,11 +46,13 @@ public class CodeDetailController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_LIST')")
     public ResponseEntity<ApiResponse<CodeDetailDetailResponse>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.of(codeDetailAssembler.toDetail(codeDetailUseCase.findCodeDetailById(id))));
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCodeDetailRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -61,6 +63,7 @@ public class CodeDetailController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_UPDATE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCodeDetailRequest req) {
@@ -69,6 +72,7 @@ public class CodeDetailController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         codeDetailUseCase.deleteCodeDetailById(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_DETAIL_DELETED.getMessage()));

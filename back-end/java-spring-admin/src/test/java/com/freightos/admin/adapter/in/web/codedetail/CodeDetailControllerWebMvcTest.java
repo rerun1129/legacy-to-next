@@ -74,10 +74,10 @@ class CodeDetailControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── 인증·정상 search → 200 ────────────────────────────────────────────────
+    // ── MENU_ADMIN_CODE_LIST authority → 200 ──────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
     void search_authenticated_returns200() throws Exception {
         CodeDetailSummaryResponse summaryResponse = new CodeDetailSummaryResponse(
                 10L, 1L, "ACTIVE", "활성", 1, true, LocalDateTime.of(2024, 1, 1, 0, 0));
@@ -98,10 +98,10 @@ class CodeDetailControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].codeValue").value("ACTIVE"));
     }
 
-    // ── 인증·create → 201 + Location + data.id ────────────────────────────────
+    // ── BTN_ADMIN_CODE_LIST_CREATE authority → 201 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_CREATE")
     void create_returns201WithLocationAndId() throws Exception {
         given(codeDetailAssembler.toCreateCommand(any())).willReturn(null);
         given(codeDetailUseCase.createCodeDetail(any())).willReturn(55L);
@@ -119,7 +119,7 @@ class CodeDetailControllerWebMvcTest {
     // ── 검증 실패 → 400 ────────────────────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_CREATE")
     void create_blankCodeValue_returns400() throws Exception {
         // codeValue가 빈 문자열 → @NotBlank 위반
         String body = """
@@ -131,10 +131,10 @@ class CodeDetailControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── 인증·delete → 200 ─────────────────────────────────────────────────────
+    // ── BTN_ADMIN_CODE_LIST_DELETE authority → 200 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_DELETE")
     void delete_returns200() throws Exception {
         willDoNothing().given(codeDetailUseCase).deleteCodeDetailById(any());
 
@@ -142,10 +142,10 @@ class CodeDetailControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── 상세 조회 getById → 200 ───────────────────────────────────────────────
+    // ── MENU_ADMIN_CODE_LIST authority → getById 200 ─────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
     void getById_returns200WithDetail() throws Exception {
         CodeDetailDetailResponse detail = new CodeDetailDetailResponse(
                 10L, 1L, "ACTIVE", "활성", 1, true, "활성 상태",

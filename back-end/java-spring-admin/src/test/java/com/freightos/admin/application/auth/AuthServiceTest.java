@@ -5,13 +5,15 @@ import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
+import com.freightos.admin.application.auth.projection.MeProjection;
+import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
+import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
 import com.freightos.admin.application.user.port.in.UserUseCase;
-import com.freightos.admin.application.user.port.out.UserPort;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.Permission;
 import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,8 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
@@ -43,9 +48,6 @@ class AuthServiceTest {
     private UserUseCase userUseCase;
 
     @Mock
-    private UserPort userPort;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -53,6 +55,15 @@ class AuthServiceTest {
 
     @Mock
     private RefreshTokenPort refreshTokenPort;
+
+    @Mock
+    private PolicyEvaluator policyEvaluator;
+
+    @Mock
+    private MenuPolicyPort menuPolicyPort;
+
+    @Mock
+    private ButtonPolicyPort buttonPolicyPort;
 
     @InjectMocks
     private AuthService authService;
@@ -63,12 +74,16 @@ class AuthServiceTest {
     void login_validCredentials_returnsLoginResult() {
         AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
         user.assignIdentity(1L, null, null, null, null);
-        Set<Permission> permissions = Set.of(Permission.CODE_MANAGE);
+        Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
+        user.assignAttributes(attrs);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
         given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
-        given(userPort.findPermissionsByUserId(1L)).willReturn(permissions);
-        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection())).willReturn("access.token");
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of("ADMIN_CODE_LIST"));
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
+        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("access.token");
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rawRefresh");
         given(jwtTokenProvider.hashRefreshToken("rawRefresh")).willReturn("hashedRefresh");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
@@ -79,7 +94,7 @@ class AuthServiceTest {
         assertThat(result.accessToken()).isEqualTo("access.token");
         assertThat(result.refreshToken()).isEqualTo("rawRefresh");
         assertThat(result.user()).isSameAs(user);
-        assertThat(result.permissions()).containsExactlyInAnyOrderElementsOf(permissions);
+        assertThat(result.accessibleMenus()).contains("ADMIN_CODE_LIST");
 
         ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
         then(refreshTokenPort).should().save(tokenCaptor.capture());
@@ -133,13 +148,17 @@ class AuthServiceTest {
         RefreshToken oldToken = RefreshToken.issue(1L, "oldHash", LocalDateTime.now().plusDays(7));
         AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
         user.assignIdentity(1L, null, null, null, null);
+        user.assignAttributes(Collections.emptyMap());
 
         given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
         given(refreshTokenPort.findActiveByTokenHash("oldHash")).willReturn(Optional.of(oldToken));
         willDoNothing().given(refreshTokenPort).revokeByTokenHash("oldHash");
         given(userUseCase.findUserById(1L)).willReturn(user);
-        given(userPort.findPermissionsByUserId(1L)).willReturn(Set.of());
-        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection())).willReturn("new.access.token");
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
+        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("new.access.token");
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("newRawRefresh");
         given(jwtTokenProvider.hashRefreshToken("newRawRefresh")).willReturn("newHash");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
@@ -173,5 +192,27 @@ class AuthServiceTest {
         authService.logout(new LogoutCommand("rawToken"));
 
         then(refreshTokenPort).should().revokeByTokenHash("hashed");
+    }
+
+    // ── getMe: 정상 → MeProjection 반환 ──────────────────────────────────────
+
+    @Test
+    void getMe_returnsProjectionWithAccessibleMenusAndButtons() {
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
+        user.assignIdentity(1L, null, null, null, null);
+        user.assignAttributes(Map.of("role", List.of("ADMIN")));
+
+        given(userUseCase.findUserByUsername("admin")).willReturn(user);
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of("ADMIN_USER_LIST"));
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of("ADMIN_USER_LIST_CREATE"));
+
+        MeProjection projection = authService.getMe("admin");
+
+        assertThat(projection.username()).isEqualTo("admin");
+        assertThat(projection.role()).isEqualTo(UserRole.ADMIN);
+        assertThat(projection.accessibleMenus()).contains("ADMIN_USER_LIST");
+        assertThat(projection.accessibleButtons()).contains("ADMIN_USER_LIST_CREATE");
     }
 }

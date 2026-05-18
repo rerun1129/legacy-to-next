@@ -3,13 +3,12 @@ package com.freightos.admin.adapter.in.web.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
 import com.freightos.admin.application.auth.projection.LoginResult;
-import com.freightos.admin.application.user.port.in.UserUseCase;
+import com.freightos.admin.application.auth.projection.MeProjection;
 import com.freightos.admin.common.security.JpaUserDetailsService;
 import com.freightos.admin.common.security.JwtAuthenticationFilter;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.Permission;
 import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -42,9 +44,6 @@ class AuthControllerWebMvcTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @MockitoBean
-    private UserUseCase userUseCase;
 
     @MockitoBean
     private AuthUseCase authUseCase;
@@ -70,14 +69,14 @@ class AuthControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── ADMIN role → 200 + role=ADMIN + permissions=[] ───────────────────────
+    // ── ADMIN role → 200 + role=ADMIN + accessibleMenus=[] ───────────────────
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    void me_adminUser_returns200WithRoleAndEmptyPermissions() throws Exception {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", UserRole.ADMIN, true, Set.of());
-        user.assignIdentity(1L, null, null, null, null);
-        given(userUseCase.findUserByUsername("admin")).willReturn(user);
+    void me_adminUser_returns200WithRoleAndEmptyMenus() throws Exception {
+        MeProjection projection = new MeProjection(1L, "admin", "admin@example.com",
+                UserRole.ADMIN, Collections.emptyMap(), List.of(), List.of());
+        given(authUseCase.getMe("admin")).willReturn(projection);
 
         mockMvc.perform(get("/api/admin/auth/me")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -85,18 +84,19 @@ class AuthControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.username").value("admin"))
                 .andExpect(jsonPath("$.data.role").value("ADMIN"))
-                .andExpect(jsonPath("$.data.permissions").isArray())
-                .andExpect(jsonPath("$.data.permissions").isEmpty());
+                .andExpect(jsonPath("$.data.accessibleMenus").isArray())
+                .andExpect(jsonPath("$.data.accessibleMenus").isEmpty());
     }
 
-    // ── USER role + CODE_MANAGE authority → 200 + permissions=["CODE_MANAGE"] ──
+    // ── USER role → 200 + accessibleMenus 포함 ──────────────────────────────
 
     @Test
-    @WithMockUser(username = "tester", authorities = {"ROLE_USER", "CODE_MANAGE"})
-    void me_userWithCodeManage_returns200WithPermissions() throws Exception {
-        AdminUser user = AdminUser.create("tester", "tester@example.com", "hashed", UserRole.USER, true, Set.of(Permission.CODE_MANAGE));
-        user.assignIdentity(2L, null, null, null, null);
-        given(userUseCase.findUserByUsername("tester")).willReturn(user);
+    @WithMockUser(username = "tester", authorities = {"ROLE_USER", "MENU_ADMIN_CODE_LIST"})
+    void me_userWithMenuAuthority_returns200WithMenus() throws Exception {
+        MeProjection projection = new MeProjection(2L, "tester", "tester@example.com",
+                UserRole.USER, Map.of("role", List.of("ADMIN")),
+                List.of("ADMIN_CODE_LIST"), List.of());
+        given(authUseCase.getMe("tester")).willReturn(projection);
 
         mockMvc.perform(get("/api/admin/auth/me")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -104,7 +104,7 @@ class AuthControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.id").value(2L))
                 .andExpect(jsonPath("$.data.username").value("tester"))
                 .andExpect(jsonPath("$.data.role").value("USER"))
-                .andExpect(jsonPath("$.data.permissions[0]").value("CODE_MANAGE"));
+                .andExpect(jsonPath("$.data.accessibleMenus[0]").value("ADMIN_CODE_LIST"));
     }
 
     // ── login: 정상 → 200 ────────────────────────────────────────────────────
@@ -113,7 +113,8 @@ class AuthControllerWebMvcTest {
     void login_validCredentials_returns200() throws Exception {
         AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", UserRole.ADMIN, true, Set.of());
         user.assignIdentity(1L, null, null, null, null);
-        LoginResult loginResult = new LoginResult("access.token", "refresh.token", user, Set.of());
+        LoginResult loginResult = new LoginResult("access.token", "refresh.token", user,
+                Collections.emptyMap(), List.of(), List.of());
 
         given(authUseCase.login(any())).willReturn(loginResult);
 
@@ -150,7 +151,8 @@ class AuthControllerWebMvcTest {
     void refresh_validToken_returns200() throws Exception {
         AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", UserRole.ADMIN, true, Set.of());
         user.assignIdentity(1L, null, null, null, null);
-        LoginResult refreshResult = new LoginResult("new.access.token", "new.refresh.token", user, Set.of());
+        LoginResult refreshResult = new LoginResult("new.access.token", "new.refresh.token", user,
+                Collections.emptyMap(), List.of(), List.of());
 
         given(authUseCase.refresh(any())).willReturn(refreshResult);
 

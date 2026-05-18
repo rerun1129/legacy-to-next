@@ -6,10 +6,16 @@ import com.freightos.admin.application.buttonpolicy.projection.ButtonPolicySumma
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.security.ButtonEvalRow;
+import com.freightos.admin.common.security.PolicyRow;
 import com.freightos.admin.domain.buttonpolicy.entity.ButtonPolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -63,5 +69,19 @@ public class ButtonPolicyPersistenceAdapter implements ButtonPolicyPort {
     @Override
     public boolean existsByAttributeKey(String attributeKey) {
         return buttonPolicyRepository.existsByAttributeKey(attributeKey);
+    }
+
+    @Override
+    public List<ButtonEvalRow> findAllActiveForEvaluation() {
+        List<ButtonPolicyEvalProjection> rows = buttonPolicyRepository.findAllActiveButtonsWithPolicies();
+        Map<Long, ButtonEvalRow> byButtonId = new HashMap<>();
+        for (ButtonPolicyEvalProjection row : rows) {
+            byButtonId.computeIfAbsent(row.getButtonId(), id -> new ButtonEvalRow(id, row.getButtonCode(), new ArrayList<>()));
+            if (row.getAttributeKey() != null) {
+                ((ArrayList<PolicyRow>) byButtonId.get(row.getButtonId()).policies())
+                        .add(new PolicyRow(row.getAttributeKey(), row.getRequiredValue()));
+            }
+        }
+        return new ArrayList<>(byButtonId.values());
     }
 }

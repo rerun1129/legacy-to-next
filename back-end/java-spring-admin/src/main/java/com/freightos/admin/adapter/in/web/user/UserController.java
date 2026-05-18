@@ -33,13 +33,13 @@ import java.util.Map;
 @RequestMapping("/api/admin/user")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_MANAGE')")
 public class UserController {
 
     private final UserUseCase userUseCase;
     private final UserAssembler userAssembler;
 
     @PostMapping("/search")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_USER_LIST')")
     public ResponseEntity<ApiResponse<PagedResult<UserSummaryResponse>>> search(
             @Valid @RequestBody SearchUserRequest req) {
         PagedResult<UserSummary> result = userUseCase.searchUsers(userAssembler.toSearchCommand(req));
@@ -47,12 +47,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_USER_LIST')")
     public ResponseEntity<ApiResponse<UserDetailResponse>> getById(@PathVariable Long id) {
         AdminUser domain = userUseCase.findUserById(id);
         return ResponseEntity.ok(ApiResponse.of(userAssembler.toDetail(domain)));
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_CREATE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateUserRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -63,6 +65,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_UPDATE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest req) {
@@ -71,6 +74,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         userUseCase.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.USER_DELETED.getMessage()));

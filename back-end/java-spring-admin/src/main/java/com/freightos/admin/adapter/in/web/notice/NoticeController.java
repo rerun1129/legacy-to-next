@@ -33,13 +33,13 @@ import java.util.Map;
 @RequestMapping("/api/admin/cms/notice")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasAuthority('CMS_MANAGE') or hasRole('ADMIN')")
 public class NoticeController {
 
     private final NoticeUseCase noticeUseCase;
     private final NoticeAssembler noticeAssembler;
 
     @PostMapping("/search")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CMS_NOTICE_LIST')")
     public ResponseEntity<ApiResponse<PagedResult<NoticeSummaryResponse>>> search(
             @Valid @RequestBody SearchNoticeRequest req) {
         PagedResult<NoticeSummary> result = noticeUseCase.searchNotices(noticeAssembler.toSearchCommand(req));
@@ -47,12 +47,14 @@ public class NoticeController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CMS_NOTICE_LIST')")
     public ResponseEntity<ApiResponse<NoticeDetailResponse>> getById(@PathVariable Long id) {
         Notice domain = noticeUseCase.getNoticeById(id);
         return ResponseEntity.ok(ApiResponse.of(noticeAssembler.toDetail(domain)));
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CMS_NOTICE_LIST_CREATE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateNoticeRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -63,6 +65,7 @@ public class NoticeController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CMS_NOTICE_LIST_UPDATE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateNoticeRequest req) {
@@ -71,6 +74,7 @@ public class NoticeController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CMS_NOTICE_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         noticeUseCase.deleteNotice(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.NOTICE_DELETED.getMessage()));

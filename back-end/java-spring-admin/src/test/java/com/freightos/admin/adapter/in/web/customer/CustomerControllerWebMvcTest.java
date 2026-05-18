@@ -77,10 +77,10 @@ class CustomerControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── 인증·정상 search → 200 ────────────────────────────────────────────────
+    // ── MENU_ADMIN_CUSTOMER_LIST authority → 200 ──────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_CUSTOMER_LIST")
     void search_authenticated_returns200() throws Exception {
         CustomerSummaryResponse summaryResponse = new CustomerSummaryResponse(
                 1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더", true,
@@ -102,10 +102,10 @@ class CustomerControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].customerCode").value("CUS-001"));
     }
 
-    // ── 인증·create → 201 + Location + data.id ────────────────────────────────
+    // ── BTN_ADMIN_CUSTOMER_LIST_CREATE authority → 201 ────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
     void create_returns201WithLocationAndId() throws Exception {
         given(customerAssembler.toCreateCommand(any())).willReturn(
                 new CreateCustomerCommand("CUS-001", CustomerType.FORWARDER, "테스트 포워더",
@@ -127,7 +127,7 @@ class CustomerControllerWebMvcTest {
     // ── customerCode @NotBlank → 400 ─────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
     void create_blankCustomerCode_returns400() throws Exception {
         String body = """
                 {"customerCode":"","customerType":"FORWARDER","name":"테스트","active":true}
@@ -141,7 +141,7 @@ class CustomerControllerWebMvcTest {
     // ── name @NotBlank → 400 ─────────────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
     void create_blankName_returns400() throws Exception {
         String body = """
                 {"customerCode":"CUS-001","customerType":"FORWARDER","name":"","active":true}
@@ -152,10 +152,10 @@ class CustomerControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── delete → 200 ──────────────────────────────────────────────────────────
+    // ── BTN_ADMIN_CUSTOMER_LIST_DELETE authority → 200 ────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_DELETE")
     void delete_returns200() throws Exception {
         willDoNothing().given(customerUseCase).deleteCustomer(any());
 
@@ -163,10 +163,10 @@ class CustomerControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── getById → 200 + detail ────────────────────────────────────────────────
+    // ── MENU_ADMIN_CUSTOMER_LIST authority → getById 200 ─────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_CUSTOMER_LIST")
     void getById_returns200WithDetail() throws Exception {
         CustomerDetailResponse detail = new CustomerDetailResponse(
                 1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더", "Global Forwarder",
@@ -185,11 +185,11 @@ class CustomerControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.customerType").value("FORWARDER"));
     }
 
-    // ── @PreAuthorize: CUSTOMER_MANAGE authority → 200 ───────────────────────
+    // ── @PreAuthorize: MENU_ADMIN_CUSTOMER_LIST authority → 200 ─────────────
 
     @Test
-    @WithMockUser(authorities = {"ROLE_USER", "CUSTOMER_MANAGE"})
-    void search_withCustomerManageAuthority_returns200() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_CUSTOMER_LIST")
+    void search_withCustomerListMenuAuthority_returns200() throws Exception {
         PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 0L, 0, 0, 20);
         PagedResult<CustomerSummaryResponse> responsePage = PagedResult.of(List.of(), 0L, 0, 0, 20);
 
@@ -205,34 +205,14 @@ class CustomerControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── @PreAuthorize: CODE_MANAGE authority (CUSTOMER_MANAGE 없음) → 403 ─────
+    // ── @PreAuthorize: 다른 authority (MENU_ADMIN_CODE_LIST) → 403 ───────────
 
     @Test
-    @WithMockUser(authorities = {"ROLE_USER", "CODE_MANAGE"})
-    void search_withCodeManageOnly_returns403() throws Exception {
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
+    void search_withCodeListMenuOnly_returns403() throws Exception {
         mockMvc.perform(post("/api/admin/customer/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"page\":0,\"size\":20}"))
                 .andExpect(status().isForbidden());
-    }
-
-    // ── @PreAuthorize: ROLE_ADMIN (authorities 없음) → 200 ───────────────────
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void search_withAdminRole_noAuthority_returns200() throws Exception {
-        PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 0L, 0, 0, 20);
-        PagedResult<CustomerSummaryResponse> responsePage = PagedResult.of(List.of(), 0L, 0, 0, 20);
-
-        given(customerAssembler.toSearchCommand(any())).willReturn(new SearchCustomerCommand(null, null, null, null, false, 0, 20));
-        given(customerUseCase.searchCustomers(any())).willReturn(summaryPage);
-        given(customerAssembler.toSummaryPage(any())).willReturn(responsePage);
-
-        SearchCustomerRequest req = new SearchCustomerRequest(null, null, null, null, false, 0, 20);
-
-        mockMvc.perform(post("/api/admin/customer/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk());
     }
 }

@@ -74,10 +74,10 @@ class CodeMasterControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── 인증·정상 search → 200 ────────────────────────────────────────────────
+    // ── MENU_ADMIN_CODE_LIST authority → 200 ──────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
     void search_authenticated_returns200() throws Exception {
         CodeMasterSummaryResponse summaryResponse = new CodeMasterSummaryResponse(
                 1L, "USER_STATUS", "사용자 상태", null, 1, true, LocalDateTime.of(2024, 1, 1, 0, 0));
@@ -98,10 +98,10 @@ class CodeMasterControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].masterCode").value("USER_STATUS"));
     }
 
-    // ── 인증·create → 201 + Location + data.id ────────────────────────────────
+    // ── BTN_ADMIN_CODE_LIST_CREATE authority → 201 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_CREATE")
     void create_returns201WithLocationAndId() throws Exception {
         given(codeMasterAssembler.toCreateCommand(any())).willReturn(null);
         given(codeMasterUseCase.createCodeMaster(any())).willReturn(42L);
@@ -119,7 +119,7 @@ class CodeMasterControllerWebMvcTest {
     // ── 검증 실패 → 400 ────────────────────────────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_CREATE")
     void create_blankMasterCode_returns400() throws Exception {
         // masterCode가 빈 문자열 → @NotBlank 위반
         String body = """
@@ -131,10 +131,10 @@ class CodeMasterControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── 인증·delete → 200 ─────────────────────────────────────────────────────
+    // ── BTN_ADMIN_CODE_LIST_DELETE authority → 200 ────────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_DELETE")
     void delete_returns200() throws Exception {
         willDoNothing().given(codeMasterUseCase).deleteCodeMasterById(any());
 
@@ -142,10 +142,10 @@ class CodeMasterControllerWebMvcTest {
                 .andExpect(status().isOk());
     }
 
-    // ── 상세 조회 getById → 200 ───────────────────────────────────────────────
+    // ── MENU_ADMIN_CODE_LIST authority → getById 200 ─────────────────────────
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
     void getById_returns200WithDetail() throws Exception {
         CodeMasterDetailResponse detail = new CodeMasterDetailResponse(
                 1L, "USER_STATUS", "사용자 상태", "사용자의 활성 상태를 나타냅니다.", 1, true,
@@ -159,5 +159,16 @@ class CodeMasterControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.masterCode").value("USER_STATUS"));
+    }
+
+    // ── 권한 없음 (다른 authority) → 403 ─────────────────────────────────────
+
+    @Test
+    @WithMockUser(authorities = "MENU_ADMIN_USER_LIST")
+    void search_withWrongAuthority_returns403() throws Exception {
+        mockMvc.perform(post("/api/admin/code-master/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
     }
 }

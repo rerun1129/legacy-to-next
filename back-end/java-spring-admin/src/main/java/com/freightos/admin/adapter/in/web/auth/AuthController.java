@@ -11,11 +11,9 @@ import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
 import com.freightos.admin.application.auth.projection.LoginResult;
-import com.freightos.admin.application.user.port.in.UserUseCase;
+import com.freightos.admin.application.auth.projection.MeProjection;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
-import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.Permission;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,19 +30,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserUseCase userUseCase;
     private final AuthUseCase authUseCase;
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<MeResponse>> me() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        AdminUser user = userUseCase.findUserByUsername(auth.getName());
+        MeProjection projection = authUseCase.getMe(auth.getName());
         MeResponse response = new MeResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRole(),
-                user.getPermissions().stream().map(Enum::name).sorted().toList()
+                projection.id(),
+                projection.username(),
+                projection.email(),
+                projection.role(),
+                projection.attributes(),
+                projection.accessibleMenus(),
+                projection.accessibleButtons()
         );
         return ResponseEntity.ok(ApiResponse.of(response, MessageCode.AUTH_ME_OK.getMessage()));
     }
@@ -57,7 +56,9 @@ public class AuthController {
                 result.user().getUsername(),
                 result.user().getEmail(),
                 result.user().getRole(),
-                result.permissions().stream().map(Permission::name).sorted().toList()
+                result.attributes(),
+                result.accessibleMenus(),
+                result.accessibleButtons()
         );
         return ResponseEntity.ok(ApiResponse.of(
                 new LoginResponse(result.accessToken(), result.refreshToken(), me),
