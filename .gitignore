@@ -25,5 +25,5 @@
 .gradle/
 build/
 
-# IntelliJ IDEA 빌드 출력
-out/
+# IntelliJ IDEA 빌드 출력 (프로젝트 루트 한정 — adapter/out 같은 경로 중간 out 디렉토리 보호)
+/out/
