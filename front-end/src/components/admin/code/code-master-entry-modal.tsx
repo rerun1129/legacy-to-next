@@ -7,36 +7,34 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
-import { codeUseCases } from "@/application/code/use-cases";
-import type { CreateCodeRequestDto, UpdateCodeRequestDto } from "@/domain/code";
+import { codeMasterUseCases } from "@/application/code-master/use-cases";
+import type { CreateCodeMasterRequestDto, UpdateCodeMasterRequestDto } from "@/domain/code-master";
 
-export interface EntryModalState {
+export interface CodeMasterEntryModalState {
   mode: "create" | "edit";
   id?: number;
 }
 
 interface Props {
-  state: EntryModalState | null;
+  state: CodeMasterEntryModalState | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (createdId?: number) => void;
 }
 
-interface CodeFormValues {
-  codeGroup: string;
-  codeValue: string;
-  codeLabel: string;
+interface CodeMasterFormValues {
+  masterCode: string;
+  masterName: string;
+  description: string;
   sortOrder: string;
   active: boolean;
-  remark: string;
 }
 
-const DEFAULT_FORM: CodeFormValues = {
-  codeGroup: "",
-  codeValue: "",
-  codeLabel: "",
+const DEFAULT_FORM: CodeMasterFormValues = {
+  masterCode: "",
+  masterName: "",
+  description: "",
   sortOrder: "",
   active: true,
-  remark: "",
 };
 
 function parseSortOrder(v: string): number | null {
@@ -49,17 +47,15 @@ function parseNullable(v: string): string | null {
   return v.trim() === "" ? null : v.trim();
 }
 
-// ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
-function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
+function CodeMasterEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
-  const form = useForm<CodeFormValues>({ defaultValues: DEFAULT_FORM });
+  const form = useForm<CodeMasterFormValues>({ defaultValues: DEFAULT_FORM });
   const { register, reset, getValues, formState: { isSubmitting } } = form;
 
-  // 수정 모드: 상세 조회 후 form.reset
   const { data: detail, isLoading: isDetailLoading } = useQuery({
-    queryKey: ["admin-code", "detail", state?.id],
-    queryFn: () => codeUseCases.getById(state!.id!),
+    queryKey: ["admin-code-master", "detail", state?.id],
+    queryFn: () => codeMasterUseCases.getById(state!.id!),
     enabled: isEdit && state?.id != null,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -69,17 +65,15 @@ function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
   useEffect(() => {
     if (detail) {
       reset({
-        codeGroup: detail.codeGroup,
-        codeValue: detail.codeValue,
-        codeLabel: detail.codeLabel,
+        masterCode: detail.masterCode,
+        masterName: detail.masterName,
+        description: detail.description ?? "",
         sortOrder: detail.sortOrder != null ? String(detail.sortOrder) : "",
         active: detail.active,
-        remark: detail.remark ?? "",
       });
     }
   }, [detail, reset]);
 
-  // 신규 모드: 폼 초기화
   useEffect(() => {
     if (!isEdit) {
       reset(DEFAULT_FORM);
@@ -87,50 +81,59 @@ function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
   }, [isEdit, reset]);
 
   const createMutation = useMutation({
-    mutationFn: (req: CreateCodeRequestDto) => codeUseCases.create(req),
-    onSuccess: () => {
-      toast.success("코드가 등록되었습니다.");
-      onSaved();
+    mutationFn: (req: CreateCodeMasterRequestDto) => codeMasterUseCases.create(req),
+    onSuccess: (createdId) => {
+      toast.success("마스터 코드가 등록되었습니다.");
+      onSaved(createdId);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, req }: { id: number; req: UpdateCodeRequestDto }) =>
-      codeUseCases.update(id, req),
+    mutationFn: ({ id, req }: { id: number; req: UpdateCodeMasterRequestDto }) =>
+      codeMasterUseCases.update(id, req),
     onSuccess: () => {
-      toast.success("코드가 수정되었습니다.");
+      toast.success("마스터 코드가 수정되었습니다.");
       onSaved();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => codeUseCases.delete(id),
+    mutationFn: (id: number) => codeMasterUseCases.delete(id),
     onSuccess: () => {
-      toast.success("코드가 삭제되었습니다.");
+      toast.success("마스터 코드가 삭제되었습니다.");
       onSaved();
+    },
+    onError: (err: Error) => {
+      // BE RESTRICT 에러(자식 detail 존재) 메시지를 그대로 노출
+      toast.error(err.message);
     },
   });
 
-  function handleSave(values: CodeFormValues) {
+  function handleSave(values: CodeMasterFormValues) {
     const sortOrder = parseSortOrder(values.sortOrder);
-    const remark = parseNullable(values.remark);
+    const description = parseNullable(values.description);
 
     if (isEdit && state?.id != null) {
-      const req: UpdateCodeRequestDto = {
-        codeLabel: values.codeLabel.trim(),
+      const req: UpdateCodeMasterRequestDto = {
+        masterName: values.masterName.trim(),
+        description,
         sortOrder,
         active: values.active,
-        remark,
       };
       updateMutation.mutate({ id: state.id, req });
     } else {
-      const req: CreateCodeRequestDto = {
-        codeGroup: values.codeGroup.trim(),
-        codeValue: values.codeValue.trim(),
-        codeLabel: values.codeLabel.trim(),
+      const req: CreateCodeMasterRequestDto = {
+        masterCode: values.masterCode.trim(),
+        masterName: values.masterName.trim(),
+        description,
         sortOrder,
         active: values.active,
-        remark,
       };
       createMutation.mutate(req);
     }
@@ -139,8 +142,8 @@ function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
   async function handleDelete() {
     if (!state?.id) return;
     const ok = await confirm({
-      title: "코드 삭제",
-      description: `${getValues("codeGroup")} / ${getValues("codeValue")} 을 삭제하시겠습니까?`,
+      title: "마스터 코드 삭제",
+      description: `${getValues("masterCode")} / ${getValues("masterName")} 을 삭제하시겠습니까?`,
       variant: "destructive",
       confirmText: "삭제",
       cancelText: "취소",
@@ -164,31 +167,36 @@ function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
         <form onSubmit={form.handleSubmit(handleSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div className="lcn">
-              <span className="lcn__label">코드 그룹</span>
+              <span className="lcn__label">마스터 코드</span>
+              {isEdit ? (
+                <span
+                  className="text-box text-box--panel"
+                  style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}
+                >
+                  {detail?.masterCode ?? getValues("masterCode")}
+                </span>
+              ) : (
+                <input
+                  className="text-box text-box--panel"
+                  placeholder="마스터 코드 (예: SHIP_TYPE)"
+                  {...register("masterCode")}
+                />
+              )}
+            </div>
+            <div className="lcn">
+              <span className="lcn__label">마스터 명</span>
               <input
                 className="text-box text-box--panel"
-                placeholder="코드 그룹"
-                readOnly={isEdit}
-                style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
-                {...register("codeGroup")}
+                placeholder="마스터 명"
+                {...register("masterName")}
               />
             </div>
             <div className="lcn">
-              <span className="lcn__label">코드 값</span>
+              <span className="lcn__label">설명</span>
               <input
                 className="text-box text-box--panel"
-                placeholder="코드 값"
-                readOnly={isEdit}
-                style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
-                {...register("codeValue")}
-              />
-            </div>
-            <div className="lcn">
-              <span className="lcn__label">코드 라벨</span>
-              <input
-                className="text-box text-box--panel"
-                placeholder="코드 라벨"
-                {...register("codeLabel")}
+                placeholder="설명 (선택)"
+                {...register("description")}
               />
             </div>
             <div className="lcn">
@@ -206,16 +214,6 @@ function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
                 <input type="checkbox" {...register("active")} />
                 활성
               </label>
-            </div>
-            <div className="lcn" style={{ alignItems: "flex-start" }}>
-              <span className="lcn__label" style={{ paddingTop: 4 }}>비고</span>
-              <textarea
-                className="text-box text-box--panel"
-                rows={3}
-                placeholder="비고"
-                style={{ resize: "vertical" }}
-                {...register("remark")}
-              />
             </div>
           </div>
         </form>
@@ -248,13 +246,12 @@ function CodeEntryModalInner({ state, onClose, onSaved }: Props) {
   );
 }
 
-// ─── 외부 래퍼 (isOpen 가드 — false 시 unmount로 hook·캐시 초기화) ───────────
-export function CodeEntryModal({ state, onClose, onSaved }: Props) {
+export function CodeMasterEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
-  const title = state?.mode === "edit" ? "코드 수정" : "코드 등록";
+  const title = state?.mode === "edit" ? "마스터 코드 수정" : "마스터 코드 등록";
   return (
     <ModalShell isOpen={isOpen} title={title} size="default">
-      <CodeEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
+      <CodeMasterEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );
 }

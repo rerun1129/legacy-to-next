@@ -1,40 +1,40 @@
 import { z } from "zod";
-import type { CodePort, CodePageResult } from "@/application/code/ports";
+import type { CodeDetailPort, CodeDetailPageResult } from "@/application/code-detail/ports";
 import type {
-  CodeRow,
-  CodeDetail,
-  CodeFilter,
-  CreateCodeRequestDto,
-  UpdateCodeRequestDto,
-} from "@/domain/code";
+  CodeDetailRow,
+  CodeDetailDetail,
+  CodeDetailFilter,
+  CreateCodeDetailRequestDto,
+  UpdateCodeDetailRequestDto,
+} from "@/domain/code-detail";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
 
-const BASE = "/api/admin/code";
+const BASE = "/api/admin/code-detail";
 
-const CODE_ROW_SCHEMA = z.object({
+const CODE_DETAIL_ROW_SCHEMA = z.object({
   id: z.number(),
-  codeGroup: z.string(),
+  masterId: z.number(),
   codeValue: z.string(),
   codeLabel: z.string(),
   sortOrder: z.number().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   updatedAt: z.string(),
-}) satisfies z.ZodType<CodeRow>;
+}) satisfies z.ZodType<CodeDetailRow>;
 
-const CODE_DETAIL_SCHEMA = z.object({
+const CODE_DETAIL_DETAIL_SCHEMA = z.object({
   id: z.number(),
-  codeGroup: z.string(),
+  masterId: z.number(),
   codeValue: z.string(),
   codeLabel: z.string(),
   sortOrder: z.number().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
+  updatedAt: z.string(),
   remark: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),
-  updatedAt: z.string(),
   createdBy: z.string().nullable().optional().transform((v) => v ?? null),
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
-}) satisfies z.ZodType<CodeDetail>;
+}) satisfies z.ZodType<CodeDetailDetail>;
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
@@ -48,20 +48,25 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     size: z.number(),
   });
 
-function activeForBackend(active: CodeFilter["active"]): boolean | null {
+function activeForBackend(active: CodeDetailFilter["active"]): boolean | null {
   if (active === "ALL") return null;
   return active === "ACTIVE";
 }
 
-export const API_CODE_PORT: CodePort = {
-  async search(filter, page, size = 20): Promise<CodePageResult> {
+export const API_CODE_DETAIL_PORT: CodeDetailPort = {
+  async search(
+    masterId: number,
+    filter: CodeDetailFilter,
+    page: number,
+    size = 50,
+  ): Promise<CodeDetailPageResult> {
     const body: Record<string, unknown> = {
+      masterId,
       page: page - 1,
       size,
     };
-    if (filter.codeGroup) body.codeGroup = filter.codeGroup;
-    if (filter.codeValue) body.codeValue = filter.codeValue;
-    if (filter.codeLabel) body.codeLabel = filter.codeLabel;
+    if (filter.codeValue.trim()) body.codeValue = filter.codeValue.trim();
+    if (filter.codeLabel.trim()) body.codeLabel = filter.codeLabel.trim();
     const activeFlag = activeForBackend(filter.active);
     if (activeFlag !== null) body.active = activeFlag;
 
@@ -69,11 +74,13 @@ export const API_CODE_PORT: CodePort = {
       method: "POST",
       body: JSON.stringify(body),
     });
-    const parsed = apiResponse(pagedResult(CODE_ROW_SCHEMA)).safeParse(json);
-    if (!parsed.success) throw new ResponseParseError(`Invalid code search response: ${parsed.error.message}`);
+    const parsed = apiResponse(pagedResult(CODE_DETAIL_ROW_SCHEMA)).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid code-detail search response: ${parsed.error.message}`);
+    }
     const d = parsed.data.data;
     return {
-      content: d.content as CodeRow[],
+      content: d.content as CodeDetailRow[],
       totalPages: d.totalPages,
       totalElements: d.totalElements,
       page: d.page + 1,
@@ -81,31 +88,35 @@ export const API_CODE_PORT: CodePort = {
     };
   },
 
-  async getById(id) {
+  async getById(id: number) {
     const json = await adminFetchJson(`${BASE}/${id}`);
-    const parsed = apiResponse(CODE_DETAIL_SCHEMA).safeParse(json);
-    if (!parsed.success) throw new ResponseParseError(`Invalid code detail response: ${parsed.error.message}`);
-    return parsed.data.data as CodeDetail;
+    const parsed = apiResponse(CODE_DETAIL_DETAIL_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid code-detail detail response: ${parsed.error.message}`);
+    }
+    return parsed.data.data as CodeDetailDetail;
   },
 
-  async create(req: CreateCodeRequestDto) {
+  async create(req: CreateCodeDetailRequestDto) {
     const json = await adminFetchJson(BASE, {
       method: "POST",
       body: JSON.stringify(req),
     });
     const parsed = apiResponse(z.object({ id: z.number() })).safeParse(json);
-    if (!parsed.success) throw new ResponseParseError(`Invalid code create response: ${parsed.error.message}`);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid code-detail create response: ${parsed.error.message}`);
+    }
     return parsed.data.data.id;
   },
 
-  async update(id, req: UpdateCodeRequestDto) {
+  async update(id: number, req: UpdateCodeDetailRequestDto) {
     await adminFetchJson(`${BASE}/${id}`, {
       method: "PUT",
       body: JSON.stringify(req),
     });
   },
 
-  async delete(id) {
+  async delete(id: number) {
     await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
 };

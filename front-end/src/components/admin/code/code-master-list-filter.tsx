@@ -1,10 +1,10 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import type { CodeFilter } from "@/domain/code";
+import type { CodeMasterFilter } from "@/domain/code-master";
 
 interface Props {
-  form: UseFormReturn<CodeFilter>;
+  form: UseFormReturn<CodeMasterFilter>;
 }
 
 const ACTIVE_OPTIONS = [
@@ -13,7 +13,7 @@ const ACTIVE_OPTIONS = [
   { value: "INACTIVE", label: "비활성" },
 ] as const;
 
-export function CodeListFilter({ form }: Props) {
+export function CodeMasterListFilter({ form }: Props) {
   const { register } = form;
 
   return (
@@ -21,27 +21,19 @@ export function CodeListFilter({ form }: Props) {
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <div className="lcn">
-            <span className="lcn__label">코드 그룹</span>
+            <span className="lcn__label">마스터 코드</span>
             <input
               className="text-box text-box--panel"
-              placeholder="코드 그룹"
-              {...register("codeGroup")}
+              placeholder="마스터 코드"
+              {...register("masterCode")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">코드 값</span>
+            <span className="lcn__label">마스터 명</span>
             <input
               className="text-box text-box--panel"
-              placeholder="코드 값"
-              {...register("codeValue")}
-            />
-          </div>
-          <div className="lcn">
-            <span className="lcn__label">코드 라벨</span>
-            <input
-              className="text-box text-box--panel"
-              placeholder="코드 라벨"
-              {...register("codeLabel")}
+              placeholder="마스터 명"
+              {...register("masterName")}
             />
           </div>
           <div className="lcn">

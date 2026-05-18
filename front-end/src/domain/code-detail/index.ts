@@ -1,6 +1,10 @@
-export interface CodeRow {
+import type { ActiveFilter } from "@/domain/code-master";
+
+export type { ActiveFilter };
+
+export interface CodeDetailRow {
   id: number;
-  codeGroup: string;
+  masterId: number;
   codeValue: string;
   codeLabel: string;
   sortOrder: number | null;
@@ -8,31 +12,21 @@ export interface CodeRow {
   updatedAt: string;
 }
 
-export interface CodeDetail {
-  id: number;
-  codeGroup: string;
-  codeValue: string;
-  codeLabel: string;
-  sortOrder: number | null;
-  active: boolean;
+export interface CodeDetailDetail extends CodeDetailRow {
   remark: string | null;
   createdAt: string;
-  updatedAt: string;
   createdBy: string | null;
   updatedBy: string | null;
 }
 
-export type ActiveFilter = "ALL" | "ACTIVE" | "INACTIVE";
-
-export interface CodeFilter {
-  codeGroup: string;
+export interface CodeDetailFilter {
   codeValue: string;
   codeLabel: string;
   active: ActiveFilter;
 }
 
-export interface CreateCodeRequestDto {
-  codeGroup: string;
+export interface CreateCodeDetailRequestDto {
+  masterId: number;
   codeValue: string;
   codeLabel: string;
   sortOrder: number | null;
@@ -40,7 +34,7 @@ export interface CreateCodeRequestDto {
   remark: string | null;
 }
 
-export interface UpdateCodeRequestDto {
+export interface UpdateCodeDetailRequestDto {
   codeLabel: string;
   sortOrder: number | null;
   active: boolean;
