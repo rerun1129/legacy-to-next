@@ -1,7 +1,3 @@
-import type { ActiveFilter } from "@/domain/code-master";
-
-export type { ActiveFilter };
-
 export interface CodeDetailRow {
   id: number;
   masterId: number;
@@ -17,12 +13,6 @@ export interface CodeDetailDetail extends CodeDetailRow {
   createdAt: string;
   createdBy: string | null;
   updatedBy: string | null;
-}
-
-export interface CodeDetailFilter {
-  codeValue: string;
-  codeLabel: string;
-  active: ActiveFilter;
 }
 
 export interface CreateCodeDetailRequestDto {

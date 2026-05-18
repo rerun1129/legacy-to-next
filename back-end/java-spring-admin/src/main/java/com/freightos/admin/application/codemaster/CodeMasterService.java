@@ -12,6 +12,7 @@ import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.codemaster.entity.CodeMaster;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +39,12 @@ public class CodeMasterService implements CodeMasterUseCase {
     @Override
     @Transactional
     public Long createCodeMaster(CreateCodeMasterCommand command) {
-        CodeMaster codeMaster = codeMasterFactory.from(command);
-        return codeMasterPort.save(codeMaster);
+        try {
+            CodeMaster codeMaster = codeMasterFactory.from(command);
+            return codeMasterPort.save(codeMaster);
+        } catch (DataIntegrityViolationException e) {
+            throw ApplicationException.conflict("CODE_MASTER_DUPLICATE_CODE", MessageCode.CODE_MASTER_DUPLICATE_CODE.getMessage());
+        }
     }
 
     @Override

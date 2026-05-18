@@ -26,7 +26,8 @@ export function CodeListClient() {
         />
       </div>
       <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-        <CodeDetailListGrid masterId={selectedMasterId} />
+        {/* key로 master 변경 시 컴포넌트 remount → currentPage 등 내부 state 자연 초기화 */}
+        <CodeDetailListGrid key={selectedMasterId ?? "none"} masterId={selectedMasterId} />
       </div>
     </div>
   );

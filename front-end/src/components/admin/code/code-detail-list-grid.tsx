@@ -1,29 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
-import { RotateCcw, Search, Plus } from "lucide-react";
-import { Button } from "@/components/shared/button";
+import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
 import { codeDetailUseCases } from "@/application/code-detail/use-cases";
-import { CodeDetailListFilter } from "./code-detail-list-filter";
 import { CodeDetailEntryModal } from "./code-detail-entry-modal";
 import type { CodeDetailEntryModalState } from "./code-detail-entry-modal";
-import type { CodeDetailRow, CodeDetailFilter } from "@/domain/code-detail";
+import type { CodeDetailRow } from "@/domain/code-detail";
 
 interface Props {
   masterId: number | null;
 }
-
-const DEFAULT_FILTER: CodeDetailFilter = {
-  codeValue: "",
-  codeLabel: "",
-  active: "ALL",
-};
 
 const COLUMNS: GridColumn<CodeDetailRow>[] = [
   { key: "codeValue", label: "코드 값", minWidth: 120 },
@@ -40,16 +31,13 @@ const COLUMNS: GridColumn<CodeDetailRow>[] = [
 ];
 
 export function CodeDetailListGrid({ masterId }: Props) {
-  const form = useForm<CodeDetailFilter>({ defaultValues: DEFAULT_FILTER });
-
-  const [submittedFilter, setSubmittedFilter] = useState<CodeDetailFilter | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [entryModalState, setEntryModalState] = useState<CodeDetailEntryModalState | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["admin-code-detail", "list", masterId, submittedFilter, currentPage],
-    queryFn: () => codeDetailUseCases.search(masterId!, submittedFilter!, currentPage, 50),
-    enabled: masterId !== null && submittedFilter !== null,
+    queryKey: ["admin-code-detail", "list", masterId, currentPage],
+    queryFn: () => codeDetailUseCases.search(masterId!, currentPage, 50),
+    enabled: masterId !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -57,20 +45,6 @@ export function CodeDetailListGrid({ masterId }: Props) {
 
   const rows = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
-
-  function handleSearch() {
-    if (masterId === null) return;
-    form.handleSubmit((values) => {
-      setSubmittedFilter(values);
-      setCurrentPage(1);
-    })();
-  }
-
-  function handleReset() {
-    form.reset(DEFAULT_FILTER);
-    setSubmittedFilter(null);
-    setCurrentPage(1);
-  }
 
   if (masterId === null) {
     return (
@@ -97,12 +71,6 @@ export function CodeDetailListGrid({ masterId }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
-        <Button size="sm" variant="normal" leftIcon={<RotateCcw size={12} />} onClick={handleReset}>
-          Reset
-        </Button>
-        <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearch}>
-          Search
-        </Button>
         <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_CREATE"
           className="btn btn--modal btn--sm"
@@ -112,23 +80,8 @@ export function CodeDetailListGrid({ masterId }: Props) {
         </ActionButton>
       </div>
 
-      <CodeDetailListFilter form={form} />
-
       <div style={{ flex: 1, overflow: "auto", marginTop: 10, display: "flex", flexDirection: "column" }}>
-        {submittedFilter === null ? (
-          <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <div className="panel__head">
-              <div className="panel__title-accent" />
-              <span className="panel__title">코드 상세</span>
-            </div>
-            <div
-              className="list-wrap"
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
-            >
-              <span style={{ color: "var(--ink-3)" }}>검색 조건을 입력 후 Search를 클릭하세요.</span>
-            </div>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head">
               <div className="panel__title-accent" />

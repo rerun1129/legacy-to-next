@@ -3,7 +3,6 @@ import type { CodeDetailPort, CodeDetailPageResult } from "@/application/code-de
 import type {
   CodeDetailRow,
   CodeDetailDetail,
-  CodeDetailFilter,
   CreateCodeDetailRequestDto,
   UpdateCodeDetailRequestDto,
 } from "@/domain/code-detail";
@@ -48,15 +47,9 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     size: z.number(),
   });
 
-function activeForBackend(active: CodeDetailFilter["active"]): boolean | null {
-  if (active === "ALL") return null;
-  return active === "ACTIVE";
-}
-
 export const API_CODE_DETAIL_PORT: CodeDetailPort = {
   async search(
     masterId: number,
-    filter: CodeDetailFilter,
     page: number,
     size = 50,
   ): Promise<CodeDetailPageResult> {
@@ -65,10 +58,6 @@ export const API_CODE_DETAIL_PORT: CodeDetailPort = {
       page: page - 1,
       size,
     };
-    if (filter.codeValue.trim()) body.codeValue = filter.codeValue.trim();
-    if (filter.codeLabel.trim()) body.codeLabel = filter.codeLabel.trim();
-    const activeFlag = activeForBackend(filter.active);
-    if (activeFlag !== null) body.active = activeFlag;
 
     const json = await adminFetchJson(`${BASE}/search`, {
       method: "POST",

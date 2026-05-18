@@ -12,6 +12,7 @@ import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.codedetail.entity.CodeDetail;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,8 +43,12 @@ public class CodeDetailService implements CodeDetailUseCase {
         if (!codeMasterPort.existsById(command.masterId())) {
             throw ApplicationException.notFound("CODE_MASTER_NOT_FOUND", MessageCode.CODE_MASTER_NOT_FOUND.getMessage());
         }
-        CodeDetail codeDetail = codeDetailFactory.from(command);
-        return codeDetailPort.save(codeDetail);
+        try {
+            CodeDetail codeDetail = codeDetailFactory.from(command);
+            return codeDetailPort.save(codeDetail);
+        } catch (DataIntegrityViolationException e) {
+            throw ApplicationException.conflict("CODE_DUPLICATE_DETAIL_VALUE", MessageCode.CODE_DUPLICATE_DETAIL_VALUE.getMessage());
+        }
     }
 
     @Override

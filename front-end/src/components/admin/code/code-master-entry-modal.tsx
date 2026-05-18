@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -50,6 +50,7 @@ function parseNullable(v: string): string | null {
 
 function CodeMasterEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
+  const qc = useQueryClient();
 
   const form = useForm<CodeMasterFormValues>({ defaultValues: DEFAULT_FORM });
   const { register, reset, getValues, formState: { isSubmitting } } = form;
@@ -84,11 +85,9 @@ function CodeMasterEntryModalInner({ state, onClose, onSaved }: Props) {
   const createMutation = useMutation({
     mutationFn: (req: CreateCodeMasterRequestDto) => codeMasterUseCases.create(req),
     onSuccess: (createdId) => {
+      qc.invalidateQueries({ queryKey: ["admin-code-master"] });
       toast.success("마스터 코드가 등록되었습니다.");
       onSaved(createdId);
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
     },
   });
 
@@ -96,23 +95,18 @@ function CodeMasterEntryModalInner({ state, onClose, onSaved }: Props) {
     mutationFn: ({ id, req }: { id: number; req: UpdateCodeMasterRequestDto }) =>
       codeMasterUseCases.update(id, req),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-code-master"] });
       toast.success("마스터 코드가 수정되었습니다.");
       onSaved();
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => codeMasterUseCases.delete(id),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-code-master"] });
       toast.success("마스터 코드가 삭제되었습니다.");
       onSaved();
-    },
-    onError: (err: Error) => {
-      // BE RESTRICT 에러(자식 detail 존재) 메시지를 그대로 노출
-      toast.error(err.message);
     },
   });
 

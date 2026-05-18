@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -51,6 +51,7 @@ function parseNullable(v: string): string | null {
 
 function CodeDetailEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
+  const qc = useQueryClient();
 
   const form = useForm<CodeDetailFormValues>({ defaultValues: DEFAULT_FORM });
   const { register, reset, getValues, formState: { isSubmitting } } = form;
@@ -85,11 +86,9 @@ function CodeDetailEntryModalInner({ state, onClose, onSaved }: Props) {
   const createMutation = useMutation({
     mutationFn: (req: CreateCodeDetailRequestDto) => codeDetailUseCases.create(req),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-code-detail"] });
       toast.success("코드 상세가 등록되었습니다.");
       onSaved();
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
     },
   });
 
@@ -97,22 +96,18 @@ function CodeDetailEntryModalInner({ state, onClose, onSaved }: Props) {
     mutationFn: ({ id, req }: { id: number; req: UpdateCodeDetailRequestDto }) =>
       codeDetailUseCases.update(id, req),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-code-detail"] });
       toast.success("코드 상세가 수정되었습니다.");
       onSaved();
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => codeDetailUseCases.delete(id),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-code-detail"] });
       toast.success("코드 상세가 삭제되었습니다.");
       onSaved();
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
     },
   });
 
