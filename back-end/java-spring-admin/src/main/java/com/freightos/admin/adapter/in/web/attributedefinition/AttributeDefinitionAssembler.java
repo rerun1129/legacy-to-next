@@ -22,21 +22,21 @@ public class AttributeDefinitionAssembler {
     }
 
     public CreateAttributeDefinitionCommand toCreateCommand(CreateAttributeDefinitionRequest req) {
-        return new CreateAttributeDefinitionCommand(req.attributeKey(), req.name(), req.description(), req.valueType(), req.active());
+        return new CreateAttributeDefinitionCommand(req.attributeKey(), req.name(), req.description(), req.valueType(), req.active(), req.allowMulti());
     }
 
     public UpdateAttributeDefinitionCommand toUpdateCommand(UpdateAttributeDefinitionRequest req) {
-        return new UpdateAttributeDefinitionCommand(req.name(), req.description(), req.valueType(), req.active());
+        return new UpdateAttributeDefinitionCommand(req.name(), req.description(), req.valueType(), req.active(), req.allowMulti());
     }
 
     public AttributeDefinitionSummaryResponse toSummaryResponse(AttributeDefinitionSummary p) {
-        return new AttributeDefinitionSummaryResponse(p.id(), p.attributeKey(), p.name(), p.description(), p.valueType(), p.active(), p.updatedAt());
+        return new AttributeDefinitionSummaryResponse(p.id(), p.attributeKey(), p.name(), p.description(), p.valueType(), p.active(), p.allowMulti(), p.updatedAt());
     }
 
     public AttributeDefinitionDetailResponse toDetail(AttributeDefinition domain) {
         return new AttributeDefinitionDetailResponse(
                 domain.getId(), domain.getAttributeKey(), domain.getName(), domain.getDescription(),
-                domain.getValueType().name(), domain.getActive(),
+                domain.getValueType().name(), domain.getActive(), domain.getAllowMulti(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }

@@ -55,7 +55,7 @@ public class AttributeDefinitionService implements AttributeDefinitionUseCase {
     public void updateAttributeDefinition(String attributeKey, UpdateAttributeDefinitionCommand command) {
         AttributeDefinition existing = attributeDefinitionPort.findAttributeDefinitionByKey(attributeKey)
                 .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_DEFINITION_NOT_FOUND", MessageCode.ATTRIBUTE_DEFINITION_NOT_FOUND.getMessage()));
-        existing.applyUpdate(command.name(), command.description(), ValueType.valueOf(command.valueType()), command.active());
+        existing.applyUpdate(command.name(), command.description(), ValueType.valueOf(command.valueType()), command.active(), command.allowMulti());
         attributeDefinitionPort.update(attributeKey, existing);
     }
 

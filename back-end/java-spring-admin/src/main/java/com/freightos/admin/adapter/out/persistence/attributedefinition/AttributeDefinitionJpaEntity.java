@@ -37,4 +37,7 @@ public class AttributeDefinitionJpaEntity extends BaseJpaEntity {
 
     @Column(name = "active", nullable = false)
     private Boolean active;
+
+    @Column(name = "allow_multi", nullable = false)
+    private Boolean allowMulti;
 }

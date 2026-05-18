@@ -10,5 +10,6 @@ public record CreateAttributeDefinitionRequest(
         @NotBlank @Size(max = 200) String name,
         @Size(max = 500) String description,
         @NotBlank String valueType,
-        @NotNull Boolean active
+        @NotNull Boolean active,
+        @NotNull Boolean allowMulti
 ) {}

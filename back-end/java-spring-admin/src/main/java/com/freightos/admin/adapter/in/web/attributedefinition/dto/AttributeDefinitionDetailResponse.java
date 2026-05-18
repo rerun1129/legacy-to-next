@@ -9,6 +9,7 @@ public record AttributeDefinitionDetailResponse(
         String description,
         String valueType,
         Boolean active,
+        Boolean allowMulti,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String createdBy,

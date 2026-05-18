@@ -13,6 +13,7 @@ public class AttributeDefinitionDomainToJpaMapper {
         entity.setDescription(domain.getDescription());
         entity.setValueType(domain.getValueType().name());
         entity.setActive(domain.getActive());
+        entity.setAllowMulti(domain.getAllowMulti());
         return entity;
     }
 
@@ -22,5 +23,6 @@ public class AttributeDefinitionDomainToJpaMapper {
         entity.setDescription(patch.getDescription());
         entity.setValueType(patch.getValueType().name());
         entity.setActive(patch.getActive());
+        entity.setAllowMulti(patch.getAllowMulti());
     }
 }

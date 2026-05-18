@@ -44,7 +44,7 @@ public class AttributeDefinitionRepositoryImpl implements AttributeDefinitionRep
         typedQuery.setMaxResults(command.size());
 
         List<AttributeDefinitionSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new AttributeDefinitionSummary(e.getId(), e.getAttributeKey(), e.getName(), e.getDescription(), e.getValueType(), e.getActive(), e.getUpdatedAt()))
+                .map(e -> new AttributeDefinitionSummary(e.getId(), e.getAttributeKey(), e.getName(), e.getDescription(), e.getValueType(), e.getActive(), e.getAllowMulti(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

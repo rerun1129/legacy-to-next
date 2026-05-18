@@ -15,6 +15,7 @@ public class AttributeDefinition {
     private String description;
     private ValueType valueType;
     private Boolean active;
+    private Boolean allowMulti;
 
     private Long id;
     private LocalDateTime createdAt;
@@ -22,24 +23,26 @@ public class AttributeDefinition {
     private String createdBy;
     private String updatedBy;
 
-    private AttributeDefinition(String attributeKey, String name, String description, ValueType valueType, Boolean active) {
+    private AttributeDefinition(String attributeKey, String name, String description, ValueType valueType, Boolean active, Boolean allowMulti) {
         this.attributeKey = attributeKey;
         this.name         = name;
         this.description  = description;
         this.valueType    = valueType;
         this.active       = active;
+        this.allowMulti   = allowMulti;
     }
 
-    public static AttributeDefinition create(String attributeKey, String name, String description, ValueType valueType, Boolean active) {
-        return new AttributeDefinition(attributeKey, name, description, valueType, active);
+    public static AttributeDefinition create(String attributeKey, String name, String description, ValueType valueType, Boolean active, Boolean allowMulti) {
+        return new AttributeDefinition(attributeKey, name, description, valueType, active, allowMulti);
     }
 
     /** 표시 필드만 갱신. 식별 필드(attributeKey)는 변경 불가. */
-    public void applyUpdate(String name, String description, ValueType valueType, Boolean active) {
+    public void applyUpdate(String name, String description, ValueType valueType, Boolean active, Boolean allowMulti) {
         this.name        = name;
         this.description = description;
         this.valueType   = valueType;
         this.active      = active;
+        this.allowMulti  = allowMulti;
     }
 
     /** 어댑터 계층이 JPA→Domain 변환 시 감사 필드를 주입할 때 사용한다. */

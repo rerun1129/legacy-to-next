@@ -45,7 +45,7 @@ class AttributeDefinitionServiceTest {
 
     @Test
     void createAttributeDefinition_duplicate_throwsConflict() {
-        CreateAttributeDefinitionCommand command = new CreateAttributeDefinitionCommand("dept", "부서", null, "ENUM", true);
+        CreateAttributeDefinitionCommand command = new CreateAttributeDefinitionCommand("dept", "부서", null, "ENUM", true, false);
         given(attributeDefinitionPort.existsByKey("dept")).willReturn(true);
 
         assertThatThrownBy(() -> attributeDefinitionService.createAttributeDefinition(command))
@@ -55,8 +55,8 @@ class AttributeDefinitionServiceTest {
 
     @Test
     void createAttributeDefinition_noDuplicate_savesAndReturnsKey() {
-        CreateAttributeDefinitionCommand command = new CreateAttributeDefinitionCommand("dept", "부서", null, "ENUM", true);
-        AttributeDefinition domain = AttributeDefinition.create("dept", "부서", null, ValueType.ENUM, true);
+        CreateAttributeDefinitionCommand command = new CreateAttributeDefinitionCommand("dept", "부서", null, "ENUM", true, false);
+        AttributeDefinition domain = AttributeDefinition.create("dept", "부서", null, ValueType.ENUM, true, false);
         given(attributeDefinitionPort.existsByKey("dept")).willReturn(false);
         given(attributeDefinitionFactory.from(command)).willReturn(domain);
         given(attributeDefinitionPort.save(domain)).willReturn("dept");

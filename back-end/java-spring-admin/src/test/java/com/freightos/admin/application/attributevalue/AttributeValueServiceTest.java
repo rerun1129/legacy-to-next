@@ -35,7 +35,7 @@ class AttributeValueServiceTest {
     @Test
     void createAttributeValue_typeNotEnum_throwsConflict() {
         CreateAttributeValueCommand command = new CreateAttributeValueCommand("level", "HIGH", "높음", 1, true);
-        AttributeDefinition stringDef = AttributeDefinition.create("level", "레벨", null, ValueType.STRING, true);
+        AttributeDefinition stringDef = AttributeDefinition.create("level", "레벨", null, ValueType.STRING, true, false);
         given(attributeDefinitionPort.findAttributeDefinitionByKey("level")).willReturn(Optional.of(stringDef));
 
         assertThatThrownBy(() -> attributeValueService.createAttributeValue(command))
@@ -46,7 +46,7 @@ class AttributeValueServiceTest {
     @Test
     void createAttributeValue_duplicateKey_throwsConflict() {
         CreateAttributeValueCommand command = new CreateAttributeValueCommand("dept", "DEV", "개발", 1, true);
-        AttributeDefinition enumDef = AttributeDefinition.create("dept", "부서", null, ValueType.ENUM, true);
+        AttributeDefinition enumDef = AttributeDefinition.create("dept", "부서", null, ValueType.ENUM, true, false);
         given(attributeDefinitionPort.findAttributeDefinitionByKey("dept")).willReturn(Optional.of(enumDef));
         given(attributeValuePort.existsByKey("dept", "DEV")).willReturn(true);
 
@@ -58,7 +58,7 @@ class AttributeValueServiceTest {
     @Test
     void createAttributeValue_valid_callsSave() {
         CreateAttributeValueCommand command = new CreateAttributeValueCommand("dept", "DEV", "개발", 1, true);
-        AttributeDefinition enumDef = AttributeDefinition.create("dept", "부서", null, ValueType.ENUM, true);
+        AttributeDefinition enumDef = AttributeDefinition.create("dept", "부서", null, ValueType.ENUM, true, false);
         given(attributeDefinitionPort.findAttributeDefinitionByKey("dept")).willReturn(Optional.of(enumDef));
         given(attributeValuePort.existsByKey("dept", "DEV")).willReturn(false);
 

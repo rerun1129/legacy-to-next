@@ -9,5 +9,6 @@ public record AttributeDefinitionSummaryResponse(
         String description,
         String valueType,
         Boolean active,
+        Boolean allowMulti,
         LocalDateTime updatedAt
 ) {}

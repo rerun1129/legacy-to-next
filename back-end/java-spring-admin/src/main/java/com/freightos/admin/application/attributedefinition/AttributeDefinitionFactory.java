@@ -14,7 +14,8 @@ public class AttributeDefinitionFactory {
                 command.name(),
                 command.description(),
                 ValueType.valueOf(command.valueType()),
-                command.active()
+                command.active(),
+                command.allowMulti()
         );
     }
 }
