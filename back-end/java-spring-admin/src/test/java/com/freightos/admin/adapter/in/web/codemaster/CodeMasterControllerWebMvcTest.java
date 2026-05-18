@@ -166,9 +166,11 @@ class CodeMasterControllerWebMvcTest {
     @Test
     @WithMockUser(authorities = "MENU_ADMIN_USER_LIST")
     void search_withWrongAuthority_returns403() throws Exception {
+        // Bean Validation(@Min(1) size)이 @PreAuthorize보다 먼저 동작하므로
+        // valid한 최소 body를 전달해야 403이 정상 반환된다.
         mockMvc.perform(post("/api/admin/code-master/search")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content("{\"page\":0,\"size\":20}"))
                 .andExpect(status().isForbidden());
     }
 }
