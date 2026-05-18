@@ -98,10 +98,10 @@ class CustomerPersistenceAdapterTest {
         assertThat(found.get().getDeletedAt()).isNotNull();
     }
 
-    // ── searchSummaries: includeDeleted=false → soft deleted 제외 ────────────
+    // ── searchSummaries: scope=ALL(기본값) → soft deleted 제외 ──────────────
 
     @Test
-    void searchSummaries_excludeDeleted_softDeletedNotReturned() {
+    void searchSummaries_scopeAll_softDeletedNotReturned() {
         Customer active = Customer.create("ACT-001", CustomerType.AGENT, "활성 에이전트",
                 null, null, null, null, null, null, null, null, true);
         Long activeId = adapter.save(active);
@@ -111,7 +111,7 @@ class CustomerPersistenceAdapterTest {
         Long deletedId = adapter.save(toDelete);
         adapter.softDelete(deletedId);
 
-        SearchCustomerCommand command = new SearchCustomerCommand(null, null, null, null, false, 0, 20);
+        SearchCustomerCommand command = new SearchCustomerCommand(null, null, null, "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
 
         List<Long> ids = result.getContent().stream().map(CustomerSummary::id).toList();
@@ -119,10 +119,10 @@ class CustomerPersistenceAdapterTest {
         assertThat(ids).doesNotContain(deletedId);
     }
 
-    // ── searchSummaries: includeDeleted=true → soft deleted 포함 ─────────────
+    // ── searchSummaries: scope=DELETED → soft deleted 만 반환 ────────────────
 
     @Test
-    void searchSummaries_includeDeleted_softDeletedReturned() {
+    void searchSummaries_scopeDeleted_onlySoftDeletedReturned() {
         Customer active = Customer.create("INC-ACT", CustomerType.FORWARDER, "포함 활성",
                 null, null, null, null, null, null, null, null, true);
         Long activeId = adapter.save(active);
@@ -132,11 +132,12 @@ class CustomerPersistenceAdapterTest {
         Long deletedId = adapter.save(deleted);
         adapter.softDelete(deletedId);
 
-        SearchCustomerCommand command = new SearchCustomerCommand("INC-", null, null, null, true, 0, 20);
+        SearchCustomerCommand command = new SearchCustomerCommand("INC-", null, null, "DELETED", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
 
         List<Long> ids = result.getContent().stream().map(CustomerSummary::id).toList();
-        assertThat(ids).contains(activeId, deletedId);
+        assertThat(ids).contains(deletedId);
+        assertThat(ids).doesNotContain(activeId);
     }
 
     // ── searchSummaries: customerType 필터 ───────────────────────────────────
@@ -147,7 +148,7 @@ class CustomerPersistenceAdapterTest {
         adapter.save(Customer.create("TYPE-SHP", CustomerType.SHIPPER, "화주 회사", null, null, null, null, null, null, null, null, true));
         adapter.save(Customer.create("TYPE-CSG", CustomerType.CONSIGNEE, "수하인 회사", null, null, null, null, null, null, null, null, true));
 
-        SearchCustomerCommand command = new SearchCustomerCommand("TYPE-", null, "FORWARDER", null, false, 0, 20);
+        SearchCustomerCommand command = new SearchCustomerCommand("TYPE-", null, "FORWARDER", "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
 
         assertThat(result.getContent()).hasSize(1);
@@ -162,7 +163,7 @@ class CustomerPersistenceAdapterTest {
         adapter.save(Customer.create("SORT-A", CustomerType.AGENT, "에이전트 A", null, null, null, null, null, null, null, null, true));
         adapter.save(Customer.create("SORT-B", CustomerType.CUSTOMS_BROKER, "관세사 B", null, null, null, null, null, null, null, null, true));
 
-        SearchCustomerCommand command = new SearchCustomerCommand("SORT-", null, null, null, false, 0, 20);
+        SearchCustomerCommand command = new SearchCustomerCommand("SORT-", null, null, "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
 
         assertThat(result.getContent()).hasSize(3);
@@ -180,7 +181,7 @@ class CustomerPersistenceAdapterTest {
         adapter.save(Customer.create("NAME-002", CustomerType.SHIPPER, "로컬 화주", null, null, null, null, null, null, null, null, true));
         adapter.save(Customer.create("NAME-003", CustomerType.CONSIGNEE, "글로벌 수하인", null, null, null, null, null, null, null, null, true));
 
-        SearchCustomerCommand command = new SearchCustomerCommand(null, "글로벌", null, null, false, 0, 20);
+        SearchCustomerCommand command = new SearchCustomerCommand(null, "글로벌", null, "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
 
         assertThat(result.getTotalElements()).isEqualTo(2L);

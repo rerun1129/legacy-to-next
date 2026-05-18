@@ -7,8 +7,7 @@ public record SearchCustomerRequest(
         String customerCode,
         String name,
         String customerType,
-        Boolean active,
-        boolean includeDeleted,
+        String scope,
         @Min(0) int page,
         @Min(1) @Max(200) int size
 ) {}

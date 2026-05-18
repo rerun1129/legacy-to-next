@@ -18,7 +18,7 @@ public class CustomerAssembler {
 
     public SearchCustomerCommand toSearchCommand(SearchCustomerRequest req) {
         int size = req.size() == 0 ? 20 : req.size();
-        return new SearchCustomerCommand(req.customerCode(), req.name(), req.customerType(), req.active(), req.includeDeleted(), req.page(), size);
+        return new SearchCustomerCommand(req.customerCode(), req.name(), req.customerType(), req.scope(), req.page(), size);
     }
 
     public CreateCustomerCommand toCreateCommand(CreateCustomerRequest req) {

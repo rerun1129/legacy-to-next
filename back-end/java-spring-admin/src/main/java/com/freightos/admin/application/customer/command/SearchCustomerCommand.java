@@ -4,8 +4,7 @@ public record SearchCustomerCommand(
         String customerCode,
         String name,
         String customerType,
-        Boolean active,
-        boolean includeDeleted,
+        String scope,
         int page,
         int size
 ) {}

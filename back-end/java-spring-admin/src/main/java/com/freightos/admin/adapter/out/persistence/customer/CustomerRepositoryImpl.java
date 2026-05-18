@@ -55,11 +55,23 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<CustomerJpaEntity> root, SearchCustomerCommand command) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if (!command.includeDeleted()) {
-            predicates.add(cb.isNull(root.get("deletedAt")));
-        }
-        if (command.active() != null) {
-            predicates.add(cb.equal(root.get("active"), command.active()));
+        String scope = (command.scope() == null || command.scope().isBlank()) ? "ALL" : command.scope();
+        switch (scope) {
+            case "ACTIVE":
+                predicates.add(cb.isNull(root.get("deletedAt")));
+                predicates.add(cb.isTrue(root.get("active")));
+                break;
+            case "INACTIVE":
+                predicates.add(cb.isNull(root.get("deletedAt")));
+                predicates.add(cb.isFalse(root.get("active")));
+                break;
+            case "DELETED":
+                predicates.add(cb.isNotNull(root.get("deletedAt")));
+                break;
+            case "ALL":
+            default:
+                predicates.add(cb.isNull(root.get("deletedAt")));
+                break;
         }
         if (StringUtils.hasText(command.customerCode())) {
             predicates.add(cb.like(root.get("customerCode"), command.customerCode() + "%"));

@@ -88,11 +88,11 @@ class CustomerControllerWebMvcTest {
         PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<CustomerSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
 
-        given(customerAssembler.toSearchCommand(any())).willReturn(new SearchCustomerCommand(null, null, null, null, false, 0, 20));
+        given(customerAssembler.toSearchCommand(any())).willReturn(new SearchCustomerCommand(null, null, null, null, 0, 20));
         given(customerUseCase.searchCustomers(any())).willReturn(summaryPage);
         given(customerAssembler.toSummaryPage(any())).willReturn(responsePage);
 
-        SearchCustomerRequest req = new SearchCustomerRequest(null, null, null, null, false, 0, 20);
+        SearchCustomerRequest req = new SearchCustomerRequest(null, null, null, null, 0, 20);
 
         mockMvc.perform(post("/api/admin/customer/search")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,11 +193,11 @@ class CustomerControllerWebMvcTest {
         PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 0L, 0, 0, 20);
         PagedResult<CustomerSummaryResponse> responsePage = PagedResult.of(List.of(), 0L, 0, 0, 20);
 
-        given(customerAssembler.toSearchCommand(any())).willReturn(new SearchCustomerCommand(null, null, null, null, false, 0, 20));
+        given(customerAssembler.toSearchCommand(any())).willReturn(new SearchCustomerCommand(null, null, null, null, 0, 20));
         given(customerUseCase.searchCustomers(any())).willReturn(summaryPage);
         given(customerAssembler.toSummaryPage(any())).willReturn(responsePage);
 
-        SearchCustomerRequest req = new SearchCustomerRequest(null, null, null, null, false, 0, 20);
+        SearchCustomerRequest req = new SearchCustomerRequest(null, null, null, null, 0, 20);
 
         mockMvc.perform(post("/api/admin/customer/search")
                         .contentType(MediaType.APPLICATION_JSON)
