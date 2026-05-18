@@ -32,7 +32,7 @@ import static org.mockito.BDDMockito.given;
 
 /**
  * Phase 3 ABAC 전환 후 JpaUserDetailsService 단위 테스트.
- * ROLE_* 권한은 유지되고, MENU_*/BTN_* 권한이 ABAC 평가 결과로 부여된다.
+ * ROLE_* 권한은 유지되고, {@code MENU_*} / {@code BTN_*} 권한이 ABAC 평가 결과로 부여된다.
  * 실제 ObjectMapper를 사용하여 JSON 파싱 경로를 실제와 동일하게 유지.
  */
 @ExtendWith(MockitoExtension.class)
