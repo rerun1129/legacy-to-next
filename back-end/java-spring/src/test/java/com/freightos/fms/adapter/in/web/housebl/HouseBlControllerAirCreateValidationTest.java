@@ -5,6 +5,7 @@ import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * AirGroup 필수 12개 + AirImpGroup 추가 1개(consigneeCode) + nested airDetail.airlineCode(@Valid cascade) 검증.
  * AirImpGroup extends AirGroup 구조이므로 IMP 검증 시 AirGroup 어노테이션도 함께 트리거된다.
  */
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(HouseBlController.class)
 @ActiveProfiles("test")
 class HouseBlControllerAirCreateValidationTest {

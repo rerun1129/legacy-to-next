@@ -12,6 +12,7 @@ import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -40,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * §6.61: @MockitoBean Validator 추가 금지 — Validator 실 빈 사용.
  * 검증 그룹(AirMasterGroup/AirImpMasterGroup) 실 동작 확인 포함.
  */
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(MasterBlController.class)
 @ActiveProfiles("test")
 class AirMasterBlControllerWebMvcTest {

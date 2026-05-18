@@ -5,6 +5,7 @@ import com.freightos.fms.domain.housebl.enums.JobDiv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * POST /api/house-bl/find-by-hbl-no endpoint 전용 WebMvc 슬라이스 테스트.
  */
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(HouseBlController.class)
 @ActiveProfiles("test")
 class HouseBlControllerFindByHblNoTest {

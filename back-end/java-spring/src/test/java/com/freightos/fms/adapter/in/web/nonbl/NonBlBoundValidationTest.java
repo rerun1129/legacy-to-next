@@ -4,6 +4,7 @@ import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * DDL 상 bound VARCHAR(3) NOT NULL 이며 EXP/IMP 식별 구분값이므로
  * Create/Update 모두 누락·공백 시 400 응답을 보장한다.
  */
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(NonBlController.class)
 @ActiveProfiles("test")
 class NonBlBoundValidationTest {
