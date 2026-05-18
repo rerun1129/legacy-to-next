@@ -5,7 +5,7 @@ import { NoticeListClient } from "@/components/admin/cms/notice/notice-list-clie
 
 export default function AdminNoticeListPage() {
   return (
-    <AdminGuard requiredPermission="CMS_MANAGE">
+    <AdminGuard requiredMenuCode="MENU_ADMIN_CMS_NOTICE_LIST">
       <div style={{ padding: 16, display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
         <h1 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 12 }}>공지사항 관리</h1>
         <NoticeListClient />

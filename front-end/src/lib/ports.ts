@@ -16,6 +16,13 @@ import { API_CODE_DETAIL_PORT } from '@/adapter/out/api/code-detail';
 import { API_USER_PORT } from '@/adapter/out/api/user';
 import { API_CUSTOMER_PORT } from '@/adapter/out/api/customer';
 import { API_NOTICE_PORT } from '@/adapter/out/api/notice';
+import { API_MODULE_PORT } from '@/adapter/out/api/access/module';
+import { API_ATTRIBUTE_PORT } from '@/adapter/out/api/access/attribute';
+import { API_ATTRIBUTE_VALUE_PORT } from '@/adapter/out/api/access/attribute-value';
+import { API_MENU_PORT } from '@/adapter/out/api/access/menu';
+import { API_BUTTON_PORT } from '@/adapter/out/api/access/button';
+import { API_MENU_POLICY_PORT } from '@/adapter/out/api/access/menu-policy';
+import { API_BUTTON_POLICY_PORT } from '@/adapter/out/api/access/button-policy';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -34,3 +41,10 @@ export const userPort = API_USER_PORT;
 export const customerPort = API_CUSTOMER_PORT;
 export const noticePort = API_NOTICE_PORT;
 export const authPort = API_AUTH_PORT;
+export const accessModulePort = API_MODULE_PORT;
+export const accessAttributePort = API_ATTRIBUTE_PORT;
+export const accessAttributeValuePort = API_ATTRIBUTE_VALUE_PORT;
+export const accessMenuPort = API_MENU_PORT;
+export const accessButtonPort = API_BUTTON_PORT;
+export const accessMenuPolicyPort = API_MENU_POLICY_PORT;
+export const accessButtonPolicyPort = API_BUTTON_POLICY_PORT;

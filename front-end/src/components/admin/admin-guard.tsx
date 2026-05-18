@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { getSession, hasPermission, clearSession, firstAccessibleRoute } from "@/lib/admin-session";
+import { getSession, hasMenuAccess, clearSession, firstAccessibleRoute } from "@/lib/admin-session";
 import { useTabs } from "@/lib/use-tabs";
-import type { Permission } from "@/domain/permission";
 import { toast } from "@/lib/toast-store";
 
 interface Props {
   children: React.ReactNode;
-  requiredPermission?: Permission;
+  requiredMenuCode?: string;
 }
 
-export function AdminGuard({ children, requiredPermission }: Props) {
+export function AdminGuard({ children, requiredMenuCode }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   // SSR 단계에서는 session을 읽지 않고, mounted 후에만 실제 세션을 평가.
@@ -21,9 +20,7 @@ export function AdminGuard({ children, requiredPermission }: Props) {
   const [session] = useState(() => getSession());
 
   const authorized = session !== null && (
-    requiredPermission
-      ? hasPermission(session, requiredPermission)
-      : true
+    requiredMenuCode ? hasMenuAccess(session, requiredMenuCode) : true
   );
 
   // SSR/CSR hydration 일치를 위한 mount gate

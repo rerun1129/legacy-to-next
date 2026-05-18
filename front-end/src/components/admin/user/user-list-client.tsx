@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { UserListFilter } from "./user-list-filter";
 import { UserListGrid } from "./user-list-grid";
 import { UserEntryModal } from "./user-entry-modal";
@@ -13,7 +14,6 @@ import type { UserFilter } from "@/domain/user";
 
 const DEFAULT_VALUES: UserFilter = {
   username: "",
-  role: "ALL",
   scope: "ALL",
 };
 
@@ -53,14 +53,13 @@ export function UserListClient() {
         >
           Search
         </Button>
-        <Button
-          size="sm"
-          variant="modal"
-          leftIcon={<Plus size={12} />}
+        <ActionButton
+          buttonCode="BTN_ADMIN_USER_LIST_CREATE"
+          className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
         >
-          신규
-        </Button>
+          <Plus size={12} style={{ marginRight: 4 }} />신규
+        </ActionButton>
       </div>
 
       <UserListFilter form={form} />

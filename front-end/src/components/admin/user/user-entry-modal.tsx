@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { userUseCases } from "@/application/user/use-cases";
-import type { CreateUserRequestDto, UpdateUserRequestDto, UserRole } from "@/domain/user";
-import type { Permission } from "@/domain/permission";
-import { ALL_PERMISSIONS, PERMISSION_LABEL } from "@/domain/permission";
+import type { CreateUserRequestDto, UpdateUserRequestDto } from "@/domain/user";
 
 export interface EntryModalState {
   mode: "create" | "edit";
@@ -27,21 +25,19 @@ interface UserFormValues {
   username: string;
   email: string;
   password: string; // create 필수, edit 빈 값이면 미갱신
-  role: UserRole;
+  role: "ADMIN" | "USER";
   active: boolean;
-  permissions: Permission[];
 }
 
 const DEFAULT_FORM: UserFormValues = {
   username: "",
   email: "",
   password: "",
-  role: "ADMIN",
+  role: "USER",
   active: true,
-  permissions: [...ALL_PERMISSIONS],
 };
 
-const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
+const ROLE_OPTIONS: Array<{ value: "ADMIN" | "USER"; label: string }> = [
   { value: "ADMIN", label: "ADMIN" },
   { value: "USER", label: "USER" },
 ];
@@ -51,7 +47,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
   const form = useForm<UserFormValues>({ defaultValues: DEFAULT_FORM });
-  const { register, reset, getValues, watch, formState: { isSubmitting } } = form;
+  const { register, reset, getValues, formState: { isSubmitting } } = form;
 
   // 수정 모드: 상세 조회 후 form.reset
   const { data: detail, isLoading: isDetailLoading } = useQuery({
@@ -65,13 +61,13 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
 
   useEffect(() => {
     if (detail) {
+      const roleAttr = detail.attributes?.role?.[0] as "ADMIN" | "USER" | undefined;
       reset({
         username: detail.username,
         email: detail.email ?? "",
-        password: "", // 응답에 password 없음 — 변경 시에만 입력
-        role: detail.role,
+        password: "",
+        role: roleAttr ?? "USER",
         active: detail.active,
-        permissions: detail.permissions,
       });
     }
   }, [detail, reset]);
@@ -82,14 +78,6 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
       reset(DEFAULT_FORM);
     }
   }, [isEdit, reset]);
-
-  // ADMIN role 선택 시 전체 권한 자동 부여
-  const role = watch("role");
-  useEffect(() => {
-    if (role === "ADMIN") {
-      form.setValue("permissions", [...ALL_PERMISSIONS]);
-    }
-  }, [role, form]);
 
   const createMutation = useMutation({
     mutationFn: (req: CreateUserRequestDto) => userUseCases.create(req),
@@ -117,14 +105,15 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   });
 
   function handleSave(values: UserFormValues) {
+    // role은 ABAC attributes로 전송
+    const attributes: Record<string, string[]> = { role: [values.role] };
+
     if (isEdit && state?.id != null) {
       const req: UpdateUserRequestDto = {
         email: values.email.trim() || null,
-        // 빈 값이면 null — 어댑터에서도 재정규화하지만 여기서도 명시적으로 처리
         password: values.password.trim() || null,
-        role: values.role,
         active: values.active,
-        permissions: values.permissions,
+        attributes,
       };
       updateMutation.mutate({ id: state.id, req });
     } else {
@@ -132,9 +121,8 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         username: values.username.trim(),
         email: values.email.trim() || null,
         password: values.password,
-        role: values.role,
         active: values.active,
-        permissions: values.permissions,
+        attributes,
       };
       createMutation.mutate(req);
     }
@@ -220,41 +208,6 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                 ))}
               </select>
             </div>
-            <Controller
-              name="permissions"
-              control={form.control}
-              render={({ field }) => {
-                const isAdmin = watch("role") === "ADMIN";
-                return (
-                  <div className="lcn" style={{ alignItems: "flex-start" }}>
-                    <span className="lcn__label" style={{ paddingTop: 4 }}>권한</span>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      {ALL_PERMISSIONS.map((p) => {
-                        const checked = isAdmin || (field.value ?? []).includes(p);
-                        return (
-                          <label key={p} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              disabled={isAdmin || isReadOnly}
-                              onChange={(e) => {
-                                const current = field.value ?? [];
-                                field.onChange(
-                                  e.target.checked
-                                    ? [...current, p]
-                                    : current.filter((v) => v !== p)
-                                );
-                              }}
-                            />
-                            {PERMISSION_LABEL[p]}
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              }}
-            />
             <div className="lcn">
               <span className="lcn__label">활성</span>
               <label style={{ display: "flex", alignItems: "center", gap: 6 }}>

@@ -4,14 +4,13 @@ import { ADMIN_API_URL } from "@/lib/api-base";
 import { getAuthHeader } from "@/lib/admin-session";
 import { ApiError, ResponseParseError } from "./errors";
 
-const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "CUSTOMER_MANAGE", "CMS_MANAGE"]);
-
 const ME_SCHEMA = z.object({
   id: z.number(),
   username: z.string(),
   email: z.string().nullable().optional().transform((v) => v ?? null),
-  role: z.enum(["ADMIN", "USER"]),
-  permissions: z.array(PERMISSION_SCHEMA),
+  attributes: z.record(z.string(), z.array(z.string())),
+  accessibleMenus: z.array(z.string()),
+  accessibleButtons: z.array(z.string()),
 }) satisfies z.ZodType<MeInfo>;
 
 const LOGIN_SCHEMA = z.object({

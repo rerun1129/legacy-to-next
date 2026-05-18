@@ -5,12 +5,11 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid,
-  KeyRound, UserCog, Building2, Megaphone,
+  KeyRound, UserCog, Building2, Megaphone, ShieldCheck,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { getSession, hasPermission } from "@/lib/admin-session";
-import type { Permission } from "@/domain/permission";
+import { getSession, hasMenuAccess } from "@/lib/admin-session";
 
 
 // ─── Types ──────────────────────────────────────────────────
@@ -18,7 +17,7 @@ interface NavLeaf {
   label: string;
   href: string;
   icon: React.ComponentType<{ size?: number }>;
-  requiredPermission?: Permission;
+  requiredMenuCode?: string;
 }
 
 interface NavSection {
@@ -89,25 +88,34 @@ const NAV_MODULES: NavModule[] = [
       {
         group: "Code Master", icon: KeyRound, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/code/list", icon: List, requiredPermission: "CODE_MANAGE" },
+          { label: "List", href: "/admin/code/list", icon: List, requiredMenuCode: "MENU_ADMIN_CODE_LIST" },
         ],
       },
       {
         group: "사용자 관리", icon: UserCog, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/user/list", icon: List, requiredPermission: "USER_MANAGE" },
+          { label: "List", href: "/admin/user/list", icon: List, requiredMenuCode: "MENU_ADMIN_USER_LIST" },
         ],
       },
       {
         group: "Customer", icon: Building2, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/customer/list", icon: List, requiredPermission: "CUSTOMER_MANAGE" },
+          { label: "List", href: "/admin/customer/list", icon: List, requiredMenuCode: "MENU_ADMIN_CUSTOMER_LIST" },
         ],
       },
       {
         group: "공지사항", icon: Megaphone, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/cms/notice/list", icon: List, requiredPermission: "CMS_MANAGE" },
+          { label: "List", href: "/admin/cms/notice/list", icon: List, requiredMenuCode: "MENU_ADMIN_CMS_NOTICE_LIST" },
+        ],
+      },
+      {
+        group: "Access 관리", icon: ShieldCheck, defaultOpen: false,
+        children: [
+          { label: "Menu",      href: "/admin/access/menu",      icon: List },
+          { label: "Button",    href: "/admin/access/button",    icon: List },
+          { label: "Policy",    href: "/admin/access/policy",    icon: List },
+          { label: "Attribute", href: "/admin/access/attribute", icon: List },
         ],
       },
     ],
@@ -182,7 +190,7 @@ export function Sidebar() {
         Dashboard
       </button>
 
-      {/* 최상위 모듈 (FMS, BMS …) */}
+      {/* 최상위 모듈 (FMS, Admin …) */}
       {NAV_MODULES.map((mod) => {
         const modActive   = moduleActive(pathname, mod);
         const modOpen     = openModules[mod.module];
@@ -232,7 +240,7 @@ export function Sidebar() {
 
                   {secOpen && section.children
                     // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
-                    .filter((leaf) => !leaf.requiredPermission || (mounted && hasPermission(session, leaf.requiredPermission)))
+                    .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
                     .map((leaf) => {
                     const active = leafActive(pathname, leaf);
                     return (

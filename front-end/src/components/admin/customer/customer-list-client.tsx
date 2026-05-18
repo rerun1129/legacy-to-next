@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { CustomerListFilter } from "./customer-list-filter";
 import { CustomerListGrid } from "./customer-list-grid";
 import { CustomerEntryModal } from "./customer-entry-modal";
@@ -54,14 +55,13 @@ export function CustomerListClient() {
         >
           Search
         </Button>
-        <Button
-          size="sm"
-          variant="modal"
-          leftIcon={<Plus size={12} />}
+        <ActionButton
+          buttonCode="BTN_ADMIN_CUSTOMER_LIST_CREATE"
+          className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
         >
-          신규
-        </Button>
+          <Plus size={12} style={{ marginRight: 4 }} />신규
+        </ActionButton>
       </div>
 
       <CustomerListFilter form={form} />

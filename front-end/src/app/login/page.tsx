@@ -31,8 +31,9 @@ export default function LoginPage() {
       const session: AdminSession = {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
-        role: result.me.role,
-        permissions: result.me.permissions,
+        attributes: result.me.attributes,
+        accessibleMenus: result.me.accessibleMenus,
+        accessibleButtons: result.me.accessibleButtons,
       };
       const target = firstAccessibleRoute(session);
       if (!target) {

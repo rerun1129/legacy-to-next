@@ -1,11 +1,10 @@
-import type { Permission } from "@/domain/permission";
-
 export interface MeInfo {
   id: number;
   username: string;
   email: string | null;
-  role: "ADMIN" | "USER";
-  permissions: Permission[];
+  attributes: Record<string, string[]>;
+  accessibleMenus: string[];
+  accessibleButtons: string[];
 }
 
 export interface LoginResult {

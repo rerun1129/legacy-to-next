@@ -1,12 +1,11 @@
-import type { Permission } from "@/domain/permission";
-
 const STORAGE_KEY = "admin.session";
 
 export interface AdminSession {
   accessToken: string;
   refreshToken: string;
-  role: "ADMIN" | "USER";
-  permissions: Permission[];
+  attributes: Record<string, string[]>;
+  accessibleMenus: string[];
+  accessibleButtons: string[];
 }
 
 export function getSession(): AdminSession | null {
@@ -16,8 +15,8 @@ export function getSession(): AdminSession | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AdminSession;
     if (!parsed?.accessToken || !parsed?.refreshToken) return null;
-    if (parsed.role !== "ADMIN" && parsed.role !== "USER") return null;
-    if (!Array.isArray(parsed.permissions)) return null;
+    if (!Array.isArray(parsed.accessibleMenus)) return null;
+    if (!Array.isArray(parsed.accessibleButtons)) return null;
     return parsed;
   } catch {
     return null;
@@ -45,16 +44,26 @@ export function getAuthHeader(): Record<string, string> {
   return s ? { Authorization: `Bearer ${s.accessToken}` } : {};
 }
 
-export function hasPermission(session: AdminSession | null, permission: Permission): boolean {
+export function hasMenuAccess(session: AdminSession | null, menuCode: string): boolean {
   if (!session) return false;
-  if (session.role === "ADMIN") return true;
-  return session.permissions.includes(permission);
+  return session.accessibleMenus.includes(menuCode);
+}
+
+export function hasButtonAccess(session: AdminSession | null, buttonCode: string): boolean {
+  if (!session) return false;
+  return session.accessibleButtons.includes(buttonCode);
 }
 
 // login·guard 양측에서 공유하는 "이 세션으로 진입 가능한 첫 번째 라우트" 헬퍼
 export function firstAccessibleRoute(session: AdminSession): string | null {
-  if (session.role === "ADMIN") return "/admin/code/list";
-  if (hasPermission(session, "CODE_MANAGE")) return "/admin/code/list";
-  if (hasPermission(session, "USER_MANAGE")) return "/admin/user/list";
+  const order: Array<[string, string]> = [
+    ["MENU_ADMIN_CODE_LIST", "/admin/code/list"],
+    ["MENU_ADMIN_USER_LIST", "/admin/user/list"],
+    ["MENU_ADMIN_CUSTOMER_LIST", "/admin/customer/list"],
+    ["MENU_ADMIN_CMS_NOTICE_LIST", "/admin/cms/notice/list"],
+  ];
+  for (const [code, route] of order) {
+    if (hasMenuAccess(session, code)) return route;
+  }
   return null;
 }

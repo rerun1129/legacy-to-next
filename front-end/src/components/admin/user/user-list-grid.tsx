@@ -18,7 +18,6 @@ interface Props {
 const COLUMNS: GridColumn<UserRow>[] = [
   { key: "username", label: "사용자명", minWidth: 140 },
   { key: "email", label: "이메일", minWidth: 200 },
-  { key: "role", label: "역할", minWidth: 80, align: "center" },
   {
     key: "active",
     label: "상태",

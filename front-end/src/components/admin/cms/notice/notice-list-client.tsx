@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { NoticeListFilter } from "./notice-list-filter";
 import { NoticeListGrid } from "./notice-list-grid";
 import { NoticeEntryModal } from "./notice-entry-modal";
@@ -52,14 +53,13 @@ export function NoticeListClient() {
         >
           Search
         </Button>
-        <Button
-          size="sm"
-          variant="modal"
-          leftIcon={<Plus size={12} />}
+        <ActionButton
+          buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_CREATE"
+          className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
         >
-          신규
-        </Button>
+          <Plus size={12} style={{ marginRight: 4 }} />신규
+        </ActionButton>
       </div>
 
       <NoticeListFilter form={form} />

@@ -6,7 +6,6 @@ import type {
   UserFilter,
   CreateUserRequestDto,
   UpdateUserRequestDto,
-  UserRole,
   UserScope,
 } from "@/domain/user";
 import { adminFetchJson } from "./admin-fetch";
@@ -14,15 +13,10 @@ import { ResponseParseError } from "./errors";
 
 const BASE = "/api/admin/user";
 
-const USER_ROLE_SCHEMA = z.enum(["ADMIN", "USER"]) satisfies z.ZodType<UserRole>;
-
-const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "CUSTOMER_MANAGE", "CMS_MANAGE"]);
-
 const USER_ROW_SCHEMA = z.object({
   id: z.number(),
   username: z.string(),
   email: z.string().nullable().optional().transform((v) => v ?? null),
-  role: USER_ROLE_SCHEMA,
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),
@@ -32,14 +26,13 @@ const USER_DETAIL_SCHEMA = z.object({
   id: z.number(),
   username: z.string(),
   email: z.string().nullable().optional().transform((v) => v ?? null),
-  role: USER_ROLE_SCHEMA,
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),
   updatedAt: z.string(),
   createdBy: z.string().nullable().optional().transform((v) => v ?? null),
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
-  permissions: z.array(PERMISSION_SCHEMA).default([]),
+  attributes: z.record(z.string(), z.array(z.string())).default({}),
 }) satisfies z.ZodType<UserDetail>;
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
@@ -54,12 +47,7 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     size: z.number(),
   });
 
-function roleForBackend(role: UserFilter["role"]): UserRole | null {
-  return role === "ALL" ? null : role;
-}
-
 function scopeForBackend(scope: UserScope): UserScope {
-  // ALL을 포함해 항상 명시 전송 — BE가 null→ALL 처리하지만 명시 권장
   return scope;
 }
 
@@ -71,8 +59,6 @@ export const API_USER_PORT: UserPort = {
       scope: scopeForBackend(filter.scope),
     };
     if (filter.username) body.username = filter.username;
-    const r = roleForBackend(filter.role);
-    if (r !== null) body.role = r;
 
     const json = await adminFetchJson(`${BASE}/search`, {
       method: "POST",
@@ -108,7 +94,6 @@ export const API_USER_PORT: UserPort = {
   },
 
   async update(id, req: UpdateUserRequestDto) {
-    // password가 빈 문자열이면 null로 정규화 — BE는 null/빈 모두 '미갱신'으로 처리
     const normalized: UpdateUserRequestDto = {
       ...req,
       password: req.password && req.password.length > 0 ? req.password : null,

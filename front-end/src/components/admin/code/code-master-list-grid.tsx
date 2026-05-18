@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
@@ -81,14 +82,13 @@ export function CodeMasterListGrid({ selectedId, onSelect }: Props) {
         <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearch}>
           Search
         </Button>
-        <Button
-          size="sm"
-          variant="modal"
-          leftIcon={<Plus size={12} />}
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_CREATE"
+          className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
         >
-          신규
-        </Button>
+          <Plus size={12} style={{ marginRight: 4 }} />신규
+        </ActionButton>
       </div>
 
       <CodeMasterListFilter form={form} />

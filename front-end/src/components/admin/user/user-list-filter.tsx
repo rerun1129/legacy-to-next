@@ -7,12 +7,6 @@ interface Props {
   form: UseFormReturn<UserFilter>;
 }
 
-const ROLE_OPTIONS = [
-  { value: "ALL", label: "전체" },
-  { value: "ADMIN", label: "ADMIN" },
-  { value: "USER", label: "USER" },
-] as const;
-
 const SCOPE_OPTIONS = [
   { value: "ALL", label: "전체" },
   { value: "ACTIVE", label: "활성" },
@@ -34,16 +28,6 @@ export function UserListFilter({ form }: Props) {
               placeholder="사용자명"
               {...register("username")}
             />
-          </div>
-          <div className="lcn">
-            <span className="lcn__label">역할</span>
-            <select className="text-box text-box--panel" {...register("role")}>
-              {ROLE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
           </div>
           <div className="lcn">
             <span className="lcn__label">상태</span>
