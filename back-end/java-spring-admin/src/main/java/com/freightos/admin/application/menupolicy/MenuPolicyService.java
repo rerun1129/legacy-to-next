@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,6 +51,14 @@ public class MenuPolicyService implements MenuPolicyUseCase {
         }
         MenuPolicy menuPolicy = MenuPolicy.create(command.menuId(), command.attributeKey(), command.requiredValue());
         return menuPolicyPort.save(menuPolicy);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMenuPoliciesByIds(List<Long> ids) {
+        for (Long id : ids) {
+            deleteMenuPolicyById(id);
+        }
     }
 
     @Override

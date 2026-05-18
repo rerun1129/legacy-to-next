@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -59,6 +61,14 @@ public class AttributeValueService implements AttributeValueUseCase {
                 .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
         existing.applyUpdate(command.label(), command.sortOrder(), command.active());
         attributeValuePort.update(attributeKey, value, existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAttributeValues(String attributeKey, List<String> values) {
+        for (String value : values) {
+            deleteAttributeValueByKey(attributeKey, value);
+        }
     }
 
     @Override

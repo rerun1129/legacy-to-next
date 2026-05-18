@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.attributedefinition.dto.SearchAttribut
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.UpdateAttributeDefinitionRequest;
 import com.freightos.admin.application.attributedefinition.port.in.AttributeDefinitionUseCase;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
+import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -71,6 +72,13 @@ public class AttributeDefinitionController {
     @DeleteMapping("/{attributeKey}")
     public ResponseEntity<ApiResponse<Void>> deleteByKey(@PathVariable String attributeKey) {
         attributeDefinitionUseCase.deleteAttributeDefinitionByKey(attributeKey);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_DEFINITION_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteByCodeRequest req) {
+        attributeDefinitionUseCase.deleteAttributeDefinitionsByKeys(req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_DEFINITION_DELETED.getMessage()));
     }
 }

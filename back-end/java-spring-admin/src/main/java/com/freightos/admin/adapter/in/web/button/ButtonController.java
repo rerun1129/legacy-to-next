@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.button.dto.SearchButtonRequest;
 import com.freightos.admin.adapter.in.web.button.dto.UpdateButtonRequest;
 import com.freightos.admin.application.button.port.in.ButtonUseCase;
 import com.freightos.admin.application.button.projection.ButtonSummary;
+import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -71,6 +72,13 @@ public class ButtonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         buttonUseCase.deleteButtonById(id);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.BUTTON_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_BUTTON_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
+        buttonUseCase.deleteButtonsByIds(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.BUTTON_DELETED.getMessage()));
     }
 }

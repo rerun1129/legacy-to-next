@@ -78,6 +78,14 @@ public class MenuService implements MenuUseCase {
 
     @Override
     @Transactional
+    public void deleteMenusByIds(List<Long> ids) {
+        for (Long id : ids) {
+            deleteMenuById(id);
+        }
+    }
+
+    @Override
+    @Transactional
     public void deleteMenuById(Long menuId) {
         if (!menuPort.existsById(menuId)) {
             throw ApplicationException.notFound("MENU_NOT_FOUND", MessageCode.MENU_NOT_FOUND.getMessage());

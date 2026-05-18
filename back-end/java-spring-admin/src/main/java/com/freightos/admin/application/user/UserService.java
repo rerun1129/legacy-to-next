@@ -84,4 +84,12 @@ public class UserService implements UserUseCase {
         }
         userPort.softDelete(id);
     }
+
+    @Override
+    @Transactional
+    public void deleteUsers(List<Long> ids) {
+        for (Long id : ids) {
+            deleteUser(id);
+        }
+    }
 }

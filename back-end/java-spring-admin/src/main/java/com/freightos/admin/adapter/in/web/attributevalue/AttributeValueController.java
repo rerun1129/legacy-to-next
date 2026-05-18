@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.attributevalue.dto.SearchAttributeValu
 import com.freightos.admin.adapter.in.web.attributevalue.dto.UpdateAttributeValueRequest;
 import com.freightos.admin.application.attributevalue.port.in.AttributeValueUseCase;
 import com.freightos.admin.application.attributevalue.projection.AttributeValueSummary;
+import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -66,6 +67,15 @@ public class AttributeValueController {
     public ResponseEntity<ApiResponse<Void>> deleteByKey(
             @PathVariable String attributeKey, @PathVariable String value) {
         attributeValueUseCase.deleteAttributeValueByKey(attributeKey, value);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_VALUE_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/{attributeKey}/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(
+            @PathVariable String attributeKey,
+            @Valid @RequestBody BulkDeleteByCodeRequest req) {
+        attributeValueUseCase.deleteAttributeValues(attributeKey, req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_VALUE_DELETED.getMessage()));
     }
 }

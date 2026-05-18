@@ -7,10 +7,13 @@ import com.freightos.admin.application.codemaster.projection.CodeMasterSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.codemaster.entity.CodeMaster;
 
+import java.util.List;
+
 public interface CodeMasterUseCase {
     PagedResult<CodeMasterSummary> searchCodeMasters(SearchCodeMasterCommand command);
     CodeMaster findCodeMasterById(Long id);
     Long createCodeMaster(CreateCodeMasterCommand command);
     void updateCodeMaster(Long id, UpdateCodeMasterCommand command);
     void deleteCodeMasterById(Long id);
+    void deleteCodeMasters(List<Long> ids);
 }

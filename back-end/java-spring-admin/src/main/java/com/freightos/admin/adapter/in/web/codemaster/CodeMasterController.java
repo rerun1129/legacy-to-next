@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.codemaster.dto.SearchCodeMasterRequest
 import com.freightos.admin.adapter.in.web.codemaster.dto.UpdateCodeMasterRequest;
 import com.freightos.admin.application.codemaster.port.in.CodeMasterUseCase;
 import com.freightos.admin.application.codemaster.projection.CodeMasterSummary;
+import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -75,6 +76,13 @@ public class CodeMasterController {
     @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         codeMasterUseCase.deleteCodeMasterById(id);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_MASTER_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
+        codeMasterUseCase.deleteCodeMasters(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_MASTER_DELETED.getMessage()));
     }
 }

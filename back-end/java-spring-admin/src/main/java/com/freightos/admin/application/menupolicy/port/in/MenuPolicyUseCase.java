@@ -6,9 +6,12 @@ import com.freightos.admin.application.menupolicy.projection.MenuPolicySummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.menupolicy.entity.MenuPolicy;
 
+import java.util.List;
+
 public interface MenuPolicyUseCase {
     PagedResult<MenuPolicySummary> searchMenuPolicies(SearchMenuPolicyCommand command);
     MenuPolicy findMenuPolicyById(Long policyId);
     Long createMenuPolicy(CreateMenuPolicyCommand command);
     void deleteMenuPolicyById(Long policyId);
+    void deleteMenuPoliciesByIds(List<Long> ids);
 }

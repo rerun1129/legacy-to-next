@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -52,6 +54,14 @@ public class ModuleService implements ModuleUseCase {
                 .orElseThrow(() -> ApplicationException.notFound("MODULE_NOT_FOUND", MessageCode.MODULE_NOT_FOUND.getMessage()));
         existing.applyUpdate(command.name(), command.description(), command.sortOrder(), command.active());
         modulePort.update(moduleCode, existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteModulesByCodes(List<String> codes) {
+        for (String code : codes) {
+            deleteModuleByCode(code);
+        }
     }
 
     @Override

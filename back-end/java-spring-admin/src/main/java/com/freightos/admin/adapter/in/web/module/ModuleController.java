@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.module.dto.SearchModuleRequest;
 import com.freightos.admin.adapter.in.web.module.dto.UpdateModuleRequest;
 import com.freightos.admin.application.module.port.in.ModuleUseCase;
 import com.freightos.admin.application.module.projection.ModuleSummary;
+import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -71,6 +72,13 @@ public class ModuleController {
     @DeleteMapping("/{moduleCode}")
     public ResponseEntity<ApiResponse<Void>> deleteByCode(@PathVariable String moduleCode) {
         moduleUseCase.deleteModuleByCode(moduleCode);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.MODULE_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_MODULE_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteByCodeRequest req) {
+        moduleUseCase.deleteModulesByCodes(req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.MODULE_DELETED.getMessage()));
     }
 }

@@ -7,10 +7,13 @@ import com.freightos.admin.application.attributedefinition.projection.AttributeD
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributedefinition.entity.AttributeDefinition;
 
+import java.util.List;
+
 public interface AttributeDefinitionUseCase {
     PagedResult<AttributeDefinitionSummary> searchAttributeDefinitions(SearchAttributeDefinitionCommand command);
     AttributeDefinition findAttributeDefinitionByKey(String attributeKey);
     String createAttributeDefinition(CreateAttributeDefinitionCommand command);
     void updateAttributeDefinition(String attributeKey, UpdateAttributeDefinitionCommand command);
     void deleteAttributeDefinitionByKey(String attributeKey);
+    void deleteAttributeDefinitionsByKeys(List<String> keys);
 }

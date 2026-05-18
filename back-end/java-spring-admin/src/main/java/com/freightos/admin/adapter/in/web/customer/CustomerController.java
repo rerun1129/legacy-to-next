@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.customer.dto.SearchCustomerRequest;
 import com.freightos.admin.adapter.in.web.customer.dto.UpdateCustomerRequest;
 import com.freightos.admin.application.customer.port.in.CustomerUseCase;
 import com.freightos.admin.application.customer.projection.CustomerSummary;
+import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -77,6 +78,13 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         customerUseCase.deleteCustomer(id);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.CUSTOMER_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
+        customerUseCase.deleteCustomers(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CUSTOMER_DELETED.getMessage()));
     }
 }

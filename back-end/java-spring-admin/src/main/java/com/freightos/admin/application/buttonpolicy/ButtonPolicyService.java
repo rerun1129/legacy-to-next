@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,6 +51,14 @@ public class ButtonPolicyService implements ButtonPolicyUseCase {
         }
         ButtonPolicy buttonPolicy = ButtonPolicy.create(command.buttonId(), command.attributeKey(), command.requiredValue());
         return buttonPolicyPort.save(buttonPolicy);
+    }
+
+    @Override
+    @Transactional
+    public void deleteButtonPoliciesByIds(List<Long> ids) {
+        for (Long id : ids) {
+            deleteButtonPolicyById(id);
+        }
     }
 
     @Override

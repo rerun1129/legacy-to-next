@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.codedetail.dto.SearchCodeDetailRequest
 import com.freightos.admin.adapter.in.web.codedetail.dto.UpdateCodeDetailRequest;
 import com.freightos.admin.application.codedetail.port.in.CodeDetailUseCase;
 import com.freightos.admin.application.codedetail.projection.CodeDetailSummary;
+import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -75,6 +76,13 @@ public class CodeDetailController {
     @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         codeDetailUseCase.deleteCodeDetailById(id);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_DETAIL_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
+        codeDetailUseCase.deleteCodeDetails(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_DETAIL_DELETED.getMessage()));
     }
 }

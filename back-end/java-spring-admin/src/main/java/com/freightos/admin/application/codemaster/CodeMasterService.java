@@ -16,6 +16,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -64,5 +66,13 @@ public class CodeMasterService implements CodeMasterUseCase {
             throw ApplicationException.conflict("CODE_MASTER_HAS_DETAIL_CANNOT_DELETE", MessageCode.CODE_MASTER_HAS_DETAIL_CANNOT_DELETE.getMessage());
         }
         codeMasterPort.deleteCodeMasterById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCodeMasters(List<Long> ids) {
+        for (Long id : ids) {
+            deleteCodeMasterById(id);
+        }
     }
 }

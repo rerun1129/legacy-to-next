@@ -6,9 +6,12 @@ import com.freightos.admin.application.buttonpolicy.projection.ButtonPolicySumma
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.buttonpolicy.entity.ButtonPolicy;
 
+import java.util.List;
+
 public interface ButtonPolicyUseCase {
     PagedResult<ButtonPolicySummary> searchButtonPolicies(SearchButtonPolicyCommand command);
     ButtonPolicy findButtonPolicyById(Long policyId);
     Long createButtonPolicy(CreateButtonPolicyCommand command);
     void deleteButtonPolicyById(Long policyId);
+    void deleteButtonPoliciesByIds(List<Long> ids);
 }

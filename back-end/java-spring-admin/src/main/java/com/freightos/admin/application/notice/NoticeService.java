@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -58,5 +60,13 @@ public class NoticeService implements NoticeUseCase {
             throw ApplicationException.conflict("NOTICE_ALREADY_DELETED", MessageCode.NOTICE_ALREADY_DELETED.getMessage());
         }
         noticePort.softDelete(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteNotices(List<Long> ids) {
+        for (Long id : ids) {
+            deleteNotice(id);
+        }
     }
 }

@@ -7,10 +7,13 @@ import com.freightos.admin.application.attributevalue.projection.AttributeValueS
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 
+import java.util.List;
+
 public interface AttributeValueUseCase {
     PagedResult<AttributeValueSummary> searchAttributeValues(SearchAttributeValueCommand command);
     AttributeValue findAttributeValueByKey(String attributeKey, String value);
     void createAttributeValue(CreateAttributeValueCommand command);
     void updateAttributeValue(String attributeKey, String value, UpdateAttributeValueCommand command);
     void deleteAttributeValueByKey(String attributeKey, String value);
+    void deleteAttributeValues(String attributeKey, List<String> values);
 }

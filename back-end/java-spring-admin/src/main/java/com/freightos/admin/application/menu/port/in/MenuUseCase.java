@@ -16,5 +16,6 @@ public interface MenuUseCase {
     Long createMenu(CreateMenuCommand command);
     void updateMenu(Long menuId, UpdateMenuCommand command);
     void deleteMenuById(Long menuId);
+    void deleteMenusByIds(List<Long> ids);
     List<Menu> findAccessibleAdminMenus(Set<String> menuCodes);
 }

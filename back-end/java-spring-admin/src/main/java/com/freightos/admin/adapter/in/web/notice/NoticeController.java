@@ -7,6 +7,7 @@ import com.freightos.admin.adapter.in.web.notice.dto.SearchNoticeRequest;
 import com.freightos.admin.adapter.in.web.notice.dto.UpdateNoticeRequest;
 import com.freightos.admin.application.notice.port.in.NoticeUseCase;
 import com.freightos.admin.application.notice.projection.NoticeSummary;
+import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -77,6 +78,13 @@ public class NoticeController {
     @PreAuthorize("hasAuthority('BTN_ADMIN_CMS_NOTICE_LIST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         noticeUseCase.deleteNotice(id);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.NOTICE_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CMS_NOTICE_LIST_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
+        noticeUseCase.deleteNotices(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.NOTICE_DELETED.getMessage()));
     }
 }

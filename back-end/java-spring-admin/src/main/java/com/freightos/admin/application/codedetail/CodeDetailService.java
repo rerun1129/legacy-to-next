@@ -16,6 +16,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -64,5 +66,13 @@ public class CodeDetailService implements CodeDetailUseCase {
     @Transactional
     public void deleteCodeDetailById(Long id) {
         codeDetailPort.deleteCodeDetailById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCodeDetails(List<Long> ids) {
+        for (Long id : ids) {
+            deleteCodeDetailById(id);
+        }
     }
 }

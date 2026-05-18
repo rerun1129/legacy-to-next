@@ -8,6 +8,7 @@ import com.freightos.admin.adapter.in.web.menu.dto.SearchMenuRequest;
 import com.freightos.admin.adapter.in.web.menu.dto.UpdateMenuRequest;
 import com.freightos.admin.application.menu.port.in.MenuUseCase;
 import com.freightos.admin.application.menu.projection.MenuSummary;
+import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -89,6 +90,13 @@ public class MenuController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         menuUseCase.deleteMenuById(id);
+        return ResponseEntity.ok(ApiResponse.ok(MessageCode.MENU_DELETED.getMessage()));
+    }
+
+    @DeleteMapping("/bulk")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_MENU_DELETE')")
+    public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
+        menuUseCase.deleteMenusByIds(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.MENU_DELETED.getMessage()));
     }
 }

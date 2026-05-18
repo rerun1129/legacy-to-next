@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,6 +59,14 @@ public class AttributeDefinitionService implements AttributeDefinitionUseCase {
                 .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_DEFINITION_NOT_FOUND", MessageCode.ATTRIBUTE_DEFINITION_NOT_FOUND.getMessage()));
         existing.applyUpdate(command.name(), command.description(), ValueType.valueOf(command.valueType()), command.active(), command.allowMulti());
         attributeDefinitionPort.update(attributeKey, existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAttributeDefinitionsByKeys(List<String> keys) {
+        for (String key : keys) {
+            deleteAttributeDefinitionByKey(key);
+        }
     }
 
     @Override

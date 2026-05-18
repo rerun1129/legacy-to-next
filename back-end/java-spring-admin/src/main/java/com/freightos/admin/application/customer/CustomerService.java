@@ -15,6 +15,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -67,5 +69,13 @@ public class CustomerService implements CustomerUseCase {
             throw ApplicationException.conflict("CUSTOMER_ALREADY_DELETED", MessageCode.CUSTOMER_ALREADY_DELETED.getMessage());
         }
         customerPort.softDelete(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCustomers(List<Long> ids) {
+        for (Long id : ids) {
+            deleteCustomer(id);
+        }
     }
 }

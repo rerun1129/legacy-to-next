@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -62,6 +64,14 @@ public class ButtonService implements ButtonUseCase {
         existing.applyUpdate(command.menuId(), command.label(), ActionType.valueOf(command.actionType()),
                 command.apiMethod(), command.apiPath(), command.sortOrder(), command.active());
         buttonPort.update(buttonId, existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteButtonsByIds(List<Long> ids) {
+        for (Long id : ids) {
+            deleteButtonById(id);
+        }
     }
 
     @Override
