@@ -1,1 +1,11 @@
 # G7 Flyway 활성화 이후 local 전용 override 없음. application.yml의 ddl-auto: validate 상속.
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+
+logging:
+  level:
+    com.freightos.admin: DEBUG
+    p6spy: INFO
