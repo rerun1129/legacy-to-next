@@ -92,7 +92,7 @@ class AuthServiceTest {
         assertThat(result.accessToken()).isEqualTo("access.token");
         assertThat(result.refreshToken()).isEqualTo("rawRefresh");
         assertThat(result.user()).isSameAs(user);
-        assertThat(result.accessibleMenus()).contains("ADMIN_CODE_LIST");
+        assertThat(result.accessibleMenus()).contains("MENU_ADMIN_CODE_LIST");
 
         ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
         then(refreshTokenPort).should().save(tokenCaptor.capture());
@@ -210,7 +210,7 @@ class AuthServiceTest {
         assertThat(projection.username()).isEqualTo("admin");
         // role 필드는 MeProjection에서 제거됨 — attributes에서 확인
         assertThat(projection.attributes().get("role")).contains("ADMIN");
-        assertThat(projection.accessibleMenus()).contains("ADMIN_USER_LIST");
-        assertThat(projection.accessibleButtons()).contains("ADMIN_USER_LIST_CREATE");
+        assertThat(projection.accessibleMenus()).contains("MENU_ADMIN_USER_LIST");
+        assertThat(projection.accessibleButtons()).contains("BTN_ADMIN_USER_LIST_CREATE");
     }
 }

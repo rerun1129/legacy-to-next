@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +69,10 @@ public class AuthService implements AuthUseCase {
 
         refreshTokenPort.save(RefreshToken.issue(user.getId(), refreshHash, expiresAt));
 
+        // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, refreshRaw, user, attrs,
-                new ArrayList<>(accessibleMenus), new ArrayList<>(accessibleButtons));
+                accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
+                accessibleButtons.stream().map(c -> "BTN_" + c).toList());
     }
 
     @Override
@@ -100,8 +101,10 @@ public class AuthService implements AuthUseCase {
 
         refreshTokenPort.save(RefreshToken.issue(user.getId(), newRefreshHash, newExpiresAt));
 
+        // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, newRefreshRaw, user, attrs,
-                new ArrayList<>(accessibleMenus), new ArrayList<>(accessibleButtons));
+                accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
+                accessibleButtons.stream().map(c -> "BTN_" + c).toList());
     }
 
     @Override
@@ -117,13 +120,14 @@ public class AuthService implements AuthUseCase {
         Map<String, List<String>> attrs = user.getAttributes();
         Set<String> accessibleMenus = evaluateMenus(attrs);
         Set<String> accessibleButtons = evaluateButtons(attrs);
+        // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new MeProjection(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 attrs,
-                new ArrayList<>(accessibleMenus),
-                new ArrayList<>(accessibleButtons)
+                accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
+                accessibleButtons.stream().map(c -> "BTN_" + c).toList()
         );
     }
 

@@ -95,7 +95,7 @@ class AuthControllerWebMvcTest {
     void me_userWithMenuAuthority_returns200WithMenus() throws Exception {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
         MeProjection projection = new MeProjection(2L, "tester", "tester@example.com",
-                attrs, List.of("ADMIN_CODE_LIST"), List.of());
+                attrs, List.of("MENU_ADMIN_CODE_LIST"), List.of());
         given(authUseCase.getMe("tester")).willReturn(projection);
 
         mockMvc.perform(get("/api/admin/auth/me")
@@ -103,7 +103,7 @@ class AuthControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(2L))
                 .andExpect(jsonPath("$.data.username").value("tester"))
-                .andExpect(jsonPath("$.data.accessibleMenus[0]").value("ADMIN_CODE_LIST"));
+                .andExpect(jsonPath("$.data.accessibleMenus[0]").value("MENU_ADMIN_CODE_LIST"));
     }
 
     // ── login: 정상 → 200 ────────────────────────────────────────────────────
