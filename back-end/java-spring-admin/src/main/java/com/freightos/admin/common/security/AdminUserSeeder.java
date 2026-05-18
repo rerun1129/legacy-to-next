@@ -38,6 +38,7 @@ public class AdminUserSeeder implements ApplicationRunner {
         entity.setPasswordHash(passwordEncoder.encode(SEED_RAW_PASSWORD));
         entity.setRole(UserRole.ADMIN);
         entity.setActive(true);
+        entity.setAttributes("{}");
         userRepository.save(entity);
         log.info("AdminUserSeeder: seeded '{}' user", SEED_USERNAME);
     }

@@ -10,6 +10,7 @@ import com.freightos.admin.domain.user.entity.Permission;
 import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({UserPersistenceAdapter.class, UserDomainToJpaMapper.class, UserJpaToDomainMapper.class, UserRepositoryImpl.class, JpaAuditingConfig.class})
+@Import({UserPersistenceAdapter.class, UserDomainToJpaMapper.class, UserJpaToDomainMapper.class, UserRepositoryImpl.class, JpaAuditingConfig.class, JacksonAutoConfiguration.class})
 @TestPropertySource(properties = {
         "spring.datasource.url=jdbc:h2:mem:userpa;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;INIT=CREATE SCHEMA IF NOT EXISTS admin",
         "spring.datasource.driver-class-name=org.h2.Driver",
