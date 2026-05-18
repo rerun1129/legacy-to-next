@@ -14,31 +14,35 @@ import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.user.entity.AdminUser;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+
 @Component
 public class UserAssembler {
 
     public SearchUserCommand toSearchCommand(SearchUserRequest req) {
         int size = req.size() == 0 ? 20 : req.size();
         UserScope scope = req.scope() != null ? req.scope() : UserScope.ALL;
-        return new SearchUserCommand(req.username(), req.role(), scope, req.page(), size);
+        return new SearchUserCommand(req.username(), scope, req.page(), size);
     }
 
     public CreateUserCommand toCreateCommand(CreateUserRequest req) {
-        return new CreateUserCommand(req.username(), req.email(), req.password(), req.role(), req.active(), req.permissions());
+        return new CreateUserCommand(req.username(), req.email(), req.password(), req.active(),
+                req.attributes() != null ? req.attributes() : Collections.emptyMap());
     }
 
     public UpdateUserCommand toUpdateCommand(UpdateUserRequest req) {
-        return new UpdateUserCommand(req.email(), req.password(), req.role(), req.active(), req.permissions());
+        return new UpdateUserCommand(req.email(), req.password(), req.active(),
+                req.attributes() != null ? req.attributes() : Collections.emptyMap());
     }
 
     public UserSummaryResponse toSummaryResponse(UserSummary p) {
-        return new UserSummaryResponse(p.id(), p.username(), p.email(), p.role(), p.active(), p.deletedAt(), p.updatedAt());
+        return new UserSummaryResponse(p.id(), p.username(), p.email(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public UserDetailResponse toDetail(AdminUser domain) {
         return new UserDetailResponse(
                 domain.getId(), domain.getUsername(), domain.getEmail(),
-                domain.getRole(), domain.isActive(), domain.getDeletedAt(), domain.getPermissions(),
+                domain.isActive(), domain.getDeletedAt(), domain.getAttributes(),
                 domain.getCreatedAt(), domain.getUpdatedAt(),
                 domain.getCreatedBy(), domain.getUpdatedBy()
         );

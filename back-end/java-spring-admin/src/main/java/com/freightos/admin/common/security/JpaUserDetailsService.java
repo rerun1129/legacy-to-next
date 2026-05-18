@@ -3,7 +3,6 @@ package com.freightos.admin.common.security;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
-import com.freightos.admin.adapter.out.persistence.user.UserPermissionRepository;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
@@ -32,8 +31,6 @@ public class JpaUserDetailsService implements UserDetailsService {
     private static final TypeReference<Map<String, List<String>>> ATTR_TYPE_REF = new TypeReference<>() {};
 
     private final UserRepository userRepository;
-    // Phase 4에서 제거 예정. 현재는 의존성 유지하되 findAllByUserId 호출 없음.
-    private final UserPermissionRepository userPermissionRepository;
     private final ObjectMapper objectMapper;
     private final PolicyEvaluator policyEvaluator;
     private final MenuPolicyPort menuPolicyPort;
@@ -56,7 +53,9 @@ public class JpaUserDetailsService implements UserDetailsService {
         Set<String> accessibleButtons = policyEvaluator.accessibleButtonCodes(attrs, buttonRows);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + entity.getRole().name()));
+        // attributes의 role 키 값들을 ROLE_*로 부여
+        attrs.getOrDefault("role", List.of())
+                .forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
         accessibleMenus.forEach(code -> authorities.add(new SimpleGrantedAuthority("MENU_" + code)));
         accessibleButtons.forEach(code -> authorities.add(new SimpleGrantedAuthority("BTN_" + code)));
 

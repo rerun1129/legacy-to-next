@@ -2,11 +2,9 @@ package com.freightos.admin.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
-import com.freightos.admin.adapter.out.persistence.user.UserPermissionRepository;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
-import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +29,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 /**
- * Phase 3 ABAC 전환 후 JpaUserDetailsService 단위 테스트.
- * ROLE_* 권한은 유지되고, {@code MENU_*} / {@code BTN_*} 권한이 ABAC 평가 결과로 부여된다.
+ * Phase 4 ABAC 완전 전환 후 JpaUserDetailsService 단위 테스트.
+ * ROLE_* 권한은 attributes.role 기반으로 부여되며, {@code MENU_*} / {@code BTN_*} 권한이 ABAC 평가 결과로 부여된다.
  * 실제 ObjectMapper를 사용하여 JSON 파싱 경로를 실제와 동일하게 유지.
  */
 @ExtendWith(MockitoExtension.class)
@@ -40,9 +38,6 @@ class JpaUserDetailsServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private UserPermissionRepository userPermissionRepository;
 
     @Mock
     private PolicyEvaluator policyEvaluator;
@@ -59,8 +54,7 @@ class JpaUserDetailsServiceTest {
     void setUp() {
         // 실제 ObjectMapper 사용 — JSON 파싱 경로를 실제와 동일하게 유지
         jpaUserDetailsService = new JpaUserDetailsService(
-                userRepository, userPermissionRepository,
-                new ObjectMapper(), policyEvaluator, menuPolicyPort, buttonPolicyPort);
+                userRepository, new ObjectMapper(), policyEvaluator, menuPolicyPort, buttonPolicyPort);
     }
 
     // ── 정상 사용자 → UserDetails 반환, ROLE_ADMIN + MENU_* 포함 ────────────────
@@ -68,8 +62,7 @@ class JpaUserDetailsServiceTest {
     @Test
     void loadUserByUsername_activeAdminUser_returnsUserDetailsWithRoleAdminAndMenuAuthority() {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        UserJpaEntity entity = buildEntity(1L, "admin", "$2a$10$hashed", UserRole.ADMIN, true,
-                "{\"role\":[\"ADMIN\"]}");
+        UserJpaEntity entity = buildEntity(1L, "admin", "$2a$10$hashed", true, "{\"role\":[\"ADMIN\"]}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("admin")).willReturn(Optional.of(entity));
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
@@ -91,12 +84,13 @@ class JpaUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_activeUserRole_returnsUserDetailsWithRoleUser() {
-        UserJpaEntity entity = buildEntity(2L, "alice", "$2a$10$hashed", UserRole.USER, true, "{}");
+        Map<String, List<String>> attrs = Map.of("role", List.of("USER"));
+        UserJpaEntity entity = buildEntity(2L, "alice", "$2a$10$hashed", true, "{\"role\":[\"USER\"]}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("alice")).willReturn(Optional.of(entity));
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
-        given(policyEvaluator.accessibleMenuCodes(eq(Map.of()), any())).willReturn(Set.of());
-        given(policyEvaluator.accessibleButtonCodes(eq(Map.of()), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleMenuCodes(eq(attrs), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(eq(attrs), any())).willReturn(Set.of());
 
         UserDetails details = jpaUserDetailsService.loadUserByUsername("alice");
 
@@ -104,6 +98,25 @@ class JpaUserDetailsServiceTest {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
         assertThat(authorities).contains("ROLE_USER");
+    }
+
+    // ── attributes.role이 없을 때 → ROLE_* 없이 MENU_* 만 ────────────────────
+
+    @Test
+    void loadUserByUsername_noRoleInAttributes_noRoleAuthority() {
+        UserJpaEntity entity = buildEntity(5L, "norole", "$2a$10$hashed", true, "{}");
+        given(userRepository.findByUsernameAndDeletedAtIsNull("norole")).willReturn(Optional.of(entity));
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(eq(Map.of()), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(eq(Map.of()), any())).willReturn(Set.of());
+
+        UserDetails details = jpaUserDetailsService.loadUserByUsername("norole");
+
+        List<String> authorities = details.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        assertThat(authorities).noneMatch(a -> a.startsWith("ROLE_"));
     }
 
     // ── 미존재 → UsernameNotFoundException ────────────────────────────────────
@@ -120,7 +133,7 @@ class JpaUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_inactiveUser_throwsDisabledException() {
-        UserJpaEntity entity = buildEntity(3L, "inactive", "$2a$10$hashed", UserRole.USER, false, "{}");
+        UserJpaEntity entity = buildEntity(3L, "inactive", "$2a$10$hashed", false, "{}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("inactive")).willReturn(Optional.of(entity));
 
         assertThatThrownBy(() -> jpaUserDetailsService.loadUserByUsername("inactive"))
@@ -132,8 +145,7 @@ class JpaUserDetailsServiceTest {
     @Test
     void loadUserByUsername_abacEval_authoritiesContainMenuAndButtonCodes() {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        UserJpaEntity entity = buildEntity(4L, "tester", "$2a$10$hashed", UserRole.USER, true,
-                "{\"role\":[\"ADMIN\"]}");
+        UserJpaEntity entity = buildEntity(4L, "tester", "$2a$10$hashed", true, "{\"role\":[\"ADMIN\"]}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("tester")).willReturn(Optional.of(entity));
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
@@ -145,16 +157,15 @@ class JpaUserDetailsServiceTest {
         List<String> authorities = details.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
-        assertThat(authorities).contains("ROLE_USER", "MENU_ADMIN_CODE_LIST", "MENU_ADMIN_USER_LIST", "BTN_ADMIN_CODE_LIST_CREATE");
+        assertThat(authorities).contains("ROLE_ADMIN", "MENU_ADMIN_CODE_LIST", "MENU_ADMIN_USER_LIST", "BTN_ADMIN_CODE_LIST_CREATE");
     }
 
-    private UserJpaEntity buildEntity(Long id, String username, String passwordHash, UserRole role,
+    private UserJpaEntity buildEntity(Long id, String username, String passwordHash,
                                       boolean active, String attributes) {
         UserJpaEntity entity = new UserJpaEntity();
         ReflectionTestUtils.setField(entity, "id", id);
         entity.setUsername(username);
         entity.setPasswordHash(passwordHash);
-        entity.setRole(role);
         entity.setActive(active);
         entity.setAttributes(attributes);
         return entity;

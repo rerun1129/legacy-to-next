@@ -2,7 +2,6 @@ package com.freightos.admin.common.security;
 
 import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
-import com.freightos.admin.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -36,9 +35,8 @@ public class AdminUserSeeder implements ApplicationRunner {
         entity.setUsername(SEED_USERNAME);
         entity.setEmail(null);
         entity.setPasswordHash(passwordEncoder.encode(SEED_RAW_PASSWORD));
-        entity.setRole(UserRole.ADMIN);
         entity.setActive(true);
-        entity.setAttributes("{}");
+        entity.setAttributes("{\"role\":[\"ADMIN\"]}");
         userRepository.save(entity);
         log.info("AdminUserSeeder: seeded '{}' user", SEED_USERNAME);
     }

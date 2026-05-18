@@ -40,7 +40,6 @@ public class AuthController {
                 projection.id(),
                 projection.username(),
                 projection.email(),
-                projection.role(),
                 projection.attributes(),
                 projection.accessibleMenus(),
                 projection.accessibleButtons()
@@ -55,7 +54,6 @@ public class AuthController {
                 result.user().getId(),
                 result.user().getUsername(),
                 result.user().getEmail(),
-                result.user().getRole(),
                 result.attributes(),
                 result.accessibleMenus(),
                 result.accessibleButtons()

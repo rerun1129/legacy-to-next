@@ -45,7 +45,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<UserSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getRole(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
@@ -75,9 +75,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
         if (StringUtils.hasText(command.username())) {
             predicates.add(cb.like(root.get("username"), command.username() + "%"));
-        }
-        if (command.role() != null) {
-            predicates.add(cb.equal(root.get("role"), command.role()));
         }
         return predicates.toArray(Predicate[]::new);
     }

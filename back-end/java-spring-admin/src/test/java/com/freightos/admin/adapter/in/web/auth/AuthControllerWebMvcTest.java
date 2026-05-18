@@ -9,7 +9,6 @@ import com.freightos.admin.common.security.JwtAuthenticationFilter;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,7 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -69,13 +67,14 @@ class AuthControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── ADMIN role → 200 + role=ADMIN + accessibleMenus=[] ───────────────────
+    // ── ADMIN role → 200 + attributes 포함, role 필드 없음 ────────────────────
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    void me_adminUser_returns200WithRoleAndEmptyMenus() throws Exception {
+    void me_adminUser_returns200WithAttributesAndEmptyMenus() throws Exception {
+        Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
         MeProjection projection = new MeProjection(1L, "admin", "admin@example.com",
-                UserRole.ADMIN, Collections.emptyMap(), List.of(), List.of());
+                attrs, List.of(), List.of());
         given(authUseCase.getMe("admin")).willReturn(projection);
 
         mockMvc.perform(get("/api/admin/auth/me")
@@ -83,7 +82,8 @@ class AuthControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.username").value("admin"))
-                .andExpect(jsonPath("$.data.role").value("ADMIN"))
+                // role 필드는 더 이상 존재하지 않음 (Phase 4: attributes로 이전)
+                .andExpect(jsonPath("$.data.role").doesNotExist())
                 .andExpect(jsonPath("$.data.accessibleMenus").isArray())
                 .andExpect(jsonPath("$.data.accessibleMenus").isEmpty());
     }
@@ -93,9 +93,9 @@ class AuthControllerWebMvcTest {
     @Test
     @WithMockUser(username = "tester", authorities = {"ROLE_USER", "MENU_ADMIN_CODE_LIST"})
     void me_userWithMenuAuthority_returns200WithMenus() throws Exception {
+        Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
         MeProjection projection = new MeProjection(2L, "tester", "tester@example.com",
-                UserRole.USER, Map.of("role", List.of("ADMIN")),
-                List.of("ADMIN_CODE_LIST"), List.of());
+                attrs, List.of("ADMIN_CODE_LIST"), List.of());
         given(authUseCase.getMe("tester")).willReturn(projection);
 
         mockMvc.perform(get("/api/admin/auth/me")
@@ -103,7 +103,6 @@ class AuthControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(2L))
                 .andExpect(jsonPath("$.data.username").value("tester"))
-                .andExpect(jsonPath("$.data.role").value("USER"))
                 .andExpect(jsonPath("$.data.accessibleMenus[0]").value("ADMIN_CODE_LIST"));
     }
 
@@ -111,10 +110,11 @@ class AuthControllerWebMvcTest {
 
     @Test
     void login_validCredentials_returns200() throws Exception {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", UserRole.ADMIN, true, Set.of());
+        Map<String, List<String>> attrsAdmin = Map.of("role", List.of("ADMIN"));
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin);
         user.assignIdentity(1L, null, null, null, null);
         LoginResult loginResult = new LoginResult("access.token", "refresh.token", user,
-                Collections.emptyMap(), List.of(), List.of());
+                attrsAdmin, List.of(), List.of());
 
         given(authUseCase.login(any())).willReturn(loginResult);
 
@@ -149,10 +149,11 @@ class AuthControllerWebMvcTest {
 
     @Test
     void refresh_validToken_returns200() throws Exception {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", UserRole.ADMIN, true, Set.of());
+        Map<String, List<String>> attrsAdmin = Map.of("role", List.of("ADMIN"));
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin);
         user.assignIdentity(1L, null, null, null, null);
         LoginResult refreshResult = new LoginResult("new.access.token", "new.refresh.token", user,
-                Collections.emptyMap(), List.of(), List.of());
+                attrsAdmin, List.of(), List.of());
 
         given(authUseCase.refresh(any())).willReturn(refreshResult);
 

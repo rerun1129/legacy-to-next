@@ -1,11 +1,8 @@
 package com.freightos.admin.adapter.out.persistence.user;
 
 import com.freightos.admin.common.persistence.BaseJpaEntity;
-import com.freightos.admin.domain.user.entity.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,17 +36,12 @@ public class UserJpaEntity extends BaseJpaEntity {
     @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 20)
-    private UserRole role;
-
     @Column(name = "active", nullable = false)
     private Boolean active;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    /** ABAC 속성 JSONB — Phase 3에서 권한 평가에 사용. 현재는 데이터 저장 전용. */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attributes", columnDefinition = "jsonb", nullable = false)
     private String attributes;

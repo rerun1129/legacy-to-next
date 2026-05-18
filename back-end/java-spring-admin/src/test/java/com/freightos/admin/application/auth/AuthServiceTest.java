@@ -14,7 +14,6 @@ import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -72,10 +71,9 @@ class AuthServiceTest {
 
     @Test
     void login_validCredentials_returnsLoginResult() {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
-        user.assignIdentity(1L, null, null, null, null);
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        user.assignAttributes(attrs);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs);
+        user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
         given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
@@ -105,7 +103,7 @@ class AuthServiceTest {
 
     @Test
     void login_wrongPassword_throwsBadCredentials() {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap());
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -130,7 +128,7 @@ class AuthServiceTest {
 
     @Test
     void login_inactiveUser_throwsBadCredentials() {
-        AdminUser inactiveUser = AdminUser.create("bob", "bob@example.com", "hashedPw", UserRole.USER, false, Set.of());
+        AdminUser inactiveUser = AdminUser.create("bob", "bob@example.com", "hashedPw", false, Collections.emptyMap());
         inactiveUser.assignIdentity(2L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("bob")).willReturn(inactiveUser);
@@ -146,9 +144,8 @@ class AuthServiceTest {
     @Test
     void refresh_validToken_revokesOldAndIssuesNew() {
         RefreshToken oldToken = RefreshToken.issue(1L, "oldHash", LocalDateTime.now().plusDays(7));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap());
         user.assignIdentity(1L, null, null, null, null);
-        user.assignAttributes(Collections.emptyMap());
 
         given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
         given(refreshTokenPort.findActiveByTokenHash("oldHash")).willReturn(Optional.of(oldToken));
@@ -198,9 +195,9 @@ class AuthServiceTest {
 
     @Test
     void getMe_returnsProjectionWithAccessibleMenusAndButtons() {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", UserRole.ADMIN, true, Set.of());
+        Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs);
         user.assignIdentity(1L, null, null, null, null);
-        user.assignAttributes(Map.of("role", List.of("ADMIN")));
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
@@ -211,7 +208,8 @@ class AuthServiceTest {
         MeProjection projection = authService.getMe("admin");
 
         assertThat(projection.username()).isEqualTo("admin");
-        assertThat(projection.role()).isEqualTo(UserRole.ADMIN);
+        // role 필드는 MeProjection에서 제거됨 — attributes에서 확인
+        assertThat(projection.attributes().get("role")).contains("ADMIN");
         assertThat(projection.accessibleMenus()).contains("ADMIN_USER_LIST");
         assertThat(projection.accessibleButtons()).contains("ADMIN_USER_LIST_CREATE");
     }

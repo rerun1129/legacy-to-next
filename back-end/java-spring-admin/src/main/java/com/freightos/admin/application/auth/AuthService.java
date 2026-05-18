@@ -61,7 +61,7 @@ public class AuthService implements AuthUseCase {
         Map<String, List<String>> attrs = user.getAttributes();
         Set<String> accessibleMenus = evaluateMenus(attrs);
         Set<String> accessibleButtons = evaluateButtons(attrs);
-        Set<String> authorities = buildAuthorities(user, accessibleMenus, accessibleButtons);
+        Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
         String refreshRaw = jwtTokenProvider.generateRefreshTokenRaw();
@@ -91,7 +91,7 @@ public class AuthService implements AuthUseCase {
         Map<String, List<String>> attrs = user.getAttributes();
         Set<String> accessibleMenus = evaluateMenus(attrs);
         Set<String> accessibleButtons = evaluateButtons(attrs);
-        Set<String> authorities = buildAuthorities(user, accessibleMenus, accessibleButtons);
+        Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
         String newRefreshRaw = jwtTokenProvider.generateRefreshTokenRaw();
@@ -121,7 +121,6 @@ public class AuthService implements AuthUseCase {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole(),
                 attrs,
                 new ArrayList<>(accessibleMenus),
                 new ArrayList<>(accessibleButtons)
@@ -138,9 +137,10 @@ public class AuthService implements AuthUseCase {
         return policyEvaluator.accessibleButtonCodes(attrs, buttonRows);
     }
 
-    private Set<String> buildAuthorities(AdminUser user, Set<String> accessibleMenus, Set<String> accessibleButtons) {
+    private Set<String> buildAuthorities(Map<String, List<String>> attrs, Set<String> accessibleMenus, Set<String> accessibleButtons) {
         Set<String> authorities = new HashSet<>();
-        authorities.add("ROLE_" + user.getRole().name());
+        // attributes의 role 키 값들을 ROLE_*로 부여
+        attrs.getOrDefault("role", List.of()).forEach(r -> authorities.add("ROLE_" + r));
         accessibleMenus.forEach(code -> authorities.add("MENU_" + code));
         accessibleButtons.forEach(code -> authorities.add("BTN_" + code));
         return authorities;

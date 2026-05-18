@@ -10,9 +10,10 @@ import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.user.entity.AdminUser;
-import com.freightos.admin.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,9 +46,7 @@ public class UserService implements UserUseCase {
     @Transactional
     public Long createUser(CreateUserCommand command) {
         try {
-            Long id = userPort.save(userFactory.from(command));
-            userPort.savePermissions(id, command.permissions());
-            return id;
+            return userPort.save(userFactory.from(command));
         } catch (DataIntegrityViolationException e) {
             throw ApplicationException.conflict("USER_DUPLICATE_USERNAME", MessageCode.USER_DUPLICATE_USERNAME.getMessage());
         }
@@ -61,15 +60,15 @@ public class UserService implements UserUseCase {
             throw ApplicationException.conflict("USER_DELETED", MessageCode.USER_ALREADY_DELETED.getMessage());
         }
         // 마지막 활성 ADMIN 비활성화·역할 강등 방어
-        if (existing.getRole() == UserRole.ADMIN && existing.isActive()) {
-            boolean demotingOrDeactivating = command.role() != UserRole.ADMIN || !command.active();
-            if (demotingOrDeactivating && userPort.countActiveByRole(UserRole.ADMIN) <= 1) {
+        if (existing.hasRole("ADMIN") && existing.isActive()) {
+            boolean deactivating = !command.active();
+            boolean demoting = !command.attributes().getOrDefault("role", List.of()).contains("ADMIN");
+            if ((deactivating || demoting) && userPort.countActiveAdmins() <= 1) {
                 throw ApplicationException.conflict("LAST_ADMIN", MessageCode.USER_LAST_ADMIN.getMessage());
             }
         }
-        existing.applyUpdate(command.email(), userFactory.hashIfPresent(command.rawPasswordOrNull()), command.role(), command.active(), command.permissions());
+        existing.applyUpdate(command.email(), userFactory.hashIfPresent(command.rawPasswordOrNull()), command.active(), command.attributes());
         userPort.update(id, existing);
-        userPort.savePermissions(id, command.permissions());
     }
 
     @Override
@@ -80,8 +79,7 @@ public class UserService implements UserUseCase {
             throw ApplicationException.conflict("USER_DELETED", MessageCode.USER_ALREADY_DELETED.getMessage());
         }
         // 마지막 활성 ADMIN 삭제 방어
-        if (existing.getRole() == UserRole.ADMIN && existing.isActive()
-                && userPort.countActiveByRole(UserRole.ADMIN) <= 1) {
+        if (existing.hasRole("ADMIN") && existing.isActive() && userPort.countActiveAdmins() <= 1) {
             throw ApplicationException.conflict("LAST_ADMIN", MessageCode.USER_LAST_ADMIN.getMessage());
         }
         userPort.softDelete(id);

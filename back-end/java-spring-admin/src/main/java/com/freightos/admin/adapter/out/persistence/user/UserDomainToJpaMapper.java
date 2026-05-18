@@ -22,11 +22,9 @@ public class UserDomainToJpaMapper {
         entity.setUsername(domain.getUsername());
         entity.setEmail(domain.getEmail());
         entity.setPasswordHash(domain.getPasswordHash());
-        entity.setRole(domain.getRole());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
-        // 신규 사용자는 빈 attributes로 시작
-        entity.setAttributes(serializeAttributes(Map.of()));
+        entity.setAttributes(serializeAttributes(domain.getAttributes()));
         return entity;
     }
 
@@ -36,12 +34,11 @@ public class UserDomainToJpaMapper {
      */
     public void applyUpdateFields(UserJpaEntity entity, AdminUser patch) {
         entity.setEmail(patch.getEmail());
-        entity.setRole(patch.getRole());
         entity.setActive(patch.isActive());
+        entity.setAttributes(serializeAttributes(patch.getAttributes()));
         if (patch.getPasswordHash() != null) {
             entity.setPasswordHash(patch.getPasswordHash());
         }
-        // attributes는 CreateUserRequest/UpdateUserRequest DTO 변경 없이 기존 값 유지
     }
 
     private String serializeAttributes(Map<String, List<String>> attrs) {
