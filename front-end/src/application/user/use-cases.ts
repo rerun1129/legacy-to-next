@@ -7,4 +7,5 @@ export const userUseCases = {
   create: (req: CreateUserRequestDto) => userPort.create(req),
   update: (id: number, req: UpdateUserRequestDto) => userPort.update(id, req),
   delete: (id: number) => userPort.delete(id),
+  deleteMany: (ids: number[]) => userPort.deleteMany(ids),
 };

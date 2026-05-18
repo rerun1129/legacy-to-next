@@ -80,4 +80,12 @@ export const API_ATTRIBUTE_PORT: AttributeDefinitionPort = {
   async delete(attributeKey) {
     await adminFetchJson(`${BASE}/${attributeKey}`, { method: "DELETE" });
   },
+
+  async deleteMany(keys) {
+    // BE BulkDeleteByCodeRequest DTO 필드명이 codes이므로 keys를 codes로 매핑
+    await adminFetchJson(`${BASE}/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ codes: keys }),
+    });
+  },
 };

@@ -19,4 +19,5 @@ export interface MenuPort {
   create(req: CreateMenuDto): Promise<number>;
   update(id: number, req: UpdateMenuDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

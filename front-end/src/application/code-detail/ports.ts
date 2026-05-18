@@ -19,4 +19,5 @@ export interface CodeDetailPort {
   create(req: CreateCodeDetailRequestDto): Promise<number>;
   update(id: number, req: UpdateCodeDetailRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

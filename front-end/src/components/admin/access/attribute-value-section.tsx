@@ -8,6 +8,8 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessAttributeValuePort } from "@/lib/ports";
+import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { useState } from "react";
 import type { CreateAttributeValueDto } from "@/domain/access/attribute-value";
 
@@ -42,6 +44,7 @@ function parseNullableNum(v: string): number | null {
 export function AttributeValueSection({ attributeKey }: Props) {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const form = useForm<CreateFormValues>({ defaultValues: DEFAULT_FORM });
 
   const { data, isFetching } = useQuery({
@@ -71,6 +74,15 @@ export function AttributeValueSection({ attributeKey }: Props) {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (values: string[]) => accessAttributeValueUseCases.deleteMany(attributeKey, values),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["access-attribute-value", attributeKey] });
+      setSelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
+
   async function handleDelete(value: string) {
     const ok = await confirm({
       title: "값 삭제",
@@ -81,6 +93,19 @@ export function AttributeValueSection({ attributeKey }: Props) {
     });
     if (!ok) return;
     deleteMutation.mutate({ value });
+  }
+
+  async function handleBulkDelete() {
+    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
+    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  }
+
+  function toggleKey(value: string) {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value); else next.add(value);
+      return next;
+    });
   }
 
   function handleCreate(values: CreateFormValues) {
@@ -103,7 +128,15 @@ export function AttributeValueSection({ attributeKey }: Props) {
           <div className="panel__title-accent" />
           <span className="panel__title">Attribute Value — {attributeKey}</span>
           <span className="panel__rowcount">{rows.length}</span>
-          <div style={{ marginLeft: "auto" }}>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            <ActionButton
+              buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"
+              className="btn btn--modal btn--sm"
+              disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
+              onClick={handleBulkDelete}
+            >
+              선택 삭제
+            </ActionButton>
             <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setCreateOpen(true)}>
               값 추가
             </Button>
@@ -116,6 +149,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
             <table className="grid" style={{ width: "100%" }}>
               <thead>
                 <tr>
+                  <th style={{ width: 32 }}></th>
                   <th>value</th>
                   <th>label</th>
                   <th>sortOrder</th>
@@ -126,6 +160,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.value}>
+                    <td><input type="checkbox" checked={selectedKeys.has(r.value)} onChange={() => toggleKey(r.value)} /></td>
                     <td>{r.value}</td>
                     <td>{r.label ?? "-"}</td>
                     <td style={{ textAlign: "right" }}>{r.sortOrder ?? "-"}</td>
@@ -143,7 +178,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center", color: "var(--ink-3)" }}>
+                    <td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>
                       값이 없습니다.
                     </td>
                   </tr>

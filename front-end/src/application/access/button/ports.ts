@@ -19,4 +19,5 @@ export interface ButtonPort {
   create(req: CreateButtonDto): Promise<number>;
   update(id: number, req: UpdateButtonDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

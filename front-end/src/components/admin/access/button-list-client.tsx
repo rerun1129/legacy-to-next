@@ -9,6 +9,7 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessButtonPort } from "@/lib/ports";
+import { accessButtonUseCases } from "@/application/access/button/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import type { CreateButtonDto, UpdateButtonDto, ButtonActionType, ButtonRow } from "@/domain/access/button";
 
@@ -59,6 +60,7 @@ export function AccessButtonListClient() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ButtonRow | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
   const createForm = useForm<CreateButtonDto>({ defaultValues: DEFAULT_FORM });
   const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
 
@@ -99,6 +101,15 @@ export function AccessButtonListClient() {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => accessButtonUseCases.deleteMany(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
+      setSelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
+
   function openEdit(row: ButtonRow) {
     setEditTarget(row);
     editForm.reset({
@@ -132,11 +143,32 @@ export function AccessButtonListClient() {
     deleteMutation.mutate(id);
   }
 
+  async function handleBulkDelete() {
+    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
+    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  }
+
+  function toggleKey(id: number) {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
   const rows = data?.content ?? [];
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_BUTTON_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
+          onClick={handleBulkDelete}
+        >
+          선택 삭제
+        </ActionButton>
         <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setCreateOpen(true)}>신규</Button>
       </div>
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -148,10 +180,11 @@ export function AccessButtonListClient() {
         <div className="list-wrap">
           {isFetching ? <div style={{ padding: 16, color: "var(--ink-3)" }}>로딩 중...</div> : (
             <table className="grid" style={{ width: "100%" }}>
-              <thead><tr><th>ID</th><th>buttonCode</th><th>label</th><th>menuId</th><th>actionType</th><th>active</th><th></th></tr></thead>
+              <thead><tr><th style={{ width: 32 }}></th><th>ID</th><th>buttonCode</th><th>label</th><th>menuId</th><th>actionType</th><th>active</th><th></th></tr></thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id}>
+                    <td><input type="checkbox" checked={selectedKeys.has(r.id)} onChange={() => toggleKey(r.id)} /></td>
                     <td>{r.id}</td>
                     <td>{r.buttonCode}</td>
                     <td>{r.label}</td>
@@ -177,7 +210,7 @@ export function AccessButtonListClient() {
                     </td>
                   </tr>
                 ))}
-                {rows.length === 0 && <tr><td colSpan={7} style={{ textAlign: "center", color: "var(--ink-3)" }}>데이터가 없습니다.</td></tr>}
+                {rows.length === 0 && <tr><td colSpan={8} style={{ textAlign: "center", color: "var(--ink-3)" }}>데이터가 없습니다.</td></tr>}
               </tbody>
             </table>
           )}

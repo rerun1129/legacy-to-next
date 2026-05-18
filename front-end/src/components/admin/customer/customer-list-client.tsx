@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -11,6 +11,9 @@ import { CustomerListGrid } from "./customer-list-grid";
 import { CustomerEntryModal } from "./customer-entry-modal";
 import type { EntryModalState } from "./customer-entry-modal";
 import type { CustomerFilter } from "@/domain/customer";
+import { customerUseCases } from "@/application/customer/use-cases";
+import { confirm } from "@/components/confirm";
+import { toast } from "@/lib/toast-store";
 
 const DEFAULT_VALUES: CustomerFilter = {
   customerCode: "",
@@ -26,6 +29,16 @@ export function CustomerListClient() {
   const [extraFilter, setExtraFilter] = useState<CustomerFilter | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [entryModalState, setEntryModalState] = useState<EntryModalState | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => customerUseCases.deleteMany(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-customer", "list"] });
+      setSelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
 
   return (
     <>
@@ -56,6 +69,21 @@ export function CustomerListClient() {
           Search
         </Button>
         <ActionButton
+          buttonCode="BTN_ADMIN_CUSTOMER_LIST_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
+          onClick={async () => {
+            const ok = await confirm({
+              title: "선택 삭제",
+              description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`,
+              variant: "destructive",
+            });
+            if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+          }}
+        >
+          선택 삭제
+        </ActionButton>
+        <ActionButton
           buttonCode="BTN_ADMIN_CUSTOMER_LIST_CREATE"
           className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
@@ -72,6 +100,8 @@ export function CustomerListClient() {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           onRowDoubleClick={(id) => setEntryModalState({ mode: "edit", id })}
+          selectedKeys={selectedKeys}
+          onSelectionChange={setSelectedKeys}
         />
       </div>
 

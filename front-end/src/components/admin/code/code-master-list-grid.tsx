@@ -19,6 +19,10 @@ interface Props {
   selectedId: number | null;
   onSelect: (id: number) => void;
   onRowDoubleClick: (id: number) => void;
+  selectedKeys: ReadonlySet<number>;
+  onSelectionChange: (next: Set<number>) => void;
+  onBulkDelete: () => void;
+  isBulkDeletePending: boolean;
 }
 
 const DEFAULT_FILTER: CodeMasterFilter = {
@@ -42,7 +46,7 @@ const COLUMNS: GridColumn<CodeMasterRow>[] = [
   { key: "updatedAt", label: "수정일시", minWidth: 150 },
 ];
 
-export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick }: Props) {
+export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, selectedKeys, onSelectionChange, onBulkDelete, isBulkDeletePending }: Props) {
   const form = useForm<CodeMasterFilter>({ defaultValues: DEFAULT_FILTER });
 
   const [submittedFilter, setSubmittedFilter] = useState<CodeMasterFilter | null>(null);
@@ -83,6 +87,14 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick }: P
         <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearch}>
           Search
         </Button>
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || isBulkDeletePending}
+          onClick={onBulkDelete}
+        >
+          선택 삭제
+        </ActionButton>
         <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_CREATE"
           className="btn btn--modal btn--sm"
@@ -148,6 +160,9 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick }: P
                 }
                 isLoading={isFetching}
                 emptyMessage="검색 결과가 없습니다."
+                selectable
+                selectedKeys={selectedKeys}
+                onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
               />
             </div>
             <Pagination

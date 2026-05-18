@@ -9,6 +9,7 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessAttributePort } from "@/lib/ports";
+import { accessAttributeUseCases } from "@/application/access/attribute/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { AttributeValueSection } from "@/components/admin/access/attribute-value-section";
 import type {
@@ -47,6 +48,7 @@ export function AccessAttributeListClient() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<AttributeDefinitionRow | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const createForm = useForm<CreateAttributeDefinitionDto>({ defaultValues: DEFAULT_FORM });
   const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
 
@@ -88,6 +90,15 @@ export function AccessAttributeListClient() {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (keys: string[]) => accessAttributeUseCases.deleteMany(keys),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["access-attribute", "list"] });
+      setSelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
+
   function openEdit(row: AttributeDefinitionRow) {
     setEditTarget(row);
     editForm.reset({
@@ -126,11 +137,32 @@ export function AccessAttributeListClient() {
     deleteMutation.mutate(attributeKey);
   }
 
+  async function handleBulkDelete() {
+    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
+    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  }
+
+  function toggleKey(attributeKey: string) {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(attributeKey)) next.delete(attributeKey); else next.add(attributeKey);
+      return next;
+    });
+  }
+
   const rows = data?.content ?? [];
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
+          onClick={handleBulkDelete}
+        >
+          선택 삭제
+        </ActionButton>
         <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setCreateOpen(true)}>신규</Button>
       </div>
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -146,6 +178,7 @@ export function AccessAttributeListClient() {
             <table className="grid" style={{ width: "100%" }}>
               <thead>
                 <tr>
+                  <th style={{ width: 32 }}></th>
                   <th>attributeKey</th>
                   <th>name</th>
                   <th>valueType</th>
@@ -162,6 +195,7 @@ export function AccessAttributeListClient() {
                     className={selectedKey === r.attributeKey ? "is-selected" : undefined}
                     style={r.valueType === "ENUM" ? { cursor: "pointer" } : undefined}
                   >
+                    <td onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedKeys.has(r.attributeKey)} onChange={() => toggleKey(r.attributeKey)} /></td>
                     <td>{r.attributeKey}</td>
                     <td>{r.name}</td>
                     <td>{r.valueType}</td>
@@ -188,7 +222,7 @@ export function AccessAttributeListClient() {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>
+                    <td colSpan={7} style={{ textAlign: "center", color: "var(--ink-3)" }}>
                       데이터가 없습니다.
                     </td>
                   </tr>

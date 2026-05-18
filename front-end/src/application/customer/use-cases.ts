@@ -7,4 +7,5 @@ export const customerUseCases = {
   create: (req: CreateCustomerRequestDto) => customerPort.create(req),
   update: (id: number, req: UpdateCustomerRequestDto) => customerPort.update(id, req),
   delete: (id: number) => customerPort.delete(id),
+  deleteMany: (ids: number[]) => customerPort.deleteMany(ids),
 };

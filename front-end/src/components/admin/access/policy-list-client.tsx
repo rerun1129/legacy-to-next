@@ -9,6 +9,9 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessMenuPolicyPort, accessButtonPolicyPort } from "@/lib/ports";
+import { accessMenuPolicyUseCases } from "@/application/access/menu-policy/use-cases";
+import { accessButtonPolicyUseCases } from "@/application/access/button-policy/use-cases";
+import { ActionButton } from "@/components/admin/access/action-button";
 import type { CreateMenuPolicyDto, CreateButtonPolicyDto } from "@/domain/access/policy";
 
 const DEFAULT_MENU_POLICY: CreateMenuPolicyDto = { menuId: 0, attributeKey: "", requiredValue: "" };
@@ -23,6 +26,8 @@ export function AccessPolicyListClient() {
   const [filterButtonId, setFilterButtonId] = useState<string>("");
   const [menuPolicyOpen, setMenuPolicyOpen] = useState(false);
   const [btnPolicyOpen, setBtnPolicyOpen] = useState(false);
+  const [menuPolicySelectedKeys, setMenuPolicySelectedKeys] = useState<Set<number>>(new Set());
+  const [btnPolicySelectedKeys, setBtnPolicySelectedKeys] = useState<Set<number>>(new Set());
   const menuForm = useForm<CreateMenuPolicyDto>({ defaultValues: DEFAULT_MENU_POLICY });
   const btnForm = useForm<CreateButtonPolicyDto>({ defaultValues: DEFAULT_BTN_POLICY });
 
@@ -57,6 +62,15 @@ export function AccessPolicyListClient() {
     onSuccess: () => { toast.success("삭제됨"); qc.invalidateQueries({ queryKey: ["access-menu-policy"] }); },
   });
 
+  const bulkDeleteMenuPolicy = useMutation({
+    mutationFn: (ids: number[]) => accessMenuPolicyUseCases.deleteMany(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["access-menu-policy"] });
+      setMenuPolicySelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
+
   const createBtnPolicy = useMutation({
     mutationFn: (req: CreateButtonPolicyDto) => accessButtonPolicyPort.create(req),
     onSuccess: () => { toast.success("Button Policy 등록"); qc.invalidateQueries({ queryKey: ["access-button-policy"] }); setBtnPolicyOpen(false); btnForm.reset(DEFAULT_BTN_POLICY); },
@@ -67,16 +81,51 @@ export function AccessPolicyListClient() {
     onSuccess: () => { toast.success("삭제됨"); qc.invalidateQueries({ queryKey: ["access-button-policy"] }); },
   });
 
+  const bulkDeleteBtnPolicy = useMutation({
+    mutationFn: (ids: number[]) => accessButtonPolicyUseCases.deleteMany(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["access-button-policy"] });
+      setBtnPolicySelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
+
   async function handleDeleteMenu(id: number) {
     const ok = await confirm({ title: "Menu Policy 삭제", description: "삭제하시겠습니까?", variant: "destructive", confirmText: "삭제", cancelText: "취소" });
     if (!ok) return;
     deleteMenuPolicy.mutate(id);
   }
 
+  async function handleBulkDeleteMenu() {
+    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${menuPolicySelectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
+    if (ok) bulkDeleteMenuPolicy.mutate([...menuPolicySelectedKeys]);
+  }
+
+  function toggleMenuPolicyKey(id: number) {
+    setMenuPolicySelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
   async function handleDeleteBtn(id: number) {
     const ok = await confirm({ title: "Button Policy 삭제", description: "삭제하시겠습니까?", variant: "destructive", confirmText: "삭제", cancelText: "취소" });
     if (!ok) return;
     deleteBtnPolicy.mutate(id);
+  }
+
+  async function handleBulkDeleteBtn() {
+    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${btnPolicySelectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
+    if (ok) bulkDeleteBtnPolicy.mutate([...btnPolicySelectedKeys]);
+  }
+
+  function toggleBtnPolicyKey(id: number) {
+    setBtnPolicySelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   }
 
   return (
@@ -93,22 +142,33 @@ export function AccessPolicyListClient() {
               <span className="lcn__label">Menu ID</span>
               <input className="text-box text-box--panel" placeholder="Menu ID 입력 후 조회" value={filterMenuId} onChange={(e) => setFilterMenuId(e.target.value)} />
             </div>
-            <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setMenuPolicyOpen(true)}>신규</Button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <ActionButton
+                buttonCode="BTN_ADMIN_ACCESS_POLICY_DELETE"
+                className="btn btn--modal btn--sm"
+                disabled={menuPolicySelectedKeys.size === 0 || bulkDeleteMenuPolicy.isPending}
+                onClick={handleBulkDeleteMenu}
+              >
+                선택 삭제
+              </ActionButton>
+              <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setMenuPolicyOpen(true)}>신규</Button>
+            </div>
           </div>
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Menu Policy</span></div>
             <div className="list-wrap">
               {menuFetching ? <div style={{ padding: 16 }}>로딩 중...</div> : (
                 <table className="grid" style={{ width: "100%" }}>
-                  <thead><tr><th>ID</th><th>menuId</th><th>attributeKey</th><th>requiredValue</th><th></th></tr></thead>
+                  <thead><tr><th style={{ width: 32 }}></th><th>ID</th><th>menuId</th><th>attributeKey</th><th>requiredValue</th><th></th></tr></thead>
                   <tbody>
                     {(menuPolicies ?? []).map((r) => (
                       <tr key={r.id}>
+                        <td><input type="checkbox" checked={menuPolicySelectedKeys.has(r.id)} onChange={() => toggleMenuPolicyKey(r.id)} /></td>
                         <td>{r.id}</td><td>{r.menuId}</td><td>{r.attributeKey}</td><td>{r.requiredValue}</td>
                         <td><button className="btn btn--danger btn--sm" onClick={() => handleDeleteMenu(r.id)}><Trash2 size={12} /></button></td>
                       </tr>
                     ))}
-                    {!menuPolicies && <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--ink-3)" }}>Menu ID를 입력하세요.</td></tr>}
+                    {!menuPolicies && <tr><td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>Menu ID를 입력하세요.</td></tr>}
                   </tbody>
                 </table>
               )}
@@ -137,22 +197,33 @@ export function AccessPolicyListClient() {
               <span className="lcn__label">Button ID</span>
               <input className="text-box text-box--panel" placeholder="Button ID 입력 후 조회" value={filterButtonId} onChange={(e) => setFilterButtonId(e.target.value)} />
             </div>
-            <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setBtnPolicyOpen(true)}>신규</Button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <ActionButton
+                buttonCode="BTN_ADMIN_ACCESS_POLICY_DELETE"
+                className="btn btn--modal btn--sm"
+                disabled={btnPolicySelectedKeys.size === 0 || bulkDeleteBtnPolicy.isPending}
+                onClick={handleBulkDeleteBtn}
+              >
+                선택 삭제
+              </ActionButton>
+              <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setBtnPolicyOpen(true)}>신규</Button>
+            </div>
           </div>
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Button Policy</span></div>
             <div className="list-wrap">
               {btnFetching ? <div style={{ padding: 16 }}>로딩 중...</div> : (
                 <table className="grid" style={{ width: "100%" }}>
-                  <thead><tr><th>ID</th><th>buttonId</th><th>attributeKey</th><th>requiredValue</th><th></th></tr></thead>
+                  <thead><tr><th style={{ width: 32 }}></th><th>ID</th><th>buttonId</th><th>attributeKey</th><th>requiredValue</th><th></th></tr></thead>
                   <tbody>
                     {(btnPolicies ?? []).map((r) => (
                       <tr key={r.id}>
+                        <td><input type="checkbox" checked={btnPolicySelectedKeys.has(r.id)} onChange={() => toggleBtnPolicyKey(r.id)} /></td>
                         <td>{r.id}</td><td>{r.buttonId}</td><td>{r.attributeKey}</td><td>{r.requiredValue}</td>
                         <td><button className="btn btn--danger btn--sm" onClick={() => handleDeleteBtn(r.id)}><Trash2 size={12} /></button></td>
                       </tr>
                     ))}
-                    {!btnPolicies && <tr><td colSpan={5} style={{ textAlign: "center", color: "var(--ink-3)" }}>Button ID를 입력하세요.</td></tr>}
+                    {!btnPolicies && <tr><td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>Button ID를 입력하세요.</td></tr>}
                   </tbody>
                 </table>
               )}

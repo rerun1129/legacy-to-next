@@ -40,4 +40,11 @@ export const API_BUTTON_POLICY_PORT: ButtonPolicyPort = {
   async delete(id) {
     await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
+
+  async deleteMany(ids) {
+    await adminFetchJson(`${BASE}/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    });
+  },
 };

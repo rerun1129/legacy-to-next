@@ -82,4 +82,11 @@ export const API_BUTTON_PORT: ButtonPort = {
   async delete(id) {
     await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
+
+  async deleteMany(ids) {
+    await adminFetchJson(`${BASE}/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    });
+  },
 };

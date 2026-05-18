@@ -8,4 +8,5 @@ export const codeDetailUseCases = {
   create: (req: CreateCodeDetailRequestDto) => codeDetailPort.create(req),
   update: (id: number, req: UpdateCodeDetailRequestDto) => codeDetailPort.update(id, req),
   delete: (id: number) => codeDetailPort.delete(id),
+  deleteMany: (ids: number[]) => codeDetailPort.deleteMany(ids),
 };

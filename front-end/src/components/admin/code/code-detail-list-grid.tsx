@@ -14,6 +14,10 @@ import type { CodeDetailRow } from "@/domain/code-detail";
 
 interface Props {
   masterId: number | null;
+  selectedKeys: ReadonlySet<number>;
+  onSelectionChange: (next: Set<number>) => void;
+  onBulkDelete: () => void;
+  isBulkDeletePending: boolean;
 }
 
 const COLUMNS: GridColumn<CodeDetailRow>[] = [
@@ -30,7 +34,7 @@ const COLUMNS: GridColumn<CodeDetailRow>[] = [
   { key: "updatedAt", label: "수정일시", minWidth: 150 },
 ];
 
-export function CodeDetailListGrid({ masterId }: Props) {
+export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, onBulkDelete, isBulkDeletePending }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [entryModalState, setEntryModalState] = useState<CodeDetailEntryModalState | null>(null);
 
@@ -72,6 +76,14 @@ export function CodeDetailListGrid({ masterId }: Props) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || isBulkDeletePending}
+          onClick={onBulkDelete}
+        >
+          선택 삭제
+        </ActionButton>
+        <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_CREATE"
           className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create", masterId })}
@@ -109,6 +121,9 @@ export function CodeDetailListGrid({ masterId }: Props) {
                 onRowClick={(row) => setEntryModalState({ mode: "edit", masterId, id: row.id })}
                 isLoading={isFetching}
                 emptyMessage="검색 결과가 없습니다."
+                selectable
+                selectedKeys={selectedKeys}
+                onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
               />
             </div>
             <Pagination

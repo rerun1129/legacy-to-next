@@ -7,4 +7,5 @@ export const noticeUseCases = {
   create: (req: CreateNoticeRequestDto) => noticePort.create(req),
   update: (id: number, req: UpdateNoticeRequestDto) => noticePort.update(id, req),
   delete: (id: number) => noticePort.delete(id),
+  deleteMany: (ids: number[]) => noticePort.deleteMany(ids),
 };

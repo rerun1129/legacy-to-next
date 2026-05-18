@@ -20,4 +20,5 @@ export interface CodeMasterPort {
   create(req: CreateCodeMasterRequestDto): Promise<number>;
   update(id: number, req: UpdateCodeMasterRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

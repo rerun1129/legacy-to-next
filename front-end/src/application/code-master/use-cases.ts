@@ -8,4 +8,5 @@ export const codeMasterUseCases = {
   create: (req: CreateCodeMasterRequestDto) => codeMasterPort.create(req),
   update: (id: number, req: UpdateCodeMasterRequestDto) => codeMasterPort.update(id, req),
   delete: (id: number) => codeMasterPort.delete(id),
+  deleteMany: (ids: number[]) => codeMasterPort.deleteMany(ids),
 };

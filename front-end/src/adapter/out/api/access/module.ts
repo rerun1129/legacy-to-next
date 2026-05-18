@@ -72,4 +72,11 @@ export const API_MODULE_PORT: ModulePort = {
   async delete(moduleCode) {
     await adminFetchJson(`${BASE}/${moduleCode}`, { method: "DELETE" });
   },
+
+  async deleteMany(codes) {
+    await adminFetchJson(`${BASE}/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ codes }),
+    });
+  },
 };

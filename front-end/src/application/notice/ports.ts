@@ -20,4 +20,5 @@ export interface NoticePort {
   create(req: CreateNoticeRequestDto): Promise<number>;
   update(id: number, req: UpdateNoticeRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

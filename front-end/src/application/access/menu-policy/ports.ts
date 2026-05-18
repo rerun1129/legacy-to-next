@@ -4,4 +4,5 @@ export interface MenuPolicyPort {
   listByMenu(menuId: number): Promise<MenuPolicyRow[]>;
   create(req: CreateMenuPolicyDto): Promise<number>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

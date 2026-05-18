@@ -9,4 +9,5 @@ export interface AttributeValuePort {
   create(req: CreateAttributeValueDto): Promise<void>;
   update(attributeKey: string, value: string, req: UpdateAttributeValueDto): Promise<void>;
   delete(attributeKey: string, value: string): Promise<void>;
+  deleteMany(attributeKey: string, values: string[]): Promise<void>;
 }

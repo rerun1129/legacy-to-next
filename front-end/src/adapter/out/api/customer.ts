@@ -124,4 +124,11 @@ export const API_CUSTOMER_PORT: CustomerPort = {
   async delete(id: number) {
     await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
+
+  async deleteMany(ids: number[]) {
+    await adminFetchJson(`${BASE}/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    });
+  },
 };

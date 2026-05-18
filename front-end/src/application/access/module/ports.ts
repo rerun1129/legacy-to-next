@@ -19,4 +19,5 @@ export interface ModulePort {
   create(req: CreateModuleDto): Promise<string>;
   update(moduleCode: string, req: UpdateModuleDto): Promise<void>;
   delete(moduleCode: string): Promise<void>;
+  deleteMany(codes: string[]): Promise<void>;
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -10,6 +11,9 @@ import { NoticeListGrid } from "./notice-list-grid";
 import { NoticeEntryModal } from "./notice-entry-modal";
 import type { EntryModalState } from "./notice-entry-modal";
 import type { NoticeFilter } from "@/domain/notice";
+import { noticeUseCases } from "@/application/notice/use-cases";
+import { confirm } from "@/components/confirm";
+import { toast } from "@/lib/toast-store";
 
 const DEFAULT_VALUES: NoticeFilter = {
   title: "",
@@ -20,10 +24,21 @@ const DEFAULT_VALUES: NoticeFilter = {
 
 export function NoticeListClient() {
   const form = useForm<NoticeFilter>({ defaultValues: DEFAULT_VALUES });
+  const qc = useQueryClient();
 
   const [extraFilter, setExtraFilter] = useState<NoticeFilter | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [entryModalState, setEntryModalState] = useState<EntryModalState | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => noticeUseCases.deleteMany(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-notice"] });
+      setSelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
 
   return (
     <>
@@ -54,6 +69,21 @@ export function NoticeListClient() {
           Search
         </Button>
         <ActionButton
+          buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
+          onClick={async () => {
+            const ok = await confirm({
+              title: "선택 삭제",
+              description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`,
+              variant: "destructive",
+            });
+            if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+          }}
+        >
+          선택 삭제
+        </ActionButton>
+        <ActionButton
           buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_CREATE"
           className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
@@ -70,6 +100,8 @@ export function NoticeListClient() {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           onRowDoubleClick={(id) => setEntryModalState({ mode: "edit", id })}
+          selectedKeys={selectedKeys}
+          onSelectionChange={setSelectedKeys}
         />
       </div>
 

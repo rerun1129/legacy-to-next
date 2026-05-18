@@ -9,6 +9,7 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessModulePort } from "@/lib/ports";
+import { accessModuleUseCases } from "@/application/access/module/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { ModuleUpdateModal } from "@/components/admin/access/module-update-modal";
 import type { CreateModuleDto, UpdateModuleDto, ModuleRow } from "@/domain/access/module";
@@ -25,6 +26,7 @@ export function AccessModuleListClient() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ModuleRow | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const createForm = useForm<CreateModuleDto>({ defaultValues: DEFAULT_CREATE });
 
   const { data, isFetching } = useQuery({
@@ -63,6 +65,15 @@ export function AccessModuleListClient() {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (codes: string[]) => accessModuleUseCases.deleteMany(codes),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["access-module", "list"] });
+      setSelectedKeys(new Set());
+      toast.success("선택한 항목이 삭제되었습니다.");
+    },
+  });
+
   async function handleDelete(moduleCode: string) {
     const ok = await confirm({
       title: "모듈 삭제",
@@ -75,11 +86,32 @@ export function AccessModuleListClient() {
     deleteMutation.mutate(moduleCode);
   }
 
+  async function handleBulkDelete() {
+    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
+    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  }
+
+  function toggleKey(code: string) {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code); else next.add(code);
+      return next;
+    });
+  }
+
   const rows = data?.content ?? [];
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_MODULE_DELETE"
+          className="btn btn--modal btn--sm"
+          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
+          onClick={handleBulkDelete}
+        >
+          선택 삭제
+        </ActionButton>
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_MODULE_CREATE"
           className="btn btn--modal btn--sm"
@@ -102,6 +134,7 @@ export function AccessModuleListClient() {
             <table className="grid" style={{ width: "100%" }}>
               <thead>
                 <tr>
+                  <th style={{ width: 32 }}></th>
                   <th>moduleCode</th>
                   <th>name</th>
                   <th>description</th>
@@ -113,6 +146,7 @@ export function AccessModuleListClient() {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.moduleCode}>
+                    <td><input type="checkbox" checked={selectedKeys.has(r.moduleCode)} onChange={() => toggleKey(r.moduleCode)} /></td>
                     <td>{r.moduleCode}</td>
                     <td>{r.name}</td>
                     <td>{r.description ?? "-"}</td>
@@ -139,7 +173,7 @@ export function AccessModuleListClient() {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>
+                    <td colSpan={7} style={{ textAlign: "center", color: "var(--ink-3)" }}>
                       데이터가 없습니다.
                     </td>
                   </tr>

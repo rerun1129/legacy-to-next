@@ -13,6 +13,8 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   onRowDoubleClick: (id: number) => void;
+  selectedKeys: ReadonlySet<number>;
+  onSelectionChange: (next: Set<number>) => void;
 }
 
 const COLUMNS: GridColumn<CustomerRow>[] = [
@@ -32,7 +34,7 @@ const COLUMNS: GridColumn<CustomerRow>[] = [
   { key: "updatedAt", label: "수정일시", minWidth: 160 },
 ];
 
-export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick }: Props) {
+export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
@@ -108,6 +110,9 @@ export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRow
           isLoading={isFetching}
           emptyMessage="검색 결과가 없습니다."
           onClearRow={() => setSelected(null)}
+          selectable
+          selectedKeys={selectedKeys}
+          onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
         />
       </div>
       <Pagination

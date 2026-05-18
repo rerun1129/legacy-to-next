@@ -13,6 +13,8 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   onRowDoubleClick: (id: number) => void;
+  selectedKeys: ReadonlySet<number>;
+  onSelectionChange: (next: Set<number>) => void;
 }
 
 const COLUMNS: GridColumn<NoticeRow>[] = [
@@ -39,7 +41,7 @@ const COLUMNS: GridColumn<NoticeRow>[] = [
   { key: "updatedAt", label: "수정일시", minWidth: 160 },
 ];
 
-export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick }: Props) {
+export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
@@ -115,6 +117,9 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
           isLoading={isFetching}
           emptyMessage="검색 결과가 없습니다."
           onClearRow={() => setSelected(null)}
+          selectable
+          selectedKeys={selectedKeys}
+          onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
         />
       </div>
       <Pagination

@@ -19,4 +19,5 @@ export interface AttributeDefinitionPort {
   create(req: CreateAttributeDefinitionDto): Promise<string>;
   update(attributeKey: string, req: UpdateAttributeDefinitionDto): Promise<void>;
   delete(attributeKey: string): Promise<void>;
+  deleteMany(keys: string[]): Promise<void>;
 }

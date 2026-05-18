@@ -20,4 +20,5 @@ export interface CustomerPort {
   create(req: CreateCustomerRequestDto): Promise<number>;
   update(id: number, req: UpdateCustomerRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

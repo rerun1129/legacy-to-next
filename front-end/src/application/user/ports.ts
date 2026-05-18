@@ -20,4 +20,5 @@ export interface UserPort {
   create(req: CreateUserRequestDto): Promise<number>;
   update(id: number, req: UpdateUserRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
+  deleteMany(ids: number[]): Promise<void>;
 }

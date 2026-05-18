@@ -108,4 +108,11 @@ export const API_CODE_DETAIL_PORT: CodeDetailPort = {
   async delete(id: number) {
     await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
+
+  async deleteMany(ids: number[]) {
+    await adminFetchJson(`${BASE}/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ ids }),
+    });
+  },
 };
