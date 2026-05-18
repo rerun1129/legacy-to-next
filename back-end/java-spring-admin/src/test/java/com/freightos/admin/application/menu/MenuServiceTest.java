@@ -14,12 +14,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class MenuServiceTest {
@@ -106,5 +109,45 @@ class MenuServiceTest {
         assertThatThrownBy(() -> menuService.findMenuById(99L))
                 .isInstanceOf(ApplicationException.class)
                 .satisfies(ex -> assertThat(((ApplicationException) ex).getStatus()).isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
+    // ── findAccessibleAdminMenus ──────────────────────────────────────────────
+
+    @Test
+    void findAccessibleAdminMenus_includesParentWhenChildAccessible() {
+        // 부모 메뉴(id=10, parentId=null)와 자식 메뉴(parentId=10) 모두 반환하는 경우
+        Menu parent = Menu.create("PARENT_CODE", null, "/parent", "부모", null, null, 1, true, "ACCESS");
+        parent.assignIdentity(10L, null, null, null, null);
+
+        Menu child = Menu.create("CHILD_CODE", 10L, "/child", "자식", null, null, 1, true, "ACCESS");
+        child.assignIdentity(20L, null, null, null, null);
+
+        given(menuPort.findAccessibleAdminMenus(Set.of("CHILD_CODE"))).willReturn(List.of(child, parent));
+
+        List<Menu> result = menuService.findAccessibleAdminMenus(Set.of("CHILD_CODE"));
+
+        assertThat(result).contains(child, parent);
+    }
+
+    @Test
+    void findAccessibleAdminMenus_excludesParentWhenNoChild() {
+        // 자식이 없는 root 메뉴만 반환되는 경우 → 후처리로 제거
+        Menu root = Menu.create("ROOT_CODE", null, "/root", "루트", null, null, 1, true, "ACCESS");
+        root.assignIdentity(5L, null, null, null, null);
+
+        given(menuPort.findAccessibleAdminMenus(Set.of("ROOT_CODE"))).willReturn(List.of(root));
+
+        List<Menu> result = menuService.findAccessibleAdminMenus(Set.of("ROOT_CODE"));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findAccessibleAdminMenus_emptyCodesReturnsEmpty() {
+        List<Menu> result = menuService.findAccessibleAdminMenus(Set.of());
+
+        assertThat(result).isEmpty();
+        // Port를 전혀 호출하지 않아야 한다 (빈 Set 조기 반환)
+        verifyNoInteractions(menuPort);
     }
 }

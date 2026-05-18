@@ -76,6 +76,7 @@ export function AccessMenuListClient() {
     onSuccess: () => {
       toast.success("메뉴가 등록되었습니다.");
       qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
+      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
       setCreateOpen(false);
       createForm.reset(DEFAULT_FORM);
     },
@@ -87,6 +88,7 @@ export function AccessMenuListClient() {
     onSuccess: () => {
       toast.success("메뉴가 수정되었습니다.");
       qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
+      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
       setEditTarget(null);
       editForm.reset(DEFAULT_UPDATE);
     },
@@ -97,6 +99,7 @@ export function AccessMenuListClient() {
     onSuccess: () => {
       toast.success("삭제되었습니다.");
       qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
+      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
     },
   });
 
