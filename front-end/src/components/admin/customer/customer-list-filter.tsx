@@ -1,13 +1,13 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import type { PartnerFilter } from "@/domain/partner";
+import type { CustomerFilter } from "@/domain/customer";
 
 interface Props {
-  form: UseFormReturn<PartnerFilter>;
+  form: UseFormReturn<CustomerFilter>;
 }
 
-const PARTNER_TYPE_OPTIONS = [
+const CUSTOMER_TYPE_OPTIONS = [
   { value: "ALL", label: "전체" },
   { value: "FORWARDER", label: "FORWARDER" },
   { value: "SHIPPER", label: "SHIPPER" },
@@ -24,7 +24,7 @@ const SCOPE_OPTIONS = [
   { value: "DELETED", label: "삭제됨" },
 ] as const;
 
-export function PartnerListFilter({ form }: Props) {
+export function CustomerListFilter({ form }: Props) {
   const { register } = form;
 
   return (
@@ -32,25 +32,25 @@ export function PartnerListFilter({ form }: Props) {
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <div className="lcn">
-            <span className="lcn__label">협력사 코드</span>
+            <span className="lcn__label">고객 코드</span>
             <input
               className="text-box text-box--panel"
-              placeholder="협력사 코드"
-              {...register("partnerCode")}
+              placeholder="고객 코드"
+              {...register("customerCode")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">협력사명</span>
+            <span className="lcn__label">고객명</span>
             <input
               className="text-box text-box--panel"
-              placeholder="협력사명 (부분일치)"
+              placeholder="고객명 (부분일치)"
               {...register("name")}
             />
           </div>
           <div className="lcn">
             <span className="lcn__label">구분</span>
-            <select className="text-box text-box--panel" {...register("partnerType")}>
-              {PARTNER_TYPE_OPTIONS.map((o) => (
+            <select className="text-box text-box--panel" {...register("customerType")}>
+              {CUSTOMER_TYPE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
                 </option>

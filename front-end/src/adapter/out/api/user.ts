@@ -16,7 +16,7 @@ const BASE = "/api/admin/user";
 
 const USER_ROLE_SCHEMA = z.enum(["ADMIN", "USER"]) satisfies z.ZodType<UserRole>;
 
-const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "PARTNER_MANAGE", "CMS_MANAGE"]);
+const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "CUSTOMER_MANAGE", "CMS_MANAGE"]);
 
 const USER_ROW_SCHEMA = z.object({
   id: z.number(),

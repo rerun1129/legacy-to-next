@@ -4,7 +4,7 @@ import { ADMIN_API_URL } from "@/lib/api-base";
 import { getAuthHeader } from "@/lib/admin-session";
 import { ApiError, ResponseParseError } from "./errors";
 
-const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "PARTNER_MANAGE", "CMS_MANAGE"]);
+const PERMISSION_SCHEMA = z.enum(["CODE_MANAGE", "USER_MANAGE", "CUSTOMER_MANAGE", "CMS_MANAGE"]);
 
 const ME_SCHEMA = z.object({
   id: z.number(),

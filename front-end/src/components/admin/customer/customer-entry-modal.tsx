@@ -7,8 +7,8 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
-import { partnerUseCases } from "@/application/partner/use-cases";
-import type { CreatePartnerRequestDto, UpdatePartnerRequestDto, PartnerType } from "@/domain/partner";
+import { customerUseCases } from "@/application/customer/use-cases";
+import type { CreateCustomerRequestDto, UpdateCustomerRequestDto, CustomerType } from "@/domain/customer";
 
 export interface EntryModalState {
   mode: "create" | "edit";
@@ -21,9 +21,9 @@ interface Props {
   onSaved: () => void;
 }
 
-interface PartnerFormValues {
-  partnerCode: string;
-  partnerType: PartnerType;
+interface CustomerFormValues {
+  customerCode: string;
+  customerType: CustomerType;
   name: string;
   nameEn: string;
   businessNo: string;
@@ -31,13 +31,14 @@ interface PartnerFormValues {
   phone: string;
   email: string;
   address: string;
+  addressEn: string;
   memo: string;
   active: boolean;
 }
 
-const DEFAULT_FORM: PartnerFormValues = {
-  partnerCode: "",
-  partnerType: "FORWARDER",
+const DEFAULT_FORM: CustomerFormValues = {
+  customerCode: "",
+  customerType: "FORWARDER",
   name: "",
   nameEn: "",
   businessNo: "",
@@ -45,11 +46,12 @@ const DEFAULT_FORM: PartnerFormValues = {
   phone: "",
   email: "",
   address: "",
+  addressEn: "",
   memo: "",
   active: true,
 };
 
-const PARTNER_TYPE_OPTIONS: { value: PartnerType; label: string }[] = [
+const CUSTOMER_TYPE_OPTIONS: { value: CustomerType; label: string }[] = [
   { value: "FORWARDER", label: "FORWARDER" },
   { value: "SHIPPER", label: "SHIPPER" },
   { value: "CONSIGNEE", label: "CONSIGNEE" },
@@ -64,29 +66,29 @@ function parseNullable(v: string): string | null {
 
 // ─── 필드 영역 분리 (11 필드 수용, readOnly 상태 전파) ───────────────────────
 interface FormFieldsProps {
-  register: ReturnType<typeof useForm<PartnerFormValues>>["register"];
+  register: ReturnType<typeof useForm<CustomerFormValues>>["register"];
   isEdit: boolean;
   isReadOnly: boolean;
 }
 
-function PartnerFormFields({ register, isEdit, isReadOnly }: FormFieldsProps) {
+function CustomerFormFields({ register, isEdit, isReadOnly }: FormFieldsProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div className="lcn">
-        <span className="lcn__label">협력사 코드 *</span>
-        {/* partnerCode는 edit 모드에서 UX readOnly 스타일. BE updatable=false가 변경 방지 SSOT */}
+        <span className="lcn__label">고객 코드 *</span>
+        {/* customerCode는 edit 모드에서 UX readOnly 스타일. BE updatable=false가 변경 방지 SSOT */}
         <input
           className="text-box text-box--panel"
-          placeholder="협력사 코드"
+          placeholder="고객 코드"
           readOnly={isEdit || isReadOnly}
           style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
-          {...register("partnerCode")}
+          {...register("customerCode")}
         />
       </div>
       <div className="lcn">
         <span className="lcn__label">구분 *</span>
-        <select className="text-box text-box--panel" disabled={isReadOnly} {...register("partnerType")}>
-          {PARTNER_TYPE_OPTIONS.map((o) => (
+        <select className="text-box text-box--panel" disabled={isReadOnly} {...register("customerType")}>
+          {CUSTOMER_TYPE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
@@ -94,10 +96,10 @@ function PartnerFormFields({ register, isEdit, isReadOnly }: FormFieldsProps) {
         </select>
       </div>
       <div className="lcn">
-        <span className="lcn__label">협력사명 *</span>
+        <span className="lcn__label">고객명 *</span>
         <input
           className="text-box text-box--panel"
-          placeholder="협력사명"
+          placeholder="고객명"
           readOnly={isReadOnly}
           {...register("name")}
         />
@@ -156,6 +158,15 @@ function PartnerFormFields({ register, isEdit, isReadOnly }: FormFieldsProps) {
           {...register("address")}
         />
       </div>
+      <div className="lcn">
+        <span className="lcn__label">영문 주소</span>
+        <input
+          className="text-box text-box--panel"
+          placeholder="영문 주소 (선택)"
+          readOnly={isReadOnly}
+          {...register("addressEn")}
+        />
+      </div>
       <div className="lcn" style={{ alignItems: "flex-start" }}>
         <span className="lcn__label" style={{ paddingTop: 4 }}>메모</span>
         <textarea
@@ -179,15 +190,15 @@ function PartnerFormFields({ register, isEdit, isReadOnly }: FormFieldsProps) {
 }
 
 // ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
-function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
+function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
-  const form = useForm<PartnerFormValues>({ defaultValues: DEFAULT_FORM });
+  const form = useForm<CustomerFormValues>({ defaultValues: DEFAULT_FORM });
   const { register, reset, getValues, formState: { isSubmitting } } = form;
 
   const { data: detail, isLoading: isDetailLoading } = useQuery({
-    queryKey: ["admin-partner", "detail", state?.id],
-    queryFn: () => partnerUseCases.getById(state!.id!),
+    queryKey: ["admin-customer", "detail", state?.id],
+    queryFn: () => customerUseCases.getById(state!.id!),
     enabled: isEdit && state?.id != null,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -197,8 +208,8 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
   useEffect(() => {
     if (detail) {
       reset({
-        partnerCode: detail.partnerCode,
-        partnerType: detail.partnerType,
+        customerCode: detail.customerCode,
+        customerType: detail.customerType,
         name: detail.name,
         nameEn: detail.nameEn ?? "",
         businessNo: detail.businessNo ?? "",
@@ -206,6 +217,7 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
         phone: detail.phone ?? "",
         email: detail.email ?? "",
         address: detail.address ?? "",
+        addressEn: detail.addressEn ?? "",
         memo: detail.memo ?? "",
         active: detail.active,
       });
@@ -219,34 +231,34 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
   }, [isEdit, reset]);
 
   const createMutation = useMutation({
-    mutationFn: (req: CreatePartnerRequestDto) => partnerUseCases.create(req),
+    mutationFn: (req: CreateCustomerRequestDto) => customerUseCases.create(req),
     onSuccess: () => {
-      toast.success("협력사가 등록되었습니다.");
+      toast.success("고객이 등록되었습니다.");
       onSaved();
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, req }: { id: number; req: UpdatePartnerRequestDto }) =>
-      partnerUseCases.update(id, req),
+    mutationFn: ({ id, req }: { id: number; req: UpdateCustomerRequestDto }) =>
+      customerUseCases.update(id, req),
     onSuccess: () => {
-      toast.success("협력사가 수정되었습니다.");
+      toast.success("고객이 수정되었습니다.");
       onSaved();
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => partnerUseCases.delete(id),
+    mutationFn: (id: number) => customerUseCases.delete(id),
     onSuccess: () => {
-      toast.success("협력사가 삭제되었습니다.");
+      toast.success("고객이 삭제되었습니다.");
       onSaved();
     },
   });
 
-  function handleSave(values: PartnerFormValues) {
+  function handleSave(values: CustomerFormValues) {
     if (isEdit && state?.id != null) {
-      const req: UpdatePartnerRequestDto = {
-        partnerType: values.partnerType,
+      const req: UpdateCustomerRequestDto = {
+        customerType: values.customerType,
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         businessNo: parseNullable(values.businessNo),
@@ -254,14 +266,15 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
         phone: parseNullable(values.phone),
         email: parseNullable(values.email),
         address: parseNullable(values.address),
+        addressEn: parseNullable(values.addressEn),
         memo: parseNullable(values.memo),
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
     } else {
-      const req: CreatePartnerRequestDto = {
-        partnerCode: values.partnerCode.trim(),
-        partnerType: values.partnerType,
+      const req: CreateCustomerRequestDto = {
+        customerCode: values.customerCode.trim(),
+        customerType: values.customerType,
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         businessNo: parseNullable(values.businessNo),
@@ -269,6 +282,7 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
         phone: parseNullable(values.phone),
         email: parseNullable(values.email),
         address: parseNullable(values.address),
+        addressEn: parseNullable(values.addressEn),
         memo: parseNullable(values.memo),
         active: values.active,
       };
@@ -279,8 +293,8 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
   async function handleDelete() {
     if (!state?.id) return;
     const ok = await confirm({
-      title: "협력사 삭제",
-      description: `${getValues("partnerCode")} / ${getValues("name")} 을 삭제하시겠습니까?`,
+      title: "고객 삭제",
+      description: `${getValues("customerCode")} / ${getValues("name")} 을 삭제하시겠습니까?`,
       variant: "destructive",
       confirmText: "삭제",
       cancelText: "취소",
@@ -314,10 +328,10 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
               color: "var(--danger, #dc2626)",
               fontSize: 13,
             }}>
-              삭제된 협력사입니다 (삭제일시: {detail?.deletedAt ?? "—"}). 조회 전용입니다.
+              삭제된 고객입니다 (삭제일시: {detail?.deletedAt ?? "—"}). 조회 전용입니다.
             </div>
           )}
-          <PartnerFormFields register={register} isEdit={isEdit} isReadOnly={isReadOnly} />
+          <CustomerFormFields register={register} isEdit={isEdit} isReadOnly={isReadOnly} />
         </form>
       )}
       <div className="modal__footer">
@@ -349,12 +363,12 @@ function PartnerEntryModalInner({ state, onClose, onSaved }: Props) {
 }
 
 // ─── 외부 래퍼 (isOpen 가드 — false 시 unmount로 hook·캐시 초기화) ───────────
-export function PartnerEntryModal({ state, onClose, onSaved }: Props) {
+export function CustomerEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
-  const title = state?.mode === "edit" ? "협력사 수정" : "협력사 등록";
+  const title = state?.mode === "edit" ? "고객 수정" : "고객 등록";
   return (
     <ModalShell isOpen={isOpen} title={title} size="default">
-      <PartnerEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
+      <CustomerEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );
 }

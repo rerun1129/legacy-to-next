@@ -1,4 +1,4 @@
-export type PartnerType =
+export type CustomerType =
   | "FORWARDER"
   | "SHIPPER"
   | "CONSIGNEE"
@@ -6,24 +6,24 @@ export type PartnerType =
   | "AGENT"
   | "CUSTOMS_BROKER";
 
-export type PartnerTypeFilter = "ALL" | PartnerType;
+export type CustomerTypeFilter = "ALL" | CustomerType;
 
-export type PartnerScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
+export type CustomerScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 
-export interface PartnerRow {
+export interface CustomerRow {
   id: number;
-  partnerCode: string;
+  customerCode: string;
   name: string;
-  partnerType: PartnerType;
+  customerType: CustomerType;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;
 }
 
-export interface PartnerDetail {
+export interface CustomerDetail {
   id: number;
-  partnerCode: string;
-  partnerType: PartnerType;
+  customerCode: string;
+  customerType: CustomerType;
   name: string;
   nameEn: string | null;
   businessNo: string | null;
@@ -31,6 +31,7 @@ export interface PartnerDetail {
   phone: string | null;
   email: string | null;
   address: string | null;
+  addressEn: string | null;
   memo: string | null;
   active: boolean;
   deletedAt: string | null;
@@ -40,16 +41,16 @@ export interface PartnerDetail {
   updatedBy: string | null;
 }
 
-export interface PartnerFilter {
-  partnerCode: string;
+export interface CustomerFilter {
+  customerCode: string;
   name: string;
-  partnerType: PartnerTypeFilter;
-  scope: PartnerScope;
+  customerType: CustomerTypeFilter;
+  scope: CustomerScope;
 }
 
-export interface CreatePartnerRequestDto {
-  partnerCode: string;
-  partnerType: PartnerType;
+export interface CreateCustomerRequestDto {
+  customerCode: string;
+  customerType: CustomerType;
   name: string;
   nameEn: string | null;
   businessNo: string | null;
@@ -57,12 +58,13 @@ export interface CreatePartnerRequestDto {
   phone: string | null;
   email: string | null;
   address: string | null;
+  addressEn: string | null;
   memo: string | null;
   active: boolean;
 }
 
-export interface UpdatePartnerRequestDto {
-  partnerType: PartnerType;
+export interface UpdateCustomerRequestDto {
+  customerType: CustomerType;
   name: string;
   nameEn: string | null;
   businessNo: string | null;
@@ -70,6 +72,7 @@ export interface UpdatePartnerRequestDto {
   phone: string | null;
   email: string | null;
   address: string | null;
+  addressEn: string | null;
   memo: string | null;
   active: boolean;
 }

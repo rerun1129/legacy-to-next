@@ -47,7 +47,7 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/fms/non-bl/entry":   "Non B/L Entry",
   "/admin/code/list": "Code Master List",
   "/admin/user/list": "사용자 관리 List",
-  "/admin/partner/list": "Partner List",
+  "/admin/customer/list": "Customer List",
   "/admin/cms/notice/list": "공지사항 List",
   "/admin/cms/terms/list": "약관·정책 List",
   "/admin/cms/faq": "FAQ",

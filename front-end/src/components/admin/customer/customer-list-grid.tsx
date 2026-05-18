@@ -5,20 +5,20 @@ import { useQuery } from "@tanstack/react-query";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
-import { partnerUseCases } from "@/application/partner/use-cases";
-import type { PartnerRow, PartnerFilter } from "@/domain/partner";
+import { customerUseCases } from "@/application/customer/use-cases";
+import type { CustomerRow, CustomerFilter } from "@/domain/customer";
 
 interface Props {
-  extraFilter: PartnerFilter | null;
+  extraFilter: CustomerFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
   onRowDoubleClick: (id: number) => void;
 }
 
-const COLUMNS: GridColumn<PartnerRow>[] = [
-  { key: "partnerCode", label: "협력사 코드", minWidth: 140 },
-  { key: "name", label: "협력사명", minWidth: 200 },
-  { key: "partnerType", label: "구분", minWidth: 120, align: "center" },
+const COLUMNS: GridColumn<CustomerRow>[] = [
+  { key: "customerCode", label: "고객 코드", minWidth: 140 },
+  { key: "name", label: "고객명", minWidth: 200 },
+  { key: "customerType", label: "구분", minWidth: 120, align: "center" },
   {
     key: "active",
     label: "상태",
@@ -32,12 +32,12 @@ const COLUMNS: GridColumn<PartnerRow>[] = [
   { key: "updatedAt", label: "수정일시", minWidth: 160 },
 ];
 
-export function PartnerListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick }: Props) {
+export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["admin-partner", "list", extraFilter, currentPage],
-    queryFn: () => partnerUseCases.search(extraFilter!, currentPage, 50),
+    queryKey: ["admin-customer", "list", extraFilter, currentPage],
+    queryFn: () => customerUseCases.search(extraFilter!, currentPage, 50),
     enabled: extraFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -52,7 +52,7 @@ export function PartnerListGrid({ extraFilter, currentPage, onPageChange, onRowD
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">협력사 관리</span>
+          <span className="panel__title">고객 관리</span>
         </div>
         <div
           className="list-wrap"
@@ -69,7 +69,7 @@ export function PartnerListGrid({ extraFilter, currentPage, onPageChange, onRowD
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">협력사 관리</span>
+          <span className="panel__title">고객 관리</span>
         </div>
         <div
           className="list-wrap"
@@ -95,11 +95,11 @@ export function PartnerListGrid({ extraFilter, currentPage, onPageChange, onRowD
     >
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">협력사 관리</span>
+        <span className="panel__title">고객 관리</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
       </div>
       <div className="list-wrap">
-        <GridList<PartnerRow>
+        <GridList<CustomerRow>
           columns={COLUMNS}
           data={rows}
           onRowClick={(row) => setSelected(row.id)}

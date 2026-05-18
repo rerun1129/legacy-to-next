@@ -99,9 +99,9 @@ const NAV_MODULES: NavModule[] = [
         ],
       },
       {
-        group: "Partner", icon: Building2, defaultOpen: false,
+        group: "Customer", icon: Building2, defaultOpen: false,
         children: [
-          { label: "List", href: "/admin/partner/list", icon: List, requiredPermission: "PARTNER_MANAGE" },
+          { label: "List", href: "/admin/customer/list", icon: List, requiredPermission: "CUSTOMER_MANAGE" },
         ],
       },
       {
