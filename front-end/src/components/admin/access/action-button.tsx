@@ -5,7 +5,7 @@ import { getSession, hasButtonAccess } from "@/lib/admin-session";
 
 interface ActionButtonProps {
   buttonCode: string;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
