@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -132,6 +132,7 @@ function NoticeFormFields({ register, isReadOnly }: FormFieldsProps) {
 // ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
 function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
+  const qc = useQueryClient();
 
   const form = useForm<NoticeFormValues>({ defaultValues: DEFAULT_FORM });
   const { register, reset, getValues, formState: { isSubmitting } } = form;
@@ -167,6 +168,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
   const createMutation = useMutation({
     mutationFn: (req: CreateNoticeRequestDto) => noticeUseCases.create(req),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-notice"] });
       toast.success("공지사항이 등록되었습니다.");
       onSaved();
     },
@@ -176,6 +178,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
     mutationFn: ({ id, req }: { id: number; req: UpdateNoticeRequestDto }) =>
       noticeUseCases.update(id, req),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-notice"] });
       toast.success("공지사항이 수정되었습니다.");
       onSaved();
     },
@@ -184,6 +187,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => noticeUseCases.delete(id),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-notice"] });
       toast.success("공지사항이 삭제되었습니다.");
       onSaved();
     },

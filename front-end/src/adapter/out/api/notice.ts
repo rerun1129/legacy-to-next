@@ -85,7 +85,7 @@ export const API_NOTICE_PORT: NoticePort = {
   },
 
   async getById(id: number) {
-    const json = await adminFetchJson(`${BASE}/get/${id}`);
+    const json = await adminFetchJson(`${BASE}/${id}`);
     const parsed = apiResponse(NOTICE_DETAIL_SCHEMA).safeParse(json);
     if (!parsed.success) {
       throw new ResponseParseError(`Invalid notice detail response: ${parsed.error.message}`);
@@ -94,7 +94,7 @@ export const API_NOTICE_PORT: NoticePort = {
   },
 
   async create(req: CreateNoticeRequestDto) {
-    const json = await adminFetchJson(`${BASE}/post`, {
+    const json = await adminFetchJson(BASE, {
       method: "POST",
       body: JSON.stringify(req),
     });
@@ -106,13 +106,13 @@ export const API_NOTICE_PORT: NoticePort = {
   },
 
   async update(id: number, req: UpdateNoticeRequestDto) {
-    await adminFetchJson(`${BASE}/put/${id}`, {
+    await adminFetchJson(`${BASE}/${id}`, {
       method: "PUT",
       body: JSON.stringify(req),
     });
   },
 
   async delete(id: number) {
-    await adminFetchJson(`${BASE}/delete/${id}`, { method: "DELETE" });
+    await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
 };
