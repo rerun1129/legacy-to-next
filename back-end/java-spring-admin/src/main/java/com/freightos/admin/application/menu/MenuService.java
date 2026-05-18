@@ -17,6 +17,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -84,5 +89,30 @@ public class MenuService implements MenuUseCase {
             throw ApplicationException.conflict("MENU_HAS_CHILDREN_OR_BUTTONS_CANNOT_DELETE", MessageCode.MENU_HAS_CHILDREN_OR_BUTTONS_CANNOT_DELETE.getMessage());
         }
         menuPort.deleteMenuById(menuId);
+    }
+
+    @Override
+    public List<Menu> findAccessibleAdminMenus(Set<String> menuCodes) {
+        if (menuCodes.isEmpty()) {
+            return List.of();
+        }
+        // 어댑터에서 자식 + 자식의 부모 union 반환
+        List<Menu> initial = menuPort.findAccessibleAdminMenus(menuCodes);
+
+        // 부모 over-expose 방지: 자식이 없는 root는 제거
+        List<Menu> roots = initial.stream().filter(m -> m.getParentId() == null).toList();
+        List<Menu> leaves = initial.stream().filter(m -> m.getParentId() != null).toList();
+
+        Set<Long> referencedParentIds = leaves.stream()
+                .map(Menu::getParentId)
+                .collect(Collectors.toSet());
+
+        List<Menu> survivingRoots = roots.stream()
+                .filter(r -> referencedParentIds.contains(r.getId()))
+                .toList();
+
+        List<Menu> result = new ArrayList<>(leaves);
+        result.addAll(survivingRoots);
+        return result;
     }
 }

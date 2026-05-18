@@ -1,5 +1,6 @@
 package com.freightos.admin.adapter.in.web.menu;
 
+import com.freightos.admin.adapter.in.web.menu.dto.AccessibleMenuResponse;
 import com.freightos.admin.adapter.in.web.menu.dto.CreateMenuRequest;
 import com.freightos.admin.adapter.in.web.menu.dto.MenuDetailResponse;
 import com.freightos.admin.adapter.in.web.menu.dto.MenuSummaryResponse;
@@ -12,6 +13,8 @@ import com.freightos.admin.application.menu.projection.MenuSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.menu.entity.Menu;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class MenuAssembler {
@@ -44,5 +47,13 @@ public class MenuAssembler {
 
     public PagedResult<MenuSummaryResponse> toSummaryPage(PagedResult<MenuSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public List<AccessibleMenuResponse> toAccessibleList(List<Menu> menus) {
+        return menus.stream()
+                .map(m -> new AccessibleMenuResponse(
+                        m.getId(), m.getMenuCode(), m.getParentId(), m.getPath(),
+                        m.getLabel(), m.getLabelEn(), m.getIcon(), m.getSortOrder(), m.getModuleCode()))
+                .toList();
     }
 }

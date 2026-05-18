@@ -1,5 +1,6 @@
 package com.freightos.admin.adapter.in.web.menu;
 
+import com.freightos.admin.adapter.in.web.menu.dto.AccessibleMenuResponse;
 import com.freightos.admin.adapter.in.web.menu.dto.CreateMenuRequest;
 import com.freightos.admin.adapter.in.web.menu.dto.MenuDetailResponse;
 import com.freightos.admin.adapter.in.web.menu.dto.MenuSummaryResponse;
@@ -14,6 +15,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/access/menu")
@@ -37,6 +43,18 @@ public class MenuController {
 
     private final MenuUseCase menuUseCase;
     private final MenuAssembler menuAssembler;
+
+    @GetMapping("/accessible")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<AccessibleMenuResponse>>> getAccessibleMenus(Authentication auth) {
+        Set<String> menuCodes = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("MENU_"))
+                .map(a -> a.substring(5))
+                .collect(Collectors.toSet());
+        List<AccessibleMenuResponse> data = menuAssembler.toAccessibleList(menuUseCase.findAccessibleAdminMenus(menuCodes));
+        return ResponseEntity.ok(ApiResponse.of(data));
+    }
 
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<PagedResult<MenuSummaryResponse>>> search(

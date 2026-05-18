@@ -10,7 +10,13 @@ import com.freightos.admin.domain.menu.entity.Menu;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -70,5 +76,22 @@ public class MenuPersistenceAdapter implements MenuPort {
     @Override
     public boolean existsByParentId(Long parentId) {
         return menuRepository.existsByParentId(parentId);
+    }
+
+    @Override
+    public List<Menu> findAccessibleAdminMenus(Set<String> menuCodes) {
+        List<MenuJpaEntity> children = menuRepository.findAllByActiveTrueAndModuleCodeAndMenuCodeIn("ADMIN", menuCodes);
+        Set<Long> parentIds = children.stream()
+                .map(MenuJpaEntity::getParentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<MenuJpaEntity> parents = parentIds.isEmpty() ? List.of() : menuRepository.findAllByActiveTrueAndIdIn(parentIds);
+
+        // id 기준 dedupe 후 도메인 변환
+        Map<Long, MenuJpaEntity> merged = new LinkedHashMap<>();
+        children.forEach(e -> merged.put(e.getId(), e));
+        parents.forEach(e -> merged.put(e.getId(), e));
+
+        return merged.values().stream().map(menuJpaToDomainMapper::toDomain).toList();
     }
 }
