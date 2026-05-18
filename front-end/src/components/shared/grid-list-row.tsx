@@ -17,10 +17,16 @@ export interface GridRowProps<T> {
   measureRef?: (el: HTMLTableRowElement | null) => void;
   /** virtualizer의 row 인덱스. measureElement가 DOM 요소와 측정값을 연결하는 데 사용된다. */
   dataIndex?: number;
+  /** true이면 행 앞에 체크박스 td를 렌더한다. */
+  selectable?: boolean;
+  /** 체크박스의 checked 상태. */
+  selected?: boolean;
+  /** 체크박스 클릭 시 호출. stopPropagation으로 onRowClick과 분리된다. */
+  onToggleSelect?: () => void;
 }
 
 function GridRowInner<T>(props: GridRowProps<T>) {
-  const { row, rowIndex, columns, rowKey, extraClassName, onRowClick, selectedRowKey, onSelectRow, measureRef, dataIndex } = props;
+  const { row, rowIndex, columns, rowKey, extraClassName, onRowClick, selectedRowKey, onSelectRow, measureRef, dataIndex, selectable, selected, onToggleSelect } = props;
 
   const key = rowKey
     ? rowKey(row, rowIndex)
@@ -37,6 +43,12 @@ function GridRowInner<T>(props: GridRowProps<T>) {
     }
   }
 
+  function handleCheckboxClick(e: React.MouseEvent<HTMLTableCellElement>) {
+    // 행 onRowClick/onSelectRow가 발동되지 않도록 이벤트 전파를 차단한다.
+    e.stopPropagation();
+    onToggleSelect?.();
+  }
+
   return (
     <tr
       ref={measureRef}
@@ -45,6 +57,16 @@ function GridRowInner<T>(props: GridRowProps<T>) {
       onMouseDown={onRowClick || onSelectRow ? handleMouseDown : undefined}
       style={onRowClick || onSelectRow ? { cursor: "pointer" } : undefined}
     >
+      {selectable && (
+        <td className="grid__select-cell" onClick={handleCheckboxClick}>
+          <input
+            type="checkbox"
+            className="chk"
+            checked={selected ?? false}
+            onChange={() => { /* checked는 onClick으로 제어 */ }}
+          />
+        </td>
+      )}
       {columns.map((col) => {
         const rawValue =
           typeof col.key === "string"

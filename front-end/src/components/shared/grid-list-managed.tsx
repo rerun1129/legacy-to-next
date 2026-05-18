@@ -38,6 +38,9 @@ export function ManagedGridList<T>({
   isLoading = false,
   skeletonRowCount = 12,
   scrollPositionKey,
+  selectable = false,
+  selectedKeys,
+  onSelectionChange,
 }: GridListProps<T> & { gridId: string }) {
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
@@ -126,6 +129,27 @@ export function ManagedGridList<T>({
   const paddingBottom =
     virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
 
+  // 전체 선택 체크박스 상태 계산
+  const allChecked = selectable && data.length > 0 && selectedKeys != null && selectedKeys.size === data.length;
+  const indeterminate = selectable && selectedKeys != null && selectedKeys.size > 0 && selectedKeys.size < data.length;
+
+  function handleHeaderCheckboxChange() {
+    if (!onSelectionChange) return;
+    if (allChecked) {
+      onSelectionChange(new Set());
+    } else {
+      const next = new Set<string | number>();
+      for (let i = 0; i < data.length; i++) {
+        const k = rowKey ? rowKey(data[i], i) : ((data[i] as Record<string, unknown>).id as string | number | undefined) ?? i;
+        next.add(k);
+      }
+      onSelectionChange(next);
+    }
+  }
+
+  // 체크박스 컬럼 포함 시 colSpan 계산
+  const totalColSpan = visibleColumns.length + (selectable ? 1 : 0);
+
   function isOutsideTable(rect: { left: number; right: number; top: number; bottom: number }) {
     const tableEl = tableRef.current;
     if (!tableEl) return false;
@@ -180,6 +204,7 @@ export function ManagedGridList<T>({
       >
         <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
           <colgroup>
+            {selectable && <col style={{ width: 28 }} />}
             {visibleColumns.map((col) => (
               <col key={String(col.key)} style={{ width: col.width ?? col.minWidth }} />
             ))}
@@ -187,6 +212,17 @@ export function ManagedGridList<T>({
           <thead>
             <SortableContext items={ids} strategy={horizontalListSortingStrategy}>
               <tr>
+                {selectable && (
+                  <th className="grid__select-cell" style={{ width: 28 }}>
+                    <input
+                      type="checkbox"
+                      className="chk"
+                      checked={allChecked}
+                      ref={(el) => { if (el) el.indeterminate = indeterminate; }}
+                      onChange={handleHeaderCheckboxChange}
+                    />
+                  </th>
+                )}
                 {visibleColumns.map((col) => (
                   <SortableTh<T>
                     key={String(col.key)}
@@ -208,6 +244,7 @@ export function ManagedGridList<T>({
                 },
                 (_, i) => (
                   <tr key={`skel-${i}`}>
+                    {selectable && <td className="grid__select-cell" />}
                     {visibleColumns.map((col) => (
                       <td key={String(col.key)}>
                         <div className="h-3 w-full rounded animate-pulse" style={{ backgroundColor: "var(--surface-3)" }} />
@@ -218,7 +255,7 @@ export function ManagedGridList<T>({
               )
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={visibleColumns.length} className="grid__empty">
+                <td colSpan={totalColSpan} className="grid__empty">
                   {emptyMessage}
                 </td>
               </tr>
@@ -226,11 +263,12 @@ export function ManagedGridList<T>({
               <>
                 {paddingTop > 0 && (
                   <tr>
-                    <td colSpan={visibleColumns.length} style={{ height: paddingTop, padding: 0 }} />
+                    <td colSpan={totalColSpan} style={{ height: paddingTop, padding: 0 }} />
                   </tr>
                 )}
                 {virtualRows.map((virtualRow) => {
                   const ri = virtualRow.index;
+                  const rk = rowKey ? rowKey(data[ri], ri) : ((data[ri] as Record<string, unknown>).id as string | number | undefined) ?? ri;
                   return (
                     <GridRow<T>
                       key={String(virtualRow.key)}
@@ -244,12 +282,19 @@ export function ManagedGridList<T>({
                       onSelectRow={stableOnSelectRow}
                       measureRef={rowVirtualizer.measureElement}
                       dataIndex={ri}
+                      selectable={selectable}
+                      selected={selectable && selectedKeys != null ? selectedKeys.has(rk) : undefined}
+                      onToggleSelect={selectable && onSelectionChange ? () => {
+                        const next = new Set(selectedKeys);
+                        if (next.has(rk)) { next.delete(rk); } else { next.add(rk); }
+                        onSelectionChange(next);
+                      } : undefined}
                     />
                   );
                 })}
                 {paddingBottom > 0 && (
                   <tr>
-                    <td colSpan={visibleColumns.length} style={{ height: paddingBottom, padding: 0 }} />
+                    <td colSpan={totalColSpan} style={{ height: paddingBottom, padding: 0 }} />
                   </tr>
                 )}
               </>

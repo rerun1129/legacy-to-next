@@ -62,6 +62,9 @@ export function PlainGridList<T>({
   isLoading = false,
   skeletonRowCount = 12,
   scrollPositionKey,
+  selectable = false,
+  selectedKeys,
+  onSelectionChange,
 }: Omit<GridListProps<T>, "gridId">) {
   const { colWidths, handleResizePointerDown } = useColResize();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -129,6 +132,7 @@ export function PlainGridList<T>({
     return { ...col, width: w };
   });
 
+  // 셀 선택/복사 범위는 체크박스 컬럼을 제외한 데이터 컬럼만 대상으로 한다.
   const { handleTableMouseDown } = useGridCellSelection({
     data,
     rowKey,
@@ -148,16 +152,49 @@ export function PlainGridList<T>({
   const paddingBottom =
     virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
 
+  // 전체 선택 체크박스 상태 계산
+  const allChecked = selectable && data.length > 0 && selectedKeys != null && selectedKeys.size === data.length;
+  const indeterminate = selectable && selectedKeys != null && selectedKeys.size > 0 && selectedKeys.size < data.length;
+
+  function handleHeaderCheckboxChange() {
+    if (!onSelectionChange) return;
+    if (allChecked) {
+      onSelectionChange(new Set());
+    } else {
+      const next = new Set<string | number>();
+      for (let i = 0; i < data.length; i++) {
+        const k = rowKey ? rowKey(data[i], i) : ((data[i] as Record<string, unknown>).id as string | number | undefined) ?? i;
+        next.add(k);
+      }
+      onSelectionChange(next);
+    }
+  }
+
+  // 체크박스 컬럼 포함 시 colSpan 계산
+  const totalColSpan = resolvedColumns.length + (selectable ? 1 : 0);
+
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={{ ...style, overflowY: isLoading ? "hidden" : undefined }}>
       <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
         <colgroup>
+          {selectable && <col style={{ width: 28 }} />}
           {resolvedColumns.map((col) => (
             <col key={String(col.key)} style={{ width: col.width }} />
           ))}
         </colgroup>
         <thead>
           <tr>
+            {selectable && (
+              <th className="grid__select-cell" style={{ width: 28 }}>
+                <input
+                  type="checkbox"
+                  className="chk"
+                  checked={allChecked}
+                  ref={(el) => { if (el) el.indeterminate = indeterminate; }}
+                  onChange={handleHeaderCheckboxChange}
+                />
+              </th>
+            )}
             {resolvedColumns.map((col) => {
               const key = String(col.key);
               return (
@@ -188,6 +225,7 @@ export function PlainGridList<T>({
               },
               (_, i) => (
                 <tr key={`skel-${i}`}>
+                  {selectable && <td className="grid__select-cell" />}
                   {resolvedColumns.map((col) => (
                     <td key={String(col.key)}>
                       <div className="h-3 w-full rounded animate-pulse" style={{ backgroundColor: "var(--surface-3)" }} />
@@ -198,7 +236,7 @@ export function PlainGridList<T>({
             )
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan={resolvedColumns.length} className="grid__empty">
+              <td colSpan={totalColSpan} className="grid__empty">
                 {emptyMessage}
               </td>
             </tr>
@@ -206,11 +244,12 @@ export function PlainGridList<T>({
             <>
               {paddingTop > 0 && (
                 <tr>
-                  <td colSpan={resolvedColumns.length} style={{ height: paddingTop, padding: 0 }} />
+                  <td colSpan={totalColSpan} style={{ height: paddingTop, padding: 0 }} />
                 </tr>
               )}
               {virtualRows.map((virtualRow) => {
                 const ri = virtualRow.index;
+                const rk = rowKey ? rowKey(data[ri], ri) : ((data[ri] as Record<string, unknown>).id as string | number | undefined) ?? ri;
                 return (
                   <GridRow<T>
                     key={String(virtualRow.key)}
@@ -224,12 +263,19 @@ export function PlainGridList<T>({
                     onSelectRow={stableOnSelectRow}
                     measureRef={rowVirtualizer.measureElement}
                     dataIndex={ri}
+                    selectable={selectable}
+                    selected={selectable && selectedKeys != null ? selectedKeys.has(rk) : undefined}
+                    onToggleSelect={selectable && onSelectionChange ? () => {
+                      const next = new Set(selectedKeys);
+                      if (next.has(rk)) { next.delete(rk); } else { next.add(rk); }
+                      onSelectionChange(next);
+                    } : undefined}
                   />
                 );
               })}
               {paddingBottom > 0 && (
                 <tr>
-                  <td colSpan={resolvedColumns.length} style={{ height: paddingBottom, padding: 0 }} />
+                  <td colSpan={totalColSpan} style={{ height: paddingBottom, padding: 0 }} />
                 </tr>
               )}
             </>

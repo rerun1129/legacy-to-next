@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { GridPreviewPanel, type DimPreviewFormValues, createDimPreviewDefaults } from "./grid-preview-panel";
+import { SelectableGridDemo } from "./selectable-grid-demo";
 
 export function GridSection() {
   const methods = useForm<DimPreviewFormValues>({ defaultValues: createDimPreviewDefaults() });
@@ -65,6 +66,13 @@ export function GridSection() {
             <GridPreviewPanel isLoading={false} gridId="catalog-managed-demo" />
           </div>
         </FormProvider>
+      </div>
+
+      <div style={{ borderTop: "1px solid var(--border, #e5e7eb)", paddingTop: 16, marginTop: 24, marginBottom: 40 }}>
+        <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 8, color: "var(--ink-4, #6b7280)" }}>
+          selectable 모드 데모 (Phase C 다중 삭제 UI에서 사용하는 체크박스 selection)
+        </div>
+        <SelectableGridDemo />
       </div>
     </div>
   );

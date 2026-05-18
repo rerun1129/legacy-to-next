@@ -209,6 +209,18 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   color: var(--ink-muted, #888);
 }
 
+/* 체크박스 선택 컬럼 — resize/drag 대상 제외, 셀 drag-select 대상 제외 */
+.grid__select-cell {
+  width: 28px;
+  min-width: 28px;
+  text-align: center;
+  padding: 0;
+  /* pointer-events를 살려 클릭이 체크박스에 도달하도록 한다 */
+  user-select: none;
+  /* th에서도 배경/스타일 공유 */
+  vertical-align: middle;
+}
+
 /* tbody 드래그 중 텍스트 선택 방지 */
 .grid--list tbody,
 .grid tbody {

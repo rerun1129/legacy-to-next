@@ -31,6 +31,12 @@ export interface GridListProps<T> {
   isLoading?: boolean;
   skeletonRowCount?: number;
   scrollPositionKey?: string;
+  /** true이면 각 행 앞에 체크박스 컬럼을 렌더한다. 미지정 시 기존 동작 유지. */
+  selectable?: boolean;
+  /** 현재 선택된 row key Set. selectable=true일 때 유효. */
+  selectedKeys?: ReadonlySet<string | number>;
+  /** 선택 변경 콜백. 새 Set을 인자로 전달한다. selectable=true일 때 유효. */
+  onSelectionChange?: (next: Set<string | number>) => void;
 }
 
 // --row-h 기본값 24px — tokens.css:21 정의 기준
