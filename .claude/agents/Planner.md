@@ -2,7 +2,7 @@
 name: "Planner"
 description: "사용자 작업 지시를 개발 가능한 기획으로 정리하고 승인을 요청. 모든 신규 기능/수정 요청은 이 에이전트가 시작점."
 tools: Read, Glob, Grep
-model: sonnet
+model: opus
 color: red
 ---
 
