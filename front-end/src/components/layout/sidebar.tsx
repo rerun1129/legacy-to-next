@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
@@ -84,6 +84,12 @@ const FMS_NAV_MODULE: NavModule = {
   ],
 };
 
+// ─── useSyncExternalStore helpers for hydration mount gate ──
+// SSR snapshot → false, CSR snapshot → true. setState 없이 hydration guard 구현.
+const subscribeNoop = () => () => {};
+const getServerSnapshot = () => false;
+const getClientSnapshot = () => true;
+
 // ─── Helpers ────────────────────────────────────────────────
 function leafActive(pathname: string, leaf: NavLeaf) {
   return pathname === leaf.href || pathname.startsWith(leaf.href + "/");
@@ -100,11 +106,8 @@ export function Sidebar() {
   const addTab   = useTabs((s) => s.addTab);
   // SSR 시 session=null이므로 admin 메뉴가 모두 숨겨진 결과물을 렌더.
   // mounted 전에는 동일하게 숨겨서 hydration mismatch를 방지.
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
   const [session] = useState(() => getSession());
-
-  // SSR/CSR hydration 일치를 위한 mount gate
-  useEffect(() => setMounted(true), []);
 
   const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => ({
     [FMS_NAV_MODULE.module]:
