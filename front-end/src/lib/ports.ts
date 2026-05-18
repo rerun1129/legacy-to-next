@@ -23,6 +23,7 @@ import { API_MENU_PORT } from '@/adapter/out/api/access/menu';
 import { API_BUTTON_PORT } from '@/adapter/out/api/access/button';
 import { API_MENU_POLICY_PORT } from '@/adapter/out/api/access/menu-policy';
 import { API_BUTTON_POLICY_PORT } from '@/adapter/out/api/access/button-policy';
+import { API_SIDEBAR_MENU_PORT } from '@/adapter/out/api/access/sidebar-menu';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -48,3 +49,4 @@ export const accessMenuPort = API_MENU_PORT;
 export const accessButtonPort = API_BUTTON_PORT;
 export const accessMenuPolicyPort = API_MENU_POLICY_PORT;
 export const accessButtonPolicyPort = API_BUTTON_POLICY_PORT;
+export const sidebarMenuPort = API_SIDEBAR_MENU_PORT;

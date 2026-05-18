@@ -2,14 +2,16 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid,
-  KeyRound, UserCog, Building2, Megaphone, ShieldCheck,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { getSession, hasMenuAccess } from "@/lib/admin-session";
+import { sidebarMenuPort } from "@/lib/ports";
+import { SidebarAdminTree } from "./sidebar-admin-tree";
 
 
 // ─── Types ──────────────────────────────────────────────────
@@ -33,95 +35,54 @@ interface NavModule {
   sections: NavSection[];
 }
 
-// ─── Nav data ───────────────────────────────────────────────
+// ─── FMS Nav data (정적) ────────────────────────────────────
 const DASHBOARD_HREF = "/dashboard";
 
-const NAV_MODULES: NavModule[] = [
-  {
-    module: "FMS", defaultOpen: true,
-    sections: [
-      {
-        group: "House B/L", icon: FileText, defaultOpen: true,
-        children: [
-          { label: "Sea Export List",  href: "/fms/house-bl/sea-exp/list",  icon: List },
-          { label: "Sea Export Entry", href: "/fms/house-bl/sea-exp/entry", icon: FilePlus },
-          { label: "Sea Import List",  href: "/fms/house-bl/sea-imp/list",  icon: List },
-          { label: "Sea Import Entry", href: "/fms/house-bl/sea-imp/entry", icon: FilePlus },
-          { label: "Air Export List",  href: "/fms/house-bl/air-exp/list",  icon: List },
-          { label: "Air Export Entry", href: "/fms/house-bl/air-exp/entry", icon: FilePlus },
-          { label: "Air Import List",  href: "/fms/house-bl/air-imp/list",  icon: List },
-          { label: "Air Import Entry", href: "/fms/house-bl/air-imp/entry", icon: FilePlus },
-        ],
-      },
-      {
-        group: "Master B/L", icon: Layers, defaultOpen: false,
-        children: [
-          { label: "Sea Export List",  href: "/fms/master-bl/sea-exp/list",  icon: List },
-          { label: "Sea Export Entry", href: "/fms/master-bl/sea-exp/entry", icon: FilePlus },
-          { label: "Sea Import List",  href: "/fms/master-bl/sea-imp/list",  icon: List },
-          { label: "Sea Import Entry", href: "/fms/master-bl/sea-imp/entry", icon: FilePlus },
-          { label: "Air Export List",  href: "/fms/master-bl/air-exp/list",  icon: List },
-          { label: "Air Export Entry", href: "/fms/master-bl/air-exp/entry", icon: FilePlus },
-          { label: "Air Import List",  href: "/fms/master-bl/air-imp/list",  icon: List },
-          { label: "Air Import Entry", href: "/fms/master-bl/air-imp/entry", icon: FilePlus },
-        ],
-      },
-      {
-        group: "Truck B/L", icon: Truck, defaultOpen: false,
-        children: [
-          { label: "List",  href: "/fms/truck-bl/list",  icon: List },
-          { label: "Entry", href: "/fms/truck-bl/entry", icon: FilePlus },
-        ],
-      },
-      {
-        group: "Non B/L", icon: Package, defaultOpen: false,
-        children: [
-          { label: "List",  href: "/fms/non-bl/list",  icon: List },
-          { label: "Entry", href: "/fms/non-bl/entry", icon: FilePlus },
-        ],
-      },
-    ],
-  },
-  {
-    module: "Admin", defaultOpen: false,
-    sections: [
-      {
-        group: "Code Master", icon: KeyRound, defaultOpen: false,
-        children: [
-          { label: "List", href: "/admin/code/list", icon: List, requiredMenuCode: "MENU_ADMIN_CODE_LIST" },
-        ],
-      },
-      {
-        group: "사용자 관리", icon: UserCog, defaultOpen: false,
-        children: [
-          { label: "List", href: "/admin/user/list", icon: List, requiredMenuCode: "MENU_ADMIN_USER_LIST" },
-        ],
-      },
-      {
-        group: "Customer", icon: Building2, defaultOpen: false,
-        children: [
-          { label: "List", href: "/admin/customer/list", icon: List, requiredMenuCode: "MENU_ADMIN_CUSTOMER_LIST" },
-        ],
-      },
-      {
-        group: "공지사항", icon: Megaphone, defaultOpen: false,
-        children: [
-          { label: "List", href: "/admin/cms/notice/list", icon: List, requiredMenuCode: "MENU_ADMIN_CMS_NOTICE_LIST" },
-        ],
-      },
-      {
-        group: "Access 관리", icon: ShieldCheck, defaultOpen: false,
-        children: [
-          { label: "Menu",      href: "/admin/access/menu",      icon: List, requiredMenuCode: "ADMIN_ACCESS_MENU" },
-          { label: "Button",    href: "/admin/access/button",    icon: List, requiredMenuCode: "ADMIN_ACCESS_BUTTON" },
-          { label: "Policy",    href: "/admin/access/policy",    icon: List, requiredMenuCode: "ADMIN_ACCESS_POLICY" },
-          { label: "Attribute", href: "/admin/access/attribute", icon: List, requiredMenuCode: "ADMIN_ACCESS_ATTRIBUTE" },
-          { label: "Module",    href: "/admin/access/module",    icon: List, requiredMenuCode: "ADMIN_ACCESS_MODULE" },
-        ],
-      },
-    ],
-  },
-];
+const FMS_NAV_MODULE: NavModule = {
+  module: "FMS", defaultOpen: true,
+  sections: [
+    {
+      group: "House B/L", icon: FileText, defaultOpen: true,
+      children: [
+        { label: "Sea Export List",  href: "/fms/house-bl/sea-exp/list",  icon: List },
+        { label: "Sea Export Entry", href: "/fms/house-bl/sea-exp/entry", icon: FilePlus },
+        { label: "Sea Import List",  href: "/fms/house-bl/sea-imp/list",  icon: List },
+        { label: "Sea Import Entry", href: "/fms/house-bl/sea-imp/entry", icon: FilePlus },
+        { label: "Air Export List",  href: "/fms/house-bl/air-exp/list",  icon: List },
+        { label: "Air Export Entry", href: "/fms/house-bl/air-exp/entry", icon: FilePlus },
+        { label: "Air Import List",  href: "/fms/house-bl/air-imp/list",  icon: List },
+        { label: "Air Import Entry", href: "/fms/house-bl/air-imp/entry", icon: FilePlus },
+      ],
+    },
+    {
+      group: "Master B/L", icon: Layers, defaultOpen: false,
+      children: [
+        { label: "Sea Export List",  href: "/fms/master-bl/sea-exp/list",  icon: List },
+        { label: "Sea Export Entry", href: "/fms/master-bl/sea-exp/entry", icon: FilePlus },
+        { label: "Sea Import List",  href: "/fms/master-bl/sea-imp/list",  icon: List },
+        { label: "Sea Import Entry", href: "/fms/master-bl/sea-imp/entry", icon: FilePlus },
+        { label: "Air Export List",  href: "/fms/master-bl/air-exp/list",  icon: List },
+        { label: "Air Export Entry", href: "/fms/master-bl/air-exp/entry", icon: FilePlus },
+        { label: "Air Import List",  href: "/fms/master-bl/air-imp/list",  icon: List },
+        { label: "Air Import Entry", href: "/fms/master-bl/air-imp/entry", icon: FilePlus },
+      ],
+    },
+    {
+      group: "Truck B/L", icon: Truck, defaultOpen: false,
+      children: [
+        { label: "List",  href: "/fms/truck-bl/list",  icon: List },
+        { label: "Entry", href: "/fms/truck-bl/entry", icon: FilePlus },
+      ],
+    },
+    {
+      group: "Non B/L", icon: Package, defaultOpen: false,
+      children: [
+        { label: "List",  href: "/fms/non-bl/list",  icon: List },
+        { label: "Entry", href: "/fms/non-bl/entry", icon: FilePlus },
+      ],
+    },
+  ],
+};
 
 // ─── Helpers ────────────────────────────────────────────────
 function leafActive(pathname: string, leaf: NavLeaf) {
@@ -130,10 +91,6 @@ function leafActive(pathname: string, leaf: NavLeaf) {
 
 function sectionActive(pathname: string, s: NavSection) {
   return s.children.some((c) => leafActive(pathname, c));
-}
-
-function moduleActive(pathname: string, m: NavModule) {
-  return m.sections.some((s) => sectionActive(pathname, s));
 }
 
 // ─── Component ──────────────────────────────────────────────
@@ -147,29 +104,25 @@ export function Sidebar() {
   const [session] = useState(() => getSession());
 
   // SSR/CSR hydration 일치를 위한 mount gate
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
-  const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => {
+  const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => ({
+    [FMS_NAV_MODULE.module]:
+      FMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s)) ||
+      (FMS_NAV_MODULE.defaultOpen ?? false),
+    Admin: false,
+  }));
+
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
-    NAV_MODULES.forEach((m) => {
-      init[m.module] = moduleActive(pathname, m) || (m.defaultOpen ?? false);
+    FMS_NAV_MODULE.sections.forEach((s) => {
+      init[s.group] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
     });
     return init;
   });
 
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    NAV_MODULES.forEach((m) =>
-      m.sections.forEach((s) => {
-        init[s.group] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
-      })
-    );
-    return init;
-  });
-
-  const toggleModule  = (module: string)  => setOpenModules((p)  => ({ ...p, [module]:  !p[module]  }));
-  const toggleSection = (group: string)   => setOpenSections((p) => ({ ...p, [group]:   !p[group]   }));
+  const toggleModule  = (module: string) => setOpenModules((p) => ({ ...p, [module]: !p[module] }));
+  const toggleSection = (group: string)  => setOpenSections((p) => ({ ...p, [group]:  !p[group]  }));
 
   function navigate(label: string, href: string) {
     addTab(label, href);
@@ -179,6 +132,17 @@ export function Sidebar() {
   const { editMode, setEditMode, canEdit } = useWidgetLayout();
 
   useEffect(() => { setEditMode(false); }, [pathname, setEditMode]);
+
+  // Admin 동적 메뉴 fetch — mount 전에는 SSR 무력화
+  const { data: adminMenuData, isLoading: adminMenuLoading } = useQuery({
+    queryKey: ["sidebar-menu", "accessible"],
+    queryFn: () => sidebarMenuPort.fetchAccessibleAdminMenus(),
+    enabled: mounted,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const fmsModActive = FMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s));
+  const fmsModOpen   = openModules[FMS_NAV_MODULE.module];
 
   return (
     <nav className="app__side" style={{ display: "flex", flexDirection: "column" }}>
@@ -191,77 +155,80 @@ export function Sidebar() {
         Dashboard
       </button>
 
-      {/* 최상위 모듈 (FMS, Admin …) */}
-      {NAV_MODULES.map((mod) => {
-        const modActive   = moduleActive(pathname, mod);
-        const modOpen     = openModules[mod.module];
+      {/* FMS 모듈 — 정적 */}
+      <div className="side-group">
+        <button
+          className={`side-group__label side-group__label--toggle${fmsModActive ? " is-active" : ""}`}
+          onClick={() => toggleModule(FMS_NAV_MODULE.module)}
+        >
+          <span style={{ flex: 1 }}>{FMS_NAV_MODULE.module}</span>
+          <ChevronRight
+            size={11}
+            style={{
+              flexShrink: 0,
+              color: fmsModActive ? "var(--accent)" : "var(--ink-4)",
+              transform: fmsModOpen ? "rotate(90deg)" : undefined,
+              transition: "transform 160ms ease",
+            }}
+          />
+        </button>
 
-        return (
-          <div key={mod.module} className="side-group">
-            <button
-              className={`side-group__label side-group__label--toggle${modActive ? " is-active" : ""}`}
-              onClick={() => toggleModule(mod.module)}
-            >
-              <span style={{ flex: 1 }}>{mod.module}</span>
-              <ChevronRight
-                size={11}
-                style={{
-                  flexShrink: 0,
-                  color: modActive ? "var(--accent)" : "var(--ink-4)",
-                  transform: modOpen ? "rotate(90deg)" : undefined,
-                  transition: "transform 160ms ease",
-                }}
-              />
-            </button>
+        {fmsModOpen && FMS_NAV_MODULE.sections.map((section) => {
+          const secActive = sectionActive(pathname, section);
+          const secOpen   = openSections[section.group];
 
-            {modOpen && mod.sections.map((section) => {
-              const secActive = sectionActive(pathname, section);
-              const secOpen   = openSections[section.group];
+          return (
+            <div key={section.group}>
+              <button
+                className={`side-item${secActive ? " is-active" : ""}`}
+                style={{ paddingLeft: 12 }}
+                onClick={() => toggleSection(section.group)}
+              >
+                <span className="side-item__icon"><section.icon size={13} /></span>
+                <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
+                <ChevronRight
+                  size={11}
+                  style={{
+                    flexShrink: 0,
+                    color: secActive ? "var(--accent)" : "var(--ink-4)",
+                    transform: secOpen ? "rotate(90deg)" : undefined,
+                    transition: "transform 160ms ease",
+                    marginRight: 4,
+                  }}
+                />
+              </button>
 
-              return (
-                <div key={section.group}>
+              {secOpen && section.children
+                // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
+                .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
+                .map((leaf) => {
+                const active = leafActive(pathname, leaf);
+                return (
                   <button
-                    className={`side-item${secActive ? " is-active" : ""}`}
-                    style={{ paddingLeft: 12 }}
-                    onClick={() => toggleSection(section.group)}
+                    key={leaf.href}
+                    className={`side-item${active ? " is-active" : ""}`}
+                    style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
+                    onClick={() => navigate(`${section.group} ${leaf.label}`, leaf.href)}
                   >
-                    <span className="side-item__icon"><section.icon size={13} /></span>
-                    <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
-                    <ChevronRight
-                      size={11}
-                      style={{
-                        flexShrink: 0,
-                        color: secActive ? "var(--accent)" : "var(--ink-4)",
-                        transform: secOpen ? "rotate(90deg)" : undefined,
-                        transition: "transform 160ms ease",
-                        marginRight: 4,
-                      }}
-                    />
+                    <span className="side-item__icon"><leaf.icon size={11} /></span>
+                    {leaf.label}
                   </button>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
 
-                  {secOpen && section.children
-                    // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
-                    .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
-                    .map((leaf) => {
-                    const active = leafActive(pathname, leaf);
-                    return (
-                      <button
-                        key={leaf.href}
-                        className={`side-item${active ? " is-active" : ""}`}
-                        style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
-                        onClick={() => navigate(`${section.group} ${leaf.label}`, leaf.href)}
-                      >
-                        <span className="side-item__icon"><leaf.icon size={11} /></span>
-                        {leaf.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+      {/* Admin 모듈 — BE fetch 동적 렌더 */}
+      <SidebarAdminTree
+        data={adminMenuData}
+        isLoading={mounted && adminMenuLoading}
+        pathname={pathname}
+        openSections={openSections}
+        onToggleSection={toggleSection}
+        onNavigate={navigate}
+      />
 
       {/* ── 하단: 위젯 편집 토글 ── */}
       <div style={{ flex: 1 }} />
