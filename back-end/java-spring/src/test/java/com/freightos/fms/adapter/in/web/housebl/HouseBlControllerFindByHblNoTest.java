@@ -2,6 +2,8 @@ package com.freightos.fms.adapter.in.web.housebl;
 
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.common.security.JwtAuthenticationFilter;
+import com.freightos.common.security.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,16 @@ class HouseBlControllerFindByHblNoTest {
     @MockitoBean
     @SuppressWarnings("unused")
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    // SecurityConfig가 JwtAuthenticationFilter를 등록하고, JwtAuthenticationFilter는 JwtTokenProvider를 주입받음
+    // WebMvcTest 슬라이스는 @Component인 JwtTokenProvider를 스캔하지 않으므로 Mock 등록으로 컨텍스트 로딩 보완
+    @MockitoBean
+    @SuppressWarnings("unused")
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    @SuppressWarnings("unused")
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String URL = "/api/house-bl/find-by-hbl-no";
 

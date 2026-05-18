@@ -4,6 +4,8 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.common.response.MessageCode;
+import com.freightos.common.security.JwtAuthenticationFilter;
+import com.freightos.common.security.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,16 @@ class NonBlControllerTest {
     @MockitoBean
     @SuppressWarnings("unused")
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    // SecurityConfig가 JwtAuthenticationFilter를 등록하고, JwtAuthenticationFilter는 JwtTokenProvider를 주입받음
+    // WebMvcTest 슬라이스는 @Component인 JwtTokenProvider를 스캔하지 않으므로 Mock 등록으로 컨텍스트 로딩 보완
+    @MockitoBean
+    @SuppressWarnings("unused")
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    @SuppressWarnings("unused")
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     // ── POST /api/non-bl ──────────────────────────────────────────────────
 
