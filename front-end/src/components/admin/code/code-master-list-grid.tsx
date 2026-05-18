@@ -18,6 +18,7 @@ import type { CodeMasterRow, CodeMasterFilter } from "@/domain/code-master";
 interface Props {
   selectedId: number | null;
   onSelect: (id: number) => void;
+  onRowDoubleClick: (id: number) => void;
 }
 
 const DEFAULT_FILTER: CodeMasterFilter = {
@@ -41,7 +42,7 @@ const COLUMNS: GridColumn<CodeMasterRow>[] = [
   { key: "updatedAt", label: "수정일시", minWidth: 150 },
 ];
 
-export function CodeMasterListGrid({ selectedId, onSelect }: Props) {
+export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick }: Props) {
   const form = useForm<CodeMasterFilter>({ defaultValues: DEFAULT_FILTER });
 
   const [submittedFilter, setSubmittedFilter] = useState<CodeMasterFilter | null>(null);
@@ -121,7 +122,16 @@ export function CodeMasterListGrid({ selectedId, onSelect }: Props) {
             </div>
           </div>
         ) : (
-          <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div
+            className="panel"
+            style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+            onDoubleClick={(e) => {
+              const td = (e.target as HTMLElement).closest("td[data-row-key]");
+              if (!td) return;
+              const key = Number((td as HTMLElement).getAttribute("data-row-key"));
+              if (!isNaN(key)) onRowDoubleClick(key);
+            }}
+          >
             <div className="panel__head">
               <div className="panel__title-accent" />
               <span className="panel__title">코드 마스터</span>
