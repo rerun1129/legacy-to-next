@@ -49,8 +49,6 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/admin/user/list": "사용자 관리 List",
   "/admin/customer/list": "Customer List",
   "/admin/cms/notice/list": "공지사항 List",
-  "/admin/cms/terms/list": "약관·정책 List",
-  "/admin/cms/faq": "FAQ",
 };
 
 export function inferLabelFromPath(pathname: string): string {

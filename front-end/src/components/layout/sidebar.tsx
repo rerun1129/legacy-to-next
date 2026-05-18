@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid,
-  KeyRound, UserCog, Building2, Megaphone, ScrollText, HelpCircle,
+  KeyRound, UserCog, Building2, Megaphone,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -108,18 +108,6 @@ const NAV_MODULES: NavModule[] = [
         group: "공지사항", icon: Megaphone, defaultOpen: false,
         children: [
           { label: "List", href: "/admin/cms/notice/list", icon: List, requiredPermission: "CMS_MANAGE" },
-        ],
-      },
-      {
-        group: "약관·정책", icon: ScrollText, defaultOpen: false,
-        children: [
-          { label: "List", href: "/admin/cms/terms/list", icon: List, requiredPermission: "CMS_MANAGE" },
-        ],
-      },
-      {
-        group: "FAQ", icon: HelpCircle, defaultOpen: false,
-        children: [
-          { label: "List", href: "/admin/cms/faq", icon: List, requiredPermission: "CMS_MANAGE" },
         ],
       },
     ],
