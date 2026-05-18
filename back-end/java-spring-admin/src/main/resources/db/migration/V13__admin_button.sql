@@ -3,8 +3,8 @@
 CREATE TABLE admin.button (
     button_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     menu_id     BIGINT       NOT NULL,
-    button_code VARCHAR(100) NOT NULL,
-    label       VARCHAR(100) NOT NULL,
+    button_code VARCHAR(80)  NOT NULL,
+    label       VARCHAR(200) NOT NULL,
     action_type VARCHAR(20)  NOT NULL,
     api_method  VARCHAR(10),
     api_path    VARCHAR(200),

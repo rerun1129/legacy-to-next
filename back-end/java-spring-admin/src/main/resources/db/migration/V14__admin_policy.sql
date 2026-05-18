@@ -4,7 +4,7 @@
 CREATE TABLE admin.menu_policy (
     policy_id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     menu_id        BIGINT       NOT NULL,
-    attribute_key  VARCHAR(50)  NOT NULL,
+    attribute_key  VARCHAR(80)  NOT NULL,
     required_value VARCHAR(100) NOT NULL,
     created_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -34,7 +34,7 @@ COMMENT ON COLUMN admin.menu_policy.updated_by     IS '수정자';
 CREATE TABLE admin.button_policy (
     policy_id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     button_id      BIGINT       NOT NULL,
-    attribute_key  VARCHAR(50)  NOT NULL,
+    attribute_key  VARCHAR(80)  NOT NULL,
     required_value VARCHAR(100) NOT NULL,
     created_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
