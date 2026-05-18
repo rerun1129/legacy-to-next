@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { customerUseCases } from "@/application/customer/use-cases";
@@ -336,24 +337,23 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
       )}
       <div className="modal__footer">
         {isEdit && (
-          <Button
-            variant="danger"
-            size="sm"
+          <ActionButton
+            buttonCode="BTN_ADMIN_CUSTOMER_LIST_DELETE"
+            className="btn btn--danger btn--sm"
             onClick={handleDelete}
             disabled={isBusy || isReadOnly}
           >
             삭제
-          </Button>
+          </ActionButton>
         )}
-        <Button
-          variant="modal"
-          size="sm"
+        <ActionButton
+          buttonCode={isEdit ? "BTN_ADMIN_CUSTOMER_LIST_UPDATE" : "BTN_ADMIN_CUSTOMER_LIST_CREATE"}
+          className="btn btn--modal btn--sm"
           onClick={form.handleSubmit(handleSave)}
           disabled={isBusy || isReadOnly}
-          loading={createMutation.isPending || updateMutation.isPending}
         >
           저장
-        </Button>
+        </ActionButton>
         <Button size="sm" onClick={onClose} disabled={isBusy}>
           닫기
         </Button>

@@ -5,7 +5,7 @@ import { AccessMenuListClient } from "@/components/admin/access/menu-list-client
 
 export default function AdminAccessMenuPage() {
   return (
-    <AdminGuard>
+    <AdminGuard requiredMenuCode="ADMIN_ACCESS_MENU">
       <div style={{ padding: 16, display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
         <h1 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 12 }}>Access - Menu</h1>
         <AccessMenuListClient />

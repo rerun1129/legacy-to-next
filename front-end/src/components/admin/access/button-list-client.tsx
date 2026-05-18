@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessButtonPort } from "@/lib/ports";
-import type { CreateButtonDto, ButtonActionType } from "@/domain/access/button";
+import { ActionButton } from "@/components/admin/access/action-button";
+import type { CreateButtonDto, UpdateButtonDto, ButtonActionType, ButtonRow } from "@/domain/access/button";
 
 const ACTION_TYPES: ButtonActionType[] = ["CREATE", "UPDATE", "DELETE", "EXPORT", "CUSTOM"];
 
@@ -24,10 +25,42 @@ const DEFAULT_FORM: CreateButtonDto = {
   active: true,
 };
 
+interface UpdateFormValues {
+  menuId: string;
+  label: string;
+  actionType: ButtonActionType;
+  apiMethod: string;
+  apiPath: string;
+  sortOrder: string;
+  active: boolean;
+}
+
+const DEFAULT_UPDATE: UpdateFormValues = {
+  menuId: "",
+  label: "",
+  actionType: "CREATE",
+  apiMethod: "",
+  apiPath: "",
+  sortOrder: "",
+  active: true,
+};
+
+function parseNullableStr(v: string): string | null {
+  return v.trim() === "" ? null : v.trim();
+}
+
+function parseNullableNum(v: string): number | null {
+  if (!v.trim()) return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
 export function AccessButtonListClient() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
-  const form = useForm<CreateButtonDto>({ defaultValues: DEFAULT_FORM });
+  const [editTarget, setEditTarget] = useState<ButtonRow | null>(null);
+  const createForm = useForm<CreateButtonDto>({ defaultValues: DEFAULT_FORM });
+  const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
 
   const { data, isFetching } = useQuery({
     queryKey: ["access-button", "list"],
@@ -43,7 +76,18 @@ export function AccessButtonListClient() {
       toast.success("버튼이 등록되었습니다.");
       qc.invalidateQueries({ queryKey: ["access-button", "list"] });
       setCreateOpen(false);
-      form.reset(DEFAULT_FORM);
+      createForm.reset(DEFAULT_FORM);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, req }: { id: number; req: UpdateButtonDto }) =>
+      accessButtonPort.update(id, req),
+    onSuccess: () => {
+      toast.success("버튼이 수정되었습니다.");
+      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
+      setEditTarget(null);
+      editForm.reset(DEFAULT_UPDATE);
     },
   });
 
@@ -54,6 +98,33 @@ export function AccessButtonListClient() {
       qc.invalidateQueries({ queryKey: ["access-button", "list"] });
     },
   });
+
+  function openEdit(row: ButtonRow) {
+    setEditTarget(row);
+    editForm.reset({
+      menuId: String(row.menuId),
+      label: row.label,
+      actionType: row.actionType,
+      apiMethod: row.apiMethod ?? "",
+      apiPath: row.apiPath ?? "",
+      sortOrder: row.sortOrder != null ? String(row.sortOrder) : "",
+      active: row.active,
+    });
+  }
+
+  function handleEditSave(values: UpdateFormValues) {
+    if (!editTarget) return;
+    const req: UpdateButtonDto = {
+      menuId: Number(values.menuId),
+      label: values.label.trim(),
+      actionType: values.actionType,
+      apiMethod: parseNullableStr(values.apiMethod),
+      apiPath: parseNullableStr(values.apiPath),
+      sortOrder: parseNullableNum(values.sortOrder),
+      active: values.active,
+    };
+    updateMutation.mutate({ id: editTarget.id, req });
+  }
 
   async function handleDelete(id: number, label: string) {
     const ok = await confirm({ title: "버튼 삭제", description: `"${label}" 버튼을 삭제하시겠습니까?`, variant: "destructive", confirmText: "삭제", cancelText: "취소" });
@@ -87,10 +158,22 @@ export function AccessButtonListClient() {
                     <td>{r.menuId}</td>
                     <td>{r.actionType}</td>
                     <td style={{ textAlign: "center" }}>{r.active ? "활성" : "비활성"}</td>
-                    <td>
-                      <button className="btn btn--danger btn--sm" onClick={() => handleDelete(r.id, r.label)} disabled={deleteMutation.isPending}>
+                    <td style={{ display: "flex", gap: 4 }}>
+                      <ActionButton
+                        buttonCode="BTN_ADMIN_ACCESS_BUTTON_UPDATE"
+                        className="btn btn--sm"
+                        onClick={() => openEdit(r)}
+                      >
+                        <Pencil size={12} />
+                      </ActionButton>
+                      <ActionButton
+                        buttonCode="BTN_ADMIN_ACCESS_BUTTON_DELETE"
+                        className="btn btn--danger btn--sm"
+                        onClick={() => handleDelete(r.id, r.label)}
+                        disabled={deleteMutation.isPending}
+                      >
                         <Trash2 size={12} />
-                      </button>
+                      </ActionButton>
                     </td>
                   </tr>
                 ))}
@@ -101,23 +184,52 @@ export function AccessButtonListClient() {
         </div>
       </div>
 
+      {/* 신규 등록 모달 */}
       <ModalShell isOpen={createOpen} title="버튼 등록">
-        <form onSubmit={form.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
+        <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...form.register("menuId", { valueAsNumber: true })} /></div>
-            <div className="lcn"><span className="lcn__label">buttonCode</span><input className="text-box text-box--panel" {...form.register("buttonCode")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...form.register("label")} /></div>
+            <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...createForm.register("menuId", { valueAsNumber: true })} /></div>
+            <div className="lcn"><span className="lcn__label">buttonCode</span><input className="text-box text-box--panel" {...createForm.register("buttonCode")} /></div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...createForm.register("label")} /></div>
             <div className="lcn"><span className="lcn__label">actionType</span>
-              <select className="text-box text-box--panel" {...form.register("actionType")}>
+              <select className="text-box text-box--panel" {...createForm.register("actionType")}>
                 {ACTION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...form.register("active")} />활성</label></div>
+            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("active")} />활성</label></div>
           </div>
         </form>
         <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={form.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setCreateOpen(false); form.reset(DEFAULT_FORM); }}>닫기</Button>
+          <Button variant="modal" size="sm" onClick={createForm.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
+          <Button size="sm" onClick={() => { setCreateOpen(false); createForm.reset(DEFAULT_FORM); }}>닫기</Button>
+        </div>
+      </ModalShell>
+
+      {/* 수정 모달 */}
+      <ModalShell isOpen={editTarget !== null} title="버튼 수정">
+        <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="lcn">
+              <span className="lcn__label">buttonCode</span>
+              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}>
+                {editTarget?.buttonCode}
+              </span>
+            </div>
+            <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...editForm.register("menuId")} /></div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...editForm.register("label")} /></div>
+            <div className="lcn"><span className="lcn__label">actionType</span>
+              <select className="text-box text-box--panel" {...editForm.register("actionType")}>
+                {ACTION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="lcn"><span className="lcn__label">apiMethod</span><input className="text-box text-box--panel" placeholder="선택" {...editForm.register("apiMethod")} /></div>
+            <div className="lcn"><span className="lcn__label">apiPath</span><input className="text-box text-box--panel" placeholder="선택" {...editForm.register("apiPath")} /></div>
+            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
+          </div>
+        </form>
+        <div className="modal__footer">
+          <Button variant="modal" size="sm" onClick={editForm.handleSubmit(handleEditSave)} loading={updateMutation.isPending}>저장</Button>
+          <Button size="sm" onClick={() => { setEditTarget(null); editForm.reset(DEFAULT_UPDATE); }}>닫기</Button>
         </div>
       </ModalShell>
     </>

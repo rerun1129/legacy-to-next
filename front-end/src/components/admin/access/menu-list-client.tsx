@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { accessMenuPort } from "@/lib/ports";
-import type { CreateMenuDto } from "@/domain/access/menu";
+import { ActionButton } from "@/components/admin/access/action-button";
+import type { CreateMenuDto, UpdateMenuDto, MenuRow } from "@/domain/access/menu";
 
 const DEFAULT_FORM: CreateMenuDto = {
   menuCode: "",
@@ -23,10 +24,44 @@ const DEFAULT_FORM: CreateMenuDto = {
   moduleCode: "",
 };
 
+interface UpdateFormValues {
+  parentId: string;
+  path: string;
+  label: string;
+  labelEn: string;
+  icon: string;
+  sortOrder: string;
+  active: boolean;
+  moduleCode: string;
+}
+
+const DEFAULT_UPDATE: UpdateFormValues = {
+  parentId: "",
+  path: "",
+  label: "",
+  labelEn: "",
+  icon: "",
+  sortOrder: "",
+  active: true,
+  moduleCode: "",
+};
+
+function parseNullableStr(v: string): string | null {
+  return v.trim() === "" ? null : v.trim();
+}
+
+function parseNullableNum(v: string): number | null {
+  if (!v.trim()) return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
 export function AccessMenuListClient() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
-  const form = useForm<CreateMenuDto>({ defaultValues: DEFAULT_FORM });
+  const [editTarget, setEditTarget] = useState<MenuRow | null>(null);
+  const createForm = useForm<CreateMenuDto>({ defaultValues: DEFAULT_FORM });
+  const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
 
   const { data, isFetching } = useQuery({
     queryKey: ["access-menu", "list"],
@@ -42,7 +77,18 @@ export function AccessMenuListClient() {
       toast.success("메뉴가 등록되었습니다.");
       qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
       setCreateOpen(false);
-      form.reset(DEFAULT_FORM);
+      createForm.reset(DEFAULT_FORM);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, req }: { id: number; req: UpdateMenuDto }) =>
+      accessMenuPort.update(id, req),
+    onSuccess: () => {
+      toast.success("메뉴가 수정되었습니다.");
+      qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
+      setEditTarget(null);
+      editForm.reset(DEFAULT_UPDATE);
     },
   });
 
@@ -53,6 +99,35 @@ export function AccessMenuListClient() {
       qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
     },
   });
+
+  function openEdit(row: MenuRow) {
+    setEditTarget(row);
+    editForm.reset({
+      parentId: row.parentId != null ? String(row.parentId) : "",
+      path: row.path ?? "",
+      label: row.label,
+      labelEn: row.labelEn ?? "",
+      icon: row.icon ?? "",
+      sortOrder: row.sortOrder != null ? String(row.sortOrder) : "",
+      active: row.active,
+      moduleCode: row.moduleCode,
+    });
+  }
+
+  function handleEditSave(values: UpdateFormValues) {
+    if (!editTarget) return;
+    const req: UpdateMenuDto = {
+      parentId: parseNullableNum(values.parentId),
+      path: parseNullableStr(values.path),
+      label: values.label.trim(),
+      labelEn: parseNullableStr(values.labelEn),
+      icon: parseNullableStr(values.icon),
+      sortOrder: parseNullableNum(values.sortOrder),
+      active: values.active,
+      moduleCode: values.moduleCode.trim(),
+    };
+    updateMutation.mutate({ id: editTarget.id, req });
+  }
 
   async function handleDelete(id: number, label: string) {
     const ok = await confirm({ title: "메뉴 삭제", description: `"${label}" 메뉴를 삭제하시겠습니까?`, variant: "destructive", confirmText: "삭제", cancelText: "취소" });
@@ -86,10 +161,22 @@ export function AccessMenuListClient() {
                     <td>{r.moduleCode}</td>
                     <td>{r.path ?? "-"}</td>
                     <td style={{ textAlign: "center" }}>{r.active ? "활성" : "비활성"}</td>
-                    <td>
-                      <button className="btn btn--danger btn--sm" onClick={() => handleDelete(r.id, r.label)} disabled={deleteMutation.isPending}>
+                    <td style={{ display: "flex", gap: 4 }}>
+                      <ActionButton
+                        buttonCode="BTN_ADMIN_ACCESS_MENU_UPDATE"
+                        className="btn btn--sm"
+                        onClick={() => openEdit(r)}
+                      >
+                        <Pencil size={12} />
+                      </ActionButton>
+                      <ActionButton
+                        buttonCode="BTN_ADMIN_ACCESS_MENU_DELETE"
+                        className="btn btn--danger btn--sm"
+                        onClick={() => handleDelete(r.id, r.label)}
+                        disabled={deleteMutation.isPending}
+                      >
                         <Trash2 size={12} />
-                      </button>
+                      </ActionButton>
                     </td>
                   </tr>
                 ))}
@@ -100,19 +187,42 @@ export function AccessMenuListClient() {
         </div>
       </div>
 
+      {/* 신규 등록 모달 */}
       <ModalShell isOpen={createOpen} title="메뉴 등록">
-        <form onSubmit={form.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
+        <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn"><span className="lcn__label">menuCode</span><input className="text-box text-box--panel" {...form.register("menuCode")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...form.register("label")} /></div>
-            <div className="lcn"><span className="lcn__label">moduleCode</span><input className="text-box text-box--panel" {...form.register("moduleCode")} /></div>
-            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" placeholder="선택" {...form.register("path")} /></div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...form.register("active")} />활성</label></div>
+            <div className="lcn"><span className="lcn__label">menuCode</span><input className="text-box text-box--panel" {...createForm.register("menuCode")} /></div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...createForm.register("label")} /></div>
+            <div className="lcn"><span className="lcn__label">moduleCode</span><input className="text-box text-box--panel" {...createForm.register("moduleCode")} /></div>
+            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" placeholder="선택" {...createForm.register("path")} /></div>
+            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("active")} />활성</label></div>
           </div>
         </form>
         <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={form.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setCreateOpen(false); form.reset(DEFAULT_FORM); }}>닫기</Button>
+          <Button variant="modal" size="sm" onClick={createForm.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
+          <Button size="sm" onClick={() => { setCreateOpen(false); createForm.reset(DEFAULT_FORM); }}>닫기</Button>
+        </div>
+      </ModalShell>
+
+      {/* 수정 모달 */}
+      <ModalShell isOpen={editTarget !== null} title="메뉴 수정">
+        <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="lcn">
+              <span className="lcn__label">menuCode</span>
+              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}>
+                {editTarget?.menuCode}
+              </span>
+            </div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...editForm.register("label")} /></div>
+            <div className="lcn"><span className="lcn__label">moduleCode</span><input className="text-box text-box--panel" {...editForm.register("moduleCode")} /></div>
+            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" placeholder="선택" {...editForm.register("path")} /></div>
+            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
+          </div>
+        </form>
+        <div className="modal__footer">
+          <Button variant="modal" size="sm" onClick={editForm.handleSubmit(handleEditSave)} loading={updateMutation.isPending}>저장</Button>
+          <Button size="sm" onClick={() => { setEditTarget(null); editForm.reset(DEFAULT_UPDATE); }}>닫기</Button>
         </div>
       </ModalShell>
     </>

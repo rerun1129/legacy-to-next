@@ -112,10 +112,11 @@ const NAV_MODULES: NavModule[] = [
       {
         group: "Access 관리", icon: ShieldCheck, defaultOpen: false,
         children: [
-          { label: "Menu",      href: "/admin/access/menu",      icon: List },
-          { label: "Button",    href: "/admin/access/button",    icon: List },
-          { label: "Policy",    href: "/admin/access/policy",    icon: List },
-          { label: "Attribute", href: "/admin/access/attribute", icon: List },
+          { label: "Menu",      href: "/admin/access/menu",      icon: List, requiredMenuCode: "ADMIN_ACCESS_MENU" },
+          { label: "Button",    href: "/admin/access/button",    icon: List, requiredMenuCode: "ADMIN_ACCESS_BUTTON" },
+          { label: "Policy",    href: "/admin/access/policy",    icon: List, requiredMenuCode: "ADMIN_ACCESS_POLICY" },
+          { label: "Attribute", href: "/admin/access/attribute", icon: List, requiredMenuCode: "ADMIN_ACCESS_ATTRIBUTE" },
+          { label: "Module",    href: "/admin/access/module",    icon: List, requiredMenuCode: "ADMIN_ACCESS_MODULE" },
         ],
       },
     ],
