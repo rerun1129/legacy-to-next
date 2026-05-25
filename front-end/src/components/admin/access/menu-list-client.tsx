@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Pencil } from "lucide-react";
@@ -11,6 +11,9 @@ import { toast } from "@/lib/toast-store";
 import { accessMenuPort } from "@/lib/ports";
 import { accessMenuUseCases } from "@/application/access/menu/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
+import { GridList } from "@/components/shared/grid-list";
+import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import type { CreateMenuDto, UpdateMenuDto, MenuRow } from "@/domain/access/menu";
 
 const DEFAULT_FORM: CreateMenuDto = {
@@ -56,6 +59,15 @@ function parseNullableNum(v: string): number | null {
   const n = Number(v);
   return isNaN(n) ? null : n;
 }
+
+const MENU_COLUMNS: GridColumn<MenuRow>[] = [
+  { key: "id", label: "ID", minWidth: 60 },
+  { key: "menuCode", label: "menuCode", minWidth: 140 },
+  { key: "label", label: "label", minWidth: 120 },
+  { key: "moduleCode", label: "moduleCode", minWidth: 120 },
+  { key: "path", label: "path", minWidth: 120, render: (v) => (v as string | null) ?? "-" },
+  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
+];
 
 export function AccessMenuListClient() {
   const qc = useQueryClient();
@@ -115,7 +127,7 @@ export function AccessMenuListClient() {
     },
   });
 
-  function openEdit(row: MenuRow) {
+  const openEdit = useCallback((row: MenuRow) => {
     setEditTarget(row);
     editForm.reset({
       parentId: row.parentId != null ? String(row.parentId) : "",
@@ -127,7 +139,7 @@ export function AccessMenuListClient() {
       active: row.active,
       moduleCode: row.moduleCode,
     });
-  }
+  }, [editForm]);
 
   function handleEditSave(values: UpdateFormValues) {
     if (!editTarget) return;
@@ -144,24 +156,35 @@ export function AccessMenuListClient() {
     updateMutation.mutate({ id: editTarget.id, req });
   }
 
-  async function handleDelete(id: number, label: string) {
+  const handleDelete = useCallback(async (id: number, label: string) => {
     const ok = await confirm({ title: "메뉴 삭제", description: `"${label}" 메뉴를 삭제하시겠습니까?`, variant: "destructive", confirmText: "삭제", cancelText: "취소" });
     if (!ok) return;
     deleteMutation.mutate(id);
-  }
+  }, [deleteMutation]);
 
   async function handleBulkDelete() {
     const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
     if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
   }
 
-  function toggleKey(id: number) {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }
+  const columns = useMemo<GridColumn<MenuRow>[]>(() => [
+    ...MENU_COLUMNS,
+    {
+      key: "_actions",
+      label: "",
+      minWidth: 70,
+      render: (_v, row) => (
+        <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+          <ActionButton buttonCode="BTN_ADMIN_ACCESS_MENU_UPDATE" className="btn btn--sm" onClick={() => openEdit(row)}>
+            <Pencil size={12} />
+          </ActionButton>
+          <ActionButton buttonCode="BTN_ADMIN_ACCESS_MENU_DELETE" className="btn btn--danger btn--sm" onClick={() => handleDelete(row.id, row.label)} disabled={deleteMutation.isPending}>
+            <Trash2 size={12} />
+          </ActionButton>
+        </div>
+      ),
+    },
+  ], [deleteMutation.isPending, openEdit, handleDelete]);
 
   const rows = data?.content ?? [];
 
@@ -183,44 +206,20 @@ export function AccessMenuListClient() {
           <div className="panel__title-accent" />
           <span className="panel__title">Menus</span>
           <span className="panel__rowcount">{rows.length}</span>
+          <ColumnVisibilityMenu<MenuRow> gridId="access-menu" defaultColumns={MENU_COLUMNS} />
         </div>
         <div className="list-wrap">
-          {isFetching ? <div style={{ padding: 16, color: "var(--ink-3)" }}>로딩 중...</div> : (
-            <table className="grid" style={{ width: "100%" }}>
-              <thead><tr><th style={{ width: 32 }}></th><th>ID</th><th>menuCode</th><th>label</th><th>moduleCode</th><th>path</th><th>active</th><th></th></tr></thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id}>
-                    <td><input type="checkbox" checked={selectedKeys.has(r.id)} onChange={() => toggleKey(r.id)} /></td>
-                    <td>{r.id}</td>
-                    <td>{r.menuCode}</td>
-                    <td>{r.label}</td>
-                    <td>{r.moduleCode}</td>
-                    <td>{r.path ?? "-"}</td>
-                    <td style={{ textAlign: "center" }}>{r.active ? "활성" : "비활성"}</td>
-                    <td style={{ display: "flex", gap: 4 }}>
-                      <ActionButton
-                        buttonCode="BTN_ADMIN_ACCESS_MENU_UPDATE"
-                        className="btn btn--sm"
-                        onClick={() => openEdit(r)}
-                      >
-                        <Pencil size={12} />
-                      </ActionButton>
-                      <ActionButton
-                        buttonCode="BTN_ADMIN_ACCESS_MENU_DELETE"
-                        className="btn btn--danger btn--sm"
-                        onClick={() => handleDelete(r.id, r.label)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 size={12} />
-                      </ActionButton>
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && <tr><td colSpan={8} style={{ textAlign: "center", color: "var(--ink-3)" }}>데이터가 없습니다.</td></tr>}
-              </tbody>
-            </table>
-          )}
+          <GridList<MenuRow>
+            columns={columns}
+            data={rows}
+            gridId="access-menu"
+            rowKey={(row) => row.id}
+            selectable
+            selectedKeys={selectedKeys}
+            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
+            isLoading={isFetching}
+            emptyMessage="데이터가 없습니다."
+          />
         </div>
       </div>
 

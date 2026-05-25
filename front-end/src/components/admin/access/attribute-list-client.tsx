@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Pencil } from "lucide-react";
@@ -12,6 +12,9 @@ import { accessAttributePort } from "@/lib/ports";
 import { accessAttributeUseCases } from "@/application/access/attribute/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { AttributeValueSection } from "@/components/admin/access/attribute-value-section";
+import { GridList } from "@/components/shared/grid-list";
+import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import type {
   CreateAttributeDefinitionDto,
   UpdateAttributeDefinitionDto,
@@ -42,6 +45,14 @@ const DEFAULT_UPDATE: UpdateFormValues = {
   allowMulti: false,
   active: true,
 };
+
+const ATTRIBUTE_COLUMNS: GridColumn<AttributeDefinitionRow>[] = [
+  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
+  { key: "name", label: "name", minWidth: 120 },
+  { key: "valueType", label: "valueType", minWidth: 100 },
+  { key: "allowMulti", label: "allowMulti", minWidth: 80, align: "center", render: (v) => (v ? "Y" : "N") },
+  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
+];
 
 export function AccessAttributeListClient() {
   const qc = useQueryClient();
@@ -99,7 +110,7 @@ export function AccessAttributeListClient() {
     },
   });
 
-  function openEdit(row: AttributeDefinitionRow) {
+  const openEdit = useCallback((row: AttributeDefinitionRow) => {
     setEditTarget(row);
     editForm.reset({
       name: row.name,
@@ -107,7 +118,7 @@ export function AccessAttributeListClient() {
       allowMulti: row.allowMulti,
       active: row.active,
     });
-  }
+  }, [editForm]);
 
   function handleEditSave(values: UpdateFormValues) {
     if (!editTarget) return;
@@ -125,7 +136,7 @@ export function AccessAttributeListClient() {
     setSelectedKey((prev) => (prev === attributeKey ? null : attributeKey));
   }
 
-  async function handleDelete(attributeKey: string) {
+  const handleDelete = useCallback(async (attributeKey: string) => {
     const ok = await confirm({
       title: "속성 삭제",
       description: `"${attributeKey}" 속성을 삭제하시겠습니까?`,
@@ -135,20 +146,40 @@ export function AccessAttributeListClient() {
     });
     if (!ok) return;
     deleteMutation.mutate(attributeKey);
-  }
+  }, [deleteMutation]);
 
   async function handleBulkDelete() {
     const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
     if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
   }
 
-  function toggleKey(attributeKey: string) {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(attributeKey)) next.delete(attributeKey); else next.add(attributeKey);
-      return next;
-    });
-  }
+  const columns = useMemo<GridColumn<AttributeDefinitionRow>[]>(() => [
+    ...ATTRIBUTE_COLUMNS,
+    {
+      key: "_actions",
+      label: "",
+      minWidth: 70,
+      render: (_v, row) => (
+        <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+          <ActionButton
+            buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_UPDATE"
+            className="btn btn--sm"
+            onClick={(e) => { e.stopPropagation(); openEdit(row); }}
+          >
+            <Pencil size={12} />
+          </ActionButton>
+          <ActionButton
+            buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"
+            className="btn btn--danger btn--sm"
+            onClick={(e) => { e.stopPropagation(); handleDelete(row.attributeKey); }}
+            disabled={deleteMutation.isPending}
+          >
+            <Trash2 size={12} />
+          </ActionButton>
+        </div>
+      ),
+    },
+  ], [deleteMutation.isPending, openEdit, handleDelete]);
 
   const rows = data?.content ?? [];
 
@@ -170,66 +201,27 @@ export function AccessAttributeListClient() {
           <div className="panel__title-accent" />
           <span className="panel__title">Attributes</span>
           <span className="panel__rowcount">{rows.length}</span>
+          <ColumnVisibilityMenu<AttributeDefinitionRow> gridId="access-attribute" defaultColumns={ATTRIBUTE_COLUMNS} />
         </div>
         <div className="list-wrap">
-          {isFetching ? (
-            <div style={{ padding: 16, color: "var(--ink-3)" }}>로딩 중...</div>
-          ) : (
-            <table className="grid" style={{ width: "100%" }}>
-              <thead>
-                <tr>
-                  <th style={{ width: 32 }}></th>
-                  <th>attributeKey</th>
-                  <th>name</th>
-                  <th>valueType</th>
-                  <th>allowMulti</th>
-                  <th>active</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr
-                    key={r.attributeKey}
-                    onClick={() => handleRowClick(r.attributeKey, r.valueType)}
-                    className={selectedKey === r.attributeKey ? "is-selected" : undefined}
-                    style={r.valueType === "ENUM" ? { cursor: "pointer" } : undefined}
-                  >
-                    <td onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selectedKeys.has(r.attributeKey)} onChange={() => toggleKey(r.attributeKey)} /></td>
-                    <td>{r.attributeKey}</td>
-                    <td>{r.name}</td>
-                    <td>{r.valueType}</td>
-                    <td style={{ textAlign: "center" }}>{r.allowMulti ? "Y" : "N"}</td>
-                    <td style={{ textAlign: "center" }}>{r.active ? "활성" : "비활성"}</td>
-                    <td style={{ display: "flex", gap: 4 }}>
-                      <ActionButton
-                        buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_UPDATE"
-                        className="btn btn--sm"
-                        onClick={(e) => { e.stopPropagation(); openEdit(r); }}
-                      >
-                        <Pencil size={12} />
-                      </ActionButton>
-                      <ActionButton
-                        buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"
-                        className="btn btn--danger btn--sm"
-                        onClick={(e) => { e.stopPropagation(); handleDelete(r.attributeKey); }}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 size={12} />
-                      </ActionButton>
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "center", color: "var(--ink-3)" }}>
-                      데이터가 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
+          <GridList<AttributeDefinitionRow>
+            columns={columns}
+            data={rows}
+            gridId="access-attribute"
+            rowKey={(row) => row.attributeKey}
+            onRowClick={(row) => handleRowClick(row.attributeKey, row.valueType)}
+            rowClassName={(row) => {
+              const cls: string[] = [];
+              if (selectedKey === row.attributeKey) cls.push("is-selected");
+              if (row.valueType === "ENUM") cls.push("cursor-pointer");
+              return cls.length > 0 ? cls.join(" ") : undefined;
+            }}
+            selectable
+            selectedKeys={selectedKeys}
+            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(String)))}
+            isLoading={isFetching}
+            emptyMessage="데이터가 없습니다."
+          />
         </div>
       </div>
 

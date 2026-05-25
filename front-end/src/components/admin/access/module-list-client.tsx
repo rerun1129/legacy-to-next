@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Pencil } from "lucide-react";
@@ -12,6 +12,9 @@ import { accessModulePort } from "@/lib/ports";
 import { accessModuleUseCases } from "@/application/access/module/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { ModuleUpdateModal } from "@/components/admin/access/module-update-modal";
+import { GridList } from "@/components/shared/grid-list";
+import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import type { CreateModuleDto, UpdateModuleDto, ModuleRow } from "@/domain/access/module";
 
 const DEFAULT_CREATE: CreateModuleDto = {
@@ -21,6 +24,14 @@ const DEFAULT_CREATE: CreateModuleDto = {
   sortOrder: null,
   active: true,
 };
+
+const MODULE_COLUMNS: GridColumn<ModuleRow>[] = [
+  { key: "moduleCode", label: "moduleCode", minWidth: 140 },
+  { key: "name", label: "name", minWidth: 120 },
+  { key: "description", label: "description", minWidth: 160, render: (v) => (v as string | null) ?? "-" },
+  { key: "sortOrder", label: "sortOrder", minWidth: 80, align: "right", render: (v) => (v as number | null) ?? "-" },
+  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
+];
 
 export function AccessModuleListClient() {
   const qc = useQueryClient();
@@ -74,7 +85,7 @@ export function AccessModuleListClient() {
     },
   });
 
-  async function handleDelete(moduleCode: string) {
+  const handleDelete = useCallback(async (moduleCode: string) => {
     const ok = await confirm({
       title: "모듈 삭제",
       description: `"${moduleCode}" 모듈을 삭제하시겠습니까?`,
@@ -84,20 +95,31 @@ export function AccessModuleListClient() {
     });
     if (!ok) return;
     deleteMutation.mutate(moduleCode);
-  }
+  }, [deleteMutation]);
 
   async function handleBulkDelete() {
     const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
     if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
   }
 
-  function toggleKey(code: string) {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(code)) next.delete(code); else next.add(code);
-      return next;
-    });
-  }
+  const columns = useMemo<GridColumn<ModuleRow>[]>(() => [
+    ...MODULE_COLUMNS,
+    {
+      key: "_actions",
+      label: "",
+      minWidth: 70,
+      render: (_v, row) => (
+        <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+          <ActionButton buttonCode="BTN_ADMIN_ACCESS_MODULE_UPDATE" className="btn btn--sm" onClick={() => setEditTarget(row)}>
+            <Pencil size={12} />
+          </ActionButton>
+          <ActionButton buttonCode="BTN_ADMIN_ACCESS_MODULE_DELETE" className="btn btn--danger btn--sm" onClick={() => handleDelete(row.moduleCode)} disabled={deleteMutation.isPending}>
+            <Trash2 size={12} />
+          </ActionButton>
+        </div>
+      ),
+    },
+  ], [deleteMutation.isPending, handleDelete]);
 
   const rows = data?.content ?? [];
 
@@ -126,61 +148,20 @@ export function AccessModuleListClient() {
           <div className="panel__title-accent" />
           <span className="panel__title">Modules</span>
           <span className="panel__rowcount">{rows.length}</span>
+          <ColumnVisibilityMenu<ModuleRow> gridId="access-module" defaultColumns={MODULE_COLUMNS} />
         </div>
         <div className="list-wrap">
-          {isFetching ? (
-            <div style={{ padding: 16, color: "var(--ink-3)" }}>로딩 중...</div>
-          ) : (
-            <table className="grid" style={{ width: "100%" }}>
-              <thead>
-                <tr>
-                  <th style={{ width: 32 }}></th>
-                  <th>moduleCode</th>
-                  <th>name</th>
-                  <th>description</th>
-                  <th>sortOrder</th>
-                  <th>active</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.moduleCode}>
-                    <td><input type="checkbox" checked={selectedKeys.has(r.moduleCode)} onChange={() => toggleKey(r.moduleCode)} /></td>
-                    <td>{r.moduleCode}</td>
-                    <td>{r.name}</td>
-                    <td>{r.description ?? "-"}</td>
-                    <td style={{ textAlign: "right" }}>{r.sortOrder ?? "-"}</td>
-                    <td style={{ textAlign: "center" }}>{r.active ? "활성" : "비활성"}</td>
-                    <td style={{ display: "flex", gap: 4 }}>
-                      <ActionButton
-                        buttonCode="BTN_ADMIN_ACCESS_MODULE_UPDATE"
-                        className="btn btn--sm"
-                        onClick={() => setEditTarget(r)}
-                      >
-                        <Pencil size={12} />
-                      </ActionButton>
-                      <ActionButton
-                        buttonCode="BTN_ADMIN_ACCESS_MODULE_DELETE"
-                        className="btn btn--danger btn--sm"
-                        onClick={() => handleDelete(r.moduleCode)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 size={12} />
-                      </ActionButton>
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "center", color: "var(--ink-3)" }}>
-                      데이터가 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
+          <GridList<ModuleRow>
+            columns={columns}
+            data={rows}
+            gridId="access-module"
+            rowKey={(r) => r.moduleCode}
+            selectable
+            selectedKeys={selectedKeys}
+            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(String)))}
+            isLoading={isFetching}
+            emptyMessage="데이터가 없습니다."
+          />
         </div>
       </div>
 

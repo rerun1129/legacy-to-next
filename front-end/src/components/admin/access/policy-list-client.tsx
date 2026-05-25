@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
@@ -12,12 +12,31 @@ import { accessMenuPolicyPort, accessButtonPolicyPort } from "@/lib/ports";
 import { accessMenuPolicyUseCases } from "@/application/access/menu-policy/use-cases";
 import { accessButtonPolicyUseCases } from "@/application/access/button-policy/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
+import { GridList } from "@/components/shared/grid-list";
+import type { GridColumn } from "@/components/shared/grid-list";
 import type { CreateMenuPolicyDto, CreateButtonPolicyDto } from "@/domain/access/policy";
 
 const DEFAULT_MENU_POLICY: CreateMenuPolicyDto = { menuId: 0, attributeKey: "", requiredValue: "" };
 const DEFAULT_BTN_POLICY: CreateButtonPolicyDto = { buttonId: 0, attributeKey: "", requiredValue: "" };
 
 type Tab = "menu" | "button";
+
+type MenuPolicyRow = { id: number; menuId: number; attributeKey: string; requiredValue: string };
+type BtnPolicyRow = { id: number; buttonId: number; attributeKey: string; requiredValue: string };
+
+const MENU_POLICY_COLUMNS: GridColumn<MenuPolicyRow>[] = [
+  { key: "id", label: "ID", minWidth: 60 },
+  { key: "menuId", label: "menuId", minWidth: 80 },
+  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
+  { key: "requiredValue", label: "requiredValue", minWidth: 140 },
+];
+
+const BTN_POLICY_COLUMNS: GridColumn<BtnPolicyRow>[] = [
+  { key: "id", label: "ID", minWidth: 60 },
+  { key: "buttonId", label: "buttonId", minWidth: 80 },
+  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
+  { key: "requiredValue", label: "requiredValue", minWidth: 140 },
+];
 
 export function AccessPolicyListClient() {
   const qc = useQueryClient();
@@ -90,43 +109,55 @@ export function AccessPolicyListClient() {
     },
   });
 
-  async function handleDeleteMenu(id: number) {
+  const handleDeleteMenu = useCallback(async (id: number) => {
     const ok = await confirm({ title: "Menu Policy 삭제", description: "삭제하시겠습니까?", variant: "destructive", confirmText: "삭제", cancelText: "취소" });
     if (!ok) return;
     deleteMenuPolicy.mutate(id);
-  }
+  }, [deleteMenuPolicy]);
 
   async function handleBulkDeleteMenu() {
     const ok = await confirm({ title: "선택 삭제", description: `선택한 ${menuPolicySelectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
     if (ok) bulkDeleteMenuPolicy.mutate([...menuPolicySelectedKeys]);
   }
 
-  function toggleMenuPolicyKey(id: number) {
-    setMenuPolicySelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }
-
-  async function handleDeleteBtn(id: number) {
+  const handleDeleteBtn = useCallback(async (id: number) => {
     const ok = await confirm({ title: "Button Policy 삭제", description: "삭제하시겠습니까?", variant: "destructive", confirmText: "삭제", cancelText: "취소" });
     if (!ok) return;
     deleteBtnPolicy.mutate(id);
-  }
+  }, [deleteBtnPolicy]);
 
   async function handleBulkDeleteBtn() {
     const ok = await confirm({ title: "선택 삭제", description: `선택한 ${btnPolicySelectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
     if (ok) bulkDeleteBtnPolicy.mutate([...btnPolicySelectedKeys]);
   }
 
-  function toggleBtnPolicyKey(id: number) {
-    setBtnPolicySelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }
+  const menuPolicyColumns = useMemo<GridColumn<MenuPolicyRow>[]>(() => [
+    ...MENU_POLICY_COLUMNS,
+    {
+      key: "_actions",
+      label: "",
+      minWidth: 60,
+      render: (_v, row) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <button className="btn btn--danger btn--sm" onClick={() => handleDeleteMenu(row.id)}><Trash2 size={12} /></button>
+        </div>
+      ),
+    },
+  ], [handleDeleteMenu]);
+
+  const btnPolicyColumns = useMemo<GridColumn<BtnPolicyRow>[]>(() => [
+    ...BTN_POLICY_COLUMNS,
+    {
+      key: "_actions",
+      label: "",
+      minWidth: 60,
+      render: (_v, row) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <button className="btn btn--danger btn--sm" onClick={() => handleDeleteBtn(row.id)}><Trash2 size={12} /></button>
+        </div>
+      ),
+    },
+  ], [handleDeleteBtn]);
 
   return (
     <>
@@ -157,21 +188,17 @@ export function AccessPolicyListClient() {
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Menu Policy</span></div>
             <div className="list-wrap">
-              {menuFetching ? <div style={{ padding: 16 }}>로딩 중...</div> : (
-                <table className="grid" style={{ width: "100%" }}>
-                  <thead><tr><th style={{ width: 32 }}></th><th>ID</th><th>menuId</th><th>attributeKey</th><th>requiredValue</th><th></th></tr></thead>
-                  <tbody>
-                    {(menuPolicies ?? []).map((r) => (
-                      <tr key={r.id}>
-                        <td><input type="checkbox" checked={menuPolicySelectedKeys.has(r.id)} onChange={() => toggleMenuPolicyKey(r.id)} /></td>
-                        <td>{r.id}</td><td>{r.menuId}</td><td>{r.attributeKey}</td><td>{r.requiredValue}</td>
-                        <td><button className="btn btn--danger btn--sm" onClick={() => handleDeleteMenu(r.id)}><Trash2 size={12} /></button></td>
-                      </tr>
-                    ))}
-                    {!menuPolicies && <tr><td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>Menu ID를 입력하세요.</td></tr>}
-                  </tbody>
-                </table>
-              )}
+              <GridList<MenuPolicyRow>
+                columns={menuPolicyColumns}
+                data={menuPolicies ?? []}
+                gridId="access-menu-policy"
+                rowKey={(r) => r.id}
+                selectable
+                selectedKeys={menuPolicySelectedKeys}
+                onSelectionChange={(next) => setMenuPolicySelectedKeys(new Set([...next].map(Number)))}
+                isLoading={menuFetching}
+                emptyMessage={menuId > 0 ? "데이터가 없습니다." : "Menu ID를 입력하세요."}
+              />
             </div>
           </div>
           <ModalShell isOpen={menuPolicyOpen} title="Menu Policy 등록">
@@ -212,21 +239,17 @@ export function AccessPolicyListClient() {
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Button Policy</span></div>
             <div className="list-wrap">
-              {btnFetching ? <div style={{ padding: 16 }}>로딩 중...</div> : (
-                <table className="grid" style={{ width: "100%" }}>
-                  <thead><tr><th style={{ width: 32 }}></th><th>ID</th><th>buttonId</th><th>attributeKey</th><th>requiredValue</th><th></th></tr></thead>
-                  <tbody>
-                    {(btnPolicies ?? []).map((r) => (
-                      <tr key={r.id}>
-                        <td><input type="checkbox" checked={btnPolicySelectedKeys.has(r.id)} onChange={() => toggleBtnPolicyKey(r.id)} /></td>
-                        <td>{r.id}</td><td>{r.buttonId}</td><td>{r.attributeKey}</td><td>{r.requiredValue}</td>
-                        <td><button className="btn btn--danger btn--sm" onClick={() => handleDeleteBtn(r.id)}><Trash2 size={12} /></button></td>
-                      </tr>
-                    ))}
-                    {!btnPolicies && <tr><td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>Button ID를 입력하세요.</td></tr>}
-                  </tbody>
-                </table>
-              )}
+              <GridList<BtnPolicyRow>
+                columns={btnPolicyColumns}
+                data={btnPolicies ?? []}
+                gridId="access-btn-policy"
+                rowKey={(r) => r.id}
+                selectable
+                selectedKeys={btnPolicySelectedKeys}
+                onSelectionChange={(next) => setBtnPolicySelectedKeys(new Set([...next].map(Number)))}
+                isLoading={btnFetching}
+                emptyMessage={buttonId > 0 ? "데이터가 없습니다." : "Button ID를 입력하세요."}
+              />
             </div>
           </div>
           <ModalShell isOpen={btnPolicyOpen} title="Button Policy 등록">

@@ -10,8 +10,10 @@ import { toast } from "@/lib/toast-store";
 import { accessAttributeValuePort } from "@/lib/ports";
 import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { useState } from "react";
-import type { CreateAttributeValueDto } from "@/domain/access/attribute-value";
+import { useState, useMemo, useCallback } from "react";
+import type { CreateAttributeValueDto, AttributeValueRow } from "@/domain/access/attribute-value";
+import { GridList } from "@/components/shared/grid-list";
+import type { GridColumn } from "@/components/shared/grid-list";
 
 interface Props {
   attributeKey: string;
@@ -40,6 +42,13 @@ function parseNullableNum(v: string): number | null {
   const n = Number(v);
   return isNaN(n) ? null : n;
 }
+
+const ATTR_VALUE_COLUMNS: GridColumn<AttributeValueRow>[] = [
+  { key: "value", label: "value", minWidth: 120 },
+  { key: "label", label: "label", minWidth: 120, render: (v) => (v as string | null) ?? "-" },
+  { key: "sortOrder", label: "sortOrder", minWidth: 80, align: "right", render: (v) => (v as number | null) ?? "-" },
+  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
+];
 
 export function AttributeValueSection({ attributeKey }: Props) {
   const qc = useQueryClient();
@@ -83,7 +92,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
     },
   });
 
-  async function handleDelete(value: string) {
+  const handleDelete = useCallback(async (value: string) => {
     const ok = await confirm({
       title: "값 삭제",
       description: `"${value}" 값을 삭제하시겠습니까?`,
@@ -93,20 +102,28 @@ export function AttributeValueSection({ attributeKey }: Props) {
     });
     if (!ok) return;
     deleteMutation.mutate({ value });
-  }
+  }, [deleteMutation]);
 
   async function handleBulkDelete() {
     const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
     if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
   }
 
-  function toggleKey(value: string) {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(value)) next.delete(value); else next.add(value);
-      return next;
-    });
-  }
+  const columns = useMemo<GridColumn<AttributeValueRow>[]>(() => [
+    ...ATTR_VALUE_COLUMNS,
+    {
+      key: "_actions",
+      label: "",
+      minWidth: 50,
+      render: (_v, row) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <button className="btn btn--danger btn--sm" onClick={() => handleDelete(row.value)} disabled={deleteMutation.isPending}>
+            <Trash2 size={12} />
+          </button>
+        </div>
+      ),
+    },
+  ], [deleteMutation.isPending, handleDelete]);
 
   function handleCreate(values: CreateFormValues) {
     const req: CreateAttributeValueDto = {
@@ -143,49 +160,17 @@ export function AttributeValueSection({ attributeKey }: Props) {
           </div>
         </div>
         <div className="list-wrap">
-          {isFetching ? (
-            <div style={{ padding: 16, color: "var(--ink-3)" }}>로딩 중...</div>
-          ) : (
-            <table className="grid" style={{ width: "100%" }}>
-              <thead>
-                <tr>
-                  <th style={{ width: 32 }}></th>
-                  <th>value</th>
-                  <th>label</th>
-                  <th>sortOrder</th>
-                  <th>active</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.value}>
-                    <td><input type="checkbox" checked={selectedKeys.has(r.value)} onChange={() => toggleKey(r.value)} /></td>
-                    <td>{r.value}</td>
-                    <td>{r.label ?? "-"}</td>
-                    <td style={{ textAlign: "right" }}>{r.sortOrder ?? "-"}</td>
-                    <td style={{ textAlign: "center" }}>{r.active ? "활성" : "비활성"}</td>
-                    <td>
-                      <button
-                        className="btn btn--danger btn--sm"
-                        onClick={() => handleDelete(r.value)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: "center", color: "var(--ink-3)" }}>
-                      값이 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
+          <GridList<AttributeValueRow>
+            columns={columns}
+            data={rows}
+            gridId="access-attr-value"
+            rowKey={(row) => row.value}
+            selectable
+            selectedKeys={selectedKeys}
+            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(String)))}
+            isLoading={isFetching}
+            emptyMessage="값이 없습니다."
+          />
         </div>
       </div>
 
