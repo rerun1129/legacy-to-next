@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
@@ -48,7 +49,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
   const form = useForm<UserFormValues>({ defaultValues: DEFAULT_FORM });
-  const { register, reset, getValues, formState: { isSubmitting } } = form;
+  const { register, reset, getValues, control, formState: { isSubmitting } } = form;
 
   // 수정 모드: 상세 조회 후 form.reset
   const { data: detail, isLoading: isDetailLoading } = useQuery({
@@ -167,53 +168,59 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                 color: "var(--danger, #dc2626)",
                 fontSize: 13,
               }}>
-                삭제된 사용자입니다 (삭제일시: {detail?.deletedAt ?? "—"}). 조회 전용입니다.
+                Deleted user (deleted at: {detail?.deletedAt ?? "—"}). Read only.
               </div>
             )}
             <div className="lcn">
-              <span className="lcn__label">사용자명</span>
+              <span className="lcn__label">Username</span>
               <input
-                className="text-box text-box--panel"
-                placeholder="사용자명"
+                className="box-panel"
+                placeholder="Username"
                 readOnly={isEdit || isReadOnly}
                 style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
                 {...register("username")}
               />
             </div>
             <div className="lcn">
-              <span className="lcn__label">이메일</span>
+              <span className="lcn__label">Email</span>
               <input
-                className="text-box text-box--panel"
-                placeholder="이메일 (선택)"
+                className="box-panel"
+                placeholder="Email (optional)"
                 readOnly={isReadOnly}
                 {...register("email")}
               />
             </div>
             <div className="lcn">
-              <span className="lcn__label">비밀번호</span>
+              <span className="lcn__label">Password</span>
               <input
                 type="password"
-                className="text-box text-box--panel"
-                placeholder={isEdit ? "변경 시에만 입력" : "8자 이상 필수"}
+                className="box-panel"
+                placeholder={isEdit ? "Enter only to change" : "Min 8 characters"}
                 readOnly={isReadOnly}
                 {...register("password")}
               />
             </div>
             <div className="lcn">
-              <span className="lcn__label">역할</span>
-              <select className="text-box text-box--panel" disabled={isReadOnly} {...register("role")}>
-                {ROLE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <span className="lcn__label">Role</span>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <ComboBox
+                    variant="panel"
+                    options={ROLE_OPTIONS}
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isReadOnly}
+                  />
+                )}
+              />
             </div>
             <div className="lcn">
-              <span className="lcn__label">활성</span>
+              <span className="lcn__label">Active</span>
               <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <input type="checkbox" disabled={isReadOnly} {...register("active")} />
-                활성
+                Active
               </label>
             </div>
           </div>

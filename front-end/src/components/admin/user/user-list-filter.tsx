@@ -1,17 +1,19 @@
 "use client";
 
+import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { UserFilter } from "@/domain/user";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 
 interface Props {
   form: UseFormReturn<UserFilter>;
 }
 
 const SCOPE_OPTIONS = [
-  { value: "ALL", label: "전체" },
-  { value: "ACTIVE", label: "활성" },
-  { value: "INACTIVE", label: "비활성" },
-  { value: "DELETED", label: "삭제됨" },
+  { value: "ALL", label: "All" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "INACTIVE", label: "Inactive" },
+  { value: "DELETED", label: "Deleted" },
 ] as const;
 
 export function UserListFilter({ form }: Props) {
@@ -22,22 +24,27 @@ export function UserListFilter({ form }: Props) {
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <div className="lcn">
-            <span className="lcn__label">사용자명</span>
+            <span className="lcn__label">Username</span>
             <input
-              className="text-box text-box--panel"
-              placeholder="사용자명"
+              className="box-panel"
+              placeholder="Username"
               {...register("username")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">상태</span>
-            <select className="text-box text-box--panel" {...register("scope")}>
-              {SCOPE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <span className="lcn__label">Status</span>
+            <Controller
+              name="scope"
+              control={form.control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={[...SCOPE_OPTIONS]}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       </div>

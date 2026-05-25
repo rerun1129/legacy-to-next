@@ -181,7 +181,7 @@ export function AccessMenuListClient() {
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Menu 목록</span>
+          <span className="panel__title">Menus</span>
           <span className="panel__rowcount">{rows.length}</span>
         </div>
         <div className="list-wrap">

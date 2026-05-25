@@ -18,27 +18,27 @@ interface Props {
 }
 
 const COLUMNS: GridColumn<NoticeRow>[] = [
-  { key: "title", label: "제목", minWidth: 300 },
+  { key: "title", label: "Title", minWidth: 300 },
   {
     key: "pinned",
-    label: "고정",
+    label: "Pinned",
     minWidth: 70,
     align: "center",
     render: (v) => (v ? "Y" : ""),
   },
   {
     key: "active",
-    label: "상태",
+    label: "Status",
     minWidth: 90,
     align: "center",
     render: (_v, row) => {
-      if (row.deletedAt) return "삭제됨";
-      return row.active ? "활성" : "비활성";
+      if (row.deletedAt) return "Deleted";
+      return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "publishedAt", label: "게시일시", minWidth: 160 },
-  { key: "expiresAt", label: "만료일시", minWidth: 160 },
-  { key: "updatedAt", label: "수정일시", minWidth: 160 },
+  { key: "publishedAt", label: "Published At", minWidth: 160 },
+  { key: "expiresAt", label: "Expires At", minWidth: 160 },
+  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {
@@ -61,13 +61,13 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">공지사항 관리</span>
+          <span className="panel__title">Notice</span>
         </div>
         <div
           className="list-wrap"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <span style={{ color: "var(--ink-3)" }}>검색 조건을 입력 후 Search를 클릭하세요.</span>
+          <span style={{ color: "var(--ink-3)" }}>Enter search criteria and click Search.</span>
         </div>
       </div>
     );
@@ -78,13 +78,13 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">공지사항 관리</span>
+          <span className="panel__title">Notice</span>
         </div>
         <div
           className="list-wrap"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+          <span className="text-error">Failed to load data.</span>
         </div>
       </div>
     );
@@ -115,7 +115,7 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
           rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           isLoading={isFetching}
-          emptyMessage="검색 결과가 없습니다."
+          emptyMessage="No results found."
           onClearRow={() => setSelected(null)}
           selectable
           selectedKeys={selectedKeys}

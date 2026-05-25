@@ -32,18 +32,18 @@ const DEFAULT_FILTER: CodeMasterFilter = {
 };
 
 const COLUMNS: GridColumn<CodeMasterRow>[] = [
-  { key: "masterCode", label: "마스터 코드", minWidth: 140 },
-  { key: "masterName", label: "마스터 명", minWidth: 160 },
-  { key: "description", label: "설명", minWidth: 160 },
-  { key: "sortOrder", label: "정렬순서", minWidth: 80, align: "right" },
+  { key: "masterCode", label: "Master Code", minWidth: 140 },
+  { key: "masterName", label: "Master Name", minWidth: 160 },
+  { key: "description", label: "Description", minWidth: 160 },
+  { key: "sortOrder", label: "Sort Order", minWidth: 80, align: "right" },
   {
     key: "active",
-    label: "활성",
+    label: "Active",
     minWidth: 70,
     align: "center",
-    render: (v) => (v ? "활성" : "비활성"),
+    render: (v) => (v ? "Active" : "Inactive"),
   },
-  { key: "updatedAt", label: "수정일시", minWidth: 150 },
+  { key: "updatedAt", label: "Updated At", minWidth: 150 },
 ];
 
 export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, selectedKeys, onSelectionChange, onBulkDelete, isBulkDeletePending }: Props) {
@@ -111,26 +111,26 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head">
               <div className="panel__title-accent" />
-              <span className="panel__title">코드 마스터</span>
+              <span className="panel__title">Code Master</span>
             </div>
             <div
               className="list-wrap"
               style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
             >
-              <span style={{ color: "var(--ink-3)" }}>검색 조건을 입력 후 Search를 클릭하세요.</span>
+              <span style={{ color: "var(--ink-3)" }}>Enter search criteria and click Search.</span>
             </div>
           </div>
         ) : error ? (
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head">
               <div className="panel__title-accent" />
-              <span className="panel__title">코드 마스터</span>
+              <span className="panel__title">Code Master</span>
             </div>
             <div
               className="list-wrap"
               style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
             >
-              <span className="text-error">데이터를 불러오지 못했습니다.</span>
+              <span className="text-error">Failed to load data.</span>
             </div>
           </div>
         ) : (
@@ -146,7 +146,7 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
           >
             <div className="panel__head">
               <div className="panel__title-accent" />
-              <span className="panel__title">코드 마스터</span>
+              <span className="panel__title">Code Master</span>
               <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
             </div>
             <div className="list-wrap">
@@ -159,7 +159,7 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
                   selectedId === row.id ? "is-selected" : undefined
                 }
                 isLoading={isFetching}
-                emptyMessage="검색 결과가 없습니다."
+                emptyMessage="No results found."
                 selectable
                 selectedKeys={selectedKeys}
                 onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}

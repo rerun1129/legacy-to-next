@@ -1,14 +1,17 @@
 "use client";
 
+import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { CustomerFilter } from "@/domain/customer";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
+import { CodeBox } from "@/components/shared/inputs/code-box";
 
 interface Props {
   form: UseFormReturn<CustomerFilter>;
 }
 
 const CUSTOMER_TYPE_OPTIONS = [
-  { value: "ALL", label: "전체" },
+  { value: "ALL", label: "All" },
   { value: "FORWARDER", label: "FORWARDER" },
   { value: "SHIPPER", label: "SHIPPER" },
   { value: "CONSIGNEE", label: "CONSIGNEE" },
@@ -18,10 +21,10 @@ const CUSTOMER_TYPE_OPTIONS = [
 ] as const;
 
 const SCOPE_OPTIONS = [
-  { value: "ALL", label: "전체" },
-  { value: "ACTIVE", label: "활성" },
-  { value: "INACTIVE", label: "비활성" },
-  { value: "DELETED", label: "삭제됨" },
+  { value: "ALL", label: "All" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "INACTIVE", label: "Inactive" },
+  { value: "DELETED", label: "Deleted" },
 ] as const;
 
 export function CustomerListFilter({ form }: Props) {
@@ -31,41 +34,44 @@ export function CustomerListFilter({ form }: Props) {
     <div className="search-card">
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          <CodeBox kind="code-only" label="Customer Code" onLookup={() => {}} codeProps={{ placeholder: "Customer Code", ...register("customerCode") }} />
           <div className="lcn">
-            <span className="lcn__label">고객 코드</span>
+            <span className="lcn__label">Customer Name</span>
             <input
-              className="text-box text-box--panel"
-              placeholder="고객 코드"
-              {...register("customerCode")}
-            />
-          </div>
-          <div className="lcn">
-            <span className="lcn__label">고객명</span>
-            <input
-              className="text-box text-box--panel"
-              placeholder="고객명 (부분일치)"
+              className="box-panel"
+              placeholder="Customer Name (partial)"
               {...register("name")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">구분</span>
-            <select className="text-box text-box--panel" {...register("customerType")}>
-              {CUSTOMER_TYPE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <span className="lcn__label">Type</span>
+            <Controller
+              name="customerType"
+              control={form.control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={[...CUSTOMER_TYPE_OPTIONS]}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
           <div className="lcn">
-            <span className="lcn__label">상태</span>
-            <select className="text-box text-box--panel" {...register("scope")}>
-              {SCOPE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            <span className="lcn__label">Status</span>
+            <Controller
+              name="scope"
+              control={form.control}
+              render={({ field }) => (
+                <ComboBox
+                  variant="panel"
+                  options={[...SCOPE_OPTIONS]}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       </div>

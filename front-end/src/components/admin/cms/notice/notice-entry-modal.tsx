@@ -72,57 +72,57 @@ function NoticeFormFields({ register, isReadOnly }: FormFieldsProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div className="lcn">
-        <span className="lcn__label">제목 *</span>
+        <span className="lcn__label">Title *</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="공지사항 제목"
+          className="box-panel"
+          placeholder="Notice title"
           readOnly={isReadOnly}
           {...register("title")}
         />
       </div>
       <div className="lcn" style={{ alignItems: "flex-start" }}>
-        <span className="lcn__label" style={{ paddingTop: 4 }}>내용 *</span>
+        <span className="lcn__label" style={{ paddingTop: 4 }}>Content *</span>
         <textarea
-          className="text-box text-box--panel"
+          className="box-panel"
           rows={8}
-          placeholder="공지사항 내용"
+          placeholder="Notice content"
           style={{ resize: "vertical", whiteSpace: "pre-wrap" }}
           readOnly={isReadOnly}
           {...register("content")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">게시일시</span>
+        <span className="lcn__label">Published At</span>
         <input
           type="datetime-local"
-          className="text-box text-box--panel"
+          className="box-panel"
           readOnly={isReadOnly}
           disabled={isReadOnly}
           {...register("publishedAt")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">만료일시</span>
+        <span className="lcn__label">Expires At</span>
         <input
           type="datetime-local"
-          className="text-box text-box--panel"
+          className="box-panel"
           readOnly={isReadOnly}
           disabled={isReadOnly}
           {...register("expiresAt")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">고정</span>
+        <span className="lcn__label">Pinned</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("pinned")} />
-          고정 공지
+          Pinned
         </label>
       </div>
       <div className="lcn">
-        <span className="lcn__label">활성</span>
+        <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
-          활성
+          Active
         </label>
       </div>
     </div>
@@ -255,7 +255,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
               color: "var(--danger, #dc2626)",
               fontSize: 13,
             }}>
-              삭제된 공지사항입니다 (삭제일시: {detail?.deletedAt ?? "—"}). 조회 전용입니다.
+              Deleted notice (deleted at: {detail?.deletedAt ?? "—"}). Read only.
             </div>
           )}
           <NoticeFormFields register={register} isReadOnly={isReadOnly} />

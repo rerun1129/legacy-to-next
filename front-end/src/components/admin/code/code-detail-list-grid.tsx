@@ -21,17 +21,17 @@ interface Props {
 }
 
 const COLUMNS: GridColumn<CodeDetailRow>[] = [
-  { key: "codeValue", label: "코드 값", minWidth: 120 },
-  { key: "codeLabel", label: "코드 라벨", minWidth: 160 },
-  { key: "sortOrder", label: "정렬순서", minWidth: 80, align: "right" },
+  { key: "codeValue", label: "Code Value", minWidth: 120 },
+  { key: "codeLabel", label: "Code Label", minWidth: 160 },
+  { key: "sortOrder", label: "Sort Order", minWidth: 80, align: "right" },
   {
     key: "active",
-    label: "활성",
+    label: "Active",
     minWidth: 70,
     align: "center",
-    render: (v) => (v ? "활성" : "비활성"),
+    render: (v) => (v ? "Active" : "Inactive"),
   },
-  { key: "updatedAt", label: "수정일시", minWidth: 150 },
+  { key: "updatedAt", label: "Updated At", minWidth: 150 },
 ];
 
 export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, onBulkDelete, isBulkDeletePending }: Props) {
@@ -59,7 +59,7 @@ export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, 
         >
           <div className="panel__head">
             <div className="panel__title-accent" />
-            <span className="panel__title">코드 상세</span>
+            <span className="panel__title">Code Detail</span>
           </div>
           <div
             className="list-wrap"
@@ -97,20 +97,20 @@ export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, 
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head">
               <div className="panel__title-accent" />
-              <span className="panel__title">코드 상세</span>
+              <span className="panel__title">Code Detail</span>
             </div>
             <div
               className="list-wrap"
               style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
             >
-              <span className="text-error">데이터를 불러오지 못했습니다.</span>
+              <span className="text-error">Failed to load data.</span>
             </div>
           </div>
         ) : (
           <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div className="panel__head">
               <div className="panel__title-accent" />
-              <span className="panel__title">코드 상세</span>
+              <span className="panel__title">Code Detail</span>
               <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
             </div>
             <div className="list-wrap">
@@ -120,7 +120,7 @@ export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, 
                 rowKey={(row) => row.id}
                 onRowClick={(row) => setEntryModalState({ mode: "edit", masterId, id: row.id })}
                 isLoading={isFetching}
-                emptyMessage="검색 결과가 없습니다."
+                emptyMessage="No results found."
                 selectable
                 selectedKeys={selectedKeys}
                 onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}

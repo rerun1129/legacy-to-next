@@ -9,6 +9,7 @@ import { ActionButton } from "@/components/admin/access/action-button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { codeDetailUseCases } from "@/application/code-detail/use-cases";
+import { CodeBox } from "@/components/shared/inputs/code-box";
 import type { CreateCodeDetailRequestDto, UpdateCodeDetailRequestDto } from "@/domain/code-detail";
 
 export interface CodeDetailEntryModalState {
@@ -163,53 +164,47 @@ function CodeDetailEntryModalInner({ state, onClose, onSaved }: Props) {
       ) : (
         <form onSubmit={form.handleSubmit(handleSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <CodeBox
+              kind="code-only"
+              label="Code Value"
+              readOnly={isEdit}
+              onLookup={() => {}}
+              codeProps={{
+                placeholder: "Code Value",
+                ...register("codeValue"),
+                ...(isEdit ? { style: { background: "var(--surface-2)", color: "var(--ink-3)" } } : {}),
+              }}
+            />
             <div className="lcn">
-              <span className="lcn__label">코드 값</span>
-              {isEdit ? (
-                <span
-                  className="text-box text-box--panel"
-                  style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}
-                >
-                  {detail?.codeValue ?? getValues("codeValue")}
-                </span>
-              ) : (
-                <input
-                  className="text-box text-box--panel"
-                  placeholder="코드 값"
-                  {...register("codeValue")}
-                />
-              )}
-            </div>
-            <div className="lcn">
-              <span className="lcn__label">코드 라벨</span>
+              <span className="lcn__label">Code Label</span>
               <input
-                className="text-box text-box--panel"
-                placeholder="코드 라벨"
+                className="box-panel"
+                placeholder="Code Label"
                 {...register("codeLabel")}
               />
             </div>
             <div className="lcn">
-              <span className="lcn__label">정렬순서</span>
+              <span className="lcn__label">Sort Order</span>
               <input
                 type="number"
-                className="text-box text-box--panel"
+                className="box-panel"
                 placeholder="1"
                 {...register("sortOrder")}
               />
             </div>
             <div className="lcn">
-              <span className="lcn__label">활성</span>
+              <span className="lcn__label">Active</span>
               <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <input type="checkbox" {...register("active")} />
-                활성
+                Active
               </label>
             </div>
             <div className="lcn" style={{ alignItems: "flex-start" }}>
-              <span className="lcn__label" style={{ paddingTop: 4 }}>비고</span>
+              <span className="lcn__label" style={{ paddingTop: 4 }}>Remark</span>
               <textarea
-                className="text-box text-box--panel"
+                className="box-panel"
                 rows={3}
-                placeholder="비고"
+                placeholder="Remark (optional)"
                 style={{ resize: "vertical" }}
                 {...register("remark")}
               />

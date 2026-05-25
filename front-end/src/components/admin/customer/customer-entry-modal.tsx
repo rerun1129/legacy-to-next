@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import type { Control } from "react-hook-form";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
@@ -9,6 +11,7 @@ import { ActionButton } from "@/components/admin/access/action-button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { customerUseCases } from "@/application/customer/use-cases";
+import { CodeBox } from "@/components/shared/inputs/code-box";
 import type { CreateCustomerRequestDto, UpdateCustomerRequestDto, CustomerType } from "@/domain/customer";
 
 export interface EntryModalState {
@@ -68,122 +71,129 @@ function parseNullable(v: string): string | null {
 // ─── 필드 영역 분리 (11 필드 수용, readOnly 상태 전파) ───────────────────────
 interface FormFieldsProps {
   register: ReturnType<typeof useForm<CustomerFormValues>>["register"];
+  control: Control<CustomerFormValues>;
   isEdit: boolean;
   isReadOnly: boolean;
 }
 
-function CustomerFormFields({ register, isEdit, isReadOnly }: FormFieldsProps) {
+function CustomerFormFields({ register, control, isEdit, isReadOnly }: FormFieldsProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <CodeBox
+        kind="code-only"
+        label="Customer Code *"
+        readOnly={isEdit || isReadOnly}
+        onLookup={() => {}}
+        codeProps={{
+          placeholder: "Customer Code",
+          ...register("customerCode"),
+          ...(isEdit ? { style: { background: "var(--surface-2)", color: "var(--ink-3)" } } : {}),
+        }}
+      />
       <div className="lcn">
-        <span className="lcn__label">고객 코드 *</span>
-        {/* customerCode는 edit 모드에서 UX readOnly 스타일. BE updatable=false가 변경 방지 SSOT */}
-        <input
-          className="text-box text-box--panel"
-          placeholder="고객 코드"
-          readOnly={isEdit || isReadOnly}
-          style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
-          {...register("customerCode")}
+        <span className="lcn__label">Type *</span>
+        <Controller
+          name="customerType"
+          control={control}
+          render={({ field }) => (
+            <ComboBox
+              variant="panel"
+              options={CUSTOMER_TYPE_OPTIONS}
+              value={field.value}
+              onChange={field.onChange}
+              disabled={isReadOnly}
+            />
+          )}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">구분 *</span>
-        <select className="text-box text-box--panel" disabled={isReadOnly} {...register("customerType")}>
-          {CUSTOMER_TYPE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="lcn">
-        <span className="lcn__label">고객명 *</span>
+        <span className="lcn__label">Customer Name *</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="고객명"
+          className="box-panel"
+          placeholder="Customer Name"
           readOnly={isReadOnly}
           {...register("name")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">영문명</span>
+        <span className="lcn__label">English Name</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="영문명 (선택)"
+          className="box-panel"
+          placeholder="English Name (optional)"
           readOnly={isReadOnly}
           {...register("nameEn")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">사업자번호</span>
+        <span className="lcn__label">Business No.</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="사업자번호 (선택)"
+          className="box-panel"
+          placeholder="Business No. (optional)"
           readOnly={isReadOnly}
           {...register("businessNo")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">대표자</span>
+        <span className="lcn__label">Representative</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="대표자 (선택)"
+          className="box-panel"
+          placeholder="Representative (optional)"
           readOnly={isReadOnly}
           {...register("representative")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">전화번호</span>
+        <span className="lcn__label">Phone</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="전화번호 (선택)"
+          className="box-panel"
+          placeholder="Phone (optional)"
           readOnly={isReadOnly}
           {...register("phone")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">이메일</span>
+        <span className="lcn__label">Email</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="이메일 (선택)"
+          className="box-panel"
+          placeholder="Email (optional)"
           readOnly={isReadOnly}
           {...register("email")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">주소</span>
+        <span className="lcn__label">Address</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="주소 (선택)"
+          className="box-panel"
+          placeholder="Address (optional)"
           readOnly={isReadOnly}
           {...register("address")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">영문 주소</span>
+        <span className="lcn__label">English Address</span>
         <input
-          className="text-box text-box--panel"
-          placeholder="영문 주소 (선택)"
+          className="box-panel"
+          placeholder="English Address (optional)"
           readOnly={isReadOnly}
           {...register("addressEn")}
         />
       </div>
       <div className="lcn" style={{ alignItems: "flex-start" }}>
-        <span className="lcn__label" style={{ paddingTop: 4 }}>메모</span>
+        <span className="lcn__label" style={{ paddingTop: 4 }}>Memo</span>
         <textarea
-          className="text-box text-box--panel"
+          className="box-panel"
           rows={3}
-          placeholder="메모 (선택)"
+          placeholder="Memo (optional)"
           style={{ resize: "vertical" }}
           readOnly={isReadOnly}
           {...register("memo")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">활성</span>
+        <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
-          활성
+          Active
         </label>
       </div>
     </div>
@@ -195,7 +205,7 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
   const form = useForm<CustomerFormValues>({ defaultValues: DEFAULT_FORM });
-  const { register, reset, getValues, formState: { isSubmitting } } = form;
+  const { register, reset, getValues, control, formState: { isSubmitting } } = form;
 
   const { data: detail, isLoading: isDetailLoading } = useQuery({
     queryKey: ["admin-customer", "detail", state?.id],
@@ -329,10 +339,10 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
               color: "var(--danger, #dc2626)",
               fontSize: 13,
             }}>
-              삭제된 고객입니다 (삭제일시: {detail?.deletedAt ?? "—"}). 조회 전용입니다.
+              Deleted customer (deleted at: {detail?.deletedAt ?? "—"}). Read only.
             </div>
           )}
-          <CustomerFormFields register={register} isEdit={isEdit} isReadOnly={isReadOnly} />
+          <CustomerFormFields register={register} control={control} isEdit={isEdit} isReadOnly={isReadOnly} />
         </form>
       )}
       <div className="modal__footer">

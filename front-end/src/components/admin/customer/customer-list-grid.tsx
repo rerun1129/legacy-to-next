@@ -18,20 +18,20 @@ interface Props {
 }
 
 const COLUMNS: GridColumn<CustomerRow>[] = [
-  { key: "customerCode", label: "고객 코드", minWidth: 140 },
-  { key: "name", label: "고객명", minWidth: 200 },
-  { key: "customerType", label: "구분", minWidth: 120, align: "center" },
+  { key: "customerCode", label: "Customer Code", minWidth: 140 },
+  { key: "name", label: "Customer Name", minWidth: 200 },
+  { key: "customerType", label: "Type", minWidth: 120, align: "center" },
   {
     key: "active",
-    label: "상태",
+    label: "Status",
     minWidth: 90,
     align: "center",
     render: (_v, row) => {
-      if (row.deletedAt) return "삭제됨";
-      return row.active ? "활성" : "비활성";
+      if (row.deletedAt) return "Deleted";
+      return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "수정일시", minWidth: 160 },
+  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {
@@ -54,13 +54,13 @@ export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRow
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">고객 관리</span>
+          <span className="panel__title">Customer Management</span>
         </div>
         <div
           className="list-wrap"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <span style={{ color: "var(--ink-3)" }}>검색 조건을 입력 후 Search를 클릭하세요.</span>
+          <span style={{ color: "var(--ink-3)" }}>Enter search criteria and click Search.</span>
         </div>
       </div>
     );
@@ -71,13 +71,13 @@ export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRow
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">고객 관리</span>
+          <span className="panel__title">Customer Management</span>
         </div>
         <div
           className="list-wrap"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+          <span className="text-error">Failed to load data.</span>
         </div>
       </div>
     );
@@ -108,7 +108,7 @@ export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRow
           rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           isLoading={isFetching}
-          emptyMessage="검색 결과가 없습니다."
+          emptyMessage="No results found."
           onClearRow={() => setSelected(null)}
           selectable
           selectedKeys={selectedKeys}
