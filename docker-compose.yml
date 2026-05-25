@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: fms-postgres
+    environment:
+      POSTGRES_DB: fms
+      POSTGRES_USER: fms
+      POSTGRES_PASSWORD: fms_local
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema/V1__fms_initial_schema.sql:/docker-entrypoint-initdb.d/01_fms_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  fms-api:
+    build:
+      context: ./back-end/java-spring
+    container_name: fms-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/fms
+      DB_USER: fms
+      DB_PASS: fms_local
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  admin-api:
+    build:
+      context: ./back-end/java-spring-admin
+    container_name: admin-api
+    ports:
+      - "8081:8081"
+    environment:
+      ADMIN_DB_URL: jdbc:postgresql://postgres:5432/fms?currentSchema=admin
+      ADMIN_DB_USER: fms
+      ADMIN_DB_PASS: fms_local
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./front-end
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+        NEXT_PUBLIC_FMS_API_URL: http://localhost:8080
+        NEXT_PUBLIC_ADMIN_API_URL: http://localhost:8081
+        NEXT_PUBLIC_USE_MOCK: "false"
+    container_name: fms-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - fms-api
+      - admin-api
+
+volumes:
+  postgres_data:
