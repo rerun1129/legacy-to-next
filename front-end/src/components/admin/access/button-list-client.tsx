@@ -217,7 +217,7 @@ export function AccessButtonListClient() {
       </div>
 
       {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="버튼 등록">
+      <ModalShell isOpen={createOpen} title="버튼 등록" size="md">
         <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...createForm.register("menuId", { valueAsNumber: true })} /></div>
@@ -238,7 +238,7 @@ export function AccessButtonListClient() {
       </ModalShell>
 
       {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="버튼 수정">
+      <ModalShell isOpen={editTarget !== null} title="버튼 수정" size="md">
         <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn">

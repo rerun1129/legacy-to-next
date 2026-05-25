@@ -17,6 +17,10 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
+.modal--md {
+  width: 510px;
+}
+
 /* ---------- Large modal (Switch B/L 등 2-col entry 폼) ---------- */
 .modal--lg {
   max-width: 1200px;

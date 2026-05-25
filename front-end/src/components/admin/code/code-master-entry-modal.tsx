@@ -239,7 +239,7 @@ export function CodeMasterEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
   const title = state?.mode === "edit" ? "마스터 코드 수정" : "마스터 코드 등록";
   return (
-    <ModalShell isOpen={isOpen} title={title} size="default">
+    <ModalShell isOpen={isOpen} title={title} size="md">
       <CodeMasterEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );

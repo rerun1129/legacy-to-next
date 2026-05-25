@@ -65,7 +65,7 @@ export function ModuleUpdateModal({ target, isPending, onSave, onClose }: Props)
   }
 
   return (
-    <ModalShell isOpen={target !== null} title="모듈 수정">
+    <ModalShell isOpen={target !== null} title="모듈 수정" size="md">
       <form onSubmit={form.handleSubmit(handleSave)} className="modal__body">
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="lcn">

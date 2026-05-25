@@ -258,7 +258,7 @@ export function UserEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
   const title = state?.mode === "edit" ? "사용자 수정" : "사용자 등록";
   return (
-    <ModalShell isOpen={isOpen} title={title} size="default">
+    <ModalShell isOpen={isOpen} title={title} size="md">
       <UserEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );

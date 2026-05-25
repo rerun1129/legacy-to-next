@@ -229,7 +229,7 @@ export function AccessAttributeListClient() {
       {selectedKey !== null && <AttributeValueSection attributeKey={selectedKey} />}
 
       {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="속성 등록">
+      <ModalShell isOpen={createOpen} title="속성 등록" size="md">
         <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn"><span className="lcn__label">attributeKey</span><input className="text-box text-box--panel" {...createForm.register("attributeKey")} /></div>
@@ -250,7 +250,7 @@ export function AccessAttributeListClient() {
       </ModalShell>
 
       {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="속성 수정">
+      <ModalShell isOpen={editTarget !== null} title="속성 수정" size="md">
         <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn">

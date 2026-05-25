@@ -377,7 +377,7 @@ export function CustomerEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
   const title = state?.mode === "edit" ? "고객 수정" : "고객 등록";
   return (
-    <ModalShell isOpen={isOpen} title={title} size="default">
+    <ModalShell isOpen={isOpen} title={title} size="md">
       <CustomerEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );

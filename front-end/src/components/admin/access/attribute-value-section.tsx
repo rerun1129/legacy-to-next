@@ -174,7 +174,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
         </div>
       </div>
 
-      <ModalShell isOpen={createOpen} title="Attribute Value 추가">
+      <ModalShell isOpen={createOpen} title="Attribute Value 추가" size="md">
         <form onSubmit={form.handleSubmit(handleCreate)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn">

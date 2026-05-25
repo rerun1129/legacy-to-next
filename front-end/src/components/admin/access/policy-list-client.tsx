@@ -201,7 +201,7 @@ export function AccessPolicyListClient() {
               />
             </div>
           </div>
-          <ModalShell isOpen={menuPolicyOpen} title="Menu Policy 등록">
+          <ModalShell isOpen={menuPolicyOpen} title="Menu Policy 등록" size="md">
             <form onSubmit={menuForm.handleSubmit((v) => createMenuPolicy.mutate(v))} className="modal__body">
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...menuForm.register("menuId", { valueAsNumber: true })} /></div>
@@ -252,7 +252,7 @@ export function AccessPolicyListClient() {
               />
             </div>
           </div>
-          <ModalShell isOpen={btnPolicyOpen} title="Button Policy 등록">
+          <ModalShell isOpen={btnPolicyOpen} title="Button Policy 등록" size="md">
             <form onSubmit={btnForm.handleSubmit((v) => createBtnPolicy.mutate(v))} className="modal__body">
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div className="lcn"><span className="lcn__label">buttonId</span><input type="number" className="text-box text-box--panel" {...btnForm.register("buttonId", { valueAsNumber: true })} /></div>

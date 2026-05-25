@@ -243,7 +243,7 @@ export function CodeDetailEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
   const title = state?.mode === "edit" ? "코드 상세 수정" : "코드 상세 등록";
   return (
-    <ModalShell isOpen={isOpen} title={title} size="default">
+    <ModalShell isOpen={isOpen} title={title} size="md">
       <CodeDetailEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );

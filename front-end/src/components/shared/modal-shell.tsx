@@ -6,7 +6,7 @@ import { useModalDrag } from "./use-modal-drag";
 export interface ModalShellProps {
   isOpen: boolean;
   title: string;
-  size?: "default" | "lg";
+  size?: "default" | "md" | "lg";
   children: ReactNode;
 }
 
@@ -18,7 +18,7 @@ export function ModalShell({ isOpen, title, size = "default", children }: ModalS
 
 function ModalShellInner({ title, size, children }: Omit<ModalShellProps, "isOpen">) {
   const { offset, onHeaderMouseDown } = useModalDrag();
-  const sizeClass = size === "lg" ? "modal modal--lg" : "modal";
+  const sizeClass = size === "lg" ? "modal modal--lg" : size === "md" ? "modal modal--md" : "modal";
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className={sizeClass} style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}>

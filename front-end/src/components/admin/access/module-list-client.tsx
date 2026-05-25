@@ -166,7 +166,7 @@ export function AccessModuleListClient() {
       </div>
 
       {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="모듈 등록">
+      <ModalShell isOpen={createOpen} title="모듈 등록" size="md">
         <form
           onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))}
           className="modal__body"

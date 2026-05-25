@@ -293,7 +293,7 @@ export function NoticeEntryModal({ state, onClose, onSaved }: Props) {
   const isOpen = state !== null;
   const title = state?.mode === "edit" ? "공지사항 수정" : "공지사항 등록";
   return (
-    <ModalShell isOpen={isOpen} title={title} size="default">
+    <ModalShell isOpen={isOpen} title={title} size="md">
       <NoticeEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />
     </ModalShell>
   );
