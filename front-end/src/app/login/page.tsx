@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { authUseCases } from "@/application/auth/use-cases";
 import { setSession, firstAccessibleRoute } from "@/lib/admin-session";
 import type { AdminSession } from "@/lib/admin-session";
@@ -16,6 +17,7 @@ interface LoginForm {
 
 export default function LoginPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<LoginForm>();
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +43,7 @@ export default function LoginPage() {
         setError("no-access");
         return;
       }
+      qc.clear();
       setSession(session);
       router.replace(target);
     } catch (e) {

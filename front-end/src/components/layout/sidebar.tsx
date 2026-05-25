@@ -27,6 +27,7 @@ interface NavSection {
   icon: React.ComponentType<{ size?: number }>;
   children: NavLeaf[];
   defaultOpen?: boolean;
+  requiredMenuCode?: string;
 }
 
 interface NavModule {
@@ -42,7 +43,7 @@ const FMS_NAV_MODULE: NavModule = {
   module: "FMS", defaultOpen: true,
   sections: [
     {
-      group: "House B/L", icon: FileText, defaultOpen: true,
+      group: "House B/L", icon: FileText, defaultOpen: true, requiredMenuCode: "MENU_FMS_HOUSE_BL",
       children: [
         { label: "Sea Export List",  href: "/fms/house-bl/sea-exp/list",  icon: List },
         { label: "Sea Export Entry", href: "/fms/house-bl/sea-exp/entry", icon: FilePlus },
@@ -55,7 +56,7 @@ const FMS_NAV_MODULE: NavModule = {
       ],
     },
     {
-      group: "Master B/L", icon: Layers, defaultOpen: false,
+      group: "Master B/L", icon: Layers, defaultOpen: false, requiredMenuCode: "MENU_FMS_MASTER_BL",
       children: [
         { label: "Sea Export List",  href: "/fms/master-bl/sea-exp/list",  icon: List },
         { label: "Sea Export Entry", href: "/fms/master-bl/sea-exp/entry", icon: FilePlus },
@@ -68,14 +69,14 @@ const FMS_NAV_MODULE: NavModule = {
       ],
     },
     {
-      group: "Truck B/L", icon: Truck, defaultOpen: false,
+      group: "Truck B/L", icon: Truck, defaultOpen: false, requiredMenuCode: "MENU_FMS_TRUCK_BL",
       children: [
         { label: "List",  href: "/fms/truck-bl/list",  icon: List },
         { label: "Entry", href: "/fms/truck-bl/entry", icon: FilePlus },
       ],
     },
     {
-      group: "Non B/L", icon: Package, defaultOpen: false,
+      group: "Non B/L", icon: Package, defaultOpen: false, requiredMenuCode: "MENU_FMS_NON_BL",
       children: [
         { label: "List",  href: "/fms/non-bl/list",  icon: List },
         { label: "Entry", href: "/fms/non-bl/entry", icon: FilePlus },
@@ -146,6 +147,9 @@ export function Sidebar() {
 
   const fmsModActive = FMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s));
   const fmsModOpen   = openModules[FMS_NAV_MODULE.module];
+  const fmsAccessibleSections = FMS_NAV_MODULE.sections.filter(
+    (s) => !s.requiredMenuCode || (mounted && hasMenuAccess(session, s.requiredMenuCode))
+  );
 
   return (
     <nav className="app__side" style={{ display: "flex", flexDirection: "column" }}>
@@ -158,70 +162,72 @@ export function Sidebar() {
         Dashboard
       </button>
 
-      {/* FMS 모듈 — 정적 */}
-      <div className="side-group">
-        <button
-          className={`side-group__label side-group__label--toggle${fmsModActive ? " is-active" : ""}`}
-          onClick={() => toggleModule(FMS_NAV_MODULE.module)}
-        >
-          <span style={{ flex: 1 }}>{FMS_NAV_MODULE.module}</span>
-          <ChevronRight
-            size={11}
-            style={{
-              flexShrink: 0,
-              color: fmsModActive ? "var(--accent)" : "var(--ink-4)",
-              transform: fmsModOpen ? "rotate(90deg)" : undefined,
-              transition: "transform 160ms ease",
-            }}
-          />
-        </button>
+      {/* FMS 모듈 — 정적, 접근 가능한 섹션이 1개 이상일 때만 렌더 */}
+      {fmsAccessibleSections.length > 0 && (
+        <div className="side-group">
+          <button
+            className={`side-group__label side-group__label--toggle${fmsModActive ? " is-active" : ""}`}
+            onClick={() => toggleModule(FMS_NAV_MODULE.module)}
+          >
+            <span style={{ flex: 1 }}>{FMS_NAV_MODULE.module}</span>
+            <ChevronRight
+              size={11}
+              style={{
+                flexShrink: 0,
+                color: fmsModActive ? "var(--accent)" : "var(--ink-4)",
+                transform: fmsModOpen ? "rotate(90deg)" : undefined,
+                transition: "transform 160ms ease",
+              }}
+            />
+          </button>
 
-        {fmsModOpen && FMS_NAV_MODULE.sections.map((section) => {
-          const secActive = sectionActive(pathname, section);
-          const secOpen   = openSections[section.group];
+          {fmsModOpen && fmsAccessibleSections.map((section) => {
+            const secActive = sectionActive(pathname, section);
+            const secOpen   = openSections[section.group];
 
-          return (
-            <div key={section.group}>
-              <button
-                className={`side-item${secActive ? " is-active" : ""}`}
-                style={{ paddingLeft: 12 }}
-                onClick={() => toggleSection(section.group)}
-              >
-                <span className="side-item__icon"><section.icon size={13} /></span>
-                <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
-                <ChevronRight
-                  size={11}
-                  style={{
-                    flexShrink: 0,
-                    color: secActive ? "var(--accent)" : "var(--ink-4)",
-                    transform: secOpen ? "rotate(90deg)" : undefined,
-                    transition: "transform 160ms ease",
-                    marginRight: 4,
-                  }}
-                />
-              </button>
+            return (
+              <div key={section.group}>
+                <button
+                  className={`side-item${secActive ? " is-active" : ""}`}
+                  style={{ paddingLeft: 12 }}
+                  onClick={() => toggleSection(section.group)}
+                >
+                  <span className="side-item__icon"><section.icon size={13} /></span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
+                  <ChevronRight
+                    size={11}
+                    style={{
+                      flexShrink: 0,
+                      color: secActive ? "var(--accent)" : "var(--ink-4)",
+                      transform: secOpen ? "rotate(90deg)" : undefined,
+                      transition: "transform 160ms ease",
+                      marginRight: 4,
+                    }}
+                  />
+                </button>
 
-              {secOpen && section.children
-                // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
-                .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
-                .map((leaf) => {
-                const active = leafActive(pathname, leaf);
-                return (
-                  <button
-                    key={leaf.href}
-                    className={`side-item${active ? " is-active" : ""}`}
-                    style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
-                    onClick={() => navigate(`${section.group} ${leaf.label}`, leaf.href)}
-                  >
-                    <span className="side-item__icon"><leaf.icon size={11} /></span>
-                    {leaf.label}
-                  </button>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+                {secOpen && section.children
+                  // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
+                  .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
+                  .map((leaf) => {
+                  const active = leafActive(pathname, leaf);
+                  return (
+                    <button
+                      key={leaf.href}
+                      className={`side-item${active ? " is-active" : ""}`}
+                      style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
+                      onClick={() => navigate(`${section.group} ${leaf.label}`, leaf.href)}
+                    >
+                      <span className="side-item__icon"><leaf.icon size={11} /></span>
+                      {leaf.label}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Admin 모듈 — BE fetch 동적 렌더 */}
       <SidebarAdminTree

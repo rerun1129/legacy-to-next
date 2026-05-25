@@ -29,6 +29,7 @@ interface UserFormValues {
   password: string; // create 필수, edit 빈 값이면 미갱신
   role: "ADMIN" | "USER";
   active: boolean;
+  modules: string[];
 }
 
 const DEFAULT_FORM: UserFormValues = {
@@ -37,12 +38,18 @@ const DEFAULT_FORM: UserFormValues = {
   password: "",
   role: "USER",
   active: true,
+  modules: [],
 };
 
 const ROLE_OPTIONS: Array<{ value: "ADMIN" | "USER"; label: string }> = [
   { value: "ADMIN", label: "ADMIN" },
   { value: "USER", label: "USER" },
 ];
+
+const MODULE_OPTIONS = [
+  { value: "ADMIN", label: "ADMIN" },
+  { value: "FMS", label: "FMS" },
+] as const;
 
 // ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
 function UserEntryModalInner({ state, onClose, onSaved }: Props) {
@@ -70,6 +77,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         password: "",
         role: roleAttr ?? "USER",
         active: detail.active,
+        modules: detail.attributes?.module ?? [],
       });
     }
   }, [detail, reset]);
@@ -107,8 +115,11 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   });
 
   function handleSave(values: UserFormValues) {
-    // role은 ABAC attributes로 전송
+    // role·module은 ABAC attributes로 전송
     const attributes: Record<string, string[]> = { role: [values.role] };
+    if (values.modules.length > 0) {
+      attributes.module = values.modules;
+    }
 
     if (isEdit && state?.id != null) {
       const req: UpdateUserRequestDto = {
@@ -215,6 +226,34 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                   />
                 )}
               />
+            </div>
+            <div className="lcn">
+              <span className="lcn__label">Module</span>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {MODULE_OPTIONS.map((opt) => (
+                  <Controller
+                    key={opt.value}
+                    name="modules"
+                    control={control}
+                    render={({ field }) => (
+                      <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <input
+                          type="checkbox"
+                          checked={field.value.includes(opt.value)}
+                          disabled={isReadOnly}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...field.value, opt.value]
+                              : field.value.filter((v: string) => v !== opt.value);
+                            field.onChange(next);
+                          }}
+                        />
+                        {opt.label}
+                      </label>
+                    )}
+                  />
+                ))}
+              </div>
             </div>
             <div className="lcn">
               <span className="lcn__label">Active</span>

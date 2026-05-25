@@ -63,6 +63,10 @@ export function firstAccessibleRoute(session: AdminSession): string | null {
     ["MENU_ADMIN_USER_LIST", "/admin/user/list"],
     ["MENU_ADMIN_CUSTOMER_LIST", "/admin/customer/list"],
     ["MENU_ADMIN_CMS_NOTICE_LIST", "/admin/cms/notice/list"],
+    ["MENU_FMS_HOUSE_BL", "/fms/house-bl/sea-exp/list"],
+    ["MENU_FMS_MASTER_BL", "/fms/master-bl/sea-exp/list"],
+    ["MENU_FMS_TRUCK_BL", "/fms/truck-bl/list"],
+    ["MENU_FMS_NON_BL", "/fms/non-bl/list"],
   ];
   for (const [code, route] of order) {
     if (hasMenuAccess(session, code)) return route;
