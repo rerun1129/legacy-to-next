@@ -5,6 +5,7 @@ import type { UseFormReturn } from "react-hook-form";
 import type { CustomerFilter } from "@/domain/customer";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
   form: UseFormReturn<CustomerFilter>;
@@ -28,6 +29,7 @@ const SCOPE_OPTIONS = [
 ] as const;
 
 export function CustomerListFilter({ form }: Props) {
+  useListFilterSync(form, "/admin/customer/list");
   const { register } = form;
 
   return (

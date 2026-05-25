@@ -4,6 +4,7 @@ import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { UserFilter } from "@/domain/user";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
   form: UseFormReturn<UserFilter>;
@@ -17,6 +18,7 @@ const SCOPE_OPTIONS = [
 ] as const;
 
 export function UserListFilter({ form }: Props) {
+  useListFilterSync(form, "/admin/user/list");
   const { register } = form;
 
   return (

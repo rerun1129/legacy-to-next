@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { noticeUseCases } from "@/application/notice/use-cases";
 import type { NoticeRow, NoticeFilter } from "@/domain/notice";
@@ -106,6 +107,7 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
         <div className="panel__title-accent" />
         <span className="panel__title">공지사항 관리</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
+        <ColumnVisibilityMenu<NoticeRow> gridId="admin-notice" defaultColumns={COLUMNS} />
       </div>
       <div className="list-wrap">
         <GridList<NoticeRow>
@@ -120,6 +122,7 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
           selectable
           selectedKeys={selectedKeys}
           onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
+          gridId="admin-notice"
         />
       </div>
       <Pagination

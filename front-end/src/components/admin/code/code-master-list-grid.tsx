@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
@@ -8,12 +8,15 @@ import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { codeMasterUseCases } from "@/application/code-master/use-cases";
 import { CodeMasterListFilter } from "./code-master-list-filter";
 import { CodeMasterEntryModal } from "./code-master-entry-modal";
 import type { CodeMasterEntryModalState } from "./code-master-entry-modal";
 import type { CodeMasterRow, CodeMasterFilter } from "@/domain/code-master";
+import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
   selectedId: number | null;
@@ -24,6 +27,10 @@ interface Props {
   onBulkDelete: () => void;
   isBulkDeletePending: boolean;
 }
+
+const SCOPE = "/admin/code-master/list";
+
+type CodeMasterSearchState = SavedSearchState & { extraFilter: CodeMasterFilter | null };
 
 const DEFAULT_FILTER: CodeMasterFilter = {
   masterCode: "",
@@ -48,10 +55,21 @@ const COLUMNS: GridColumn<CodeMasterRow>[] = [
 
 export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, selectedKeys, onSelectionChange, onBulkDelete, isBulkDeletePending }: Props) {
   const form = useForm<CodeMasterFilter>({ defaultValues: DEFAULT_FILTER });
+  useListFilterSync(form, SCOPE);
 
-  const [submittedFilter, setSubmittedFilter] = useState<CodeMasterFilter | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [submittedFilter, setSubmittedFilter] = useState<CodeMasterFilter | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as CodeMasterSearchState | undefined;
+    return s?.extraFilter ?? null;
+  });
+  const [currentPage, setCurrentPage] = useState(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE);
+    return s?.currentPage ?? 1;
+  });
   const [entryModalState, setEntryModalState] = useState<CodeMasterEntryModalState | null>(null);
+
+  useEffect(() => {
+    listFilterStore.getState().setSearch(SCOPE, { extraFilter: submittedFilter, currentPage });
+  }, [submittedFilter, currentPage]);
 
   const { data, isFetching, error } = useQuery({
     queryKey: ["admin-code-master", "list", submittedFilter, currentPage],
@@ -148,6 +166,7 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
               <div className="panel__title-accent" />
               <span className="panel__title">Code Master</span>
               <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
+              <ColumnVisibilityMenu<CodeMasterRow> gridId="admin-code-master" defaultColumns={COLUMNS} />
             </div>
             <div className="list-wrap">
               <GridList<CodeMasterRow>
@@ -163,6 +182,7 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
                 selectable
                 selectedKeys={selectedKeys}
                 onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
+                gridId="admin-code-master"
               />
             </div>
             <Pagination

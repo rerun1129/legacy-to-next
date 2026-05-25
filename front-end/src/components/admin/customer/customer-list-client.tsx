@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -22,14 +23,28 @@ const DEFAULT_VALUES: CustomerFilter = {
   scope: "ALL",
 };
 
+const SCOPE = "/admin/customer/list";
+
+type CustomerSearchState = SavedSearchState & { extraFilter: CustomerFilter | null };
+
 export function CustomerListClient() {
   const form = useForm<CustomerFilter>({ defaultValues: DEFAULT_VALUES });
   const qc = useQueryClient();
 
-  const [extraFilter, setExtraFilter] = useState<CustomerFilter | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [extraFilter, setExtraFilter] = useState<CustomerFilter | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as CustomerSearchState | undefined;
+    return s?.extraFilter ?? null;
+  });
+  const [currentPage, setCurrentPage] = useState(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE);
+    return s?.currentPage ?? 1;
+  });
   const [entryModalState, setEntryModalState] = useState<EntryModalState | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage });
+  }, [extraFilter, currentPage]);
 
   const bulkDeleteMutation = useMutation({
     mutationFn: (ids: number[]) => customerUseCases.deleteMany(ids),

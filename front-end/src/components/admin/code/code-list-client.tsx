@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { CodeMasterListGrid } from "./code-master-list-grid";
 import { CodeDetailListGrid } from "./code-detail-list-grid";
 import { CodeMasterEntryModal } from "./code-master-entry-modal";
@@ -11,12 +12,24 @@ import { codeDetailUseCases } from "@/application/code-detail/use-cases";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 
+const SCOPE = "/admin/code/list";
+
+type CodeSearchState = SavedSearchState & { selectedMasterId: number | null };
+
 export function CodeListClient() {
   const qc = useQueryClient();
-  const [selectedMasterId, setSelectedMasterId] = useState<number | null>(null);
+  const [selectedMasterId, setSelectedMasterId] = useState<number | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as CodeSearchState | undefined;
+    return s?.selectedMasterId ?? null;
+  });
   const [editModalState, setEditModalState] = useState<CodeMasterEntryModalState | null>(null);
+
   const [masterSelectedKeys, setMasterSelectedKeys] = useState<Set<number>>(new Set());
   const [detailSelectedKeys, setDetailSelectedKeys] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    listFilterStore.getState().setSearch(SCOPE, { selectedMasterId });
+  }, [selectedMasterId]);
 
   const masterBulkDeleteMutation = useMutation({
     mutationFn: (ids: number[]) => codeMasterUseCases.deleteMany(ids),

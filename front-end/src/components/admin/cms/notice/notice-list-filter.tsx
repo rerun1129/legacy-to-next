@@ -4,6 +4,7 @@ import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { NoticeFilter } from "@/domain/notice";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
   form: UseFormReturn<NoticeFilter>;
@@ -23,6 +24,7 @@ const SCOPE_OPTIONS = [
 ] as const;
 
 export function NoticeListFilter({ form }: Props) {
+  useListFilterSync(form, "/admin/notice/list");
   const { register } = form;
 
   return (

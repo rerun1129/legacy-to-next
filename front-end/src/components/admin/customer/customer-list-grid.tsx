@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { customerUseCases } from "@/application/customer/use-cases";
 import type { CustomerRow, CustomerFilter } from "@/domain/customer";
@@ -99,6 +100,7 @@ export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRow
         <div className="panel__title-accent" />
         <span className="panel__title">고객 관리</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
+        <ColumnVisibilityMenu<CustomerRow> gridId="admin-customer" defaultColumns={COLUMNS} />
       </div>
       <div className="list-wrap">
         <GridList<CustomerRow>
@@ -113,6 +115,7 @@ export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRow
           selectable
           selectedKeys={selectedKeys}
           onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
+          gridId="admin-customer"
         />
       </div>
       <Pagination

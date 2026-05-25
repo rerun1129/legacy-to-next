@@ -1,9 +1,10 @@
 import { create } from "zustand";
 
 export interface SavedSearchState {
-  extraFilter: unknown;
-  currentPage: number;
-  showAll: boolean;
+  extraFilter?: unknown;
+  currentPage?: number;
+  showAll?: boolean;
+  [key: string]: unknown;
 }
 
 interface ListFilterState {

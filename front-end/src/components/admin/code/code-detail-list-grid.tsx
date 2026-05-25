@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
+import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { codeDetailUseCases } from "@/application/code-detail/use-cases";
 import { CodeDetailEntryModal } from "./code-detail-entry-modal";
@@ -112,6 +113,7 @@ export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, 
               <div className="panel__title-accent" />
               <span className="panel__title">Code Detail</span>
               <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
+              <ColumnVisibilityMenu<CodeDetailRow> gridId="admin-code-detail" defaultColumns={COLUMNS} />
             </div>
             <div className="list-wrap">
               <GridList<CodeDetailRow>
@@ -124,6 +126,7 @@ export function CodeDetailListGrid({ masterId, selectedKeys, onSelectionChange, 
                 selectable
                 selectedKeys={selectedKeys}
                 onSelectionChange={(next) => onSelectionChange(new Set([...next].map(Number)))}
+                gridId="admin-code-detail"
               />
             </div>
             <Pagination
