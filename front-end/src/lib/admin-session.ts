@@ -26,6 +26,7 @@ export function getSession(): AdminSession | null {
 export function setSession(session: AdminSession): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  document.cookie = "fms.auth=1; path=/; SameSite=Lax";
 }
 
 export function updateTokens(accessToken: string, refreshToken: string): void {
@@ -37,6 +38,7 @@ export function updateTokens(accessToken: string, refreshToken: string): void {
 export function clearSession(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(STORAGE_KEY);
+  document.cookie = "fms.auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 }
 
 export function getAuthHeader(): Record<string, string> {

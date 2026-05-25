@@ -1,4 +1,5 @@
 import { ApiError, NotFoundError, ResponseParseError } from './errors';
+import { getAuthHeader } from '@/lib/admin-session';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
 
@@ -22,6 +23,7 @@ export async function fetchJson(input: RequestInfo, init?: RequestInit): Promise
   if (init?.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
+  for (const [k, v] of Object.entries(getAuthHeader())) headers.set(k, v);
   let res: Response;
   try {
     res = await fetch(url, { ...init, headers });

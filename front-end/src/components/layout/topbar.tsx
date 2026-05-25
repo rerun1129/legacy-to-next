@@ -7,6 +7,8 @@ import { Bell, HelpCircle, Search, ChevronLeft, LogOut, Moon, Sun } from "lucide
 import { useTabs } from "@/lib/use-tabs";
 import { useCurrentUser, USERS } from "@/lib/use-current-user";
 import { useTheme } from "@/lib/use-theme";
+import { authUseCases } from "@/application/auth/use-cases";
+import { clearSession, getSession } from "@/lib/admin-session";
 
 const SIDEBAR_W = 220;
 
@@ -26,7 +28,7 @@ interface DragState {
 export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   const pathname = usePathname();
   const router   = useRouter();
-  const { tabs, removeTab, initFromPath, reorderTabs, closeOtherTabs, closeTabsToRight, closeTabsToLeft } = useTabs();
+  const { tabs, removeTab, initFromPath, reorderTabs, closeOtherTabs, closeTabsToRight, closeTabsToLeft, clearTabs } = useTabs();
   const tabsRef  = useRef<HTMLDivElement>(null);
 
   const [ctxMenu, setCtxMenu]     = useState<{ x: number; y: number; tabId: string } | null>(null);
@@ -186,6 +188,20 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
     router.push(href);
   }
 
+  const handleLogout = async () => {
+    const session = getSession();
+    if (session) {
+      try {
+        await authUseCases.logout(session.refreshToken);
+      } catch {
+        // best-effort — 실패해도 로컬 세션 정리
+      }
+    }
+    clearTabs();
+    clearSession();
+    router.replace("/login");
+  };
+
   const isDragging = dragState !== null && Math.abs(dragState.deltaX) > 4;
 
   return (
@@ -258,7 +274,7 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
             <div className="app__user-avatar">{currentUser.initials}</div>
             <span>{currentUser.name}</span>
           </div>
-          <button className="topbar-icon" title="Logout" style={{ margin: 4 }}><LogOut /></button>
+          <button className="topbar-icon" title="Logout" style={{ margin: 4 }} onClick={handleLogout}><LogOut /></button>
         </div>
       </header>
 

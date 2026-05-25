@@ -30,6 +30,8 @@ export function AdminGuard({ children, requiredMenuCode }: Props) {
   useEffect(() => {
     if (!mounted) return;
     if (!session) {
+      // 쿠키는 있지만 localStorage가 비어있는 desync 상태를 정리해 무한 리다이렉트 방지
+      clearSession();
       router.replace("/login");
       return;
     }
