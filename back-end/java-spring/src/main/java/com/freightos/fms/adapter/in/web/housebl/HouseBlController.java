@@ -27,6 +27,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -42,6 +43,7 @@ import java.util.Set;
 @RequestMapping("/api/house-bl")
 @RequiredArgsConstructor
 @Validated
+@PreAuthorize("hasAuthority('MENU_FMS_HOUSE_BL')")
 public class HouseBlController {
 
     private final HouseBlUseCase houseBlUseCase;

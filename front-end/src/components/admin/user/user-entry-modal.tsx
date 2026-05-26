@@ -30,6 +30,7 @@ interface UserFormValues {
   role: "ADMIN" | "USER";
   active: boolean;
   modules: string[];
+  fmsScopes: string[];
 }
 
 const DEFAULT_FORM: UserFormValues = {
@@ -39,6 +40,7 @@ const DEFAULT_FORM: UserFormValues = {
   role: "USER",
   active: true,
   modules: [],
+  fmsScopes: [],
 };
 
 const ROLE_OPTIONS: Array<{ value: "ADMIN" | "USER"; label: string }> = [
@@ -49,6 +51,13 @@ const ROLE_OPTIONS: Array<{ value: "ADMIN" | "USER"; label: string }> = [
 const MODULE_OPTIONS = [
   { value: "ADMIN", label: "ADMIN" },
   { value: "FMS", label: "FMS" },
+] as const;
+
+const FMS_SCOPE_OPTIONS = [
+  { value: "SEA", label: "SEA" },
+  { value: "AIR", label: "AIR" },
+  { value: "TRUCK", label: "TRUCK" },
+  { value: "NON_BL", label: "NON_BL" },
 ] as const;
 
 // ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
@@ -78,6 +87,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         role: roleAttr ?? "USER",
         active: detail.active,
         modules: detail.attributes?.module ?? [],
+        fmsScopes: detail.attributes?.fms_scope ?? [],
       });
     }
   }, [detail, reset]);
@@ -119,6 +129,9 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
     const attributes: Record<string, string[]> = { role: [values.role] };
     if (values.modules.length > 0) {
       attributes.module = values.modules;
+    }
+    if (values.fmsScopes.length > 0) {
+      attributes.fms_scope = values.fmsScopes;
     }
 
     if (isEdit && state?.id != null) {
@@ -234,6 +247,34 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                   <Controller
                     key={opt.value}
                     name="modules"
+                    control={control}
+                    render={({ field }) => (
+                      <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <input
+                          type="checkbox"
+                          checked={field.value.includes(opt.value)}
+                          disabled={isReadOnly}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...field.value, opt.value]
+                              : field.value.filter((v: string) => v !== opt.value);
+                            field.onChange(next);
+                          }}
+                        />
+                        {opt.label}
+                      </label>
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="lcn">
+              <span className="lcn__label">FMS Scope</span>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {FMS_SCOPE_OPTIONS.map((opt) => (
+                  <Controller
+                    key={opt.value}
+                    name="fmsScopes"
                     control={control}
                     render={({ field }) => (
                       <label style={{ display: "flex", alignItems: "center", gap: 4 }}>

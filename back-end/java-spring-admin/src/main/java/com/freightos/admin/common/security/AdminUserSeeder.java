@@ -46,7 +46,7 @@ public class AdminUserSeeder implements ApplicationRunner {
             fmsEntity.setEmail(null);
             fmsEntity.setPasswordHash(passwordEncoder.encode(FMS_RAW_PASSWORD));
             fmsEntity.setActive(true);
-            fmsEntity.setAttributes("{\"role\":[\"USER\"],\"module\":[\"FMS\"]}");
+            fmsEntity.setAttributes("{\"role\":[\"USER\"],\"module\":[\"FMS\"],\"fms_scope\":[\"SEA\",\"AIR\",\"TRUCK\",\"NON_BL\"]}");
             userRepository.save(fmsEntity);
             log.info("AdminUserSeeder: seeded '{}' user", FMS_USERNAME);
         }

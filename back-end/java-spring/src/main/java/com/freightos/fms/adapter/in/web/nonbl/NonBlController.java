@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,7 @@ import java.util.Map;
 @RequestMapping("/api/non-bl")
 @RequiredArgsConstructor
 @Validated
+@PreAuthorize("hasAuthority('MENU_FMS_NON_BL')")
 public class NonBlController {
 
     private final NonBlUseCase nonBlUseCase;
