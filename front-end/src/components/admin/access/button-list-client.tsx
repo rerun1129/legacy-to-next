@@ -1,19 +1,18 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useCallback } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
-import { accessButtonPort } from "@/lib/ports";
+import { accessButtonPort, accessMenuPort } from "@/lib/ports";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { accessButtonUseCases } from "@/application/access/button/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { GridList } from "@/components/shared/grid-list";
-import type { GridColumn } from "@/components/shared/grid-list";
-import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
+import { ButtonTreeView } from "@/components/admin/access/button-tree-view";
 import type { CreateButtonDto, UpdateButtonDto, ButtonActionType, ButtonRow } from "@/domain/access/button";
 
 const ACTION_TYPES: ButtonActionType[] = ["CREATE", "UPDATE", "DELETE", "EXPORT", "CUSTOM"];
@@ -59,15 +58,6 @@ function parseNullableNum(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-const BUTTON_COLUMNS: GridColumn<ButtonRow>[] = [
-  { key: "id", label: "ID", minWidth: 60 },
-  { key: "buttonCode", label: "buttonCode", minWidth: 140 },
-  { key: "label", label: "label", minWidth: 120 },
-  { key: "menuId", label: "menuId", minWidth: 80 },
-  { key: "actionType", label: "actionType", minWidth: 100 },
-  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
-];
-
 export function AccessButtonListClient() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
@@ -83,6 +73,16 @@ export function AccessButtonListClient() {
     gcTime: Infinity,
     refetchOnMount: false,
   });
+
+  const { data: menuData } = useQuery({
+    queryKey: ["access-menu", "list"],
+    queryFn: () => accessMenuPort.search(1, 100),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+  });
+  const menus = menuData?.content ?? [];
+  const menuOptions = menus.map(m => ({ value: String(m.id), label: m.menuCode }));
 
   const createMutation = useMutation({
     mutationFn: (req: CreateButtonDto) => accessButtonPort.create(req),
@@ -160,25 +160,6 @@ export function AccessButtonListClient() {
     if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
   }
 
-  const columns = useMemo<GridColumn<ButtonRow>[]>(() => [
-    ...BUTTON_COLUMNS,
-    {
-      key: "_actions",
-      label: "",
-      minWidth: 70,
-      render: (_v, row) => (
-        <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
-          <ActionButton buttonCode="BTN_ADMIN_ACCESS_BUTTON_UPDATE" className="btn btn--sm" onClick={() => openEdit(row)}>
-            <Pencil size={12} />
-          </ActionButton>
-          <ActionButton buttonCode="BTN_ADMIN_ACCESS_BUTTON_DELETE" className="btn btn--danger btn--sm" onClick={() => handleDelete(row.id, row.label)} disabled={deleteMutation.isPending}>
-            <Trash2 size={12} />
-          </ActionButton>
-        </div>
-      ),
-    },
-  ], [deleteMutation.isPending, openEdit, handleDelete]);
-
   const rows = data?.content ?? [];
 
   return (
@@ -199,32 +180,43 @@ export function AccessButtonListClient() {
           <div className="panel__title-accent" />
           <span className="panel__title">Buttons</span>
           <span className="panel__rowcount">{rows.length}</span>
-          <ColumnVisibilityMenu<ButtonRow> gridId="access-button" defaultColumns={BUTTON_COLUMNS} />
         </div>
-        <div className="list-wrap">
-          <GridList<ButtonRow>
-            columns={columns}
-            data={rows}
-            gridId="access-button"
-            rowKey={(r) => r.id}
-            selectable
-            selectedKeys={selectedKeys}
-            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
-            isLoading={isFetching}
-            emptyMessage="데이터가 없습니다."
-          />
+        <div className="list-wrap" style={{ overflowY: "auto" }}>
+          {isFetching && rows.length === 0 ? (
+            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>로딩 중...</div>
+          ) : rows.length === 0 ? (
+            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>데이터가 없습니다.</div>
+          ) : (
+            <ButtonTreeView
+              menus={menus}
+              buttons={rows}
+              selectedKeys={selectedKeys}
+              onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
       </div>
 
       {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="버튼 등록" size="md">
+      <ModalShell isOpen={createOpen} title="버튼 등록" size="md" style={{ maxWidth: 460 }}>
         <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...createForm.register("menuId", { valueAsNumber: true })} /></div>
-            <div className="lcn"><span className="lcn__label">buttonCode</span><input className="text-box text-box--panel" {...createForm.register("buttonCode")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...createForm.register("label")} /></div>
+            <div className="lcn">
+              <span className="lcn__label">menuId</span>
+              <Controller
+                name="menuId"
+                control={createForm.control}
+                render={({ field }) => (
+                  <ComboBox variant="panel" style={{ width: 170 }} options={menuOptions} value={field.value ? String(field.value) : ""} onChange={(e) => field.onChange(Number(e.target.value))} />
+                )}
+              />
+            </div>
+            <div className="lcn"><span className="lcn__label">buttonCode</span><input className="text-box text-box--panel" style={{ width: 170, border: "1px solid var(--border)" }} {...createForm.register("buttonCode")} /></div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...createForm.register("label")} /></div>
             <div className="lcn"><span className="lcn__label">actionType</span>
-              <select className="text-box text-box--panel" {...createForm.register("actionType")}>
+              <select className="text-box text-box--panel" style={{ border: "1px solid var(--border)" }} {...createForm.register("actionType")}>
                 {ACTION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
@@ -238,25 +230,32 @@ export function AccessButtonListClient() {
       </ModalShell>
 
       {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="버튼 수정" size="md">
+      <ModalShell isOpen={editTarget !== null} title="버튼 수정" size="md" style={{ maxWidth: 460 }}>
         <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn">
               <span className="lcn__label">buttonCode</span>
-              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}>
+              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center", border: "1px solid var(--border)" }}>
                 {editTarget?.buttonCode}
               </span>
             </div>
-            <div className="lcn"><span className="lcn__label">menuId</span><input type="number" className="text-box text-box--panel" {...editForm.register("menuId")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...editForm.register("label")} /></div>
+            <div className="lcn">
+              <span className="lcn__label">menuId</span>
+              <Controller
+                name="menuId"
+                control={editForm.control}
+                render={({ field }) => (
+                  <ComboBox variant="panel" style={{ width: 170 }} options={menuOptions} value={field.value} onChange={(e) => field.onChange(e.target.value)} />
+                )}
+              />
+            </div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...editForm.register("label")} /></div>
             <div className="lcn"><span className="lcn__label">actionType</span>
-              <select className="text-box text-box--panel" {...editForm.register("actionType")}>
+              <select className="text-box text-box--panel" style={{ border: "1px solid var(--border)" }} {...editForm.register("actionType")}>
                 {ACTION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
-            <div className="lcn"><span className="lcn__label">apiMethod</span><input className="text-box text-box--panel" placeholder="선택" {...editForm.register("apiMethod")} /></div>
-            <div className="lcn"><span className="lcn__label">apiPath</span><input className="text-box text-box--panel" placeholder="선택" {...editForm.register("apiPath")} /></div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
+<div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
           </div>
         </form>
         <div className="modal__footer">
