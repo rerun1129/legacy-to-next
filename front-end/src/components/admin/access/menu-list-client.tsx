@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
-import { accessMenuPort } from "@/lib/ports";
+import { accessMenuPort, accessModulePort } from "@/lib/ports";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { accessMenuUseCases } from "@/application/access/menu/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { MenuTreeView } from "@/components/admin/access/menu-tree-view";
@@ -73,6 +74,15 @@ export function AccessMenuListClient() {
     gcTime: Infinity,
     refetchOnMount: false,
   });
+
+  const { data: moduleData } = useQuery({
+    queryKey: ["access-module", "list"],
+    queryFn: () => accessModulePort.search(1, 100),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+  });
+  const moduleOptions = (moduleData?.content ?? []).map(m => ({ value: m.moduleCode, label: m.name }));
 
   const createMutation = useMutation({
     mutationFn: (req: CreateMenuDto) => accessMenuPort.create(req),
@@ -188,7 +198,6 @@ export function AccessMenuListClient() {
               selectedKeys={selectedKeys}
               deleteIsPending={deleteMutation.isPending}
               onSelectionChange={setSelectedKeys}
-              onDoubleClick={openEdit}
               onEdit={openEdit}
               onDelete={handleDelete}
             />
@@ -197,13 +206,22 @@ export function AccessMenuListClient() {
       </div>
 
       {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="메뉴 등록" size="md">
+      <ModalShell isOpen={createOpen} title="메뉴 등록" size="md" style={{ maxWidth: 460 }}>
         <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn"><span className="lcn__label">menuCode</span><input className="text-box text-box--panel" {...createForm.register("menuCode")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...createForm.register("label")} /></div>
-            <div className="lcn"><span className="lcn__label">moduleCode</span><input className="text-box text-box--panel" {...createForm.register("moduleCode")} /></div>
-            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" placeholder="선택" {...createForm.register("path")} /></div>
+            <div className="lcn"><span className="lcn__label">menuCode</span><input className="text-box text-box--panel" style={{ width: 170, border: "1px solid var(--border)" }} {...createForm.register("menuCode")} /></div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...createForm.register("label")} /></div>
+            <div className="lcn">
+              <span className="lcn__label">moduleCode</span>
+              <Controller
+                name="moduleCode"
+                control={createForm.control}
+                render={({ field }) => (
+                  <ComboBox variant="panel" style={{ width: 170 }} options={moduleOptions} value={field.value} onChange={field.onChange} />
+                )}
+              />
+            </div>
+            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" style={{ width: 250, border: "1px solid var(--border)" }} {...createForm.register("path")} /></div>
             <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("active")} />활성</label></div>
           </div>
         </form>
@@ -214,18 +232,27 @@ export function AccessMenuListClient() {
       </ModalShell>
 
       {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="메뉴 수정" size="md">
+      <ModalShell isOpen={editTarget !== null} title="메뉴 수정" size="md" style={{ maxWidth: 460 }}>
         <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div className="lcn">
               <span className="lcn__label">menuCode</span>
-              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}>
+              <span className="text-box text-box--panel" style={{ width: 170, background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center", border: "1px solid var(--border)" }}>
                 {editTarget?.menuCode}
               </span>
             </div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" {...editForm.register("label")} /></div>
-            <div className="lcn"><span className="lcn__label">moduleCode</span><input className="text-box text-box--panel" {...editForm.register("moduleCode")} /></div>
-            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" placeholder="선택" {...editForm.register("path")} /></div>
+            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...editForm.register("label")} /></div>
+            <div className="lcn">
+              <span className="lcn__label">moduleCode</span>
+              <Controller
+                name="moduleCode"
+                control={editForm.control}
+                render={({ field }) => (
+                  <ComboBox variant="panel" style={{ width: 170 }} options={moduleOptions} value={field.value} onChange={field.onChange} />
+                )}
+              />
+            </div>
+            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" style={{ width: 250, border: "1px solid var(--border)" }} {...editForm.register("path")} /></div>
             <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
           </div>
         </form>

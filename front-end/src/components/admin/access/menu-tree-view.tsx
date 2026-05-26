@@ -5,6 +5,11 @@ import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import type { MenuRow } from "@/domain/access/menu";
 
+function collectDescendantIds(nodeId: number, childMap: Map<number, MenuRow[]>): number[] {
+  const children = childMap.get(nodeId) ?? [];
+  return children.flatMap(c => [c.id, ...collectDescendantIds(c.id, childMap)]);
+}
+
 interface TreeNode {
   row: MenuRow;
   children: TreeNode[];
@@ -43,9 +48,9 @@ interface TreeRowProps {
   level: number;
   expandedNodes: Set<number>;
   selectedKeys: Set<number>;
+  childMap: Map<number, MenuRow[]>;
   onToggleNode: (id: number) => void;
-  onToggleSelect: (id: number) => void;
-  onDoubleClick: (row: MenuRow) => void;
+  onSelectionChange: (next: Set<number>) => void;
   onEdit: (row: MenuRow) => void;
   onDelete: (id: number, label: string) => void;
   deleteIsPending: boolean;
@@ -56,9 +61,9 @@ function TreeRow({
   level,
   expandedNodes,
   selectedKeys,
+  childMap,
   onToggleNode,
-  onToggleSelect,
-  onDoubleClick,
+  onSelectionChange,
   onEdit,
   onDelete,
   deleteIsPending,
@@ -74,13 +79,22 @@ function TreeRow({
       <div
         className={`tree-row${isSelected ? " tree-row--selected" : ""}`}
         style={{ paddingLeft }}
-        onDoubleClick={() => onDoubleClick(row)}
       >
         <input
           type="checkbox"
           className="chk"
           checked={isSelected}
-          onChange={() => onToggleSelect(row.id)}
+          onChange={() => {
+            const descendantIds = collectDescendantIds(row.id, childMap);
+            const allIds = [row.id, ...descendantIds];
+            const next = new Set(selectedKeys);
+            if (next.has(row.id)) {
+              allIds.forEach(id => next.delete(id));
+            } else {
+              allIds.forEach(id => next.add(id));
+            }
+            onSelectionChange(next);
+          }}
           onClick={(e) => e.stopPropagation()}
           style={{ flexShrink: 0 }}
         />
@@ -128,9 +142,9 @@ function TreeRow({
           level={level + 1}
           expandedNodes={expandedNodes}
           selectedKeys={selectedKeys}
+          childMap={childMap}
           onToggleNode={onToggleNode}
-          onToggleSelect={onToggleSelect}
-          onDoubleClick={onDoubleClick}
+          onSelectionChange={onSelectionChange}
           onEdit={onEdit}
           onDelete={onDelete}
           deleteIsPending={deleteIsPending}
@@ -145,7 +159,6 @@ export interface MenuTreeViewProps {
   selectedKeys: Set<number>;
   deleteIsPending: boolean;
   onSelectionChange: (next: Set<number>) => void;
-  onDoubleClick: (row: MenuRow) => void;
   onEdit: (row: MenuRow) => void;
   onDelete: (id: number, label: string) => void;
 }
@@ -155,7 +168,6 @@ export function MenuTreeView({
   selectedKeys,
   deleteIsPending,
   onSelectionChange,
-  onDoubleClick,
   onEdit,
   onDelete,
 }: MenuTreeViewProps) {
@@ -166,6 +178,19 @@ export function MenuTreeView({
       const list = map.get(row.moduleCode) ?? [];
       list.push(row);
       map.set(row.moduleCode, list);
+    });
+    return map;
+  }, [rows]);
+
+  // 부모→자식 id 맵: 체크박스 하위 일괄 토글에 사용
+  const childMap = useMemo(() => {
+    const map = new Map<number, MenuRow[]>();
+    rows.forEach(row => {
+      if (row.parentId !== null) {
+        const list = map.get(row.parentId) ?? [];
+        list.push(row);
+        map.set(row.parentId, list);
+      }
     });
     return map;
   }, [rows]);
@@ -192,13 +217,6 @@ export function MenuTreeView({
       else next.add(id);
       return next;
     });
-  }
-
-  function toggleSelect(id: number) {
-    const next = new Set(selectedKeys);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    onSelectionChange(next);
   }
 
   const treesByModule = useMemo(() => {
@@ -238,9 +256,9 @@ export function MenuTreeView({
                 level={0}
                 expandedNodes={expandedNodes}
                 selectedKeys={selectedKeys}
+                childMap={childMap}
                 onToggleNode={toggleNode}
-                onToggleSelect={toggleSelect}
-                onDoubleClick={onDoubleClick}
+                onSelectionChange={onSelectionChange}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 deleteIsPending={deleteIsPending}
