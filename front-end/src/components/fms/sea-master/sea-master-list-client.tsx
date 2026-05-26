@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
 import { RotateCcw, Search } from 'lucide-react';
-import { Button } from '@/components/shared/button';
+import { ActionButton } from '@/components/admin/access/action-button';
 import type { SeaMasterFilter } from '@/domain/sea-master';
 import { SeaMasterListFilter } from './sea-master-list-filter';
 import { SeaMasterGrid } from './sea-master-grid';
@@ -32,6 +32,7 @@ interface Props {
 type SeaMasterSearchState = SavedSearchState & { extraFilter: SeaMasterFilter | null };
 
 export function SeaMasterListClient({ bound }: Props) {
+  const menuCode = `FMS_MASTER_BL_SEA_${bound}_LIST`;
   const pathname = usePathname();
   const form = useForm<SeaMasterFilter>({
     defaultValues: {
@@ -78,11 +79,7 @@ export function SeaMasterListClient({ bound }: Props) {
     <>
       <div className="page-head__actions">
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-          <Button
-            size="sm"
-            variant="normal"
-            leftIcon={<RotateCcw size={12} />}
-            onClick={() => {
+          <ActionButton buttonCode={`BTN_${menuCode}_RESET`} className="btn btn--normal btn--sm" onClick={() => {
               form.reset({
                 bound,
                 dateKind: 'ETD',
@@ -107,21 +104,13 @@ export function SeaMasterListClient({ bound }: Props) {
               setCurrentPage(1);
               setShowAll(true);
             }}
-          >
-            Reset
-          </Button>
-          <Button
-            size="sm"
-            variant="search"
-            leftIcon={<Search size={12} />}
-            onClick={() => form.handleSubmit((values) => {
+            icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
+          <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
               setExtraFilter(values);
               setCurrentPage(1);
               qc.invalidateQueries({ queryKey: ['sea-master', 'list', bound] });
             })()}
-          >
-            Search
-          </Button>
+            icon={<Search size={12} style={{ marginRight: 4 }} />} />
         </div>
       </div>
 

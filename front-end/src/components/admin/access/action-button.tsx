@@ -3,14 +3,9 @@
 import { useState, type ReactNode } from "react";
 import { getSession, hasButtonAccess, getButtonLabel } from "@/lib/admin-session";
 
-interface ActionButtonProps {
+interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   buttonCode: string;
   icon?: ReactNode;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  children?: React.ReactNode;
-  className?: string;
-  disabled?: boolean;
-  title?: string;
 }
 
 export function ActionButton({ buttonCode, icon, children, ...rest }: ActionButtonProps) {

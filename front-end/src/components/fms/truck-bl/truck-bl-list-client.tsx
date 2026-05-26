@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, Search } from 'lucide-react';
-import { Button } from '@/components/shared/button';
+import { ActionButton } from '@/components/admin/access/action-button';
 import type { TruckBlFilter } from '@/domain/truck-bl';
 import { TruckBlListFilter } from './truck-bl-list-filter';
 import { TruckBlGrid } from './truck-bl-grid';
@@ -46,6 +46,7 @@ const SCOPE = "/fms/truck-bl/list";
 type TruckBlSearchState = SavedSearchState & { extraFilter: TruckBlFilter | null };
 
 export function TruckBlListClient() {
+  const menuCode = "FMS_TRUCK_BL_LIST";
   const form = useForm<TruckBlFilter>({ defaultValues: DEFAULT_VALUES });
   const qc = useQueryClient();
 
@@ -70,31 +71,19 @@ export function TruckBlListClient() {
     <>
       <div className="page-head__actions">
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-          <Button
-            size="sm"
-            variant="normal"
-            leftIcon={<RotateCcw size={12} />}
-            onClick={() => {
+          <ActionButton buttonCode={`BTN_${menuCode}_RESET`} className="btn btn--normal btn--sm" onClick={() => {
               form.reset(DEFAULT_VALUES);
               setExtraFilter(null);
               setCurrentPage(1);
               setShowAll(true);
             }}
-          >
-            Reset
-          </Button>
-          <Button
-            size="sm"
-            variant="search"
-            leftIcon={<Search size={12} />}
-            onClick={() => form.handleSubmit((values) => {
+            icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
+          <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
               setExtraFilter(values);
               setCurrentPage(1);
               qc.invalidateQueries({ queryKey: ['truck-bl', 'list'] });
             })()}
-          >
-            Search
-          </Button>
+            icon={<Search size={12} style={{ marginRight: 4 }} />} />
         </div>
       </div>
 

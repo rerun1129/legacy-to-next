@@ -2,7 +2,7 @@
 
 import { Save, Trash2, Layers, SquarePen, Search, FilePlus } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
-import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { getPageTitle } from "@/lib/bl-variants";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import type { MasterBlFormValues } from "./master-bl-schema";
@@ -20,6 +20,13 @@ interface MasterBlEntryPageHeadProps {
   onChangeBlNo: () => void;
 }
 
+const VARIANT_TO_MENU: Record<string, string> = {
+  "sea-exp": "FMS_MASTER_BL_SEA_EXP_ENTRY",
+  "sea-imp": "FMS_MASTER_BL_SEA_IMP_ENTRY",
+  "air-exp": "FMS_MASTER_BL_AIR_EXP_ENTRY",
+  "air-imp": "FMS_MASTER_BL_AIR_IMP_ENTRY",
+};
+
 // NOTE: No Print button per PRD §S-04
 export function MasterBlEntryPageHead({
   variant,
@@ -32,6 +39,7 @@ export function MasterBlEntryPageHead({
   onDelete,
   onChangeBlNo,
 }: MasterBlEntryPageHeadProps) {
+  const menuCode = VARIANT_TO_MENU[variant.key] ?? "FMS_MASTER_BL_SEA_EXP_ENTRY";
   return (
     <div className="page-head">
       <div className="page-head__title">
@@ -42,23 +50,40 @@ export function MasterBlEntryPageHead({
         <span className="badge badge--draft">DRAFT</span>
       </div>
       <div className="page-head__actions">
-        <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={onResetEntry}>New</Button>
-        <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={onSearchBl}>Search</Button>
-        <Button
+        <ActionButton
+          buttonCode={`BTN_${menuCode}_CREATE`}
+          className="btn btn--normal btn--sm"
+          onClick={onResetEntry}
+          icon={<FilePlus size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode={`BTN_${menuCode}_SEARCH_BL`}
+          className="btn btn--search btn--sm"
+          onClick={onSearchBl}
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode={`BTN_${menuCode}_UPDATE`}
+          className="btn btn--transaction btn--sm"
           type="submit"
-          size="sm"
-          variant="transaction"
-          leftIcon={<Save size={12} />}
-          loading={mutation.isPending}
-        >{mutation.isPending ? "Saving..." : "Save"}</Button>
-        <Button
-          size="sm"
-          variant="danger"
-          leftIcon={<Trash2 size={12} />}
+          disabled={mutation.isPending}
+        >
+          <Save size={12} style={{ marginRight: 4 }} />{mutation.isPending ? "Saving..." : "Save"}
+        </ActionButton>
+        <ActionButton
+          buttonCode={`BTN_${menuCode}_DELETE`}
+          className="btn btn--danger btn--sm"
           onClick={onDelete}
           disabled={!isEdit || deleteMutation.isPending}
-        >Delete</Button>
-        <Button size="sm" variant="modal" leftIcon={<SquarePen size={12} />} onClick={onChangeBlNo} disabled={!isEdit}>{modeLabels.changeBLNo}</Button>
+          icon={<Trash2 size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode={`BTN_${menuCode}_CHANGE_BL_NO`}
+          className="btn btn--modal btn--sm"
+          onClick={onChangeBlNo}
+          disabled={!isEdit}
+          icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
     </div>
   );

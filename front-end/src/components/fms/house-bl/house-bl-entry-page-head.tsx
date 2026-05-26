@@ -4,7 +4,7 @@ import { Save, Printer, Trash2, FileText, SquarePen, Search, FilePlus } from "lu
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
-import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { getPageTitle } from "@/lib/bl-variants";
@@ -48,6 +48,15 @@ interface HouseBlEntryPageHeadProps {
   onOpenSwitchBl: () => void;
 }
 
+const VARIANT_TO_MENU: Record<string, string> = {
+  "sea-exp": "FMS_HOUSE_BL_SEA_EXP_ENTRY",
+  "sea-imp": "FMS_HOUSE_BL_SEA_IMP_ENTRY",
+  "air-exp": "FMS_HOUSE_BL_AIR_EXP_ENTRY",
+  "air-imp": "FMS_HOUSE_BL_AIR_IMP_ENTRY",
+  "truck":   "FMS_TRUCK_BL_ENTRY",
+  "non-bl":  "FMS_NON_BL_ENTRY",
+};
+
 export function HouseBlEntryPageHead({
   variant,
   form,
@@ -64,6 +73,7 @@ export function HouseBlEntryPageHead({
 }: HouseBlEntryPageHeadProps) {
   const isExp = variant.direction === "EXP";
   const defaults = getToolbarDefaults(variant);
+  const menuCode = VARIANT_TO_MENU[variant.key] ?? "FMS_HOUSE_BL_SEA_EXP_ENTRY";
 
   const { options: loadTypeOptions,     placeholder: loadTypePh }     = useEnumOptions("LoadType");
   const { options: serviceTermOptions,  placeholder: serviceTermPh }  = useEnumOptions("ServiceTerm");
@@ -89,41 +99,56 @@ export function HouseBlEntryPageHead({
           <span className="badge badge--draft">DRAFT</span>
         </div>
         <div className="page-head__actions">
-          <Button size="sm" variant="normal" leftIcon={<FilePlus size={12} />} onClick={onResetEntry}>New</Button>
-          <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={onSearchBl}>Search B/L</Button>
-          <Button
+          <ActionButton
+            buttonCode={`BTN_${menuCode}_CREATE`}
+            className="btn btn--normal btn--sm"
+            onClick={onResetEntry}
+            icon={<FilePlus size={12} style={{ marginRight: 4 }} />}
+          />
+          <ActionButton
+            buttonCode={`BTN_${menuCode}_SEARCH_BL`}
+            className="btn btn--search btn--sm"
+            onClick={onSearchBl}
+            icon={<Search size={12} style={{ marginRight: 4 }} />}
+          />
+          <ActionButton
+            buttonCode={`BTN_${menuCode}_UPDATE`}
+            className="btn btn--transaction btn--sm"
             type="submit"
-            size="sm"
-            variant="transaction"
-            leftIcon={<Save size={12} />}
-            loading={mutation.isPending}
-          >{mutation.isPending ? "Saving..." : "Save"}</Button>
-          <Button
-            size="sm"
-            variant="danger"
-            leftIcon={<Trash2 size={12} />}
+            disabled={mutation.isPending}
+          >
+            <Save size={12} style={{ marginRight: 4 }} />{mutation.isPending ? "Saving..." : "Save"}
+          </ActionButton>
+          <ActionButton
+            buttonCode={`BTN_${menuCode}_DELETE`}
+            className="btn btn--danger btn--sm"
             onClick={onDelete}
             disabled={!isEdit || deleteMutation.isPending}
-          >Delete</Button>
+            icon={<Trash2 size={12} style={{ marginRight: 4 }} />}
+          />
           {isExp && variant.printDocs.length > 0 && (
-            <Button size="sm" variant="normal" leftIcon={<Printer size={12} />}>Print</Button>
+            <ActionButton
+              buttonCode={`BTN_${menuCode}_PRINT`}
+              className="btn btn--normal btn--sm"
+              icon={<Printer size={12} style={{ marginRight: 4 }} />}
+            />
           )}
           {isExp && (
-            <Button
-              size="sm"
-              variant="modal"
-              leftIcon={<SquarePen size={12} />}
+            <ActionButton
+              buttonCode={`BTN_${menuCode}_SWITCH_BL`}
+              className="btn btn--modal btn--sm"
               disabled={!canSwitchBl}
               onClick={onOpenSwitchBl}
-            >Switch B/L</Button>
+              icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+            />
           )}
-          <Button
-            size="sm"
-            variant="modal"
-            leftIcon={<SquarePen size={12} />}
+          <ActionButton
+            buttonCode={`BTN_${menuCode}_CHANGE_BL_NO`}
+            className="btn btn--modal btn--sm"
             onClick={onChangeBlNo}
             disabled={!isEdit}
-          >Change B/L No.</Button>
+            icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+          />
         </div>
       </div>
 

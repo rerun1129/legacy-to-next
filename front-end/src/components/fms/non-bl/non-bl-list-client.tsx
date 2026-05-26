@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { RotateCcw, Search } from 'lucide-react';
-import { Button } from '@/components/shared/button';
+import { ActionButton } from '@/components/admin/access/action-button';
 import type { NonBlFilter } from '@/domain/non-bl';
 import { NonBlListFilter } from './non-bl-list-filter';
 import { NonBlGrid } from './non-bl-grid';
@@ -47,6 +47,7 @@ type NonBlSearchState = SavedSearchState & { extraFilter: NonBlFilter | null };
 type NonBlListInject = { nonBlNo: string };
 
 export function NonBlListClient() {
+  const menuCode = "FMS_NON_BL_LIST";
   const form = useForm<NonBlFilter>({ defaultValues: DEFAULT_VALUES });
   const qc = useQueryClient();
 
@@ -87,31 +88,19 @@ export function NonBlListClient() {
     <>
       <div className="page-head__actions">
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-          <Button
-            size="sm"
-            variant="normal"
-            leftIcon={<RotateCcw size={12} />}
-            onClick={() => {
+          <ActionButton buttonCode={`BTN_${menuCode}_RESET`} className="btn btn--normal btn--sm" onClick={() => {
               form.reset(DEFAULT_VALUES);
               setExtraFilter(null);
               setCurrentPage(1);
               setShowAll(true);
             }}
-          >
-            Reset
-          </Button>
-          <Button
-            size="sm"
-            variant="search"
-            leftIcon={<Search size={12} />}
-            onClick={() => form.handleSubmit((values) => {
+            icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
+          <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
               setExtraFilter(values);
               setCurrentPage(1);
               qc.invalidateQueries({ queryKey: ['non-bl', 'list'] });
             })()}
-          >
-            Search
-          </Button>
+            icon={<Search size={12} style={{ marginRight: 4 }} />} />
         </div>
       </div>
 

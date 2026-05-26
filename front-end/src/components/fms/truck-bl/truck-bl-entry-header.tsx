@@ -1,7 +1,7 @@
 "use client";
 
 import { Truck, FilePlus, Search, Save, Trash2, SquarePen } from "lucide-react";
-import { Button } from "@/components/shared/button";
+import { ActionButton } from "@/components/admin/access/action-button";
 
 export function TruckBlEntryHeader(props: {
   isEdit: boolean;
@@ -36,35 +36,39 @@ export function TruckBlEntryHeader(props: {
         </span>
       </div>
       <div className="page-head__actions">
-        <button type="button" className="btn btn--sm" onClick={onNew}>
-          <FilePlus size={12} />New
-        </button>
-        <button type="button" className="btn btn--sm btn--search" onClick={onSearch}>
-          <Search size={12} />Search
-        </button>
-        <button
-          type="button"
-          className="btn btn--sm btn--transaction"
+        <ActionButton
+          buttonCode="BTN_FMS_TRUCK_BL_ENTRY_CREATE"
+          className="btn btn--normal btn--sm"
+          onClick={onNew}
+          icon={<FilePlus size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_FMS_TRUCK_BL_ENTRY_SEARCH_BL"
+          className="btn btn--search btn--sm"
+          onClick={onSearch}
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_FMS_TRUCK_BL_ENTRY_UPDATE"
+          className="btn btn--transaction btn--sm"
           disabled={isSavePending}
           onClick={onSave}
         >
-          <Save size={12} />{isSavePending ? "Saving..." : "Save"}
-        </button>
-        <Button
-          variant="danger"
-          size="sm"
+          <Save size={12} style={{ marginRight: 4 }} />{isSavePending ? "Saving..." : "Save"}
+        </ActionButton>
+        <ActionButton
+          buttonCode="BTN_FMS_TRUCK_BL_ENTRY_DELETE"
+          className="btn btn--danger btn--sm"
           onClick={onDelete}
           disabled={!isEdit || isDeletePending}
-        >
-          <Trash2 size={12} />Delete
-        </Button>
-        <button
-          type="button"
-          className="btn btn--sm btn--modal"
+          icon={<Trash2 size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_FMS_TRUCK_BL_ENTRY_CHANGE_BL_NO"
+          className="btn btn--modal btn--sm"
           onClick={onChangeBlNo}
-        >
-          <SquarePen size={12} />Change B/L No
-        </button>
+          icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
     </div>
   );
