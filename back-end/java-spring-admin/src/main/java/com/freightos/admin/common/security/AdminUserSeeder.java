@@ -19,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminUserSeeder implements ApplicationRunner {
 
-    private static final String SEED_USERNAME = "admin";
-    private static final String SEED_RAW_PASSWORD = "admin1234";
+    private static final String ADMIN_USERNAME = "admin";
+    private static final String ADMIN_RAW_PASSWORD = "admin1234";
+    private static final String FMS_USERNAME = "fms";
+    private static final String FMS_RAW_PASSWORD = "fms12345";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -28,16 +30,25 @@ public class AdminUserSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (userRepository.findByUsernameAndDeletedAtIsNull(SEED_USERNAME).isPresent()) {
-            return;
+        if (userRepository.findByUsernameAndDeletedAtIsNull(ADMIN_USERNAME).isEmpty()) {
+            UserJpaEntity entity = new UserJpaEntity();
+            entity.setUsername(ADMIN_USERNAME);
+            entity.setEmail(null);
+            entity.setPasswordHash(passwordEncoder.encode(ADMIN_RAW_PASSWORD));
+            entity.setActive(true);
+            entity.setAttributes("{\"role\":[\"ADMIN\"],\"module\":[\"ADMIN\"]}");
+            userRepository.save(entity);
+            log.info("AdminUserSeeder: seeded '{}' user", ADMIN_USERNAME);
         }
-        UserJpaEntity entity = new UserJpaEntity();
-        entity.setUsername(SEED_USERNAME);
-        entity.setEmail(null);
-        entity.setPasswordHash(passwordEncoder.encode(SEED_RAW_PASSWORD));
-        entity.setActive(true);
-        entity.setAttributes("{\"role\":[\"ADMIN\"],\"module\":[\"ADMIN\"]}");
-        userRepository.save(entity);
-        log.info("AdminUserSeeder: seeded '{}' user", SEED_USERNAME);
+        if (userRepository.findByUsernameAndDeletedAtIsNull(FMS_USERNAME).isEmpty()) {
+            UserJpaEntity fmsEntity = new UserJpaEntity();
+            fmsEntity.setUsername(FMS_USERNAME);
+            fmsEntity.setEmail(null);
+            fmsEntity.setPasswordHash(passwordEncoder.encode(FMS_RAW_PASSWORD));
+            fmsEntity.setActive(true);
+            fmsEntity.setAttributes("{\"role\":[\"USER\"],\"module\":[\"FMS\"]}");
+            userRepository.save(fmsEntity);
+            log.info("AdminUserSeeder: seeded '{}' user", FMS_USERNAME);
+        }
     }
 }
