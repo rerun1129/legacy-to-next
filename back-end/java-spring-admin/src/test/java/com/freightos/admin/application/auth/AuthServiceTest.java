@@ -3,6 +3,7 @@ package com.freightos.admin.application.auth;
 import com.freightos.admin.application.auth.command.LoginCommand;
 import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
+import com.freightos.admin.common.security.AccessibleButton;
 import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
@@ -211,6 +212,7 @@ class AuthServiceTest {
         // role 필드는 MeProjection에서 제거됨 — attributes에서 확인
         assertThat(projection.attributes().get("role")).contains("ADMIN");
         assertThat(projection.accessibleMenus()).contains("MENU_ADMIN_USER_LIST");
-        assertThat(projection.accessibleButtons()).contains("BTN_ADMIN_USER_LIST_CREATE");
+        assertThat(projection.accessibleButtons().stream().map(AccessibleButton::code).toList())
+            .contains("BTN_ADMIN_USER_LIST_CREATE");
     }
 }
