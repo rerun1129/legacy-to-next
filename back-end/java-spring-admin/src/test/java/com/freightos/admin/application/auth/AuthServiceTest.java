@@ -4,6 +4,7 @@ import com.freightos.admin.application.auth.command.LoginCommand;
 import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.common.security.AccessibleButton;
+import com.freightos.admin.common.security.ButtonEvalRow;
 import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
@@ -202,7 +203,9 @@ class AuthServiceTest {
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
-        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of(
+            new ButtonEvalRow(1L, "ADMIN_USER_LIST_CREATE", "신규", List.of())
+        ));
         given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of("ADMIN_USER_LIST"));
         given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of("ADMIN_USER_LIST_CREATE"));
 
