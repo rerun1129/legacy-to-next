@@ -65,9 +65,8 @@ export function NoticeListClient() {
             setExtraFilter(null);
             setCurrentPage(1);
           }}
-        >
-          <RotateCcw size={12} style={{ marginRight: 4 }} />Reset
-        </ActionButton>
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_SEARCH"
           className="btn btn--search btn--sm"
@@ -77,9 +76,8 @@ export function NoticeListClient() {
               setCurrentPage(1);
             })()
           }
-        >
-          <Search size={12} style={{ marginRight: 4 }} />Search
-        </ActionButton>
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_DELETE"
           className="btn btn--modal btn--sm"
@@ -92,16 +90,14 @@ export function NoticeListClient() {
             });
             if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
           }}
-        >
-          선택 삭제
-        </ActionButton>
+          icon={null}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_CREATE"
           className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
-        >
-          <Plus size={12} style={{ marginRight: 4 }} />신규
-        </ActionButton>
+          icon={<Plus size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
 
       <NoticeListFilter form={form} />

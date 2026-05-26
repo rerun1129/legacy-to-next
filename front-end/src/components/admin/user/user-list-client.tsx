@@ -63,9 +63,8 @@ export function UserListClient() {
             setExtraFilter(null);
             setCurrentPage(1);
           }}
-        >
-          <RotateCcw size={12} style={{ marginRight: 4 }} />Reset
-        </ActionButton>
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_USER_LIST_SEARCH"
           className="btn btn--search btn--sm"
@@ -75,9 +74,8 @@ export function UserListClient() {
               setCurrentPage(1);
             })()
           }
-        >
-          <Search size={12} style={{ marginRight: 4 }} />Search
-        </ActionButton>
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_USER_LIST_DELETE"
           className="btn btn--modal btn--sm"
@@ -90,16 +88,14 @@ export function UserListClient() {
             });
             if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
           }}
-        >
-          선택 삭제
-        </ActionButton>
+          icon={null}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_USER_LIST_CREATE"
           className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
-        >
-          <Plus size={12} style={{ marginRight: 4 }} />신규
-        </ActionButton>
+          icon={<Plus size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
 
       <UserListFilter form={form} />

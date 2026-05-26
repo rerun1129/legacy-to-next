@@ -102,31 +102,27 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
           buttonCode="BTN_ADMIN_CODE_LIST_RESET"
           className="btn btn--normal btn--sm"
           onClick={handleReset}
-        >
-          <RotateCcw size={12} style={{ marginRight: 4 }} />Reset
-        </ActionButton>
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_SEARCH"
           className="btn btn--search btn--sm"
           onClick={handleSearch}
-        >
-          <Search size={12} style={{ marginRight: 4 }} />Search
-        </ActionButton>
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_DELETE"
           className="btn btn--modal btn--sm"
           disabled={selectedKeys.size === 0 || isBulkDeletePending}
           onClick={onBulkDelete}
-        >
-          선택 삭제
-        </ActionButton>
+          icon={null}
+        />
         <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_CREATE"
           className="btn btn--modal btn--sm"
           onClick={() => setEntryModalState({ mode: "create" })}
-        >
-          <Plus size={12} style={{ marginRight: 4 }} />신규
-        </ActionButton>
+          icon={<Plus size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
 
       <CodeMasterListFilter form={form} />

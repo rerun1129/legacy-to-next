@@ -1,8 +1,13 @@
 import { z } from "zod";
-import type { AuthPort, MeInfo, LoginResult, RefreshResult } from "@/application/auth/ports";
+import type { AuthPort, MeInfo, LoginResult, RefreshResult, AccessibleButtonInfo } from "@/application/auth/ports";
 import { ADMIN_API_URL } from "@/lib/api-base";
 import { getAuthHeader } from "@/lib/admin-session";
 import { ApiError, ResponseParseError } from "./errors";
+
+const ACCESSIBLE_BUTTON_SCHEMA = z.object({
+  code: z.string(),
+  label: z.string(),
+}) satisfies z.ZodType<AccessibleButtonInfo>;
 
 const ME_SCHEMA = z.object({
   id: z.number(),
@@ -10,7 +15,7 @@ const ME_SCHEMA = z.object({
   email: z.string().nullable().optional().transform((v) => v ?? null),
   attributes: z.record(z.string(), z.array(z.string())),
   accessibleMenus: z.array(z.string()),
-  accessibleButtons: z.array(z.string()),
+  accessibleButtons: z.array(ACCESSIBLE_BUTTON_SCHEMA),
 }) satisfies z.ZodType<MeInfo>;
 
 const LOGIN_SCHEMA = z.object({

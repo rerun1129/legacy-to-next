@@ -1,10 +1,15 @@
+export interface AccessibleButtonInfo {
+  code: string;
+  label: string;
+}
+
 export interface MeInfo {
   id: number;
   username: string;
   email: string | null;
   attributes: Record<string, string[]>;
   accessibleMenus: string[];
-  accessibleButtons: string[];
+  accessibleButtons: AccessibleButtonInfo[];
 }
 
 export interface LoginResult {

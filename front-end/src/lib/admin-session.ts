@@ -1,3 +1,5 @@
+import type { AccessibleButtonInfo } from "@/application/auth/ports";
+
 const STORAGE_KEY = "admin.session";
 
 export interface AdminSession {
@@ -5,7 +7,7 @@ export interface AdminSession {
   refreshToken: string;
   attributes: Record<string, string[]>;
   accessibleMenus: string[];
-  accessibleButtons: string[];
+  accessibleButtons: AccessibleButtonInfo[];
 }
 
 export function getSession(): AdminSession | null {
@@ -53,7 +55,12 @@ export function hasMenuAccess(session: AdminSession | null, menuCode: string): b
 
 export function hasButtonAccess(session: AdminSession | null, buttonCode: string): boolean {
   if (!session) return false;
-  return session.accessibleButtons.includes(buttonCode);
+  return session.accessibleButtons.some(b => b.code === buttonCode);
+}
+
+export function getButtonLabel(session: AdminSession | null, buttonCode: string): string | null {
+  if (!session) return null;
+  return session.accessibleButtons.find(b => b.code === buttonCode)?.label ?? null;
 }
 
 // login·guard 양측에서 공유하는 "이 세션으로 진입 가능한 첫 번째 라우트" 헬퍼
