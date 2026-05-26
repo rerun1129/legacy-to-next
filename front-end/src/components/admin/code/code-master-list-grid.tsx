@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus } from "lucide-react";
-import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
@@ -99,12 +98,20 @@ export function CodeMasterListGrid({ selectedId, onSelect, onRowDoubleClick, sel
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
-        <Button size="sm" variant="normal" leftIcon={<RotateCcw size={12} />} onClick={handleReset}>
-          Reset
-        </Button>
-        <Button size="sm" variant="search" leftIcon={<Search size={12} />} onClick={handleSearch}>
-          Search
-        </Button>
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_RESET"
+          className="btn btn--normal btn--sm"
+          onClick={handleReset}
+        >
+          <RotateCcw size={12} style={{ marginRight: 4 }} />Reset
+        </ActionButton>
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_SEARCH"
+          className="btn btn--search btn--sm"
+          onClick={handleSearch}
+        >
+          <Search size={12} style={{ marginRight: 4 }} />Search
+        </ActionButton>
         <ActionButton
           buttonCode="BTN_ADMIN_CODE_LIST_DELETE"
           className="btn btn--modal btn--sm"

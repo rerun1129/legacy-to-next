@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { RotateCcw, Search, Plus } from "lucide-react";
-import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { NoticeListFilter } from "./notice-list-filter";
 import { NoticeListGrid } from "./notice-list-grid";
@@ -58,22 +57,20 @@ export function NoticeListClient() {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
-        <Button
-          size="sm"
-          variant="normal"
-          leftIcon={<RotateCcw size={12} />}
+        <ActionButton
+          buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_RESET"
+          className="btn btn--normal btn--sm"
           onClick={() => {
             form.reset(DEFAULT_VALUES);
             setExtraFilter(null);
             setCurrentPage(1);
           }}
         >
-          Reset
-        </Button>
-        <Button
-          size="sm"
-          variant="search"
-          leftIcon={<Search size={12} />}
+          <RotateCcw size={12} style={{ marginRight: 4 }} />Reset
+        </ActionButton>
+        <ActionButton
+          buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_SEARCH"
+          className="btn btn--search btn--sm"
           onClick={() =>
             form.handleSubmit((values) => {
               setExtraFilter(values);
@@ -81,8 +78,8 @@ export function NoticeListClient() {
             })()
           }
         >
-          Search
-        </Button>
+          <Search size={12} style={{ marginRight: 4 }} />Search
+        </ActionButton>
         <ActionButton
           buttonCode="BTN_ADMIN_CMS_NOTICE_LIST_DELETE"
           className="btn btn--modal btn--sm"
