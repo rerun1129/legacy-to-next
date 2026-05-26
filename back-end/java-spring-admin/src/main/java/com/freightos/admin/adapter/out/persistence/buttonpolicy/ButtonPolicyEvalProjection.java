@@ -7,6 +7,7 @@ package com.freightos.admin.adapter.out.persistence.buttonpolicy;
 public interface ButtonPolicyEvalProjection {
     Long getButtonId();
     String getButtonCode();
+    String getLabel();
     String getAttributeKey();
     String getRequiredValue();
 }

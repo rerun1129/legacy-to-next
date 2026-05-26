@@ -17,6 +17,7 @@ public interface ButtonPolicyRepository extends JpaRepository<ButtonPolicyJpaEnt
     @Query("""
             SELECT b.id         AS buttonId,
                    b.buttonCode AS buttonCode,
+                   b.label      AS label,
                    p.attributeKey  AS attributeKey,
                    p.requiredValue AS requiredValue
             FROM ButtonJpaEntity b

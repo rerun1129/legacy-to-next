@@ -11,6 +11,7 @@ import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
 import com.freightos.admin.application.user.port.in.UserUseCase;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.security.AccessibleButton;
 import com.freightos.admin.common.security.ButtonEvalRow;
 import com.freightos.admin.common.security.MenuEvalRow;
 import com.freightos.admin.common.security.PolicyEvaluator;
@@ -59,7 +60,7 @@ public class AuthService implements AuthUseCase {
 
         Map<String, List<String>> attrs = user.getAttributes();
         Set<String> accessibleMenus = evaluateMenus(attrs);
-        Set<String> accessibleButtons = evaluateButtons(attrs);
+        List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
         Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
@@ -72,7 +73,7 @@ public class AuthService implements AuthUseCase {
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, refreshRaw, user, attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(c -> "BTN_" + c).toList());
+                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label())).toList());
     }
 
     @Override
@@ -91,7 +92,7 @@ public class AuthService implements AuthUseCase {
 
         Map<String, List<String>> attrs = user.getAttributes();
         Set<String> accessibleMenus = evaluateMenus(attrs);
-        Set<String> accessibleButtons = evaluateButtons(attrs);
+        List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
         Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
 
         String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
@@ -104,7 +105,7 @@ public class AuthService implements AuthUseCase {
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, newRefreshRaw, user, attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(c -> "BTN_" + c).toList());
+                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label())).toList());
     }
 
     @Override
@@ -119,7 +120,7 @@ public class AuthService implements AuthUseCase {
         AdminUser user = userUseCase.findUserByUsername(username);
         Map<String, List<String>> attrs = user.getAttributes();
         Set<String> accessibleMenus = evaluateMenus(attrs);
-        Set<String> accessibleButtons = evaluateButtons(attrs);
+        List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new MeProjection(
                 user.getId(),
@@ -127,7 +128,7 @@ public class AuthService implements AuthUseCase {
                 user.getEmail(),
                 attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(c -> "BTN_" + c).toList()
+                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label())).toList()
         );
     }
 
@@ -136,17 +137,21 @@ public class AuthService implements AuthUseCase {
         return policyEvaluator.accessibleMenuCodes(attrs, menuRows);
     }
 
-    private Set<String> evaluateButtons(Map<String, List<String>> attrs) {
+    private List<AccessibleButton> evaluateButtons(Map<String, List<String>> attrs) {
         List<ButtonEvalRow> buttonRows = buttonPolicyPort.findAllActiveForEvaluation();
-        return policyEvaluator.accessibleButtonCodes(attrs, buttonRows);
+        Set<String> accessibleCodes = policyEvaluator.accessibleButtonCodes(attrs, buttonRows);
+        return buttonRows.stream()
+                .filter(row -> accessibleCodes.contains(row.buttonCode()))
+                .map(row -> new AccessibleButton(row.buttonCode(), row.label()))
+                .toList();
     }
 
-    private Set<String> buildAuthorities(Map<String, List<String>> attrs, Set<String> accessibleMenus, Set<String> accessibleButtons) {
+    private Set<String> buildAuthorities(Map<String, List<String>> attrs, Set<String> accessibleMenus, List<AccessibleButton> accessibleButtons) {
         Set<String> authorities = new HashSet<>();
         // attributes의 role 키 값들을 ROLE_*로 부여
         attrs.getOrDefault("role", List.of()).forEach(r -> authorities.add("ROLE_" + r));
         accessibleMenus.forEach(code -> authorities.add("MENU_" + code));
-        accessibleButtons.forEach(code -> authorities.add("BTN_" + code));
+        accessibleButtons.forEach(ab -> authorities.add("BTN_" + ab.code()));
         return authorities;
     }
 }
