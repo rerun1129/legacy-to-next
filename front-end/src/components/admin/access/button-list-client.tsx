@@ -68,7 +68,7 @@ export function AccessButtonListClient() {
 
   const { data, isFetching } = useQuery({
     queryKey: ["access-button", "list"],
-    queryFn: () => accessButtonPort.search(1, 100),
+    queryFn: () => accessButtonPort.search(1, 200),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -76,7 +76,7 @@ export function AccessButtonListClient() {
 
   const { data: menuData } = useQuery({
     queryKey: ["access-menu", "list"],
-    queryFn: () => accessMenuPort.search(1, 100),
+    queryFn: () => accessMenuPort.search(1, 200),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
