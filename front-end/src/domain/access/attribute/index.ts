@@ -29,3 +29,16 @@ export interface UpdateAttributeDefinitionDto {
   allowMulti: boolean;
   active: boolean;
 }
+
+export interface ModuleAttributeValueDto {
+  value: string;
+  label: string;
+}
+
+export interface ModuleAttributeDto {
+  attributeKey: string;
+  name: string;
+  valueType: AttributeValueType;
+  allowMulti: boolean;
+  values: ModuleAttributeValueDto[];
+}

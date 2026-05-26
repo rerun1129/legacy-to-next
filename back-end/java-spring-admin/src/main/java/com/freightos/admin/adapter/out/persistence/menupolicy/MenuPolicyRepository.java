@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.out.persistence.menupolicy;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -24,4 +25,15 @@ public interface MenuPolicyRepository extends JpaRepository<MenuPolicyJpaEntity,
             WHERE m.active = true
             """)
     List<MenuPolicyEvalProjection> findAllActiveMenusWithPolicies();
+
+    /** 특정 모듈의 active 메뉴에 설정된 attributeKey 목록 (중복 제거, module 키 제외). */
+    @Query("""
+            SELECT DISTINCT mp.attributeKey
+            FROM MenuPolicyJpaEntity mp
+            JOIN MenuJpaEntity m ON mp.menuId = m.id
+            WHERE m.moduleCode = :moduleCode
+              AND m.active = true
+              AND mp.attributeKey != 'module'
+            """)
+    List<String> findDistinctAttributeKeysByModuleCode(@Param("moduleCode") String moduleCode);
 }

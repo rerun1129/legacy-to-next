@@ -3,8 +3,10 @@ package com.freightos.admin.adapter.in.web.attributedefinition;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefinitionDetailResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefinitionSummaryResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.CreateAttributeDefinitionRequest;
+import com.freightos.admin.adapter.in.web.attributedefinition.dto.ModuleAttributeResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.SearchAttributeDefinitionRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.UpdateAttributeDefinitionRequest;
+import com.freightos.admin.application.attributedefinition.ModuleAttributeResult;
 import com.freightos.admin.application.attributedefinition.port.in.AttributeDefinitionUseCase;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
 import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -80,5 +83,11 @@ public class AttributeDefinitionController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteByCodeRequest req) {
         attributeDefinitionUseCase.deleteAttributeDefinitionsByKeys(req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_DEFINITION_DELETED.getMessage()));
+    }
+
+    @GetMapping("/by-module/{moduleCode}")
+    public ResponseEntity<ApiResponse<List<ModuleAttributeResponse>>> getByModule(@PathVariable String moduleCode) {
+        List<ModuleAttributeResult> results = attributeDefinitionUseCase.findAttributesByModuleCode(moduleCode);
+        return ResponseEntity.ok(ApiResponse.of(attributeDefinitionAssembler.toModuleAttributeResponseList(results)));
     }
 }

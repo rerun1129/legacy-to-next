@@ -3,6 +3,7 @@ import type {
   AttributeDefinitionDetail,
   CreateAttributeDefinitionDto,
   UpdateAttributeDefinitionDto,
+  ModuleAttributeDto,
 } from "@/domain/access/attribute";
 
 export interface AttributeDefinitionPageResult {
@@ -20,4 +21,5 @@ export interface AttributeDefinitionPort {
   update(attributeKey: string, req: UpdateAttributeDefinitionDto): Promise<void>;
   delete(attributeKey: string): Promise<void>;
   deleteMany(keys: string[]): Promise<void>;
+  getByModule(moduleCode: string): Promise<ModuleAttributeDto[]>;
 }

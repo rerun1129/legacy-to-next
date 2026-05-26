@@ -10,6 +10,7 @@ import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -60,5 +61,13 @@ public class AttributeValuePersistenceAdapter implements AttributeValuePort {
     @Override
     public boolean existsByAttributeKey(String attributeKey) {
         return attributeValueRepository.existsByIdAttributeKey(attributeKey);
+    }
+
+    @Override
+    public List<AttributeValue> findActiveAttributeValuesByKey(String attributeKey) {
+        return attributeValueRepository.findByIdAttributeKeyAndActiveTrue(attributeKey)
+                .stream()
+                .map(attributeValueJpaToDomainMapper::toDomain)
+                .toList();
     }
 }

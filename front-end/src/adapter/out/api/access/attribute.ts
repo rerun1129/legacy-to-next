@@ -6,6 +6,7 @@ import type {
   CreateAttributeDefinitionDto,
   UpdateAttributeDefinitionDto,
   AttributeValueType,
+  ModuleAttributeDto,
 } from "@/domain/access/attribute";
 import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
@@ -34,6 +35,19 @@ const ATTRIBUTE_DETAIL_SCHEMA = z.object({
   createdBy: z.string().nullable().optional().transform((v) => v ?? null),
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
 }) satisfies z.ZodType<AttributeDefinitionDetail>;
+
+const MODULE_ATTRIBUTE_VALUE_SCHEMA = z.object({
+  value: z.string(),
+  label: z.string(),
+});
+
+const MODULE_ATTRIBUTE_SCHEMA = z.object({
+  attributeKey: z.string(),
+  name: z.string(),
+  valueType: ATTRIBUTE_VALUE_TYPE_SCHEMA,
+  allowMulti: z.boolean(),
+  values: z.array(MODULE_ATTRIBUTE_VALUE_SCHEMA),
+}) satisfies z.ZodType<ModuleAttributeDto>;
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
@@ -87,5 +101,12 @@ export const API_ATTRIBUTE_PORT: AttributeDefinitionPort = {
       method: "DELETE",
       body: JSON.stringify({ codes: keys }),
     });
+  },
+
+  async getByModule(moduleCode) {
+    const json = await adminFetchJson(`${BASE}/by-module/${encodeURIComponent(moduleCode)}`);
+    const parsed = apiResponse(z.array(MODULE_ATTRIBUTE_SCHEMA)).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid module attributes response: ${parsed.error.message}`);
+    return parsed.data.data as ModuleAttributeDto[];
   },
 };

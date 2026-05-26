@@ -1,5 +1,6 @@
 package com.freightos.admin.application.attributedefinition.port.in;
 
+import com.freightos.admin.application.attributedefinition.ModuleAttributeResult;
 import com.freightos.admin.application.attributedefinition.command.CreateAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.command.SearchAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.command.UpdateAttributeDefinitionCommand;
@@ -16,4 +17,5 @@ public interface AttributeDefinitionUseCase {
     void updateAttributeDefinition(String attributeKey, UpdateAttributeDefinitionCommand command);
     void deleteAttributeDefinitionByKey(String attributeKey);
     void deleteAttributeDefinitionsByKeys(List<String> keys);
+    List<ModuleAttributeResult> findAttributesByModuleCode(String moduleCode);
 }

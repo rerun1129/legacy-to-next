@@ -3,8 +3,10 @@ package com.freightos.admin.adapter.in.web.attributedefinition;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefinitionDetailResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefinitionSummaryResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.CreateAttributeDefinitionRequest;
+import com.freightos.admin.adapter.in.web.attributedefinition.dto.ModuleAttributeResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.SearchAttributeDefinitionRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.UpdateAttributeDefinitionRequest;
+import com.freightos.admin.application.attributedefinition.ModuleAttributeResult;
 import com.freightos.admin.application.attributedefinition.command.CreateAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.command.SearchAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.command.UpdateAttributeDefinitionCommand;
@@ -12,6 +14,8 @@ import com.freightos.admin.application.attributedefinition.projection.AttributeD
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributedefinition.entity.AttributeDefinition;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AttributeDefinitionAssembler {
@@ -43,5 +47,16 @@ public class AttributeDefinitionAssembler {
 
     public PagedResult<AttributeDefinitionSummaryResponse> toSummaryPage(PagedResult<AttributeDefinitionSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public List<ModuleAttributeResponse> toModuleAttributeResponseList(List<ModuleAttributeResult> results) {
+        return results.stream().map(this::toModuleAttributeResponse).toList();
+    }
+
+    private ModuleAttributeResponse toModuleAttributeResponse(ModuleAttributeResult result) {
+        List<ModuleAttributeResponse.ValueOption> valueOptions = result.values().stream()
+                .map(v -> new ModuleAttributeResponse.ValueOption(v.value(), v.label()))
+                .toList();
+        return new ModuleAttributeResponse(result.attributeKey(), result.name(), result.valueType(), result.allowMulti(), valueOptions);
     }
 }

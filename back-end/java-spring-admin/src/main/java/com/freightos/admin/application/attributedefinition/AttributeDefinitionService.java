@@ -14,11 +14,13 @@ import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributedefinition.entity.AttributeDefinition;
 import com.freightos.admin.domain.attributedefinition.entity.ValueType;
+import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +84,25 @@ public class AttributeDefinitionService implements AttributeDefinitionUseCase {
             throw ApplicationException.conflict("ATTRIBUTE_DEFINITION_IN_USE_CANNOT_DELETE", MessageCode.ATTRIBUTE_DEFINITION_IN_USE_CANNOT_DELETE.getMessage());
         }
         attributeDefinitionPort.deleteAttributeDefinitionByKey(attributeKey);
+    }
+
+    @Override
+    public List<ModuleAttributeResult> findAttributesByModuleCode(String moduleCode) {
+        List<String> keys = menuPolicyPort.findDistinctAttributeKeysByModuleCode(moduleCode);
+        return keys.stream()
+                .map(key -> {
+                    AttributeDefinition def = attributeDefinitionPort.findAttributeDefinitionByKey(key).orElse(null);
+                    if (def == null) return null;
+                    List<ModuleAttributeResult.ValueEntry> valueEntries = List.of();
+                    if ("ENUM".equals(def.getValueType().name())) {
+                        List<AttributeValue> activeValues = attributeValuePort.findActiveAttributeValuesByKey(key);
+                        valueEntries = activeValues.stream()
+                                .map(v -> new ModuleAttributeResult.ValueEntry(v.getValue(), v.getLabel()))
+                                .toList();
+                    }
+                    return new ModuleAttributeResult(def.getAttributeKey(), def.getName(), def.getValueType().name(), Boolean.TRUE.equals(def.getAllowMulti()), valueEntries);
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 }

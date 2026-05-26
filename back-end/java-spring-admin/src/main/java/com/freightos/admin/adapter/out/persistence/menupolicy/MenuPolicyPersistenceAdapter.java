@@ -87,4 +87,9 @@ public class MenuPolicyPersistenceAdapter implements MenuPolicyPort {
         }
         return new ArrayList<>(byMenuId.values());
     }
+
+    @Override
+    public List<String> findDistinctAttributeKeysByModuleCode(String moduleCode) {
+        return menuPolicyRepository.findDistinctAttributeKeysByModuleCode(moduleCode);
+    }
 }

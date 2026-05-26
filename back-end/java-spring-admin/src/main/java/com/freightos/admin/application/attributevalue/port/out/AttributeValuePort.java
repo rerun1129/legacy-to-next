@@ -5,6 +5,7 @@ import com.freightos.admin.application.attributevalue.projection.AttributeValueS
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AttributeValuePort {
@@ -15,4 +16,5 @@ public interface AttributeValuePort {
     void deleteAttributeValueByKey(String attributeKey, String value);
     boolean existsByKey(String attributeKey, String value);
     boolean existsByAttributeKey(String attributeKey);
+    List<AttributeValue> findActiveAttributeValuesByKey(String attributeKey);
 }

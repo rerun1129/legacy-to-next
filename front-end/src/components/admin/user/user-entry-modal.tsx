@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -10,7 +10,9 @@ import { ActionButton } from "@/components/admin/access/action-button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { userUseCases } from "@/application/user/use-cases";
+import { accessAttributeUseCases } from "@/application/access/attribute/use-cases";
 import type { CreateUserRequestDto, UpdateUserRequestDto } from "@/domain/user";
+import type { ModuleAttributeDto } from "@/domain/access/attribute";
 
 export interface EntryModalState {
   mode: "create" | "edit";
@@ -30,7 +32,6 @@ interface UserFormValues {
   role: "ADMIN" | "USER";
   active: boolean;
   modules: string[];
-  fmsScopes: string[];
 }
 
 const DEFAULT_FORM: UserFormValues = {
@@ -40,7 +41,6 @@ const DEFAULT_FORM: UserFormValues = {
   role: "USER",
   active: true,
   modules: [],
-  fmsScopes: [],
 };
 
 const ROLE_OPTIONS: Array<{ value: "ADMIN" | "USER"; label: string }> = [
@@ -53,19 +53,17 @@ const MODULE_OPTIONS = [
   { value: "FMS", label: "FMS" },
 ] as const;
 
-const FMS_SCOPE_OPTIONS = [
-  { value: "SEA", label: "SEA" },
-  { value: "AIR", label: "AIR" },
-  { value: "TRUCK", label: "TRUCK" },
-  { value: "NON_BL", label: "NON_BL" },
-] as const;
-
 // ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
 function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
   const form = useForm<UserFormValues>({ defaultValues: DEFAULT_FORM });
-  const { register, reset, getValues, control, formState: { isSubmitting } } = form;
+  const { register, reset, getValues, control, watch, formState: { isSubmitting } } = form;
+
+  // 동적 속성 값 (role·module 외 나머지 ABAC 속성)
+  const [dynamicAttrs, setDynamicAttrs] = useState<Record<string, string[]>>({});
+
+  const selectedModules = watch("modules");
 
   // 수정 모드: 상세 조회 후 form.reset
   const { data: detail, isLoading: isDetailLoading } = useQuery({
@@ -87,8 +85,11 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
         role: roleAttr ?? "USER",
         active: detail.active,
         modules: detail.attributes?.module ?? [],
-        fmsScopes: detail.attributes?.fms_scope ?? [],
       });
+      // role·module 제외한 나머지 속성을 동적 상태로 복원
+      // eslint 오류 방지를 위해 구조분해 후 rest 사용 (role, module은 고정 필드)
+      const { role: _r, module: _m, ...rest } = detail.attributes ?? {};
+      setDynamicAttrs(rest as Record<string, string[]>);
     }
   }, [detail, reset]);
 
@@ -96,6 +97,7 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
   useEffect(() => {
     if (!isEdit) {
       reset(DEFAULT_FORM);
+      setDynamicAttrs({});
     }
   }, [isEdit, reset]);
 
@@ -124,14 +126,35 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
     },
   });
 
+  // 선택된 모듈에 속한 동적 속성을 BE에서 조회
+  const { data: moduleAttributes = [] } = useQuery<ModuleAttributeDto[]>({
+    queryKey: ["module-attributes", selectedModules],
+    queryFn: async () => {
+      if (selectedModules.length === 0) return [];
+      const results = await Promise.all(
+        selectedModules.map((mod) => accessAttributeUseCases.getByModule(mod))
+      );
+      // 모듈별 결과를 합치고 attributeKey 기준 중복 제거 (첫 번째 등장 우선)
+      const merged = new Map<string, ModuleAttributeDto>();
+      results.flat().forEach((attr) => {
+        if (!merged.has(attr.attributeKey)) merged.set(attr.attributeKey, attr);
+      });
+      return Array.from(merged.values());
+    },
+    enabled: selectedModules.length > 0,
+  });
+
   function handleSave(values: UserFormValues) {
     // role·module은 ABAC attributes로 전송
     const attributes: Record<string, string[]> = { role: [values.role] };
     if (values.modules.length > 0) {
       attributes.module = values.modules;
     }
-    if (values.fmsScopes.length > 0) {
-      attributes.fms_scope = values.fmsScopes;
+    // 동적 속성 추가
+    for (const [key, vals] of Object.entries(dynamicAttrs)) {
+      if (vals.length > 0) {
+        attributes[key] = vals;
+      }
     }
 
     if (isEdit && state?.id != null) {
@@ -268,34 +291,71 @@ function UserEntryModalInner({ state, onClose, onSaved }: Props) {
                 ))}
               </div>
             </div>
-            <div className="lcn">
-              <span className="lcn__label">FMS Scope</span>
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                {FMS_SCOPE_OPTIONS.map((opt) => (
-                  <Controller
-                    key={opt.value}
-                    name="fmsScopes"
-                    control={control}
-                    render={({ field }) => (
-                      <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <input
-                          type="checkbox"
-                          checked={field.value.includes(opt.value)}
-                          disabled={isReadOnly}
-                          onChange={(e) => {
-                            const next = e.target.checked
-                              ? [...field.value, opt.value]
-                              : field.value.filter((v: string) => v !== opt.value);
-                            field.onChange(next);
-                          }}
-                        />
-                        {opt.label}
-                      </label>
-                    )}
-                  />
-                ))}
+            {moduleAttributes.map((attr) => (
+              <div className="lcn" key={attr.attributeKey}>
+                <span className="lcn__label">{attr.name}</span>
+                <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                  {attr.valueType === "ENUM" && attr.allowMulti && attr.values.map((opt) => (
+                    <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <input
+                        type="checkbox"
+                        checked={(dynamicAttrs[attr.attributeKey] ?? []).includes(opt.value)}
+                        disabled={isReadOnly}
+                        onChange={(e) => {
+                          const prev = dynamicAttrs[attr.attributeKey] ?? [];
+                          const next = e.target.checked
+                            ? [...prev, opt.value]
+                            : prev.filter((v) => v !== opt.value);
+                          setDynamicAttrs((p) => ({ ...p, [attr.attributeKey]: next }));
+                        }}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                  {attr.valueType === "ENUM" && !attr.allowMulti && (
+                    <ComboBox
+                      variant="panel"
+                      options={attr.values.map((v) => ({ value: v.value, label: v.label }))}
+                      value={(dynamicAttrs[attr.attributeKey] ?? [])[0] ?? ""}
+                      onChange={(e) =>
+                        setDynamicAttrs((p) => ({
+                          ...p,
+                          [attr.attributeKey]: e.target.value ? [e.target.value] : [],
+                        }))
+                      }
+                      disabled={isReadOnly}
+                    />
+                  )}
+                  {attr.valueType === "STRING" && (
+                    <input
+                      className="box-panel"
+                      value={(dynamicAttrs[attr.attributeKey] ?? [])[0] ?? ""}
+                      disabled={isReadOnly}
+                      onChange={(e) =>
+                        setDynamicAttrs((p) => ({
+                          ...p,
+                          [attr.attributeKey]: e.target.value ? [e.target.value] : [],
+                        }))
+                      }
+                    />
+                  )}
+                  {attr.valueType === "NUMBER" && (
+                    <input
+                      type="number"
+                      className="box-panel"
+                      value={(dynamicAttrs[attr.attributeKey] ?? [])[0] ?? ""}
+                      disabled={isReadOnly}
+                      onChange={(e) =>
+                        setDynamicAttrs((p) => ({
+                          ...p,
+                          [attr.attributeKey]: e.target.value ? [e.target.value] : [],
+                        }))
+                      }
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            ))}
             <div className="lcn">
               <span className="lcn__label">Active</span>
               <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
