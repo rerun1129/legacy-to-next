@@ -114,6 +114,9 @@ export function AccessMenuListClient() {
       qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
       qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
     },
+    onError: () => {
+      toast.error("하위 메뉴가 존재하여 삭제할 수 없습니다.");
+    },
   });
 
   const bulkDeleteMutation = useMutation({
@@ -123,6 +126,9 @@ export function AccessMenuListClient() {
       qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
       setSelectedKeys(new Set());
       toast.success("선택한 항목이 삭제되었습니다.");
+    },
+    onError: () => {
+      toast.error("하위 메뉴가 존재하는 항목이 포함되어 삭제할 수 없습니다.");
     },
   });
 
