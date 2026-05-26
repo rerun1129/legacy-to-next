@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
@@ -11,9 +11,7 @@ import { toast } from "@/lib/toast-store";
 import { accessMenuPort } from "@/lib/ports";
 import { accessMenuUseCases } from "@/application/access/menu/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { GridList } from "@/components/shared/grid-list";
-import type { GridColumn } from "@/components/shared/grid-list";
-import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
+import { MenuTreeView } from "@/components/admin/access/menu-tree-view";
 import type { CreateMenuDto, UpdateMenuDto, MenuRow } from "@/domain/access/menu";
 
 const DEFAULT_FORM: CreateMenuDto = {
@@ -59,15 +57,6 @@ function parseNullableNum(v: string): number | null {
   const n = Number(v);
   return isNaN(n) ? null : n;
 }
-
-const MENU_COLUMNS: GridColumn<MenuRow>[] = [
-  { key: "id", label: "ID", minWidth: 60 },
-  { key: "menuCode", label: "menuCode", minWidth: 140 },
-  { key: "label", label: "label", minWidth: 120 },
-  { key: "moduleCode", label: "moduleCode", minWidth: 120 },
-  { key: "path", label: "path", minWidth: 120, render: (v) => (v as string | null) ?? "-" },
-  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
-];
 
 export function AccessMenuListClient() {
   const qc = useQueryClient();
@@ -167,25 +156,6 @@ export function AccessMenuListClient() {
     if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
   }
 
-  const columns = useMemo<GridColumn<MenuRow>[]>(() => [
-    ...MENU_COLUMNS,
-    {
-      key: "_actions",
-      label: "",
-      minWidth: 70,
-      render: (_v, row) => (
-        <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
-          <ActionButton buttonCode="BTN_ADMIN_ACCESS_MENU_UPDATE" className="btn btn--sm" onClick={() => openEdit(row)}>
-            <Pencil size={12} />
-          </ActionButton>
-          <ActionButton buttonCode="BTN_ADMIN_ACCESS_MENU_DELETE" className="btn btn--danger btn--sm" onClick={() => handleDelete(row.id, row.label)} disabled={deleteMutation.isPending}>
-            <Trash2 size={12} />
-          </ActionButton>
-        </div>
-      ),
-    },
-  ], [deleteMutation.isPending, openEdit, handleDelete]);
-
   const rows = data?.content ?? [];
 
   return (
@@ -206,20 +176,23 @@ export function AccessMenuListClient() {
           <div className="panel__title-accent" />
           <span className="panel__title">Menus</span>
           <span className="panel__rowcount">{rows.length}</span>
-          <ColumnVisibilityMenu<MenuRow> gridId="access-menu" defaultColumns={MENU_COLUMNS} />
         </div>
-        <div className="list-wrap">
-          <GridList<MenuRow>
-            columns={columns}
-            data={rows}
-            gridId="access-menu"
-            rowKey={(row) => row.id}
-            selectable
-            selectedKeys={selectedKeys}
-            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
-            isLoading={isFetching}
-            emptyMessage="데이터가 없습니다."
-          />
+        <div className="list-wrap" style={{ overflowY: "auto" }}>
+          {isFetching && rows.length === 0 ? (
+            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>로딩 중...</div>
+          ) : rows.length === 0 ? (
+            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>데이터가 없습니다.</div>
+          ) : (
+            <MenuTreeView
+              rows={rows}
+              selectedKeys={selectedKeys}
+              deleteIsPending={deleteMutation.isPending}
+              onSelectionChange={setSelectedKeys}
+              onDoubleClick={openEdit}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
       </div>
 
