@@ -4,6 +4,7 @@ import type {
   FreightRow,
   FreightDetail,
   FreightFilter,
+  FreightGroup,
   FreightScope,
   CreateFreightRequestDto,
   UpdateFreightRequestDto,
@@ -13,6 +14,8 @@ import { ResponseParseError } from "../errors";
 
 const BASE = "/api/admin/code/freight";
 
+const FREIGHT_GROUP_SCHEMA = z.enum(["OTHER", "FREIGHT", "SURCHARGE", "WHARFAGE"]) satisfies z.ZodType<FreightGroup>;
+
 const FREIGHT_ROW_SCHEMA = z.object({
   id: z.number(),
   freightCode: z.string(),
@@ -20,7 +23,7 @@ const FREIGHT_ROW_SCHEMA = z.object({
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   description: z.string().nullable().optional().transform((v) => v ?? null),
   freightUnit: z.string().nullable().optional().transform((v) => v ?? null),
-  freightGroup: z.string().nullable().optional().transform((v) => v ?? null),
+  freightGroup: FREIGHT_GROUP_SCHEMA.nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),
@@ -33,7 +36,7 @@ const FREIGHT_DETAIL_SCHEMA = z.object({
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   description: z.string().nullable().optional().transform((v) => v ?? null),
   freightUnit: z.string().nullable().optional().transform((v) => v ?? null),
-  freightGroup: z.string().nullable().optional().transform((v) => v ?? null),
+  freightGroup: FREIGHT_GROUP_SCHEMA.nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),

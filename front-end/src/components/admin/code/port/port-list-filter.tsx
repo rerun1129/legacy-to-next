@@ -22,7 +22,6 @@ const PORT_TYPE_OPTIONS = [
   { value: "ALL", label: "All" },
   { value: "SEA", label: "SEA" },
   { value: "AIR", label: "AIR" },
-  { value: "INLAND", label: "INLAND" },
 ] as const;
 
 export function PortListFilter({ form }: Props) {

@@ -13,12 +13,13 @@ interface Props {
 
 const CUSTOMER_TYPE_OPTIONS = [
   { value: "ALL", label: "All" },
-  { value: "FORWARDER", label: "FORWARDER" },
-  { value: "SHIPPER", label: "SHIPPER" },
-  { value: "CONSIGNEE", label: "CONSIGNEE" },
-  { value: "CARRIER", label: "CARRIER" },
-  { value: "AGENT", label: "AGENT" },
-  { value: "CUSTOMS_BROKER", label: "CUSTOMS_BROKER" },
+  { value: "CUSTOMER", label: "CUSTOMER" },
+  { value: "PARTNER", label: "PARTNER" },
+  { value: "AIRCARRIER", label: "AIRCARRIER" },
+  { value: "LINER", label: "LINER" },
+  { value: "TRUCKER", label: "TRUCKER" },
+  { value: "WAREHOUSE", label: "WAREHOUSE" },
+  { value: "OTHER", label: "OTHER" },
 ] as const;
 
 const SCOPE_OPTIONS = [

@@ -1,4 +1,4 @@
-export type PortType = "SEA" | "AIR" | "INLAND";
+export type PortType = "SEA" | "AIR";
 
 export type PortTypeFilter = "ALL" | PortType;
 

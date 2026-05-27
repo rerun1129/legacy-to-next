@@ -1,10 +1,11 @@
 export type CustomerType =
-  | "FORWARDER"
-  | "SHIPPER"
-  | "CONSIGNEE"
-  | "CARRIER"
-  | "AGENT"
-  | "CUSTOMS_BROKER";
+  | "CUSTOMER"
+  | "PARTNER"
+  | "AIRCARRIER"
+  | "LINER"
+  | "TRUCKER"
+  | "WAREHOUSE"
+  | "OTHER";
 
 export type CustomerTypeFilter = "ALL" | CustomerType;
 

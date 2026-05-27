@@ -14,7 +14,7 @@ import { ResponseParseError } from "../errors";
 
 const BASE = "/api/admin/code/port";
 
-const PORT_TYPE_SCHEMA = z.enum(["SEA", "AIR", "INLAND"]) satisfies z.ZodType<PortType>;
+const PORT_TYPE_SCHEMA = z.enum(["SEA", "AIR"]) satisfies z.ZodType<PortType>;
 
 const PORT_ROW_SCHEMA = z.object({
   id: z.number(),

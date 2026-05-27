@@ -1,11 +1,13 @@
 package com.freightos.admin.application.code.freight.command;
 
+import com.freightos.admin.domain.code.freight.FreightGroup;
+
 public record CreateFreightCommand(
         String freightCode,
         String name,
         String nameEn,
         String description,
         String freightUnit,
-        String freightGroup,
+        FreightGroup freightGroup,
         boolean active
 ) {}

@@ -46,7 +46,6 @@ const DEFAULT_FORM: PortFormValues = {
 const PORT_TYPE_OPTIONS: { value: PortType; label: string }[] = [
   { value: "SEA", label: "SEA" },
   { value: "AIR", label: "AIR" },
-  { value: "INLAND", label: "INLAND" },
 ];
 
 function parseNullable(v: string): string | null {

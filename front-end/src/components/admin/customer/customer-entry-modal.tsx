@@ -43,7 +43,7 @@ interface CustomerFormValues {
 
 const DEFAULT_FORM: CustomerFormValues = {
   customerCode: "",
-  customerType: "FORWARDER",
+  customerType: "CUSTOMER",
   name: "",
   nameEn: "",
   businessNo: "",
@@ -58,12 +58,13 @@ const DEFAULT_FORM: CustomerFormValues = {
 };
 
 const CUSTOMER_TYPE_OPTIONS: { value: CustomerType; label: string }[] = [
-  { value: "FORWARDER", label: "FORWARDER" },
-  { value: "SHIPPER", label: "SHIPPER" },
-  { value: "CONSIGNEE", label: "CONSIGNEE" },
-  { value: "CARRIER", label: "CARRIER" },
-  { value: "AGENT", label: "AGENT" },
-  { value: "CUSTOMS_BROKER", label: "CUSTOMS_BROKER" },
+  { value: "CUSTOMER", label: "CUSTOMER" },
+  { value: "PARTNER", label: "PARTNER" },
+  { value: "AIRCARRIER", label: "AIRCARRIER" },
+  { value: "LINER", label: "LINER" },
+  { value: "TRUCKER", label: "TRUCKER" },
+  { value: "WAREHOUSE", label: "WAREHOUSE" },
+  { value: "OTHER", label: "OTHER" },
 ];
 
 function parseNullable(v: string): string | null {

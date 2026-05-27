@@ -15,12 +15,13 @@ import { ResponseParseError } from "./errors";
 const BASE = "/api/admin/customer";
 
 const CUSTOMER_TYPE_SCHEMA = z.enum([
-  "FORWARDER",
-  "SHIPPER",
-  "CONSIGNEE",
-  "CARRIER",
-  "AGENT",
-  "CUSTOMS_BROKER",
+  "CUSTOMER",
+  "PARTNER",
+  "AIRCARRIER",
+  "LINER",
+  "TRUCKER",
+  "WAREHOUSE",
+  "OTHER",
 ]) satisfies z.ZodType<CustomerType>;
 
 const CUSTOMER_ROW_SCHEMA = z.object({

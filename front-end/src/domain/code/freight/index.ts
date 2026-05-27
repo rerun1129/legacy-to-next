@@ -1,5 +1,7 @@
 export type FreightScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 
+export type FreightGroup = "OTHER" | "FREIGHT" | "SURCHARGE" | "WHARFAGE";
+
 export interface FreightRow {
   id: number;
   freightCode: string;
@@ -7,7 +9,7 @@ export interface FreightRow {
   nameEn: string | null;
   description: string | null;
   freightUnit: string | null;
-  freightGroup: string | null;
+  freightGroup: FreightGroup | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;
@@ -20,7 +22,7 @@ export interface FreightDetail {
   nameEn: string | null;
   description: string | null;
   freightUnit: string | null;
-  freightGroup: string | null;
+  freightGroup: FreightGroup | null;
   active: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -41,7 +43,7 @@ export interface CreateFreightRequestDto {
   nameEn: string | null;
   description: string | null;
   freightUnit: string | null;
-  freightGroup: string | null;
+  freightGroup: FreightGroup | null;
   active: boolean;
 }
 
@@ -50,6 +52,6 @@ export interface UpdateFreightRequestDto {
   nameEn: string | null;
   description: string | null;
   freightUnit: string | null;
-  freightGroup: string | null;
+  freightGroup: FreightGroup | null;
   active: boolean;
 }

@@ -41,9 +41,9 @@ class CustomerServiceTest {
     @Test
     void createCustomer_callsFactoryAndPortSaveReturnsId() {
         CreateCustomerCommand command = new CreateCustomerCommand(
-                "CUS-001", CustomerType.FORWARDER, "테스트 포워더", null,
+                "CUS-001", CustomerType.CUSTOMER, "테스트 포워더", null,
                 null, null, null, null, null, null, null, null, true);
-        Customer domain = Customer.create("CUS-001", CustomerType.FORWARDER, "테스트 포워더",
+        Customer domain = Customer.create("CUS-001", CustomerType.CUSTOMER, "테스트 포워더",
                 null, null, null, null, null, null, null, null, null, true);
         given(customerFactory.from(command)).willReturn(domain);
         given(customerPort.save(domain)).willReturn(10L);
@@ -60,9 +60,9 @@ class CustomerServiceTest {
     @Test
     void createCustomer_duplicateCode_throwsConflict() {
         CreateCustomerCommand command = new CreateCustomerCommand(
-                "CUS-001", CustomerType.FORWARDER, "중복 포워더", null,
+                "CUS-001", CustomerType.CUSTOMER, "중복 포워더", null,
                 null, null, null, null, null, null, null, null, true);
-        Customer domain = Customer.create("CUS-001", CustomerType.FORWARDER, "중복 포워더",
+        Customer domain = Customer.create("CUS-001", CustomerType.CUSTOMER, "중복 포워더",
                 null, null, null, null, null, null, null, null, null, true);
         given(customerFactory.from(command)).willReturn(domain);
         given(customerPort.save(domain)).willThrow(new DataIntegrityViolationException("uq_admin_customer_code"));
@@ -95,7 +95,7 @@ class CustomerServiceTest {
 
     @Test
     void getCustomerById_found_returnsDomain() {
-        Customer domain = Customer.create("CUS-001", CustomerType.FORWARDER, "테스트",
+        Customer domain = Customer.create("CUS-001", CustomerType.CUSTOMER, "테스트",
                 null, null, null, null, null, null, null, null, null, true);
         given(customerPort.findById(1L)).willReturn(Optional.of(domain));
 
@@ -108,10 +108,10 @@ class CustomerServiceTest {
 
     @Test
     void updateCustomer_normal_callsPortUpdate() {
-        Customer existing = Customer.create("CUS-001", CustomerType.FORWARDER, "기존 이름",
+        Customer existing = Customer.create("CUS-001", CustomerType.CUSTOMER, "기존 이름",
                 null, null, null, null, null, null, null, null, null, true);
         UpdateCustomerCommand command = new UpdateCustomerCommand(
-                CustomerType.SHIPPER, "변경 이름", null,
+                CustomerType.PARTNER, "변경 이름", null,
                 null, null, null, null, null, null, null, null, true);
         given(customerPort.findById(1L)).willReturn(Optional.of(existing));
 
@@ -124,11 +124,11 @@ class CustomerServiceTest {
 
     @Test
     void updateCustomer_deletedCustomer_throwsConflict() {
-        Customer deleted = Customer.create("CUS-001", CustomerType.FORWARDER, "삭제된 포워더",
+        Customer deleted = Customer.create("CUS-001", CustomerType.CUSTOMER, "삭제된 포워더",
                 null, null, null, null, null, null, null, null, null, true);
         deleted.assignDeletedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
         UpdateCustomerCommand command = new UpdateCustomerCommand(
-                CustomerType.FORWARDER, "변경 이름", null,
+                CustomerType.CUSTOMER, "변경 이름", null,
                 null, null, null, null, null, null, null, null, true);
         given(customerPort.findById(1L)).willReturn(Optional.of(deleted));
 
@@ -145,7 +145,7 @@ class CustomerServiceTest {
 
     @Test
     void deleteCustomer_normal_callsSoftDelete() {
-        Customer existing = Customer.create("CUS-001", CustomerType.FORWARDER, "테스트",
+        Customer existing = Customer.create("CUS-001", CustomerType.CUSTOMER, "테스트",
                 null, null, null, null, null, null, null, null, null, true);
         given(customerPort.findById(5L)).willReturn(Optional.of(existing));
 
@@ -158,7 +158,7 @@ class CustomerServiceTest {
 
     @Test
     void deleteCustomer_deletedCustomer_throwsConflict() {
-        Customer deleted = Customer.create("CUS-001", CustomerType.FORWARDER, "삭제된 포워더",
+        Customer deleted = Customer.create("CUS-001", CustomerType.CUSTOMER, "삭제된 포워더",
                 null, null, null, null, null, null, null, null, null, true);
         deleted.assignDeletedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
         given(customerPort.findById(5L)).willReturn(Optional.of(deleted));

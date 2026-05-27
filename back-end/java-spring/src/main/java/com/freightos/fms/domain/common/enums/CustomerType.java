@@ -1,4 +1,4 @@
-package com.freightos.admin.domain.customer.entity;
+package com.freightos.fms.domain.common.enums;
 
 public enum CustomerType {
     CUSTOMER,

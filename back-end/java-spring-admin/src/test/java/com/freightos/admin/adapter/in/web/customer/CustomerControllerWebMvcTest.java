@@ -83,7 +83,7 @@ class CustomerControllerWebMvcTest {
     @WithMockUser(authorities = "MENU_ADMIN_CUSTOMER_LIST")
     void search_authenticated_returns200() throws Exception {
         CustomerSummaryResponse summaryResponse = new CustomerSummaryResponse(
-                1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더",
+                1L, "CUS-001", CustomerType.CUSTOMER, "글로벌 포워더",
                 null, null, null, null, null, null, null, null, null,
                 true, null, LocalDateTime.of(2024, 1, 1, 0, 0));
         PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
@@ -109,12 +109,12 @@ class CustomerControllerWebMvcTest {
     @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
     void create_returns201WithLocationAndId() throws Exception {
         given(customerAssembler.toCreateCommand(any())).willReturn(
-                new CreateCustomerCommand("CUS-001", CustomerType.FORWARDER, "테스트 포워더",
+                new CreateCustomerCommand("CUS-001", CustomerType.CUSTOMER, "테스트 포워더",
                         null, null, null, null, null, null, null, null, null, true));
         given(customerUseCase.createCustomer(any())).willReturn(42L);
 
         CreateCustomerRequest req = new CreateCustomerRequest(
-                "CUS-001", CustomerType.FORWARDER, "테스트 포워더",
+                "CUS-001", CustomerType.CUSTOMER, "테스트 포워더",
                 null, null, null, null, null, null, null, null, null, Boolean.TRUE);
 
         mockMvc.perform(post("/api/admin/customer")
@@ -131,7 +131,7 @@ class CustomerControllerWebMvcTest {
     @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
     void create_blankCustomerCode_returns400() throws Exception {
         String body = """
-                {"customerCode":"","customerType":"FORWARDER","name":"테스트","active":true}
+                {"customerCode":"","customerType":"CUSTOMER","name":"테스트","active":true}
                 """;
         mockMvc.perform(post("/api/admin/customer")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +145,7 @@ class CustomerControllerWebMvcTest {
     @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
     void create_blankName_returns400() throws Exception {
         String body = """
-                {"customerCode":"CUS-001","customerType":"FORWARDER","name":"","active":true}
+                {"customerCode":"CUS-001","customerType":"CUSTOMER","name":"","active":true}
                 """;
         mockMvc.perform(post("/api/admin/customer")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +170,7 @@ class CustomerControllerWebMvcTest {
     @WithMockUser(authorities = "MENU_ADMIN_CUSTOMER_LIST")
     void getById_returns200WithDetail() throws Exception {
         CustomerDetailResponse detail = new CustomerDetailResponse(
-                1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더", "Global Forwarder",
+                1L, "CUS-001", CustomerType.CUSTOMER, "글로벌 포워더", "Global Forwarder",
                 null, null, null, null, null, null, null, null, true, null,
                 LocalDateTime.of(2024, 1, 1, 0, 0),
                 LocalDateTime.of(2024, 1, 2, 0, 0),
@@ -183,7 +183,7 @@ class CustomerControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.customerCode").value("CUS-001"))
-                .andExpect(jsonPath("$.data.customerType").value("FORWARDER"));
+                .andExpect(jsonPath("$.data.customerType").value("CUSTOMER"));
     }
 
     // ── @PreAuthorize: MENU_ADMIN_CUSTOMER_LIST authority → 200 ─────────────

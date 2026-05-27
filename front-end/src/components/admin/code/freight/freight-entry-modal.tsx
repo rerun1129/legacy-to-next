@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import type { Control } from "react-hook-form";
+import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
@@ -10,7 +12,7 @@ import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { freightUseCases } from "@/application/code/freight/use-cases";
 import { CodeBox } from "@/components/shared/inputs/code-box";
-import type { CreateFreightRequestDto, UpdateFreightRequestDto } from "@/domain/code/freight";
+import type { CreateFreightRequestDto, UpdateFreightRequestDto, FreightGroup } from "@/domain/code/freight";
 
 export interface EntryModalState {
   mode: "create" | "edit";
@@ -29,7 +31,7 @@ interface FreightFormValues {
   nameEn: string;
   description: string;
   freightUnit: string;
-  freightGroup: string;
+  freightGroup: FreightGroup | "";
   active: boolean;
 }
 
@@ -43,19 +45,30 @@ const DEFAULT_FORM: FreightFormValues = {
   active: true,
 };
 
+const FREIGHT_GROUP_OPTIONS: { value: FreightGroup | ""; label: string }[] = [
+  { value: "", label: "—" },
+  { value: "OTHER", label: "OTHER" },
+  { value: "FREIGHT", label: "FREIGHT" },
+  { value: "SURCHARGE", label: "SURCHARGE" },
+  { value: "WHARFAGE", label: "WHARFAGE" },
+];
+
 function parseNullable(v: string): string | null {
   return v.trim() === "" ? null : v.trim();
 }
 
-function FreightFormFields({
-  register,
-  isEdit,
-  isReadOnly,
-}: {
+function parseFreightGroup(v: FreightGroup | ""): FreightGroup | null {
+  return v === "" ? null : v;
+}
+
+interface FormFieldsProps {
   register: ReturnType<typeof useForm<FreightFormValues>>["register"];
+  control: Control<FreightFormValues>;
   isEdit: boolean;
   isReadOnly: boolean;
-}) {
+}
+
+function FreightFormFields({ register, control, isEdit, isReadOnly }: FormFieldsProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <CodeBox
@@ -110,12 +123,18 @@ function FreightFormFields({
       </div>
       <div className="lcn">
         <span className="lcn__label">Freight Group</span>
-        <input
-          className="box-panel"
-          placeholder="Freight Group (max 50)"
-          maxLength={50}
-          readOnly={isReadOnly}
-          {...register("freightGroup")}
+        <Controller
+          name="freightGroup"
+          control={control}
+          render={({ field }) => (
+            <ComboBox
+              variant="panel"
+              options={FREIGHT_GROUP_OPTIONS}
+              value={field.value}
+              onChange={field.onChange}
+              disabled={isReadOnly}
+            />
+          )}
         />
       </div>
       <div className="lcn">
@@ -133,7 +152,7 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
   const form = useForm<FreightFormValues>({ defaultValues: DEFAULT_FORM });
-  const { register, reset, getValues, formState: { isSubmitting } } = form;
+  const { register, reset, getValues, control, formState: { isSubmitting } } = form;
 
   const { data: detail, isLoading: isDetailLoading } = useQuery({
     queryKey: ["admin-code-freight", "detail", state?.id],
@@ -196,7 +215,7 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
         nameEn: parseNullable(values.nameEn),
         description: parseNullable(values.description),
         freightUnit: parseNullable(values.freightUnit),
-        freightGroup: parseNullable(values.freightGroup),
+        freightGroup: parseFreightGroup(values.freightGroup),
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
@@ -207,7 +226,7 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
         nameEn: parseNullable(values.nameEn),
         description: parseNullable(values.description),
         freightUnit: parseNullable(values.freightUnit),
-        freightGroup: parseNullable(values.freightGroup),
+        freightGroup: parseFreightGroup(values.freightGroup),
         active: values.active,
       };
       createMutation.mutate(req);
@@ -255,7 +274,7 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
               Deleted freight (deleted at: {detail?.deletedAt ?? "—"}). Read only.
             </div>
           )}
-          <FreightFormFields register={register} isEdit={isEdit} isReadOnly={isReadOnly} />
+          <FreightFormFields register={register} control={control} isEdit={isEdit} isReadOnly={isReadOnly} />
         </form>
       )}
       <div className="modal__footer">

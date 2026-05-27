@@ -1,5 +1,7 @@
 package com.freightos.admin.adapter.in.web.code.freight.dto;
 
+import com.freightos.admin.domain.code.freight.FreightGroup;
+
 import java.time.LocalDateTime;
 
 public record FreightSummaryResponse(
@@ -9,7 +11,7 @@ public record FreightSummaryResponse(
         String nameEn,
         String description,
         String freightUnit,
-        String freightGroup,
+        FreightGroup freightGroup,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime updatedAt

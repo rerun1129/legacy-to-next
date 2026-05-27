@@ -1,6 +1,7 @@
 package com.freightos.admin.domain.code.freight.entity;
 
 import com.freightos.admin.common.entity.BaseEntity;
+import com.freightos.admin.domain.code.freight.FreightGroup;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -13,11 +14,11 @@ public class Freight extends BaseEntity {
     private String nameEn;
     private String description;
     private String freightUnit;
-    private String freightGroup;
+    private FreightGroup freightGroup;
     private boolean active;
     private LocalDateTime deletedAt;
 
-    private Freight(String freightCode, String name, String nameEn, String description, String freightUnit, String freightGroup, boolean active) {
+    private Freight(String freightCode, String name, String nameEn, String description, String freightUnit, FreightGroup freightGroup, boolean active) {
         this.freightCode  = freightCode;
         this.name         = name;
         this.nameEn       = nameEn;
@@ -28,14 +29,14 @@ public class Freight extends BaseEntity {
         this.deletedAt    = null;
     }
 
-    public static Freight create(String freightCode, String name, String nameEn, String description, String freightUnit, String freightGroup, boolean active) {
+    public static Freight create(String freightCode, String name, String nameEn, String description, String freightUnit, FreightGroup freightGroup, boolean active) {
         return new Freight(freightCode, name, nameEn, description, freightUnit, freightGroup, active);
     }
 
     /**
      * 수정 가능한 필드만 갱신. 식별 필드(freightCode)는 변경 불가.
      */
-    public void applyUpdate(String name, String nameEn, String description, String freightUnit, String freightGroup, boolean active) {
+    public void applyUpdate(String name, String nameEn, String description, String freightUnit, FreightGroup freightGroup, boolean active) {
         this.name         = name;
         this.nameEn       = nameEn;
         this.description  = description;

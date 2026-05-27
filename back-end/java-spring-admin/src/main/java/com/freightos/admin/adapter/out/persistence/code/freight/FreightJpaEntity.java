@@ -1,8 +1,11 @@
 package com.freightos.admin.adapter.out.persistence.code.freight;
 
 import com.freightos.admin.common.persistence.BaseJpaEntity;
+import com.freightos.admin.domain.code.freight.FreightGroup;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,8 +43,9 @@ public class FreightJpaEntity extends BaseJpaEntity {
     @Column(name = "freight_unit", length = 10)
     private String freightUnit;
 
-    @Column(name = "freight_group", length = 50)
-    private String freightGroup;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "freight_group", length = 20)
+    private FreightGroup freightGroup;
 
     @Column(name = "active", nullable = false)
     private Boolean active;
