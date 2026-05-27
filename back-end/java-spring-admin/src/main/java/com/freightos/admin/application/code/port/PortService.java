@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.port;
 
 import com.freightos.admin.application.code.port.command.CreatePortCommand;
+import com.freightos.admin.application.code.port.command.SavePortChangesCommand;
 import com.freightos.admin.application.code.port.command.SearchPortCommand;
 import com.freightos.admin.application.code.port.command.UpdatePortCommand;
 import com.freightos.admin.application.code.port.port.in.PortUseCase;
 import com.freightos.admin.application.code.port.port.out.PortPort;
 import com.freightos.admin.application.code.port.projection.PortSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.port.entity.Port;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +76,29 @@ public class PortService implements PortUseCase {
         for (Long id : ids) {
             deletePort(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult savePortChanges(SavePortChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deletePort(id);
+        }
+        for (SavePortChangesCommand.UpdateEntry entry : command.updates()) {
+            updatePort(entry.id(), entry.command());
+        }
+        for (CreatePortCommand create : command.creates()) {
+            createPort(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompletePorts(String query, int limit) {
+        return portPort.autocomplete(query, limit);
     }
 }

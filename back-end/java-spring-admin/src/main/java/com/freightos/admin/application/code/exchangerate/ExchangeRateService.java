@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.exchangerate;
 
 import com.freightos.admin.application.code.exchangerate.command.CreateExchangeRateCommand;
+import com.freightos.admin.application.code.exchangerate.command.SaveExchangeRateChangesCommand;
 import com.freightos.admin.application.code.exchangerate.command.SearchExchangeRateCommand;
 import com.freightos.admin.application.code.exchangerate.command.UpdateExchangeRateCommand;
 import com.freightos.admin.application.code.exchangerate.port.in.ExchangeRateUseCase;
 import com.freightos.admin.application.code.exchangerate.port.out.ExchangeRatePort;
 import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.exchangerate.entity.ExchangeRate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -75,5 +78,29 @@ public class ExchangeRateService implements ExchangeRateUseCase {
         for (Long id : ids) {
             deleteExchangeRate(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveExchangeRateChanges(SaveExchangeRateChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteExchangeRate(id);
+        }
+        for (SaveExchangeRateChangesCommand.UpdateEntry entry : command.updates()) {
+            updateExchangeRate(entry.id(), entry.command());
+        }
+        for (CreateExchangeRateCommand create : command.creates()) {
+            createExchangeRate(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteExchangeRates(String query, int limit) {
+        return exchangeRatePort.autocomplete(query, limit);
     }
 }

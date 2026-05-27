@@ -4,6 +4,7 @@ import com.freightos.admin.application.code.hscode.command.SearchHsCodeCommand;
 import com.freightos.admin.application.code.hscode.port.out.HsCodePort;
 import com.freightos.admin.application.code.hscode.projection.HsCodeSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.hscode.entity.HsCode;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class HsCodePersistenceAdapter implements HsCodePort {
                 .orElseThrow(() -> ApplicationException.notFound("HS_CODE_NOT_FOUND", MessageCode.HS_CODE_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return hsCodeRepository.autocomplete(query, limit);
     }
 }

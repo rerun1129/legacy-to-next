@@ -4,7 +4,6 @@ import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { CustomerFilter } from "@/domain/customer";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
-import { CodeBox } from "@/components/shared/inputs/code-box";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
@@ -37,7 +36,14 @@ export function CustomerListFilter({ form }: Props) {
     <div className="search-card">
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-          <CodeBox kind="code-only" label="Customer Code" onLookup={() => {}} codeProps={{ placeholder: "Customer Code", ...register("customerCode") }} />
+          <div className="lcn">
+            <span className="lcn__label">Customer Code</span>
+            <input
+              className="box-panel"
+              placeholder="Customer Code"
+              {...register("customerCode")}
+            />
+          </div>
           <div className="lcn">
             <span className="lcn__label">Customer Name</span>
             <input

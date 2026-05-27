@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.code.carrier;
 import com.freightos.admin.adapter.in.web.code.carrier.dto.CarrierDetailResponse;
 import com.freightos.admin.adapter.in.web.code.carrier.dto.CarrierSummaryResponse;
 import com.freightos.admin.adapter.in.web.code.carrier.dto.CreateCarrierRequest;
+import com.freightos.admin.adapter.in.web.code.carrier.dto.SaveCarrierChangesRequest;
 import com.freightos.admin.adapter.in.web.code.carrier.dto.SearchCarrierRequest;
 import com.freightos.admin.adapter.in.web.code.carrier.dto.UpdateCarrierRequest;
 import com.freightos.admin.application.code.carrier.command.CreateCarrierCommand;
+import com.freightos.admin.application.code.carrier.command.SaveCarrierChangesCommand;
 import com.freightos.admin.application.code.carrier.command.SearchCarrierCommand;
 import com.freightos.admin.application.code.carrier.command.UpdateCarrierCommand;
 import com.freightos.admin.application.code.carrier.projection.CarrierSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.carrier.entity.Carrier;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class CarrierAssembler {
@@ -44,5 +48,16 @@ public class CarrierAssembler {
 
     public PagedResult<CarrierSummaryResponse> toSummaryPage(PagedResult<CarrierSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveCarrierChangesCommand toSaveChangesCommand(SaveCarrierChangesRequest req) {
+        List<CreateCarrierCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveCarrierChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveCarrierChangesCommand.UpdateEntry(u.id(), new UpdateCarrierCommand(u.name(), u.nameEn(), u.carrierType(), u.carrierAddress(), u.ediCode(), u.active())))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SaveCarrierChangesCommand(creates, updates, deleteIds);
     }
 }

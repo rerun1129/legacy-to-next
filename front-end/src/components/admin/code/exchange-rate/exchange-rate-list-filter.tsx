@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import type { ExchangeRateFilter } from "@/domain/code/exchange-rate";
+import { exchangeRateUseCases } from "@/application/code/exchange-rate/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
+import { CodeBox } from "@/components/shared/inputs/code-box";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
@@ -19,28 +24,53 @@ const SCOPE_OPTIONS = [
 
 export function ExchangeRateListFilter({ form }: Props) {
   useListFilterSync(form, "/admin/code/exchange-rate/list");
-  const { register } = form;
+  const { register, setValue } = form;
+
+  const [fromAcQuery, setFromAcQuery] = useState("");
+  const [toAcQuery, setToAcQuery] = useState("");
+
+  const { data: fromSuggestions = [] } = useQuery({
+    queryKey: ["admin-code-exchange-rate", "autocomplete", "from", fromAcQuery],
+    queryFn: () => exchangeRateUseCases.autocomplete(fromAcQuery),
+    enabled: fromAcQuery.length >= 1,
+    staleTime: 30_000,
+  });
+
+  const { data: toSuggestions = [] } = useQuery({
+    queryKey: ["admin-code-exchange-rate", "autocomplete", "to", toAcQuery],
+    queryFn: () => exchangeRateUseCases.autocomplete(toAcQuery),
+    enabled: toAcQuery.length >= 1,
+    staleTime: 30_000,
+  });
+
+  function handleFromSelect(item: CodeBoxSuggestion) {
+    setValue("fromCurrencyCode", item.code);
+  }
+
+  function handleToSelect(item: CodeBoxSuggestion) {
+    setValue("toCurrencyCode", item.code);
+  }
 
   return (
     <div className="search-card">
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-          <div className="lcn">
-            <span className="lcn__label">From Currency</span>
-            <input
-              className="box-panel"
-              placeholder="e.g. USD"
-              {...register("fromCurrencyCode")}
-            />
-          </div>
-          <div className="lcn">
-            <span className="lcn__label">To Currency</span>
-            <input
-              className="box-panel"
-              placeholder="e.g. KRW"
-              {...register("toCurrencyCode")}
-            />
-          </div>
+          <CodeBox
+            kind="code-only"
+            label="From Currency"
+            onSearch={setFromAcQuery}
+            suggestions={fromSuggestions}
+            onSelect={handleFromSelect}
+            codeProps={{ placeholder: "e.g. USD", ...register("fromCurrencyCode") }}
+          />
+          <CodeBox
+            kind="code-only"
+            label="To Currency"
+            onSearch={setToAcQuery}
+            suggestions={toSuggestions}
+            onSelect={handleToSelect}
+            codeProps={{ placeholder: "e.g. KRW", ...register("toCurrencyCode") }}
+          />
           <div className="lcn">
             <span className="lcn__label">Name</span>
             <input

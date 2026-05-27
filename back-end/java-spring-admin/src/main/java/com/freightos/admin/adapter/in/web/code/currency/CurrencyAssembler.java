@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.code.currency;
 import com.freightos.admin.adapter.in.web.code.currency.dto.CreateCurrencyRequest;
 import com.freightos.admin.adapter.in.web.code.currency.dto.CurrencyDetailResponse;
 import com.freightos.admin.adapter.in.web.code.currency.dto.CurrencySummaryResponse;
+import com.freightos.admin.adapter.in.web.code.currency.dto.SaveCurrencyChangesRequest;
 import com.freightos.admin.adapter.in.web.code.currency.dto.SearchCurrencyRequest;
 import com.freightos.admin.adapter.in.web.code.currency.dto.UpdateCurrencyRequest;
 import com.freightos.admin.application.code.currency.command.CreateCurrencyCommand;
+import com.freightos.admin.application.code.currency.command.SaveCurrencyChangesCommand;
 import com.freightos.admin.application.code.currency.command.SearchCurrencyCommand;
 import com.freightos.admin.application.code.currency.command.UpdateCurrencyCommand;
 import com.freightos.admin.application.code.currency.projection.CurrencySummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.currency.entity.Currency;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class CurrencyAssembler {
@@ -43,5 +47,16 @@ public class CurrencyAssembler {
 
     public PagedResult<CurrencySummaryResponse> toSummaryPage(PagedResult<CurrencySummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveCurrencyChangesCommand toSaveChangesCommand(SaveCurrencyChangesRequest req) {
+        List<CreateCurrencyCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveCurrencyChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveCurrencyChangesCommand.UpdateEntry(u.id(), new UpdateCurrencyCommand(u.name(), u.nameEn(), u.symbol(), u.currencyUnit(), u.active())))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SaveCurrencyChangesCommand(creates, updates, deleteIds);
     }
 }

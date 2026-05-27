@@ -4,7 +4,10 @@ import type {
   PortFilter,
   CreatePortRequestDto,
   UpdatePortRequestDto,
+  SavePortChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/port";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface PortPageResult {
   content: PortRow[];
@@ -21,4 +24,6 @@ export interface PortPort {
   update(id: number, req: UpdatePortRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SavePortChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

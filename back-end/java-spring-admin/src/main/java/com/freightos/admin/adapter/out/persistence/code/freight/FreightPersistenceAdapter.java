@@ -4,6 +4,7 @@ import com.freightos.admin.application.code.freight.command.SearchFreightCommand
 import com.freightos.admin.application.code.freight.port.out.FreightPort;
 import com.freightos.admin.application.code.freight.projection.FreightSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.freight.entity.Freight;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class FreightPersistenceAdapter implements FreightPort {
                 .orElseThrow(() -> ApplicationException.notFound("FREIGHT_NOT_FOUND", MessageCode.FREIGHT_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return freightRepository.autocomplete(query, limit);
     }
 }

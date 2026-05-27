@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.code.freight;
 import com.freightos.admin.adapter.in.web.code.freight.dto.CreateFreightRequest;
 import com.freightos.admin.adapter.in.web.code.freight.dto.FreightDetailResponse;
 import com.freightos.admin.adapter.in.web.code.freight.dto.FreightSummaryResponse;
+import com.freightos.admin.adapter.in.web.code.freight.dto.SaveFreightChangesRequest;
 import com.freightos.admin.adapter.in.web.code.freight.dto.SearchFreightRequest;
 import com.freightos.admin.adapter.in.web.code.freight.dto.UpdateFreightRequest;
 import com.freightos.admin.application.code.freight.command.CreateFreightCommand;
+import com.freightos.admin.application.code.freight.command.SaveFreightChangesCommand;
 import com.freightos.admin.application.code.freight.command.SearchFreightCommand;
 import com.freightos.admin.application.code.freight.command.UpdateFreightCommand;
 import com.freightos.admin.application.code.freight.projection.FreightSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.freight.entity.Freight;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class FreightAssembler {
@@ -44,5 +48,16 @@ public class FreightAssembler {
 
     public PagedResult<FreightSummaryResponse> toSummaryPage(PagedResult<FreightSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveFreightChangesCommand toSaveChangesCommand(SaveFreightChangesRequest req) {
+        List<CreateFreightCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveFreightChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveFreightChangesCommand.UpdateEntry(u.id(), new UpdateFreightCommand(u.name(), u.nameEn(), u.description(), u.freightUnit(), u.freightGroup(), u.active())))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SaveFreightChangesCommand(creates, updates, deleteIds);
     }
 }

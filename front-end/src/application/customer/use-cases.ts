@@ -1,5 +1,5 @@
 import { customerPort } from "@/lib/ports";
-import type { CustomerFilter, CreateCustomerRequestDto, UpdateCustomerRequestDto } from "@/domain/customer";
+import type { CustomerFilter, CreateCustomerRequestDto, UpdateCustomerRequestDto, SaveCustomerChangesRequestDto } from "@/domain/customer";
 
 export const customerUseCases = {
   search: (filter: CustomerFilter, page: number, size?: number) => customerPort.search(filter, page, size),
@@ -8,4 +8,5 @@ export const customerUseCases = {
   update: (id: number, req: UpdateCustomerRequestDto) => customerPort.update(id, req),
   delete: (id: number) => customerPort.delete(id),
   deleteMany: (ids: number[]) => customerPort.deleteMany(ids),
+  saveChanges: (req: SaveCustomerChangesRequestDto) => customerPort.saveChanges(req),
 };

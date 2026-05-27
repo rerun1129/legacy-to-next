@@ -1,14 +1,17 @@
 package com.freightos.admin.application.customer;
 
 import com.freightos.admin.application.customer.command.CreateCustomerCommand;
+import com.freightos.admin.application.customer.command.SaveCustomerChangesCommand;
 import com.freightos.admin.application.customer.command.SearchCustomerCommand;
 import com.freightos.admin.application.customer.command.UpdateCustomerCommand;
 import com.freightos.admin.application.customer.port.in.CustomerUseCase;
 import com.freightos.admin.application.customer.port.out.CustomerPort;
 import com.freightos.admin.application.customer.projection.CustomerSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.customer.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -77,5 +80,29 @@ public class CustomerService implements CustomerUseCase {
         for (Long id : ids) {
             deleteCustomer(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveCustomerChanges(SaveCustomerChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteCustomer(id);
+        }
+        for (SaveCustomerChangesCommand.UpdateEntry entry : command.updates()) {
+            updateCustomer(entry.id(), entry.command());
+        }
+        for (CreateCustomerCommand create : command.creates()) {
+            createCustomer(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteCustomers(String query, int limit) {
+        return customerPort.autocomplete(query, limit);
     }
 }

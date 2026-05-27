@@ -55,3 +55,24 @@ export interface UpdatePortRequestDto {
   countryCode: string;
   active: boolean;
 }
+
+export interface UpdatePortItemDto {
+  id: number;
+  portType: PortType;
+  name: string;
+  nameEn: string | null;
+  countryCode: string;
+  active: boolean;
+}
+
+export interface SavePortChangesRequestDto {
+  creates: CreatePortRequestDto[];
+  updates: UpdatePortItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

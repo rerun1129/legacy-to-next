@@ -4,7 +4,10 @@ import type {
   CarrierFilter,
   CreateCarrierRequestDto,
   UpdateCarrierRequestDto,
+  SaveCarrierChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/carrier";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface CarrierPageResult {
   content: CarrierRow[];
@@ -21,4 +24,6 @@ export interface CarrierPort {
   update(id: number, req: UpdateCarrierRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveCarrierChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

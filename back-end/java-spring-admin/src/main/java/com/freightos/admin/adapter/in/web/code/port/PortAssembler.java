@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.code.port;
 import com.freightos.admin.adapter.in.web.code.port.dto.CreatePortRequest;
 import com.freightos.admin.adapter.in.web.code.port.dto.PortDetailResponse;
 import com.freightos.admin.adapter.in.web.code.port.dto.PortSummaryResponse;
+import com.freightos.admin.adapter.in.web.code.port.dto.SavePortChangesRequest;
 import com.freightos.admin.adapter.in.web.code.port.dto.SearchPortRequest;
 import com.freightos.admin.adapter.in.web.code.port.dto.UpdatePortRequest;
 import com.freightos.admin.application.code.port.command.CreatePortCommand;
+import com.freightos.admin.application.code.port.command.SavePortChangesCommand;
 import com.freightos.admin.application.code.port.command.SearchPortCommand;
 import com.freightos.admin.application.code.port.command.UpdatePortCommand;
 import com.freightos.admin.application.code.port.projection.PortSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.port.entity.Port;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class PortAssembler {
@@ -43,5 +47,16 @@ public class PortAssembler {
 
     public PagedResult<PortSummaryResponse> toSummaryPage(PagedResult<PortSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SavePortChangesCommand toSaveChangesCommand(SavePortChangesRequest req) {
+        List<CreatePortCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SavePortChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SavePortChangesCommand.UpdateEntry(u.id(), new UpdatePortCommand(u.name(), u.nameEn(), u.countryCode(), u.portType(), u.active())))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SavePortChangesCommand(creates, updates, deleteIds);
     }
 }

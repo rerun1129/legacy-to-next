@@ -51,12 +51,16 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/admin/cms/notice/list": "공지사항 List",
 };
 
+const SKIP_SEGMENTS = new Set(["admin", "code", "fms", "cms", "access"]);
+
 export function inferLabelFromPath(pathname: string): string {
   if (PATH_LABEL_MAP[pathname]) return PATH_LABEL_MAP[pathname];
-  // Fallback: last path segment, capitalized
   const segments = pathname.split("/").filter(Boolean);
-  const last = segments[segments.length - 1] ?? "Page";
-  return last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, " ");
+  const meaningful = segments.filter((s) => !SKIP_SEGMENTS.has(s));
+  if (meaningful.length === 0) return "Page";
+  return meaningful
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, " "))
+    .join(" ");
 }
 
 export const useTabs = create<TabStore>((set, get) => ({

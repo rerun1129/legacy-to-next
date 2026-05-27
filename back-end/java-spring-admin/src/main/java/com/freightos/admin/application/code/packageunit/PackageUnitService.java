@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.packageunit;
 
 import com.freightos.admin.application.code.packageunit.command.CreatePackageUnitCommand;
+import com.freightos.admin.application.code.packageunit.command.SavePackageUnitChangesCommand;
 import com.freightos.admin.application.code.packageunit.command.SearchPackageUnitCommand;
 import com.freightos.admin.application.code.packageunit.command.UpdatePackageUnitCommand;
 import com.freightos.admin.application.code.packageunit.port.in.PackageUnitUseCase;
 import com.freightos.admin.application.code.packageunit.port.out.PackageUnitPort;
 import com.freightos.admin.application.code.packageunit.projection.PackageUnitSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.packageunit.entity.PackageUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +76,29 @@ public class PackageUnitService implements PackageUnitUseCase {
         for (Long id : ids) {
             deletePackageUnit(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult savePackageUnitChanges(SavePackageUnitChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deletePackageUnit(id);
+        }
+        for (SavePackageUnitChangesCommand.UpdateEntry entry : command.updates()) {
+            updatePackageUnit(entry.id(), entry.command());
+        }
+        for (CreatePackageUnitCommand create : command.creates()) {
+            createPackageUnit(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompletePackageUnits(String query, int limit) {
+        return packageUnitPort.autocomplete(query, limit);
     }
 }

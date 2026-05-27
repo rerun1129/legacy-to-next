@@ -4,6 +4,7 @@ import com.freightos.admin.application.customer.command.SearchCustomerCommand;
 import com.freightos.admin.application.customer.port.out.CustomerPort;
 import com.freightos.admin.application.customer.projection.CustomerSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.customer.entity.Customer;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class CustomerPersistenceAdapter implements CustomerPort {
                 .orElseThrow(() -> ApplicationException.notFound("CUSTOMER_NOT_FOUND", MessageCode.CUSTOMER_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return customerRepository.autocomplete(query, limit);
     }
 }

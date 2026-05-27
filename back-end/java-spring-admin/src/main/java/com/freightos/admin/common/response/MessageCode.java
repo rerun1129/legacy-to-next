@@ -124,7 +124,15 @@ public enum MessageCode {
     COUNTRY_NOT_FOUND("국가를 찾을 수 없습니다."),
     COUNTRY_DUPLICATE_CODE("동일한 국가 코드가 이미 존재합니다."),
     COUNTRY_ALREADY_DELETED("이미 삭제된 국가입니다."),
-    COUNTRY_SAVE_CHANGES("국가 일괄 저장이 완료되었습니다.");
+    COUNTRY_SAVE_CHANGES("국가 일괄 저장이 완료되었습니다."),
+    PACKAGE_UNIT_SAVE_CHANGES("포장 단위 일괄 저장이 완료되었습니다."),
+    HS_CODE_SAVE_CHANGES("HS Code 일괄 저장이 완료되었습니다."),
+    CURRENCY_SAVE_CHANGES("통화 일괄 저장이 완료되었습니다."),
+    CARRIER_SAVE_CHANGES("선사 일괄 저장이 완료되었습니다."),
+    PORT_SAVE_CHANGES("항구 일괄 저장이 완료되었습니다."),
+    FREIGHT_SAVE_CHANGES("운임 일괄 저장이 완료되었습니다."),
+    EXCHANGE_RATE_SAVE_CHANGES("환율 일괄 저장이 완료되었습니다."),
+    CUSTOMER_SAVE_CHANGES("고객 일괄 저장이 완료되었습니다.");
 
     private final String message;
 

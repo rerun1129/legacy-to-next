@@ -4,7 +4,10 @@ import type {
   PackageUnitFilter,
   CreatePackageUnitRequestDto,
   UpdatePackageUnitRequestDto,
+  SavePackageUnitChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/package-unit";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface PackageUnitPageResult {
   content: PackageUnitRow[];
@@ -21,4 +24,6 @@ export interface PackageUnitPort {
   update(id: number, req: UpdatePackageUnitRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SavePackageUnitChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

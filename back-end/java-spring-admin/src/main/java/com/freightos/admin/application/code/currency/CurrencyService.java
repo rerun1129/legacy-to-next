@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.currency;
 
 import com.freightos.admin.application.code.currency.command.CreateCurrencyCommand;
+import com.freightos.admin.application.code.currency.command.SaveCurrencyChangesCommand;
 import com.freightos.admin.application.code.currency.command.SearchCurrencyCommand;
 import com.freightos.admin.application.code.currency.command.UpdateCurrencyCommand;
 import com.freightos.admin.application.code.currency.port.in.CurrencyUseCase;
 import com.freightos.admin.application.code.currency.port.out.CurrencyPort;
 import com.freightos.admin.application.code.currency.projection.CurrencySummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.currency.entity.Currency;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +76,29 @@ public class CurrencyService implements CurrencyUseCase {
         for (Long id : ids) {
             deleteCurrency(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveCurrencyChanges(SaveCurrencyChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteCurrency(id);
+        }
+        for (SaveCurrencyChangesCommand.UpdateEntry entry : command.updates()) {
+            updateCurrency(entry.id(), entry.command());
+        }
+        for (CreateCurrencyCommand create : command.creates()) {
+            createCurrency(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteCurrencies(String query, int limit) {
+        return currencyPort.autocomplete(query, limit);
     }
 }

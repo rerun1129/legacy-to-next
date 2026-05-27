@@ -8,6 +8,8 @@ import type {
   CustomerScope,
   CreateCustomerRequestDto,
   UpdateCustomerRequestDto,
+  SaveCustomerChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/customer";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
@@ -77,6 +79,12 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     size: z.number(),
   });
 
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+});
+
 function scopeForBackend(scope: CustomerScope): CustomerScope {
   return scope;
 }
@@ -141,5 +149,15 @@ export const API_CUSTOMER_PORT: CustomerPort = {
       method: "DELETE",
       body: JSON.stringify({ ids }),
     });
+  },
+
+  async saveChanges(req: SaveCustomerChangesRequestDto): Promise<SaveChangesResultDto> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid customer save-changes response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
 };

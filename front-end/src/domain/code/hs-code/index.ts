@@ -45,3 +45,23 @@ export interface UpdateHsCodeRequestDto {
   countryCode: string | null;
   active: boolean;
 }
+
+export interface UpdateHsCodeItemDto {
+  id: number;
+  name: string;
+  nameEn: string | null;
+  countryCode: string | null;
+  active: boolean;
+}
+
+export interface SaveHsCodeChangesRequestDto {
+  creates: CreateHsCodeRequestDto[];
+  updates: UpdateHsCodeItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

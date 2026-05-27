@@ -4,6 +4,7 @@ import com.freightos.admin.application.code.packageunit.command.SearchPackageUni
 import com.freightos.admin.application.code.packageunit.port.out.PackageUnitPort;
 import com.freightos.admin.application.code.packageunit.projection.PackageUnitSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.packageunit.entity.PackageUnit;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class PackageUnitPersistenceAdapter implements PackageUnitPort {
                 .orElseThrow(() -> ApplicationException.notFound("PACKAGE_UNIT_NOT_FOUND", MessageCode.PACKAGE_UNIT_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return packageUnitRepository.autocomplete(query, limit);
     }
 }

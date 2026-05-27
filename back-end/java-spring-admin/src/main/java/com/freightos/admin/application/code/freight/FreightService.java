@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.freight;
 
 import com.freightos.admin.application.code.freight.command.CreateFreightCommand;
+import com.freightos.admin.application.code.freight.command.SaveFreightChangesCommand;
 import com.freightos.admin.application.code.freight.command.SearchFreightCommand;
 import com.freightos.admin.application.code.freight.command.UpdateFreightCommand;
 import com.freightos.admin.application.code.freight.port.in.FreightUseCase;
 import com.freightos.admin.application.code.freight.port.out.FreightPort;
 import com.freightos.admin.application.code.freight.projection.FreightSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.freight.entity.Freight;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +76,29 @@ public class FreightService implements FreightUseCase {
         for (Long id : ids) {
             deleteFreight(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveFreightChanges(SaveFreightChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteFreight(id);
+        }
+        for (SaveFreightChangesCommand.UpdateEntry entry : command.updates()) {
+            updateFreight(entry.id(), entry.command());
+        }
+        for (CreateFreightCommand create : command.creates()) {
+            createFreight(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteFreights(String query, int limit) {
+        return freightPort.autocomplete(query, limit);
     }
 }

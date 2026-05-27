@@ -49,3 +49,24 @@ export interface UpdateCurrencyRequestDto {
   currencyUnit: number | null;
   active: boolean;
 }
+
+export interface UpdateCurrencyItemDto {
+  id: number;
+  name: string;
+  nameEn: string | null;
+  symbol: string | null;
+  currencyUnit: number | null;
+  active: boolean;
+}
+
+export interface SaveCurrencyChangesRequestDto {
+  creates: CreateCurrencyRequestDto[];
+  updates: UpdateCurrencyItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

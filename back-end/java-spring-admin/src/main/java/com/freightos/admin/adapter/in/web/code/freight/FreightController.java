@@ -3,16 +3,21 @@ package com.freightos.admin.adapter.in.web.code.freight;
 import com.freightos.admin.adapter.in.web.code.freight.dto.CreateFreightRequest;
 import com.freightos.admin.adapter.in.web.code.freight.dto.FreightDetailResponse;
 import com.freightos.admin.adapter.in.web.code.freight.dto.FreightSummaryResponse;
+import com.freightos.admin.adapter.in.web.code.freight.dto.SaveFreightChangesRequest;
 import com.freightos.admin.adapter.in.web.code.freight.dto.SearchFreightRequest;
 import com.freightos.admin.adapter.in.web.code.freight.dto.UpdateFreightRequest;
 import com.freightos.admin.application.code.freight.port.in.FreightUseCase;
 import com.freightos.admin.application.code.freight.projection.FreightSummary;
 import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.freight.entity.Freight;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,10 +29,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -86,5 +93,21 @@ public class FreightController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         freightUseCase.deleteFreights(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.FREIGHT_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_CREATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveFreightChangesRequest req) {
+        SaveChangesResult result = freightUseCase.saveFreightChanges(freightAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.FREIGHT_SAVE_CHANGES.getMessage()));
+    }
+
+    @GetMapping("/autocomplete")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_FREIGHT')")
+    public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
+        return ResponseEntity.ok(ApiResponse.of(freightUseCase.autocompleteFreights(q, limit)));
     }
 }

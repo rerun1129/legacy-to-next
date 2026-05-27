@@ -4,6 +4,8 @@ import type {
   CustomerFilter,
   CreateCustomerRequestDto,
   UpdateCustomerRequestDto,
+  SaveCustomerChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/customer";
 
 export interface CustomerPageResult {
@@ -21,4 +23,5 @@ export interface CustomerPort {
   update(id: number, req: UpdateCustomerRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveCustomerChangesRequestDto): Promise<SaveChangesResultDto>;
 }

@@ -4,6 +4,7 @@ import com.freightos.admin.application.code.carrier.command.SearchCarrierCommand
 import com.freightos.admin.application.code.carrier.port.out.CarrierPort;
 import com.freightos.admin.application.code.carrier.projection.CarrierSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.carrier.entity.Carrier;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class CarrierPersistenceAdapter implements CarrierPort {
                 .orElseThrow(() -> ApplicationException.notFound("CARRIER_NOT_FOUND", MessageCode.CARRIER_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return carrierRepository.autocomplete(query, limit);
     }
 }

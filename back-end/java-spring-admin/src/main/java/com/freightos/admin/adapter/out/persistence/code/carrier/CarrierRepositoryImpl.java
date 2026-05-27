@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.out.persistence.code.carrier;
 
 import com.freightos.admin.application.code.carrier.command.SearchCarrierCommand;
 import com.freightos.admin.application.code.carrier.projection.CarrierSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.carrier.entity.CarrierType;
 import jakarta.persistence.EntityManager;
@@ -50,6 +51,25 @@ public class CarrierRepositoryImpl implements CarrierRepositoryCustom {
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
         return PagedResult.of(content, totalElements, totalPages, command.page(), command.size());
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        String sql = """
+                SELECT carrier_code, name FROM admin.carrier
+                WHERE deleted_at IS NULL
+                  AND (carrier_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
+                ORDER BY carrier_code
+                LIMIT :limit
+                """;
+        // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern
+        List<?> rows = em.createNativeQuery(sql)
+                .setParameter("q", query)
+                .setParameter("limit", limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1]); })
+                .toList();
     }
 
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<CarrierJpaEntity> root, SearchCarrierCommand command) {

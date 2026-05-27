@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.hscode;
 
 import com.freightos.admin.application.code.hscode.command.CreateHsCodeCommand;
+import com.freightos.admin.application.code.hscode.command.SaveHsCodeChangesCommand;
 import com.freightos.admin.application.code.hscode.command.SearchHsCodeCommand;
 import com.freightos.admin.application.code.hscode.command.UpdateHsCodeCommand;
 import com.freightos.admin.application.code.hscode.port.in.HsCodeUseCase;
 import com.freightos.admin.application.code.hscode.port.out.HsCodePort;
 import com.freightos.admin.application.code.hscode.projection.HsCodeSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.hscode.entity.HsCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +76,29 @@ public class HsCodeService implements HsCodeUseCase {
         for (Long id : ids) {
             deleteHsCode(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveHsCodeChanges(SaveHsCodeChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteHsCode(id);
+        }
+        for (SaveHsCodeChangesCommand.UpdateEntry entry : command.updates()) {
+            updateHsCode(entry.id(), entry.command());
+        }
+        for (CreateHsCodeCommand create : command.creates()) {
+            createHsCode(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteHsCodes(String query, int limit) {
+        return hsCodePort.autocomplete(query, limit);
     }
 }

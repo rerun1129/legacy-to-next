@@ -8,7 +8,10 @@ import type {
   FreightScope,
   CreateFreightRequestDto,
   UpdateFreightRequestDto,
+  SaveFreightChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/freight";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
 
@@ -56,6 +59,17 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     page: z.number(),
     size: z.number(),
   });
+
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+});
+
+const AUTOCOMPLETE_ITEM_SCHEMA = z.object({
+  code: z.string(),
+  name: z.string().nullable().transform((v) => v ?? ""),
+}) satisfies z.ZodType<CodeBoxSuggestion>;
 
 function scopeForBackend(scope: FreightScope): FreightScope {
   return scope;
@@ -120,5 +134,23 @@ export const API_FREIGHT_PORT: FreightPort = {
       method: "DELETE",
       body: JSON.stringify({ ids }),
     });
+  },
+
+  async saveChanges(req: SaveFreightChangesRequestDto): Promise<SaveChangesResultDto> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid freight save-changes response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async autocomplete(q: string, limit = 20): Promise<CodeBoxSuggestion[]> {
+    const params = new URLSearchParams({ q, limit: String(limit) });
+    const json = await adminFetchJson(`${BASE}/autocomplete?${params}`);
+    const parsed = apiResponse(z.array(AUTOCOMPLETE_ITEM_SCHEMA)).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid freight autocomplete response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
 };

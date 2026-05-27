@@ -1,14 +1,17 @@
 package com.freightos.admin.application.code.carrier;
 
 import com.freightos.admin.application.code.carrier.command.CreateCarrierCommand;
+import com.freightos.admin.application.code.carrier.command.SaveCarrierChangesCommand;
 import com.freightos.admin.application.code.carrier.command.SearchCarrierCommand;
 import com.freightos.admin.application.code.carrier.command.UpdateCarrierCommand;
 import com.freightos.admin.application.code.carrier.port.in.CarrierUseCase;
 import com.freightos.admin.application.code.carrier.port.out.CarrierPort;
 import com.freightos.admin.application.code.carrier.projection.CarrierSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.carrier.entity.Carrier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +76,29 @@ public class CarrierService implements CarrierUseCase {
         for (Long id : ids) {
             deleteCarrier(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveCarrierChanges(SaveCarrierChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteCarrier(id);
+        }
+        for (SaveCarrierChangesCommand.UpdateEntry entry : command.updates()) {
+            updateCarrier(entry.id(), entry.command());
+        }
+        for (CreateCarrierCommand create : command.creates()) {
+            createCarrier(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteCarriers(String query, int limit) {
+        return carrierPort.autocomplete(query, limit);
     }
 }

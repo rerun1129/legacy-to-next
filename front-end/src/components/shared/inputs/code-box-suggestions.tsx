@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { ChevronsRight } from "lucide-react";
 import type { CodeBoxSuggestion } from "./_types";
 
@@ -61,13 +61,13 @@ const expandBtnStyle: React.CSSProperties = {
 
 export function CodeBoxSuggestions({ items, loading, activeIndex, onSelect, visible, expandCount, onExpand }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const baseWidthRef = useRef(0);
+  const [baseWidth, setBaseWidth] = useState(0);
 
   useEffect(() => {
-    if (visible && ref.current && baseWidthRef.current === 0) {
-      baseWidthRef.current = ref.current.offsetWidth;
+    if (visible && ref.current && baseWidth === 0) {
+      setBaseWidth(ref.current.offsetWidth);
     }
-  }, [visible, items]);
+  }, [visible, items, baseWidth]);
 
   useEffect(() => {
     if (!visible || activeIndex < 0) return;
@@ -89,8 +89,8 @@ export function CodeBoxSuggestions({ items, loading, activeIndex, onSelect, visi
     overflowY: "auto",
     boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
     minWidth: "100%",
-    width: expandCount > 0 && baseWidthRef.current > 0
-      ? baseWidthRef.current * (1 + expandCount)
+    width: expandCount > 0 && baseWidth > 0
+      ? baseWidth * (1 + expandCount)
       : undefined,
   };
 

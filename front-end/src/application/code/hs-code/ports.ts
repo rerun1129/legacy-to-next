@@ -4,7 +4,10 @@ import type {
   HsCodeFilter,
   CreateHsCodeRequestDto,
   UpdateHsCodeRequestDto,
+  SaveHsCodeChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/hs-code";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface HsCodePageResult {
   content: HsCodeRow[];
@@ -21,4 +24,6 @@ export interface HsCodePort {
   update(id: number, req: UpdateHsCodeRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveHsCodeChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

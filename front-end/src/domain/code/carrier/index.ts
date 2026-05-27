@@ -58,3 +58,25 @@ export interface UpdateCarrierRequestDto {
   ediCode: string | null;
   active: boolean;
 }
+
+export interface UpdateCarrierItemDto {
+  id: number;
+  carrierType: CarrierType;
+  name: string;
+  nameEn: string | null;
+  carrierAddress: string | null;
+  ediCode: string | null;
+  active: boolean;
+}
+
+export interface SaveCarrierChangesRequestDto {
+  creates: CreateCarrierRequestDto[];
+  updates: UpdateCarrierItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

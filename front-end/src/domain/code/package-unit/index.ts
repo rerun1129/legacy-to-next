@@ -41,3 +41,22 @@ export interface UpdatePackageUnitRequestDto {
   nameEn: string | null;
   active: boolean;
 }
+
+export interface UpdatePackageUnitItemDto {
+  id: number;
+  name: string;
+  nameEn: string | null;
+  active: boolean;
+}
+
+export interface SavePackageUnitChangesRequestDto {
+  creates: CreatePackageUnitRequestDto[];
+  updates: UpdatePackageUnitItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

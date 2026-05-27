@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.out.persistence.customer;
 
 import com.freightos.admin.application.customer.command.SearchCustomerCommand;
 import com.freightos.admin.application.customer.projection.CustomerSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.customer.entity.CustomerType;
 import jakarta.persistence.EntityManager;
@@ -50,6 +51,25 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
         return PagedResult.of(content, totalElements, totalPages, command.page(), command.size());
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        String sql = """
+                SELECT customer_code, name FROM admin.customer
+                WHERE deleted_at IS NULL
+                  AND (customer_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
+                ORDER BY customer_code
+                LIMIT :limit
+                """;
+        // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern
+        List<?> rows = em.createNativeQuery(sql)
+                .setParameter("q", query)
+                .setParameter("limit", limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1]); })
+                .toList();
     }
 
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<CustomerJpaEntity> root, SearchCustomerCommand command) {

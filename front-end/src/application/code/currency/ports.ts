@@ -4,7 +4,10 @@ import type {
   CurrencyFilter,
   CreateCurrencyRequestDto,
   UpdateCurrencyRequestDto,
+  SaveCurrencyChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/currency";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface CurrencyPageResult {
   content: CurrencyRow[];
@@ -21,4 +24,6 @@ export interface CurrencyPort {
   update(id: number, req: UpdateCurrencyRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveCurrencyChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

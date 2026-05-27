@@ -2,9 +2,11 @@ package com.freightos.admin.application.code.packageunit.port.out;
 
 import com.freightos.admin.application.code.packageunit.command.SearchPackageUnitCommand;
 import com.freightos.admin.application.code.packageunit.projection.PackageUnitSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.packageunit.entity.PackageUnit;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PackageUnitPort {
@@ -13,4 +15,5 @@ public interface PackageUnitPort {
     Long save(PackageUnit packageUnit);
     void update(Long id, PackageUnit patchData);
     void softDelete(Long id);
+    List<AutocompleteItem> autocomplete(String query, int limit);
 }

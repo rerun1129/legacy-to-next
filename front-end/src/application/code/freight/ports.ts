@@ -4,7 +4,10 @@ import type {
   FreightFilter,
   CreateFreightRequestDto,
   UpdateFreightRequestDto,
+  SaveFreightChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/freight";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface FreightPageResult {
   content: FreightRow[];
@@ -21,4 +24,6 @@ export interface FreightPort {
   update(id: number, req: UpdateFreightRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveFreightChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

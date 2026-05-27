@@ -4,6 +4,7 @@ import com.freightos.admin.application.code.exchangerate.command.SearchExchangeR
 import com.freightos.admin.application.code.exchangerate.port.out.ExchangeRatePort;
 import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.exchangerate.entity.ExchangeRate;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class ExchangeRatePersistenceAdapter implements ExchangeRatePort {
                 .orElseThrow(() -> ApplicationException.notFound("EXCHANGE_RATE_NOT_FOUND", MessageCode.EXCHANGE_RATE_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return exchangeRateRepository.autocomplete(query, limit);
     }
 }

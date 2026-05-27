@@ -2,9 +2,11 @@ package com.freightos.admin.application.code.hscode.port.out;
 
 import com.freightos.admin.application.code.hscode.command.SearchHsCodeCommand;
 import com.freightos.admin.application.code.hscode.projection.HsCodeSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.hscode.entity.HsCode;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface HsCodePort {
@@ -13,4 +15,5 @@ public interface HsCodePort {
     Long save(HsCode hsCode);
     void update(Long id, HsCode patchData);
     void softDelete(Long id);
+    List<AutocompleteItem> autocomplete(String query, int limit);
 }

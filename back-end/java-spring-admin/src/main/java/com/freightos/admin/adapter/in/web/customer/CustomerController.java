@@ -3,16 +3,21 @@ package com.freightos.admin.adapter.in.web.customer;
 import com.freightos.admin.adapter.in.web.customer.dto.CreateCustomerRequest;
 import com.freightos.admin.adapter.in.web.customer.dto.CustomerDetailResponse;
 import com.freightos.admin.adapter.in.web.customer.dto.CustomerSummaryResponse;
+import com.freightos.admin.adapter.in.web.customer.dto.SaveCustomerChangesRequest;
 import com.freightos.admin.adapter.in.web.customer.dto.SearchCustomerRequest;
 import com.freightos.admin.adapter.in.web.customer.dto.UpdateCustomerRequest;
 import com.freightos.admin.application.customer.port.in.CustomerUseCase;
 import com.freightos.admin.application.customer.projection.CustomerSummary;
 import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.customer.entity.Customer;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,10 +29,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -86,5 +93,21 @@ public class CustomerController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         customerUseCase.deleteCustomers(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CUSTOMER_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_CREATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveCustomerChangesRequest req) {
+        SaveChangesResult result = customerUseCase.saveCustomerChanges(customerAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.CUSTOMER_SAVE_CHANGES.getMessage()));
+    }
+
+    @GetMapping("/autocomplete")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CUSTOMER')")
+    public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
+        return ResponseEntity.ok(ApiResponse.of(customerUseCase.autocompleteCustomers(q, limit)));
     }
 }

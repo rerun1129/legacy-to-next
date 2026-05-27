@@ -3,16 +3,21 @@ package com.freightos.admin.adapter.in.web.code.packageunit;
 import com.freightos.admin.adapter.in.web.code.packageunit.dto.CreatePackageUnitRequest;
 import com.freightos.admin.adapter.in.web.code.packageunit.dto.PackageUnitDetailResponse;
 import com.freightos.admin.adapter.in.web.code.packageunit.dto.PackageUnitSummaryResponse;
+import com.freightos.admin.adapter.in.web.code.packageunit.dto.SavePackageUnitChangesRequest;
 import com.freightos.admin.adapter.in.web.code.packageunit.dto.SearchPackageUnitRequest;
 import com.freightos.admin.adapter.in.web.code.packageunit.dto.UpdatePackageUnitRequest;
 import com.freightos.admin.application.code.packageunit.port.in.PackageUnitUseCase;
 import com.freightos.admin.application.code.packageunit.projection.PackageUnitSummary;
 import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.packageunit.entity.PackageUnit;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,10 +29,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -86,5 +93,21 @@ public class PackageUnitController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         packageUnitUseCase.deletePackageUnits(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PACKAGE_UNIT_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_CREATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SavePackageUnitChangesRequest req) {
+        SaveChangesResult result = packageUnitUseCase.savePackageUnitChanges(packageUnitAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.PACKAGE_UNIT_SAVE_CHANGES.getMessage()));
+    }
+
+    @GetMapping("/autocomplete")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_PACKAGE')")
+    public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
+        return ResponseEntity.ok(ApiResponse.of(packageUnitUseCase.autocompletePackageUnits(q, limit)));
     }
 }

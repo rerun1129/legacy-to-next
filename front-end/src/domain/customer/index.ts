@@ -89,3 +89,31 @@ export interface UpdateCustomerRequestDto {
   countryCode: string | null;
   active: boolean;
 }
+
+export interface UpdateCustomerItemDto {
+  id: number;
+  customerType: CustomerType;
+  name: string;
+  nameEn: string | null;
+  businessNo: string | null;
+  representative: string | null;
+  phone: string | null;
+  email: string | null;
+  customerLocalAddress: string | null;
+  customerEnglishAddress: string | null;
+  memo: string | null;
+  countryCode: string | null;
+  active: boolean;
+}
+
+export interface SaveCustomerChangesRequestDto {
+  creates: CreateCustomerRequestDto[];
+  updates: UpdateCustomerItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

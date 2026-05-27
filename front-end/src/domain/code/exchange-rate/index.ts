@@ -69,3 +69,28 @@ export interface UpdateExchangeRateRequestDto {
   nameEn: string | null;
   active: boolean;
 }
+
+export interface UpdateExchangeRateItemDto {
+  id: number;
+  exchangeDate: string | null;
+  cashSellExchangeRate: number | null;
+  cashBuyExchangeRate: number | null;
+  wireSendExchangeRate: number | null;
+  wireReceiveExchangeRate: number | null;
+  standardExchangeRate: number | null;
+  name: string;
+  nameEn: string | null;
+  active: boolean;
+}
+
+export interface SaveExchangeRateChangesRequestDto {
+  creates: CreateExchangeRateRequestDto[];
+  updates: UpdateExchangeRateItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

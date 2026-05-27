@@ -4,6 +4,7 @@ import com.freightos.admin.application.code.port.command.SearchPortCommand;
 import com.freightos.admin.application.code.port.port.out.PortPort;
 import com.freightos.admin.application.code.port.projection.PortSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.port.entity.Port;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -52,5 +54,10 @@ public class PortPersistenceAdapter implements PortPort {
                 .orElseThrow(() -> ApplicationException.notFound("PORT_NOT_FOUND", MessageCode.PORT_NOT_FOUND.getMessage()));
         entity.setDeletedAt(LocalDateTime.now());
         entity.setActive(false);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return portRepository.autocomplete(query, limit);
     }
 }

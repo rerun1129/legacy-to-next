@@ -55,3 +55,25 @@ export interface UpdateFreightRequestDto {
   freightGroup: FreightGroup | null;
   active: boolean;
 }
+
+export interface UpdateFreightItemDto {
+  id: number;
+  name: string;
+  nameEn: string | null;
+  description: string | null;
+  freightUnit: string | null;
+  freightGroup: FreightGroup | null;
+  active: boolean;
+}
+
+export interface SaveFreightChangesRequestDto {
+  creates: CreateFreightRequestDto[];
+  updates: UpdateFreightItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}
