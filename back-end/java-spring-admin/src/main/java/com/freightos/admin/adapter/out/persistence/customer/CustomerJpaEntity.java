@@ -35,7 +35,7 @@ public class CustomerJpaEntity extends BaseJpaEntity {
     @Column(name = "customer_type", length = 30)
     private CustomerType customerType;
 
-    @Column(name = "name", nullable = false, length = 200)
+    @Column(name = "name", length = 200)
     private String name;
 
     @Column(name = "name_en", length = 200)
