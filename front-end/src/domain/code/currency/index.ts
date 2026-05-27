@@ -3,7 +3,7 @@ export type CurrencyScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface CurrencyRow {
   id: number;
   currencyCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   symbol: string | null;
   currencyUnit: number | null;
@@ -15,7 +15,7 @@ export interface CurrencyRow {
 export interface CurrencyDetail {
   id: number;
   currencyCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   symbol: string | null;
   currencyUnit: number | null;

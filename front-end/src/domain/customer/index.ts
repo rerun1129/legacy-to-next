@@ -15,7 +15,7 @@ export interface CustomerRow {
   id: number;
   customerCode: string;
   customerType: CustomerType;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   businessNo: string | null;
   representative: string | null;
@@ -34,7 +34,7 @@ export interface CustomerDetail {
   id: number;
   customerCode: string;
   customerType: CustomerType;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   businessNo: string | null;
   representative: string | null;

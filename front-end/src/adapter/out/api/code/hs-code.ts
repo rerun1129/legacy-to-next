@@ -16,7 +16,7 @@ const BASE = "/api/admin/code/hs-code";
 const HS_CODE_ROW_SCHEMA = z.object({
   id: z.number(),
   hsCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   countryCode: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
@@ -27,7 +27,7 @@ const HS_CODE_ROW_SCHEMA = z.object({
 const HS_CODE_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hsCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   countryCode: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),

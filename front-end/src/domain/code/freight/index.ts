@@ -5,7 +5,7 @@ export type FreightGroup = "OTHER" | "FREIGHT" | "SURCHARGE" | "WHARFAGE";
 export interface FreightRow {
   id: number;
   freightCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   description: string | null;
   freightUnit: string | null;
@@ -18,7 +18,7 @@ export interface FreightRow {
 export interface FreightDetail {
   id: number;
   freightCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   description: string | null;
   freightUnit: string | null;

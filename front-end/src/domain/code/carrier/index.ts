@@ -7,7 +7,7 @@ export type CarrierScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface CarrierRow {
   id: number;
   carrierCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   carrierType: CarrierType;
   carrierAddress: string | null;
@@ -21,7 +21,7 @@ export interface CarrierDetail {
   id: number;
   carrierCode: string;
   carrierType: CarrierType;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   carrierAddress: string | null;
   ediCode: string | null;

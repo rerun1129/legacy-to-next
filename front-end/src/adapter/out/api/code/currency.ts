@@ -16,7 +16,7 @@ const BASE = "/api/admin/code/currency";
 const CURRENCY_ROW_SCHEMA = z.object({
   id: z.number(),
   currencyCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   symbol: z.string().nullable().optional().transform((v) => v ?? null),
   currencyUnit: z.number().nullable().optional().transform((v) => v ?? null),
@@ -28,7 +28,7 @@ const CURRENCY_ROW_SCHEMA = z.object({
 const CURRENCY_DETAIL_SCHEMA = z.object({
   id: z.number(),
   currencyCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   symbol: z.string().nullable().optional().transform((v) => v ?? null),
   currencyUnit: z.number().nullable().optional().transform((v) => v ?? null),

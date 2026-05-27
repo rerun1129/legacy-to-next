@@ -16,7 +16,7 @@ const BASE = "/api/admin/code/country";
 const COUNTRY_ROW_SCHEMA = z.object({
   id: z.number(),
   countryCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
@@ -26,7 +26,7 @@ const COUNTRY_ROW_SCHEMA = z.object({
 const COUNTRY_DETAIL_SCHEMA = z.object({
   id: z.number(),
   countryCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
