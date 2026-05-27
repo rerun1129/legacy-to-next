@@ -31,7 +31,7 @@ public class PortJpaEntity extends BaseJpaEntity {
     @Column(name = "port_code", nullable = false, length = 10, updatable = false, unique = true)
     private String portCode;
 
-    @Column(name = "name", nullable = false, length = 200)
+    @Column(name = "name", length = 200)
     private String name;
 
     @Column(name = "name_en", length = 200)
@@ -41,7 +41,7 @@ public class PortJpaEntity extends BaseJpaEntity {
     private String countryCode;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "port_type", nullable = false, length = 10)
+    @Column(name = "port_type", length = 10)
     private PortType portType;
 
     @Column(name = "active", nullable = false)

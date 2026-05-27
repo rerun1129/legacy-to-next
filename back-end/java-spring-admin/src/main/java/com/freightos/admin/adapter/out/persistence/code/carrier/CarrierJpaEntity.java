@@ -38,13 +38,13 @@ public class CarrierJpaEntity extends BaseJpaEntity {
     private String nameEn;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "carrier_type", nullable = false, length = 10)
+    @Column(name = "carrier_type", length = 10)
     private CarrierType carrierType;
 
     @Column(name = "carrier_address", length = 4000)
     private String carrierAddress;
 
-    @Column(name = "edi_code", length = 2)
+    @Column(name = "edi_code", length = 10)
     private String ediCode;
 
     @Column(name = "active", nullable = false)

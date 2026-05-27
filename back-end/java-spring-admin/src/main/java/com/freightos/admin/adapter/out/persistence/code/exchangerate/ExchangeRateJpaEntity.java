@@ -52,7 +52,7 @@ public class ExchangeRateJpaEntity extends BaseJpaEntity {
     @Column(name = "standard_exchange_rate", precision = 10, scale = 4)
     private BigDecimal standardExchangeRate;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", length = 100)
     private String name;
 
     @Column(name = "name_en", length = 100)

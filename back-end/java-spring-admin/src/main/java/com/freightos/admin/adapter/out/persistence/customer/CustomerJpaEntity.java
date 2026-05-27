@@ -32,7 +32,7 @@ public class CustomerJpaEntity extends BaseJpaEntity {
     private String customerCode;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "customer_type", nullable = false, length = 30)
+    @Column(name = "customer_type", length = 30)
     private CustomerType customerType;
 
     @Column(name = "name", nullable = false, length = 200)
