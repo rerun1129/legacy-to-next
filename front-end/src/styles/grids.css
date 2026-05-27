@@ -401,3 +401,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   60%  { opacity: 0.4; }
   100% { opacity: 0; }
 }
+
+tr.is-new { box-shadow: inset 3px 0 0 var(--success); }
+tr.is-modified { box-shadow: inset 3px 0 0 var(--warning); }
+tr.is-deleted { opacity: 0.45; text-decoration: line-through; pointer-events: none; }

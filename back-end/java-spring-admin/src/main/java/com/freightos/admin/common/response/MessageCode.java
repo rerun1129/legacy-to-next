@@ -123,7 +123,8 @@ public enum MessageCode {
     COUNTRY_DELETED("국가가 삭제되었습니다."),
     COUNTRY_NOT_FOUND("국가를 찾을 수 없습니다."),
     COUNTRY_DUPLICATE_CODE("동일한 국가 코드가 이미 존재합니다."),
-    COUNTRY_ALREADY_DELETED("이미 삭제된 국가입니다.");
+    COUNTRY_ALREADY_DELETED("이미 삭제된 국가입니다."),
+    COUNTRY_SAVE_CHANGES("국가 일괄 저장이 완료되었습니다.");
 
     private final String message;
 

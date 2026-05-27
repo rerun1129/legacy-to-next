@@ -7,6 +7,8 @@ import type {
   CountryScope,
   CreateCountryRequestDto,
   UpdateCountryRequestDto,
+  SaveCountryChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/country";
 import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
@@ -47,6 +49,12 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     page: z.number(),
     size: z.number(),
   });
+
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+});
 
 function scopeForBackend(scope: CountryScope): CountryScope {
   return scope;
@@ -111,5 +119,15 @@ export const API_COUNTRY_PORT: CountryPort = {
       method: "DELETE",
       body: JSON.stringify({ ids }),
     });
+  },
+
+  async saveChanges(req: SaveCountryChangesRequestDto): Promise<SaveChangesResultDto> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid country save-changes response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
 };

@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.code.country;
 import com.freightos.admin.adapter.in.web.code.country.dto.CountryDetailResponse;
 import com.freightos.admin.adapter.in.web.code.country.dto.CountrySummaryResponse;
 import com.freightos.admin.adapter.in.web.code.country.dto.CreateCountryRequest;
+import com.freightos.admin.adapter.in.web.code.country.dto.SaveCountryChangesRequest;
 import com.freightos.admin.adapter.in.web.code.country.dto.SearchCountryRequest;
 import com.freightos.admin.adapter.in.web.code.country.dto.UpdateCountryRequest;
 import com.freightos.admin.application.code.country.command.CreateCountryCommand;
+import com.freightos.admin.application.code.country.command.SaveCountryChangesCommand;
 import com.freightos.admin.application.code.country.command.SearchCountryCommand;
 import com.freightos.admin.application.code.country.command.UpdateCountryCommand;
 import com.freightos.admin.application.code.country.projection.CountrySummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.country.entity.Country;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class CountryAssembler {
@@ -43,5 +47,16 @@ public class CountryAssembler {
 
     public PagedResult<CountrySummaryResponse> toSummaryPage(PagedResult<CountrySummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveCountryChangesCommand toSaveChangesCommand(SaveCountryChangesRequest req) {
+        List<CreateCountryCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveCountryChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveCountryChangesCommand.UpdateEntry(u.id(), new UpdateCountryCommand(u.name(), u.nameEn(), u.active())))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SaveCountryChangesCommand(creates, updates, deleteIds);
     }
 }

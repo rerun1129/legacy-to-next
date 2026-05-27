@@ -60,7 +60,9 @@ export function serializeRange<T>(
         `td[data-row-key="${CSS.escape(rk)}"][data-col-key="${CSS.escape(ck)}"]`
       ) as HTMLTableCellElement | null;
       if (tdEl) {
-        cells.push((tdEl.textContent ?? "").replace(/[\t\r\n]+/g, " "));
+        const input = tdEl.querySelector("input:not([type=hidden]), textarea, select") as HTMLInputElement | null;
+        const text = input ? input.value : (tdEl.textContent ?? "");
+        cells.push(text.replace(/[\t\r\n]+/g, " "));
         continue;
       }
       const row = data[ri];

@@ -4,6 +4,8 @@ import type {
   CountryFilter,
   CreateCountryRequestDto,
   UpdateCountryRequestDto,
+  SaveCountryChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/code/country";
 
 export interface CountryPageResult {
@@ -21,4 +23,5 @@ export interface CountryPort {
   update(id: number, req: UpdateCountryRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveCountryChangesRequestDto): Promise<SaveChangesResultDto>;
 }

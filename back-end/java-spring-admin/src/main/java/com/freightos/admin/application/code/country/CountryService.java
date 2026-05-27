@@ -1,6 +1,7 @@
 package com.freightos.admin.application.code.country;
 
 import com.freightos.admin.application.code.country.command.CreateCountryCommand;
+import com.freightos.admin.application.code.country.command.SaveCountryChangesCommand;
 import com.freightos.admin.application.code.country.command.SearchCountryCommand;
 import com.freightos.admin.application.code.country.command.UpdateCountryCommand;
 import com.freightos.admin.application.code.country.port.in.CountryUseCase;
@@ -9,6 +10,7 @@ import com.freightos.admin.application.code.country.projection.CountrySummary;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.country.entity.Country;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,5 +75,24 @@ public class CountryService implements CountryUseCase {
         for (Long id : ids) {
             deleteCountry(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveCountryChanges(SaveCountryChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteCountry(id);
+        }
+        for (SaveCountryChangesCommand.UpdateEntry entry : command.updates()) {
+            updateCountry(entry.id(), entry.command());
+        }
+        for (CreateCountryCommand create : command.creates()) {
+            createCountry(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
     }
 }

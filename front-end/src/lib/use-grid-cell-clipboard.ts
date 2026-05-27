@@ -26,15 +26,6 @@ export function useGridCellClipboard<T>(params: {
   useEffect(() => {
     function handleCopy(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "c") return;
-      const active = document.activeElement;
-      if (
-        active &&
-        (active.tagName === "INPUT" ||
-          active.tagName === "TEXTAREA" ||
-          (active as HTMLElement).isContentEditable)
-      )
-        return;
-      if (window.getSelection()?.toString()) return;
       const range = selectedRangeRef.current;
       if (!range) return;
       const text = serializeRange(

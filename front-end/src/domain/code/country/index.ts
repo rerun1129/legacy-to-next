@@ -41,3 +41,22 @@ export interface UpdateCountryRequestDto {
   nameEn: string | null;
   active: boolean;
 }
+
+export interface UpdateCountryItemDto {
+  id: number;
+  name: string;
+  nameEn: string | null;
+  active: boolean;
+}
+
+export interface SaveCountryChangesRequestDto {
+  creates: CreateCountryRequestDto[];
+  updates: UpdateCountryItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

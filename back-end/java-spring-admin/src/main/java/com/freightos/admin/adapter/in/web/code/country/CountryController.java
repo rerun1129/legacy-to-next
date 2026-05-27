@@ -3,6 +3,7 @@ package com.freightos.admin.adapter.in.web.code.country;
 import com.freightos.admin.adapter.in.web.code.country.dto.CountryDetailResponse;
 import com.freightos.admin.adapter.in.web.code.country.dto.CountrySummaryResponse;
 import com.freightos.admin.adapter.in.web.code.country.dto.CreateCountryRequest;
+import com.freightos.admin.adapter.in.web.code.country.dto.SaveCountryChangesRequest;
 import com.freightos.admin.adapter.in.web.code.country.dto.SearchCountryRequest;
 import com.freightos.admin.adapter.in.web.code.country.dto.UpdateCountryRequest;
 import com.freightos.admin.application.code.country.port.in.CountryUseCase;
@@ -11,6 +12,7 @@ import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.country.entity.Country;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -86,5 +88,13 @@ public class CountryController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         countryUseCase.deleteCountries(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.COUNTRY_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_CREATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveCountryChangesRequest req) {
+        SaveChangesResult result = countryUseCase.saveCountryChanges(countryAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.COUNTRY_SAVE_CHANGES.getMessage()));
     }
 }
