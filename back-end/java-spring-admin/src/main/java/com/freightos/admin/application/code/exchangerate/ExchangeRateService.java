@@ -53,7 +53,9 @@ public class ExchangeRateService implements ExchangeRateUseCase {
         if (exchangeRate.isDeleted()) {
             throw ApplicationException.conflict("EXCHANGE_RATE_ALREADY_DELETED", MessageCode.EXCHANGE_RATE_ALREADY_DELETED.getMessage());
         }
-        exchangeRate.applyUpdate(command.rate(), command.name(), command.nameEn(), command.active());
+        exchangeRate.applyUpdate(command.cashSellExchangeRate(), command.cashBuyExchangeRate(),
+                command.wireSendExchangeRate(), command.wireReceiveExchangeRate(),
+                command.standardExchangeRate(), command.name(), command.nameEn(), command.active());
         exchangeRatePort.update(id, exchangeRate);
     }
 

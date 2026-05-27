@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class CurrencyJpaToDomainMapper {
 
     public Currency toDomain(CurrencyJpaEntity e) {
-        Currency domain = Currency.create(e.getCurrencyCode(), e.getName(), e.getNameEn(), e.getSymbol(), e.getActive());
+        Currency domain = Currency.create(e.getCurrencyCode(), e.getName(), e.getNameEn(), e.getSymbol(), e.getCurrencyUnit(), e.getActive());
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());
         return domain;

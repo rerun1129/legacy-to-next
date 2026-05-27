@@ -11,5 +11,7 @@ public record CreateCarrierRequest(
         @NotBlank @Size(max = 200) String name,
         @Size(max = 200) String nameEn,
         @NotNull CarrierType carrierType,
+        @Size(max = 4000) String carrierAddress,
+        @Size(max = 2) String ediCode,
         @NotNull Boolean active
 ) {}

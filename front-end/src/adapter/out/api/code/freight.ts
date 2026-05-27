@@ -28,6 +28,8 @@ const FREIGHT_DETAIL_SCHEMA = z.object({
   name: z.string(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   description: z.string().nullable().optional().transform((v) => v ?? null),
+  freightUnit: z.string().nullable().optional().transform((v) => v ?? null),
+  freightGroup: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),

@@ -28,6 +28,7 @@ interface CurrencyFormValues {
   name: string;
   nameEn: string;
   symbol: string;
+  currencyUnit: number | null;
   active: boolean;
 }
 
@@ -36,6 +37,7 @@ const DEFAULT_FORM: CurrencyFormValues = {
   name: "",
   nameEn: "",
   symbol: "",
+  currencyUnit: null,
   active: true,
 };
 
@@ -93,6 +95,16 @@ function CurrencyFormFields({
         />
       </div>
       <div className="lcn">
+        <span className="lcn__label">Currency Unit</span>
+        <input
+          className="box-panel"
+          type="number"
+          placeholder="Currency Unit (optional)"
+          readOnly={isReadOnly}
+          {...register("currencyUnit", { valueAsNumber: true })}
+        />
+      </div>
+      <div className="lcn">
         <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
@@ -125,6 +137,7 @@ function CurrencyEntryModalInner({ state, onClose, onSaved }: Props) {
         name: detail.name,
         nameEn: detail.nameEn ?? "",
         symbol: detail.symbol ?? "",
+        currencyUnit: detail.currencyUnit,
         active: detail.active,
       });
     }
@@ -167,6 +180,7 @@ function CurrencyEntryModalInner({ state, onClose, onSaved }: Props) {
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         symbol: parseNullable(values.symbol),
+        currencyUnit: Number.isNaN(values.currencyUnit) ? null : values.currencyUnit,
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
@@ -176,6 +190,7 @@ function CurrencyEntryModalInner({ state, onClose, onSaved }: Props) {
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         symbol: parseNullable(values.symbol),
+        currencyUnit: Number.isNaN(values.currencyUnit) ? null : values.currencyUnit,
         active: values.active,
       };
       createMutation.mutate(req);

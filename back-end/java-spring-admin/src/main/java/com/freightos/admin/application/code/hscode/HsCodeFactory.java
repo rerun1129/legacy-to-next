@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public class HsCodeFactory {
 
     public HsCode from(CreateHsCodeCommand command) {
-        return HsCode.create(command.hsCode(), command.name(), command.nameEn(), command.active());
+        return HsCode.create(command.hsCode(), command.name(), command.nameEn(), command.countryCode(), command.active());
     }
 }

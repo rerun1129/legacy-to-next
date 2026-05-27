@@ -34,8 +34,8 @@ interface CustomerFormValues {
   representative: string;
   phone: string;
   email: string;
-  address: string;
-  addressEn: string;
+  customerLocalAddress: string;
+  customerEnglishAddress: string;
   memo: string;
   active: boolean;
 }
@@ -49,8 +49,8 @@ const DEFAULT_FORM: CustomerFormValues = {
   representative: "",
   phone: "",
   email: "",
-  address: "",
-  addressEn: "",
+  customerLocalAddress: "",
+  customerEnglishAddress: "",
   memo: "",
   active: true,
 };
@@ -166,7 +166,7 @@ function CustomerFormFields({ register, control, isEdit, isReadOnly }: FormField
           className="box-panel"
           placeholder="Address (optional)"
           readOnly={isReadOnly}
-          {...register("address")}
+          {...register("customerLocalAddress")}
         />
       </div>
       <div className="lcn">
@@ -175,7 +175,7 @@ function CustomerFormFields({ register, control, isEdit, isReadOnly }: FormField
           className="box-panel"
           placeholder="English Address (optional)"
           readOnly={isReadOnly}
-          {...register("addressEn")}
+          {...register("customerEnglishAddress")}
         />
       </div>
       <div className="lcn" style={{ alignItems: "flex-start" }}>
@@ -227,8 +227,8 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
         representative: detail.representative ?? "",
         phone: detail.phone ?? "",
         email: detail.email ?? "",
-        address: detail.address ?? "",
-        addressEn: detail.addressEn ?? "",
+        customerLocalAddress: detail.customerLocalAddress ?? "",
+        customerEnglishAddress: detail.customerEnglishAddress ?? "",
         memo: detail.memo ?? "",
         active: detail.active,
       });
@@ -276,8 +276,8 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
         representative: parseNullable(values.representative),
         phone: parseNullable(values.phone),
         email: parseNullable(values.email),
-        address: parseNullable(values.address),
-        addressEn: parseNullable(values.addressEn),
+        customerLocalAddress: parseNullable(values.customerLocalAddress),
+        customerEnglishAddress: parseNullable(values.customerEnglishAddress),
         memo: parseNullable(values.memo),
         active: values.active,
       };
@@ -292,8 +292,8 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
         representative: parseNullable(values.representative),
         phone: parseNullable(values.phone),
         email: parseNullable(values.email),
-        address: parseNullable(values.address),
-        addressEn: parseNullable(values.addressEn),
+        customerLocalAddress: parseNullable(values.customerLocalAddress),
+        customerEnglishAddress: parseNullable(values.customerEnglishAddress),
         memo: parseNullable(values.memo),
         active: values.active,
       };

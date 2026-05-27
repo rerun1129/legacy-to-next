@@ -15,9 +15,8 @@ const BASE = "/api/admin/code/exchange-rate";
 
 const EXCHANGE_RATE_ROW_SCHEMA = z.object({
   id: z.number(),
-  baseCurrency: z.string(),
-  targetCurrency: z.string(),
-  rate: z.number(),
+  fromCurrencyCode: z.string(),
+  toCurrencyCode: z.string(),
   name: z.string(),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
@@ -26,11 +25,16 @@ const EXCHANGE_RATE_ROW_SCHEMA = z.object({
 
 const EXCHANGE_RATE_DETAIL_SCHEMA = z.object({
   id: z.number(),
-  baseCurrency: z.string(),
-  targetCurrency: z.string(),
-  rate: z.number(),
+  fromCurrencyCode: z.string(),
+  toCurrencyCode: z.string(),
   name: z.string(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
+  exchangeDate: z.string().nullable().optional().transform((v) => v ?? null),
+  cashSellExchangeRate: z.number().nullable().optional().transform((v) => v ?? null),
+  cashBuyExchangeRate: z.number().nullable().optional().transform((v) => v ?? null),
+  wireSendExchangeRate: z.number().nullable().optional().transform((v) => v ?? null),
+  wireReceiveExchangeRate: z.number().nullable().optional().transform((v) => v ?? null),
+  standardExchangeRate: z.number().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),
@@ -62,8 +66,8 @@ export const API_EXCHANGE_RATE_PORT: ExchangeRatePort = {
       size,
       scope: scopeForBackend(filter.scope),
     };
-    if (filter.baseCurrency) body.baseCurrency = filter.baseCurrency;
-    if (filter.targetCurrency) body.targetCurrency = filter.targetCurrency;
+    if (filter.fromCurrencyCode) body.fromCurrencyCode = filter.fromCurrencyCode;
+    if (filter.toCurrencyCode) body.toCurrencyCode = filter.toCurrencyCode;
     if (filter.name) body.name = filter.name;
 
     const json = await adminFetchJson(`${BASE}/search`, {

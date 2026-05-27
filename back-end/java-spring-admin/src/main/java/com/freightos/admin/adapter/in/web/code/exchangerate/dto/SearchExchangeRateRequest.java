@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 public record SearchExchangeRateRequest(
-        String baseCurrency,
-        String targetCurrency,
+        String fromCurrencyCode,
+        String toCurrencyCode,
         String name,
         String scope,
         @Min(0) int page,

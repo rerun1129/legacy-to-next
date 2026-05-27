@@ -12,30 +12,36 @@ public class Carrier extends BaseEntity {
     private String name;
     private String nameEn;
     private CarrierType carrierType;
+    private String carrierAddress;
+    private String ediCode;
     private boolean active;
     private LocalDateTime deletedAt;
 
-    private Carrier(String carrierCode, String name, String nameEn, CarrierType carrierType, boolean active) {
-        this.carrierCode  = carrierCode;
-        this.name         = name;
-        this.nameEn       = nameEn;
-        this.carrierType  = carrierType;
-        this.active       = active;
-        this.deletedAt    = null;
+    private Carrier(String carrierCode, String name, String nameEn, CarrierType carrierType, String carrierAddress, String ediCode, boolean active) {
+        this.carrierCode    = carrierCode;
+        this.name           = name;
+        this.nameEn         = nameEn;
+        this.carrierType    = carrierType;
+        this.carrierAddress = carrierAddress;
+        this.ediCode        = ediCode;
+        this.active         = active;
+        this.deletedAt      = null;
     }
 
-    public static Carrier create(String carrierCode, String name, String nameEn, CarrierType carrierType, boolean active) {
-        return new Carrier(carrierCode, name, nameEn, carrierType, active);
+    public static Carrier create(String carrierCode, String name, String nameEn, CarrierType carrierType, String carrierAddress, String ediCode, boolean active) {
+        return new Carrier(carrierCode, name, nameEn, carrierType, carrierAddress, ediCode, active);
     }
 
     /**
      * 수정 가능한 필드만 갱신. 식별 필드(carrierCode)는 변경 불가.
      */
-    public void applyUpdate(String name, String nameEn, CarrierType carrierType, boolean active) {
-        this.name        = name;
-        this.nameEn      = nameEn;
-        this.carrierType = carrierType;
-        this.active      = active;
+    public void applyUpdate(String name, String nameEn, CarrierType carrierType, String carrierAddress, String ediCode, boolean active) {
+        this.name           = name;
+        this.nameEn         = nameEn;
+        this.carrierType    = carrierType;
+        this.carrierAddress = carrierAddress;
+        this.ediCode        = ediCode;
+        this.active         = active;
     }
 
     /** soft delete: 삭제 시각 기록 + 비활성화. */

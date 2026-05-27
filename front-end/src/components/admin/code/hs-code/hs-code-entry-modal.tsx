@@ -27,6 +27,7 @@ interface HsCodeFormValues {
   hsCode: string;
   name: string;
   nameEn: string;
+  countryCode: string;
   active: boolean;
 }
 
@@ -34,6 +35,7 @@ const DEFAULT_FORM: HsCodeFormValues = {
   hsCode: "",
   name: "",
   nameEn: "",
+  countryCode: "",
   active: true,
 };
 
@@ -82,6 +84,16 @@ function HsCodeFormFields({
         />
       </div>
       <div className="lcn">
+        <span className="lcn__label">Country Code</span>
+        <input
+          className="box-panel"
+          placeholder="Country Code (max 5)"
+          maxLength={5}
+          readOnly={isReadOnly}
+          {...register("countryCode")}
+        />
+      </div>
+      <div className="lcn">
         <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
@@ -113,6 +125,7 @@ function HsCodeEntryModalInner({ state, onClose, onSaved }: Props) {
         hsCode: detail.hsCode,
         name: detail.name,
         nameEn: detail.nameEn ?? "",
+        countryCode: detail.countryCode ?? "",
         active: detail.active,
       });
     }
@@ -154,6 +167,7 @@ function HsCodeEntryModalInner({ state, onClose, onSaved }: Props) {
       const req: UpdateHsCodeRequestDto = {
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
+        countryCode: parseNullable(values.countryCode),
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
@@ -162,6 +176,7 @@ function HsCodeEntryModalInner({ state, onClose, onSaved }: Props) {
         hsCode: values.hsCode.trim(),
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
+        countryCode: parseNullable(values.countryCode),
         active: values.active,
       };
       createMutation.mutate(req);

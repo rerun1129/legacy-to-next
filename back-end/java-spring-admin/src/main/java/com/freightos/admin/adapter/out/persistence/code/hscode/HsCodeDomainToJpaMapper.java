@@ -12,6 +12,7 @@ public class HsCodeDomainToJpaMapper {
         entity.setHsCode(domain.getHsCode());
         entity.setName(domain.getName());
         entity.setNameEn(domain.getNameEn());
+        entity.setCountryCode(domain.getCountryCode());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
         return entity;
@@ -23,6 +24,7 @@ public class HsCodeDomainToJpaMapper {
     public void applyUpdateFields(HsCodeJpaEntity entity, HsCode patch) {
         entity.setName(patch.getName());
         entity.setNameEn(patch.getNameEn());
+        entity.setCountryCode(patch.getCountryCode());
         entity.setActive(patch.isActive());
     }
 }

@@ -12,30 +12,36 @@ public class Freight extends BaseEntity {
     private String name;
     private String nameEn;
     private String description;
+    private String freightUnit;
+    private String freightGroup;
     private boolean active;
     private LocalDateTime deletedAt;
 
-    private Freight(String freightCode, String name, String nameEn, String description, boolean active) {
-        this.freightCode = freightCode;
-        this.name        = name;
-        this.nameEn      = nameEn;
-        this.description = description;
-        this.active      = active;
-        this.deletedAt   = null;
+    private Freight(String freightCode, String name, String nameEn, String description, String freightUnit, String freightGroup, boolean active) {
+        this.freightCode  = freightCode;
+        this.name         = name;
+        this.nameEn       = nameEn;
+        this.description  = description;
+        this.freightUnit  = freightUnit;
+        this.freightGroup = freightGroup;
+        this.active       = active;
+        this.deletedAt    = null;
     }
 
-    public static Freight create(String freightCode, String name, String nameEn, String description, boolean active) {
-        return new Freight(freightCode, name, nameEn, description, active);
+    public static Freight create(String freightCode, String name, String nameEn, String description, String freightUnit, String freightGroup, boolean active) {
+        return new Freight(freightCode, name, nameEn, description, freightUnit, freightGroup, active);
     }
 
     /**
      * 수정 가능한 필드만 갱신. 식별 필드(freightCode)는 변경 불가.
      */
-    public void applyUpdate(String name, String nameEn, String description, boolean active) {
-        this.name        = name;
-        this.nameEn      = nameEn;
-        this.description = description;
-        this.active      = active;
+    public void applyUpdate(String name, String nameEn, String description, String freightUnit, String freightGroup, boolean active) {
+        this.name         = name;
+        this.nameEn       = nameEn;
+        this.description  = description;
+        this.freightUnit  = freightUnit;
+        this.freightGroup = freightGroup;
+        this.active       = active;
     }
 
     /** soft delete: 삭제 시각 기록 + 비활성화. */

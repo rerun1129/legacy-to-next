@@ -4,5 +4,6 @@ public record CreateHsCodeCommand(
         String hsCode,
         String name,
         String nameEn,
+        String countryCode,
         boolean active
 ) {}

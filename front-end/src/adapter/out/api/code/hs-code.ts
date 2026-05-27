@@ -27,6 +27,7 @@ const HS_CODE_DETAIL_SCHEMA = z.object({
   hsCode: z.string(),
   name: z.string(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
+  countryCode: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),

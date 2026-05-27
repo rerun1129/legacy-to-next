@@ -10,6 +10,8 @@ public record CarrierDetailResponse(
         String name,
         String nameEn,
         CarrierType carrierType,
+        String carrierAddress,
+        String ediCode,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime createdAt,

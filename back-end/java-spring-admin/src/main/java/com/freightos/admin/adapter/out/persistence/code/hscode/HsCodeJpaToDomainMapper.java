@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class HsCodeJpaToDomainMapper {
 
     public HsCode toDomain(HsCodeJpaEntity e) {
-        HsCode domain = HsCode.create(e.getHsCode(), e.getName(), e.getNameEn(), e.getActive());
+        HsCode domain = HsCode.create(e.getHsCode(), e.getName(), e.getNameEn(), e.getCountryCode(), e.getActive());
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());
         return domain;

@@ -10,5 +10,7 @@ public record CreateFreightRequest(
         @NotBlank @Size(max = 100) String name,
         @Size(max = 100) String nameEn,
         @Size(max = 500) String description,
+        @Size(max = 10) String freightUnit,
+        @Size(max = 50) String freightGroup,
         @NotNull Boolean active
 ) {}

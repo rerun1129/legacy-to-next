@@ -29,6 +29,7 @@ const CURRENCY_DETAIL_SCHEMA = z.object({
   name: z.string(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   symbol: z.string().nullable().optional().transform((v) => v ?? null),
+  currencyUnit: z.number().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),

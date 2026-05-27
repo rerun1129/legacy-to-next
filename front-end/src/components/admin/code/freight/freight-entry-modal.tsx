@@ -28,6 +28,8 @@ interface FreightFormValues {
   name: string;
   nameEn: string;
   description: string;
+  freightUnit: string;
+  freightGroup: string;
   active: boolean;
 }
 
@@ -36,6 +38,8 @@ const DEFAULT_FORM: FreightFormValues = {
   name: "",
   nameEn: "",
   description: "",
+  freightUnit: "",
+  freightGroup: "",
   active: true,
 };
 
@@ -95,6 +99,26 @@ function FreightFormFields({
         />
       </div>
       <div className="lcn">
+        <span className="lcn__label">Freight Unit</span>
+        <input
+          className="box-panel"
+          placeholder="Freight Unit (max 10)"
+          maxLength={10}
+          readOnly={isReadOnly}
+          {...register("freightUnit")}
+        />
+      </div>
+      <div className="lcn">
+        <span className="lcn__label">Freight Group</span>
+        <input
+          className="box-panel"
+          placeholder="Freight Group (max 50)"
+          maxLength={50}
+          readOnly={isReadOnly}
+          {...register("freightGroup")}
+        />
+      </div>
+      <div className="lcn">
         <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
@@ -127,6 +151,8 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
         name: detail.name,
         nameEn: detail.nameEn ?? "",
         description: detail.description ?? "",
+        freightUnit: detail.freightUnit ?? "",
+        freightGroup: detail.freightGroup ?? "",
         active: detail.active,
       });
     }
@@ -169,6 +195,8 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         description: parseNullable(values.description),
+        freightUnit: parseNullable(values.freightUnit),
+        freightGroup: parseNullable(values.freightGroup),
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
@@ -178,6 +206,8 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         description: parseNullable(values.description),
+        freightUnit: parseNullable(values.freightUnit),
+        freightGroup: parseNullable(values.freightGroup),
         active: values.active,
       };
       createMutation.mutate(req);

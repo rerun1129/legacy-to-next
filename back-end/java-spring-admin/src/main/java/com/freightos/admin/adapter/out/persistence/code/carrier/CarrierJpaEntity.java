@@ -41,6 +41,12 @@ public class CarrierJpaEntity extends BaseJpaEntity {
     @Column(name = "carrier_type", nullable = false, length = 10)
     private CarrierType carrierType;
 
+    @Column(name = "carrier_address", length = 4000)
+    private String carrierAddress;
+
+    @Column(name = "edi_code", length = 2)
+    private String ediCode;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 

@@ -37,6 +37,12 @@ public class FreightJpaEntity extends BaseJpaEntity {
     @Column(name = "description", length = 500)
     private String description;
 
+    @Column(name = "freight_unit", length = 10)
+    private String freightUnit;
+
+    @Column(name = "freight_group", length = 50)
+    private String freightGroup;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 

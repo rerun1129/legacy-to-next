@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public class FreightFactory {
 
     public Freight from(CreateFreightCommand command) {
-        return Freight.create(command.freightCode(), command.name(), command.nameEn(), command.description(), command.active());
+        return Freight.create(command.freightCode(), command.name(), command.nameEn(), command.description(), command.freightUnit(), command.freightGroup(), command.active());
     }
 }

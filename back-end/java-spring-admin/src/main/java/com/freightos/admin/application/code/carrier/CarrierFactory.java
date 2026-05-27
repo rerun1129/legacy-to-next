@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public class CarrierFactory {
 
     public Carrier from(CreateCarrierCommand command) {
-        return Carrier.create(command.carrierCode(), command.name(), command.nameEn(), command.carrierType(), command.active());
+        return Carrier.create(command.carrierCode(), command.name(), command.nameEn(), command.carrierType(), command.carrierAddress(), command.ediCode(), command.active());
     }
 }

@@ -30,8 +30,8 @@ export interface CustomerDetail {
   representative: string | null;
   phone: string | null;
   email: string | null;
-  address: string | null;
-  addressEn: string | null;
+  customerLocalAddress: string | null;
+  customerEnglishAddress: string | null;
   memo: string | null;
   active: boolean;
   deletedAt: string | null;
@@ -57,8 +57,8 @@ export interface CreateCustomerRequestDto {
   representative: string | null;
   phone: string | null;
   email: string | null;
-  address: string | null;
-  addressEn: string | null;
+  customerLocalAddress: string | null;
+  customerEnglishAddress: string | null;
   memo: string | null;
   active: boolean;
 }
@@ -71,8 +71,8 @@ export interface UpdateCustomerRequestDto {
   representative: string | null;
   phone: string | null;
   email: string | null;
-  address: string | null;
-  addressEn: string | null;
+  customerLocalAddress: string | null;
+  customerEnglishAddress: string | null;
   memo: string | null;
   active: boolean;
 }

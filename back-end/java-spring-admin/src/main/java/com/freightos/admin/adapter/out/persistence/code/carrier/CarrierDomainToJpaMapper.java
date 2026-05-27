@@ -13,6 +13,8 @@ public class CarrierDomainToJpaMapper {
         entity.setName(domain.getName());
         entity.setNameEn(domain.getNameEn());
         entity.setCarrierType(domain.getCarrierType());
+        entity.setCarrierAddress(domain.getCarrierAddress());
+        entity.setEdiCode(domain.getEdiCode());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
         return entity;
@@ -25,6 +27,8 @@ public class CarrierDomainToJpaMapper {
         entity.setName(patch.getName());
         entity.setNameEn(patch.getNameEn());
         entity.setCarrierType(patch.getCarrierType());
+        entity.setCarrierAddress(patch.getCarrierAddress());
+        entity.setEdiCode(patch.getEdiCode());
         entity.setActive(patch.isActive());
     }
 }

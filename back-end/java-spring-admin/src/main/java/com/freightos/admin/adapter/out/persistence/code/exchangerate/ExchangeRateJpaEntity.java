@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(schema = "admin", name = "exchange_rate",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"base_currency", "target_currency"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"from_currency_code", "to_currency_code", "exchange_date"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,14 +28,29 @@ public class ExchangeRateJpaEntity extends BaseJpaEntity {
     @Column(name = "exchange_rate_id")
     private Long id;
 
-    @Column(name = "base_currency", nullable = false, length = 3, updatable = false)
-    private String baseCurrency;
+    @Column(name = "from_currency_code", nullable = false, length = 3, updatable = false)
+    private String fromCurrencyCode;
 
-    @Column(name = "target_currency", nullable = false, length = 3, updatable = false)
-    private String targetCurrency;
+    @Column(name = "to_currency_code", nullable = false, length = 3, updatable = false)
+    private String toCurrencyCode;
 
-    @Column(name = "rate", nullable = false, precision = 18, scale = 6)
-    private BigDecimal rate;
+    @Column(name = "exchange_date", length = 8, updatable = false)
+    private String exchangeDate;
+
+    @Column(name = "cash_sell_exchange_rate", precision = 10, scale = 4)
+    private BigDecimal cashSellExchangeRate;
+
+    @Column(name = "cash_buy_exchange_rate", precision = 10, scale = 4)
+    private BigDecimal cashBuyExchangeRate;
+
+    @Column(name = "wire_send_exchange_rate", precision = 10, scale = 4)
+    private BigDecimal wireSendExchangeRate;
+
+    @Column(name = "wire_receive_exchange_rate", precision = 10, scale = 4)
+    private BigDecimal wireReceiveExchangeRate;
+
+    @Column(name = "standard_exchange_rate", precision = 10, scale = 4)
+    private BigDecimal standardExchangeRate;
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

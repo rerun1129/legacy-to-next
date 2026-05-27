@@ -8,6 +8,7 @@ public record CurrencyDetailResponse(
         String name,
         String nameEn,
         String symbol,
+        Integer currencyUnit,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime createdAt,

@@ -7,7 +7,12 @@ import org.springframework.stereotype.Component;
 public class ExchangeRateJpaToDomainMapper {
 
     public ExchangeRate toDomain(ExchangeRateJpaEntity e) {
-        ExchangeRate domain = ExchangeRate.create(e.getBaseCurrency(), e.getTargetCurrency(), e.getRate(), e.getName(), e.getNameEn(), e.getActive());
+        ExchangeRate domain = ExchangeRate.create(
+                e.getFromCurrencyCode(), e.getToCurrencyCode(), e.getExchangeDate(),
+                e.getCashSellExchangeRate(), e.getCashBuyExchangeRate(),
+                e.getWireSendExchangeRate(), e.getWireReceiveExchangeRate(),
+                e.getStandardExchangeRate(), e.getName(), e.getNameEn(), e.getActive()
+        );
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());
         return domain;

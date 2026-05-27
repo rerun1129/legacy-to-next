@@ -17,8 +17,8 @@ public class CustomerFactory {
                 command.representative(),
                 command.phone(),
                 command.email(),
-                command.address(),
-                command.addressEn(),
+                command.customerLocalAddress(),
+                command.customerEnglishAddress(),
                 command.memo(),
                 command.active()
         );

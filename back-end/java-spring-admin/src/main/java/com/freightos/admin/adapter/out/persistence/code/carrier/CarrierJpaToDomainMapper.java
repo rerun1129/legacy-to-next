@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class CarrierJpaToDomainMapper {
 
     public Carrier toDomain(CarrierJpaEntity e) {
-        Carrier domain = Carrier.create(e.getCarrierCode(), e.getName(), e.getNameEn(), e.getCarrierType(), e.getActive());
+        Carrier domain = Carrier.create(e.getCarrierCode(), e.getName(), e.getNameEn(), e.getCarrierType(), e.getCarrierAddress(), e.getEdiCode(), e.getActive());
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());
         return domain;

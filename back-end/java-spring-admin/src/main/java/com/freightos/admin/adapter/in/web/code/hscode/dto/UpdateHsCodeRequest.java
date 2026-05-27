@@ -7,5 +7,6 @@ import jakarta.validation.constraints.Size;
 public record UpdateHsCodeRequest(
         @NotBlank @Size(max = 200) String name,
         @Size(max = 200) String nameEn,
+        @Size(max = 5) String countryCode,
         @NotNull Boolean active
 ) {}

@@ -53,7 +53,7 @@ public class HsCodeService implements HsCodeUseCase {
         if (hsCode.isDeleted()) {
             throw ApplicationException.conflict("HS_CODE_ALREADY_DELETED", MessageCode.HS_CODE_ALREADY_DELETED.getMessage());
         }
-        hsCode.applyUpdate(command.name(), command.nameEn(), command.active());
+        hsCode.applyUpdate(command.name(), command.nameEn(), command.countryCode(), command.active());
         hsCodePort.update(id, hsCode);
     }
 

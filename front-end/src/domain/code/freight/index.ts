@@ -15,6 +15,8 @@ export interface FreightDetail {
   name: string;
   nameEn: string | null;
   description: string | null;
+  freightUnit: string | null;
+  freightGroup: string | null;
   active: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -34,6 +36,8 @@ export interface CreateFreightRequestDto {
   name: string;
   nameEn: string | null;
   description: string | null;
+  freightUnit: string | null;
+  freightGroup: string | null;
   active: boolean;
 }
 
@@ -41,5 +45,7 @@ export interface UpdateFreightRequestDto {
   name: string;
   nameEn: string | null;
   description: string | null;
+  freightUnit: string | null;
+  freightGroup: string | null;
   active: boolean;
 }

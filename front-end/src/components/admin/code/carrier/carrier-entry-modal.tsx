@@ -30,6 +30,8 @@ interface CarrierFormValues {
   carrierType: CarrierType;
   name: string;
   nameEn: string;
+  carrierAddress: string;
+  ediCode: string;
   active: boolean;
 }
 
@@ -38,6 +40,8 @@ const DEFAULT_FORM: CarrierFormValues = {
   carrierType: "SEA",
   name: "",
   nameEn: "",
+  carrierAddress: "",
+  ediCode: "",
   active: true,
 };
 
@@ -105,6 +109,27 @@ function CarrierFormFields({ register, control, isEdit, isReadOnly }: FormFields
           {...register("nameEn")}
         />
       </div>
+      <div className="lcn" style={{ alignItems: "flex-start" }}>
+        <span className="lcn__label" style={{ paddingTop: 4 }}>Address</span>
+        <textarea
+          className="box-panel"
+          rows={3}
+          placeholder="Carrier Address (optional)"
+          style={{ resize: "vertical" }}
+          readOnly={isReadOnly}
+          {...register("carrierAddress")}
+        />
+      </div>
+      <div className="lcn">
+        <span className="lcn__label">EDI Code</span>
+        <input
+          className="box-panel"
+          placeholder="EDI Code (max 2)"
+          maxLength={2}
+          readOnly={isReadOnly}
+          {...register("ediCode")}
+        />
+      </div>
       <div className="lcn">
         <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -138,6 +163,8 @@ function CarrierEntryModalInner({ state, onClose, onSaved }: Props) {
         carrierType: detail.carrierType,
         name: detail.name,
         nameEn: detail.nameEn ?? "",
+        carrierAddress: detail.carrierAddress ?? "",
+        ediCode: detail.ediCode ?? "",
         active: detail.active,
       });
     }
@@ -180,6 +207,8 @@ function CarrierEntryModalInner({ state, onClose, onSaved }: Props) {
         carrierType: values.carrierType,
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
+        carrierAddress: parseNullable(values.carrierAddress),
+        ediCode: parseNullable(values.ediCode),
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
@@ -189,6 +218,8 @@ function CarrierEntryModalInner({ state, onClose, onSaved }: Props) {
         carrierType: values.carrierType,
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
+        carrierAddress: parseNullable(values.carrierAddress),
+        ediCode: parseNullable(values.ediCode),
         active: values.active,
       };
       createMutation.mutate(req);

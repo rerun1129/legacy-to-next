@@ -34,6 +34,9 @@ public class HsCodeJpaEntity extends BaseJpaEntity {
     @Column(name = "name_en", length = 200)
     private String nameEn;
 
+    @Column(name = "country_code", length = 5)
+    private String countryCode;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 

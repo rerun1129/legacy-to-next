@@ -13,6 +13,7 @@ public class CurrencyDomainToJpaMapper {
         entity.setName(domain.getName());
         entity.setNameEn(domain.getNameEn());
         entity.setSymbol(domain.getSymbol());
+        entity.setCurrencyUnit(domain.getCurrencyUnit());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
         return entity;
@@ -25,6 +26,7 @@ public class CurrencyDomainToJpaMapper {
         entity.setName(patch.getName());
         entity.setNameEn(patch.getNameEn());
         entity.setSymbol(patch.getSymbol());
+        entity.setCurrencyUnit(patch.getCurrencyUnit());
         entity.setActive(patch.isActive());
     }
 }

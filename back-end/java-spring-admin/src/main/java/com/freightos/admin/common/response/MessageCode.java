@@ -117,7 +117,13 @@ public enum MessageCode {
     PORT_DELETED("항구가 삭제되었습니다."),
     PORT_NOT_FOUND("항구를 찾을 수 없습니다."),
     PORT_DUPLICATE_CODE("동일한 항구 코드가 이미 존재합니다."),
-    PORT_ALREADY_DELETED("이미 삭제된 항구입니다.");
+    PORT_ALREADY_DELETED("이미 삭제된 항구입니다."),
+    COUNTRY_CREATED("국가가 등록되었습니다."),
+    COUNTRY_UPDATED("국가가 수정되었습니다."),
+    COUNTRY_DELETED("국가가 삭제되었습니다."),
+    COUNTRY_NOT_FOUND("국가를 찾을 수 없습니다."),
+    COUNTRY_DUPLICATE_CODE("동일한 국가 코드가 이미 존재합니다."),
+    COUNTRY_ALREADY_DELETED("이미 삭제된 국가입니다.");
 
     private final String message;
 

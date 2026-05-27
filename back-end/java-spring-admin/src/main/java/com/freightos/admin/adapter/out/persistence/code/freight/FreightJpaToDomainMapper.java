@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class FreightJpaToDomainMapper {
 
     public Freight toDomain(FreightJpaEntity e) {
-        Freight domain = Freight.create(e.getFreightCode(), e.getName(), e.getNameEn(), e.getDescription(), e.getActive());
+        Freight domain = Freight.create(e.getFreightCode(), e.getName(), e.getNameEn(), e.getDescription(), e.getFreightUnit(), e.getFreightGroup(), e.getActive());
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());
         return domain;

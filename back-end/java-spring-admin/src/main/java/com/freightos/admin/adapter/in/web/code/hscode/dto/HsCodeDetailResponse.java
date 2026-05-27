@@ -7,6 +7,7 @@ public record HsCodeDetailResponse(
         String hsCode,
         String name,
         String nameEn,
+        String countryCode,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime createdAt,

@@ -20,6 +20,8 @@ export interface CarrierDetail {
   carrierType: CarrierType;
   name: string;
   nameEn: string | null;
+  carrierAddress: string | null;
+  ediCode: string | null;
   active: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -40,6 +42,8 @@ export interface CreateCarrierRequestDto {
   carrierType: CarrierType;
   name: string;
   nameEn: string | null;
+  carrierAddress: string | null;
+  ediCode: string | null;
   active: boolean;
 }
 
@@ -47,5 +51,7 @@ export interface UpdateCarrierRequestDto {
   carrierType: CarrierType;
   name: string;
   nameEn: string | null;
+  carrierAddress: string | null;
+  ediCode: string | null;
   active: boolean;
 }

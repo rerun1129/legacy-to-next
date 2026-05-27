@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 public class ExchangeRateFactory {
 
     public ExchangeRate from(CreateExchangeRateCommand command) {
-        return ExchangeRate.create(command.baseCurrency(), command.targetCurrency(), command.rate(), command.name(), command.nameEn(), command.active());
+        return ExchangeRate.create(
+                command.fromCurrencyCode(), command.toCurrencyCode(), command.exchangeDate(),
+                command.cashSellExchangeRate(), command.cashBuyExchangeRate(),
+                command.wireSendExchangeRate(), command.wireReceiveExchangeRate(),
+                command.standardExchangeRate(), command.name(), command.nameEn(), command.active()
+        );
     }
 }

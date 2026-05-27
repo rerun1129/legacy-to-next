@@ -22,11 +22,11 @@ public class CarrierAssembler {
     }
 
     public CreateCarrierCommand toCreateCommand(CreateCarrierRequest req) {
-        return new CreateCarrierCommand(req.carrierCode(), req.name(), req.nameEn(), req.carrierType(), req.active());
+        return new CreateCarrierCommand(req.carrierCode(), req.name(), req.nameEn(), req.carrierType(), req.carrierAddress(), req.ediCode(), req.active());
     }
 
     public UpdateCarrierCommand toUpdateCommand(UpdateCarrierRequest req) {
-        return new UpdateCarrierCommand(req.name(), req.nameEn(), req.carrierType(), req.active());
+        return new UpdateCarrierCommand(req.name(), req.nameEn(), req.carrierType(), req.carrierAddress(), req.ediCode(), req.active());
     }
 
     public CarrierSummaryResponse toSummaryResponse(CarrierSummary p) {
@@ -36,7 +36,8 @@ public class CarrierAssembler {
     public CarrierDetailResponse toDetail(Carrier domain) {
         return new CarrierDetailResponse(
                 domain.getId(), domain.getCarrierCode(), domain.getName(), domain.getNameEn(),
-                domain.getCarrierType(), domain.isActive(), domain.getDeletedAt(),
+                domain.getCarrierType(), domain.getCarrierAddress(), domain.getEdiCode(),
+                domain.isActive(), domain.getDeletedAt(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }

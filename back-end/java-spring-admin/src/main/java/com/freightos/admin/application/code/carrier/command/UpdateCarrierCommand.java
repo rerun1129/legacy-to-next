@@ -6,5 +6,7 @@ public record UpdateCarrierCommand(
         String name,
         String nameEn,
         CarrierType carrierType,
+        String carrierAddress,
+        String ediCode,
         boolean active
 ) {}

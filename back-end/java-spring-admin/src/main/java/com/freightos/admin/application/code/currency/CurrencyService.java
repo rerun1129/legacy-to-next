@@ -53,7 +53,7 @@ public class CurrencyService implements CurrencyUseCase {
         if (currency.isDeleted()) {
             throw ApplicationException.conflict("CURRENCY_ALREADY_DELETED", MessageCode.CURRENCY_ALREADY_DELETED.getMessage());
         }
-        currency.applyUpdate(command.name(), command.nameEn(), command.symbol(), command.active());
+        currency.applyUpdate(command.name(), command.nameEn(), command.symbol(), command.currencyUnit(), command.active());
         currencyPort.update(id, currency);
     }
 

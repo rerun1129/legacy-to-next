@@ -10,6 +10,8 @@ import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 import { exchangeRateUseCases } from "@/application/code/exchange-rate/use-cases";
 import type { CreateExchangeRateRequestDto, UpdateExchangeRateRequestDto } from "@/domain/code/exchange-rate";
+import { ExchangeRateFormFields } from "./exchange-rate-form-fields";
+import { type ExchangeRateFormValues, DEFAULT_EXCHANGE_RATE_FORM } from "./exchange-rate-form-types";
 
 export interface EntryModalState {
   mode: "create" | "edit";
@@ -22,116 +24,18 @@ interface Props {
   onSaved: () => void;
 }
 
-interface ExchangeRateFormValues {
-  baseCurrency: string;
-  targetCurrency: string;
-  rate: number;
-  name: string;
-  nameEn: string;
-  active: boolean;
-}
-
-const DEFAULT_FORM: ExchangeRateFormValues = {
-  baseCurrency: "",
-  targetCurrency: "",
-  rate: 0,
-  name: "",
-  nameEn: "",
-  active: true,
-};
-
 function parseNullable(v: string): string | null {
   return v.trim() === "" ? null : v.trim();
 }
 
-function ExchangeRateFormFields({
-  register,
-  isEdit,
-  isReadOnly,
-}: {
-  register: ReturnType<typeof useForm<ExchangeRateFormValues>>["register"];
-  isEdit: boolean;
-  isReadOnly: boolean;
-}) {
-  const baseCurrencyReg = register("baseCurrency");
-  const targetCurrencyReg = register("targetCurrency");
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div className="lcn">
-        <span className="lcn__label">Base Currency *</span>
-        <input
-          className="box-panel"
-          placeholder="e.g. USD"
-          maxLength={3}
-          readOnly={isEdit || isReadOnly}
-          style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
-          {...baseCurrencyReg}
-          onChange={(e) => {
-            e.target.value = e.target.value.toUpperCase();
-            void baseCurrencyReg.onChange(e);
-          }}
-        />
-      </div>
-      <div className="lcn">
-        <span className="lcn__label">Target Currency *</span>
-        <input
-          className="box-panel"
-          placeholder="e.g. KRW"
-          maxLength={3}
-          readOnly={isEdit || isReadOnly}
-          style={isEdit ? { background: "var(--surface-2)", color: "var(--ink-3)" } : undefined}
-          {...targetCurrencyReg}
-          onChange={(e) => {
-            e.target.value = e.target.value.toUpperCase();
-            void targetCurrencyReg.onChange(e);
-          }}
-        />
-      </div>
-      <div className="lcn">
-        <span className="lcn__label">Rate *</span>
-        <input
-          className="box-panel"
-          type="number"
-          step="0.000001"
-          placeholder="0.000000"
-          readOnly={isReadOnly}
-          {...register("rate", { valueAsNumber: true })}
-        />
-      </div>
-      <div className="lcn">
-        <span className="lcn__label">Name *</span>
-        <input
-          className="box-panel"
-          placeholder="Name"
-          readOnly={isReadOnly}
-          {...register("name")}
-        />
-      </div>
-      <div className="lcn">
-        <span className="lcn__label">English Name</span>
-        <input
-          className="box-panel"
-          placeholder="English Name (optional)"
-          readOnly={isReadOnly}
-          {...register("nameEn")}
-        />
-      </div>
-      <div className="lcn">
-        <span className="lcn__label">Active</span>
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <input type="checkbox" disabled={isReadOnly} {...register("active")} />
-          Active
-        </label>
-      </div>
-    </div>
-  );
+function parseNullableNumber(v: number | null): number | null {
+  return v === null || Number.isNaN(v) ? null : v;
 }
 
 function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
   const isEdit = state?.mode === "edit";
 
-  const form = useForm<ExchangeRateFormValues>({ defaultValues: DEFAULT_FORM });
+  const form = useForm<ExchangeRateFormValues>({ defaultValues: DEFAULT_EXCHANGE_RATE_FORM });
   const { register, reset, getValues, formState: { isSubmitting } } = form;
 
   const { data: detail, isLoading: isDetailLoading } = useQuery({
@@ -146,9 +50,14 @@ function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
   useEffect(() => {
     if (detail) {
       reset({
-        baseCurrency: detail.baseCurrency,
-        targetCurrency: detail.targetCurrency,
-        rate: detail.rate,
+        fromCurrencyCode: detail.fromCurrencyCode,
+        toCurrencyCode: detail.toCurrencyCode,
+        exchangeDate: detail.exchangeDate ?? "",
+        cashSellExchangeRate: detail.cashSellExchangeRate,
+        cashBuyExchangeRate: detail.cashBuyExchangeRate,
+        wireSendExchangeRate: detail.wireSendExchangeRate,
+        wireReceiveExchangeRate: detail.wireReceiveExchangeRate,
+        standardExchangeRate: detail.standardExchangeRate,
         name: detail.name,
         nameEn: detail.nameEn ?? "",
         active: detail.active,
@@ -158,7 +67,7 @@ function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
 
   useEffect(() => {
     if (!isEdit) {
-      reset(DEFAULT_FORM);
+      reset(DEFAULT_EXCHANGE_RATE_FORM);
     }
   }, [isEdit, reset]);
 
@@ -190,7 +99,12 @@ function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
   function handleSave(values: ExchangeRateFormValues) {
     if (isEdit && state?.id != null) {
       const req: UpdateExchangeRateRequestDto = {
-        rate: values.rate,
+        exchangeDate: parseNullable(values.exchangeDate),
+        cashSellExchangeRate: parseNullableNumber(values.cashSellExchangeRate),
+        cashBuyExchangeRate: parseNullableNumber(values.cashBuyExchangeRate),
+        wireSendExchangeRate: parseNullableNumber(values.wireSendExchangeRate),
+        wireReceiveExchangeRate: parseNullableNumber(values.wireReceiveExchangeRate),
+        standardExchangeRate: parseNullableNumber(values.standardExchangeRate),
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         active: values.active,
@@ -198,9 +112,14 @@ function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
       updateMutation.mutate({ id: state.id, req });
     } else {
       const req: CreateExchangeRateRequestDto = {
-        baseCurrency: values.baseCurrency.trim().toUpperCase(),
-        targetCurrency: values.targetCurrency.trim().toUpperCase(),
-        rate: values.rate,
+        fromCurrencyCode: values.fromCurrencyCode.trim().toUpperCase(),
+        toCurrencyCode: values.toCurrencyCode.trim().toUpperCase(),
+        exchangeDate: parseNullable(values.exchangeDate),
+        cashSellExchangeRate: parseNullableNumber(values.cashSellExchangeRate),
+        cashBuyExchangeRate: parseNullableNumber(values.cashBuyExchangeRate),
+        wireSendExchangeRate: parseNullableNumber(values.wireSendExchangeRate),
+        wireReceiveExchangeRate: parseNullableNumber(values.wireReceiveExchangeRate),
+        standardExchangeRate: parseNullableNumber(values.standardExchangeRate),
         name: values.name.trim(),
         nameEn: parseNullable(values.nameEn),
         active: values.active,
@@ -213,7 +132,7 @@ function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
     if (!state?.id) return;
     const ok = await confirm({
       title: "환율 삭제",
-      description: `${getValues("baseCurrency")}/${getValues("targetCurrency")} 환율을 삭제하시겠습니까?`,
+      description: `${getValues("fromCurrencyCode")}/${getValues("toCurrencyCode")} 환율을 삭제하시겠습니까?`,
       variant: "destructive",
       confirmText: "삭제",
       cancelText: "취소",

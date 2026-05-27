@@ -16,8 +16,8 @@ import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
 
 const DEFAULT_VALUES: ExchangeRateFilter = {
-  baseCurrency: "",
-  targetCurrency: "",
+  fromCurrencyCode: "",
+  toCurrencyCode: "",
   name: "",
   scope: "ALL",
 };

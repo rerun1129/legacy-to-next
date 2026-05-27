@@ -22,11 +22,11 @@ public class FreightAssembler {
     }
 
     public CreateFreightCommand toCreateCommand(CreateFreightRequest req) {
-        return new CreateFreightCommand(req.freightCode(), req.name(), req.nameEn(), req.description(), req.active());
+        return new CreateFreightCommand(req.freightCode(), req.name(), req.nameEn(), req.description(), req.freightUnit(), req.freightGroup(), req.active());
     }
 
     public UpdateFreightCommand toUpdateCommand(UpdateFreightRequest req) {
-        return new UpdateFreightCommand(req.name(), req.nameEn(), req.description(), req.active());
+        return new UpdateFreightCommand(req.name(), req.nameEn(), req.description(), req.freightUnit(), req.freightGroup(), req.active());
     }
 
     public FreightSummaryResponse toSummaryResponse(FreightSummary p) {
@@ -36,7 +36,8 @@ public class FreightAssembler {
     public FreightDetailResponse toDetail(Freight domain) {
         return new FreightDetailResponse(
                 domain.getId(), domain.getFreightCode(), domain.getName(), domain.getNameEn(),
-                domain.getDescription(), domain.isActive(), domain.getDeletedAt(),
+                domain.getDescription(), domain.getFreightUnit(), domain.getFreightGroup(),
+                domain.isActive(), domain.getDeletedAt(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }

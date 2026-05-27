@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public class CurrencyFactory {
 
     public Currency from(CreateCurrencyCommand command) {
-        return Currency.create(command.currencyCode(), command.name(), command.nameEn(), command.symbol(), command.active());
+        return Currency.create(command.currencyCode(), command.name(), command.nameEn(), command.symbol(), command.currencyUnit(), command.active());
     }
 }

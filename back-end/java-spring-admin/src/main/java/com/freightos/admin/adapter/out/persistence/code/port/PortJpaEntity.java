@@ -37,7 +37,7 @@ public class PortJpaEntity extends BaseJpaEntity {
     @Column(name = "name_en", length = 200)
     private String nameEn;
 
-    @Column(name = "country_code", length = 3)
+    @Column(name = "country_code", length = 5)
     private String countryCode;
 
     @Enumerated(EnumType.STRING)

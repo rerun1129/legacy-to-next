@@ -53,7 +53,7 @@ public class FreightService implements FreightUseCase {
         if (freight.isDeleted()) {
             throw ApplicationException.conflict("FREIGHT_ALREADY_DELETED", MessageCode.FREIGHT_ALREADY_DELETED.getMessage());
         }
-        freight.applyUpdate(command.name(), command.nameEn(), command.description(), command.active());
+        freight.applyUpdate(command.name(), command.nameEn(), command.description(), command.freightUnit(), command.freightGroup(), command.active());
         freightPort.update(id, freight);
     }
 

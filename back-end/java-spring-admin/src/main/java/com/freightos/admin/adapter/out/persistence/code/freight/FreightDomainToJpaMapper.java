@@ -13,6 +13,8 @@ public class FreightDomainToJpaMapper {
         entity.setName(domain.getName());
         entity.setNameEn(domain.getNameEn());
         entity.setDescription(domain.getDescription());
+        entity.setFreightUnit(domain.getFreightUnit());
+        entity.setFreightGroup(domain.getFreightGroup());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
         return entity;
@@ -25,6 +27,8 @@ public class FreightDomainToJpaMapper {
         entity.setName(patch.getName());
         entity.setNameEn(patch.getNameEn());
         entity.setDescription(patch.getDescription());
+        entity.setFreightUnit(patch.getFreightUnit());
+        entity.setFreightGroup(patch.getFreightGroup());
         entity.setActive(patch.isActive());
     }
 }

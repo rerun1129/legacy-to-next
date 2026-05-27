@@ -10,5 +10,6 @@ public record CreateCurrencyRequest(
         @NotBlank @Size(max = 100) String name,
         @Size(max = 100) String nameEn,
         @Size(max = 10) String symbol,
+        Integer currencyUnit,
         @NotNull Boolean active
 ) {}

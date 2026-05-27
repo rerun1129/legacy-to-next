@@ -32,6 +32,8 @@ const CARRIER_DETAIL_SCHEMA = z.object({
   carrierType: CARRIER_TYPE_SCHEMA,
   name: z.string(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
+  carrierAddress: z.string().nullable().optional().transform((v) => v ?? null),
+  ediCode: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   createdAt: z.string(),

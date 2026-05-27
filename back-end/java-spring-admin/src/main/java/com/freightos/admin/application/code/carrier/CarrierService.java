@@ -53,7 +53,7 @@ public class CarrierService implements CarrierUseCase {
         if (carrier.isDeleted()) {
             throw ApplicationException.conflict("CARRIER_ALREADY_DELETED", MessageCode.CARRIER_ALREADY_DELETED.getMessage());
         }
-        carrier.applyUpdate(command.name(), command.nameEn(), command.carrierType(), command.active());
+        carrier.applyUpdate(command.name(), command.nameEn(), command.carrierType(), command.carrierAddress(), command.ediCode(), command.active());
         carrierPort.update(id, carrier);
     }
 

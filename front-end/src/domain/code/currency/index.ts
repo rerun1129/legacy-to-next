@@ -16,6 +16,7 @@ export interface CurrencyDetail {
   name: string;
   nameEn: string | null;
   symbol: string | null;
+  currencyUnit: number | null;
   active: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -35,6 +36,7 @@ export interface CreateCurrencyRequestDto {
   name: string;
   nameEn: string | null;
   symbol: string | null;
+  currencyUnit: number | null;
   active: boolean;
 }
 
@@ -42,5 +44,6 @@ export interface UpdateCurrencyRequestDto {
   name: string;
   nameEn: string | null;
   symbol: string | null;
+  currencyUnit: number | null;
   active: boolean;
 }

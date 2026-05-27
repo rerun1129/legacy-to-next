@@ -22,11 +22,11 @@ public class CustomerAssembler {
     }
 
     public CreateCustomerCommand toCreateCommand(CreateCustomerRequest req) {
-        return new CreateCustomerCommand(req.customerCode(), req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.address(), req.addressEn(), req.memo(), req.active());
+        return new CreateCustomerCommand(req.customerCode(), req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.customerLocalAddress(), req.customerEnglishAddress(), req.memo(), req.active());
     }
 
     public UpdateCustomerCommand toUpdateCommand(UpdateCustomerRequest req) {
-        return new UpdateCustomerCommand(req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.address(), req.addressEn(), req.memo(), req.active());
+        return new UpdateCustomerCommand(req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.customerLocalAddress(), req.customerEnglishAddress(), req.memo(), req.active());
     }
 
     public CustomerSummaryResponse toSummaryResponse(CustomerSummary p) {
@@ -38,7 +38,8 @@ public class CustomerAssembler {
                 domain.getId(), domain.getCustomerCode(), domain.getCustomerType(),
                 domain.getName(), domain.getNameEn(), domain.getBusinessNo(),
                 domain.getRepresentative(), domain.getPhone(), domain.getEmail(),
-                domain.getAddress(), domain.getAddressEn(), domain.getMemo(), domain.isActive(), domain.getDeletedAt(),
+                domain.getCustomerLocalAddress(), domain.getCustomerEnglishAddress(),
+                domain.getMemo(), domain.isActive(), domain.getDeletedAt(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }

@@ -14,6 +14,7 @@ export interface HsCodeDetail {
   hsCode: string;
   name: string;
   nameEn: string | null;
+  countryCode: string | null;
   active: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -32,11 +33,13 @@ export interface CreateHsCodeRequestDto {
   hsCode: string;
   name: string;
   nameEn: string | null;
+  countryCode: string | null;
   active: boolean;
 }
 
 export interface UpdateHsCodeRequestDto {
   name: string;
   nameEn: string | null;
+  countryCode: string | null;
   active: boolean;
 }

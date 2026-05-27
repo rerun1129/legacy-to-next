@@ -26,19 +26,19 @@ export function ExchangeRateListFilter({ form }: Props) {
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <div className="lcn">
-            <span className="lcn__label">Base Currency</span>
+            <span className="lcn__label">From Currency</span>
             <input
               className="box-panel"
               placeholder="e.g. USD"
-              {...register("baseCurrency")}
+              {...register("fromCurrencyCode")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Target Currency</span>
+            <span className="lcn__label">To Currency</span>
             <input
               className="box-panel"
               placeholder="e.g. KRW"
-              {...register("targetCurrency")}
+              {...register("toCurrencyCode")}
             />
           </div>
           <div className="lcn">

@@ -19,9 +19,8 @@ interface Props {
 }
 
 const COLUMNS: GridColumn<ExchangeRateRow>[] = [
-  { key: "baseCurrency", label: "Base Currency", minWidth: 120, align: "center" },
-  { key: "targetCurrency", label: "Target Currency", minWidth: 120, align: "center" },
-  { key: "rate", label: "Rate", minWidth: 120, align: "right" },
+  { key: "fromCurrencyCode", label: "From Currency", minWidth: 120, align: "center" },
+  { key: "toCurrencyCode", label: "To Currency", minWidth: 120, align: "center" },
   { key: "name", label: "Name", minWidth: 160 },
   {
     key: "active",

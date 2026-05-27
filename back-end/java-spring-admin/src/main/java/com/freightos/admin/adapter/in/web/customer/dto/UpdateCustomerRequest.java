@@ -14,8 +14,8 @@ public record UpdateCustomerRequest(
         @Size(max = 100) String representative,
         @Size(max = 50) String phone,
         @Email @Size(max = 200) String email,
-        @Size(max = 500) String address,
-        @Size(max = 500) String addressEn,
+        @Size(max = 4000) String customerLocalAddress,
+        @Size(max = 4000) String customerEnglishAddress,
         @Size(max = 1000) String memo,
         @NotNull Boolean active
 ) {}

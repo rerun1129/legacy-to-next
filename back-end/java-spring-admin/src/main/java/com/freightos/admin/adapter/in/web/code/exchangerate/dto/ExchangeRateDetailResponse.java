@@ -5,9 +5,14 @@ import java.time.LocalDateTime;
 
 public record ExchangeRateDetailResponse(
         Long id,
-        String baseCurrency,
-        String targetCurrency,
-        BigDecimal rate,
+        String fromCurrencyCode,
+        String toCurrencyCode,
+        String exchangeDate,
+        BigDecimal cashSellExchangeRate,
+        BigDecimal cashBuyExchangeRate,
+        BigDecimal wireSendExchangeRate,
+        BigDecimal wireReceiveExchangeRate,
+        BigDecimal standardExchangeRate,
         String name,
         String nameEn,
         boolean active,

@@ -16,35 +16,35 @@ public class Customer extends BaseEntity {
     private String representative;
     private String phone;
     private String email;
-    private String address;
-    private String addressEn;
+    private String customerLocalAddress;
+    private String customerEnglishAddress;
     private String memo;
     private boolean active;
     private LocalDateTime deletedAt;
 
     private Customer(String customerCode, CustomerType customerType, String name, String nameEn,
                      String businessNo, String representative, String phone, String email,
-                     String address, String addressEn, String memo, boolean active) {
-        this.customerCode   = customerCode;
-        this.customerType   = customerType;
-        this.name           = name;
-        this.nameEn         = nameEn;
-        this.businessNo     = businessNo;
-        this.representative = representative;
-        this.phone          = phone;
-        this.email          = email;
-        this.address        = address;
-        this.addressEn      = addressEn;
-        this.memo           = memo;
-        this.active         = active;
-        this.deletedAt      = null;
+                     String customerLocalAddress, String customerEnglishAddress, String memo, boolean active) {
+        this.customerCode           = customerCode;
+        this.customerType           = customerType;
+        this.name                   = name;
+        this.nameEn                 = nameEn;
+        this.businessNo             = businessNo;
+        this.representative         = representative;
+        this.phone                  = phone;
+        this.email                  = email;
+        this.customerLocalAddress   = customerLocalAddress;
+        this.customerEnglishAddress = customerEnglishAddress;
+        this.memo                   = memo;
+        this.active                 = active;
+        this.deletedAt              = null;
     }
 
     public static Customer create(String customerCode, CustomerType customerType, String name, String nameEn,
                                   String businessNo, String representative, String phone, String email,
-                                  String address, String addressEn, String memo, boolean active) {
+                                  String customerLocalAddress, String customerEnglishAddress, String memo, boolean active) {
         return new Customer(customerCode, customerType, name, nameEn, businessNo, representative,
-                phone, email, address, addressEn, memo, active);
+                phone, email, customerLocalAddress, customerEnglishAddress, memo, active);
     }
 
     /**
@@ -52,18 +52,18 @@ public class Customer extends BaseEntity {
      */
     public void applyUpdate(CustomerType customerType, String name, String nameEn,
                             String businessNo, String representative, String phone,
-                            String email, String address, String addressEn, String memo, boolean active) {
-        this.customerType   = customerType;
-        this.name           = name;
-        this.nameEn         = nameEn;
-        this.businessNo     = businessNo;
-        this.representative = representative;
-        this.phone          = phone;
-        this.email          = email;
-        this.address        = address;
-        this.addressEn      = addressEn;
-        this.memo           = memo;
-        this.active         = active;
+                            String email, String customerLocalAddress, String customerEnglishAddress, String memo, boolean active) {
+        this.customerType           = customerType;
+        this.name                   = name;
+        this.nameEn                 = nameEn;
+        this.businessNo             = businessNo;
+        this.representative         = representative;
+        this.phone                  = phone;
+        this.email                  = email;
+        this.customerLocalAddress   = customerLocalAddress;
+        this.customerEnglishAddress = customerEnglishAddress;
+        this.memo                   = memo;
+        this.active                 = active;
     }
 
     /** soft delete: 삭제 시각 기록 + 비활성화. */

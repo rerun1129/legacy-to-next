@@ -17,8 +17,8 @@ public class CustomerDomainToJpaMapper {
         entity.setRepresentative(domain.getRepresentative());
         entity.setPhone(domain.getPhone());
         entity.setEmail(domain.getEmail());
-        entity.setAddress(domain.getAddress());
-        entity.setAddressEn(domain.getAddressEn());
+        entity.setCustomerLocalAddress(domain.getCustomerLocalAddress());
+        entity.setCustomerEnglishAddress(domain.getCustomerEnglishAddress());
         entity.setMemo(domain.getMemo());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
@@ -36,8 +36,8 @@ public class CustomerDomainToJpaMapper {
         entity.setRepresentative(patch.getRepresentative());
         entity.setPhone(patch.getPhone());
         entity.setEmail(patch.getEmail());
-        entity.setAddress(patch.getAddress());
-        entity.setAddressEn(patch.getAddressEn());
+        entity.setCustomerLocalAddress(patch.getCustomerLocalAddress());
+        entity.setCustomerEnglishAddress(patch.getCustomerEnglishAddress());
         entity.setMemo(patch.getMemo());
         entity.setActive(patch.isActive());
     }

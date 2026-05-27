@@ -22,11 +22,11 @@ public class CurrencyAssembler {
     }
 
     public CreateCurrencyCommand toCreateCommand(CreateCurrencyRequest req) {
-        return new CreateCurrencyCommand(req.currencyCode(), req.name(), req.nameEn(), req.symbol(), req.active());
+        return new CreateCurrencyCommand(req.currencyCode(), req.name(), req.nameEn(), req.symbol(), req.currencyUnit(), req.active());
     }
 
     public UpdateCurrencyCommand toUpdateCommand(UpdateCurrencyRequest req) {
-        return new UpdateCurrencyCommand(req.name(), req.nameEn(), req.symbol(), req.active());
+        return new UpdateCurrencyCommand(req.name(), req.nameEn(), req.symbol(), req.currencyUnit(), req.active());
     }
 
     public CurrencySummaryResponse toSummaryResponse(CurrencySummary p) {
@@ -36,7 +36,7 @@ public class CurrencyAssembler {
     public CurrencyDetailResponse toDetail(Currency domain) {
         return new CurrencyDetailResponse(
                 domain.getId(), domain.getCurrencyCode(), domain.getName(), domain.getNameEn(),
-                domain.getSymbol(), domain.isActive(), domain.getDeletedAt(),
+                domain.getSymbol(), domain.getCurrencyUnit(), domain.isActive(), domain.getDeletedAt(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }

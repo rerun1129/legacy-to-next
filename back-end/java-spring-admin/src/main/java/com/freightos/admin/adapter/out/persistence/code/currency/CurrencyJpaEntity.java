@@ -37,6 +37,9 @@ public class CurrencyJpaEntity extends BaseJpaEntity {
     @Column(name = "symbol", length = 10)
     private String symbol;
 
+    @Column(name = "currency_unit")
+    private Integer currencyUnit;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 

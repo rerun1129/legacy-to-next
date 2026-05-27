@@ -10,8 +10,8 @@ public record UpdateCustomerCommand(
         String representative,
         String phone,
         String email,
-        String address,
-        String addressEn,
+        String customerLocalAddress,
+        String customerEnglishAddress,
         String memo,
         boolean active
 ) {}

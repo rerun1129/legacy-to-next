@@ -22,11 +22,11 @@ public class HsCodeAssembler {
     }
 
     public CreateHsCodeCommand toCreateCommand(CreateHsCodeRequest req) {
-        return new CreateHsCodeCommand(req.hsCode(), req.name(), req.nameEn(), req.active());
+        return new CreateHsCodeCommand(req.hsCode(), req.name(), req.nameEn(), req.countryCode(), req.active());
     }
 
     public UpdateHsCodeCommand toUpdateCommand(UpdateHsCodeRequest req) {
-        return new UpdateHsCodeCommand(req.name(), req.nameEn(), req.active());
+        return new UpdateHsCodeCommand(req.name(), req.nameEn(), req.countryCode(), req.active());
     }
 
     public HsCodeSummaryResponse toSummaryResponse(HsCodeSummary p) {
@@ -36,7 +36,7 @@ public class HsCodeAssembler {
     public HsCodeDetailResponse toDetail(HsCode domain) {
         return new HsCodeDetailResponse(
                 domain.getId(), domain.getHsCode(), domain.getName(), domain.getNameEn(),
-                domain.isActive(), domain.getDeletedAt(),
+                domain.getCountryCode(), domain.isActive(), domain.getDeletedAt(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }
