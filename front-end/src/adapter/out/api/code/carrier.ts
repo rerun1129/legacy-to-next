@@ -19,7 +19,7 @@ const CARRIER_TYPE_SCHEMA = z.enum(["SEA", "AIR"]) satisfies z.ZodType<CarrierTy
 const CARRIER_ROW_SCHEMA = z.object({
   id: z.number(),
   carrierCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   carrierType: CARRIER_TYPE_SCHEMA,
   carrierAddress: z.string().nullable().optional().transform((v) => v ?? null),
@@ -33,7 +33,7 @@ const CARRIER_DETAIL_SCHEMA = z.object({
   id: z.number(),
   carrierCode: z.string(),
   carrierType: CARRIER_TYPE_SCHEMA,
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   carrierAddress: z.string().nullable().optional().transform((v) => v ?? null),
   ediCode: z.string().nullable().optional().transform((v) => v ?? null),

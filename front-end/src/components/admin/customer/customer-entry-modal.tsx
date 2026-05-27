@@ -234,7 +234,7 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
       reset({
         customerCode: detail.customerCode,
         customerType: detail.customerType,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         businessNo: detail.businessNo ?? "",
         representative: detail.representative ?? "",

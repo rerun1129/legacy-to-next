@@ -10,7 +10,7 @@ export interface ExchangeRateRow {
   wireSendExchangeRate: number | null;
   wireReceiveExchangeRate: number | null;
   standardExchangeRate: number | null;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   active: boolean;
   deletedAt: string | null;
@@ -21,7 +21,7 @@ export interface ExchangeRateDetail {
   id: number;
   fromCurrencyCode: string;
   toCurrencyCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   exchangeDate: string | null;
   cashSellExchangeRate: number | null;

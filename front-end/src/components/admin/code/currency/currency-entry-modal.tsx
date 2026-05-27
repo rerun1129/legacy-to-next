@@ -134,7 +134,7 @@ function CurrencyEntryModalInner({ state, onClose, onSaved }: Props) {
     if (detail) {
       reset({
         currencyCode: detail.currencyCode,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         symbol: detail.symbol ?? "",
         currencyUnit: detail.currencyUnit,

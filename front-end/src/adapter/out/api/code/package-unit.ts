@@ -16,7 +16,7 @@ const BASE = "/api/admin/code/package";
 const PACKAGE_UNIT_ROW_SCHEMA = z.object({
   id: z.number(),
   packageCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
@@ -26,7 +26,7 @@ const PACKAGE_UNIT_ROW_SCHEMA = z.object({
 const PACKAGE_UNIT_DETAIL_SCHEMA = z.object({
   id: z.number(),
   packageCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),

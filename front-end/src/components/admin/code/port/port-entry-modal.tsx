@@ -148,7 +148,7 @@ function PortEntryModalInner({ state, onClose, onSaved }: Props) {
       reset({
         portCode: detail.portCode,
         portType: detail.portType,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         countryCode: detail.countryCode,
         active: detail.active,

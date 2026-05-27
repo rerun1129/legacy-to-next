@@ -3,7 +3,7 @@ export type HsCodeScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface HsCodeRow {
   id: number;
   hsCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   countryCode: string | null;
   active: boolean;
@@ -14,7 +14,7 @@ export interface HsCodeRow {
 export interface HsCodeDetail {
   id: number;
   hsCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   countryCode: string | null;
   active: boolean;

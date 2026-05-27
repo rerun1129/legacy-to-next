@@ -19,7 +19,7 @@ const FREIGHT_GROUP_SCHEMA = z.enum(["OTHER", "FREIGHT", "SURCHARGE", "WHARFAGE"
 const FREIGHT_ROW_SCHEMA = z.object({
   id: z.number(),
   freightCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   description: z.string().nullable().optional().transform((v) => v ?? null),
   freightUnit: z.string().nullable().optional().transform((v) => v ?? null),
@@ -32,7 +32,7 @@ const FREIGHT_ROW_SCHEMA = z.object({
 const FREIGHT_DETAIL_SCHEMA = z.object({
   id: z.number(),
   freightCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   description: z.string().nullable().optional().transform((v) => v ?? null),
   freightUnit: z.string().nullable().optional().transform((v) => v ?? null),

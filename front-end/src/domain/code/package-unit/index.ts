@@ -3,7 +3,7 @@ export type PackageUnitScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface PackageUnitRow {
   id: number;
   packageCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   active: boolean;
   deletedAt: string | null;
@@ -13,7 +13,7 @@ export interface PackageUnitRow {
 export interface PackageUnitDetail {
   id: number;
   packageCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   active: boolean;
   deletedAt: string | null;

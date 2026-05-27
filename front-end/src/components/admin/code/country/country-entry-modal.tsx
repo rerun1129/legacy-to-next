@@ -111,7 +111,7 @@ function CountryEntryModalInner({ state, onClose, onSaved }: Props) {
     if (detail) {
       reset({
         countryCode: detail.countryCode,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         active: detail.active,
       });

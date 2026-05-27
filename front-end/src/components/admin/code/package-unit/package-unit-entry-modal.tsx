@@ -111,7 +111,7 @@ function PackageUnitEntryModalInner({ state, onClose, onSaved }: Props) {
     if (detail) {
       reset({
         packageCode: detail.packageCode,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         active: detail.active,
       });

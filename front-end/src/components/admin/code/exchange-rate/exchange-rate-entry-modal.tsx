@@ -58,7 +58,7 @@ function ExchangeRateEntryModalInner({ state, onClose, onSaved }: Props) {
         wireSendExchangeRate: detail.wireSendExchangeRate,
         wireReceiveExchangeRate: detail.wireReceiveExchangeRate,
         standardExchangeRate: detail.standardExchangeRate,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         active: detail.active,
       });

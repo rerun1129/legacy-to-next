@@ -167,7 +167,7 @@ function FreightEntryModalInner({ state, onClose, onSaved }: Props) {
     if (detail) {
       reset({
         freightCode: detail.freightCode,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         description: detail.description ?? "",
         freightUnit: detail.freightUnit ?? "",
