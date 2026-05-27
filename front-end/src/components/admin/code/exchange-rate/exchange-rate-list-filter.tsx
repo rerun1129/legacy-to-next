@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import type { ExchangeRateFilter } from "@/domain/code/exchange-rate";
-import { exchangeRateUseCases } from "@/application/code/exchange-rate/use-cases";
+import { currencyUseCases } from "@/application/code/currency/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
@@ -30,15 +30,15 @@ export function ExchangeRateListFilter({ form }: Props) {
   const [toAcQuery, setToAcQuery] = useState("");
 
   const { data: fromSuggestions = [] } = useQuery({
-    queryKey: ["admin-code-exchange-rate", "autocomplete", "from", fromAcQuery],
-    queryFn: () => exchangeRateUseCases.autocomplete(fromAcQuery),
+    queryKey: ["admin-code-currency", "autocomplete", fromAcQuery],
+    queryFn: () => currencyUseCases.autocomplete(fromAcQuery),
     enabled: fromAcQuery.length >= 1,
     staleTime: 30_000,
   });
 
   const { data: toSuggestions = [] } = useQuery({
-    queryKey: ["admin-code-exchange-rate", "autocomplete", "to", toAcQuery],
-    queryFn: () => exchangeRateUseCases.autocomplete(toAcQuery),
+    queryKey: ["admin-code-currency", "autocomplete", toAcQuery],
+    queryFn: () => currencyUseCases.autocomplete(toAcQuery),
     enabled: toAcQuery.length >= 1,
     staleTime: 30_000,
   });

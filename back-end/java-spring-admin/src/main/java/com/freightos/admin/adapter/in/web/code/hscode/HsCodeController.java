@@ -96,7 +96,7 @@ public class HsCodeController {
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HS_CODE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_CREATE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveHsCodeChangesRequest req) {
         SaveChangesResult result = hsCodeUseCase.saveHsCodeChanges(hsCodeAssembler.toSaveChangesCommand(req));
@@ -104,7 +104,7 @@ public class HsCodeController {
     }
 
     @GetMapping("/autocomplete")
-    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_HS_CODE')")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_HSCODE')")
     public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
             @RequestParam String q,
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {

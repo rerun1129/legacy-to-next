@@ -211,7 +211,7 @@ export function HsCodeListClient() {
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_ADMIN_CODE_HS_CODE_RESET"
+          buttonCode="BTN_ADMIN_CODE_HSCODE_RESET"
           className="btn btn--normal btn--sm"
           onClick={() => {
             filterForm.reset(DEFAULT_FILTER);
@@ -222,7 +222,7 @@ export function HsCodeListClient() {
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
         />
         <ActionButton
-          buttonCode="BTN_ADMIN_CODE_HS_CODE_SEARCH"
+          buttonCode="BTN_ADMIN_CODE_HSCODE_SEARCH"
           className="btn btn--search btn--sm"
           onClick={() =>
             filterForm.handleSubmit((values) => {

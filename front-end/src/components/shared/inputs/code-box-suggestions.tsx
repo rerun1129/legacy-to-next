@@ -106,7 +106,7 @@ export function CodeBoxSuggestions({ items, loading, activeIndex, onSelect, visi
       ? <div style={statusStyle}>No results</div>
       : items.map((item, idx) => (
           <div
-            key={item.code}
+            key={`${item.code}-${idx}`}
             role="option"
             aria-selected={idx === activeIndex}
             style={{

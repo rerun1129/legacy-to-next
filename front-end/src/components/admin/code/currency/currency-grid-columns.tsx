@@ -87,11 +87,17 @@ export function buildCurrencyColumns(
       label: "Unit",
       width: 90,
       render: (_v, _row, i) => (
-        <NumberBox
-          variant="cell"
+        <Controller
           name={`rows.${i}.currencyUnit`}
-          decimalPlaces={0}
-          valueAsNumber={false}
+          control={control}
+          render={({ field }) => (
+            <NumberBox
+              variant="cell"
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              decimalPlaces={0}
+            />
+          )}
         />
       ),
     },
