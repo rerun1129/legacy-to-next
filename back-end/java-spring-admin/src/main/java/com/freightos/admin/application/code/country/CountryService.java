@@ -8,6 +8,7 @@ import com.freightos.admin.application.code.country.port.in.CountryUseCase;
 import com.freightos.admin.application.code.country.port.out.CountryPort;
 import com.freightos.admin.application.code.country.projection.CountrySummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.response.SaveChangesResult;
@@ -94,5 +95,10 @@ public class CountryService implements CountryUseCase {
                 command.updates().size(),
                 command.deleteIds().size()
         );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteCountries(String query, int limit) {
+        return countryPort.autocomplete(query, limit);
     }
 }

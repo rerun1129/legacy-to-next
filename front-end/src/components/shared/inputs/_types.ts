@@ -1,5 +1,10 @@
 import type { InputHTMLAttributes } from "react";
 
+export interface CodeBoxSuggestion {
+  code: string;
+  name: string;
+}
+
 export type BoxVariant = "panel" | "cell" | "label";
 
 export type LabelOption = { value: string; label: string };
@@ -31,6 +36,11 @@ export interface CodeBoxProps extends BoxBaseProps {
   labelOptions?: LabelOption[];
   labelValue?: string;
   onLabelChange?: (v: string) => void;
+  // 자동완성 props
+  suggestions?: CodeBoxSuggestion[];
+  onSearch?: (query: string) => void;
+  onSelect?: (item: CodeBoxSuggestion) => void;
+  suggestionsLoading?: boolean;
 }
 
 export interface ComboBoxProps extends BoxBaseProps,

@@ -7,6 +7,7 @@ import type {
   SaveCountryChangesRequestDto,
   SaveChangesResultDto,
 } from "@/domain/code/country";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface CountryPageResult {
   content: CountryRow[];
@@ -24,4 +25,5 @@ export interface CountryPort {
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
   saveChanges(req: SaveCountryChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

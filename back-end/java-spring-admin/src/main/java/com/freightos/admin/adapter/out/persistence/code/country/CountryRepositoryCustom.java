@@ -2,8 +2,12 @@ package com.freightos.admin.adapter.out.persistence.code.country;
 
 import com.freightos.admin.application.code.country.command.SearchCountryCommand;
 import com.freightos.admin.application.code.country.projection.CountrySummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
+
+import java.util.List;
 
 public interface CountryRepositoryCustom {
     PagedResult<CountrySummary> searchSummaries(SearchCountryCommand command);
+    List<AutocompleteItem> autocomplete(String query, int limit);
 }

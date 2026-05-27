@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.out.persistence.code.country;
 
 import com.freightos.admin.application.code.country.command.SearchCountryCommand;
 import com.freightos.admin.application.code.country.projection.CountrySummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -49,6 +50,25 @@ public class CountryRepositoryImpl implements CountryRepositoryCustom {
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
         return PagedResult.of(content, totalElements, totalPages, command.page(), command.size());
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        String sql = """
+                SELECT country_code, name FROM admin.country
+                WHERE deleted_at IS NULL
+                  AND (country_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
+                ORDER BY country_code
+                LIMIT :limit
+                """;
+        // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern
+        List<?> rows = em.createNativeQuery(sql)
+                .setParameter("q", query)
+                .setParameter("limit", limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1]); })
+                .toList();
     }
 
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<CountryJpaEntity> root, SearchCountryCommand command) {

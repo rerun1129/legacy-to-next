@@ -9,4 +9,5 @@ export const countryUseCases = {
   delete: (id: number) => countryPort.delete(id),
   deleteMany: (ids: number[]) => countryPort.deleteMany(ids),
   saveChanges: (req: SaveCountryChangesRequestDto) => countryPort.saveChanges(req),
+  autocomplete: (q: string, limit?: number) => countryPort.autocomplete(q, limit),
 };

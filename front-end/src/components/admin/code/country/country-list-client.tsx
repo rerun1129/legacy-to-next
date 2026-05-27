@@ -28,6 +28,7 @@ const DEFAULT_FILTER: CountryFilter = {
 };
 
 const SCOPE = "/admin/code/country/list";
+const PASTE_COLS = ["countryCode", "name", "nameEn", "active"] as const;
 
 type CountrySearchState = SavedSearchState & { extraFilter: CountryFilter | null };
 
@@ -93,8 +94,6 @@ export function CountryListClient() {
     reset({ rows: originalRows });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalRows]);
-
-  const PASTE_COLS = ["countryCode", "name", "nameEn", "active"] as const;
 
   useEffect(() => {
     function handlePaste(e: ClipboardEvent) {

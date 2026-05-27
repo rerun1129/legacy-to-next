@@ -5,6 +5,7 @@ import com.freightos.admin.application.code.country.command.SaveCountryChangesCo
 import com.freightos.admin.application.code.country.command.SearchCountryCommand;
 import com.freightos.admin.application.code.country.command.UpdateCountryCommand;
 import com.freightos.admin.application.code.country.projection.CountrySummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.country.entity.Country;
@@ -19,4 +20,5 @@ public interface CountryUseCase {
     void deleteCountry(Long id);
     void deleteCountries(List<Long> ids);
     SaveChangesResult saveCountryChanges(SaveCountryChangesCommand command);
+    List<AutocompleteItem> autocompleteCountries(String query, int limit);
 }
