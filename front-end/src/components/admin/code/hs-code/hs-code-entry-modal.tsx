@@ -123,7 +123,7 @@ function HsCodeEntryModalInner({ state, onClose, onSaved }: Props) {
     if (detail) {
       reset({
         hsCode: detail.hsCode,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         countryCode: detail.countryCode ?? "",
         active: detail.active,

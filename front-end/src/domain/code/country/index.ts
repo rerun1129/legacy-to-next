@@ -3,7 +3,7 @@ export type CountryScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface CountryRow {
   id: number;
   countryCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   active: boolean;
   deletedAt: string | null;
@@ -13,7 +13,7 @@ export interface CountryRow {
 export interface CountryDetail {
   id: number;
   countryCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   active: boolean;
   deletedAt: string | null;

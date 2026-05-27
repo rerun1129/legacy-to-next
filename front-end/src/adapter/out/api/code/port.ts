@@ -19,7 +19,7 @@ const PORT_TYPE_SCHEMA = z.enum(["SEA", "AIR"]) satisfies z.ZodType<PortType>;
 const PORT_ROW_SCHEMA = z.object({
   id: z.number(),
   portCode: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   countryCode: z.string(),
   portType: PORT_TYPE_SCHEMA,
@@ -32,7 +32,7 @@ const PORT_DETAIL_SCHEMA = z.object({
   id: z.number(),
   portCode: z.string(),
   portType: PORT_TYPE_SCHEMA,
-  name: z.string(),
+  name: z.string().nullable(),
   nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   countryCode: z.string(),
   active: z.boolean(),

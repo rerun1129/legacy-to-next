@@ -161,7 +161,7 @@ function CarrierEntryModalInner({ state, onClose, onSaved }: Props) {
       reset({
         carrierCode: detail.carrierCode,
         carrierType: detail.carrierType,
-        name: detail.name,
+        name: detail.name ?? "",
         nameEn: detail.nameEn ?? "",
         carrierAddress: detail.carrierAddress ?? "",
         ediCode: detail.ediCode ?? "",

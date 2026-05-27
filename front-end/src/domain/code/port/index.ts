@@ -7,7 +7,7 @@ export type PortScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface PortRow {
   id: number;
   portCode: string;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   countryCode: string;
   portType: PortType;
@@ -20,7 +20,7 @@ export interface PortDetail {
   id: number;
   portCode: string;
   portType: PortType;
-  name: string;
+  name: string | null;
   nameEn: string | null;
   countryCode: string;
   active: boolean;
