@@ -19,6 +19,7 @@ public class CustomerDomainToJpaMapper {
         entity.setEmail(domain.getEmail());
         entity.setCustomerLocalAddress(domain.getCustomerLocalAddress());
         entity.setCustomerEnglishAddress(domain.getCustomerEnglishAddress());
+        entity.setCountryCode(domain.getCountryCode());
         entity.setMemo(domain.getMemo());
         entity.setActive(domain.isActive());
         entity.setDeletedAt(domain.getDeletedAt());
@@ -38,6 +39,7 @@ public class CustomerDomainToJpaMapper {
         entity.setEmail(patch.getEmail());
         entity.setCustomerLocalAddress(patch.getCustomerLocalAddress());
         entity.setCustomerEnglishAddress(patch.getCustomerEnglishAddress());
+        entity.setCountryCode(patch.getCountryCode());
         entity.setMemo(patch.getMemo());
         entity.setActive(patch.isActive());
     }

@@ -22,15 +22,15 @@ public class CustomerAssembler {
     }
 
     public CreateCustomerCommand toCreateCommand(CreateCustomerRequest req) {
-        return new CreateCustomerCommand(req.customerCode(), req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.customerLocalAddress(), req.customerEnglishAddress(), req.memo(), req.active());
+        return new CreateCustomerCommand(req.customerCode(), req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.customerLocalAddress(), req.customerEnglishAddress(), req.countryCode(), req.memo(), req.active());
     }
 
     public UpdateCustomerCommand toUpdateCommand(UpdateCustomerRequest req) {
-        return new UpdateCustomerCommand(req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.customerLocalAddress(), req.customerEnglishAddress(), req.memo(), req.active());
+        return new UpdateCustomerCommand(req.customerType(), req.name(), req.nameEn(), req.businessNo(), req.representative(), req.phone(), req.email(), req.customerLocalAddress(), req.customerEnglishAddress(), req.countryCode(), req.memo(), req.active());
     }
 
     public CustomerSummaryResponse toSummaryResponse(CustomerSummary p) {
-        return new CustomerSummaryResponse(p.id(), p.customerCode(), p.customerType(), p.name(), p.nameEn(), p.businessNo(), p.representative(), p.phone(), p.email(), p.customerLocalAddress(), p.customerEnglishAddress(), p.memo(), p.active(), p.deletedAt(), p.updatedAt());
+        return new CustomerSummaryResponse(p.id(), p.customerCode(), p.customerType(), p.name(), p.nameEn(), p.businessNo(), p.representative(), p.phone(), p.email(), p.customerLocalAddress(), p.customerEnglishAddress(), p.countryCode(), p.memo(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public CustomerDetailResponse toDetail(Customer domain) {
@@ -39,7 +39,7 @@ public class CustomerAssembler {
                 domain.getName(), domain.getNameEn(), domain.getBusinessNo(),
                 domain.getRepresentative(), domain.getPhone(), domain.getEmail(),
                 domain.getCustomerLocalAddress(), domain.getCustomerEnglishAddress(),
-                domain.getMemo(), domain.isActive(), domain.getDeletedAt(),
+                domain.getCountryCode(), domain.getMemo(), domain.isActive(), domain.getDeletedAt(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );
     }

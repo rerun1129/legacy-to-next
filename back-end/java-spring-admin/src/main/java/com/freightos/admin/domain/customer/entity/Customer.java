@@ -18,13 +18,14 @@ public class Customer extends BaseEntity {
     private String email;
     private String customerLocalAddress;
     private String customerEnglishAddress;
+    private String countryCode;
     private String memo;
     private boolean active;
     private LocalDateTime deletedAt;
 
     private Customer(String customerCode, CustomerType customerType, String name, String nameEn,
                      String businessNo, String representative, String phone, String email,
-                     String customerLocalAddress, String customerEnglishAddress, String memo, boolean active) {
+                     String customerLocalAddress, String customerEnglishAddress, String countryCode, String memo, boolean active) {
         this.customerCode           = customerCode;
         this.customerType           = customerType;
         this.name                   = name;
@@ -35,6 +36,7 @@ public class Customer extends BaseEntity {
         this.email                  = email;
         this.customerLocalAddress   = customerLocalAddress;
         this.customerEnglishAddress = customerEnglishAddress;
+        this.countryCode            = countryCode;
         this.memo                   = memo;
         this.active                 = active;
         this.deletedAt              = null;
@@ -42,9 +44,9 @@ public class Customer extends BaseEntity {
 
     public static Customer create(String customerCode, CustomerType customerType, String name, String nameEn,
                                   String businessNo, String representative, String phone, String email,
-                                  String customerLocalAddress, String customerEnglishAddress, String memo, boolean active) {
+                                  String customerLocalAddress, String customerEnglishAddress, String countryCode, String memo, boolean active) {
         return new Customer(customerCode, customerType, name, nameEn, businessNo, representative,
-                phone, email, customerLocalAddress, customerEnglishAddress, memo, active);
+                phone, email, customerLocalAddress, customerEnglishAddress, countryCode, memo, active);
     }
 
     /**
@@ -52,7 +54,7 @@ public class Customer extends BaseEntity {
      */
     public void applyUpdate(CustomerType customerType, String name, String nameEn,
                             String businessNo, String representative, String phone,
-                            String email, String customerLocalAddress, String customerEnglishAddress, String memo, boolean active) {
+                            String email, String customerLocalAddress, String customerEnglishAddress, String countryCode, String memo, boolean active) {
         this.customerType           = customerType;
         this.name                   = name;
         this.nameEn                 = nameEn;
@@ -62,6 +64,7 @@ public class Customer extends BaseEntity {
         this.email                  = email;
         this.customerLocalAddress   = customerLocalAddress;
         this.customerEnglishAddress = customerEnglishAddress;
+        this.countryCode            = countryCode;
         this.memo                   = memo;
         this.active                 = active;
     }

@@ -37,6 +37,7 @@ interface CustomerFormValues {
   customerLocalAddress: string;
   customerEnglishAddress: string;
   memo: string;
+  countryCode: string;
   active: boolean;
 }
 
@@ -52,6 +53,7 @@ const DEFAULT_FORM: CustomerFormValues = {
   customerLocalAddress: "",
   customerEnglishAddress: "",
   memo: "",
+  countryCode: "",
   active: true,
 };
 
@@ -190,6 +192,16 @@ function CustomerFormFields({ register, control, isEdit, isReadOnly }: FormField
         />
       </div>
       <div className="lcn">
+        <span className="lcn__label">Country Code</span>
+        <input
+          className="box-panel"
+          placeholder="Country Code (optional)"
+          maxLength={5}
+          readOnly={isReadOnly}
+          {...register("countryCode")}
+        />
+      </div>
+      <div className="lcn">
         <span className="lcn__label">Active</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
@@ -230,6 +242,7 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
         customerLocalAddress: detail.customerLocalAddress ?? "",
         customerEnglishAddress: detail.customerEnglishAddress ?? "",
         memo: detail.memo ?? "",
+        countryCode: detail.countryCode ?? "",
         active: detail.active,
       });
     }
@@ -279,6 +292,7 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
         customerLocalAddress: parseNullable(values.customerLocalAddress),
         customerEnglishAddress: parseNullable(values.customerEnglishAddress),
         memo: parseNullable(values.memo),
+        countryCode: parseNullable(values.countryCode),
         active: values.active,
       };
       updateMutation.mutate({ id: state.id, req });
@@ -295,6 +309,7 @@ function CustomerEntryModalInner({ state, onClose, onSaved }: Props) {
         customerLocalAddress: parseNullable(values.customerLocalAddress),
         customerEnglishAddress: parseNullable(values.customerEnglishAddress),
         memo: parseNullable(values.memo),
+        countryCode: parseNullable(values.countryCode),
         active: values.active,
       };
       createMutation.mutate(req);

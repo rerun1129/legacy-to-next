@@ -47,7 +47,7 @@ class CustomerPersistenceAdapterTest {
     void save_thenFindById_fieldsMatch() {
         Customer customer = Customer.create("CUS-001", CustomerType.FORWARDER, "글로벌 포워더",
                 "Global Forwarder", "123-45-67890", "홍길동", "010-1234-5678",
-                "test@fwd.com", "서울시 강남구", "Seoul Gangnam", "메모 내용", true);
+                "test@fwd.com", "서울시 강남구", "Seoul Gangnam", null, "메모 내용", true);
 
         Long id = adapter.save(customer);
 
@@ -68,12 +68,12 @@ class CustomerPersistenceAdapterTest {
     @Test
     void save_duplicateCustomerCode_throwsDataIntegrityViolation() {
         Customer first = Customer.create("DUP-001", CustomerType.SHIPPER, "첫 번째 화주",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
         adapter.save(first);
         customerRepository.flush();
 
         Customer second = Customer.create("DUP-001", CustomerType.CARRIER, "두 번째 운송사",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
 
         assertThatThrownBy(() -> {
             adapter.save(second);
@@ -86,7 +86,7 @@ class CustomerPersistenceAdapterTest {
     @Test
     void softDelete_thenFindById_returnsDomainWithDeletedAt() {
         Customer customer = Customer.create("SHP-001", CustomerType.SHIPPER, "화주 회사",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
         Long id = adapter.save(customer);
 
         adapter.softDelete(id);
@@ -103,11 +103,11 @@ class CustomerPersistenceAdapterTest {
     @Test
     void searchSummaries_scopeAll_softDeletedNotReturned() {
         Customer active = Customer.create("ACT-001", CustomerType.AGENT, "활성 에이전트",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
         Long activeId = adapter.save(active);
 
         Customer toDelete = Customer.create("DEL-001", CustomerType.AGENT, "삭제될 에이전트",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
         Long deletedId = adapter.save(toDelete);
         adapter.softDelete(deletedId);
 
@@ -124,11 +124,11 @@ class CustomerPersistenceAdapterTest {
     @Test
     void searchSummaries_scopeDeleted_onlySoftDeletedReturned() {
         Customer active = Customer.create("INC-ACT", CustomerType.FORWARDER, "포함 활성",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
         Long activeId = adapter.save(active);
 
         Customer deleted = Customer.create("INC-DEL", CustomerType.FORWARDER, "포함 삭제",
-                null, null, null, null, null, null, null, null, true);
+                null, null, null, null, null, null, null, null, null, true);
         Long deletedId = adapter.save(deleted);
         adapter.softDelete(deletedId);
 
@@ -144,9 +144,9 @@ class CustomerPersistenceAdapterTest {
 
     @Test
     void searchSummaries_filterByCustomerType_returnsOnlyMatchingType() {
-        adapter.save(Customer.create("TYPE-FWD", CustomerType.FORWARDER, "포워더 회사", null, null, null, null, null, null, null, null, true));
-        adapter.save(Customer.create("TYPE-SHP", CustomerType.SHIPPER, "화주 회사", null, null, null, null, null, null, null, null, true));
-        adapter.save(Customer.create("TYPE-CSG", CustomerType.CONSIGNEE, "수하인 회사", null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("TYPE-FWD", CustomerType.FORWARDER, "포워더 회사", null, null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("TYPE-SHP", CustomerType.SHIPPER, "화주 회사", null, null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("TYPE-CSG", CustomerType.CONSIGNEE, "수하인 회사", null, null, null, null, null, null, null, null, null, true));
 
         SearchCustomerCommand command = new SearchCustomerCommand("TYPE-", null, "FORWARDER", "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
@@ -159,9 +159,9 @@ class CustomerPersistenceAdapterTest {
 
     @Test
     void searchSummaries_sortByCustomerCodeAscThenIdAsc() {
-        adapter.save(Customer.create("SORT-C", CustomerType.CARRIER, "운송사 C", null, null, null, null, null, null, null, null, true));
-        adapter.save(Customer.create("SORT-A", CustomerType.AGENT, "에이전트 A", null, null, null, null, null, null, null, null, true));
-        adapter.save(Customer.create("SORT-B", CustomerType.CUSTOMS_BROKER, "관세사 B", null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("SORT-C", CustomerType.CARRIER, "운송사 C", null, null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("SORT-A", CustomerType.AGENT, "에이전트 A", null, null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("SORT-B", CustomerType.CUSTOMS_BROKER, "관세사 B", null, null, null, null, null, null, null, null, null, true));
 
         SearchCustomerCommand command = new SearchCustomerCommand("SORT-", null, null, "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);
@@ -177,9 +177,9 @@ class CustomerPersistenceAdapterTest {
 
     @Test
     void searchSummaries_filterByNameLike_returnsMatchingNames() {
-        adapter.save(Customer.create("NAME-001", CustomerType.FORWARDER, "글로벌 물류", null, null, null, null, null, null, null, null, true));
-        adapter.save(Customer.create("NAME-002", CustomerType.SHIPPER, "로컬 화주", null, null, null, null, null, null, null, null, true));
-        adapter.save(Customer.create("NAME-003", CustomerType.CONSIGNEE, "글로벌 수하인", null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("NAME-001", CustomerType.FORWARDER, "글로벌 물류", null, null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("NAME-002", CustomerType.SHIPPER, "로컬 화주", null, null, null, null, null, null, null, null, null, true));
+        adapter.save(Customer.create("NAME-003", CustomerType.CONSIGNEE, "글로벌 수하인", null, null, null, null, null, null, null, null, null, true));
 
         SearchCustomerCommand command = new SearchCustomerCommand(null, "글로벌", null, "ALL", 0, 20);
         PagedResult<CustomerSummary> result = adapter.searchSummaries(command);

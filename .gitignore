@@ -17,6 +17,10 @@
 .claude/worktrees/
 .claude/settings.local.json
 .claude/slack_notify.sh
+.claude/.coder_scope
+
+# 1회성 시드 데이터
+schema/seed/
 
 # Windows Bash 크래시 덤프
 *.stackdump

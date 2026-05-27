@@ -59,6 +59,9 @@ public class CustomerJpaEntity extends BaseJpaEntity {
     @Column(name = "customer_english_address", length = 4000)
     private String customerEnglishAddress;
 
+    @Column(name = "country_code", length = 5)
+    private String countryCode;
+
     @Column(name = "memo", length = 1000)
     private String memo;
 

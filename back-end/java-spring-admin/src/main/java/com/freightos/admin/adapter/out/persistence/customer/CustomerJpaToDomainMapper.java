@@ -10,7 +10,7 @@ public class CustomerJpaToDomainMapper {
         Customer domain = Customer.create(
                 e.getCustomerCode(), e.getCustomerType(), e.getName(), e.getNameEn(),
                 e.getBusinessNo(), e.getRepresentative(), e.getPhone(), e.getEmail(),
-                e.getCustomerLocalAddress(), e.getCustomerEnglishAddress(), e.getMemo(), e.getActive()
+                e.getCustomerLocalAddress(), e.getCustomerEnglishAddress(), e.getCountryCode(), e.getMemo(), e.getActive()
         );
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());

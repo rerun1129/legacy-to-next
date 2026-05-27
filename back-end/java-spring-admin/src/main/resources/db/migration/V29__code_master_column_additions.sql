@@ -53,6 +53,9 @@ ALTER TABLE admin.customer
 ALTER TABLE admin.customer
     RENAME COLUMN address_en TO customer_english_address;
 
+ALTER TABLE admin.customer
+    ADD COLUMN IF NOT EXISTS country_code VARCHAR(5);
+
 -- ========== 5. CREATE TABLE — Country ==========
 
 CREATE TABLE IF NOT EXISTS admin.country (

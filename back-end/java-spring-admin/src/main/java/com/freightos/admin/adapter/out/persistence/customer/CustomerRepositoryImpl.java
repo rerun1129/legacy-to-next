@@ -45,7 +45,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<CustomerSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new CustomerSummary(e.getId(), e.getCustomerCode(), e.getCustomerType(), e.getName(), e.getNameEn(), e.getBusinessNo(), e.getRepresentative(), e.getPhone(), e.getEmail(), e.getCustomerLocalAddress(), e.getCustomerEnglishAddress(), e.getMemo(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new CustomerSummary(e.getId(), e.getCustomerCode(), e.getCustomerType(), e.getName(), e.getNameEn(), e.getBusinessNo(), e.getRepresentative(), e.getPhone(), e.getEmail(), e.getCustomerLocalAddress(), e.getCustomerEnglishAddress(), e.getCountryCode(), e.getMemo(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

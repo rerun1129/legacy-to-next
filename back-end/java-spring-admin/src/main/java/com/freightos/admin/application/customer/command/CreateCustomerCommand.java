@@ -13,6 +13,7 @@ public record CreateCustomerCommand(
         String email,
         String customerLocalAddress,
         String customerEnglishAddress,
+        String countryCode,
         String memo,
         boolean active
 ) {}

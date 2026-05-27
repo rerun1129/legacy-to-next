@@ -84,7 +84,7 @@ class CustomerControllerWebMvcTest {
     void search_authenticated_returns200() throws Exception {
         CustomerSummaryResponse summaryResponse = new CustomerSummaryResponse(
                 1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더",
-                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null,
                 true, null, LocalDateTime.of(2024, 1, 1, 0, 0));
         PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<CustomerSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
@@ -110,12 +110,12 @@ class CustomerControllerWebMvcTest {
     void create_returns201WithLocationAndId() throws Exception {
         given(customerAssembler.toCreateCommand(any())).willReturn(
                 new CreateCustomerCommand("CUS-001", CustomerType.FORWARDER, "테스트 포워더",
-                        null, null, null, null, null, null, null, null, true));
+                        null, null, null, null, null, null, null, null, null, true));
         given(customerUseCase.createCustomer(any())).willReturn(42L);
 
         CreateCustomerRequest req = new CreateCustomerRequest(
                 "CUS-001", CustomerType.FORWARDER, "테스트 포워더",
-                null, null, null, null, null, null, null, null, Boolean.TRUE);
+                null, null, null, null, null, null, null, null, null, Boolean.TRUE);
 
         mockMvc.perform(post("/api/admin/customer")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +171,7 @@ class CustomerControllerWebMvcTest {
     void getById_returns200WithDetail() throws Exception {
         CustomerDetailResponse detail = new CustomerDetailResponse(
                 1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더", "Global Forwarder",
-                null, null, null, null, null, null, null, true, null,
+                null, null, null, null, null, null, null, null, true, null,
                 LocalDateTime.of(2024, 1, 1, 0, 0),
                 LocalDateTime.of(2024, 1, 2, 0, 0),
                 "admin", "admin");

@@ -19,6 +19,7 @@ public class CustomerFactory {
                 command.email(),
                 command.customerLocalAddress(),
                 command.customerEnglishAddress(),
+                command.countryCode(),
                 command.memo(),
                 command.active()
         );

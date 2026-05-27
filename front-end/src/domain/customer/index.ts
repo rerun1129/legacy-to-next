@@ -23,6 +23,7 @@ export interface CustomerRow {
   customerLocalAddress: string | null;
   customerEnglishAddress: string | null;
   memo: string | null;
+  countryCode: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;
@@ -41,6 +42,7 @@ export interface CustomerDetail {
   customerLocalAddress: string | null;
   customerEnglishAddress: string | null;
   memo: string | null;
+  countryCode: string | null;
   active: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -68,6 +70,7 @@ export interface CreateCustomerRequestDto {
   customerLocalAddress: string | null;
   customerEnglishAddress: string | null;
   memo: string | null;
+  countryCode: string | null;
   active: boolean;
 }
 
@@ -82,5 +85,6 @@ export interface UpdateCustomerRequestDto {
   customerLocalAddress: string | null;
   customerEnglishAddress: string | null;
   memo: string | null;
+  countryCode: string | null;
   active: boolean;
 }

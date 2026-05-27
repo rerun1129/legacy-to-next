@@ -16,6 +16,7 @@ public record CustomerDetailResponse(
         String email,
         String customerLocalAddress,
         String customerEnglishAddress,
+        String countryCode,
         String memo,
         boolean active,
         LocalDateTime deletedAt,

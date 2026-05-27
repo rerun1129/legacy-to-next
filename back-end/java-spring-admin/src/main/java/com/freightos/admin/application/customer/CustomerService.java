@@ -56,7 +56,7 @@ public class CustomerService implements CustomerUseCase {
         customer.applyUpdate(
                 command.customerType(), command.name(), command.nameEn(),
                 command.businessNo(), command.representative(), command.phone(),
-                command.email(), command.customerLocalAddress(), command.customerEnglishAddress(), command.memo(), command.active()
+                command.email(), command.customerLocalAddress(), command.customerEnglishAddress(), command.countryCode(), command.memo(), command.active()
         );
         customerPort.update(id, customer);
     }

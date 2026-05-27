@@ -30,6 +30,7 @@ const COLUMNS: GridColumn<CustomerRow>[] = [
   { key: "customerLocalAddress", label: "Local Address", minWidth: 260 },
   { key: "customerEnglishAddress", label: "English Address", minWidth: 260 },
   { key: "memo", label: "Memo", minWidth: 200 },
+  { key: "countryCode", label: "Country", minWidth: 80 },
   {
     key: "active",
     label: "Status",

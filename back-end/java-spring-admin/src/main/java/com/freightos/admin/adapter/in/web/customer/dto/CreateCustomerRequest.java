@@ -18,6 +18,7 @@ public record CreateCustomerRequest(
         @Email @Size(max = 200) String email,
         @Size(max = 4000) String customerLocalAddress,
         @Size(max = 4000) String customerEnglishAddress,
+        @Size(max = 5) String countryCode,
         @Size(max = 1000) String memo,
         @NotNull Boolean active
 ) {}
