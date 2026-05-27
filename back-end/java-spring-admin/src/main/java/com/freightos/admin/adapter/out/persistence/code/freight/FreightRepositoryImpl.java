@@ -44,7 +44,7 @@ public class FreightRepositoryImpl implements FreightRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<FreightSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new FreightSummary(e.getId(), e.getFreightCode(), e.getName(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new FreightSummary(e.getId(), e.getFreightCode(), e.getName(), e.getNameEn(), e.getDescription(), e.getFreightUnit(), e.getFreightGroup(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

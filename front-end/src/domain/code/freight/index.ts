@@ -4,6 +4,10 @@ export interface FreightRow {
   id: number;
   freightCode: string;
   name: string;
+  nameEn: string | null;
+  description: string | null;
+  freightUnit: string | null;
+  freightGroup: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

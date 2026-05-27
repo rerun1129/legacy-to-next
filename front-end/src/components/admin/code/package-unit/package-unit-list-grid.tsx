@@ -20,7 +20,8 @@ interface Props {
 
 const COLUMNS: GridColumn<PackageUnitRow>[] = [
   { key: "packageCode", label: "Package Code", minWidth: 140 },
-  { key: "name", label: "Package Name", minWidth: 200 },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
   {
     key: "active",
     label: "Status",
@@ -31,7 +32,6 @@ const COLUMNS: GridColumn<PackageUnitRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function PackageUnitListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

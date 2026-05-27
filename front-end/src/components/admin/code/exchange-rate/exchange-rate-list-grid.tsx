@@ -19,9 +19,16 @@ interface Props {
 }
 
 const COLUMNS: GridColumn<ExchangeRateRow>[] = [
-  { key: "fromCurrencyCode", label: "From Currency", minWidth: 120, align: "center" },
-  { key: "toCurrencyCode", label: "To Currency", minWidth: 120, align: "center" },
+  { key: "fromCurrencyCode", label: "From", minWidth: 100 },
+  { key: "toCurrencyCode", label: "To", minWidth: 100 },
+  { key: "exchangeDate", label: "Date", minWidth: 120 },
+  { key: "cashSellExchangeRate", label: "Cash Sell", minWidth: 110, align: "right" },
+  { key: "cashBuyExchangeRate", label: "Cash Buy", minWidth: 110, align: "right" },
+  { key: "wireSendExchangeRate", label: "Wire Send", minWidth: 110, align: "right" },
+  { key: "wireReceiveExchangeRate", label: "Wire Receive", minWidth: 120, align: "right" },
+  { key: "standardExchangeRate", label: "Standard Rate", minWidth: 120, align: "right" },
   { key: "name", label: "Name", minWidth: 160 },
+  { key: "nameEn", label: "English Name", minWidth: 160 },
   {
     key: "active",
     label: "Status",
@@ -32,7 +39,6 @@ const COLUMNS: GridColumn<ExchangeRateRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function ExchangeRateListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

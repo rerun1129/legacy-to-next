@@ -6,6 +6,7 @@ public record PackageUnitSummary(
         Long id,
         String packageCode,
         String name,
+        String nameEn,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime updatedAt

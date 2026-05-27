@@ -4,6 +4,8 @@ export interface HsCodeRow {
   id: number;
   hsCode: string;
   name: string;
+  nameEn: string | null;
+  countryCode: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

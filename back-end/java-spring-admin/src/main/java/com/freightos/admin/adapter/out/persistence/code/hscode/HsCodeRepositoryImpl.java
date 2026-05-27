@@ -44,7 +44,7 @@ public class HsCodeRepositoryImpl implements HsCodeRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<HsCodeSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new HsCodeSummary(e.getId(), e.getHsCode(), e.getName(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new HsCodeSummary(e.getId(), e.getHsCode(), e.getName(), e.getNameEn(), e.getCountryCode(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

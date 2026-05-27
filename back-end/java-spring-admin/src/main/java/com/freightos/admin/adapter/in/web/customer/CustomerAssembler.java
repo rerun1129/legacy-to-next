@@ -30,7 +30,7 @@ public class CustomerAssembler {
     }
 
     public CustomerSummaryResponse toSummaryResponse(CustomerSummary p) {
-        return new CustomerSummaryResponse(p.id(), p.customerCode(), p.customerType(), p.name(), p.active(), p.deletedAt(), p.updatedAt());
+        return new CustomerSummaryResponse(p.id(), p.customerCode(), p.customerType(), p.name(), p.nameEn(), p.businessNo(), p.representative(), p.phone(), p.email(), p.customerLocalAddress(), p.customerEnglishAddress(), p.memo(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public CustomerDetailResponse toDetail(Customer domain) {

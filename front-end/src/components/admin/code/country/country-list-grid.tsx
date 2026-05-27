@@ -20,7 +20,8 @@ interface Props {
 
 const COLUMNS: GridColumn<CountryRow>[] = [
   { key: "countryCode", label: "Country Code", minWidth: 140 },
-  { key: "name", label: "Country Name", minWidth: 200 },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
   {
     key: "active",
     label: "Status",
@@ -31,7 +32,6 @@ const COLUMNS: GridColumn<CountryRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function CountryListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

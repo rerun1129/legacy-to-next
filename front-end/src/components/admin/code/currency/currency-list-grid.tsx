@@ -20,8 +20,10 @@ interface Props {
 
 const COLUMNS: GridColumn<CurrencyRow>[] = [
   { key: "currencyCode", label: "Currency Code", minWidth: 130 },
-  { key: "name", label: "Currency Name", minWidth: 180 },
-  { key: "symbol", label: "Symbol", minWidth: 80, align: "center" },
+  { key: "name", label: "Name", minWidth: 160 },
+  { key: "nameEn", label: "English Name", minWidth: 160 },
+  { key: "symbol", label: "Symbol", minWidth: 80 },
+  { key: "currencyUnit", label: "Unit", minWidth: 100, align: "right" },
   {
     key: "active",
     label: "Status",
@@ -32,7 +34,6 @@ const COLUMNS: GridColumn<CurrencyRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function CurrencyListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

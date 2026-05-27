@@ -44,7 +44,7 @@ public class PackageUnitRepositoryImpl implements PackageUnitRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<PackageUnitSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new PackageUnitSummary(e.getId(), e.getPackageCode(), e.getName(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new PackageUnitSummary(e.getId(), e.getPackageCode(), e.getName(), e.getNameEn(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

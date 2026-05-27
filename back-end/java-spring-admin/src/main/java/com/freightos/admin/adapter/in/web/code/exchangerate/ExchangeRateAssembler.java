@@ -39,7 +39,7 @@ public class ExchangeRateAssembler {
     }
 
     public ExchangeRateSummaryResponse toSummaryResponse(ExchangeRateSummary p) {
-        return new ExchangeRateSummaryResponse(p.id(), p.fromCurrencyCode(), p.toCurrencyCode(), p.exchangeDate(), p.name(), p.active(), p.deletedAt(), p.updatedAt());
+        return new ExchangeRateSummaryResponse(p.id(), p.fromCurrencyCode(), p.toCurrencyCode(), p.exchangeDate(), p.cashSellExchangeRate(), p.cashBuyExchangeRate(), p.wireSendExchangeRate(), p.wireReceiveExchangeRate(), p.standardExchangeRate(), p.name(), p.nameEn(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public ExchangeRateDetailResponse toDetail(ExchangeRate domain) {

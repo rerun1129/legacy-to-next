@@ -13,8 +13,16 @@ export type CustomerScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 export interface CustomerRow {
   id: number;
   customerCode: string;
-  name: string;
   customerType: CustomerType;
+  name: string;
+  nameEn: string | null;
+  businessNo: string | null;
+  representative: string | null;
+  phone: string | null;
+  email: string | null;
+  customerLocalAddress: string | null;
+  customerEnglishAddress: string | null;
+  memo: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

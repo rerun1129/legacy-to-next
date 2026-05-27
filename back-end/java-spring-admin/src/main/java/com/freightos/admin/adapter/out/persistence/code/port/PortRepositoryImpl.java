@@ -45,7 +45,7 @@ public class PortRepositoryImpl implements PortRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<PortSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new PortSummary(e.getId(), e.getPortCode(), e.getName(), e.getCountryCode(), e.getPortType(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new PortSummary(e.getId(), e.getPortCode(), e.getName(), e.getNameEn(), e.getCountryCode(), e.getPortType(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

@@ -30,7 +30,7 @@ public class CurrencyAssembler {
     }
 
     public CurrencySummaryResponse toSummaryResponse(CurrencySummary p) {
-        return new CurrencySummaryResponse(p.id(), p.currencyCode(), p.name(), p.symbol(), p.active(), p.deletedAt(), p.updatedAt());
+        return new CurrencySummaryResponse(p.id(), p.currencyCode(), p.name(), p.nameEn(), p.symbol(), p.currencyUnit(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public CurrencyDetailResponse toDetail(Currency domain) {

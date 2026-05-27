@@ -4,6 +4,7 @@ export interface PackageUnitRow {
   id: number;
   packageCode: string;
   name: string;
+  nameEn: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

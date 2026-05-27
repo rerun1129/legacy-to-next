@@ -20,9 +20,10 @@ interface Props {
 
 const COLUMNS: GridColumn<PortRow>[] = [
   { key: "portCode", label: "Port Code", minWidth: 120 },
-  { key: "name", label: "Port Name", minWidth: 200 },
-  { key: "countryCode", label: "Country", minWidth: 90, align: "center" },
-  { key: "portType", label: "Type", minWidth: 90, align: "center" },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
+  { key: "countryCode", label: "Country", minWidth: 100 },
+  { key: "portType", label: "Type", minWidth: 90 },
   {
     key: "active",
     label: "Status",
@@ -33,7 +34,6 @@ const COLUMNS: GridColumn<PortRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function PortListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

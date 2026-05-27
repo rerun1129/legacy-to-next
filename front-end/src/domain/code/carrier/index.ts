@@ -8,7 +8,10 @@ export interface CarrierRow {
   id: number;
   carrierCode: string;
   name: string;
+  nameEn: string | null;
   carrierType: CarrierType;
+  carrierAddress: string | null;
+  ediCode: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

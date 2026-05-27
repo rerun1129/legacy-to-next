@@ -30,7 +30,7 @@ public class HsCodeAssembler {
     }
 
     public HsCodeSummaryResponse toSummaryResponse(HsCodeSummary p) {
-        return new HsCodeSummaryResponse(p.id(), p.hsCode(), p.name(), p.active(), p.deletedAt(), p.updatedAt());
+        return new HsCodeSummaryResponse(p.id(), p.hsCode(), p.name(), p.nameEn(), p.countryCode(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public HsCodeDetailResponse toDetail(HsCode domain) {

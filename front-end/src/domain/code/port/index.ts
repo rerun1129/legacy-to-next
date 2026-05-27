@@ -8,6 +8,7 @@ export interface PortRow {
   id: number;
   portCode: string;
   name: string;
+  nameEn: string | null;
   countryCode: string;
   portType: PortType;
   active: boolean;

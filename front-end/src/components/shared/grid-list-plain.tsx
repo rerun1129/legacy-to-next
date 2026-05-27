@@ -200,7 +200,7 @@ export function PlainGridList<T>({
               return (
                 <th
                   key={key}
-                  style={{ width: col.width, textAlign: col.align }}
+                  style={{ width: col.width, textAlign: "center" }}
                   className={col.isRequired ? "is-required" : undefined}
                 >
                   {col.label}

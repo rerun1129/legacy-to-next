@@ -19,7 +19,7 @@ export function SortableTh<T>({ col, onResize, isDraggingThis }: SortableThProps
     transform: CSS.Transform.toString(transform),
     transition,
     width: col.width ?? col.minWidth,
-    textAlign: col.align,
+    textAlign: "center",
     position: "relative",
   };
 

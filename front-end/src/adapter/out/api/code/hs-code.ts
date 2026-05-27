@@ -17,6 +17,8 @@ const HS_CODE_ROW_SCHEMA = z.object({
   id: z.number(),
   hsCode: z.string(),
   name: z.string(),
+  nameEn: z.string().nullable().optional().transform((v) => v ?? null),
+  countryCode: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),

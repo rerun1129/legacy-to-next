@@ -4,7 +4,9 @@ export interface CurrencyRow {
   id: number;
   currencyCode: string;
   name: string;
+  nameEn: string | null;
   symbol: string | null;
+  currencyUnit: number | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

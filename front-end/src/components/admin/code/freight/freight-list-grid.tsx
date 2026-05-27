@@ -20,7 +20,11 @@ interface Props {
 
 const COLUMNS: GridColumn<FreightRow>[] = [
   { key: "freightCode", label: "Freight Code", minWidth: 140 },
-  { key: "name", label: "Freight Name", minWidth: 200 },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
+  { key: "description", label: "Description", minWidth: 200 },
+  { key: "freightUnit", label: "Unit", minWidth: 120 },
+  { key: "freightGroup", label: "Group", minWidth: 120 },
   {
     key: "active",
     label: "Status",
@@ -31,7 +35,6 @@ const COLUMNS: GridColumn<FreightRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function FreightListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

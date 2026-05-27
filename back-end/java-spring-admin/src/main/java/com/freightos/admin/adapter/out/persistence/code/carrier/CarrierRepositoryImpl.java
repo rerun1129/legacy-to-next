@@ -45,7 +45,7 @@ public class CarrierRepositoryImpl implements CarrierRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<CarrierSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new CarrierSummary(e.getId(), e.getCarrierCode(), e.getName(), e.getCarrierType(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new CarrierSummary(e.getId(), e.getCarrierCode(), e.getName(), e.getNameEn(), e.getCarrierType(), e.getCarrierAddress(), e.getEdiCode(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

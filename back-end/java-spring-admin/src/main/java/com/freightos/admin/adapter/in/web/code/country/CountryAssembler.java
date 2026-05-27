@@ -30,7 +30,7 @@ public class CountryAssembler {
     }
 
     public CountrySummaryResponse toSummaryResponse(CountrySummary p) {
-        return new CountrySummaryResponse(p.id(), p.countryCode(), p.name(), p.active(), p.deletedAt(), p.updatedAt());
+        return new CountrySummaryResponse(p.id(), p.countryCode(), p.name(), p.nameEn(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public CountryDetailResponse toDetail(Country domain) {

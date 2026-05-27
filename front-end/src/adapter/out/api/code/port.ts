@@ -20,6 +20,7 @@ const PORT_ROW_SCHEMA = z.object({
   id: z.number(),
   portCode: z.string(),
   name: z.string(),
+  nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   countryCode: z.string(),
   portType: PORT_TYPE_SCHEMA,
   active: z.boolean(),

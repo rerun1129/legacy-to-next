@@ -30,7 +30,7 @@ public class PortAssembler {
     }
 
     public PortSummaryResponse toSummaryResponse(PortSummary p) {
-        return new PortSummaryResponse(p.id(), p.portCode(), p.name(), p.countryCode(), p.portType(), p.active(), p.deletedAt(), p.updatedAt());
+        return new PortSummaryResponse(p.id(), p.portCode(), p.name(), p.nameEn(), p.countryCode(), p.portType(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public PortDetailResponse toDetail(Port domain) {

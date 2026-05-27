@@ -17,6 +17,7 @@ const COUNTRY_ROW_SCHEMA = z.object({
   id: z.number(),
   countryCode: z.string(),
   name: z.string(),
+  nameEn: z.string().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),

@@ -49,7 +49,7 @@ public class ExchangeRateRepositoryImpl implements ExchangeRateRepositoryCustom 
         typedQuery.setMaxResults(command.size());
 
         List<ExchangeRateSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new ExchangeRateSummary(e.getId(), e.getFromCurrencyCode(), e.getToCurrencyCode(), e.getExchangeDate(), e.getName(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new ExchangeRateSummary(e.getId(), e.getFromCurrencyCode(), e.getToCurrencyCode(), e.getExchangeDate(), e.getCashSellExchangeRate(), e.getCashBuyExchangeRate(), e.getWireSendExchangeRate(), e.getWireReceiveExchangeRate(), e.getStandardExchangeRate(), e.getName(), e.getNameEn(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

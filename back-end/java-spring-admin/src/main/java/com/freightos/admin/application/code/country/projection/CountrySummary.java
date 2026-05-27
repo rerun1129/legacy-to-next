@@ -6,6 +6,7 @@ public record CountrySummary(
         Long id,
         String countryCode,
         String name,
+        String nameEn,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime updatedAt

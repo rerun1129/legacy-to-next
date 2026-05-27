@@ -20,7 +20,9 @@ interface Props {
 
 const COLUMNS: GridColumn<HsCodeRow>[] = [
   { key: "hsCode", label: "HS Code", minWidth: 140 },
-  { key: "name", label: "HS Code Name", minWidth: 200 },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
+  { key: "countryCode", label: "Country", minWidth: 100 },
   {
     key: "active",
     label: "Status",
@@ -31,7 +33,6 @@ const COLUMNS: GridColumn<HsCodeRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function HsCodeListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

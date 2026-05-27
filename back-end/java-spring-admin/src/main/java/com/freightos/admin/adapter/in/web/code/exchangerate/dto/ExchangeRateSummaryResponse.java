@@ -1,5 +1,6 @@
 package com.freightos.admin.adapter.in.web.code.exchangerate.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record ExchangeRateSummaryResponse(
@@ -7,7 +8,13 @@ public record ExchangeRateSummaryResponse(
         String fromCurrencyCode,
         String toCurrencyCode,
         String exchangeDate,
+        BigDecimal cashSellExchangeRate,
+        BigDecimal cashBuyExchangeRate,
+        BigDecimal wireSendExchangeRate,
+        BigDecimal wireReceiveExchangeRate,
+        BigDecimal standardExchangeRate,
         String name,
+        String nameEn,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime updatedAt

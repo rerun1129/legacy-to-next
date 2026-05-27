@@ -4,7 +4,14 @@ export interface ExchangeRateRow {
   id: number;
   fromCurrencyCode: string;
   toCurrencyCode: string;
+  exchangeDate: string | null;
+  cashSellExchangeRate: number | null;
+  cashBuyExchangeRate: number | null;
+  wireSendExchangeRate: number | null;
+  wireReceiveExchangeRate: number | null;
+  standardExchangeRate: number | null;
   name: string;
+  nameEn: string | null;
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;

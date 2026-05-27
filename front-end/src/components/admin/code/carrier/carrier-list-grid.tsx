@@ -20,8 +20,11 @@ interface Props {
 
 const COLUMNS: GridColumn<CarrierRow>[] = [
   { key: "carrierCode", label: "Carrier Code", minWidth: 140 },
-  { key: "name", label: "Carrier Name", minWidth: 200 },
-  { key: "carrierType", label: "Type", minWidth: 90, align: "center" },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
+  { key: "carrierType", label: "Type", minWidth: 90 },
+  { key: "carrierAddress", label: "Address", minWidth: 250 },
+  { key: "ediCode", label: "EDI Code", minWidth: 120 },
   {
     key: "active",
     label: "Status",
@@ -32,7 +35,6 @@ const COLUMNS: GridColumn<CarrierRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function CarrierListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

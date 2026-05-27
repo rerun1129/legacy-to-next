@@ -44,7 +44,7 @@ public class CountryRepositoryImpl implements CountryRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<CountrySummary> content = typedQuery.getResultList().stream()
-                .map(e -> new CountrySummary(e.getId(), e.getCountryCode(), e.getName(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new CountrySummary(e.getId(), e.getCountryCode(), e.getName(), e.getNameEn(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

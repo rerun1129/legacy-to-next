@@ -20,8 +20,16 @@ interface Props {
 
 const COLUMNS: GridColumn<CustomerRow>[] = [
   { key: "customerCode", label: "Customer Code", minWidth: 140 },
-  { key: "name", label: "Customer Name", minWidth: 200 },
-  { key: "customerType", label: "Type", minWidth: 120, align: "center" },
+  { key: "customerType", label: "Type", minWidth: 120 },
+  { key: "name", label: "Name", minWidth: 180 },
+  { key: "nameEn", label: "English Name", minWidth: 180 },
+  { key: "businessNo", label: "Business No.", minWidth: 140 },
+  { key: "representative", label: "Representative", minWidth: 160 },
+  { key: "phone", label: "Phone", minWidth: 140 },
+  { key: "email", label: "Email", minWidth: 200 },
+  { key: "customerLocalAddress", label: "Local Address", minWidth: 260 },
+  { key: "customerEnglishAddress", label: "English Address", minWidth: 260 },
+  { key: "memo", label: "Memo", minWidth: 200 },
   {
     key: "active",
     label: "Status",
@@ -32,7 +40,6 @@ const COLUMNS: GridColumn<CustomerRow>[] = [
       return row.active ? "Active" : "Inactive";
     },
   },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
 ];
 
 export function CustomerListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {

@@ -30,7 +30,7 @@ public class PackageUnitAssembler {
     }
 
     public PackageUnitSummaryResponse toSummaryResponse(PackageUnitSummary p) {
-        return new PackageUnitSummaryResponse(p.id(), p.packageCode(), p.name(), p.active(), p.deletedAt(), p.updatedAt());
+        return new PackageUnitSummaryResponse(p.id(), p.packageCode(), p.name(), p.nameEn(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public PackageUnitDetailResponse toDetail(PackageUnit domain) {

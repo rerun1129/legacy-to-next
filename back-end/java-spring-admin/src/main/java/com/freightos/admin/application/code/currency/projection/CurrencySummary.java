@@ -6,7 +6,9 @@ public record CurrencySummary(
         Long id,
         String currencyCode,
         String name,
+        String nameEn,
         String symbol,
+        Integer currencyUnit,
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime updatedAt

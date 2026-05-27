@@ -44,7 +44,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<CurrencySummary> content = typedQuery.getResultList().stream()
-                .map(e -> new CurrencySummary(e.getId(), e.getCurrencyCode(), e.getName(), e.getSymbol(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
+                .map(e -> new CurrencySummary(e.getId(), e.getCurrencyCode(), e.getName(), e.getNameEn(), e.getSymbol(), e.getCurrencyUnit(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

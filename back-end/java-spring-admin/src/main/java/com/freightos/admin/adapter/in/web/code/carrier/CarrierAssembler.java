@@ -30,7 +30,7 @@ public class CarrierAssembler {
     }
 
     public CarrierSummaryResponse toSummaryResponse(CarrierSummary p) {
-        return new CarrierSummaryResponse(p.id(), p.carrierCode(), p.name(), p.carrierType(), p.active(), p.deletedAt(), p.updatedAt());
+        return new CarrierSummaryResponse(p.id(), p.carrierCode(), p.name(), p.nameEn(), p.carrierType(), p.carrierAddress(), p.ediCode(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public CarrierDetailResponse toDetail(Carrier domain) {

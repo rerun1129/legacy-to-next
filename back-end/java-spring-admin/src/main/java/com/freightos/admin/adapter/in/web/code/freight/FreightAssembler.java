@@ -30,7 +30,7 @@ public class FreightAssembler {
     }
 
     public FreightSummaryResponse toSummaryResponse(FreightSummary p) {
-        return new FreightSummaryResponse(p.id(), p.freightCode(), p.name(), p.active(), p.deletedAt(), p.updatedAt());
+        return new FreightSummaryResponse(p.id(), p.freightCode(), p.name(), p.nameEn(), p.description(), p.freightUnit(), p.freightGroup(), p.active(), p.deletedAt(), p.updatedAt());
     }
 
     public FreightDetailResponse toDetail(Freight domain) {

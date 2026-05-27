@@ -83,8 +83,9 @@ class CustomerControllerWebMvcTest {
     @WithMockUser(authorities = "MENU_ADMIN_CUSTOMER_LIST")
     void search_authenticated_returns200() throws Exception {
         CustomerSummaryResponse summaryResponse = new CustomerSummaryResponse(
-                1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더", true,
-                null, LocalDateTime.of(2024, 1, 1, 0, 0));
+                1L, "CUS-001", CustomerType.FORWARDER, "글로벌 포워더",
+                null, null, null, null, null, null, null, null,
+                true, null, LocalDateTime.of(2024, 1, 1, 0, 0));
         PagedResult<CustomerSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<CustomerSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
 
