@@ -1,5 +1,5 @@
 import { userPort } from "@/lib/ports";
-import type { UserFilter, CreateUserRequestDto, UpdateUserRequestDto } from "@/domain/user";
+import type { UserFilter, CreateUserRequestDto, UpdateUserRequestDto, SaveUserChangesRequestDto } from "@/domain/user";
 
 export const userUseCases = {
   search: (filter: UserFilter, page: number, size?: number) => userPort.search(filter, page, size),
@@ -8,4 +8,6 @@ export const userUseCases = {
   update: (id: number, req: UpdateUserRequestDto) => userPort.update(id, req),
   delete: (id: number) => userPort.delete(id),
   deleteMany: (ids: number[]) => userPort.deleteMany(ids),
+  saveChanges: (req: SaveUserChangesRequestDto) => userPort.saveChanges(req),
+  autocomplete: (q: string, limit?: number) => userPort.autocomplete(q, limit),
 };

@@ -4,7 +4,10 @@ import type {
   UserFilter,
   CreateUserRequestDto,
   UpdateUserRequestDto,
+  SaveUserChangesRequestDto,
+  SaveChangesResultDto,
 } from "@/domain/user";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface UserPageResult {
   content: UserRow[];
@@ -21,4 +24,6 @@ export interface UserPort {
   update(id: number, req: UpdateUserRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveUserChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

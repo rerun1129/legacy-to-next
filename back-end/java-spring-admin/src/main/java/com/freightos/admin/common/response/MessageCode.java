@@ -132,7 +132,8 @@ public enum MessageCode {
     PORT_SAVE_CHANGES("항구 일괄 저장이 완료되었습니다."),
     FREIGHT_SAVE_CHANGES("운임 일괄 저장이 완료되었습니다."),
     EXCHANGE_RATE_SAVE_CHANGES("환율 일괄 저장이 완료되었습니다."),
-    CUSTOMER_SAVE_CHANGES("고객 일괄 저장이 완료되었습니다.");
+    CUSTOMER_SAVE_CHANGES("고객 일괄 저장이 완료되었습니다."),
+    USER_SAVE_CHANGES("사용자 일괄 저장이 완료되었습니다.");
 
     private final String message;
 

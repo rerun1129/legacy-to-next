@@ -1,11 +1,13 @@
 package com.freightos.admin.adapter.in.web.user;
 
 import com.freightos.admin.adapter.in.web.user.dto.CreateUserRequest;
+import com.freightos.admin.adapter.in.web.user.dto.SaveUserChangesRequest;
 import com.freightos.admin.adapter.in.web.user.dto.SearchUserRequest;
 import com.freightos.admin.adapter.in.web.user.dto.UpdateUserRequest;
 import com.freightos.admin.adapter.in.web.user.dto.UserDetailResponse;
 import com.freightos.admin.adapter.in.web.user.dto.UserSummaryResponse;
 import com.freightos.admin.application.user.command.CreateUserCommand;
+import com.freightos.admin.application.user.command.SaveUserChangesCommand;
 import com.freightos.admin.application.user.command.SearchUserCommand;
 import com.freightos.admin.application.user.command.UpdateUserCommand;
 import com.freightos.admin.application.user.projection.UserScope;
@@ -15,6 +17,7 @@ import com.freightos.admin.domain.user.entity.AdminUser;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 
 @Component
 public class UserAssembler {
@@ -36,7 +39,7 @@ public class UserAssembler {
     }
 
     public UserSummaryResponse toSummaryResponse(UserSummary p) {
-        return new UserSummaryResponse(p.id(), p.username(), p.email(), p.active(), p.deletedAt(), p.updatedAt());
+        return new UserSummaryResponse(p.id(), p.username(), p.email(), p.active(), p.deletedAt(), p.updatedAt(), p.attributes());
     }
 
     public UserDetailResponse toDetail(AdminUser domain) {
@@ -50,5 +53,17 @@ public class UserAssembler {
 
     public PagedResult<UserSummaryResponse> toSummaryPage(PagedResult<UserSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveUserChangesCommand toSaveChangesCommand(SaveUserChangesRequest req) {
+        List<CreateUserCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveUserChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveUserChangesCommand.UpdateEntry(u.id(),
+                            new UpdateUserCommand(u.email(), u.password(), u.active(), u.attributes())))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SaveUserChangesCommand(creates, updates, deleteIds);
     }
 }

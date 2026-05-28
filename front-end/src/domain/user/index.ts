@@ -5,6 +5,7 @@ export interface UserRow {
   active: boolean;
   deletedAt: string | null;
   updatedAt: string;
+  attributes: Record<string, string[]>;
 }
 
 export interface UserDetail {
@@ -40,4 +41,24 @@ export interface UpdateUserRequestDto {
   password: string | null; // null/empty → BE 미갱신
   active: boolean;
   attributes: Record<string, string[]>;
+}
+
+export interface UpdateUserItemDto {
+  id: number;
+  email: string | null;
+  password: string | null;
+  active: boolean;
+  attributes: Record<string, string[]>;
+}
+
+export interface SaveUserChangesRequestDto {
+  creates: CreateUserRequestDto[];
+  updates: UpdateUserItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResultDto {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
 }

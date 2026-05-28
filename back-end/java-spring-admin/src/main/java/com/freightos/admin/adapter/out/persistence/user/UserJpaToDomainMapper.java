@@ -29,7 +29,12 @@ public class UserJpaToDomainMapper {
     }
 
     public UserSummary toSummary(UserJpaEntity e) {
-        return new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt());
+        return new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt(), parseAttributesForSummary(e.getAttributes()));
+    }
+
+    /** UserRepositoryImpl에서 UserSummary 생성 시 attributes 파싱에 공유 사용 */
+    public Map<String, List<String>> parseAttributesForSummary(String json) {
+        return parseAttributes(json);
     }
 
     private Map<String, List<String>> parseAttributes(String json) {

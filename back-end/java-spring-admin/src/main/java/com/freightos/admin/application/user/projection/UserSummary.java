@@ -1,6 +1,8 @@
 package com.freightos.admin.application.user.projection;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 public record UserSummary(
         Long id,
@@ -8,5 +10,6 @@ public record UserSummary(
         String email,
         boolean active,
         LocalDateTime deletedAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Map<String, List<String>> attributes
 ) {}

@@ -85,7 +85,7 @@ class UserControllerWebMvcTest {
     void search_authenticated_returns200() throws Exception {
         UserSummaryResponse summaryResponse = new UserSummaryResponse(
                 1L, "alice", "alice@example.com", true,
-                null, LocalDateTime.of(2024, 1, 1, 0, 0));
+                null, LocalDateTime.of(2024, 1, 1, 0, 0), Map.of());
         PagedResult<UserSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<UserSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
 

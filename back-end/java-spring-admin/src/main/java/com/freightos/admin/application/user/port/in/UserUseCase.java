@@ -1,10 +1,13 @@
 package com.freightos.admin.application.user.port.in;
 
 import com.freightos.admin.application.user.command.CreateUserCommand;
+import com.freightos.admin.application.user.command.SaveUserChangesCommand;
 import com.freightos.admin.application.user.command.SearchUserCommand;
 import com.freightos.admin.application.user.command.UpdateUserCommand;
 import com.freightos.admin.application.user.projection.UserSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.user.entity.AdminUser;
 
 import java.util.List;
@@ -17,4 +20,6 @@ public interface UserUseCase {
     void updateUser(Long id, UpdateUserCommand command);
     void deleteUser(Long id);
     void deleteUsers(List<Long> ids);
+    SaveChangesResult saveUserChanges(SaveUserChangesCommand command);
+    List<AutocompleteItem> autocompleteUsers(String query, int limit);
 }

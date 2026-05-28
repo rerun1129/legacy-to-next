@@ -6,8 +6,11 @@ import type {
   UserFilter,
   CreateUserRequestDto,
   UpdateUserRequestDto,
+  SaveUserChangesRequestDto,
+  SaveChangesResultDto,
   UserScope,
 } from "@/domain/user";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
 
@@ -20,6 +23,7 @@ const USER_ROW_SCHEMA = z.object({
   active: z.boolean(),
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),
+  attributes: z.record(z.string(), z.array(z.string())).optional().transform((v) => v ?? {}),
 }) satisfies z.ZodType<UserRow>;
 
 const USER_DETAIL_SCHEMA = z.object({
@@ -46,6 +50,17 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     page: z.number(),
     size: z.number(),
   });
+
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+});
+
+const AUTOCOMPLETE_ITEM_SCHEMA = z.object({
+  code: z.string(),
+  name: z.string().nullable().transform((v) => v ?? ""),
+}) satisfies z.ZodType<CodeBoxSuggestion>;
 
 function scopeForBackend(scope: UserScope): UserScope {
   return scope;
@@ -114,5 +129,23 @@ export const API_USER_PORT: UserPort = {
       method: "DELETE",
       body: JSON.stringify({ ids }),
     });
+  },
+
+  async saveChanges(req: SaveUserChangesRequestDto): Promise<SaveChangesResultDto> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid user save-changes response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async autocomplete(q: string, limit = 20): Promise<CodeBoxSuggestion[]> {
+    const params = new URLSearchParams({ q, limit: String(limit) });
+    const json = await adminFetchJson(`${BASE}/autocomplete?${params}`);
+    const parsed = apiResponse(z.array(AUTOCOMPLETE_ITEM_SCHEMA)).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid user autocomplete response: ${parsed.error.message}`);
+    return parsed.data.data;
   },
 };

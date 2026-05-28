@@ -4,6 +4,7 @@ import com.freightos.admin.application.user.command.SearchUserCommand;
 import com.freightos.admin.application.user.port.out.UserPort;
 import com.freightos.admin.application.user.projection.UserSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.user.entity.AdminUser;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -66,5 +68,10 @@ public class UserPersistenceAdapter implements UserPort {
         return userRepository.findAllByActiveTrueAndDeletedAtIsNull().stream()
                 .filter(e -> jpaToDomainMapper.toDomain(e).hasRole("ADMIN"))
                 .count();
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return userRepository.autocomplete(query, limit);
     }
 }
