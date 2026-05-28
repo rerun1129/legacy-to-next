@@ -48,7 +48,7 @@ public class AttributeValueRepositoryImpl implements AttributeValueRepositoryCus
         typedQuery.setMaxResults(command.size());
 
         List<AttributeValueSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new AttributeValueSummary(e.getAttributeKey(), e.getValue(), e.getLabel(), e.getSortOrder(), e.getActive(), e.getUpdatedAt()))
+                .map(e -> new AttributeValueSummary(e.getId(), e.getAttributeKey(), e.getValue(), e.getLabel(), e.getSortOrder(), e.getActive(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

@@ -30,12 +30,12 @@ public class AttributeValueAssembler {
     }
 
     public AttributeValueSummaryResponse toSummaryResponse(AttributeValueSummary p) {
-        return new AttributeValueSummaryResponse(p.attributeKey(), p.value(), p.label(), p.sortOrder(), p.active(), p.updatedAt());
+        return new AttributeValueSummaryResponse(p.id(), p.attributeKey(), p.value(), p.label(), p.sortOrder(), p.active(), p.updatedAt());
     }
 
     public AttributeValueDetailResponse toDetail(AttributeValue domain) {
         return new AttributeValueDetailResponse(
-                domain.getAttributeKey(), domain.getValue(), domain.getLabel(),
+                domain.getId(), domain.getAttributeKey(), domain.getValue(), domain.getLabel(),
                 domain.getSortOrder(), domain.getActive(),
                 domain.getCreatedAt(), domain.getUpdatedAt(), domain.getCreatedBy(), domain.getUpdatedBy()
         );

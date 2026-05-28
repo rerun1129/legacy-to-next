@@ -3,6 +3,7 @@ package com.freightos.admin.adapter.in.web.attributevalue.dto;
 import java.time.LocalDateTime;
 
 public record AttributeValueDetailResponse(
+        Long id,
         String attributeKey,
         String value,
         String label,

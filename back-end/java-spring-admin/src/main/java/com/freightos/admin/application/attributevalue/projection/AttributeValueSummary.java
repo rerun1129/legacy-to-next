@@ -3,6 +3,7 @@ package com.freightos.admin.application.attributevalue.projection;
 import java.time.LocalDateTime;
 
 public record AttributeValueSummary(
+        Long id,
         String attributeKey,
         String value,
         String label,
