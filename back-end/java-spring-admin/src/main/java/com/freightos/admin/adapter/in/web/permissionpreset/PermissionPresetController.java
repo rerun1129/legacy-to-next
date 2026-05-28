@@ -8,6 +8,7 @@ import com.freightos.admin.adapter.in.web.permissionpreset.dto.SavePermissionPre
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.SearchPermissionPresetRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.UpdatePermissionPresetRequest;
 import com.freightos.admin.application.permissionpreset.port.in.AssignAttributeValuesToPresetUseCase;
+import com.freightos.admin.application.permissionpreset.port.in.AutocompletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.CreatePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.DeletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetDetailUseCase;
@@ -17,9 +18,12 @@ import com.freightos.admin.application.permissionpreset.port.in.UpdatePermission
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetDetail;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
 import com.freightos.admin.common.response.ApiResponse;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.SaveChangesResult;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -51,6 +56,7 @@ public class PermissionPresetController {
     private final ListPermissionPresetUseCase listUseCase;
     private final AssignAttributeValuesToPresetUseCase assignUseCase;
     private final SavePermissionPresetChangesUseCase saveChangesUseCase;
+    private final AutocompletePermissionPresetUseCase autocompleteUseCase;
     private final PermissionPresetWebAssembler assembler;
 
     @PostMapping("/search")
@@ -102,6 +108,14 @@ public class PermissionPresetController {
             @Valid @RequestBody SavePermissionPresetChangesRequest req) {
         SaveChangesResult result = saveChangesUseCase.savePermissionPresetChanges(assembler.toSaveChangesCommand(req));
         return ResponseEntity.ok(ApiResponse.of(result, MessageCode.PERMISSION_PRESET_SAVE_CHANGES.getMessage()));
+    }
+
+    @GetMapping("/autocomplete")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_PERMISSION_PRESET')")
+    public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
+        return ResponseEntity.ok(ApiResponse.of(autocompleteUseCase.autocompletePermissionPresets(query, limit)));
     }
 
     @PostMapping("/{id}/attribute-values")

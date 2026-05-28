@@ -67,3 +67,8 @@ export interface SaveChangesResult {
   updatedCount: number;
   deletedCount: number;
 }
+
+export interface PermissionPresetAutocompleteItem {
+  code: string;
+  name: string;
+}

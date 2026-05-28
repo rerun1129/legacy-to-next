@@ -1,5 +1,6 @@
 package com.freightos.admin.application.permissionpreset.port.out;
 
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface PermissionPresetRepository {
     void updatePermissionPreset(Long presetId, PermissionPreset patch);
     void deletePermissionPresetById(Long presetId);
     List<PermissionPreset> findAllPermissionPresets(boolean activeOnly);
+    List<AutocompleteItem> autocompletePermissionPresets(String query, int limit);
 }

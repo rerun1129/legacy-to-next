@@ -7,6 +7,7 @@ import com.freightos.admin.application.permissionpreset.command.ListPermissionPr
 import com.freightos.admin.application.permissionpreset.command.SavePermissionPresetChangesCommand;
 import com.freightos.admin.application.permissionpreset.command.UpdatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.port.in.AssignAttributeValuesToPresetUseCase;
+import com.freightos.admin.application.permissionpreset.port.in.AutocompletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.CreatePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.DeletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetDetailUseCase;
@@ -14,6 +15,7 @@ import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPre
 import com.freightos.admin.application.permissionpreset.port.in.ListPermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.SavePermissionPresetChangesUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.UpdatePermissionPresetUseCase;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetAttributeValueRepository;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetRepository;
@@ -43,7 +45,8 @@ public class PermissionPresetApplicationService
                    GetPermissionPresetDetailUseCase,
                    ListPermissionPresetUseCase,
                    AssignAttributeValuesToPresetUseCase,
-                   SavePermissionPresetChangesUseCase {
+                   SavePermissionPresetChangesUseCase,
+                   AutocompletePermissionPresetUseCase {
 
     private final PermissionPresetRepository presetRepository;
     private final PermissionPresetAttributeValueRepository presetAttributeValueRepository;
@@ -143,6 +146,11 @@ public class PermissionPresetApplicationService
         }
         // 변경 후 최종 attribute_value set 이 비어있지 않으면 module + scope 조합 필수 검증
         validateModuleAndScopeIfNotEmpty(presetId, command);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompletePermissionPresets(String query, int limit) {
+        return presetRepository.autocompletePermissionPresets(query, limit);
     }
 
     /**

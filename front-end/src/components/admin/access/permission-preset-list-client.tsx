@@ -40,9 +40,7 @@ export function PermissionPresetListClient() {
   const filterForm = useForm<PermissionPresetFilter>({
     defaultValues: DEFAULT_PERMISSION_PRESET_FILTER,
   });
-  const [activeFilter, setActiveFilter] = useState<PermissionPresetFilter>(
-    DEFAULT_PERMISSION_PRESET_FILTER,
-  );
+  const [activeFilter, setActiveFilter] = useState<PermissionPresetFilter | null>(null);
   const [acQuery, setAcQuery] = useState("");
 
   const { control, register, getValues, setValue, reset, formState: { isDirty } } =
@@ -57,16 +55,38 @@ export function PermissionPresetListClient() {
   const { data, isFetching } = useQuery({
     queryKey: ["permission-preset", "list"],
     queryFn: () => permissionPresetUseCases.search({}),
+    enabled: activeFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
     structuralSharing: false,
   });
 
+  // ─── Code 자동완성 (BE endpoint) ────────────────────────────────────────
+
+  const { data: acItems = [] } = useQuery({
+    queryKey: ["permission-preset", "autocomplete", acQuery],
+    queryFn: () => permissionPresetUseCases.autocomplete(acQuery),
+    enabled: acQuery.length >= 1,
+    staleTime: 30_000,
+  });
+
+  const codeSuggestions: CodeBoxSuggestion[] = acItems.map((item) => ({
+    code: item.code,
+    name: item.name,
+  }));
+
+  const handleCodeSelect = useCallback(
+    (item: CodeBoxSuggestion) => {
+      filterForm.setValue("code", item.code);
+    },
+    [filterForm],
+  );
+
   // ─── 클라이언트 필터링 (Code prefix-match + Status) ────────────────────
 
   const filteredData = useMemo(() => {
-    if (!data) return [];
+    if (!data || !activeFilter) return [];
     const codeQ = activeFilter.code.trim().toUpperCase();
     return data.filter((r) => {
       if (codeQ && !r.code.toUpperCase().includes(codeQ)) return false;
@@ -75,24 +95,6 @@ export function PermissionPresetListClient() {
       return true;
     });
   }, [data, activeFilter]);
-
-  // ─── Code 자동완성 제안 ─────────────────────────────────────────────────
-
-  const codeSuggestions = useMemo<CodeBoxSuggestion[]>(() => {
-    const q = acQuery.trim().toUpperCase();
-    if (!q || !data) return [];
-    return data
-      .filter((r) => r.code.toUpperCase().includes(q))
-      .slice(0, 20)
-      .map((r) => ({ code: r.code, name: r.name }));
-  }, [acQuery, data]);
-
-  const handleCodeSelect = useCallback(
-    (item: CodeBoxSuggestion) => {
-      filterForm.setValue("code", item.code);
-    },
-    [filterForm],
-  );
 
   const originalRows = useMemo<PresetFormRow[]>(
     () => filteredData.map(toFormRow),
@@ -210,9 +212,10 @@ export function PermissionPresetListClient() {
           buttonCode="BTN_ADMIN_ACCESS_PERMISSION_PRESET_RESET"
           className="btn btn--normal btn--sm"
           onClick={() => {
+            setActiveFilter(null);
             filterForm.reset(DEFAULT_PERMISSION_PRESET_FILTER);
-            setActiveFilter(DEFAULT_PERMISSION_PRESET_FILTER);
-            invalidateList();
+            reset({ rows: [] });
+            setSelectedKeys(new Set());
             setPresetTargetId(null);
           }}
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
@@ -222,8 +225,8 @@ export function PermissionPresetListClient() {
           className="btn btn--search btn--sm"
           onClick={() =>
             filterForm.handleSubmit((values) => {
-              setActiveFilter(values);
               invalidateList();
+              setActiveFilter(values);
               setPresetTargetId(null);
             })()
           }
@@ -280,7 +283,11 @@ export function PermissionPresetListClient() {
             rowKey={(row) => row.entityId}
             rowClassName={(row) => getPresetRowClassName(row, originalRows)}
             isLoading={isFetching}
-            emptyMessage="No results found."
+            emptyMessage={
+              activeFilter === null
+                ? "Enter search criteria and click Search."
+                : "No results found."
+            }
             selectable
             selectedKeys={selectedKeys}
             onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}

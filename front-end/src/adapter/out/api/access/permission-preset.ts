@@ -9,6 +9,7 @@ import type {
   AssignAttributeValuesCommand,
   SavePermissionPresetChangesRequest,
   SaveChangesResult,
+  PermissionPresetAutocompleteItem,
 } from "@/domain/access/permission-preset";
 import { adminFetchJson } from "../admin-fetch";
 import { ApiError, ResponseParseError } from "../errors";
@@ -102,6 +103,21 @@ export const API_PERMISSION_PRESET_PORT: PermissionPresetPort = {
       method: "POST",
       body: JSON.stringify(cmd),
     });
+  },
+
+  async autocomplete(query: string): Promise<PermissionPresetAutocompleteItem[]> {
+    const json = await adminFetchJson(
+      `${BASE}/autocomplete?query=${encodeURIComponent(query)}`
+    );
+    const parsed = apiResponse(
+      z.array(z.object({ code: z.string(), name: z.string() }))
+    ).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(
+        `Invalid permission-preset autocomplete response: ${parsed.error.message}`
+      );
+    }
+    return parsed.data.data as PermissionPresetAutocompleteItem[];
   },
 
   async saveChanges(req: SavePermissionPresetChangesRequest): Promise<SaveChangesResult> {

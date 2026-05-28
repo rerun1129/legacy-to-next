@@ -1,6 +1,7 @@
 package com.freightos.admin.adapter.out.persistence.permissionpreset;
 
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetRepository;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -72,6 +73,11 @@ public class PermissionPresetPersistenceAdapter implements PermissionPresetRepos
             List<Long> ids = loadAttributeValueIds(e.getId());
             return jpaToDomainMapper.toDomain(e, ids);
         }).toList();
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompletePermissionPresets(String query, int limit) {
+        return jpaRepository.autocompletePermissionPresets(query, limit);
     }
 
     private List<Long> loadAttributeValueIds(Long presetId) {

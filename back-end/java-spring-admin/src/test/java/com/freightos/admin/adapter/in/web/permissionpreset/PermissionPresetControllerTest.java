@@ -12,6 +12,7 @@ import com.freightos.admin.application.permissionpreset.command.CreatePermission
 import com.freightos.admin.application.permissionpreset.command.ListPermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.command.UpdatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.port.in.AssignAttributeValuesToPresetUseCase;
+import com.freightos.admin.application.permissionpreset.port.in.AutocompletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.CreatePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.DeletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetDetailUseCase;
@@ -82,6 +83,9 @@ class PermissionPresetControllerTest {
 
     @MockitoBean
     private SavePermissionPresetChangesUseCase saveChangesUseCase;
+
+    @MockitoBean
+    private AutocompletePermissionPresetUseCase autocompleteUseCase;
 
     @MockitoBean
     private PermissionPresetWebAssembler assembler;

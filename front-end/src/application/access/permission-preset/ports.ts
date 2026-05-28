@@ -7,6 +7,7 @@ import type {
   AssignAttributeValuesCommand,
   SavePermissionPresetChangesRequest,
   SaveChangesResult,
+  PermissionPresetAutocompleteItem,
 } from "@/domain/access/permission-preset";
 
 export interface PermissionPresetPort {
@@ -17,4 +18,5 @@ export interface PermissionPresetPort {
   delete(id: number): Promise<void>;
   assignAttributeValues(id: number, cmd: AssignAttributeValuesCommand): Promise<void>;
   saveChanges(req: SavePermissionPresetChangesRequest): Promise<SaveChangesResult>;
+  autocomplete(query: string): Promise<PermissionPresetAutocompleteItem[]>;
 }

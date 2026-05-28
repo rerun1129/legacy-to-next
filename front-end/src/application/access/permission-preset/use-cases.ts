@@ -17,4 +17,5 @@ export const permissionPresetUseCases = {
     permissionPresetPort.assignAttributeValues(id, cmd),
   saveChanges: (req: SavePermissionPresetChangesRequest) =>
     permissionPresetPort.saveChanges(req),
+  autocomplete: (query: string) => permissionPresetPort.autocomplete(query),
 };
