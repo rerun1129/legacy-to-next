@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import type { CustomerFilter } from "@/domain/customer";
+import { customerUseCases } from "@/application/customer/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
+import { CodeBox } from "@/components/shared/inputs/code-box";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 
 interface Props {
@@ -30,20 +35,32 @@ const SCOPE_OPTIONS = [
 
 export function CustomerListFilter({ form }: Props) {
   useListFilterSync(form, "/admin/customer/list");
-  const { register } = form;
+  const { register, setValue } = form;
+
+  const [acQuery, setAcQuery] = useState("");
+  const { data: suggestions = [] } = useQuery({
+    queryKey: ["admin-customer", "autocomplete", acQuery],
+    queryFn: () => customerUseCases.autocomplete(acQuery),
+    enabled: acQuery.length >= 1,
+    staleTime: 30_000,
+  });
+
+  function handleSelect(item: CodeBoxSuggestion) {
+    setValue("customerCode", item.code);
+  }
 
   return (
     <div className="search-card">
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-          <div className="lcn">
-            <span className="lcn__label">Customer Code</span>
-            <input
-              className="box-panel"
-              placeholder="Customer Code"
-              {...register("customerCode")}
-            />
-          </div>
+          <CodeBox
+            kind="code-only"
+            label="Customer Code"
+            onSearch={setAcQuery}
+            suggestions={suggestions}
+            onSelect={handleSelect}
+            codeProps={{ placeholder: "Customer Code", ...register("customerCode") }}
+          />
           <div className="lcn">
             <span className="lcn__label">Customer Name</span>
             <input

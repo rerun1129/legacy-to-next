@@ -96,7 +96,7 @@ public class CustomerController {
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_CREATE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCustomerChangesRequest req) {
         SaveChangesResult result = customerUseCase.saveCustomerChanges(customerAssembler.toSaveChangesCommand(req));

@@ -7,6 +7,7 @@ import type {
   SaveCustomerChangesRequestDto,
   SaveChangesResultDto,
 } from "@/domain/customer";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface CustomerPageResult {
   content: CustomerRow[];
@@ -24,4 +25,5 @@ export interface CustomerPort {
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
   saveChanges(req: SaveCustomerChangesRequestDto): Promise<SaveChangesResultDto>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

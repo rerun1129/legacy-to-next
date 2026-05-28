@@ -206,7 +206,7 @@ export function CustomerListClient() {
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_ADMIN_CUSTOMER_RESET"
+          buttonCode="BTN_ADMIN_CUSTOMER_LIST_RESET"
           className="btn btn--normal btn--sm"
           onClick={() => {
             filterForm.reset(DEFAULT_FILTER);
@@ -217,7 +217,7 @@ export function CustomerListClient() {
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
         />
         <ActionButton
-          buttonCode="BTN_ADMIN_CUSTOMER_SEARCH"
+          buttonCode="BTN_ADMIN_CUSTOMER_LIST_SEARCH"
           className="btn btn--search btn--sm"
           onClick={() =>
             filterForm.handleSubmit((values) => {

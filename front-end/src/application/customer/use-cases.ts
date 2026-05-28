@@ -9,4 +9,5 @@ export const customerUseCases = {
   delete: (id: number) => customerPort.delete(id),
   deleteMany: (ids: number[]) => customerPort.deleteMany(ids),
   saveChanges: (req: SaveCustomerChangesRequestDto) => customerPort.saveChanges(req),
+  autocomplete: (q: string, limit?: number) => customerPort.autocomplete(q, limit),
 };
