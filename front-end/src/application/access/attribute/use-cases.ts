@@ -1,5 +1,9 @@
 import { accessAttributePort } from "@/lib/ports";
-import type { CreateAttributeDefinitionDto, UpdateAttributeDefinitionDto } from "@/domain/access/attribute";
+import type {
+  CreateAttributeDefinitionDto,
+  UpdateAttributeDefinitionDto,
+  SaveAttributeDefinitionChangesRequest,
+} from "@/domain/access/attribute";
 
 export const accessAttributeUseCases = {
   search: (page: number, size?: number) => accessAttributePort.search(page, size),
@@ -9,4 +13,6 @@ export const accessAttributeUseCases = {
   delete: (attributeKey: string) => accessAttributePort.delete(attributeKey),
   deleteMany: (keys: string[]) => accessAttributePort.deleteMany(keys),
   getByModule: (moduleCode: string) => accessAttributePort.getByModule(moduleCode),
+  saveChanges: (req: SaveAttributeDefinitionChangesRequest) => accessAttributePort.saveChanges(req),
+  autocomplete: (query: string) => accessAttributePort.autocomplete(query),
 };

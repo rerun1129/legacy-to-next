@@ -1,17 +1,22 @@
 package com.freightos.admin.application.attributedefinition;
 
 import com.freightos.admin.application.attributedefinition.command.CreateAttributeDefinitionCommand;
+import com.freightos.admin.application.attributedefinition.command.SaveAttributeDefinitionChangesCommand;
 import com.freightos.admin.application.attributedefinition.command.SearchAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.command.UpdateAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.port.in.AttributeDefinitionUseCase;
+import com.freightos.admin.application.attributedefinition.port.in.AutocompleteAttributeKeyUseCase;
+import com.freightos.admin.application.attributedefinition.port.in.SaveAttributeDefinitionChangesUseCase;
 import com.freightos.admin.application.attributedefinition.port.out.AttributeDefinitionPort;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
 import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.attributedefinition.entity.AttributeDefinition;
 import com.freightos.admin.domain.attributedefinition.entity.ValueType;
 import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
@@ -25,7 +30,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class AttributeDefinitionService implements AttributeDefinitionUseCase {
+public class AttributeDefinitionService implements AttributeDefinitionUseCase,
+        SaveAttributeDefinitionChangesUseCase,
+        AutocompleteAttributeKeyUseCase {
 
     private final AttributeDefinitionPort attributeDefinitionPort;
     private final AttributeDefinitionFactory attributeDefinitionFactory;
@@ -84,6 +91,26 @@ public class AttributeDefinitionService implements AttributeDefinitionUseCase {
             throw ApplicationException.conflict("ATTRIBUTE_DEFINITION_IN_USE_CANNOT_DELETE", MessageCode.ATTRIBUTE_DEFINITION_IN_USE_CANNOT_DELETE.getMessage());
         }
         attributeDefinitionPort.deleteAttributeDefinitionByKey(attributeKey);
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveAttributeDefinitionChanges(SaveAttributeDefinitionChangesCommand command) {
+        for (String key : command.deleteKeys()) {
+            deleteAttributeDefinitionByKey(key);
+        }
+        for (SaveAttributeDefinitionChangesCommand.UpdateAttributeDefinitionItem item : command.updates()) {
+            updateAttributeDefinition(item.attributeKey(), new UpdateAttributeDefinitionCommand(item.name(), item.description(), item.valueType(), item.active(), item.allowMulti()));
+        }
+        for (CreateAttributeDefinitionCommand create : command.creates()) {
+            createAttributeDefinition(create);
+        }
+        return new SaveChangesResult(command.creates().size(), command.updates().size(), command.deleteKeys().size());
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteAttributeKeys(String query, int limit) {
+        return attributeDefinitionPort.autocompleteAttributeKeys(query, limit);
     }
 
     @Override

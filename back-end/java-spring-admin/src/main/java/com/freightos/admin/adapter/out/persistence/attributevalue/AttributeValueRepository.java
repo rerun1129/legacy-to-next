@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface AttributeValueRepository extends JpaRepository<AttributeValueJpaEntity, Long>, AttributeValueRepositoryCustom {
     Optional<AttributeValueJpaEntity> findByAttributeKeyAndValue(String attributeKey, String value);
     boolean existsByAttributeKeyAndValue(String attributeKey, String value);
+    boolean existsByAttributeKeyAndValueAndIdNot(String attributeKey, String value, Long id);
     boolean existsByAttributeKey(String attributeKey);
     List<AttributeValueJpaEntity> findByAttributeKeyAndActiveTrue(String attributeKey);
 }

@@ -4,6 +4,9 @@ import type {
   CreateAttributeDefinitionDto,
   UpdateAttributeDefinitionDto,
   ModuleAttributeDto,
+  SaveAttributeDefinitionChangesRequest,
+  SaveChangesResult,
+  AttributeAutocompleteItem,
 } from "@/domain/access/attribute";
 
 export interface AttributeDefinitionPageResult {
@@ -22,4 +25,6 @@ export interface AttributeDefinitionPort {
   delete(attributeKey: string): Promise<void>;
   deleteMany(keys: string[]): Promise<void>;
   getByModule(moduleCode: string): Promise<ModuleAttributeDto[]>;
+  saveChanges(req: SaveAttributeDefinitionChangesRequest): Promise<SaveChangesResult>;
+  autocomplete(query: string): Promise<AttributeAutocompleteItem[]>;
 }

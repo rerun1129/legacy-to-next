@@ -1,291 +1,286 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Pencil } from "lucide-react";
-import { Button } from "@/components/shared/button";
-import { ModalShell } from "@/components/shared/modal-shell";
-import { confirm } from "@/components/confirm";
-import { toast } from "@/lib/toast-store";
-import { accessAttributePort } from "@/lib/ports";
-import { accessAttributeUseCases } from "@/application/access/attribute/use-cases";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { Plus, Minus, Save, Search, RotateCcw } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { AttributeValueSection } from "@/components/admin/access/attribute-value-section";
 import { GridList } from "@/components/shared/grid-list";
-import type { GridColumn } from "@/components/shared/grid-list";
-import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
-import type {
-  CreateAttributeDefinitionDto,
-  UpdateAttributeDefinitionDto,
-  AttributeValueType,
-  AttributeDefinitionRow,
-} from "@/domain/access/attribute";
+import { Button } from "@/components/shared/button";
+import { toast } from "@/lib/toast-store";
+import { collectGridChanges } from "@/lib/collect-grid-changes";
+import { accessAttributeUseCases } from "@/application/access/attribute/use-cases";
+import type { SaveAttributeDefinitionChangesRequest } from "@/domain/access/attribute";
+import { AttributeValueSection } from "@/components/admin/access/attribute-value-section";
+import {
+  buildAttributeColumns,
+  getAttributeRowClassName,
+  type AttributeFormRow,
+  type AttributeFormValues,
+} from "./attribute-grid-columns";
+import {
+  ROW_IS_EQUAL,
+  TO_CREATE,
+  TO_UPDATE,
+  toFormRow,
+} from "./attribute-list-helpers";
+import { useAttributePasteHandler } from "./use-attribute-paste-handler";
+import {
+  DEFAULT_ATTRIBUTE_FILTER,
+  AttributeListFilter,
+  type AttributeFilter,
+} from "./attribute-list-filter";
 
-const VALUE_TYPES: AttributeValueType[] = ["STRING", "NUMBER", "BOOLEAN", "ENUM"];
-
-const DEFAULT_FORM: CreateAttributeDefinitionDto = {
-  attributeKey: "",
-  name: "",
-  valueType: "STRING",
-  allowMulti: false,
-  active: true,
-};
-
-interface UpdateFormValues {
-  name: string;
-  valueType: AttributeValueType;
-  allowMulti: boolean;
-  active: boolean;
-}
-
-const DEFAULT_UPDATE: UpdateFormValues = {
-  name: "",
-  valueType: "STRING",
-  allowMulti: false,
-  active: true,
-};
-
-// attributeKey 제외 나머지 데이터 컬럼 — useMemo 내에서 attributeKey render와 합산
-const ATTRIBUTE_TAIL_COLUMNS: GridColumn<AttributeDefinitionRow>[] = [
-  { key: "name", label: "name", minWidth: 120 },
-  { key: "valueType", label: "valueType", minWidth: 100 },
-  { key: "allowMulti", label: "allowMulti", minWidth: 80, align: "center", render: (v) => (v ? "Y" : "N") },
-  { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
-];
-
-// ColumnVisibilityMenu defaultColumns 기준 (render 없는 key/label 선언 목록)
-const ATTRIBUTE_BASE_COLUMNS: GridColumn<AttributeDefinitionRow>[] = [
-  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
-  ...ATTRIBUTE_TAIL_COLUMNS,
-];
+// ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function AccessAttributeListClient() {
   const qc = useQueryClient();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<AttributeDefinitionRow | null>(null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-  const createForm = useForm<CreateAttributeDefinitionDto>({ defaultValues: DEFAULT_FORM });
-  const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
+
+  const filterForm = useForm<AttributeFilter>({
+    defaultValues: DEFAULT_ATTRIBUTE_FILTER,
+  });
+  const [activeFilter, setActiveFilter] = useState<AttributeFilter | null>(null);
+
+  const { control, register, getValues, setValue, reset, formState: { isDirty } } =
+    useForm<AttributeFormValues>({ defaultValues: { rows: [] } });
+  const { fields, append, remove } = useFieldArray({ control, name: "rows" });
+
+  const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
+  const [drillTargetKey, setDrillTargetKey] = useState<string | null>(null);
+
+  // ─── 데이터 조회 ─────────────────────────────────────────────────────────
 
   const { data, isFetching } = useQuery({
     queryKey: ["access-attribute", "list"],
-    queryFn: () => accessAttributePort.search(1, 100),
+    queryFn: () => accessAttributeUseCases.search(1, 100),
+    enabled: activeFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
+    structuralSharing: false,
   });
 
-  const createMutation = useMutation({
-    mutationFn: (req: CreateAttributeDefinitionDto) => accessAttributePort.create(req),
-    onSuccess: () => {
-      toast.success("속성이 등록되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-attribute", "list"] });
-      setCreateOpen(false);
-      createForm.reset(DEFAULT_FORM);
-    },
-  });
+  // ─── 클라이언트 필터링 (attributeKey prefix-match + Status) ───────────
 
-  const updateMutation = useMutation({
-    mutationFn: ({ attributeKey, req }: { attributeKey: string; req: UpdateAttributeDefinitionDto }) =>
-      accessAttributePort.update(attributeKey, req),
-    onSuccess: () => {
-      toast.success("속성이 수정되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-attribute", "list"] });
-      setEditTarget(null);
-      editForm.reset(DEFAULT_UPDATE);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (attributeKey: string) => accessAttributePort.delete(attributeKey),
-    onSuccess: () => {
-      toast.success("삭제되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-attribute", "list"] });
-      setSelectedKey(null);
-    },
-  });
-
-  const bulkDeleteMutation = useMutation({
-    mutationFn: (keys: string[]) => accessAttributeUseCases.deleteMany(keys),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["access-attribute", "list"] });
-      setSelectedKeys(new Set());
-      toast.success("선택한 항목이 삭제되었습니다.");
-    },
-  });
-
-  const openEdit = useCallback((row: AttributeDefinitionRow) => {
-    setEditTarget(row);
-    editForm.reset({
-      name: row.name,
-      valueType: row.valueType,
-      allowMulti: row.allowMulti,
-      active: row.active,
+  const filteredData = useMemo(() => {
+    if (!data || !activeFilter) return [];
+    const keyQ = activeFilter.attributeKey.trim().toLowerCase();
+    return data.content.filter((r) => {
+      if (keyQ && !r.attributeKey.toLowerCase().includes(keyQ)) return false;
+      if (activeFilter.status === "ACTIVE" && !r.active) return false;
+      if (activeFilter.status === "INACTIVE" && r.active) return false;
+      return true;
     });
-  }, [editForm]);
+  }, [data, activeFilter]);
 
-  function handleEditSave(values: UpdateFormValues) {
-    if (!editTarget) return;
-    const req: UpdateAttributeDefinitionDto = {
-      name: values.name.trim(),
-      valueType: values.valueType,
-      allowMulti: values.allowMulti,
-      active: values.active,
-    };
-    updateMutation.mutate({ attributeKey: editTarget.attributeKey, req });
+  const originalRows = useMemo<AttributeFormRow[]>(
+    () => filteredData.map(toFormRow),
+    [filteredData],
+  );
+
+  useEffect(() => {
+    reset({ rows: originalRows });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originalRows]);
+
+  // ─── 클립보드 붙여넣기 ──────────────────────────────────────────────────
+
+  useAttributePasteHandler(getValues, setValue);
+
+  // ─── 행 추가/삭제 ────────────────────────────────────────────────────────
+
+  const pendingFocusRef = useRef<number | null>(null);
+
+  function handleAdd() {
+    const id = -Date.now();
+    append({ entityId: id, attributeKey: "", name: "", valueType: "STRING", allowMulti: false, active: true });
+    pendingFocusRef.current = id;
   }
 
-  const handleDelete = useCallback(async (attributeKey: string) => {
-    const ok = await confirm({
-      title: "속성 삭제",
-      description: `"${attributeKey}" 속성을 삭제하시겠습니까?`,
-      variant: "destructive",
-      confirmText: "삭제",
-      cancelText: "취소",
+  useEffect(() => {
+    if (pendingFocusRef.current === null) return;
+    const key = pendingFocusRef.current;
+    pendingFocusRef.current = null;
+    requestAnimationFrame(() => {
+      const td = document.querySelector(
+        `td[data-row-key="${key}"][data-col-key="attributeKey"]`,
+      ) as HTMLElement | null;
+      const input = td?.querySelector("input:not([type=hidden])") as HTMLInputElement | null;
+      input?.focus();
     });
-    if (!ok) return;
-    deleteMutation.mutate(attributeKey);
-  }, [deleteMutation]);
+  });
 
-  async function handleBulkDelete() {
-    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
-    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  function handleRemove() {
+    if (selectedKeys.size === 0) return;
+    const rows = getValues("rows");
+    const removedIds = new Set<number>();
+    const indices = rows
+      .map((r, i) => {
+        if (selectedKeys.has(r.entityId)) {
+          removedIds.add(r.entityId);
+          return i;
+        }
+        return -1;
+      })
+      .filter((i) => i !== -1)
+      .sort((a, b) => b - a);
+    for (const idx of indices) remove(idx);
+    setSelectedKeys(new Set());
+    if (drillTargetKey !== null) {
+      // 삭제된 행의 attributeKey 가 drill target이면 닫기
+      const removed = originalRows.filter((r) => removedIds.has(r.entityId));
+      if (removed.some((r) => r.attributeKey === drillTargetKey)) {
+        setDrillTargetKey(null);
+      }
+    }
   }
 
-  const columns = useMemo<GridColumn<AttributeDefinitionRow>[]>(() => [
-    {
-      key: "attributeKey",
-      label: "attributeKey",
-      minWidth: 140,
-      // allowMulti=Y 행에 한해 더블클릭으로 드릴다운 트리거
-      render: (_v, row) => (
-        <span
-          style={row.allowMulti ? { cursor: "pointer", userSelect: "none" } : undefined}
-          onDoubleClick={row.allowMulti ? (e) => {
-            e.stopPropagation();
-            setSelectedKey((prev) => (prev === row.attributeKey ? null : row.attributeKey));
-          } : undefined}
-        >
-          {row.attributeKey}
-        </span>
-      ),
-    },
-    ...ATTRIBUTE_TAIL_COLUMNS,
-    {
-      key: "_actions",
-      label: "",
-      minWidth: 70,
-      render: (_v, row) => (
-        <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
-          <ActionButton
-            buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_UPDATE"
-            className="btn btn--sm"
-            onClick={(e) => { e.stopPropagation(); openEdit(row); }}
-          >
-            <Pencil size={12} />
-          </ActionButton>
-          <ActionButton
-            buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"
-            className="btn btn--danger btn--sm"
-            onClick={(e) => { e.stopPropagation(); handleDelete(row.attributeKey); }}
-            disabled={deleteMutation.isPending}
-          >
-            <Trash2 size={12} />
-          </ActionButton>
-        </div>
-      ),
-    },
-  ], [deleteMutation.isPending, openEdit, handleDelete, setSelectedKey]);
+  // ─── 더블클릭 → 하단 값 섹션 토글 ──────────────────────────────────────
 
-  const rows = data?.content ?? [];
+  const handleKeyDoubleClick = useCallback((_entityId: number, allowMulti: boolean) => {
+    if (!allowMulti) return;
+    const rows = getValues("rows");
+    const row = rows.find((r) => r.entityId === _entityId);
+    if (!row || row.entityId < 0) return;
+    setDrillTargetKey(row.attributeKey);
+  }, [getValues]);
+
+  // ─── saveChanges ─────────────────────────────────────────────────────────
+
+  const invalidateList = () =>
+    qc.invalidateQueries({ queryKey: ["access-attribute", "list"] });
+
+  const saveChangesMutation = useMutation({
+    mutationFn: (vars: SaveAttributeDefinitionChangesRequest) =>
+      accessAttributeUseCases.saveChanges(vars),
+    onSuccess: (result) => {
+      toast.success(
+        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`,
+      );
+      setDrillTargetKey(null);
+      invalidateList();
+    },
+  });
+
+  const handleSave = useCallback(() => {
+    const liveRows = getValues("rows");
+    const changes = collectGridChanges(originalRows, liveRows, {
+      rowKey: (r) => r.entityId,
+      toCreate: TO_CREATE,
+      toUpdate: TO_UPDATE,
+      isEqual: ROW_IS_EQUAL,
+    });
+    saveChangesMutation.mutate({
+      creates: changes.creates,
+      updates: changes.updates,
+      deleteKeys: changes.deleteIds
+        .map((id) => originalRows.find((r) => r.entityId === id)?.attributeKey)
+        .filter((k): k is string => typeof k === "string" && k.length > 0),
+    });
+  }, [getValues, originalRows, saveChangesMutation]);
+
+  // ─── 컬럼 ────────────────────────────────────────────────────────────────
+
+  const columns = useMemo(
+    () => buildAttributeColumns(register, control, handleKeyDoubleClick),
+    [register, control, handleKeyDoubleClick],
+  );
+
+  // ─── 렌더 ────────────────────────────────────────────────────────────────
 
   return (
     <>
+      {/* 툴바 */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"
-          className="btn btn--modal btn--sm"
-          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
-          onClick={handleBulkDelete}
+          buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_RESET"
+          className="btn btn--normal btn--sm"
+          onClick={() => {
+            filterForm.reset(DEFAULT_ATTRIBUTE_FILTER);
+            setActiveFilter(null);
+            reset({ rows: [] });
+            setSelectedKeys(new Set());
+            setDrillTargetKey(null);
+          }}
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_SEARCH"
+          className="btn btn--search btn--sm"
+          onClick={() =>
+            filterForm.handleSubmit((values) => {
+              invalidateList();
+              setActiveFilter(values);
+              setDrillTargetKey(null);
+            })()
+          }
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
+        <Button
+          variant="transaction"
+          size="sm"
+          disabled={!isDirty || saveChangesMutation.isPending}
+          onClick={handleSave}
         >
-          선택 삭제
-        </ActionButton>
-        <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setCreateOpen(true)}>신규</Button>
+          <Save size={12} style={{ marginRight: 4 }} />
+          Save
+        </Button>
       </div>
-      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+
+      {/* 검색 필터 */}
+      <AttributeListFilter form={filterForm} />
+
+      {/* 그리드 패널 */}
+      <div
+        className="panel"
+        style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", marginTop: 10 }}
+      >
         <div className="panel__head">
           <div className="panel__title-accent" />
           <span className="panel__title">Attributes</span>
-          <span className="panel__rowcount">{rows.length}</span>
-          <ColumnVisibilityMenu<AttributeDefinitionRow> gridId="access-attribute" defaultColumns={ATTRIBUTE_BASE_COLUMNS} />
+          <span className="panel__rowcount">{fields.length}</span>
+          <div className="panel__actions">
+            <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
+              <Plus size={12} />
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              iconOnly
+              onClick={handleRemove}
+              disabled={selectedKeys.size === 0}
+            >
+              <Minus size={12} />
+            </Button>
+          </div>
         </div>
+
         <div className="list-wrap">
-          <GridList<AttributeDefinitionRow>
+          <GridList<AttributeFormRow>
             columns={columns}
-            data={rows}
-            gridId="access-attribute"
-            rowKey={(row) => row.attributeKey}
-            rowClassName={(row) => selectedKey === row.attributeKey ? "is-selected" : undefined}
+            data={fields as unknown as AttributeFormRow[]}
+            rowKey={(row) => row.entityId}
+            rowClassName={(row) => getAttributeRowClassName(row, originalRows)}
+            isLoading={isFetching}
+            emptyMessage={
+              activeFilter === null
+                ? "Enter search criteria and click Search."
+                : "No results found."
+            }
             selectable
             selectedKeys={selectedKeys}
-            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(String)))}
-            isLoading={isFetching}
-            emptyMessage="데이터가 없습니다."
+            onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
           />
         </div>
       </div>
 
-      {/* allowMulti 행 더블클릭 시 attribute-value 서브 섹션 노출 */}
-      {selectedKey !== null && <AttributeValueSection attributeKey={selectedKey} />}
-
-      {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="속성 등록" size="md">
-        <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn"><span className="lcn__label">attributeKey</span><input className="text-box text-box--panel" {...createForm.register("attributeKey")} /></div>
-            <div className="lcn"><span className="lcn__label">name</span><input className="text-box text-box--panel" {...createForm.register("name")} /></div>
-            <div className="lcn"><span className="lcn__label">valueType</span>
-              <select className="text-box text-box--panel" {...createForm.register("valueType")}>
-                {VALUE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="lcn"><span className="lcn__label">allowMulti</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("allowMulti")} />허용</label></div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("active")} />활성</label></div>
-          </div>
-        </form>
-        <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={createForm.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setCreateOpen(false); createForm.reset(DEFAULT_FORM); }}>닫기</Button>
-        </div>
-      </ModalShell>
-
-      {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="속성 수정" size="md">
-        <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn">
-              <span className="lcn__label">attributeKey</span>
-              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center" }}>
-                {editTarget?.attributeKey}
-              </span>
-            </div>
-            <div className="lcn"><span className="lcn__label">name</span><input className="text-box text-box--panel" {...editForm.register("name")} /></div>
-            <div className="lcn"><span className="lcn__label">valueType</span>
-              <select className="text-box text-box--panel" {...editForm.register("valueType")}>
-                {VALUE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="lcn"><span className="lcn__label">allowMulti</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("allowMulti")} />허용</label></div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
-          </div>
-        </form>
-        <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={editForm.handleSubmit(handleEditSave)} loading={updateMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setEditTarget(null); editForm.reset(DEFAULT_UPDATE); }}>닫기</Button>
-        </div>
-      </ModalShell>
+      {/* allowMulti 행 더블클릭 시 attribute-value 인라인 그리드 노출 */}
+      {drillTargetKey !== null && (
+        <AttributeValueSection
+          key={drillTargetKey}
+          attributeKey={drillTargetKey}
+        />
+      )}
     </>
   );
 }

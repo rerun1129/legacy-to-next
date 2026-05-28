@@ -4,16 +4,23 @@ import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefin
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefinitionSummaryResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.CreateAttributeDefinitionRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.ModuleAttributeResponse;
+import com.freightos.admin.adapter.in.web.attributedefinition.dto.SaveAttributeDefinitionChangesRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.SearchAttributeDefinitionRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.UpdateAttributeDefinitionRequest;
 import com.freightos.admin.application.attributedefinition.ModuleAttributeResult;
 import com.freightos.admin.application.attributedefinition.port.in.AttributeDefinitionUseCase;
+import com.freightos.admin.application.attributedefinition.port.in.AutocompleteAttributeKeyUseCase;
+import com.freightos.admin.application.attributedefinition.port.in.SaveAttributeDefinitionChangesUseCase;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
 import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.response.ApiResponse;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -40,6 +48,8 @@ import java.util.Map;
 public class AttributeDefinitionController {
 
     private final AttributeDefinitionUseCase attributeDefinitionUseCase;
+    private final SaveAttributeDefinitionChangesUseCase saveChangesUseCase;
+    private final AutocompleteAttributeKeyUseCase autocompleteUseCase;
     private final AttributeDefinitionAssembler attributeDefinitionAssembler;
 
     @PostMapping("/search")
@@ -83,6 +93,20 @@ public class AttributeDefinitionController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteByCodeRequest req) {
         attributeDefinitionUseCase.deleteAttributeDefinitionsByKeys(req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_DEFINITION_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveAttributeDefinitionChangesRequest req) {
+        SaveChangesResult result = saveChangesUseCase.saveAttributeDefinitionChanges(attributeDefinitionAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.ATTRIBUTE_DEFINITION_SAVE_CHANGES.getMessage()));
+    }
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
+        return ResponseEntity.ok(ApiResponse.of(autocompleteUseCase.autocompleteAttributeKeys(query, limit)));
     }
 
     @GetMapping("/by-module/{moduleCode}")

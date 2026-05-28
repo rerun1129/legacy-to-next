@@ -4,12 +4,14 @@ import com.freightos.admin.application.attributedefinition.command.SearchAttribu
 import com.freightos.admin.application.attributedefinition.port.out.AttributeDefinitionPort;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributedefinition.entity.AttributeDefinition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -55,5 +57,10 @@ public class AttributeDefinitionPersistenceAdapter implements AttributeDefinitio
     @Override
     public boolean existsByKey(String attributeKey) {
         return attributeDefinitionRepository.existsByAttributeKey(attributeKey);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteAttributeKeys(String query, int limit) {
+        return attributeDefinitionRepository.autocompleteAttributeKeys(query, limit);
     }
 }

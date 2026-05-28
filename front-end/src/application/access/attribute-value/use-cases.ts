@@ -1,5 +1,5 @@
 import { accessAttributeValuePort } from "@/lib/ports";
-import type { CreateAttributeValueDto, UpdateAttributeValueDto } from "@/domain/access/attribute-value";
+import type { CreateAttributeValueDto, UpdateAttributeValueDto, SaveAttributeValueChangesRequest } from "@/domain/access/attribute-value";
 
 export const accessAttributeValueUseCases = {
   listByKey: (attributeKey: string) => accessAttributeValuePort.listByKey(attributeKey),
@@ -10,4 +10,5 @@ export const accessAttributeValueUseCases = {
   delete: (attributeKey: string, value: string) => accessAttributeValuePort.delete(attributeKey, value),
   deleteMany: (attributeKey: string, values: string[]) =>
     accessAttributeValuePort.deleteMany(attributeKey, values),
+  saveChanges: (req: SaveAttributeValueChangesRequest) => accessAttributeValuePort.saveChanges(req),
 };

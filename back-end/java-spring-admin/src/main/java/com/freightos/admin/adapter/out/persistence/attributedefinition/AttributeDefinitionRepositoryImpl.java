@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.out.persistence.attributedefinition;
 
 import com.freightos.admin.application.attributedefinition.command.SearchAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -49,6 +50,24 @@ public class AttributeDefinitionRepositoryImpl implements AttributeDefinitionRep
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
         return PagedResult.of(content, totalElements, totalPages, command.page(), command.size());
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteAttributeKeys(String query, int limit) {
+        String sql = """
+                SELECT attribute_key, name FROM admin.attribute_definition
+                WHERE active = true
+                  AND (attribute_key ILIKE '%' || :q || '%' OR name ILIKE '%' || :q || '%')
+                ORDER BY attribute_key
+                LIMIT :limit
+                """;
+        List<?> rows = em.createNativeQuery(sql)
+                .setParameter("q", query)
+                .setParameter("limit", limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1]); })
+                .toList();
     }
 
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<AttributeDefinitionJpaEntity> root, SearchAttributeDefinitionCommand command) {

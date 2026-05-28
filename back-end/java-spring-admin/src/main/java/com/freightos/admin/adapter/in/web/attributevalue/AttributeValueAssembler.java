@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.attributevalue;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.AttributeValueDetailResponse;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.AttributeValueSummaryResponse;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.CreateAttributeValueRequest;
+import com.freightos.admin.adapter.in.web.attributevalue.dto.SaveAttributeValueChangesRequest;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.SearchAttributeValueRequest;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.UpdateAttributeValueRequest;
 import com.freightos.admin.application.attributevalue.command.CreateAttributeValueCommand;
+import com.freightos.admin.application.attributevalue.command.SaveAttributeValueChangesCommand;
 import com.freightos.admin.application.attributevalue.command.SearchAttributeValueCommand;
 import com.freightos.admin.application.attributevalue.command.UpdateAttributeValueCommand;
 import com.freightos.admin.application.attributevalue.projection.AttributeValueSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AttributeValueAssembler {
@@ -43,5 +47,16 @@ public class AttributeValueAssembler {
 
     public PagedResult<AttributeValueSummaryResponse> toSummaryPage(PagedResult<AttributeValueSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveAttributeValueChangesCommand toSaveChangesCommand(SaveAttributeValueChangesRequest req) {
+        List<CreateAttributeValueCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveAttributeValueChangesCommand.UpdateAttributeValueItem> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveAttributeValueChangesCommand.UpdateAttributeValueItem(u.id(), u.label(), u.sortOrder(), u.active()))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SaveAttributeValueChangesCommand(req.attributeKey(), creates, updates, deleteIds);
     }
 }

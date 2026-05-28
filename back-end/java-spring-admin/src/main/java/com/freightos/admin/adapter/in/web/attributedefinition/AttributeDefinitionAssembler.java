@@ -4,10 +4,12 @@ import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefin
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.AttributeDefinitionSummaryResponse;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.CreateAttributeDefinitionRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.ModuleAttributeResponse;
+import com.freightos.admin.adapter.in.web.attributedefinition.dto.SaveAttributeDefinitionChangesRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.SearchAttributeDefinitionRequest;
 import com.freightos.admin.adapter.in.web.attributedefinition.dto.UpdateAttributeDefinitionRequest;
 import com.freightos.admin.application.attributedefinition.ModuleAttributeResult;
 import com.freightos.admin.application.attributedefinition.command.CreateAttributeDefinitionCommand;
+import com.freightos.admin.application.attributedefinition.command.SaveAttributeDefinitionChangesCommand;
 import com.freightos.admin.application.attributedefinition.command.SearchAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.command.UpdateAttributeDefinitionCommand;
 import com.freightos.admin.application.attributedefinition.projection.AttributeDefinitionSummary;
@@ -47,6 +49,18 @@ public class AttributeDefinitionAssembler {
 
     public PagedResult<AttributeDefinitionSummaryResponse> toSummaryPage(PagedResult<AttributeDefinitionSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public SaveAttributeDefinitionChangesCommand toSaveChangesCommand(SaveAttributeDefinitionChangesRequest req) {
+        List<CreateAttributeDefinitionCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SaveAttributeDefinitionChangesCommand.UpdateAttributeDefinitionItem> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveAttributeDefinitionChangesCommand.UpdateAttributeDefinitionItem(
+                                u.attributeKey(), u.name(), u.description(), u.valueType(), u.active(), u.allowMulti()))
+                        .toList();
+        List<String> deleteKeys = req.deleteKeys() == null ? List.of() : req.deleteKeys();
+        return new SaveAttributeDefinitionChangesCommand(creates, updates, deleteKeys);
     }
 
     public List<ModuleAttributeResponse> toModuleAttributeResponseList(List<ModuleAttributeResult> results) {

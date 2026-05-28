@@ -2,14 +2,17 @@ package com.freightos.admin.application.attributevalue;
 
 import com.freightos.admin.application.attributedefinition.port.out.AttributeDefinitionPort;
 import com.freightos.admin.application.attributevalue.command.CreateAttributeValueCommand;
+import com.freightos.admin.application.attributevalue.command.SaveAttributeValueChangesCommand;
 import com.freightos.admin.application.attributevalue.command.SearchAttributeValueCommand;
 import com.freightos.admin.application.attributevalue.command.UpdateAttributeValueCommand;
 import com.freightos.admin.application.attributevalue.port.in.AttributeValueUseCase;
+import com.freightos.admin.application.attributevalue.port.in.SaveAttributeValueChangesUseCase;
 import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.attributevalue.projection.AttributeValueSummary;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.attributedefinition.entity.AttributeDefinition;
 import com.freightos.admin.domain.attributedefinition.entity.ValueType;
 import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
@@ -22,7 +25,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class AttributeValueService implements AttributeValueUseCase {
+public class AttributeValueService implements AttributeValueUseCase, SaveAttributeValueChangesUseCase {
 
     private final AttributeValuePort attributeValuePort;
     private final AttributeDefinitionPort attributeDefinitionPort;
@@ -78,5 +81,41 @@ public class AttributeValueService implements AttributeValueUseCase {
             throw ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage());
         }
         attributeValuePort.deleteAttributeValueByKey(attributeKey, value);
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveAttributeValueChanges(SaveAttributeValueChangesCommand command) {
+        // 부모 AttributeDefinition이 ENUM 타입인지 검증 (creates가 있을 때만 확인)
+        if (!command.creates().isEmpty()) {
+            AttributeDefinition definition = attributeDefinitionPort.findAttributeDefinitionByKey(command.attributeKey())
+                    .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_DEFINITION_NOT_FOUND", MessageCode.ATTRIBUTE_DEFINITION_NOT_FOUND.getMessage()));
+            if (definition.getValueType() != ValueType.ENUM) {
+                throw ApplicationException.conflict("ATTRIBUTE_VALUE_TYPE_NOT_ENUM", MessageCode.ATTRIBUTE_VALUE_TYPE_NOT_ENUM.getMessage());
+            }
+        }
+        for (Long id : command.deleteIds()) {
+            deleteAttributeValueById(id);
+        }
+        for (SaveAttributeValueChangesCommand.UpdateAttributeValueItem item : command.updates()) {
+            updateAttributeValueById(item.id(), new UpdateAttributeValueCommand(item.label(), item.sortOrder(), item.active()));
+        }
+        for (CreateAttributeValueCommand create : command.creates()) {
+            createAttributeValue(create);
+        }
+        return new SaveChangesResult(command.creates().size(), command.updates().size(), command.deleteIds().size());
+    }
+
+    private void deleteAttributeValueById(Long id) {
+        AttributeValue existing = attributeValuePort.findAttributeValueById(id)
+                .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
+        attributeValuePort.deleteAttributeValueById(existing.getId());
+    }
+
+    private void updateAttributeValueById(Long id, UpdateAttributeValueCommand command) {
+        AttributeValue existing = attributeValuePort.findAttributeValueById(id)
+                .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
+        existing.applyUpdate(command.label(), command.sortOrder(), command.active());
+        attributeValuePort.updateById(id, existing);
     }
 }

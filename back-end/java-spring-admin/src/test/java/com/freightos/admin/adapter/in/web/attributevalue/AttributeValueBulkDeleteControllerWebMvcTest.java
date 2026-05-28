@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.in.web.attributevalue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.attributevalue.port.in.AttributeValueUseCase;
+import com.freightos.admin.application.attributevalue.port.in.SaveAttributeValueChangesUseCase;
 import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.security.JpaUserDetailsService;
 import com.freightos.admin.common.security.JwtAuthenticationFilter;
@@ -38,6 +39,9 @@ class AttributeValueBulkDeleteControllerWebMvcTest {
 
     @MockitoBean
     private AttributeValueUseCase attributeValueUseCase;
+
+    @MockitoBean
+    private SaveAttributeValueChangesUseCase saveChangesUseCase;
 
     @MockitoBean
     private AttributeValueAssembler attributeValueAssembler;

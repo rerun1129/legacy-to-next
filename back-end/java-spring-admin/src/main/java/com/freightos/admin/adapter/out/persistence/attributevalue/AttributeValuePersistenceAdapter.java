@@ -34,6 +34,12 @@ public class AttributeValuePersistenceAdapter implements AttributeValuePort {
     }
 
     @Override
+    public Optional<AttributeValue> findAttributeValueById(Long id) {
+        return attributeValueRepository.findById(id)
+                .map(attributeValueJpaToDomainMapper::toDomain);
+    }
+
+    @Override
     public List<AttributeValue> findAttributeValuesByIds(Collection<Long> ids) {
         return attributeValueRepository.findAllById(ids)
                 .stream()
@@ -54,10 +60,22 @@ public class AttributeValuePersistenceAdapter implements AttributeValuePort {
     }
 
     @Override
+    public void updateById(Long id, AttributeValue patchData) {
+        AttributeValueJpaEntity entity = attributeValueRepository.findById(id)
+                .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
+        attributeValueDomainToJpaMapper.applyUpdateFields(entity, patchData);
+    }
+
+    @Override
     public void deleteAttributeValueByKey(String attributeKey, String value) {
         AttributeValueJpaEntity entity = attributeValueRepository.findByAttributeKeyAndValue(attributeKey, value)
                 .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
         attributeValueRepository.deleteById(entity.getId());
+    }
+
+    @Override
+    public void deleteAttributeValueById(Long id) {
+        attributeValueRepository.deleteById(id);
     }
 
     @Override
@@ -68,6 +86,11 @@ public class AttributeValuePersistenceAdapter implements AttributeValuePort {
     @Override
     public boolean existsByAttributeKey(String attributeKey) {
         return attributeValueRepository.existsByAttributeKey(attributeKey);
+    }
+
+    @Override
+    public boolean existsByAttributeKeyAndValueExcludingId(String attributeKey, String value, Long excludeId) {
+        return attributeValueRepository.existsByAttributeKeyAndValueAndIdNot(attributeKey, value, excludeId);
     }
 
     @Override

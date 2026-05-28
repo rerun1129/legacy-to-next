@@ -7,6 +7,9 @@ import type {
   UpdateAttributeDefinitionDto,
   AttributeValueType,
   ModuleAttributeDto,
+  SaveAttributeDefinitionChangesRequest,
+  SaveChangesResult,
+  AttributeAutocompleteItem,
 } from "@/domain/access/attribute";
 import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
@@ -108,5 +111,34 @@ export const API_ATTRIBUTE_PORT: AttributeDefinitionPort = {
     const parsed = apiResponse(z.array(MODULE_ATTRIBUTE_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid module attributes response: ${parsed.error.message}`);
     return parsed.data.data as ModuleAttributeDto[];
+  },
+
+  async saveChanges(req: SaveAttributeDefinitionChangesRequest): Promise<SaveChangesResult> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(
+      z.object({
+        createdCount: z.number(),
+        updatedCount: z.number(),
+        deletedCount: z.number(),
+      })
+    ).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid attribute save-changes response: ${parsed.error.message}`);
+    }
+    return parsed.data.data as SaveChangesResult;
+  },
+
+  async autocomplete(query: string): Promise<AttributeAutocompleteItem[]> {
+    const json = await adminFetchJson(
+      `${BASE}/autocomplete?query=${encodeURIComponent(query)}`
+    );
+    const parsed = apiResponse(z.array(z.object({ code: z.string(), name: z.string() }))).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid attribute autocomplete response: ${parsed.error.message}`);
+    }
+    return parsed.data.data as AttributeAutocompleteItem[];
   },
 };

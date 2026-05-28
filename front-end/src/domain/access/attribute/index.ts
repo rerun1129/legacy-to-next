@@ -42,3 +42,40 @@ export interface ModuleAttributeDto {
   allowMulti: boolean;
   values: ModuleAttributeValueDto[];
 }
+
+// save-changes DTOs
+
+export interface CreateAttributeDefinitionItem {
+  attributeKey: string;
+  name: string;
+  description?: string;
+  valueType: AttributeValueType;
+  allowMulti: boolean;
+  active: boolean;
+}
+
+export interface UpdateAttributeDefinitionItem {
+  attributeKey: string;
+  name: string;
+  description?: string;
+  valueType: AttributeValueType;
+  allowMulti: boolean;
+  active: boolean;
+}
+
+export interface SaveAttributeDefinitionChangesRequest {
+  creates: CreateAttributeDefinitionItem[];
+  updates: UpdateAttributeDefinitionItem[];
+  deleteKeys: string[];
+}
+
+export interface SaveChangesResult {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}
+
+export interface AttributeAutocompleteItem {
+  code: string;
+  name: string;
+}

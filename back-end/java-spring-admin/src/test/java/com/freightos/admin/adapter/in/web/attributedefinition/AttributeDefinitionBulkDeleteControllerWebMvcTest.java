@@ -2,6 +2,8 @@ package com.freightos.admin.adapter.in.web.attributedefinition;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.attributedefinition.port.in.AttributeDefinitionUseCase;
+import com.freightos.admin.application.attributedefinition.port.in.AutocompleteAttributeKeyUseCase;
+import com.freightos.admin.application.attributedefinition.port.in.SaveAttributeDefinitionChangesUseCase;
 import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.security.JpaUserDetailsService;
 import com.freightos.admin.common.security.JwtAuthenticationFilter;
@@ -37,6 +39,12 @@ class AttributeDefinitionBulkDeleteControllerWebMvcTest {
 
     @MockitoBean
     private AttributeDefinitionUseCase attributeDefinitionUseCase;
+
+    @MockitoBean
+    private SaveAttributeDefinitionChangesUseCase saveChangesUseCase;
+
+    @MockitoBean
+    private AutocompleteAttributeKeyUseCase autocompleteUseCase;
 
     @MockitoBean
     private AttributeDefinitionAssembler attributeDefinitionAssembler;

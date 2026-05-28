@@ -3,14 +3,17 @@ package com.freightos.admin.adapter.in.web.attributevalue;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.AttributeValueDetailResponse;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.AttributeValueSummaryResponse;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.CreateAttributeValueRequest;
+import com.freightos.admin.adapter.in.web.attributevalue.dto.SaveAttributeValueChangesRequest;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.SearchAttributeValueRequest;
 import com.freightos.admin.adapter.in.web.attributevalue.dto.UpdateAttributeValueRequest;
 import com.freightos.admin.application.attributevalue.port.in.AttributeValueUseCase;
+import com.freightos.admin.application.attributevalue.port.in.SaveAttributeValueChangesUseCase;
 import com.freightos.admin.application.attributevalue.projection.AttributeValueSummary;
 import com.freightos.admin.common.request.BulkDeleteByCodeRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AttributeValueController {
 
     private final AttributeValueUseCase attributeValueUseCase;
+    private final SaveAttributeValueChangesUseCase saveChangesUseCase;
     private final AttributeValueAssembler attributeValueAssembler;
 
     @PostMapping("/search")
@@ -77,5 +81,12 @@ public class AttributeValueController {
             @Valid @RequestBody BulkDeleteByCodeRequest req) {
         attributeValueUseCase.deleteAttributeValues(attributeKey, req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_VALUE_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveAttributeValueChangesRequest req) {
+        SaveChangesResult result = saveChangesUseCase.saveAttributeValueChanges(attributeValueAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.ATTRIBUTE_VALUE_SAVE_CHANGES.getMessage()));
     }
 }

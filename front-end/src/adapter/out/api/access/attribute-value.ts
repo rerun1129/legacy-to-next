@@ -1,6 +1,12 @@
 import { z } from "zod";
 import type { AttributeValuePort } from "@/application/access/attribute-value/ports";
-import type { AttributeValueRow, CreateAttributeValueDto, UpdateAttributeValueDto } from "@/domain/access/attribute-value";
+import type {
+  AttributeValueRow,
+  CreateAttributeValueDto,
+  UpdateAttributeValueDto,
+  SaveAttributeValueChangesRequest,
+} from "@/domain/access/attribute-value";
+import type { SaveChangesResult } from "@/domain/access/attribute";
 import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
 
@@ -61,5 +67,26 @@ export const API_ATTRIBUTE_VALUE_PORT: AttributeValuePort = {
       method: "DELETE",
       body: JSON.stringify({ codes: values }),
     });
+  },
+
+  async saveChanges(req: SaveAttributeValueChangesRequest): Promise<SaveChangesResult> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = z
+      .object({
+        data: z.object({
+          createdCount: z.number(),
+          updatedCount: z.number(),
+          deletedCount: z.number(),
+        }),
+        message: z.string().optional(),
+      })
+      .safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid attribute-value save-changes response: ${parsed.error.message}`);
+    }
+    return parsed.data.data as SaveChangesResult;
   },
 };
