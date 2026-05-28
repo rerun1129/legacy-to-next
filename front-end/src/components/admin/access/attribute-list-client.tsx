@@ -46,12 +46,18 @@ const DEFAULT_UPDATE: UpdateFormValues = {
   active: true,
 };
 
-const ATTRIBUTE_COLUMNS: GridColumn<AttributeDefinitionRow>[] = [
-  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
+// attributeKey 제외 나머지 데이터 컬럼 — useMemo 내에서 attributeKey render와 합산
+const ATTRIBUTE_TAIL_COLUMNS: GridColumn<AttributeDefinitionRow>[] = [
   { key: "name", label: "name", minWidth: 120 },
   { key: "valueType", label: "valueType", minWidth: 100 },
   { key: "allowMulti", label: "allowMulti", minWidth: 80, align: "center", render: (v) => (v ? "Y" : "N") },
   { key: "active", label: "active", minWidth: 70, align: "center", render: (v) => (v ? "활성" : "비활성") },
+];
+
+// ColumnVisibilityMenu defaultColumns 기준 (render 없는 key/label 선언 목록)
+const ATTRIBUTE_BASE_COLUMNS: GridColumn<AttributeDefinitionRow>[] = [
+  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
+  ...ATTRIBUTE_TAIL_COLUMNS,
 ];
 
 export function AccessAttributeListClient() {
@@ -131,11 +137,6 @@ export function AccessAttributeListClient() {
     updateMutation.mutate({ attributeKey: editTarget.attributeKey, req });
   }
 
-  function handleRowClick(attributeKey: string, valueType: AttributeValueType) {
-    if (valueType !== "ENUM") return;
-    setSelectedKey((prev) => (prev === attributeKey ? null : attributeKey));
-  }
-
   const handleDelete = useCallback(async (attributeKey: string) => {
     const ok = await confirm({
       title: "속성 삭제",
@@ -154,7 +155,24 @@ export function AccessAttributeListClient() {
   }
 
   const columns = useMemo<GridColumn<AttributeDefinitionRow>[]>(() => [
-    ...ATTRIBUTE_COLUMNS,
+    {
+      key: "attributeKey",
+      label: "attributeKey",
+      minWidth: 140,
+      // allowMulti=Y 행에 한해 더블클릭으로 드릴다운 트리거
+      render: (_v, row) => (
+        <span
+          style={row.allowMulti ? { cursor: "pointer", userSelect: "none" } : undefined}
+          onDoubleClick={row.allowMulti ? (e) => {
+            e.stopPropagation();
+            setSelectedKey((prev) => (prev === row.attributeKey ? null : row.attributeKey));
+          } : undefined}
+        >
+          {row.attributeKey}
+        </span>
+      ),
+    },
+    ...ATTRIBUTE_TAIL_COLUMNS,
     {
       key: "_actions",
       label: "",
@@ -179,7 +197,7 @@ export function AccessAttributeListClient() {
         </div>
       ),
     },
-  ], [deleteMutation.isPending, openEdit, handleDelete]);
+  ], [deleteMutation.isPending, openEdit, handleDelete, setSelectedKey]);
 
   const rows = data?.content ?? [];
 
@@ -201,7 +219,7 @@ export function AccessAttributeListClient() {
           <div className="panel__title-accent" />
           <span className="panel__title">Attributes</span>
           <span className="panel__rowcount">{rows.length}</span>
-          <ColumnVisibilityMenu<AttributeDefinitionRow> gridId="access-attribute" defaultColumns={ATTRIBUTE_COLUMNS} />
+          <ColumnVisibilityMenu<AttributeDefinitionRow> gridId="access-attribute" defaultColumns={ATTRIBUTE_BASE_COLUMNS} />
         </div>
         <div className="list-wrap">
           <GridList<AttributeDefinitionRow>
@@ -209,13 +227,7 @@ export function AccessAttributeListClient() {
             data={rows}
             gridId="access-attribute"
             rowKey={(row) => row.attributeKey}
-            onRowClick={(row) => handleRowClick(row.attributeKey, row.valueType)}
-            rowClassName={(row) => {
-              const cls: string[] = [];
-              if (selectedKey === row.attributeKey) cls.push("is-selected");
-              if (row.valueType === "ENUM") cls.push("cursor-pointer");
-              return cls.length > 0 ? cls.join(" ") : undefined;
-            }}
+            rowClassName={(row) => selectedKey === row.attributeKey ? "is-selected" : undefined}
             selectable
             selectedKeys={selectedKeys}
             onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(String)))}
@@ -225,7 +237,7 @@ export function AccessAttributeListClient() {
         </div>
       </div>
 
-      {/* ENUM 타입 행 클릭 시 attribute-value 서브 섹션 노출 */}
+      {/* allowMulti 행 더블클릭 시 attribute-value 서브 섹션 노출 */}
       {selectedKey !== null && <AttributeValueSection attributeKey={selectedKey} />}
 
       {/* 신규 등록 모달 */}
