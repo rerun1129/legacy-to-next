@@ -30,7 +30,7 @@ CREATE TABLE admin.user_permission_preset (
     id        BIGSERIAL PRIMARY KEY,
     user_id   BIGINT    NOT NULL,
     preset_id BIGINT    NOT NULL,
-    CONSTRAINT fk_upp_user         FOREIGN KEY (user_id)   REFERENCES admin.admin_user(id)         ON DELETE CASCADE,
+    CONSTRAINT fk_upp_user         FOREIGN KEY (user_id)   REFERENCES admin.admin_user(user_id)         ON DELETE CASCADE,
     CONSTRAINT fk_upp_preset       FOREIGN KEY (preset_id) REFERENCES admin.permission_preset(id)  ON DELETE RESTRICT,
     CONSTRAINT uq_upp_user_preset  UNIQUE (user_id, preset_id)
 );
