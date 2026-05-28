@@ -1,12 +1,13 @@
 package com.freightos.admin.application.menu;
 
+import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.button.port.out.ButtonPort;
 import com.freightos.admin.application.menu.command.CreateMenuCommand;
 import com.freightos.admin.application.menu.port.out.MenuPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
-import com.freightos.admin.application.module.port.out.ModulePort;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.domain.menu.entity.Menu;
+import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +35,7 @@ class MenuServiceTest {
     private MenuFactory menuFactory;
 
     @Mock
-    private ModulePort modulePort;
+    private AttributeValuePort attributeValuePort;
 
     @Mock
     private ButtonPort buttonPort;
@@ -59,7 +60,7 @@ class MenuServiceTest {
     void createMenu_moduleNotFound_throwsNotFound() {
         CreateMenuCommand command = new CreateMenuCommand("MAIN", null, "/main", "메인", null, null, 1, true, "MISSING");
         given(menuPort.existsByMenuCode("MAIN")).willReturn(false);
-        given(modulePort.existsByCode("MISSING")).willReturn(false);
+        given(attributeValuePort.findActiveAttributeValuesByKey("module")).willReturn(List.of());
 
         assertThatThrownBy(() -> menuService.createMenu(command))
                 .isInstanceOf(ApplicationException.class)
@@ -70,8 +71,9 @@ class MenuServiceTest {
     void createMenu_valid_savesAndReturnsId() {
         CreateMenuCommand command = new CreateMenuCommand("MAIN", null, "/main", "메인", null, null, 1, true, "ACCESS");
         Menu domain = Menu.create("MAIN", null, "/main", "메인", null, null, 1, true, "ACCESS");
+        AttributeValue moduleAttr = AttributeValue.create("module", "ACCESS", "Access", 1, true);
         given(menuPort.existsByMenuCode("MAIN")).willReturn(false);
-        given(modulePort.existsByCode("ACCESS")).willReturn(true);
+        given(attributeValuePort.findActiveAttributeValuesByKey("module")).willReturn(List.of(moduleAttr));
         given(menuFactory.from(command)).willReturn(domain);
         given(menuPort.save(domain)).willReturn(10L);
 

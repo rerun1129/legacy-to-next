@@ -8,9 +8,10 @@ import { Button } from "@/components/shared/button";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
-import { accessMenuPort, accessModulePort } from "@/lib/ports";
+import { accessMenuPort } from "@/lib/ports";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { accessMenuUseCases } from "@/application/access/menu/use-cases";
+import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { MenuTreeView } from "@/components/admin/access/menu-tree-view";
 import type { CreateMenuDto, UpdateMenuDto, MenuRow } from "@/domain/access/menu";
@@ -76,13 +77,13 @@ export function AccessMenuListClient() {
   });
 
   const { data: moduleData } = useQuery({
-    queryKey: ["access-module", "list"],
-    queryFn: () => accessModulePort.search(1, 100),
+    queryKey: ["admin-access-attribute-value", "module"],
+    queryFn: () => accessAttributeValueUseCases.listByKey("module"),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
   });
-  const moduleOptions = (moduleData?.content ?? []).map(m => ({ value: m.moduleCode, label: m.name }));
+  const moduleOptions = (moduleData ?? []).map(v => ({ value: v.value, label: v.label ?? v.value }));
 
   const createMutation = useMutation({
     mutationFn: (req: CreateMenuDto) => accessMenuPort.create(req),

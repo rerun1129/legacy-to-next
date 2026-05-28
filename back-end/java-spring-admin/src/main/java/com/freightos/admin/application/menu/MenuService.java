@@ -1,5 +1,6 @@
 package com.freightos.admin.application.menu;
 
+import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.button.port.out.ButtonPort;
 import com.freightos.admin.application.menu.command.CreateMenuCommand;
 import com.freightos.admin.application.menu.command.SearchMenuCommand;
@@ -8,7 +9,6 @@ import com.freightos.admin.application.menu.port.in.MenuUseCase;
 import com.freightos.admin.application.menu.port.out.MenuPort;
 import com.freightos.admin.application.menu.projection.MenuSummary;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
-import com.freightos.admin.application.module.port.out.ModulePort;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
@@ -29,7 +29,7 @@ public class MenuService implements MenuUseCase {
 
     private final MenuPort menuPort;
     private final MenuFactory menuFactory;
-    private final ModulePort modulePort;
+    private final AttributeValuePort attributeValuePort;
     private final ButtonPort buttonPort;
     private final MenuPolicyPort menuPolicyPort;
 
@@ -53,7 +53,8 @@ public class MenuService implements MenuUseCase {
         if (command.parentId() != null && !menuPort.existsById(command.parentId())) {
             throw ApplicationException.notFound("MENU_PARENT_NOT_FOUND", MessageCode.MENU_PARENT_NOT_FOUND.getMessage());
         }
-        if (!modulePort.existsByCode(command.moduleCode())) {
+        if (attributeValuePort.findActiveAttributeValuesByKey("module").stream()
+                .noneMatch(v -> v.getValue().equals(command.moduleCode()))) {
             throw ApplicationException.notFound("MENU_MODULE_NOT_FOUND", MessageCode.MENU_MODULE_NOT_FOUND.getMessage());
         }
         Menu menu = menuFactory.from(command);
@@ -68,7 +69,8 @@ public class MenuService implements MenuUseCase {
         if (command.parentId() != null && !menuPort.existsById(command.parentId())) {
             throw ApplicationException.notFound("MENU_PARENT_NOT_FOUND", MessageCode.MENU_PARENT_NOT_FOUND.getMessage());
         }
-        if (!modulePort.existsByCode(command.moduleCode())) {
+        if (attributeValuePort.findActiveAttributeValuesByKey("module").stream()
+                .noneMatch(v -> v.getValue().equals(command.moduleCode()))) {
             throw ApplicationException.notFound("MENU_MODULE_NOT_FOUND", MessageCode.MENU_MODULE_NOT_FOUND.getMessage());
         }
         existing.applyUpdate(command.parentId(), command.path(), command.label(), command.labelEn(),
