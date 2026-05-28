@@ -240,6 +240,7 @@ export function PortListClient() {
           icon={<Search size={12} style={{ marginRight: 4 }} />}
         />
         <Button
+          variant="transaction"
           size="sm"
           disabled={!isDirty || saveChangesMutation.isPending}
           onClick={() => saveChangesMutation.mutate()}
