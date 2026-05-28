@@ -36,7 +36,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/access/attribute")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_ATTRIBUTE')")
 public class AttributeDefinitionController {
 
     private final AttributeDefinitionUseCase attributeDefinitionUseCase;

@@ -31,7 +31,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/access/menu-policy")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_POLICY')")
 public class MenuPolicyController {
 
     private final MenuPolicyUseCase menuPolicyUseCase;

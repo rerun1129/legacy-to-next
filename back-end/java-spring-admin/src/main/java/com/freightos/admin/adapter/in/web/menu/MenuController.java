@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/admin/access/menu")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_MENU')")
 public class MenuController {
 
     private final MenuUseCase menuUseCase;

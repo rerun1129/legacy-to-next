@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/access/attribute-value")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_ATTRIBUTE')")
 public class AttributeValueController {
 
     private final AttributeValueUseCase attributeValueUseCase;

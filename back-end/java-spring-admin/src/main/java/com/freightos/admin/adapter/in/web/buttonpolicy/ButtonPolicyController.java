@@ -31,7 +31,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/access/button-policy")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_POLICY')")
 public class ButtonPolicyController {
 
     private final ButtonPolicyUseCase buttonPolicyUseCase;

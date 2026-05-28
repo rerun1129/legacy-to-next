@@ -33,7 +33,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/access/button")
 @RequiredArgsConstructor
 @Validated
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_BUTTON')")
 public class ButtonController {
 
     private final ButtonUseCase buttonUseCase;
