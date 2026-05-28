@@ -9,6 +9,7 @@ import { TextSection } from "./inputs/text-section";
 import { CodeSection } from "./inputs/code-section";
 import { NumberSection } from "./inputs/number-section";
 import { ComboSection } from "./inputs/combo-section";
+import { MultiSelectSection } from "./inputs/multi-select-section";
 import { DateSection } from "./inputs/date-section";
 import { TimeSection } from "./inputs/time-section";
 import { LinkRadioSection } from "./inputs/link-radio-section";
@@ -41,6 +42,7 @@ export function InputsSection() {
       <CodeSection {...sectionProps} />
       <NumberSection {...sectionProps} />
       <ComboSection {...sectionProps} />
+      <MultiSelectSection {...sectionProps} />
       <DateSection {...sectionProps} />
       <TimeSection {...sectionProps} />
       <LinkRadioSection {...sectionProps} />

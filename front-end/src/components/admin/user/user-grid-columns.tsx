@@ -4,6 +4,7 @@ import type { UseFormRegister, Control } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { GridColumn } from "@/components/shared/grid-list";
 import { TextBox, ComboBox } from "@/components/shared/inputs";
+import { MultiSelectBox } from "@/components/shared/inputs/multi-select-box";
 
 export interface UserFormRow {
   entityId: number;
@@ -33,7 +34,8 @@ export const ACTIVE_OPTIONS = [
 
 export function buildUserColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  moduleValueOptions: { value: string; label: string }[]
 ): GridColumn<UserFormRow>[] {
   return [
     {
@@ -111,7 +113,18 @@ export function buildUserColumns(
       label: "Modules",
       width: 160,
       render: (_v, _row, i) => (
-        <TextBox variant="cell" placeholder="ADMIN,FMS" {...register(`rows.${i}.modules`)} />
+        <Controller
+          name={`rows.${i}.modules`}
+          control={control}
+          render={({ field }) => (
+            <MultiSelectBox
+              variant="cell"
+              options={moduleValueOptions}
+              value={field.value ? field.value.split(",").filter(Boolean) : []}
+              onChange={(values) => field.onChange(values.join(","))}
+            />
+          )}
+        />
       ),
     },
     {

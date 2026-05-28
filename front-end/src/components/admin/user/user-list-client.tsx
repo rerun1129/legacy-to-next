@@ -12,6 +12,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { Button } from "@/components/shared/button";
 import type { UserFilter } from "@/domain/user";
 import { userUseCases } from "@/application/user/use-cases";
+import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
 import { collectGridChanges } from "@/lib/collect-grid-changes";
 import { toast } from "@/lib/toast-store";
 import {
@@ -27,6 +28,7 @@ import {
   TO_UPDATE,
   toFormRow,
 } from "./user-list-helpers";
+
 
 const DEFAULT_FILTER: UserFilter = {
   username: "",
@@ -66,6 +68,17 @@ export function UserListClient() {
     refetchOnMount: false,
     structuralSharing: false,
   });
+
+  const { data: moduleValues = [] } = useQuery({
+    queryKey: ["admin-access-attribute-value", "module"],
+    queryFn: () => accessAttributeValueUseCases.listByKey("module"),
+    staleTime: Infinity,
+  });
+
+  const moduleValueOptions = useMemo(
+    () => moduleValues.map((v) => ({ value: v.value, label: v.label ?? v.value })),
+    [moduleValues],
+  );
 
   const originalRows = useMemo<UserFormRow[]>(
     () => (data?.content ?? []).map(toFormRow),
@@ -186,8 +199,8 @@ export function UserListClient() {
   });
 
   const columns = useMemo(
-    () => buildUserColumns(register, control),
-    [register, control],
+    () => buildUserColumns(register, control, moduleValueOptions),
+    [register, control, moduleValueOptions],
   );
 
   const totalPages = data?.totalPages ?? 0;

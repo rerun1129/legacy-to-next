@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { listFilterStore } from "./use-list-filter-store";
 import { useEntryFocusStore, domainFromPath } from "./use-entry-focus-store";
 
@@ -45,10 +46,6 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/fms/truck-bl/entry": "Truck B/L Entry",
   "/fms/non-bl/list":    "Non B/L List",
   "/fms/non-bl/entry":   "Non B/L Entry",
-  "/admin/code/list": "Code Master List",
-  "/admin/user/list": "사용자 관리 List",
-  "/admin/customer/list": "Customer List",
-  "/admin/cms/notice/list": "공지사항 List",
 };
 
 const SKIP_SEGMENTS = new Set(["admin", "code", "fms", "cms", "access"]);
@@ -63,90 +60,99 @@ export function inferLabelFromPath(pathname: string): string {
     .join(" ");
 }
 
-export const useTabs = create<TabStore>((set, get) => ({
-  tabs: [],
+export const useTabs = create<TabStore>()(
+  persist(
+    (set, get) => ({
+      tabs: [],
 
-  addTab(label, href) {
-    // Dashboard is not tracked as a tab
-    if (href === "/dashboard") return;
-    const { tabs } = get();
-    if (tabs.some((t) => t.id === href)) return; // already open
-    set({ tabs: [...tabs, { id: href, label, href }] });
-  },
+      addTab(label, href) {
+        // Dashboard is not tracked as a tab
+        if (href === "/dashboard") return;
+        const { tabs } = get();
+        if (tabs.some((t) => t.id === href)) return; // already open
+        set({ tabs: [...tabs, { id: href, label, href }] });
+      },
 
-  removeTab(id) {
-    const { tabs } = get();
-    const idx = tabs.findIndex((t) => t.id === id);
-    if (idx === -1) return "/dashboard";
-    const next = tabs.filter((t) => t.id !== id);
-    set({ tabs: next });
-    listFilterStore.getState().clearFilter(id);
-    const dom = domainFromPath(id);
-    if (dom) useEntryFocusStore.getState().clearFocus(dom);
-    // navigate to: previous tab, or next tab, or dashboard fallback
-    const target = next[Math.max(0, idx - 1)];
-    return target?.href ?? "/dashboard";
-  },
+      removeTab(id) {
+        const { tabs } = get();
+        const idx = tabs.findIndex((t) => t.id === id);
+        if (idx === -1) return "/dashboard";
+        const next = tabs.filter((t) => t.id !== id);
+        set({ tabs: next });
+        listFilterStore.getState().clearFilter(id);
+        const dom = domainFromPath(id);
+        if (dom) useEntryFocusStore.getState().clearFocus(dom);
+        // navigate to: previous tab, or next tab, or dashboard fallback
+        const target = next[Math.max(0, idx - 1)];
+        return target?.href ?? "/dashboard";
+      },
 
-  activateTab(_id) {
-    // no-op — active tab is derived from current pathname
-  },
+      activateTab(_id) {
+        // no-op — active tab is derived from current pathname
+      },
 
-  reorderTabs(fromId, toInsertIndex) {
-    const { tabs } = get();
-    const fromIdx = tabs.findIndex(t => t.id === fromId);
-    if (fromIdx === -1) return;
-    const next = [...tabs];
-    const [moved] = next.splice(fromIdx, 1);
-    const idx = Math.max(0, Math.min(toInsertIndex, next.length));
-    next.splice(idx, 0, moved);
-    set({ tabs: next });
-  },
+      reorderTabs(fromId, toInsertIndex) {
+        const { tabs } = get();
+        const fromIdx = tabs.findIndex(t => t.id === fromId);
+        if (fromIdx === -1) return;
+        const next = [...tabs];
+        const [moved] = next.splice(fromIdx, 1);
+        const idx = Math.max(0, Math.min(toInsertIndex, next.length));
+        next.splice(idx, 0, moved);
+        set({ tabs: next });
+      },
 
-  closeOtherTabs(id) {
-    const { tabs } = get();
-    const target = tabs.find(t => t.id === id);
-    if (!target) return;
-    tabs.filter(t => t.id !== id).forEach(t => {
-      listFilterStore.getState().clearFilter(t.id);
-      const dom = domainFromPath(t.id);
-      if (dom) useEntryFocusStore.getState().clearFocus(dom);
-    });
-    set({ tabs: [target] });
-  },
+      closeOtherTabs(id) {
+        const { tabs } = get();
+        const target = tabs.find(t => t.id === id);
+        if (!target) return;
+        tabs.filter(t => t.id !== id).forEach(t => {
+          listFilterStore.getState().clearFilter(t.id);
+          const dom = domainFromPath(t.id);
+          if (dom) useEntryFocusStore.getState().clearFocus(dom);
+        });
+        set({ tabs: [target] });
+      },
 
-  closeTabsToRight(id) {
-    const { tabs } = get();
-    const idx = tabs.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    tabs.slice(idx + 1).forEach(t => {
-      listFilterStore.getState().clearFilter(t.id);
-      const dom = domainFromPath(t.id);
-      if (dom) useEntryFocusStore.getState().clearFocus(dom);
-    });
-    set({ tabs: tabs.slice(0, idx + 1) });
-  },
+      closeTabsToRight(id) {
+        const { tabs } = get();
+        const idx = tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+        tabs.slice(idx + 1).forEach(t => {
+          listFilterStore.getState().clearFilter(t.id);
+          const dom = domainFromPath(t.id);
+          if (dom) useEntryFocusStore.getState().clearFocus(dom);
+        });
+        set({ tabs: tabs.slice(0, idx + 1) });
+      },
 
-  closeTabsToLeft(id) {
-    const { tabs } = get();
-    const idx = tabs.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    tabs.slice(0, idx).forEach(t => {
-      listFilterStore.getState().clearFilter(t.id);
-      const dom = domainFromPath(t.id);
-      if (dom) useEntryFocusStore.getState().clearFocus(dom);
-    });
-    set({ tabs: tabs.slice(idx) });
-  },
+      closeTabsToLeft(id) {
+        const { tabs } = get();
+        const idx = tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+        tabs.slice(0, idx).forEach(t => {
+          listFilterStore.getState().clearFilter(t.id);
+          const dom = domainFromPath(t.id);
+          if (dom) useEntryFocusStore.getState().clearFocus(dom);
+        });
+        set({ tabs: tabs.slice(idx) });
+      },
 
-  clearTabs() {
-    set({ tabs: [] });
-  },
+      clearTabs() {
+        set({ tabs: [] });
+      },
 
-  initFromPath(pathname) {
-    if (!pathname || pathname === "/" || pathname === "/dashboard") return;
-    const { tabs } = get();
-    if (tabs.some((t) => t.id === pathname)) return;
-    set({ tabs: [...tabs, { id: pathname, label: inferLabelFromPath(pathname), href: pathname }] });
-  },
-}));
+      initFromPath(pathname) {
+        if (!pathname || pathname === "/" || pathname === "/dashboard") return;
+        const { tabs } = get();
+        if (tabs.some((t) => t.id === pathname)) return;
+        set({ tabs: [...tabs, { id: pathname, label: inferLabelFromPath(pathname), href: pathname }] });
+      },
+    }),
+    {
+      name: "admin.tabs",
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({ tabs: state.tabs }),
+    }
+  )
+);
