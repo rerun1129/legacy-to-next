@@ -5,6 +5,7 @@ import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
+import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,13 +49,16 @@ class JpaUserDetailsServiceTest {
     @Mock
     private ButtonPolicyPort buttonPolicyPort;
 
+    @Mock
+    private ComputeEffectiveAttributeValuesService effectiveAttributesService;
+
     private JpaUserDetailsService jpaUserDetailsService;
 
     @BeforeEach
     void setUp() {
         // 실제 ObjectMapper 사용 — JSON 파싱 경로를 실제와 동일하게 유지
         jpaUserDetailsService = new JpaUserDetailsService(
-                userRepository, new ObjectMapper(), policyEvaluator, menuPolicyPort, buttonPolicyPort);
+                userRepository, new ObjectMapper(), policyEvaluator, menuPolicyPort, buttonPolicyPort, effectiveAttributesService);
     }
 
     // ── 정상 사용자 → UserDetails 반환, ROLE_ADMIN + MENU_* 포함 ────────────────
@@ -64,6 +68,7 @@ class JpaUserDetailsServiceTest {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
         UserJpaEntity entity = buildEntity(1L, "admin", "$2a$10$hashed", true, "{\"role\":[\"ADMIN\"]}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("admin")).willReturn(Optional.of(entity));
+        given(effectiveAttributesService.computeEffectiveAttributes(1L, attrs)).willReturn(attrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(policyEvaluator.accessibleMenuCodes(eq(attrs), any())).willReturn(Set.of("ADMIN_CODE_LIST"));
@@ -87,6 +92,7 @@ class JpaUserDetailsServiceTest {
         Map<String, List<String>> attrs = Map.of("role", List.of("USER"));
         UserJpaEntity entity = buildEntity(2L, "alice", "$2a$10$hashed", true, "{\"role\":[\"USER\"]}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("alice")).willReturn(Optional.of(entity));
+        given(effectiveAttributesService.computeEffectiveAttributes(2L, attrs)).willReturn(attrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(policyEvaluator.accessibleMenuCodes(eq(attrs), any())).willReturn(Set.of());
@@ -106,6 +112,7 @@ class JpaUserDetailsServiceTest {
     void loadUserByUsername_noRoleInAttributes_noRoleAuthority() {
         UserJpaEntity entity = buildEntity(5L, "norole", "$2a$10$hashed", true, "{}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("norole")).willReturn(Optional.of(entity));
+        given(effectiveAttributesService.computeEffectiveAttributes(eq(5L), any())).willReturn(Map.of());
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(policyEvaluator.accessibleMenuCodes(eq(Map.of()), any())).willReturn(Set.of());
@@ -147,6 +154,7 @@ class JpaUserDetailsServiceTest {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
         UserJpaEntity entity = buildEntity(4L, "tester", "$2a$10$hashed", true, "{\"role\":[\"ADMIN\"]}");
         given(userRepository.findByUsernameAndDeletedAtIsNull("tester")).willReturn(Optional.of(entity));
+        given(effectiveAttributesService.computeEffectiveAttributes(4L, attrs)).willReturn(attrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(policyEvaluator.accessibleMenuCodes(eq(attrs), any())).willReturn(Set.of("ADMIN_CODE_LIST", "ADMIN_USER_LIST"));
