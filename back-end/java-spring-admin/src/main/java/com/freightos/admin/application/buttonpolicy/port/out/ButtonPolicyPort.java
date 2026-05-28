@@ -1,23 +1,16 @@
 package com.freightos.admin.application.buttonpolicy.port.out;
 
-import com.freightos.admin.application.buttonpolicy.command.SearchButtonPolicyCommand;
-import com.freightos.admin.application.buttonpolicy.projection.ButtonPolicySummary;
-import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.security.ButtonEvalRow;
-import com.freightos.admin.domain.buttonpolicy.entity.ButtonPolicy;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ButtonPolicyPort {
-    PagedResult<ButtonPolicySummary> searchSummaries(SearchButtonPolicyCommand command);
-    Optional<ButtonPolicy> findButtonPolicyById(Long policyId);
-    Long save(ButtonPolicy buttonPolicy);
-    void deleteButtonPolicyById(Long policyId);
-    boolean existsById(Long policyId);
-    boolean existsByCompositeKey(Long buttonId, String attributeKey, String requiredValue);
+    /** ButtonService: 버튼 삭제 전 정책 참조 여부 확인. */
     boolean existsByButtonId(Long buttonId);
+
+    /** AttributeDefinitionService: 속성키 삭제 전 정책 참조 여부 확인. */
     boolean existsByAttributeKey(String attributeKey);
+
     /** ABAC 평가용 — active 버튼과 그 정책을 한번에 조회한다. */
     List<ButtonEvalRow> findAllActiveForEvaluation();
 }

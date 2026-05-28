@@ -28,8 +28,6 @@ import { API_ATTRIBUTE_PORT } from '@/adapter/out/api/access/attribute';
 import { API_ATTRIBUTE_VALUE_PORT } from '@/adapter/out/api/access/attribute-value';
 import { API_MENU_PORT } from '@/adapter/out/api/access/menu';
 import { API_BUTTON_PORT } from '@/adapter/out/api/access/button';
-import { API_MENU_POLICY_PORT } from '@/adapter/out/api/access/menu-policy';
-import { API_BUTTON_POLICY_PORT } from '@/adapter/out/api/access/button-policy';
 import { API_SIDEBAR_MENU_PORT } from '@/adapter/out/api/access/sidebar-menu';
 import { API_PERMISSION_PRESET_PORT } from '@/adapter/out/api/access/permission-preset';
 
@@ -62,7 +60,5 @@ export const accessAttributePort = API_ATTRIBUTE_PORT;
 export const accessAttributeValuePort = API_ATTRIBUTE_VALUE_PORT;
 export const accessMenuPort = API_MENU_PORT;
 export const accessButtonPort = API_BUTTON_PORT;
-export const accessMenuPolicyPort = API_MENU_POLICY_PORT;
-export const accessButtonPolicyPort = API_BUTTON_POLICY_PORT;
 export const sidebarMenuPort = API_SIDEBAR_MENU_PORT;
 export const permissionPresetPort = API_PERMISSION_PRESET_PORT;

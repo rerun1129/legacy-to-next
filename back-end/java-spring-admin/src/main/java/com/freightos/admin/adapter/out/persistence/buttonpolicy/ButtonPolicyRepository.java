@@ -5,8 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ButtonPolicyRepository extends JpaRepository<ButtonPolicyJpaEntity, Long>, ButtonPolicyRepositoryCustom {
-    boolean existsByButtonIdAndAttributeKeyAndRequiredValue(Long buttonId, String attributeKey, String requiredValue);
+public interface ButtonPolicyRepository extends JpaRepository<ButtonPolicyJpaEntity, Long> {
     boolean existsByButtonId(Long buttonId);
     boolean existsByAttributeKey(String attributeKey);
 

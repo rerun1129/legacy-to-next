@@ -6,8 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface MenuPolicyRepository extends JpaRepository<MenuPolicyJpaEntity, Long>, MenuPolicyRepositoryCustom {
-    boolean existsByMenuIdAndAttributeKeyAndRequiredValue(Long menuId, String attributeKey, String requiredValue);
+public interface MenuPolicyRepository extends JpaRepository<MenuPolicyJpaEntity, Long> {
     boolean existsByMenuId(Long menuId);
     boolean existsByAttributeKey(String attributeKey);
 

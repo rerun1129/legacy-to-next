@@ -72,7 +72,6 @@ export function firstAccessibleRoute(session: AdminSession): string | null {
     ["MENU_ADMIN_CMS_NOTICE_LIST", "/admin/cms/notice/list"],
     ["MENU_ADMIN_ACCESS_MENU", "/admin/access/menu"],
     ["MENU_ADMIN_ACCESS_BUTTON", "/admin/access/button"],
-    ["MENU_ADMIN_ACCESS_POLICY", "/admin/access/policy"],
     ["MENU_ADMIN_ACCESS_ATTRIBUTE", "/admin/access/attribute"],
     ["MENU_ADMIN_ACCESS_PERMISSION_PRESET", "/admin/access/permission-preset"],
     ["MENU_FMS_HOUSE_BL_SEA_EXP_LIST", "/fms/house-bl/sea-exp/list"],
