@@ -3,6 +3,7 @@ import type { CreateAttributeValueDto, UpdateAttributeValueDto } from "@/domain/
 
 export const accessAttributeValueUseCases = {
   listByKey: (attributeKey: string) => accessAttributeValuePort.listByKey(attributeKey),
+  listAll: () => accessAttributeValuePort.listAll(),
   create: (req: CreateAttributeValueDto) => accessAttributeValuePort.create(req),
   update: (attributeKey: string, value: string, req: UpdateAttributeValueDto) =>
     accessAttributeValuePort.update(attributeKey, value, req),

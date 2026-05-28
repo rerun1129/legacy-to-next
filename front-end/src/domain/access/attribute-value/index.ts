@@ -1,4 +1,5 @@
 export interface AttributeValueRow {
+  id: number;
   attributeKey: string;
   value: string;
   label: string | null;

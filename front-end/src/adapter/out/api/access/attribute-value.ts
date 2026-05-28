@@ -7,6 +7,7 @@ import { ResponseParseError } from "../errors";
 const BASE = "/api/admin/access/attribute-value";
 
 const ATTRIBUTE_VALUE_ROW_SCHEMA = z.object({
+  id: z.number(),
   attributeKey: z.string(),
   value: z.string(),
   label: z.string().nullable().optional().transform((v) => v ?? null),
@@ -27,6 +28,18 @@ export const API_ATTRIBUTE_VALUE_PORT: AttributeValuePort = {
       z.object({ content: z.array(ATTRIBUTE_VALUE_ROW_SCHEMA) })
     ).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid attribute-value list response: ${parsed.error.message}`);
+    return parsed.data.data.content as AttributeValueRow[];
+  },
+
+  async listAll() {
+    const json = await adminFetchJson(`${BASE}/search`, {
+      method: "POST",
+      body: JSON.stringify({ page: 0, size: 1000 }),
+    });
+    const parsed = apiResponse(
+      z.object({ content: z.array(ATTRIBUTE_VALUE_ROW_SCHEMA) })
+    ).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid attribute-value list-all response: ${parsed.error.message}`);
     return parsed.data.data.content as AttributeValueRow[];
   },
 
