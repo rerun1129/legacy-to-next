@@ -12,6 +12,7 @@ import { collectGridChanges } from "@/lib/collect-grid-changes";
 import { permissionPresetUseCases } from "@/application/access/permission-preset/use-cases";
 import type { SavePermissionPresetChangesRequest } from "@/domain/access/permission-preset";
 import { PermissionPresetAttributeValuesSection } from "@/components/admin/access/permission-preset-attribute-values-section";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import {
   buildPresetColumns,
   getPresetRowClassName,
@@ -25,23 +26,24 @@ import {
   toFormRow,
 } from "./permission-preset-list-helpers";
 import { usePresetPasteHandler } from "./use-preset-paste-handler";
-
-// ─── 검색 필터 상태 ──────────────────────────────────────────────────────────
-
-interface SearchFilter {
-  code: string;
-  name: string;
-}
-
-const DEFAULT_FILTER: SearchFilter = { code: "", name: "" };
+import {
+  DEFAULT_PERMISSION_PRESET_FILTER,
+  PermissionPresetListFilter,
+  type PermissionPresetFilter,
+} from "./permission-preset-list-filter";
 
 // ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function PermissionPresetListClient() {
   const qc = useQueryClient();
 
-  const filterForm = useForm<SearchFilter>({ defaultValues: DEFAULT_FILTER });
-  const [activeFilter, setActiveFilter] = useState<SearchFilter | null>(null);
+  const filterForm = useForm<PermissionPresetFilter>({
+    defaultValues: DEFAULT_PERMISSION_PRESET_FILTER,
+  });
+  const [activeFilter, setActiveFilter] = useState<PermissionPresetFilter>(
+    DEFAULT_PERMISSION_PRESET_FILTER,
+  );
+  const [acQuery, setAcQuery] = useState("");
 
   const { control, register, getValues, setValue, reset, formState: { isDirty } } =
     useForm<PresetFormValues>({ defaultValues: { rows: [] } });
@@ -53,22 +55,48 @@ export function PermissionPresetListClient() {
   // ─── 데이터 조회 ─────────────────────────────────────────────────────────
 
   const { data, isFetching } = useQuery({
-    queryKey: ["permission-preset", "list", activeFilter],
-    queryFn: () =>
-      permissionPresetUseCases.search({
-        code: activeFilter?.code.trim() || undefined,
-        name: activeFilter?.name.trim() || undefined,
-      }),
-    enabled: activeFilter !== null,
+    queryKey: ["permission-preset", "list"],
+    queryFn: () => permissionPresetUseCases.search({}),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
     structuralSharing: false,
   });
 
+  // ─── 클라이언트 필터링 (Code prefix-match + Status) ────────────────────
+
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    const codeQ = activeFilter.code.trim().toUpperCase();
+    return data.filter((r) => {
+      if (codeQ && !r.code.toUpperCase().includes(codeQ)) return false;
+      if (activeFilter.status === "ACTIVE" && !r.active) return false;
+      if (activeFilter.status === "INACTIVE" && r.active) return false;
+      return true;
+    });
+  }, [data, activeFilter]);
+
+  // ─── Code 자동완성 제안 ─────────────────────────────────────────────────
+
+  const codeSuggestions = useMemo<CodeBoxSuggestion[]>(() => {
+    const q = acQuery.trim().toUpperCase();
+    if (!q || !data) return [];
+    return data
+      .filter((r) => r.code.toUpperCase().includes(q))
+      .slice(0, 20)
+      .map((r) => ({ code: r.code, name: r.name }));
+  }, [acQuery, data]);
+
+  const handleCodeSelect = useCallback(
+    (item: CodeBoxSuggestion) => {
+      filterForm.setValue("code", item.code);
+    },
+    [filterForm],
+  );
+
   const originalRows = useMemo<PresetFormRow[]>(
-    () => (data ?? []).map(toFormRow),
-    [data],
+    () => filteredData.map(toFormRow),
+    [filteredData],
   );
 
   useEffect(() => {
@@ -182,9 +210,9 @@ export function PermissionPresetListClient() {
           buttonCode="BTN_ADMIN_ACCESS_PERMISSION_PRESET_RESET"
           className="btn btn--normal btn--sm"
           onClick={() => {
-            filterForm.reset(DEFAULT_FILTER);
+            filterForm.reset(DEFAULT_PERMISSION_PRESET_FILTER);
+            setActiveFilter(DEFAULT_PERMISSION_PRESET_FILTER);
             invalidateList();
-            setActiveFilter(null);
             setPresetTargetId(null);
           }}
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
@@ -194,8 +222,8 @@ export function PermissionPresetListClient() {
           className="btn btn--search btn--sm"
           onClick={() =>
             filterForm.handleSubmit((values) => {
-              invalidateList();
               setActiveFilter(values);
+              invalidateList();
               setPresetTargetId(null);
             })()
           }
@@ -213,20 +241,12 @@ export function PermissionPresetListClient() {
       </div>
 
       {/* 검색 필터 */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <input
-          className="text-box text-box--panel"
-          placeholder="code prefix"
-          style={{ width: 160 }}
-          {...filterForm.register("code")}
-        />
-        <input
-          className="text-box text-box--panel"
-          placeholder="name keyword"
-          style={{ width: 200 }}
-          {...filterForm.register("name")}
-        />
-      </div>
+      <PermissionPresetListFilter
+        form={filterForm}
+        suggestions={codeSuggestions}
+        onCodeSearch={setAcQuery}
+        onCodeSelect={handleCodeSelect}
+      />
 
       {/* 그리드 패널 */}
       <div
@@ -260,11 +280,7 @@ export function PermissionPresetListClient() {
             rowKey={(row) => row.entityId}
             rowClassName={(row) => getPresetRowClassName(row, originalRows)}
             isLoading={isFetching}
-            emptyMessage={
-              activeFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
-            }
+            emptyMessage="No results found."
             selectable
             selectedKeys={selectedKeys}
             onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
