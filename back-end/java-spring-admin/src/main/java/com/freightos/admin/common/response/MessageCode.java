@@ -133,7 +133,10 @@ public enum MessageCode {
     FREIGHT_SAVE_CHANGES("운임 일괄 저장이 완료되었습니다."),
     EXCHANGE_RATE_SAVE_CHANGES("환율 일괄 저장이 완료되었습니다."),
     CUSTOMER_SAVE_CHANGES("고객 일괄 저장이 완료되었습니다."),
-    USER_SAVE_CHANGES("사용자 일괄 저장이 완료되었습니다.");
+    USER_SAVE_CHANGES("사용자 일괄 저장이 완료되었습니다."),
+    PERMISSION_PRESET_NOT_FOUND("권한 프리셋을 찾을 수 없습니다."),
+    PERMISSION_PRESET_CODE_DUPLICATE("동일한 프리셋 코드가 이미 존재합니다."),
+    PERMISSION_PRESET_IN_USE_CANNOT_DELETE("부여된 사용자가 존재하여 권한 프리셋을 삭제할 수 없습니다.");
 
     private final String message;
 
