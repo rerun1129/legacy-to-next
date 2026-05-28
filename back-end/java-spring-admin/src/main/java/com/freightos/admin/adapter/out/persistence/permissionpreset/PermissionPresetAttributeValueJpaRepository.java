@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface PermissionPresetAttributeValueJpaRepository
@@ -12,16 +13,14 @@ public interface PermissionPresetAttributeValueJpaRepository
 
     List<PermissionPresetAttributeValueJpaEntity> findAllByPresetId(Long presetId);
 
-    boolean existsByPresetIdAndAttributeKeyAndAvValue(Long presetId, String attributeKey, String avValue);
+    boolean existsByPresetIdAndAttributeValueId(Long presetId, Long attributeValueId);
 
     @Modifying
     @Query("""
             DELETE FROM PermissionPresetAttributeValueJpaEntity e
             WHERE e.presetId = :presetId
-              AND e.attributeKey = :attributeKey
-              AND e.avValue = :avValue
+              AND e.attributeValueId IN :attributeValueIds
             """)
-    void deleteByPresetIdAndAttributeKeyAndAvValue(@Param("presetId") Long presetId,
-                                                   @Param("attributeKey") String attributeKey,
-                                                   @Param("avValue") String avValue);
+    void deleteByPresetIdAndAttributeValueIdIn(@Param("presetId") Long presetId,
+                                               @Param("attributeValueIds") Collection<Long> attributeValueIds);
 }

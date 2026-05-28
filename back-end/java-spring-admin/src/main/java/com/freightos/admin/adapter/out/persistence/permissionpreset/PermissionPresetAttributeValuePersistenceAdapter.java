@@ -1,7 +1,6 @@
 package com.freightos.admin.adapter.out.persistence.permissionpreset;
 
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetAttributeValueRepository;
-import com.freightos.admin.domain.permissionpreset.entity.AttributeValueRef;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,19 +13,19 @@ public class PermissionPresetAttributeValuePersistenceAdapter implements Permiss
     private final PermissionPresetAttributeValueJpaRepository jpaRepository;
 
     @Override
-    public List<AttributeValueRef> findAttributeValueRefsByPresetId(Long presetId) {
+    public List<Long> findAttributeValueIdsByPresetId(Long presetId) {
         return jpaRepository.findAllByPresetId(presetId)
                 .stream()
-                .map(e -> new AttributeValueRef(e.getAttributeKey(), e.getAvValue()))
+                .map(PermissionPresetAttributeValueJpaEntity::getAttributeValueId)
                 .toList();
     }
 
     @Override
-    public void saveAllByPresetId(Long presetId, List<AttributeValueRef> refs) {
-        List<PermissionPresetAttributeValueJpaEntity> toSave = refs.stream()
+    public void saveAllByPresetId(Long presetId, List<Long> attributeValueIds) {
+        List<PermissionPresetAttributeValueJpaEntity> toSave = attributeValueIds.stream()
                 // 이미 존재하는 조합은 건너뛴다 (UNIQUE 제약 회피)
-                .filter(ref -> !jpaRepository.existsByPresetIdAndAttributeKeyAndAvValue(presetId, ref.attributeKey(), ref.value()))
-                .map(ref -> PermissionPresetAttributeValueJpaEntity.of(presetId, ref.attributeKey(), ref.value()))
+                .filter(avId -> !jpaRepository.existsByPresetIdAndAttributeValueId(presetId, avId))
+                .map(avId -> PermissionPresetAttributeValueJpaEntity.of(presetId, avId))
                 .toList();
         if (!toSave.isEmpty()) {
             jpaRepository.saveAll(toSave);
@@ -34,10 +33,9 @@ public class PermissionPresetAttributeValuePersistenceAdapter implements Permiss
     }
 
     @Override
-    public void deleteByPresetIdAndRefsIn(Long presetId, List<AttributeValueRef> refs) {
-        // 각 ref 를 개별 삭제 — 삭제 건수가 적으므로 루프 방식이 적절하다
-        for (AttributeValueRef ref : refs) {
-            jpaRepository.deleteByPresetIdAndAttributeKeyAndAvValue(presetId, ref.attributeKey(), ref.value());
+    public void deleteByPresetIdAndAttributeValueIdsIn(Long presetId, List<Long> attributeValueIds) {
+        if (!attributeValueIds.isEmpty()) {
+            jpaRepository.deleteByPresetIdAndAttributeValueIdIn(presetId, attributeValueIds);
         }
     }
 }

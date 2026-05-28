@@ -9,7 +9,6 @@ import com.freightos.admin.application.permissionpreset.port.out.PermissionPrese
 import com.freightos.admin.application.permissionpreset.port.out.UserPermissionPresetRepository;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
 import com.freightos.admin.common.exception.ApplicationException;
-import com.freightos.admin.domain.permissionpreset.entity.AttributeValueRef;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -174,9 +173,9 @@ class PermissionPresetApplicationServiceTest {
     @Test
     void assignAttributeValues_presetNotFound_throwsNotFound() {
         given(presetRepository.existsPermissionPresetById(99L)).willReturn(false);
-        List<AttributeValueRef> addRefs = List.of(new AttributeValueRef("role", "ADMIN"));
+        List<Long> addIds = List.of(1L);
 
-        assertThatThrownBy(() -> service.assignAttributeValuesToPreset(99L, new AssignAttributeValuesCommand(addRefs, List.of())))
+        assertThatThrownBy(() -> service.assignAttributeValuesToPreset(99L, new AssignAttributeValuesCommand(addIds, List.of())))
                 .isInstanceOf(ApplicationException.class)
                 .satisfies(ex -> assertThat(((ApplicationException) ex).getStatus()).isEqualTo(HttpStatus.NOT_FOUND));
     }
@@ -184,24 +183,24 @@ class PermissionPresetApplicationServiceTest {
     @Test
     void assignAttributeValues_addAndRemove_appliesBothInOrder() {
         given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
-        List<AttributeValueRef> addRefs    = List.of(new AttributeValueRef("role", "ADMIN"), new AttributeValueRef("module", "fms"));
-        List<AttributeValueRef> removeRefs = List.of(new AttributeValueRef("role", "USER"));
+        List<Long> addIds    = List.of(10L, 20L);
+        List<Long> removeIds = List.of(30L);
 
-        service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(addRefs, removeRefs));
+        service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(addIds, removeIds));
 
         // remove 먼저
-        then(presetAttributeValueRepository).should().deleteByPresetIdAndRefsIn(1L, removeRefs);
-        then(presetAttributeValueRepository).should().saveAllByPresetId(1L, addRefs);
+        then(presetAttributeValueRepository).should().deleteByPresetIdAndAttributeValueIdsIn(1L, removeIds);
+        then(presetAttributeValueRepository).should().saveAllByPresetId(1L, addIds);
     }
 
     @Test
     void assignAttributeValues_emptyAdd_skipsAdd() {
         given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
-        List<AttributeValueRef> removeRefs = List.of(new AttributeValueRef("role", "USER"));
+        List<Long> removeIds = List.of(30L);
 
-        service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(List.of(), removeRefs));
+        service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(List.of(), removeIds));
 
-        then(presetAttributeValueRepository).should().deleteByPresetIdAndRefsIn(1L, removeRefs);
+        then(presetAttributeValueRepository).should().deleteByPresetIdAndAttributeValueIdsIn(1L, removeIds);
         then(presetAttributeValueRepository).should(never()).saveAllByPresetId(any(), any());
     }
 }

@@ -10,6 +10,7 @@ import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +29,16 @@ public class AttributeValuePersistenceAdapter implements AttributeValuePort {
 
     @Override
     public Optional<AttributeValue> findAttributeValueByKey(String attributeKey, String value) {
-        return attributeValueRepository.findById(new AttributeValueId(attributeKey, value))
+        return attributeValueRepository.findByAttributeKeyAndValue(attributeKey, value)
                 .map(attributeValueJpaToDomainMapper::toDomain);
+    }
+
+    @Override
+    public List<AttributeValue> findAttributeValuesByIds(Collection<Long> ids) {
+        return attributeValueRepository.findAllById(ids)
+                .stream()
+                .map(attributeValueJpaToDomainMapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -39,33 +48,31 @@ public class AttributeValuePersistenceAdapter implements AttributeValuePort {
 
     @Override
     public void update(String attributeKey, String value, AttributeValue patchData) {
-        AttributeValueJpaEntity entity = attributeValueRepository.findById(new AttributeValueId(attributeKey, value))
+        AttributeValueJpaEntity entity = attributeValueRepository.findByAttributeKeyAndValue(attributeKey, value)
                 .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
         attributeValueDomainToJpaMapper.applyUpdateFields(entity, patchData);
     }
 
     @Override
     public void deleteAttributeValueByKey(String attributeKey, String value) {
-        AttributeValueId pk = new AttributeValueId(attributeKey, value);
-        if (!attributeValueRepository.existsById(pk)) {
-            throw ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage());
-        }
-        attributeValueRepository.deleteById(pk);
+        AttributeValueJpaEntity entity = attributeValueRepository.findByAttributeKeyAndValue(attributeKey, value)
+                .orElseThrow(() -> ApplicationException.notFound("ATTRIBUTE_VALUE_NOT_FOUND", MessageCode.ATTRIBUTE_VALUE_NOT_FOUND.getMessage()));
+        attributeValueRepository.deleteById(entity.getId());
     }
 
     @Override
     public boolean existsByKey(String attributeKey, String value) {
-        return attributeValueRepository.existsById(new AttributeValueId(attributeKey, value));
+        return attributeValueRepository.existsByAttributeKeyAndValue(attributeKey, value);
     }
 
     @Override
     public boolean existsByAttributeKey(String attributeKey) {
-        return attributeValueRepository.existsByIdAttributeKey(attributeKey);
+        return attributeValueRepository.existsByAttributeKey(attributeKey);
     }
 
     @Override
     public List<AttributeValue> findActiveAttributeValuesByKey(String attributeKey) {
-        return attributeValueRepository.findByIdAttributeKeyAndActiveTrue(attributeKey)
+        return attributeValueRepository.findByAttributeKeyAndActiveTrue(attributeKey)
                 .stream()
                 .map(attributeValueJpaToDomainMapper::toDomain)
                 .toList();

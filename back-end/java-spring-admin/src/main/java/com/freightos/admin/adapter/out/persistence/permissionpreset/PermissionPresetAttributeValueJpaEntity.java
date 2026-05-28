@@ -13,12 +13,12 @@ import lombok.Setter;
 
 /**
  * permission_preset_attribute_value 매핑 테이블 엔티티.
- * attribute_value 의 PK 가 (attribute_key, value) 복합키이므로 두 컬럼을 모두 보유한다.
+ * V34 이후 attribute_value_id 단일 FK 참조로 단순화되었다.
  * audit 컬럼 없음 — 단순 연결 테이블이므로 BaseJpaEntity 미상속.
  */
 @Entity
 @Table(schema = "admin", name = "permission_preset_attribute_value",
-        uniqueConstraints = @UniqueConstraint(name = "uq_ppav_preset_av", columnNames = {"preset_id", "attribute_key", "av_value"}))
+        uniqueConstraints = @UniqueConstraint(name = "uq_ppav_preset_av", columnNames = {"preset_id", "attribute_value_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,17 +32,13 @@ public class PermissionPresetAttributeValueJpaEntity {
     @Column(name = "preset_id", nullable = false)
     private Long presetId;
 
-    @Column(name = "attribute_key", nullable = false, length = 80)
-    private String attributeKey;
+    @Column(name = "attribute_value_id", nullable = false)
+    private Long attributeValueId;
 
-    @Column(name = "av_value", nullable = false, length = 100)
-    private String avValue;
-
-    public static PermissionPresetAttributeValueJpaEntity of(Long presetId, String attributeKey, String avValue) {
+    public static PermissionPresetAttributeValueJpaEntity of(Long presetId, Long attributeValueId) {
         PermissionPresetAttributeValueJpaEntity e = new PermissionPresetAttributeValueJpaEntity();
-        e.presetId     = presetId;
-        e.attributeKey = attributeKey;
-        e.avValue      = avValue;
+        e.presetId          = presetId;
+        e.attributeValueId  = attributeValueId;
         return e;
     }
 }

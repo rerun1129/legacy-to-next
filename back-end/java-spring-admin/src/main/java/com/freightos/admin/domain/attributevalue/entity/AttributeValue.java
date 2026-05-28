@@ -5,11 +5,13 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 /**
- * Composite PK 도메인 — BaseEntity 상속 불가. 자체 audit 필드 보유.
+ * 단일 PK(id) + UNIQUE(attributeKey, value) 도메인 엔티티.
+ * id 는 어댑터 계층이 JPA→Domain 변환 시 assignIdentity 로 주입한다.
  */
 @Getter
 public class AttributeValue {
 
+    private Long id;
     private final String attributeKey;
     private final String value;
     private String label;
@@ -40,8 +42,9 @@ public class AttributeValue {
         this.active    = active;
     }
 
-    /** 어댑터 계층이 JPA→Domain 변환 시 감사 필드를 주입할 때 사용한다. */
-    public void assignAudit(LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy) {
+    /** 어댑터 계층이 JPA→Domain 변환 시 id 및 감사 필드를 주입할 때 사용한다. */
+    public void assignIdentity(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy) {
+        this.id        = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;

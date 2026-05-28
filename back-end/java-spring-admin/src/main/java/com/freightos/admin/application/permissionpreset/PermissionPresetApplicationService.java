@@ -85,7 +85,7 @@ public class PermissionPresetApplicationService
                         preset.getName(),
                         preset.getDescription(),
                         preset.isActive(),
-                        preset.getAttributeValueRefs()
+                        preset.getAttributeValueIds()
                 ))
                 .toList();
     }
@@ -97,11 +97,11 @@ public class PermissionPresetApplicationService
             throw ApplicationException.notFound("PERMISSION_PRESET_NOT_FOUND", MessageCode.PERMISSION_PRESET_NOT_FOUND.getMessage());
         }
         // remove 먼저 처리
-        if (!command.removeRefs().isEmpty()) {
-            presetAttributeValueRepository.deleteByPresetIdAndRefsIn(presetId, command.removeRefs());
+        if (!command.removeIds().isEmpty()) {
+            presetAttributeValueRepository.deleteByPresetIdAndAttributeValueIdsIn(presetId, command.removeIds());
         }
-        if (!command.addRefs().isEmpty()) {
-            presetAttributeValueRepository.saveAllByPresetId(presetId, command.addRefs());
+        if (!command.addIds().isEmpty()) {
+            presetAttributeValueRepository.saveAllByPresetId(presetId, command.addIds());
         }
     }
 }

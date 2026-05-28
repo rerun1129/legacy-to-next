@@ -1,9 +1,10 @@
 package com.freightos.admin.application.permissionpreset;
 
+import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetAttributeValueRepository;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetRepository;
 import com.freightos.admin.application.permissionpreset.port.out.UserPermissionPresetRepository;
-import com.freightos.admin.domain.permissionpreset.entity.AttributeValueRef;
+import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,8 @@ class ComputeEffectiveAttributeValuesServiceTest {
     private PermissionPresetRepository presetRepository;
     @Mock
     private PermissionPresetAttributeValueRepository presetAttributeValueRepository;
+    @Mock
+    private AttributeValuePort attributeValuePort;
 
     @InjectMocks
     private ComputeEffectiveAttributeValuesService service;
@@ -55,10 +58,13 @@ class ComputeEffectiveAttributeValuesServiceTest {
         Map<String, List<String>> direct = new HashMap<>();
         PermissionPreset activePreset = PermissionPreset.create("PRESET_FMS_SEA", "FMS 해상", null, true);
 
+        AttributeValue roleViewer = AttributeValue.create("role", "VIEWER", "뷰어", 1, true);
+        AttributeValue moduleFms = AttributeValue.create("module", "fms", "FMS", 1, true);
+
         given(userPresetRepository.findPresetIdsByUserId(userId)).willReturn(List.of(10L));
         given(presetRepository.findPermissionPresetById(10L)).willReturn(Optional.of(activePreset));
-        given(presetAttributeValueRepository.findAttributeValueRefsByPresetId(10L))
-                .willReturn(List.of(new AttributeValueRef("role", "VIEWER"), new AttributeValueRef("module", "fms")));
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(10L)).willReturn(List.of(1L, 2L));
+        given(attributeValuePort.findAttributeValuesByIds(List.of(1L, 2L))).willReturn(List.of(roleViewer, moduleFms));
 
         Map<String, List<String>> result = service.computeEffectiveAttributes(userId, direct);
 
@@ -73,10 +79,13 @@ class ComputeEffectiveAttributeValuesServiceTest {
         Map<String, List<String>> direct = mapOf("module", List.of("admin"));
         PermissionPreset activePreset = PermissionPreset.create("PRESET_ADMIN_ALL", "전체 관리자", null, true);
 
+        AttributeValue roleAdmin = AttributeValue.create("role", "ADMIN", "관리자", 1, true);
+        AttributeValue moduleFms = AttributeValue.create("module", "fms", "FMS", 1, true);
+
         given(userPresetRepository.findPresetIdsByUserId(userId)).willReturn(List.of(20L));
         given(presetRepository.findPermissionPresetById(20L)).willReturn(Optional.of(activePreset));
-        given(presetAttributeValueRepository.findAttributeValueRefsByPresetId(20L))
-                .willReturn(List.of(new AttributeValueRef("role", "ADMIN"), new AttributeValueRef("module", "fms")));
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(20L)).willReturn(List.of(3L, 4L));
+        given(attributeValuePort.findAttributeValuesByIds(List.of(3L, 4L))).willReturn(List.of(roleAdmin, moduleFms));
 
         Map<String, List<String>> result = service.computeEffectiveAttributes(userId, direct);
 
@@ -110,13 +119,16 @@ class ComputeEffectiveAttributeValuesServiceTest {
         PermissionPreset p1 = PermissionPreset.create("PRESET_A", "A", null, true);
         PermissionPreset p2 = PermissionPreset.create("PRESET_B", "B", null, true);
 
+        AttributeValue roleAdmin = AttributeValue.create("role", "ADMIN", "관리자", 1, true);
+        AttributeValue moduleFms = AttributeValue.create("module", "fms", "FMS", 1, true);
+
         given(userPresetRepository.findPresetIdsByUserId(userId)).willReturn(List.of(40L, 50L));
         given(presetRepository.findPermissionPresetById(40L)).willReturn(Optional.of(p1));
         given(presetRepository.findPermissionPresetById(50L)).willReturn(Optional.of(p2));
-        given(presetAttributeValueRepository.findAttributeValueRefsByPresetId(40L))
-                .willReturn(List.of(new AttributeValueRef("role", "ADMIN")));
-        given(presetAttributeValueRepository.findAttributeValueRefsByPresetId(50L))
-                .willReturn(List.of(new AttributeValueRef("role", "ADMIN"), new AttributeValueRef("module", "fms")));
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(40L)).willReturn(List.of(10L));
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(50L)).willReturn(List.of(10L, 20L));
+        given(attributeValuePort.findAttributeValuesByIds(List.of(10L))).willReturn(List.of(roleAdmin));
+        given(attributeValuePort.findAttributeValuesByIds(List.of(10L, 20L))).willReturn(List.of(roleAdmin, moduleFms));
 
         Map<String, List<String>> result = service.computeEffectiveAttributes(userId, direct);
 

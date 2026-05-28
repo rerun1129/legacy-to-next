@@ -7,10 +7,8 @@ import org.springframework.stereotype.Component;
 public class AttributeValueJpaToDomainMapper {
 
     public AttributeValue toDomain(AttributeValueJpaEntity e) {
-        AttributeValue domain = AttributeValue.create(
-                e.getId().getAttributeKey(), e.getId().getValue(),
-                e.getLabel(), e.getSortOrder(), e.getActive());
-        domain.assignAudit(e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
+        AttributeValue domain = AttributeValue.create(e.getAttributeKey(), e.getValue(), e.getLabel(), e.getSortOrder(), e.getActive());
+        domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         return domain;
     }
 }

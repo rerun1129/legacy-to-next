@@ -1,7 +1,6 @@
 package com.freightos.admin.adapter.out.persistence.permissionpreset;
 
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetRepository;
-import com.freightos.admin.domain.permissionpreset.entity.AttributeValueRef;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,16 +20,16 @@ public class PermissionPresetPersistenceAdapter implements PermissionPresetRepos
     @Override
     public Optional<PermissionPreset> findPermissionPresetById(Long presetId) {
         return jpaRepository.findById(presetId).map(e -> {
-            List<AttributeValueRef> refs = loadRefs(presetId);
-            return jpaToDomainMapper.toDomain(e, refs);
+            List<Long> ids = loadAttributeValueIds(presetId);
+            return jpaToDomainMapper.toDomain(e, ids);
         });
     }
 
     @Override
     public Optional<PermissionPreset> findPermissionPresetByCode(String code) {
         return jpaRepository.findByCode(code).map(e -> {
-            List<AttributeValueRef> refs = loadRefs(e.getId());
-            return jpaToDomainMapper.toDomain(e, refs);
+            List<Long> ids = loadAttributeValueIds(e.getId());
+            return jpaToDomainMapper.toDomain(e, ids);
         });
     }
 
@@ -70,15 +69,15 @@ public class PermissionPresetPersistenceAdapter implements PermissionPresetRepos
                 : jpaRepository.findAll();
 
         return entities.stream().map(e -> {
-            List<AttributeValueRef> refs = loadRefs(e.getId());
-            return jpaToDomainMapper.toDomain(e, refs);
+            List<Long> ids = loadAttributeValueIds(e.getId());
+            return jpaToDomainMapper.toDomain(e, ids);
         }).toList();
     }
 
-    private List<AttributeValueRef> loadRefs(Long presetId) {
+    private List<Long> loadAttributeValueIds(Long presetId) {
         return attributeValueJpaRepository.findAllByPresetId(presetId)
                 .stream()
-                .map(e -> new AttributeValueRef(e.getAttributeKey(), e.getAvValue()))
+                .map(PermissionPresetAttributeValueJpaEntity::getAttributeValueId)
                 .toList();
     }
 }

@@ -38,9 +38,9 @@ public class AttributeValueRepositoryImpl implements AttributeValueRepositoryCus
         dataQuery.where(buildPredicates(cb, dataRoot, command));
         // tie-break: attributeKey asc, sortOrder asc, value asc
         dataQuery.orderBy(
-                cb.asc(dataRoot.get("id").get("attributeKey")),
+                cb.asc(dataRoot.get("attributeKey")),
                 cb.asc(dataRoot.get("sortOrder")),
-                cb.asc(dataRoot.get("id").get("value"))
+                cb.asc(dataRoot.get("value"))
         );
 
         TypedQuery<AttributeValueJpaEntity> typedQuery = em.createQuery(dataQuery);
@@ -48,7 +48,7 @@ public class AttributeValueRepositoryImpl implements AttributeValueRepositoryCus
         typedQuery.setMaxResults(command.size());
 
         List<AttributeValueSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new AttributeValueSummary(e.getId().getAttributeKey(), e.getId().getValue(), e.getLabel(), e.getSortOrder(), e.getActive(), e.getUpdatedAt()))
+                .map(e -> new AttributeValueSummary(e.getAttributeKey(), e.getValue(), e.getLabel(), e.getSortOrder(), e.getActive(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
@@ -58,10 +58,10 @@ public class AttributeValueRepositoryImpl implements AttributeValueRepositoryCus
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<AttributeValueJpaEntity> root, SearchAttributeValueCommand command) {
         List<Predicate> predicates = new ArrayList<>();
         if (StringUtils.hasText(command.attributeKey())) {
-            predicates.add(cb.equal(root.get("id").get("attributeKey"), command.attributeKey()));
+            predicates.add(cb.equal(root.get("attributeKey"), command.attributeKey()));
         }
         if (StringUtils.hasText(command.value())) {
-            predicates.add(cb.like(root.get("id").get("value"), "%" + command.value() + "%"));
+            predicates.add(cb.like(root.get("value"), "%" + command.value() + "%"));
         }
         if (command.active() != null) {
             predicates.add(cb.equal(root.get("active"), command.active()));
