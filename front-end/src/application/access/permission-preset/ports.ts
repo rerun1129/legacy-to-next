@@ -5,6 +5,8 @@ import type {
   CreatePermissionPresetCommand,
   UpdatePermissionPresetCommand,
   AssignAttributeValuesCommand,
+  SavePermissionPresetChangesRequest,
+  SaveChangesResult,
 } from "@/domain/access/permission-preset";
 
 export interface PermissionPresetPort {
@@ -14,4 +16,5 @@ export interface PermissionPresetPort {
   update(id: number, cmd: UpdatePermissionPresetCommand): Promise<void>;
   delete(id: number): Promise<void>;
   assignAttributeValues(id: number, cmd: AssignAttributeValuesCommand): Promise<void>;
+  saveChanges(req: SavePermissionPresetChangesRequest): Promise<SaveChangesResult>;
 }

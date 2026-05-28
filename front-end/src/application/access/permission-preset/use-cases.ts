@@ -4,6 +4,7 @@ import type {
   CreatePermissionPresetCommand,
   UpdatePermissionPresetCommand,
   AssignAttributeValuesCommand,
+  SavePermissionPresetChangesRequest,
 } from "@/domain/access/permission-preset";
 
 export const permissionPresetUseCases = {
@@ -14,4 +15,6 @@ export const permissionPresetUseCases = {
   delete: (id: number) => permissionPresetPort.delete(id),
   assignAttributeValues: (id: number, cmd: AssignAttributeValuesCommand) =>
     permissionPresetPort.assignAttributeValues(id, cmd),
+  saveChanges: (req: SavePermissionPresetChangesRequest) =>
+    permissionPresetPort.saveChanges(req),
 };

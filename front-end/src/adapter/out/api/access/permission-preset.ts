@@ -7,6 +7,8 @@ import type {
   CreatePermissionPresetCommand,
   UpdatePermissionPresetCommand,
   AssignAttributeValuesCommand,
+  SavePermissionPresetChangesRequest,
+  SaveChangesResult,
 } from "@/domain/access/permission-preset";
 import { adminFetchJson } from "../admin-fetch";
 import { ApiError, ResponseParseError } from "../errors";
@@ -100,5 +102,25 @@ export const API_PERMISSION_PRESET_PORT: PermissionPresetPort = {
       method: "POST",
       body: JSON.stringify(cmd),
     });
+  },
+
+  async saveChanges(req: SavePermissionPresetChangesRequest): Promise<SaveChangesResult> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(
+      z.object({
+        createdCount: z.number(),
+        updatedCount: z.number(),
+        deletedCount: z.number(),
+      })
+    ).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(
+        `Invalid permission-preset save-changes response: ${parsed.error.message}`
+      );
+    }
+    return parsed.data.data as SaveChangesResult;
   },
 };

@@ -34,7 +34,7 @@ export const API_ATTRIBUTE_VALUE_PORT: AttributeValuePort = {
   async listAll() {
     const json = await adminFetchJson(`${BASE}/search`, {
       method: "POST",
-      body: JSON.stringify({ page: 0, size: 1000 }),
+      body: JSON.stringify({ page: 0, size: 200 }),
     });
     const parsed = apiResponse(
       z.object({ content: z.array(ATTRIBUTE_VALUE_ROW_SCHEMA) })

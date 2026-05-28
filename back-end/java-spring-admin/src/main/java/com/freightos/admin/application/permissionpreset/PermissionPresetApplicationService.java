@@ -4,6 +4,7 @@ import com.freightos.admin.application.attributevalue.port.out.AttributeValuePor
 import com.freightos.admin.application.permissionpreset.command.AssignAttributeValuesCommand;
 import com.freightos.admin.application.permissionpreset.command.CreatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.command.ListPermissionPresetCommand;
+import com.freightos.admin.application.permissionpreset.command.SavePermissionPresetChangesCommand;
 import com.freightos.admin.application.permissionpreset.command.UpdatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.port.in.AssignAttributeValuesToPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.CreatePermissionPresetUseCase;
@@ -11,7 +12,9 @@ import com.freightos.admin.application.permissionpreset.port.in.DeletePermission
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetDetailUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.ListPermissionPresetUseCase;
+import com.freightos.admin.application.permissionpreset.port.in.SavePermissionPresetChangesUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.UpdatePermissionPresetUseCase;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetAttributeValueRepository;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetRepository;
 import com.freightos.admin.application.permissionpreset.port.out.UserPermissionPresetRepository;
@@ -25,7 +28,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +42,8 @@ public class PermissionPresetApplicationService
                    GetPermissionPresetUseCase,
                    GetPermissionPresetDetailUseCase,
                    ListPermissionPresetUseCase,
-                   AssignAttributeValuesToPresetUseCase {
+                   AssignAttributeValuesToPresetUseCase,
+                   SavePermissionPresetChangesUseCase {
 
     private final PermissionPresetRepository presetRepository;
     private final PermissionPresetAttributeValueRepository presetAttributeValueRepository;
@@ -109,6 +115,21 @@ public class PermissionPresetApplicationService
 
     @Override
     @Transactional
+    public SaveChangesResult savePermissionPresetChanges(SavePermissionPresetChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deletePermissionPreset(id);
+        }
+        for (SavePermissionPresetChangesCommand.UpdatePermissionPresetItem item : command.updates()) {
+            updatePermissionPreset(item.id(), new UpdatePermissionPresetCommand(item.name(), item.description(), item.active()));
+        }
+        for (CreatePermissionPresetCommand create : command.creates()) {
+            createPermissionPreset(create);
+        }
+        return new SaveChangesResult(command.creates().size(), command.updates().size(), command.deleteIds().size());
+    }
+
+    @Override
+    @Transactional
     public void assignAttributeValuesToPreset(Long presetId, AssignAttributeValuesCommand command) {
         if (!presetRepository.existsPermissionPresetById(presetId)) {
             throw ApplicationException.notFound("PERMISSION_PRESET_NOT_FOUND", MessageCode.PERMISSION_PRESET_NOT_FOUND.getMessage());
@@ -119,6 +140,31 @@ public class PermissionPresetApplicationService
         }
         if (!command.addIds().isEmpty()) {
             presetAttributeValueRepository.saveAllByPresetId(presetId, command.addIds());
+        }
+        // 변경 후 최종 attribute_value set 이 비어있지 않으면 module + scope 조합 필수 검증
+        validateModuleAndScopeIfNotEmpty(presetId, command);
+    }
+
+    /**
+     * remove/add 적용 후 preset 의 attribute_value 결과 set 이 비어있지 않을 때,
+     * module 키 ≥ 1 AND (admin_scope 키 OR fms_scope 키) ≥ 1 을 강제한다.
+     * 비즈니스 규칙: module 없는 scope, scope 없는 module 은 ABAC 접근 제어 미완성 상태.
+     */
+    private void validateModuleAndScopeIfNotEmpty(Long presetId, AssignAttributeValuesCommand command) {
+        Set<Long> currentIds = new HashSet<>(presetAttributeValueRepository.findAttributeValueIdsByPresetId(presetId));
+        currentIds.removeAll(command.removeIds());
+        currentIds.addAll(command.addIds());
+        if (currentIds.isEmpty()) {
+            return;
+        }
+        List<AttributeValue> values = attributeValuePort.findAttributeValuesByIds(currentIds);
+        boolean hasModule     = values.stream().anyMatch(av -> "module".equals(av.getAttributeKey()));
+        boolean hasScope      = values.stream().anyMatch(av -> "admin_scope".equals(av.getAttributeKey()) || "fms_scope".equals(av.getAttributeKey()));
+        if (!hasModule || !hasScope) {
+            throw ApplicationException.badRequest(
+                    "PERMISSION_PRESET_REQUIRES_MODULE_AND_SCOPE",
+                    MessageCode.PERMISSION_PRESET_REQUIRES_MODULE_AND_SCOPE.getMessage()
+            );
         }
     }
 }

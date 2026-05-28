@@ -4,6 +4,7 @@ import com.freightos.admin.adapter.in.web.permissionpreset.dto.AssignAttributeVa
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.CreatePermissionPresetRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.PermissionPresetResponse;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.PermissionPresetSummaryResponse;
+import com.freightos.admin.adapter.in.web.permissionpreset.dto.SavePermissionPresetChangesRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.SearchPermissionPresetRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.UpdatePermissionPresetRequest;
 import com.freightos.admin.application.permissionpreset.port.in.AssignAttributeValuesToPresetUseCase;
@@ -11,11 +12,13 @@ import com.freightos.admin.application.permissionpreset.port.in.CreatePermission
 import com.freightos.admin.application.permissionpreset.port.in.DeletePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetDetailUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.ListPermissionPresetUseCase;
+import com.freightos.admin.application.permissionpreset.port.in.SavePermissionPresetChangesUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.UpdatePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetDetail;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
+import com.freightos.admin.common.response.SaveChangesResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +50,7 @@ public class PermissionPresetController {
     private final GetPermissionPresetDetailUseCase getDetailUseCase;
     private final ListPermissionPresetUseCase listUseCase;
     private final AssignAttributeValuesToPresetUseCase assignUseCase;
+    private final SavePermissionPresetChangesUseCase saveChangesUseCase;
     private final PermissionPresetWebAssembler assembler;
 
     @PostMapping("/search")
@@ -90,6 +94,14 @@ public class PermissionPresetController {
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         deleteUseCase.deletePermissionPreset(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PERMISSION_PRESET_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SavePermissionPresetChangesRequest req) {
+        SaveChangesResult result = saveChangesUseCase.savePermissionPresetChanges(assembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.PERMISSION_PRESET_SAVE_CHANGES.getMessage()));
     }
 
     @PostMapping("/{id}/attribute-values")

@@ -137,7 +137,8 @@ export function UserListClient() {
   const handleUsernameDoubleClick = useCallback((entityId: number) => {
     // 신규 행(entityId < 0)은 아직 저장되지 않았으므로 preset 노출 대상 제외
     if (entityId < 0) return;
-    setPresetTargetUserId((prev) => (prev === entityId ? null : entityId));
+    // 더블클릭은 열기 전용 — 닫기 트리거는 Reset/Search/Save 버튼
+    setPresetTargetUserId(entityId);
   }, []);
 
   const pendingFocusRef = useRef<number | null>(null);
@@ -202,6 +203,7 @@ export function UserListClient() {
       toast.success(
         `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`
       );
+      setPresetTargetUserId(null);
       invalidateList();
     },
   });
@@ -224,6 +226,7 @@ export function UserListClient() {
             invalidateList();
             setExtraFilter(null);
             setCurrentPage(1);
+            setPresetTargetUserId(null);
           }}
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
         />
@@ -235,6 +238,7 @@ export function UserListClient() {
               invalidateList();
               setExtraFilter(values);
               setCurrentPage(1);
+              setPresetTargetUserId(null);
             })()
           }
           icon={<Search size={12} style={{ marginRight: 4 }} />}
@@ -304,7 +308,7 @@ export function UserListClient() {
 
       {presetTargetUserId !== null && (() => {
         const userRow = data?.content.find((r) => r.id === presetTargetUserId);
-        return <UserPermissionPresetsSection userId={presetTargetUserId} username={userRow?.username} />;
+        return <UserPermissionPresetsSection key={presetTargetUserId} userId={presetTargetUserId} username={userRow?.username} />;
       })()}
     </>
   );

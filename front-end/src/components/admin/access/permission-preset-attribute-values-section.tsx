@@ -156,7 +156,7 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
           선택 제거
         </Button>
       </div>
-      <div className="list-wrap">
+      <div className="list-wrap" style={{ minHeight: 300 }}>
         <GridList<AttributeValueRef>
           columns={ASSIGNED_COLUMNS}
           data={assignedRows}

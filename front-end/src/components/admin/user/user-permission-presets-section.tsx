@@ -168,7 +168,7 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
         </Button>
       </div>
 
-      <div className="list-wrap">
+      <div className="list-wrap" style={{ minHeight: 300 }}>
         <GridList<UserPermissionPresetRef>
           columns={ASSIGNED_COLUMNS}
           data={assigned}

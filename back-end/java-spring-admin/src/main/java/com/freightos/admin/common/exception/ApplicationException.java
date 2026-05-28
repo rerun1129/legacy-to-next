@@ -19,6 +19,10 @@ public class ApplicationException extends RuntimeException {
         this(status, status.name(), message);
     }
 
+    public static ApplicationException badRequest(String errorCode, String message) {
+        return new ApplicationException(HttpStatus.BAD_REQUEST, errorCode, message);
+    }
+
     public static ApplicationException notFound(String errorCode, String message) {
         return new ApplicationException(HttpStatus.NOT_FOUND, errorCode, message);
     }

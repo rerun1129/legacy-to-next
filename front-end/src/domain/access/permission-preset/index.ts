@@ -41,3 +41,29 @@ export interface AssignAttributeValuesCommand {
   addIds: number[];
   removeIds: number[];
 }
+
+export interface CreatePresetItemDto {
+  code: string;
+  name: string;
+  description?: string;
+  active: boolean;
+}
+
+export interface UpdatePresetItemDto {
+  id: number;
+  name: string;
+  description?: string;
+  active: boolean;
+}
+
+export interface SavePermissionPresetChangesRequest {
+  creates: CreatePresetItemDto[];
+  updates: UpdatePresetItemDto[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResult {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

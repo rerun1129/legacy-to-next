@@ -5,11 +5,13 @@ import com.freightos.admin.adapter.in.web.permissionpreset.dto.AttributeValueRef
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.CreatePermissionPresetRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.PermissionPresetResponse;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.PermissionPresetSummaryResponse;
+import com.freightos.admin.adapter.in.web.permissionpreset.dto.SavePermissionPresetChangesRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.SearchPermissionPresetRequest;
 import com.freightos.admin.adapter.in.web.permissionpreset.dto.UpdatePermissionPresetRequest;
 import com.freightos.admin.application.permissionpreset.command.AssignAttributeValuesCommand;
 import com.freightos.admin.application.permissionpreset.command.CreatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.command.ListPermissionPresetCommand;
+import com.freightos.admin.application.permissionpreset.command.SavePermissionPresetChangesCommand;
 import com.freightos.admin.application.permissionpreset.command.UpdatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetDetail;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
@@ -53,5 +55,16 @@ public class PermissionPresetWebAssembler {
                 detail.id(), detail.code(), detail.name(), detail.description(),
                 detail.active(), detail.attributeValueIds(), refs
         );
+    }
+
+    public SavePermissionPresetChangesCommand toSaveChangesCommand(SavePermissionPresetChangesRequest req) {
+        List<CreatePermissionPresetCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream().map(this::toCreateCommand).toList();
+        List<SavePermissionPresetChangesCommand.UpdatePermissionPresetItem> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SavePermissionPresetChangesCommand.UpdatePermissionPresetItem(u.id(), u.name(), u.description(), u.active()))
+                        .toList();
+        List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
+        return new SavePermissionPresetChangesCommand(creates, updates, deleteIds);
     }
 }

@@ -1,5 +1,6 @@
 package com.freightos.admin.application.permissionpreset;
 
+import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.permissionpreset.command.AssignAttributeValuesCommand;
 import com.freightos.admin.application.permissionpreset.command.CreatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.command.ListPermissionPresetCommand;
@@ -9,6 +10,7 @@ import com.freightos.admin.application.permissionpreset.port.out.PermissionPrese
 import com.freightos.admin.application.permissionpreset.port.out.UserPermissionPresetRepository;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,9 +39,31 @@ class PermissionPresetApplicationServiceTest {
     private PermissionPresetAttributeValueRepository presetAttributeValueRepository;
     @Mock
     private UserPermissionPresetRepository userPresetRepository;
+    @Mock
+    private AttributeValuePort attributeValuePort;
 
     @InjectMocks
     private PermissionPresetApplicationService service;
+
+    // --- fixture helpers ---
+
+    private static AttributeValue moduleAv() {
+        AttributeValue av = AttributeValue.create("module", "FMS", "FMS", 1, true);
+        av.assignIdentity(100L, null, null, null, null);
+        return av;
+    }
+
+    private static AttributeValue fmsScopeAv() {
+        AttributeValue av = AttributeValue.create("fms_scope", "SEA", "해상", 1, true);
+        av.assignIdentity(200L, null, null, null, null);
+        return av;
+    }
+
+    private static AttributeValue adminScopeAv() {
+        AttributeValue av = AttributeValue.create("admin_scope", "CODE", "Code Master", 1, true);
+        av.assignIdentity(201L, null, null, null, null);
+        return av;
+    }
 
     // --- createPermissionPreset ---
 
@@ -183,8 +207,11 @@ class PermissionPresetApplicationServiceTest {
     @Test
     void assignAttributeValues_addAndRemove_appliesBothInOrder() {
         given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
-        List<Long> addIds    = List.of(10L, 20L);
+        List<Long> addIds    = List.of(100L, 200L);
         List<Long> removeIds = List.of(30L);
+        // DB 현재 상태: removeIds 만 존재 → remove 후 addIds 가 최종 set
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(1L)).willReturn(List.of(30L));
+        given(attributeValuePort.findAttributeValuesByIds(any())).willReturn(List.of(moduleAv(), fmsScopeAv()));
 
         service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(addIds, removeIds));
 
@@ -197,10 +224,63 @@ class PermissionPresetApplicationServiceTest {
     void assignAttributeValues_emptyAdd_skipsAdd() {
         given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
         List<Long> removeIds = List.of(30L);
+        // DB 현재 상태: removeIds 만 존재 → remove 후 최종 set 비어있음 → 검증 skip
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(1L)).willReturn(List.of(30L));
 
         service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(List.of(), removeIds));
 
         then(presetAttributeValueRepository).should().deleteByPresetIdAndAttributeValueIdsIn(1L, removeIds);
         then(presetAttributeValueRepository).should(never()).saveAllByPresetId(any(), any());
+    }
+
+    // --- assignAttributeValuesToPreset 검증: module + scope 규칙 ---
+
+    @Test
+    void assignAttributeValues_resultSetHasModuleAndScope_passes() {
+        // module + fms_scope 조합 → 검증 통과, 예외 없음
+        given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
+        List<Long> addIds = List.of(100L, 200L);
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(1L)).willReturn(List.of());
+        given(attributeValuePort.findAttributeValuesByIds(any())).willReturn(List.of(moduleAv(), fmsScopeAv()));
+
+        service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(addIds, List.of()));
+        // 예외 없으면 통과
+    }
+
+    @Test
+    void assignAttributeValues_resultSetEmpty_skipsValidation() {
+        // 결과 set 이 비어있으면 검증 자체를 수행하지 않는다
+        given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(1L)).willReturn(List.of());
+
+        service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(List.of(), List.of()));
+
+        then(attributeValuePort).should(never()).findAttributeValuesByIds(any());
+    }
+
+    @Test
+    void assignAttributeValues_missingScope_throwsBadRequest() {
+        // module 만 있고 scope 없음 → 400
+        given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
+        List<Long> addIds = List.of(100L);
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(1L)).willReturn(List.of());
+        given(attributeValuePort.findAttributeValuesByIds(any())).willReturn(List.of(moduleAv()));
+
+        assertThatThrownBy(() -> service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(addIds, List.of())))
+                .isInstanceOf(ApplicationException.class)
+                .satisfies(ex -> assertThat(((ApplicationException) ex).getStatus()).isEqualTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    void assignAttributeValues_missingModule_throwsBadRequest() {
+        // scope 만 있고 module 없음 → 400
+        given(presetRepository.existsPermissionPresetById(1L)).willReturn(true);
+        List<Long> addIds = List.of(200L);
+        given(presetAttributeValueRepository.findAttributeValueIdsByPresetId(1L)).willReturn(List.of());
+        given(attributeValuePort.findAttributeValuesByIds(any())).willReturn(List.of(fmsScopeAv()));
+
+        assertThatThrownBy(() -> service.assignAttributeValuesToPreset(1L, new AssignAttributeValuesCommand(addIds, List.of())))
+                .isInstanceOf(ApplicationException.class)
+                .satisfies(ex -> assertThat(((ApplicationException) ex).getStatus()).isEqualTo(HttpStatus.BAD_REQUEST));
     }
 }
