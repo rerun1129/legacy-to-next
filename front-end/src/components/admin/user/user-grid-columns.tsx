@@ -79,7 +79,17 @@ export function buildUserColumns(
       label: "Password",
       width: 160,
       render: (_v, row, i) => {
-        if (row.entityId >= 0) return null;
+        const isNew = row.entityId < 0;
+        if (!isNew) {
+          return (
+            <TextBox
+              variant="cell"
+              readOnly
+              placeholder="<Hide>"
+              value=""
+            />
+          );
+        }
         return (
           <TextBox
             variant="cell"
