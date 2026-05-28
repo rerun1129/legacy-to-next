@@ -38,7 +38,7 @@ public class UserPermissionPresetController {
     private final UserPermissionPresetWebAssembler assembler;
 
     @PostMapping("/search")
-    @PreAuthorize("hasAuthority('MENU_ADMIN_ACCESS_PERMISSION_PRESET')")
+    @PreAuthorize("hasAuthority('MENU_ADMIN_USER_LIST') or hasAuthority('MENU_ADMIN_ACCESS_PERMISSION_PRESET')")
     public ResponseEntity<ApiResponse<List<UserPermissionPresetResponse>>> search(
             @Valid @RequestBody SearchUserPermissionPresetRequest req) {
         List<UserPermissionPresetRow> rows = listUseCase.listUserPermissionPresets(req.userId());
@@ -47,7 +47,7 @@ public class UserPermissionPresetController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_UPDATE') or hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> assign(
             @Valid @RequestBody AssignUserPermissionPresetRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -58,7 +58,7 @@ public class UserPermissionPresetController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_UPDATE') or hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
     public ResponseEntity<ApiResponse<Void>> revoke(@PathVariable Long id) {
         revokeUseCase.revokeUserPermissionPreset(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.USER_PERMISSION_PRESET_REVOKED.getMessage()));

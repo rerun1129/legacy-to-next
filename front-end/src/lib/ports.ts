@@ -30,6 +30,7 @@ import { API_MENU_PORT } from '@/adapter/out/api/access/menu';
 import { API_BUTTON_PORT } from '@/adapter/out/api/access/button';
 import { API_SIDEBAR_MENU_PORT } from '@/adapter/out/api/access/sidebar-menu';
 import { API_PERMISSION_PRESET_PORT } from '@/adapter/out/api/access/permission-preset';
+import { apiUserPermissionPresetPort } from '@/adapter/out/api/access/user-permission-preset';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -62,3 +63,4 @@ export const accessMenuPort = API_MENU_PORT;
 export const accessButtonPort = API_BUTTON_PORT;
 export const sidebarMenuPort = API_SIDEBAR_MENU_PORT;
 export const permissionPresetPort = API_PERMISSION_PRESET_PORT;
+export const accessUserPermissionPresetPort = apiUserPermissionPresetPort;

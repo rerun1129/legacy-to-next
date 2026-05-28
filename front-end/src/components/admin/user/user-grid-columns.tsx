@@ -35,7 +35,8 @@ export const ACTIVE_OPTIONS = [
 export function buildUserColumns(
   register: UseFormRegister<FormValues>,
   control: Control<FormValues>,
-  moduleValueOptions: { value: string; label: string }[]
+  moduleValueOptions: { value: string; label: string }[],
+  onUsernameDoubleClick?: (entityId: number) => void,
 ): GridColumn<UserFormRow>[] {
   return [
     {
@@ -62,6 +63,7 @@ export function buildUserColumns(
             {...register(`rows.${i}.username`)}
             readOnly={!isNew}
             style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}
+            onDoubleClick={() => onUsernameDoubleClick?.(row.entityId)}
           />
         );
       },

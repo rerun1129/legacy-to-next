@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus, Minus, Save } from "lucide-react";
@@ -28,6 +28,7 @@ import {
   TO_UPDATE,
   toFormRow,
 } from "./user-list-helpers";
+import { UserPermissionPresetsSection } from "./user-permission-presets-section";
 
 
 const DEFAULT_FILTER: UserFilter = {
@@ -131,6 +132,13 @@ export function UserListClient() {
   }, [getValues, setValue]);
 
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
+  const [presetTargetUserId, setPresetTargetUserId] = useState<number | null>(null);
+
+  const handleUsernameDoubleClick = useCallback((entityId: number) => {
+    // 신규 행(entityId < 0)은 아직 저장되지 않았으므로 preset 노출 대상 제외
+    if (entityId < 0) return;
+    setPresetTargetUserId((prev) => (prev === entityId ? null : entityId));
+  }, []);
 
   const pendingFocusRef = useRef<number | null>(null);
 
@@ -199,8 +207,8 @@ export function UserListClient() {
   });
 
   const columns = useMemo(
-    () => buildUserColumns(register, control, moduleValueOptions),
-    [register, control, moduleValueOptions],
+    () => buildUserColumns(register, control, moduleValueOptions, handleUsernameDoubleClick),
+    [register, control, moduleValueOptions, handleUsernameDoubleClick],
   );
 
   const totalPages = data?.totalPages ?? 0;
@@ -293,6 +301,11 @@ export function UserListClient() {
           disabled={isFetching}
         />
       </div>
+
+      {presetTargetUserId !== null && (() => {
+        const userRow = data?.content.find((r) => r.id === presetTargetUserId);
+        return <UserPermissionPresetsSection userId={presetTargetUserId} username={userRow?.username} />;
+      })()}
     </>
   );
 }
