@@ -6,6 +6,7 @@ import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
+import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.DisabledException;
@@ -35,6 +36,7 @@ public class JpaUserDetailsService implements UserDetailsService {
     private final PolicyEvaluator policyEvaluator;
     private final MenuPolicyPort menuPolicyPort;
     private final ButtonPolicyPort buttonPolicyPort;
+    private final ComputeEffectiveAttributeValuesService effectiveAttributesService;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -44,7 +46,9 @@ public class JpaUserDetailsService implements UserDetailsService {
             throw new DisabledException("비활성 사용자: " + username);
         }
 
-        Map<String, List<String>> attrs = parseAttributes(entity.getAttributes());
+        // direct ∪ active preset attribute_value union
+        Map<String, List<String>> directAttrs = parseAttributes(entity.getAttributes());
+        Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(entity.getId(), directAttrs);
 
         List<MenuEvalRow> menuRows = menuPolicyPort.findAllActiveForEvaluation();
         List<ButtonEvalRow> buttonRows = buttonPolicyPort.findAllActiveForEvaluation();

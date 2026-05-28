@@ -9,6 +9,7 @@ import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
+import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
 import com.freightos.admin.application.user.port.in.UserUseCase;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.security.AccessibleButton;
@@ -41,6 +42,7 @@ public class AuthService implements AuthUseCase {
     private final PolicyEvaluator policyEvaluator;
     private final MenuPolicyPort menuPolicyPort;
     private final ButtonPolicyPort buttonPolicyPort;
+    private final ComputeEffectiveAttributeValuesService effectiveAttributesService;
 
     @Override
     @Transactional
@@ -58,7 +60,8 @@ public class AuthService implements AuthUseCase {
             throw new BadCredentialsException("비활성 사용자입니다.");
         }
 
-        Map<String, List<String>> attrs = user.getAttributes();
+        // direct ∪ active preset attribute_value union
+        Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
         Set<String> accessibleMenus = evaluateMenus(attrs);
         List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
         Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
@@ -90,7 +93,8 @@ public class AuthService implements AuthUseCase {
             throw new BadCredentialsException("비활성 사용자입니다.");
         }
 
-        Map<String, List<String>> attrs = user.getAttributes();
+        // direct ∪ active preset attribute_value union
+        Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
         Set<String> accessibleMenus = evaluateMenus(attrs);
         List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
         Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
@@ -118,7 +122,8 @@ public class AuthService implements AuthUseCase {
     @Override
     public MeProjection getMe(String username) {
         AdminUser user = userUseCase.findUserByUsername(username);
-        Map<String, List<String>> attrs = user.getAttributes();
+        // direct ∪ active preset attribute_value union
+        Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
         Set<String> accessibleMenus = evaluateMenus(attrs);
         List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환

@@ -1,5 +1,6 @@
 package com.freightos.admin.application.permissionpreset;
 
+import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
 import com.freightos.admin.application.permissionpreset.command.AssignAttributeValuesCommand;
 import com.freightos.admin.application.permissionpreset.command.CreatePermissionPresetCommand;
 import com.freightos.admin.application.permissionpreset.command.ListPermissionPresetCommand;
@@ -7,15 +8,18 @@ import com.freightos.admin.application.permissionpreset.command.UpdatePermission
 import com.freightos.admin.application.permissionpreset.port.in.AssignAttributeValuesToPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.CreatePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.DeletePermissionPresetUseCase;
+import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetDetailUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.GetPermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.ListPermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.in.UpdatePermissionPresetUseCase;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetAttributeValueRepository;
 import com.freightos.admin.application.permissionpreset.port.out.PermissionPresetRepository;
 import com.freightos.admin.application.permissionpreset.port.out.UserPermissionPresetRepository;
+import com.freightos.admin.application.permissionpreset.projection.PermissionPresetDetail;
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
+import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
 import com.freightos.admin.domain.permissionpreset.entity.PermissionPreset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,12 +35,14 @@ public class PermissionPresetApplicationService
                    UpdatePermissionPresetUseCase,
                    DeletePermissionPresetUseCase,
                    GetPermissionPresetUseCase,
+                   GetPermissionPresetDetailUseCase,
                    ListPermissionPresetUseCase,
                    AssignAttributeValuesToPresetUseCase {
 
     private final PermissionPresetRepository presetRepository;
     private final PermissionPresetAttributeValueRepository presetAttributeValueRepository;
     private final UserPermissionPresetRepository userPresetRepository;
+    private final AttributeValuePort attributeValuePort;
 
     @Override
     @Transactional
@@ -73,6 +79,17 @@ public class PermissionPresetApplicationService
     public PermissionPreset getPermissionPresetById(Long presetId) {
         return presetRepository.findPermissionPresetById(presetId)
                 .orElseThrow(() -> ApplicationException.notFound("PERMISSION_PRESET_NOT_FOUND", MessageCode.PERMISSION_PRESET_NOT_FOUND.getMessage()));
+    }
+
+    @Override
+    public PermissionPresetDetail getPermissionPresetDetail(Long presetId) {
+        PermissionPreset preset = getPermissionPresetById(presetId);
+        List<Long> avIds = preset.getAttributeValueIds();
+        List<AttributeValue> avs = avIds.isEmpty() ? List.of() : attributeValuePort.findAttributeValuesByIds(avIds);
+        List<PermissionPresetDetail.AttributeValueItem> items = avs.stream()
+                .map(av -> new PermissionPresetDetail.AttributeValueItem(av.getId(), av.getAttributeKey(), av.getValue(), av.getLabel()))
+                .toList();
+        return new PermissionPresetDetail(preset.getId(), preset.getCode(), preset.getName(), preset.getDescription(), preset.isActive(), avIds, items);
     }
 
     @Override

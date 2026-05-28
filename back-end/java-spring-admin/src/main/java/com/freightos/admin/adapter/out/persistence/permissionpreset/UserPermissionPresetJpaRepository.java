@@ -7,4 +7,5 @@ import java.util.List;
 public interface UserPermissionPresetJpaRepository extends JpaRepository<UserPermissionPresetJpaEntity, Long> {
     List<UserPermissionPresetJpaEntity> findAllByUserId(Long userId);
     long countByPresetId(Long presetId);
+    boolean existsByUserIdAndPresetId(Long userId, Long presetId);
 }

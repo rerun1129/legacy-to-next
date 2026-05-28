@@ -3,6 +3,7 @@ package com.freightos.admin.application.auth;
 import com.freightos.admin.application.auth.command.LoginCommand;
 import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
+import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
 import com.freightos.admin.common.security.AccessibleButton;
 import com.freightos.admin.common.security.ButtonEvalRow;
 import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
@@ -66,6 +67,9 @@ class AuthServiceTest {
     @Mock
     private ButtonPolicyPort buttonPolicyPort;
 
+    @Mock
+    private ComputeEffectiveAttributeValuesService effectiveAttributesService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -79,6 +83,7 @@ class AuthServiceTest {
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
         given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
+        given(effectiveAttributesService.computeEffectiveAttributes(1L, attrs)).willReturn(attrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of("ADMIN_CODE_LIST"));
@@ -153,6 +158,7 @@ class AuthServiceTest {
         given(refreshTokenPort.findActiveByTokenHash("oldHash")).willReturn(Optional.of(oldToken));
         willDoNothing().given(refreshTokenPort).revokeByTokenHash("oldHash");
         given(userUseCase.findUserById(1L)).willReturn(user);
+        given(effectiveAttributesService.computeEffectiveAttributes(1L, Collections.emptyMap())).willReturn(Collections.emptyMap());
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
@@ -202,6 +208,7 @@ class AuthServiceTest {
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
+        given(effectiveAttributesService.computeEffectiveAttributes(1L, attrs)).willReturn(attrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of(
             new ButtonEvalRow(1L, "ADMIN_USER_LIST_CREATE", "신규", List.of())

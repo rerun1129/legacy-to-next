@@ -134,9 +134,16 @@ public enum MessageCode {
     EXCHANGE_RATE_SAVE_CHANGES("환율 일괄 저장이 완료되었습니다."),
     CUSTOMER_SAVE_CHANGES("고객 일괄 저장이 완료되었습니다."),
     USER_SAVE_CHANGES("사용자 일괄 저장이 완료되었습니다."),
+    PERMISSION_PRESET_CREATED("권한 프리셋이 등록되었습니다."),
+    PERMISSION_PRESET_UPDATED("권한 프리셋이 수정되었습니다."),
+    PERMISSION_PRESET_DELETED("권한 프리셋이 삭제되었습니다."),
     PERMISSION_PRESET_NOT_FOUND("권한 프리셋을 찾을 수 없습니다."),
     PERMISSION_PRESET_CODE_DUPLICATE("동일한 프리셋 코드가 이미 존재합니다."),
-    PERMISSION_PRESET_IN_USE_CANNOT_DELETE("부여된 사용자가 존재하여 권한 프리셋을 삭제할 수 없습니다.");
+    PERMISSION_PRESET_IN_USE_CANNOT_DELETE("부여된 사용자가 존재하여 권한 프리셋을 삭제할 수 없습니다."),
+    USER_PERMISSION_PRESET_NOT_FOUND("사용자 프리셋 부여 내역을 찾을 수 없습니다."),
+    USER_PERMISSION_PRESET_ALREADY_ASSIGNED("이미 부여된 프리셋입니다."),
+    USER_PERMISSION_PRESET_ASSIGNED("프리셋이 사용자에게 부여되었습니다."),
+    USER_PERMISSION_PRESET_REVOKED("프리셋 부여가 해제되었습니다.");
 
     private final String message;
 
