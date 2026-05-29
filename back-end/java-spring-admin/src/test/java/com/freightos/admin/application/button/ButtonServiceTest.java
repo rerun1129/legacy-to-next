@@ -2,7 +2,6 @@ package com.freightos.admin.application.button;
 
 import com.freightos.admin.application.button.command.CreateButtonCommand;
 import com.freightos.admin.application.button.port.out.ButtonPort;
-import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menu.port.out.MenuPort;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.domain.button.entity.Button;
@@ -18,7 +17,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class ButtonServiceTest {
@@ -31,9 +29,6 @@ class ButtonServiceTest {
 
     @Mock
     private MenuPort menuPort;
-
-    @Mock
-    private ButtonPolicyPort buttonPolicyPort;
 
     @InjectMocks
     private ButtonService buttonService;
@@ -71,26 +66,6 @@ class ButtonServiceTest {
         Long id = buttonService.createButton(command);
 
         assertThat(id).isEqualTo(7L);
-    }
-
-    @Test
-    void deleteButtonById_hasPolicy_throwsConflict() {
-        given(buttonPort.existsById(3L)).willReturn(true);
-        given(buttonPolicyPort.existsByButtonId(3L)).willReturn(true);
-
-        assertThatThrownBy(() -> buttonService.deleteButtonById(3L))
-                .isInstanceOf(ApplicationException.class)
-                .satisfies(ex -> assertThat(((ApplicationException) ex).getStatus()).isEqualTo(HttpStatus.CONFLICT));
-    }
-
-    @Test
-    void deleteButtonById_noPolicy_callsDelete() {
-        given(buttonPort.existsById(3L)).willReturn(true);
-        given(buttonPolicyPort.existsByButtonId(3L)).willReturn(false);
-
-        buttonService.deleteButtonById(3L);
-
-        then(buttonPort).should().deleteButtonById(3L);
     }
 
     @Test

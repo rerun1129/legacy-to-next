@@ -1,16 +1,19 @@
 package com.freightos.admin.application.button;
 
 import com.freightos.admin.application.button.command.CreateButtonCommand;
+import com.freightos.admin.application.button.command.SaveButtonChangesCommand;
 import com.freightos.admin.application.button.command.SearchButtonCommand;
 import com.freightos.admin.application.button.command.UpdateButtonCommand;
 import com.freightos.admin.application.button.port.in.ButtonUseCase;
+import com.freightos.admin.application.button.port.in.SaveButtonChangesUseCase;
 import com.freightos.admin.application.button.port.out.ButtonPort;
 import com.freightos.admin.application.button.projection.ButtonSummary;
-import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menu.port.out.MenuPort;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.button.entity.ActionType;
 import com.freightos.admin.domain.button.entity.Button;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +25,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ButtonService implements ButtonUseCase {
+public class ButtonService implements ButtonUseCase, SaveButtonChangesUseCase {
 
     private final ButtonPort buttonPort;
     private final ButtonFactory buttonFactory;
     private final MenuPort menuPort;
-    private final ButtonPolicyPort buttonPolicyPort;
 
     @Override
     public PagedResult<ButtonSummary> searchButtons(SearchButtonCommand command) {
@@ -68,21 +70,18 @@ public class ButtonService implements ButtonUseCase {
 
     @Override
     @Transactional
-    public void deleteButtonsByIds(List<Long> ids) {
-        for (Long id : ids) {
-            deleteButtonById(id);
+    public SaveChangesResult saveButtonChanges(SaveButtonChangesCommand command) {
+        for (SaveButtonChangesCommand.UpdateButtonItem item : command.updates()) {
+            updateButton(item.id(), new UpdateButtonCommand(item.menuId(), item.label(), item.actionType(), item.apiMethod(), item.apiPath(), item.sortOrder(), item.active()));
         }
+        for (CreateButtonCommand create : command.creates()) {
+            createButton(create);
+        }
+        return new SaveChangesResult(command.creates().size(), command.updates().size(), 0);
     }
 
     @Override
-    @Transactional
-    public void deleteButtonById(Long buttonId) {
-        if (!buttonPort.existsById(buttonId)) {
-            throw ApplicationException.notFound("BUTTON_NOT_FOUND", MessageCode.BUTTON_NOT_FOUND.getMessage());
-        }
-        if (buttonPolicyPort.existsByButtonId(buttonId)) {
-            throw ApplicationException.conflict("BUTTON_HAS_POLICY_CANNOT_DELETE", MessageCode.BUTTON_HAS_POLICY_CANNOT_DELETE.getMessage());
-        }
-        buttonPort.deleteButtonById(buttonId);
+    public List<AutocompleteItem> autocompleteButtonCodes(String query, int limit) {
+        return buttonPort.autocompleteButtonCodes(query, limit);
     }
 }

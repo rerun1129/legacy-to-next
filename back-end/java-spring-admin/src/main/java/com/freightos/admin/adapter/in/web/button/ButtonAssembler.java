@@ -3,15 +3,19 @@ package com.freightos.admin.adapter.in.web.button;
 import com.freightos.admin.adapter.in.web.button.dto.ButtonDetailResponse;
 import com.freightos.admin.adapter.in.web.button.dto.ButtonSummaryResponse;
 import com.freightos.admin.adapter.in.web.button.dto.CreateButtonRequest;
+import com.freightos.admin.adapter.in.web.button.dto.SaveButtonChangesRequest;
 import com.freightos.admin.adapter.in.web.button.dto.SearchButtonRequest;
 import com.freightos.admin.adapter.in.web.button.dto.UpdateButtonRequest;
 import com.freightos.admin.application.button.command.CreateButtonCommand;
+import com.freightos.admin.application.button.command.SaveButtonChangesCommand;
 import com.freightos.admin.application.button.command.SearchButtonCommand;
 import com.freightos.admin.application.button.command.UpdateButtonCommand;
 import com.freightos.admin.application.button.projection.ButtonSummary;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.button.entity.Button;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ButtonAssembler {
@@ -27,6 +31,18 @@ public class ButtonAssembler {
 
     public UpdateButtonCommand toUpdateCommand(UpdateButtonRequest req) {
         return new UpdateButtonCommand(req.menuId(), req.label(), req.actionType(), req.apiMethod(), req.apiPath(), req.sortOrder(), req.active());
+    }
+
+    public SaveButtonChangesCommand toSaveChangesCommand(SaveButtonChangesRequest req) {
+        List<CreateButtonCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream()
+                        .map(c -> new CreateButtonCommand(c.buttonCode(), c.menuId(), c.label(), c.actionType(), c.apiMethod(), c.apiPath(), c.sortOrder(), c.active()))
+                        .toList();
+        List<SaveButtonChangesCommand.UpdateButtonItem> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveButtonChangesCommand.UpdateButtonItem(u.id(), u.menuId(), u.label(), u.actionType(), u.apiMethod(), u.apiPath(), u.sortOrder(), u.active()))
+                        .toList();
+        return new SaveButtonChangesCommand(creates, updates);
     }
 
     public ButtonSummaryResponse toSummaryResponse(ButtonSummary p) {

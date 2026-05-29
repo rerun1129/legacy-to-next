@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.out.persistence.button;
 
 import com.freightos.admin.application.button.command.SearchButtonCommand;
 import com.freightos.admin.application.button.projection.ButtonSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -49,6 +50,24 @@ public class ButtonRepositoryImpl implements ButtonRepositoryCustom {
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());
         return PagedResult.of(content, totalElements, totalPages, command.page(), command.size());
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteButtonCodes(String query, int limit) {
+        String sql = """
+                SELECT button_code, label FROM admin.button
+                WHERE active = true
+                  AND (button_code ILIKE '%' || :q || '%' OR label ILIKE '%' || :q || '%')
+                ORDER BY button_code
+                LIMIT :limit
+                """;
+        List<?> rows = em.createNativeQuery(sql)
+                .setParameter("q", query)
+                .setParameter("limit", limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1]); })
+                .toList();
     }
 
     private Predicate[] buildPredicates(CriteriaBuilder cb, Root<ButtonJpaEntity> root, SearchButtonCommand command) {

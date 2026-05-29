@@ -71,6 +71,7 @@ public enum MessageCode {
     BUTTON_DUPLICATE_CODE("동일한 버튼 코드가 이미 존재합니다."),
     BUTTON_HAS_POLICY_CANNOT_DELETE("버튼 정책이 존재하여 삭제할 수 없습니다."),
     BUTTON_MENU_NOT_FOUND("지정한 메뉴를 찾을 수 없습니다."),
+    BUTTON_SAVE_CHANGES("버튼 일괄 저장이 완료되었습니다."),
     MENU_POLICY_CREATED("메뉴 정책이 등록되었습니다."),
     MENU_POLICY_DELETED("메뉴 정책이 삭제되었습니다."),
     MENU_POLICY_NOT_FOUND("메뉴 정책을 찾을 수 없습니다."),

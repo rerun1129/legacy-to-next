@@ -4,12 +4,14 @@ import com.freightos.admin.application.button.command.SearchButtonCommand;
 import com.freightos.admin.application.button.port.out.ButtonPort;
 import com.freightos.admin.application.button.projection.ButtonSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.button.entity.Button;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -45,14 +47,6 @@ public class ButtonPersistenceAdapter implements ButtonPort {
     }
 
     @Override
-    public void deleteButtonById(Long buttonId) {
-        if (!buttonRepository.existsById(buttonId)) {
-            throw ApplicationException.notFound("BUTTON_NOT_FOUND", MessageCode.BUTTON_NOT_FOUND.getMessage());
-        }
-        buttonRepository.deleteById(buttonId);
-    }
-
-    @Override
     public boolean existsById(Long buttonId) {
         return buttonRepository.existsById(buttonId);
     }
@@ -65,5 +59,10 @@ public class ButtonPersistenceAdapter implements ButtonPort {
     @Override
     public boolean existsByMenuId(Long menuId) {
         return buttonRepository.existsByMenuId(menuId);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteButtonCodes(String query, int limit) {
+        return buttonRepository.autocompleteButtonCodes(query, limit);
     }
 }
