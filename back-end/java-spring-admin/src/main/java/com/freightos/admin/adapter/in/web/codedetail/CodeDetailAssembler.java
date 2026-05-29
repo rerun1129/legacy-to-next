@@ -34,7 +34,7 @@ public class CodeDetailAssembler {
     }
 
     public CodeDetailSummaryResponse toSummaryResponse(CodeDetailSummary p) {
-        return new CodeDetailSummaryResponse(p.id(), p.masterId(), p.codeValue(), p.codeLabel(), p.sortOrder(), p.active(), p.updatedAt());
+        return new CodeDetailSummaryResponse(p.id(), p.masterId(), p.codeValue(), p.codeLabel(), p.sortOrder(), p.active(), p.remark(), p.updatedAt());
     }
 
     public CodeDetailDetailResponse toDetail(CodeDetail domain) {

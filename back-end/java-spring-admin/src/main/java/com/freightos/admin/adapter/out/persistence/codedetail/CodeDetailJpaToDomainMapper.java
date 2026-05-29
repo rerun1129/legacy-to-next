@@ -14,6 +14,6 @@ public class CodeDetailJpaToDomainMapper {
     }
 
     public CodeDetailSummary toSummary(CodeDetailJpaEntity e) {
-        return new CodeDetailSummary(e.getId(), e.getMasterId(), e.getCodeValue(), e.getCodeLabel(), e.getSortOrder(), e.getActive(), e.getUpdatedAt());
+        return new CodeDetailSummary(e.getId(), e.getMasterId(), e.getCodeValue(), e.getCodeLabel(), e.getSortOrder(), e.getActive(), e.getRemark(), e.getUpdatedAt());
     }
 }

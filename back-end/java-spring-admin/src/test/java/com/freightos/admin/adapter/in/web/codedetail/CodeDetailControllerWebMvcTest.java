@@ -80,7 +80,7 @@ class CodeDetailControllerWebMvcTest {
     @WithMockUser(authorities = "MENU_ADMIN_CODE_LIST")
     void search_authenticated_returns200() throws Exception {
         CodeDetailSummaryResponse summaryResponse = new CodeDetailSummaryResponse(
-                10L, 1L, "ACTIVE", "활성", 1, true, LocalDateTime.of(2024, 1, 1, 0, 0));
+                10L, 1L, "ACTIVE", "활성", 1, true, null, LocalDateTime.of(2024, 1, 1, 0, 0));
         PagedResult<CodeDetailSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<CodeDetailSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
 

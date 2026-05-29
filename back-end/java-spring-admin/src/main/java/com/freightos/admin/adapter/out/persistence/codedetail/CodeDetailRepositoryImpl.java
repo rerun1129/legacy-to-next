@@ -51,7 +51,7 @@ public class CodeDetailRepositoryImpl implements CodeDetailRepositoryCustom {
         typedQuery.setMaxResults(command.size());
 
         List<CodeDetailSummary> content = typedQuery.getResultList().stream()
-                .map(e -> new CodeDetailSummary(e.getId(), e.getMasterId(), e.getCodeValue(), e.getCodeLabel(), e.getSortOrder(), e.getActive(), e.getUpdatedAt()))
+                .map(e -> new CodeDetailSummary(e.getId(), e.getMasterId(), e.getCodeValue(), e.getCodeLabel(), e.getSortOrder(), e.getActive(), e.getRemark(), e.getUpdatedAt()))
                 .toList();
 
         int totalPages = (int) Math.ceil((double) totalElements / command.size());

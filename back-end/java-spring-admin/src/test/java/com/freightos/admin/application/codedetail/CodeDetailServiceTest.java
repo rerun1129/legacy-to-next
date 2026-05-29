@@ -117,7 +117,7 @@ class CodeDetailServiceTest {
     @Test
     void searchCodeDetails_byMaster_returnsSummaries() {
         SearchCodeDetailCommand command = new SearchCodeDetailCommand(1L, null, null, null, 0, 20);
-        CodeDetailSummary summary = new CodeDetailSummary(10L, 1L, "ACTIVE", "활성", 1, true, LocalDateTime.of(2024, 1, 1, 0, 0));
+        CodeDetailSummary summary = new CodeDetailSummary(10L, 1L, "ACTIVE", "활성", 1, true, null, LocalDateTime.of(2024, 1, 1, 0, 0));
         PagedResult<CodeDetailSummary> page = PagedResult.of(List.of(summary), 1L, 1, 0, 20);
         given(codeDetailPort.searchSummaries(command)).willReturn(page);
 

@@ -9,5 +9,6 @@ public record CodeDetailSummary(
         String codeLabel,
         Integer sortOrder,
         boolean active,
+        String remark,
         LocalDateTime updatedAt
 ) {}
