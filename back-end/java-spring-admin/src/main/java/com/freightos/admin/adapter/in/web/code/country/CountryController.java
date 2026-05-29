@@ -62,7 +62,7 @@ public class CountryController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCountryRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class CountryController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCountryRequest req) {
@@ -82,21 +82,21 @@ public class CountryController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         countryUseCase.deleteCountry(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.COUNTRY_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         countryUseCase.deleteCountries(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.COUNTRY_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_COUNTRY_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCountryChangesRequest req) {
         SaveChangesResult result = countryUseCase.saveCountryChanges(countryAssembler.toSaveChangesCommand(req));

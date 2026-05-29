@@ -62,7 +62,7 @@ public class PackageUnitController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreatePackageUnitRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class PackageUnitController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePackageUnitRequest req) {
@@ -82,21 +82,21 @@ public class PackageUnitController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         packageUnitUseCase.deletePackageUnit(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PACKAGE_UNIT_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         packageUnitUseCase.deletePackageUnits(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PACKAGE_UNIT_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PACKAGE_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SavePackageUnitChangesRequest req) {
         SaveChangesResult result = packageUnitUseCase.savePackageUnitChanges(packageUnitAssembler.toSaveChangesCommand(req));

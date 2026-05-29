@@ -62,7 +62,7 @@ public class FreightController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateFreightRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class FreightController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateFreightRequest req) {
@@ -82,21 +82,21 @@ public class FreightController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         freightUseCase.deleteFreight(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.FREIGHT_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         freightUseCase.deleteFreights(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.FREIGHT_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_FREIGHT_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveFreightChangesRequest req) {
         SaveChangesResult result = freightUseCase.saveFreightChanges(freightAssembler.toSaveChangesCommand(req));

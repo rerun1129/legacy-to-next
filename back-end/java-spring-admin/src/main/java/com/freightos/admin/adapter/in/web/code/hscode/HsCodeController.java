@@ -62,7 +62,7 @@ public class HsCodeController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateHsCodeRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class HsCodeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateHsCodeRequest req) {
@@ -82,21 +82,21 @@ public class HsCodeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         hsCodeUseCase.deleteHsCode(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.HS_CODE_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         hsCodeUseCase.deleteHsCodes(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.HS_CODE_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_HSCODE_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveHsCodeChangesRequest req) {
         SaveChangesResult result = hsCodeUseCase.saveHsCodeChanges(hsCodeAssembler.toSaveChangesCommand(req));

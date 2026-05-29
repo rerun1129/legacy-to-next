@@ -62,7 +62,7 @@ public class CurrencyController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCurrencyRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class CurrencyController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCurrencyRequest req) {
@@ -82,21 +82,21 @@ public class CurrencyController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         currencyUseCase.deleteCurrency(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CURRENCY_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         currencyUseCase.deleteCurrencies(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CURRENCY_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CURRENCY_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCurrencyChangesRequest req) {
         SaveChangesResult result = currencyUseCase.saveCurrencyChanges(currencyAssembler.toSaveChangesCommand(req));

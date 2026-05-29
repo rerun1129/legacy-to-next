@@ -62,7 +62,7 @@ public class CarrierController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCarrierRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class CarrierController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCarrierRequest req) {
@@ -82,21 +82,21 @@ public class CarrierController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         carrierUseCase.deleteCarrier(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CARRIER_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         carrierUseCase.deleteCarriers(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CARRIER_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_CARRIER_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCarrierChangesRequest req) {
         SaveChangesResult result = carrierUseCase.saveCarrierChanges(carrierAssembler.toSaveChangesCommand(req));

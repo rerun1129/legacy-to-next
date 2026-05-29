@@ -242,15 +242,13 @@ export function CarrierListClient() {
           }
           icon={<Search size={12} style={{ marginRight: 4 }} />}
         />
-        <Button
-          variant="transaction"
-          size="sm"
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_CARRIER_SAVE"
+          className="btn btn--transaction btn--sm"
           disabled={!isDirty || saveChangesMutation.isPending}
           onClick={() => saveChangesMutation.mutate()}
-        >
-          <Save size={12} style={{ marginRight: 4 }} />
-          Save
-        </Button>
+          icon={<Save size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
 
       <CarrierListFilter form={filterForm} />

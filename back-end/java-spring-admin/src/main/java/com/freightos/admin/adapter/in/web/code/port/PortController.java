@@ -62,7 +62,7 @@ public class PortController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreatePortRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class PortController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePortRequest req) {
@@ -82,21 +82,21 @@ public class PortController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         portUseCase.deletePort(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PORT_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         portUseCase.deletePorts(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PORT_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_PORT_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SavePortChangesRequest req) {
         SaveChangesResult result = portUseCase.savePortChanges(portAssembler.toSaveChangesCommand(req));

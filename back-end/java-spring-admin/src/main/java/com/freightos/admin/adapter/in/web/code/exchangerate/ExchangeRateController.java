@@ -62,7 +62,7 @@ public class ExchangeRateController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateExchangeRateRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class ExchangeRateController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateExchangeRateRequest req) {
@@ -82,21 +82,21 @@ public class ExchangeRateController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         exchangeRateUseCase.deleteExchangeRate(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.EXCHANGE_RATE_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         exchangeRateUseCase.deleteExchangeRates(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.EXCHANGE_RATE_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_EXCHANGE_RATE_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveExchangeRateChangesRequest req) {
         SaveChangesResult result = exchangeRateUseCase.saveExchangeRateChanges(exchangeRateAssembler.toSaveChangesCommand(req));
