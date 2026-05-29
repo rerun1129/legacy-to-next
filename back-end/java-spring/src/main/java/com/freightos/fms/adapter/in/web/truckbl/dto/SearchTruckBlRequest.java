@@ -9,7 +9,6 @@ public record SearchTruckBlRequest(
     String etdFrom,
     String etdTo,
     String truckerCode,
-    String docPartnerCode,
     String partyCode,
     String portCode,
     String operatorCode,
@@ -18,5 +17,7 @@ public record SearchTruckBlRequest(
     @NotNull @Min(1) Integer size,
     String dateKind,
     String partyKind,
-    String portKind
+    String portKind,
+    String partnerKind,
+    String partnerCode
 ) {}

@@ -31,12 +31,14 @@ public class TruckBlAssembler {
                 req.bound(),
                 req.truckBlNo(),
                 req.etdFrom(), req.etdTo(),
-                req.truckerCode(), req.docPartnerCode(),
+                req.truckerCode(),
                 req.partyCode(), req.portCode(),
                 req.operatorCode(), req.teamCode(),
                 req.dateKind(),
                 req.partyKind(),
-                req.portKind()
+                req.portKind(),
+                req.partnerKind(),
+                req.partnerCode()
         );
     }
 

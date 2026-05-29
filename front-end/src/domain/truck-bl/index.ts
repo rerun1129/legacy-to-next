@@ -213,8 +213,9 @@ export interface TruckBlFilter {
   partyName: string;
   portCode: string;
   portName: string;
-  docPartnerCode: string;
-  docPartnerName: string;
+  partnerKind: string | null;
+  partnerCode: string;
+  partnerName: string;
   operatorCode: string;
   operatorName: string;
   teamCode: string;
@@ -222,6 +223,6 @@ export interface TruckBlFilter {
   page?: number;
   size?: number;
   dateKind?: 'ETD' | 'ETA';
-  partyKind?: 'SHIPPER' | 'CONSIGNEE' | 'NOTIFY' | 'SETTLE_PARTNER';
+  partyKind?: 'SHIPPER' | 'CONSIGNEE' | 'NOTIFY';
   portKind?: 'POL' | 'POD';
 }

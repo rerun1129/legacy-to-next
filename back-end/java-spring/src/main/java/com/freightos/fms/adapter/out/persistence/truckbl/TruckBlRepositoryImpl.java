@@ -8,6 +8,7 @@ import com.freightos.fms.domain.housebl.enums.DateKind;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.housebl.enums.PartyKind;
 import com.freightos.fms.domain.housebl.enums.PortKind;
+import com.freightos.fms.domain.truckbl.PartnerKind;
 import com.freightos.fms.domain.truckbl.TruckBlFilter;
 import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 import com.querydsl.core.types.Projections;
@@ -61,12 +62,12 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
                 Nullables.mapOrNull(filter.bound(), t -> h.bound.eq(t)),
                 containsIgnoreCase(h.hblNo, filter.hblNo()),
                 containsIgnoreCase(truck.truckerCode, filter.truckerCode()),
-                containsIgnoreCase(h.docPartnerCode, filter.docPartnerCode()),
                 dateBetween(h, filter.dateKind(), filter.etdFrom(), filter.etdTo()),
                 eqString(h.operatorCode, filter.operatorCode()),
                 eqString(h.teamCode, filter.teamCode()),
-                eqParty(h, filter.partyCode(), filter.partyKind()),
-                eqPort(h, filter.portCode(), filter.portKind())
+                eqParty(h, filter),
+                eqPort(h, filter.portCode(), filter.portKind()),
+                eqPartner(h, filter)
             )
             .orderBy(h.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -83,12 +84,12 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
                 Nullables.mapOrNull(filter.bound(), t -> h.bound.eq(t)),
                 containsIgnoreCase(h.hblNo, filter.hblNo()),
                 containsIgnoreCase(truck.truckerCode, filter.truckerCode()),
-                containsIgnoreCase(h.docPartnerCode, filter.docPartnerCode()),
                 dateBetween(h, filter.dateKind(), filter.etdFrom(), filter.etdTo()),
                 eqString(h.operatorCode, filter.operatorCode()),
                 eqString(h.teamCode, filter.teamCode()),
-                eqParty(h, filter.partyCode(), filter.partyKind()),
-                eqPort(h, filter.portCode(), filter.portKind())
+                eqParty(h, filter),
+                eqPort(h, filter.portCode(), filter.portKind()),
+                eqPartner(h, filter)
             )
             .fetchOne();
 
@@ -115,8 +116,9 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
         return e;
     }
 
-    private static BooleanExpression eqParty(
-            QHouseBlJpaEntity h, String code, PartyKind kind) {
+    private static BooleanExpression eqParty(QHouseBlJpaEntity h, TruckBlFilter filter) {
+        String code = filter.partyCode();
+        PartyKind kind = filter.partyKind();
         if (!StringUtils.hasText(code)) return null;
         if (kind == null) {
             return h.shipperCode.eq(code).or(h.consigneeCode.eq(code)).or(h.notifyCode.eq(code));
@@ -125,7 +127,36 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
             case SHIPPER        -> h.shipperCode;
             case CONSIGNEE      -> h.consigneeCode;
             case NOTIFY         -> h.notifyCode;
+            // SETTLE_PARTNER은 Truck FE에서 전송하지 않으나 enum 망라를 위해 유지
             case SETTLE_PARTNER -> h.settlePartnerCode;
+        };
+        return col.eq(code);
+    }
+
+    // Settle/Doc Partner 라벨 드롭 (kind=null이면 두 컬럼 OR)
+    private static BooleanExpression eqPartner(QHouseBlJpaEntity h, TruckBlFilter filter) {
+        String code = filter.partnerCode();
+        PartnerKind kind = filter.partnerKind();
+        if (!StringUtils.hasText(code)) return null;
+        if (kind == null) {
+            return h.settlePartnerCode.eq(code).or(h.docPartnerCode.eq(code));
+        }
+        StringPath col = switch (kind) {
+            case SETTLE_PARTNER -> h.settlePartnerCode;
+            case DOC_PARTNER    -> h.docPartnerCode;
+        };
+        return col.eq(code);
+    }
+
+    private static BooleanExpression eqPort(
+            QHouseBlJpaEntity h, String code, PortKind kind) {
+        if (!StringUtils.hasText(code)) return null;
+        if (kind == null) {
+            return h.polCode.eq(code).or(h.podCode.eq(code));
+        }
+        StringPath col = switch (kind) {
+            case POL -> h.polCode;
+            case POD -> h.podCode;
         };
         return col.eq(code);
     }
@@ -140,18 +171,5 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
                 .orderBy(h.createdAt.desc())
                 .limit(2)
                 .fetch();
-    }
-
-    private static BooleanExpression eqPort(
-            QHouseBlJpaEntity h, String code, PortKind kind) {
-        if (!StringUtils.hasText(code)) return null;
-        if (kind == null) {
-            return h.polCode.eq(code).or(h.podCode.eq(code));
-        }
-        StringPath col = switch (kind) {
-            case POL -> h.polCode;
-            case POD -> h.podCode;
-        };
-        return col.eq(code);
     }
 }

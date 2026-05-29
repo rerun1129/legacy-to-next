@@ -15,14 +15,15 @@ public record TruckBlFilter(
     String etdFrom,
     String etdTo,
     String truckerCode,
-    String docPartnerCode,
     String partyCode,
     String portCode,
     String operatorCode,
     String teamCode,
     DateKind dateKind,
     PartyKind partyKind,
-    PortKind portKind
+    PortKind portKind,
+    PartnerKind partnerKind,
+    String partnerCode
 ) {
     public static TruckBlFilter of(
             Bound bound,
@@ -30,23 +31,24 @@ public record TruckBlFilter(
             String etdFrom,
             String etdTo,
             String truckerCode,
-            String docPartnerCode,
             String partyCode,
+            String partnerCode,
             String portCode,
             String operatorCode,
             String teamCode) {
         return new TruckBlFilter(bound, hblNo, etdFrom, etdTo, truckerCode,
-                docPartnerCode, partyCode, portCode, operatorCode, teamCode,
-                null, null, null);
+                partyCode, portCode, operatorCode, teamCode,
+                null, null, null, null, partnerCode);
     }
 
-    public TruckBlFilter withKinds(DateKind dateKind, PartyKind partyKind, PortKind portKind) {
+    public TruckBlFilter withKinds(DateKind dateKind, PartyKind partyKind, PortKind portKind, PartnerKind partnerKind) {
         return new TruckBlFilter(
                 this.bound(), this.hblNo(),
                 this.etdFrom(), this.etdTo(),
-                this.truckerCode(), this.docPartnerCode(),
+                this.truckerCode(),
                 this.partyCode(), this.portCode(),
                 this.operatorCode(), this.teamCode(),
-                dateKind, partyKind, portKind);
+                dateKind, partyKind, portKind,
+                partnerKind, this.partnerCode());
     }
 }

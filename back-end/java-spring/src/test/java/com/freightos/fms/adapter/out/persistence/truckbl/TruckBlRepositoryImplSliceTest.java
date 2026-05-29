@@ -6,6 +6,7 @@ import com.freightos.common.config.QueryDslConfig;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.domain.truckbl.PartnerKind;
 import com.freightos.fms.domain.truckbl.TruckBlFilter;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
@@ -36,7 +37,7 @@ class TruckBlRepositoryImplSliceTest {
     @Autowired
     private TestEntityManager em;
 
-    // ── 헬퍼 메서드 ──────────────────────────────────────────���───
+    // ── 헬퍼 메서드 ─────────────────────────────────────────────────
 
     private HouseBlJpaEntity persistHouseBl(JobDiv jobDiv, Bound bound) {
         HouseBlJpaEntity jpa = new HouseBlJpaEntity();
@@ -73,7 +74,37 @@ class TruckBlRepositoryImplSliceTest {
         return house;
     }
 
-    // ── 테스트 케이스 ─────────────────────────────��───────────────
+    /**
+     * partner 토글 테스트 전용 헬퍼.
+     * settlePartnerCode / docPartnerCode 를 독립적으로 지정할 수 있다.
+     */
+    private HouseBlJpaEntity persistTruckBlWithPartners(
+            String hblNo, String settlePartnerCode, String docPartnerCode) {
+        HouseBlJpaEntity house = new HouseBlJpaEntity();
+        house.setJobDiv(JobDiv.TRUCK);
+        house.setBound(Bound.EXP);
+        house.setHblNo(hblNo);
+        house.setSettlePartnerCode(settlePartnerCode);
+        house.setDocPartnerCode(docPartnerCode);
+        em.persist(house);
+
+        HouseBlTruckJpaEntity truck = new HouseBlTruckJpaEntity();
+        truck.setHouseBl(house);
+        em.persist(truck);
+
+        return house;
+    }
+
+    /** TruckBlFilter.of() 파라미터 순서: bound, hblNo, etdFrom, etdTo, truckerCode, partyCode, partnerCode, portCode, operatorCode, teamCode */
+    private static TruckBlFilter filterWith(Bound bound, String hblNo) {
+        return TruckBlFilter.of(bound, hblNo, null, null, null, null, null, null, null, null);
+    }
+
+    private static TruckBlFilter filterWithBoundOnly(Bound bound) {
+        return TruckBlFilter.of(bound, null, null, null, null, null, null, null, null, null);
+    }
+
+    // ── 테스트 케이스 ─────────────────────────────────────────────────
 
     @Test
     @DisplayName("searchTruckBlSummaries: jobDiv=TRUCK row만 반환되고 SEA/AIR는 제외된다")
@@ -84,7 +115,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBlWithTruckExt(Bound.EXP, "TRUCK-002", "TRUCKER02");
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = filterWithBoundOnly(Bound.EXP);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(2);
@@ -97,7 +128,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBlWithTruckExt(Bound.EXP, "TRUCK-FULL", "TRUCKER-X");
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(null, "TRUCK-FULL", null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = filterWith(null, "TRUCK-FULL");
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -124,7 +155,7 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBl(JobDiv.TRUCK, Bound.EXP);
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = filterWithBoundOnly(Bound.EXP);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -134,7 +165,7 @@ class TruckBlRepositoryImplSliceTest {
     @Test
     @DisplayName("searchTruckBlSummaries: 매칭 0건 → 빈 리스트(null 아님)")
     void searchTruckBlSummaries_zeroMatches_returnsEmptyPagedResult() {
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, "NONEXISTENT", null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = filterWith(Bound.EXP, "NONEXISTENT");
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).isNotNull().isEmpty();
@@ -148,10 +179,66 @@ class TruckBlRepositoryImplSliceTest {
         persistHouseBlWithTruckExt(Bound.IMP, "TRUCK-IMP", "TRUCKER-IMP");
         em.flush();
 
-        TruckBlFilter filter = TruckBlFilter.of(Bound.EXP, null, null, null, null, null, null, null, null, null);
+        TruckBlFilter filter = filterWithBoundOnly(Bound.EXP);
         PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).bound()).isEqualTo("EXP");
+    }
+
+    // ── partner 토글 커버리지 ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("eqPartner: partnerKind=SETTLE_PARTNER + partnerCode → settlePartnerCode 매칭 row만 반환된다")
+    void eqPartner_settlePartnerKind_matchesSettlePartnerCodeOnly() {
+        persistTruckBlWithPartners("SETTLE-MATCH", "SP001", "DP999");
+        persistTruckBlWithPartners("DOC-ONLY",     "SP999", "SP001");
+        em.flush();
+
+        // partnerKind=SETTLE_PARTNER, partnerCode=SP001 → SETTLE-MATCH만
+        TruckBlFilter filter = new TruckBlFilter(
+                null, null, null, null, null, null, null, null, null,
+                null, null, null, PartnerKind.SETTLE_PARTNER, "SP001");
+        PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).hblNo()).isEqualTo("SETTLE-MATCH");
+    }
+
+    @Test
+    @DisplayName("eqPartner: partnerKind=DOC_PARTNER + partnerCode → docPartnerCode 매칭 row만 반환된다")
+    void eqPartner_docPartnerKind_matchesDocPartnerCodeOnly() {
+        persistTruckBlWithPartners("DOC-MATCH",    "SP999", "DP001");
+        persistTruckBlWithPartners("SETTLE-ONLY",  "DP001", "DP999");
+        em.flush();
+
+        // partnerKind=DOC_PARTNER, partnerCode=DP001 → DOC-MATCH만
+        TruckBlFilter filter = new TruckBlFilter(
+                null, null, null, null, null, null, null, null, null,
+                null, null, null, PartnerKind.DOC_PARTNER, "DP001");
+        PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).hblNo()).isEqualTo("DOC-MATCH");
+    }
+
+    @Test
+    @DisplayName("eqPartner: partnerKind=null + partnerCode → settlePartnerCode OR docPartnerCode 둘 다 매칭된다")
+    void eqPartner_nullKind_matchesEitherSettleOrDocPartnerCode() {
+        persistTruckBlWithPartners("SETTLE-HIT",  "COM001", "OTHER1");
+        persistTruckBlWithPartners("DOC-HIT",     "OTHER2", "COM001");
+        persistTruckBlWithPartners("NO-HIT",      "OTHER3", "OTHER4");
+        em.flush();
+
+        // partnerKind=null, partnerCode=COM001 → SETTLE-HIT + DOC-HIT 두 건
+        TruckBlFilter filter = new TruckBlFilter(
+                null, null, null, null, null, null, null, null, null,
+                null, null, null, null, "COM001");
+        PagedResult<TruckBlSummary> result = truckBlRepositoryCustom.searchTruckBlSummaries(filter, PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent())
+                .extracting(TruckBlSummary::hblNo)
+                .containsExactlyInAnyOrder("SETTLE-HIT", "DOC-HIT");
     }
 }

@@ -33,7 +33,7 @@ const DEFAULT_VALUES: TruckBlFilter = {
   truckerCode: '', truckerName: '',
   partyCode: '', partyName: '',
   portCode: '', portName: '',
-  docPartnerCode: '', docPartnerName: '',
+  partnerKind: null, partnerCode: '', partnerName: '',
   operatorCode: '', operatorName: '',
   teamCode: '', teamName: '',
   dateKind: 'ETD',
