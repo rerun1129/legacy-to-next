@@ -1,8 +1,9 @@
 import type {
   ButtonRow,
   ButtonDetail,
-  CreateButtonDto,
-  UpdateButtonDto,
+  SaveButtonChangesRequest,
+  SaveChangesResult,
+  ButtonAutocompleteItem,
 } from "@/domain/access/button";
 
 export interface ButtonPageResult {
@@ -16,8 +17,6 @@ export interface ButtonPageResult {
 export interface ButtonPort {
   search(page: number, size?: number): Promise<ButtonPageResult>;
   getById(id: number): Promise<ButtonDetail>;
-  create(req: CreateButtonDto): Promise<number>;
-  update(id: number, req: UpdateButtonDto): Promise<void>;
-  delete(id: number): Promise<void>;
-  deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveButtonChangesRequest): Promise<SaveChangesResult>;
+  autocomplete(query: string): Promise<ButtonAutocompleteItem[]>;
 }

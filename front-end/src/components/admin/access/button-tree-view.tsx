@@ -1,148 +1,160 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
-import { ActionButton } from "@/components/admin/access/action-button";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import { Plus, Minus, ChevronDown, ChevronRight } from "lucide-react";
+import { Button } from "@/components/shared/button";
+import type { UseFormRegister, Control } from "react-hook-form";
 import type { MenuRow } from "@/domain/access/menu";
-import type { ButtonRow } from "@/domain/access/button";
+import { ButtonRowCells } from "./button-grid-columns";
+import type { ButtonFormRow, ButtonFormValues } from "./button-list-helpers";
+import { ButtonTreeHeader } from "./button-tree-header";
 
-interface TreeNode { row: MenuRow; children: TreeNode[]; }
+// ─── 메뉴 트리 빌더 ──────────────────────────────────────────────────────────
 
-function buildTree(items: MenuRow[]): TreeNode[] {
-  const nodeMap = new Map<number, TreeNode>();
-  items.forEach(row => nodeMap.set(row.id, { row, children: [] }));
-  const roots: TreeNode[] = [];
-  items.forEach(row => {
+interface MenuTreeNode {
+  row: MenuRow;
+  children: MenuTreeNode[];
+}
+
+function buildMenuTree(items: MenuRow[]): MenuTreeNode[] {
+  const nodeMap = new Map<number, MenuTreeNode>();
+  items.forEach((row) => nodeMap.set(row.id, { row, children: [] }));
+
+  const roots: MenuTreeNode[] = [];
+  items.forEach((row) => {
     const node = nodeMap.get(row.id)!;
-    if (row.parentId === null) { roots.push(node); return; }
-    const parent = nodeMap.get(row.parentId);
-    if (parent) parent.children.push(node); else roots.push(node);
+    if (row.parentId === null) {
+      roots.push(node);
+    } else {
+      const parent = nodeMap.get(row.parentId);
+      if (parent) parent.children.push(node);
+      else roots.push(node);
+    }
   });
-  const bySortOrder = (a: TreeNode, b: TreeNode) => (a.row.sortOrder ?? 0) - (b.row.sortOrder ?? 0);
+
+  const bySortOrder = (a: MenuTreeNode, b: MenuTreeNode) =>
+    (a.row.sortOrder ?? 0) - (b.row.sortOrder ?? 0);
   roots.sort(bySortOrder);
-  nodeMap.forEach(n => n.children.sort(bySortOrder));
+  nodeMap.forEach((n) => n.children.sort(bySortOrder));
   return roots;
 }
 
-// 해당 메뉴 + 하위 메뉴들에 소속된 모든 버튼 id 수집
-function collectButtonIds(
-  menuId: number,
-  childMenuMap: Map<number, MenuRow[]>,
-  buttonsByMenu: Map<number, ButtonRow[]>
-): number[] {
-  const own = (buttonsByMenu.get(menuId) ?? []).map(b => b.id);
-  const childIds = (childMenuMap.get(menuId) ?? []).flatMap(c =>
-    collectButtonIds(c.id, childMenuMap, buttonsByMenu)
-  );
-  return [...own, ...childIds];
-}
+// ─── 메뉴 노드 행 (읽기전용 그룹 헤더) ───────────────────────────────────────
 
-const BADGE: Record<string, React.CSSProperties> = {
-  CREATE: { background: "var(--accent-2)", color: "var(--accent-9)" },
-  UPDATE: { background: "var(--blue-2)", color: "var(--blue-9)" },
-  DELETE: { background: "var(--red-2)", color: "var(--red-9)" },
-  EXPORT: { background: "var(--green-2)", color: "var(--green-9)" },
-  CUSTOM: { background: "var(--surface-3)", color: "var(--ink-2)" },
-};
-const BADGE_BASE: React.CSSProperties = { fontSize: 11, padding: "1px 5px", borderRadius: 3 };
-
-interface ButtonNodeProps {
-  btn: ButtonRow; level: number; selectedKeys: Set<number>;
-  onSelectionChange: (next: Set<number>) => void;
-  onEdit: (row: ButtonRow) => void;
-  onDelete: (id: number, label: string) => void;
-}
-
-function ButtonNode({ btn, level, selectedKeys, onSelectionChange, onEdit, onDelete }: ButtonNodeProps) {
-  const paddingLeft = 8 + level * 16 + 8;
-  const isSelected = selectedKeys.has(btn.id);
-  return (
-    <div
-      className={`tree-row${isSelected ? " tree-row--selected" : ""}`}
-      style={{ paddingLeft, background: isSelected ? undefined : "var(--surface-1)" }}
-    >
-      <input type="checkbox" className="chk" checked={isSelected}
-        onChange={() => {
-          const next = new Set(selectedKeys);
-          if (next.has(btn.id)) next.delete(btn.id); else next.add(btn.id);
-          onSelectionChange(next);
-        }}
-        onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0 }}
-      />
-      <span className="tree-row__leaf-indent" />
-      <span className="tree-row__code" style={{ fontSize: 12 }}>{btn.buttonCode}</span>
-      <span className="tree-row__label" style={{ fontSize: 12 }}>{btn.label}</span>
-      <span className="tree-row__badge" style={{ ...(BADGE[btn.actionType] ?? BADGE.CUSTOM), ...BADGE_BASE }}>
-        {btn.actionType}
-      </span>
-      <span className={`tree-row__badge--${btn.active ? "active" : "inactive"}`}>
-        {btn.active ? "활성" : "비활성"}
-      </span>
-      <div className="tree-row__actions" onClick={(e) => e.stopPropagation()}>
-        <ActionButton buttonCode="BTN_ADMIN_ACCESS_BUTTON_UPDATE" className="btn btn--sm" onClick={() => onEdit(btn)}>
-          <Pencil size={12} />
-        </ActionButton>
-        <ActionButton buttonCode="BTN_ADMIN_ACCESS_BUTTON_DELETE" className="btn btn--danger btn--sm" onClick={() => onDelete(btn.id, btn.label)}>
-          <Trash2 size={12} />
-        </ActionButton>
-      </div>
-    </div>
-  );
-}
-
-interface MenuNodeProps {
-  node: TreeNode; level: number;
-  expandedNodes: Set<number>; selectedKeys: Set<number>;
-  childMenuMap: Map<number, MenuRow[]>; buttonsByMenu: Map<number, ButtonRow[]>;
+interface MenuNodeRowProps {
+  node: MenuTreeNode;
+  level: number;
+  expandedNodes: Set<number>;
+  buttonsByMenuId: Map<number, ButtonFormRow[]>;
+  indexByEntityId: Map<number, number>;
+  register: UseFormRegister<ButtonFormValues>;
+  control: Control<ButtonFormValues>;
   onToggleNode: (id: number) => void;
-  onSelectionChange: (next: Set<number>) => void;
-  onEdit: (row: ButtonRow) => void;
-  onDelete: (id: number, label: string) => void;
+  onAddButton: (menuId: number, moduleCode: string) => void;
+  onRemoveNewRow: (entityId: number) => void;
 }
 
-function MenuNode({ node, level, expandedNodes, selectedKeys, childMenuMap, buttonsByMenu, onToggleNode, onSelectionChange, onEdit, onDelete }: MenuNodeProps) {
+function MenuNodeRow({
+  node,
+  level,
+  expandedNodes,
+  buttonsByMenuId,
+  indexByEntityId,
+  register,
+  control,
+  onToggleNode,
+  onAddButton,
+  onRemoveNewRow,
+}: MenuNodeRowProps) {
   const { row } = node;
   const isExpanded = expandedNodes.has(row.id);
-  const paddingLeft = 8 + level * 16;
-  const menuButtonIds = collectButtonIds(row.id, childMenuMap, buttonsByMenu);
-  const hasButtons = menuButtonIds.length > 0;
-  const isChecked = hasButtons && menuButtonIds.every(id => selectedKeys.has(id));
-  const isIndeterminate = !isChecked && menuButtonIds.some(id => selectedKeys.has(id));
-  const leafButtons = row.path !== null ? (buttonsByMenu.get(row.id) ?? []) : [];
+  const indentPx = level * 16;
+  const ownButtons = buttonsByMenuId.get(row.id) ?? [];
 
   return (
     <>
-      <div className="tree-row" style={{ paddingLeft, background: "var(--surface-2)" }}>
-        <input type="checkbox" className="chk" checked={isChecked}
-          ref={(el) => { if (el) el.indeterminate = isIndeterminate; }}
-          onChange={() => {
-            const next = new Set(selectedKeys);
-            if (isChecked) menuButtonIds.forEach(id => next.delete(id));
-            else menuButtonIds.forEach(id => next.add(id));
-            onSelectionChange(next);
-          }}
-          onClick={(e) => e.stopPropagation()} style={{ flexShrink: 0 }}
-        />
-        <button className="tree-row__toggle" onClick={() => onToggleNode(row.id)} aria-label={isExpanded ? "접기" : "펼치기"}>
+      {/* 메뉴 노드 헤더 행 (읽기전용) */}
+      <div
+        className="tree-row"
+        style={{
+          paddingLeft: 8 + indentPx,
+          background: "var(--surface-2)",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          minHeight: 32,
+        }}
+      >
+        {/* 체크박스 스페이서 — 버튼 행 체크박스 위치와 정렬 */}
+        <span style={{ display: "inline-block", width: 20, flexShrink: 0 }} />
+
+        {/* 토글 버튼 */}
+        <button
+          className="tree-row__toggle"
+          onClick={() => onToggleNode(row.id)}
+          aria-label={isExpanded ? "접기" : "펼치기"}
+          type="button"
+          style={{ flexShrink: 0 }}
+        >
           {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </button>
-        <span className="tree-row__code">{row.menuCode}</span>
-        <span className="tree-row__label">{row.label}</span>
+
+        {/* 메뉴 코드 + 라벨 (읽기전용) */}
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontWeight: 600,
+            fontSize: 12,
+            color: "var(--ink-2)",
+            marginRight: 8,
+          }}
+        >
+          {row.menuCode}
+        </span>
+        <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{row.label}</span>
+
+        {/* 이 메뉴 아래 버튼 추가 "+" */}
+        <div style={{ marginLeft: "auto" }} onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="success"
+            size="sm"
+            iconOnly
+            type="button"
+            onClick={() => onAddButton(row.id, row.moduleCode)}
+            aria-label={`${row.menuCode} 아래 버튼 추가`}
+          >
+            <Plus size={10} />
+          </Button>
+        </div>
       </div>
+
+      {/* 펼쳐진 경우: 자식 메뉴 노드 + 이 메뉴에 속한 버튼 행 */}
       {isExpanded && (
         <>
-          {node.children.map(child => (
-            <MenuNode key={child.row.id} node={child} level={level + 1}
-              expandedNodes={expandedNodes} selectedKeys={selectedKeys}
-              childMenuMap={childMenuMap} buttonsByMenu={buttonsByMenu}
-              onToggleNode={onToggleNode} onSelectionChange={onSelectionChange}
-              onEdit={onEdit} onDelete={onDelete}
+          {node.children.map((child) => (
+            <MenuNodeRow
+              key={child.row.id}
+              node={child}
+              level={level + 1}
+              expandedNodes={expandedNodes}
+              buttonsByMenuId={buttonsByMenuId}
+              indexByEntityId={indexByEntityId}
+              register={register}
+              control={control}
+              onToggleNode={onToggleNode}
+              onAddButton={onAddButton}
+              onRemoveNewRow={onRemoveNewRow}
             />
           ))}
-          {leafButtons.map(btn => (
-            <ButtonNode key={btn.id} btn={btn} level={level + 1}
-              selectedKeys={selectedKeys} onSelectionChange={onSelectionChange}
-              onEdit={onEdit} onDelete={onDelete}
+          {ownButtons.map((btnRow) => (
+            <ButtonLeafRow
+              key={btnRow.entityId}
+              row={btnRow}
+              level={level + 1}
+              indexByEntityId={indexByEntityId}
+              register={register}
+              control={control}
+              onRemoveNewRow={onRemoveNewRow}
             />
           ))}
         </>
@@ -151,80 +163,209 @@ function MenuNode({ node, level, expandedNodes, selectedKeys, childMenuMap, butt
   );
 }
 
-export interface ButtonTreeViewProps {
-  menus: MenuRow[]; buttons: ButtonRow[];
-  selectedKeys: Set<number>;
-  onSelectionChange: (next: Set<number>) => void;
-  onEdit: (row: ButtonRow) => void;
-  onDelete: (id: number, label: string) => void;
+// ─── 버튼 leaf 행 (인라인 편집 대상) ─────────────────────────────────────────
+
+interface ButtonLeafRowProps {
+  row: ButtonFormRow;
+  level: number;
+  indexByEntityId: Map<number, number>;
+  register: UseFormRegister<ButtonFormValues>;
+  control: Control<ButtonFormValues>;
+  onRemoveNewRow: (entityId: number) => void;
 }
 
-export function ButtonTreeView({ menus, buttons, selectedKeys, onSelectionChange, onEdit, onDelete }: ButtonTreeViewProps) {
-  const grouped = useMemo(() => {
-    const map = new Map<string, MenuRow[]>();
-    menus.forEach(row => { const list = map.get(row.moduleCode) ?? []; list.push(row); map.set(row.moduleCode, list); });
-    return map;
-  }, [menus]);
-
-  const childMenuMap = useMemo(() => {
-    const map = new Map<number, MenuRow[]>();
-    menus.forEach(row => {
-      if (row.parentId !== null) {
-        const list = map.get(row.parentId) ?? []; list.push(row); map.set(row.parentId, list);
-      }
-    });
-    return map;
-  }, [menus]);
-
-  const buttonsByMenu = useMemo(() => {
-    const map = new Map<number, ButtonRow[]>();
-    buttons.forEach(btn => { const list = map.get(btn.menuId) ?? []; list.push(btn); map.set(btn.menuId, list); });
-    return map;
-  }, [buttons]);
-
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(() => new Set(menus.map(r => r.moduleCode)));
-  const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
-
-  const treesByModule = useMemo(() => {
-    const result = new Map<string, TreeNode[]>();
-    grouped.forEach((items, code) => result.set(code, buildTree(items)));
-    return result;
-  }, [grouped]);
-
-  const moduleSorted = useMemo(() => [...grouped.keys()].sort(), [grouped]);
+function ButtonLeafRow({
+  row,
+  level,
+  indexByEntityId,
+  register,
+  control,
+  onRemoveNewRow,
+}: ButtonLeafRowProps) {
+  const isNew = row.entityId < 0;
+  const idx = indexByEntityId.get(row.entityId) ?? -1;
+  const indentPx = level * 16;
 
   return (
-    <div className="menu-tree">
-      {moduleSorted.map(moduleCode => {
-        const isModuleExpanded = expandedModules.has(moduleCode);
-        const roots = treesByModule.get(moduleCode);
-        if (!roots) return null;
-        return (
-          <div key={moduleCode} className="menu-tree__module">
-            <div className="menu-tree__module-header" onClick={() => setExpandedModules(prev => {
-              const next = new Set(prev);
-              if (next.has(moduleCode)) next.delete(moduleCode); else next.add(moduleCode);
-              return next;
-            })}>
-              {isModuleExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              <span>{moduleCode}</span>
-              <span className="menu-tree__module-count">{grouped.get(moduleCode)?.length ?? 0}</span>
-            </div>
-            {isModuleExpanded && roots.map(node => (
-              <MenuNode key={node.row.id} node={node} level={0}
-                expandedNodes={expandedNodes} selectedKeys={selectedKeys}
-                childMenuMap={childMenuMap} buttonsByMenu={buttonsByMenu}
-                onToggleNode={(id) => setExpandedNodes(prev => {
-                  const next = new Set(prev);
-                  if (next.has(id)) next.delete(id); else next.add(id);
-                  return next;
-                })}
-                onSelectionChange={onSelectionChange} onEdit={onEdit} onDelete={onDelete}
-              />
-            ))}
-          </div>
-        );
-      })}
+    <div
+      className={`tree-row${isNew ? " is-new" : ""}`}
+      style={{
+        paddingLeft: 8 + indentPx,
+        display: "flex",
+        alignItems: "center",
+        gap: 4,
+        minHeight: 32,
+      }}
+    >
+      {/* 체크박스 스페이서 — 현재 버튼 행은 체크박스 없음(개별 선택 불필요, active 콤보로 관리) */}
+      <span style={{ display: "inline-block", width: 20, flexShrink: 0 }} />
+
+      {/* leaf indent 스페이서 — 헤더 TOGGLE_W(20px)와 맞춤 */}
+      <span
+        className="tree-row__leaf-indent"
+        style={{ display: "inline-block", width: 20, flexShrink: 0 }}
+      />
+
+      {/* 셀 그룹 */}
+      {idx >= 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <ButtonRowCells row={row} idx={idx} register={register} control={control} />
+        </div>
+      )}
+
+      {/* 신규 행(entityId<0)에만 제거 버튼 */}
+      {isNew && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="danger"
+            size="sm"
+            iconOnly
+            type="button"
+            onClick={() => onRemoveNewRow(row.entityId)}
+          >
+            <Minus size={12} />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
+
+// ─── 공개 인터페이스 ──────────────────────────────────────────────────────────
+
+export interface ButtonTreeHandle {
+  expandAll(): void;
+  collapseAll(): void;
+}
+
+export interface ButtonTreeViewProps {
+  menus: MenuRow[];
+  rows: ButtonFormRow[];
+  indexByEntityId: Map<number, number>;
+  register: UseFormRegister<ButtonFormValues>;
+  control: Control<ButtonFormValues>;
+  onAddButton: (menuId: number, moduleCode: string) => void;
+  onRemoveNewRow: (entityId: number) => void;
+}
+
+export const ButtonTreeView = forwardRef<ButtonTreeHandle, ButtonTreeViewProps>(
+  function ButtonTreeView(
+    { menus, rows, indexByEntityId, register, control, onAddButton, onRemoveNewRow },
+    ref,
+  ) {
+    // 메뉴를 moduleCode로 그룹핑
+    const menusByModule = useMemo(() => {
+      const map = new Map<string, MenuRow[]>();
+      menus.forEach((menu) => {
+        const list = map.get(menu.moduleCode) ?? [];
+        list.push(menu);
+        map.set(menu.moduleCode, list);
+      });
+      return map;
+    }, [menus]);
+
+    // 버튼을 menuId로 인덱싱 (ButtonFormRow)
+    const buttonsByMenuId = useMemo(() => {
+      const map = new Map<number, ButtonFormRow[]>();
+      rows.forEach((row) => {
+        const list = map.get(row.menuId) ?? [];
+        list.push(row);
+        map.set(row.menuId, list);
+      });
+      return map;
+    }, [rows]);
+
+    // 메뉴 트리 by module
+    const treesByModule = useMemo(() => {
+      const result = new Map<string, MenuTreeNode[]>();
+      menusByModule.forEach((items, code) => {
+        result.set(code, buildMenuTree(items));
+      });
+      return result;
+    }, [menusByModule]);
+
+    const moduleSorted = useMemo(() => [...menusByModule.keys()].sort(), [menusByModule]);
+
+    const [expandedModules, setExpandedModules] = useState<Set<string>>(
+      () => new Set(menus.map((m) => m.moduleCode)),
+    );
+    const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
+
+    // expandAll: 모든 모듈 펼치기 + 모든 메뉴 노드 펼치기
+    // collapseAll: 모듈·노드 모두 접기
+    useImperativeHandle(
+      ref,
+      () => ({
+        expandAll() {
+          setExpandedModules(new Set(menus.map((m) => m.moduleCode)));
+          setExpandedNodes(new Set(menus.map((m) => m.id)));
+        },
+        collapseAll() {
+          setExpandedModules(new Set());
+          setExpandedNodes(new Set());
+        },
+      }),
+      [menus],
+    );
+
+    function toggleModule(code: string) {
+      setExpandedModules((prev) => {
+        const next = new Set(prev);
+        if (next.has(code)) next.delete(code);
+        else next.add(code);
+        return next;
+      });
+    }
+
+    function toggleNode(id: number) {
+      setExpandedNodes((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    }
+
+    return (
+      <div className="menu-tree">
+        <ButtonTreeHeader />
+        {moduleSorted.map((moduleCode) => {
+          const isModuleExpanded = expandedModules.has(moduleCode);
+          const tree = treesByModule.get(moduleCode);
+          if (!tree) return null;
+
+          return (
+            <div key={moduleCode} className="menu-tree__module">
+              <div
+                className="menu-tree__module-header"
+                onClick={() => toggleModule(moduleCode)}
+              >
+                {isModuleExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <span>{moduleCode}</span>
+                <span className="menu-tree__module-count">
+                  {menusByModule.get(moduleCode)?.length ?? 0}
+                </span>
+              </div>
+              {isModuleExpanded &&
+                tree.map((node) => (
+                  <MenuNodeRow
+                    key={node.row.id}
+                    node={node}
+                    level={0}
+                    expandedNodes={expandedNodes}
+                    buttonsByMenuId={buttonsByMenuId}
+                    indexByEntityId={indexByEntityId}
+                    register={register}
+                    control={control}
+                    onToggleNode={toggleNode}
+                    onAddButton={onAddButton}
+                    onRemoveNewRow={onRemoveNewRow}
+                  />
+                ))}
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
+);

@@ -19,9 +19,11 @@ export interface ButtonDetail extends ButtonRow {
   updatedBy: string | null;
 }
 
-export interface CreateButtonDto {
-  menuId: number;
+// save-changes DTOs (batch inline edit)
+
+export interface CreateButtonItem {
   buttonCode: string;
+  menuId: number;
   label: string;
   actionType: ButtonActionType;
   apiMethod: string | null;
@@ -30,7 +32,8 @@ export interface CreateButtonDto {
   active: boolean;
 }
 
-export interface UpdateButtonDto {
+export interface UpdateButtonItem {
+  id: number;
   menuId: number;
   label: string;
   actionType: ButtonActionType;
@@ -38,4 +41,21 @@ export interface UpdateButtonDto {
   apiPath: string | null;
   sortOrder: number | null;
   active: boolean;
+}
+
+export interface SaveButtonChangesRequest {
+  creates: CreateButtonItem[];
+  updates: UpdateButtonItem[];
+}
+
+// 공용 타입 — menu와 동일 구조
+export interface SaveChangesResult {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}
+
+export interface ButtonAutocompleteItem {
+  code: string;
+  name: string;
 }

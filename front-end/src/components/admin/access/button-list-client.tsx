@@ -1,79 +1,74 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/shared/button";
-import { ModalShell } from "@/components/shared/modal-shell";
-import { confirm } from "@/components/confirm";
-import { toast } from "@/lib/toast-store";
-import { accessButtonPort, accessMenuPort } from "@/lib/ports";
-import { ComboBox } from "@/components/shared/inputs/combo-box";
-import { accessButtonUseCases } from "@/application/access/button/use-cases";
+import { Save, Search, RotateCcw, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { ButtonTreeView } from "@/components/admin/access/button-tree-view";
-import type { CreateButtonDto, UpdateButtonDto, ButtonActionType, ButtonRow } from "@/domain/access/button";
+import { Button } from "@/components/shared/button";
+import { toast } from "@/lib/toast-store";
+import { collectGridChanges } from "@/lib/collect-grid-changes";
+import { accessButtonUseCases } from "@/application/access/button/use-cases";
+import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
+import { accessMenuPort } from "@/lib/ports";
+import type { SaveButtonChangesRequest } from "@/domain/access/button";
+import { ButtonTreeView, type ButtonTreeHandle } from "@/components/admin/access/button-tree-view";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
+import { listFilterStore } from "@/lib/use-list-filter-store";
+import {
+  DEFAULT_BUTTON_FILTER,
+  ButtonListFilter,
+  type ButtonFilter,
+} from "./button-list-filter";
+import {
+  ROW_IS_EQUAL,
+  TO_CREATE,
+  TO_UPDATE,
+  toFormRow,
+  type ButtonFormRow,
+  type ButtonFormValues,
+} from "./button-list-helpers";
+import { useButtonFilter } from "./use-button-filter";
 
-const ACTION_TYPES: ButtonActionType[] = ["CREATE", "UPDATE", "DELETE", "EXPORT", "CUSTOM"];
+const BUTTON_LIST_SCOPE = "/admin/access/button/list";
 
-const DEFAULT_FORM: CreateButtonDto = {
-  menuId: 0,
-  buttonCode: "",
-  label: "",
-  actionType: "CREATE",
-  apiMethod: null,
-  apiPath: null,
-  sortOrder: null,
-  active: true,
-};
-
-interface UpdateFormValues {
-  menuId: string;
-  label: string;
-  actionType: ButtonActionType;
-  apiMethod: string;
-  apiPath: string;
-  sortOrder: string;
-  active: boolean;
-}
-
-const DEFAULT_UPDATE: UpdateFormValues = {
-  menuId: "",
-  label: "",
-  actionType: "CREATE",
-  apiMethod: "",
-  apiPath: "",
-  sortOrder: "",
-  active: true,
-};
-
-function parseNullableStr(v: string): string | null {
-  return v.trim() === "" ? null : v.trim();
-}
-
-function parseNullableNum(v: string): number | null {
-  if (!v.trim()) return null;
-  const n = Number(v);
-  return isNaN(n) ? null : n;
-}
+// ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function AccessButtonListClient() {
   const qc = useQueryClient();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<ButtonRow | null>(null);
-  const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
-  const createForm = useForm<CreateButtonDto>({ defaultValues: DEFAULT_FORM });
-  const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
 
-  const { data, isFetching } = useQuery({
+  const filterForm = useForm<ButtonFilter>({ defaultValues: DEFAULT_BUTTON_FILTER });
+
+  // 필터 폼 입력값 복원/저장 — 메뉴 이동 후 복귀 시 유지
+  useListFilterSync(filterForm, BUTTON_LIST_SCOPE);
+
+  // activeFilter 영속: 복귀 시 store search 슬롯에서 복원
+  const [activeFilter, setActiveFilter] = useState<ButtonFilter | null>(
+    () =>
+      (listFilterStore.getState().getSearch(BUTTON_LIST_SCOPE)?.extraFilter as ButtonFilter | undefined) ??
+      null,
+  );
+
+  const { control, register, getValues, reset, formState: { isDirty } } =
+    useForm<ButtonFormValues>({ defaultValues: { rows: [] } });
+  const { fields, append, remove } = useFieldArray({ control, name: "rows" });
+
+  // expand/collapse 버튼용 ref
+  const treeRef = useRef<ButtonTreeHandle>(null);
+
+  // ─── 데이터 조회 ─────────────────────────────────────────────────────────
+
+  const { data: buttonData, isFetching } = useQuery({
     queryKey: ["access-button", "list"],
-    queryFn: () => accessButtonPort.search(1, 200),
+    queryFn: () => accessButtonUseCases.search(1, 200),
+    enabled: activeFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
+    structuralSharing: false,
   });
 
+  // 메뉴 데이터: 트리 구조용, 항상 fetch
   const { data: menuData } = useQuery({
     queryKey: ["access-menu", "list"],
     queryFn: () => accessMenuPort.search(1, 200),
@@ -81,188 +76,222 @@ export function AccessButtonListClient() {
     gcTime: Infinity,
     refetchOnMount: false,
   });
-  const menus = menuData?.content ?? [];
-  const menuOptions = menus.map(m => ({ value: String(m.id), label: m.menuCode }));
 
-  const createMutation = useMutation({
-    mutationFn: (req: CreateButtonDto) => accessButtonPort.create(req),
-    onSuccess: () => {
-      toast.success("버튼이 등록되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
-      setCreateOpen(false);
-      createForm.reset(DEFAULT_FORM);
-    },
+  const { data: moduleData } = useQuery({
+    queryKey: ["admin-access-attribute-value", "module"],
+    queryFn: () => accessAttributeValueUseCases.listByKey("module"),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
   });
+  const moduleOptions = useMemo(
+    () => (moduleData ?? []).map((v) => ({ value: v.value, label: v.label ?? v.value })),
+    [moduleData],
+  );
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, req }: { id: number; req: UpdateButtonDto }) =>
-      accessButtonPort.update(id, req),
-    onSuccess: () => {
-      toast.success("버튼이 수정되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
-      setEditTarget(null);
-      editForm.reset(DEFAULT_UPDATE);
-    },
-  });
+  // ─── 클라이언트 필터링 ────────────────────────────────────────────────────
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => accessButtonPort.delete(id),
-    onSuccess: () => {
-      toast.success("삭제되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
-    },
-  });
+  const { filteredButtons, filteredMenus } = useButtonFilter(
+    buttonData?.content ?? [],
+    menuData?.content ?? [],
+    activeFilter,
+  );
 
-  const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: number[]) => accessButtonUseCases.deleteMany(ids),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
-      setSelectedKeys(new Set());
-      toast.success("선택한 항목이 삭제되었습니다.");
-    },
-  });
+  const originalRows = useMemo<ButtonFormRow[]>(
+    () => filteredButtons.map(toFormRow),
+    [filteredButtons],
+  );
 
-  const openEdit = useCallback((row: ButtonRow) => {
-    setEditTarget(row);
-    editForm.reset({
-      menuId: String(row.menuId),
-      label: row.label,
-      actionType: row.actionType,
-      apiMethod: row.apiMethod ?? "",
-      apiPath: row.apiPath ?? "",
-      sortOrder: row.sortOrder != null ? String(row.sortOrder) : "",
-      active: row.active,
+  useEffect(() => {
+    reset({ rows: originalRows });
+  // reset이 바뀌면 안정성 문제가 없으므로 originalRows만 추적
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originalRows]);
+
+  // ─── entityId → fieldArray index 맵 ─────────────────────────────────────
+
+  const indexByEntityId = useMemo(() => {
+    const map = new Map<number, number>();
+    (fields as unknown as ButtonFormRow[]).forEach((row, i) => {
+      map.set(row.entityId, i);
     });
-  }, [editForm]);
+    return map;
+  }, [fields]);
 
-  function handleEditSave(values: UpdateFormValues) {
-    if (!editTarget) return;
-    const req: UpdateButtonDto = {
-      menuId: Number(values.menuId),
-      label: values.label.trim(),
-      actionType: values.actionType,
-      apiMethod: parseNullableStr(values.apiMethod),
-      apiPath: parseNullableStr(values.apiPath),
-      sortOrder: parseNullableNum(values.sortOrder),
-      active: values.active,
-    };
-    updateMutation.mutate({ id: editTarget.id, req });
+  // ─── 신규 버튼 추가 ──────────────────────────────────────────────────────
+
+  const pendingFocusRef = useRef<number | null>(null);
+
+  function handleAddButton(menuId: number) {
+    const newEntityId = -Date.now();
+    append({
+      entityId: newEntityId,
+      id: 0,
+      buttonCode: "",
+      menuId,
+      label: "",
+      actionType: "CUSTOM",
+      apiMethod: null,
+      apiPath: null,
+      sortOrder: null,
+      active: true,
+    });
+    pendingFocusRef.current = newEntityId;
   }
 
-  const handleDelete = useCallback(async (id: number, label: string) => {
-    const ok = await confirm({ title: "버튼 삭제", description: `"${label}" 버튼을 삭제하시겠습니까?`, variant: "destructive", confirmText: "삭제", cancelText: "취소" });
-    if (!ok) return;
-    deleteMutation.mutate(id);
-  }, [deleteMutation]);
+  // 신규 버튼 행 추가 후 buttonCode 셀 포커스
+  useEffect(() => {
+    if (pendingFocusRef.current === null) return;
+    pendingFocusRef.current = null;
+    requestAnimationFrame(() => {
+      const rows = document.querySelectorAll<HTMLElement>(".tree-row.is-new input:not([type=hidden])");
+      if (rows.length > 0) rows[rows.length - 1].focus();
+    });
+  });
 
-  async function handleBulkDelete() {
-    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
-    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  // ─── 신규 행 제거 ────────────────────────────────────────────────────────
+
+  function handleRemoveNewRow(entityId: number) {
+    const rows = getValues("rows");
+    const idx = rows.findIndex((r) => r.entityId === entityId);
+    if (idx >= 0) remove(idx);
   }
 
-  const rows = data?.content ?? [];
+  // ─── Save ────────────────────────────────────────────────────────────────
+
+  const saveChangesMutation = useMutation({
+    mutationFn: (vars: SaveButtonChangesRequest) => accessButtonUseCases.saveChanges(vars),
+    onSuccess: (result) => {
+      toast.success(
+        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}`,
+      );
+      qc.invalidateQueries({ queryKey: ["access-button", "list"] });
+    },
+  });
+
+  const handleSave = useCallback(() => {
+    const liveRows = getValues("rows");
+    const changes = collectGridChanges(originalRows, liveRows, {
+      rowKey: (r) => r.entityId,
+      toCreate: TO_CREATE,
+      toUpdate: TO_UPDATE,
+      isEqual: ROW_IS_EQUAL,
+    });
+    // deleteIds는 payload에 포함하지 않음 (하드삭제 미도입)
+    saveChangesMutation.mutate({ creates: changes.creates, updates: changes.updates });
+  }, [getValues, originalRows, saveChangesMutation]);
+
+  const hasRows = fields.length > 0;
+
+  // ─── 렌더 ────────────────────────────────────────────────────────────────
+
+  const liveRows = fields as unknown as ButtonFormRow[];
 
   return (
     <>
+      {/* 툴바 */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_ADMIN_ACCESS_BUTTON_DELETE"
-          className="btn btn--modal btn--sm"
-          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
-          onClick={handleBulkDelete}
-        >
-          선택 삭제
-        </ActionButton>
-        <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setCreateOpen(true)}>신규</Button>
+          buttonCode="BTN_ADMIN_ACCESS_BUTTON_RESET"
+          className="btn btn--normal btn--sm"
+          type="button"
+          onClick={() => {
+            filterForm.reset(DEFAULT_BUTTON_FILTER);
+            setActiveFilter(null);
+            reset({ rows: [] });
+            listFilterStore.getState().clearFilter(BUTTON_LIST_SCOPE);
+          }}
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_BUTTON_SEARCH"
+          className="btn btn--search btn--sm"
+          type="button"
+          onClick={() =>
+            filterForm.handleSubmit((values) => {
+              qc.invalidateQueries({ queryKey: ["access-button", "list"] });
+              setActiveFilter(values);
+              listFilterStore.getState().setSearch(BUTTON_LIST_SCOPE, { extraFilter: values });
+            })()
+          }
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_BUTTON_SAVE"
+          className="btn btn--transaction btn--sm"
+          type="button"
+          disabled={!isDirty || saveChangesMutation.isPending}
+          onClick={handleSave}
+          icon={<Save size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
-      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+
+      {/* 검색 필터 */}
+      <ButtonListFilter form={filterForm} moduleOptions={moduleOptions} />
+
+      {/* 트리 패널 */}
+      <div
+        className="panel"
+        style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", marginTop: 10 }}
+      >
         <div className="panel__head">
           <div className="panel__title-accent" />
           <span className="panel__title">Buttons</span>
-          <span className="panel__rowcount">{rows.length}</span>
+          <span className="panel__rowcount">{liveRows.length}</span>
+          <div className="panel__actions">
+            {/* 모두 펴기 / 모두 접기 */}
+            <Button
+              variant="normal"
+              size="sm"
+              iconOnly
+              type="button"
+              disabled={!hasRows}
+              onClick={() => treeRef.current?.expandAll()}
+              aria-label="모두 펴기"
+            >
+              <ChevronsUpDown size={12} />
+            </Button>
+            <Button
+              variant="normal"
+              size="sm"
+              iconOnly
+              type="button"
+              disabled={!hasRows}
+              onClick={() => treeRef.current?.collapseAll()}
+              aria-label="모두 접기"
+            >
+              <ChevronsDownUp size={12} />
+            </Button>
+          </div>
         </div>
+
         <div className="list-wrap" style={{ overflowY: "auto" }}>
-          {isFetching && rows.length === 0 ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>로딩 중...</div>
-          ) : rows.length === 0 ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>데이터가 없습니다.</div>
+          {isFetching && liveRows.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
+              로딩 중...
+            </div>
+          ) : activeFilter === null ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
+              Enter search criteria and click Search.
+            </div>
+          ) : liveRows.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
+              No results found.
+            </div>
           ) : (
             <ButtonTreeView
-              menus={menus}
-              buttons={rows}
-              selectedKeys={selectedKeys}
-              onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
-              onEdit={openEdit}
-              onDelete={handleDelete}
+              ref={treeRef}
+              menus={filteredMenus}
+              rows={liveRows}
+              indexByEntityId={indexByEntityId}
+              register={register}
+              control={control}
+              onAddButton={handleAddButton}
+              onRemoveNewRow={handleRemoveNewRow}
             />
           )}
         </div>
       </div>
-
-      {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="버튼 등록" size="md" style={{ maxWidth: 460 }}>
-        <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn">
-              <span className="lcn__label">menuId</span>
-              <Controller
-                name="menuId"
-                control={createForm.control}
-                render={({ field }) => (
-                  <ComboBox variant="panel" style={{ width: 170 }} options={menuOptions} value={field.value ? String(field.value) : ""} onChange={(e) => field.onChange(Number(e.target.value))} />
-                )}
-              />
-            </div>
-            <div className="lcn"><span className="lcn__label">buttonCode</span><input className="text-box text-box--panel" style={{ width: 170, border: "1px solid var(--border)" }} {...createForm.register("buttonCode")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...createForm.register("label")} /></div>
-            <div className="lcn"><span className="lcn__label">actionType</span>
-              <select className="text-box text-box--panel" style={{ border: "1px solid var(--border)" }} {...createForm.register("actionType")}>
-                {ACTION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("active")} />활성</label></div>
-          </div>
-        </form>
-        <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={createForm.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setCreateOpen(false); createForm.reset(DEFAULT_FORM); }}>닫기</Button>
-        </div>
-      </ModalShell>
-
-      {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="버튼 수정" size="md" style={{ maxWidth: 460 }}>
-        <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn">
-              <span className="lcn__label">buttonCode</span>
-              <span className="text-box text-box--panel" style={{ background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center", border: "1px solid var(--border)" }}>
-                {editTarget?.buttonCode}
-              </span>
-            </div>
-            <div className="lcn">
-              <span className="lcn__label">menuId</span>
-              <Controller
-                name="menuId"
-                control={editForm.control}
-                render={({ field }) => (
-                  <ComboBox variant="panel" style={{ width: 170 }} options={menuOptions} value={field.value} onChange={(e) => field.onChange(e.target.value)} />
-                )}
-              />
-            </div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...editForm.register("label")} /></div>
-            <div className="lcn"><span className="lcn__label">actionType</span>
-              <select className="text-box text-box--panel" style={{ border: "1px solid var(--border)" }} {...editForm.register("actionType")}>
-                {ACTION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-<div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
-          </div>
-        </form>
-        <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={editForm.handleSubmit(handleEditSave)} loading={updateMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setEditTarget(null); editForm.reset(DEFAULT_UPDATE); }}>닫기</Button>
-        </div>
-      </ModalShell>
     </>
   );
 }
