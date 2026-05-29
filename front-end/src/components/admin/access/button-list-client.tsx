@@ -91,9 +91,11 @@ export function AccessButtonListClient() {
 
   // ─── 클라이언트 필터링 ────────────────────────────────────────────────────
 
+  const buttonContent = useMemo(() => buttonData?.content ?? [], [buttonData]);
+  const menuContent = useMemo(() => menuData?.content ?? [], [menuData]);
   const { filteredButtons, filteredMenus } = useButtonFilter(
-    buttonData?.content ?? [],
-    menuData?.content ?? [],
+    buttonContent,
+    menuContent,
     activeFilter,
   );
 
