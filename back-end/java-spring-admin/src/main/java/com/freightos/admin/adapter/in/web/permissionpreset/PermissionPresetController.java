@@ -76,7 +76,7 @@ public class PermissionPresetController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreatePermissionPresetRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -87,7 +87,7 @@ public class PermissionPresetController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePermissionPresetRequest req) {
@@ -96,14 +96,14 @@ public class PermissionPresetController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         deleteUseCase.deletePermissionPreset(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.PERMISSION_PRESET_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SavePermissionPresetChangesRequest req) {
         SaveChangesResult result = saveChangesUseCase.savePermissionPresetChanges(assembler.toSaveChangesCommand(req));
@@ -119,7 +119,7 @@ public class PermissionPresetController {
     }
 
     @PostMapping("/{id}/attribute-values")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE')")
     public ResponseEntity<ApiResponse<Void>> assignAttributeValues(
             @PathVariable Long id,
             @Valid @RequestBody AssignAttributeValuesRequest req) {

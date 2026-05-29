@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Minus, Save } from "lucide-react";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
 import { Button } from "@/components/shared/button";
@@ -174,15 +175,13 @@ export function CodeMasterListGrid({
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       {/* 패널별 Save/Add/Remove 툴바 */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
-        <Button
-          variant="transaction"
-          size="sm"
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_SAVE"
+          className="btn btn--transaction btn--sm"
           disabled={!isDirty || saveChangesMutation.isPending}
           onClick={() => saveChangesMutation.mutate()}
-        >
-          <Save size={12} style={{ marginRight: 4 }} />
-          Save
-        </Button>
+          icon={<Save size={12} style={{ marginRight: 4 }} />}
+        />
         <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
           <Plus size={12} />
         </Button>

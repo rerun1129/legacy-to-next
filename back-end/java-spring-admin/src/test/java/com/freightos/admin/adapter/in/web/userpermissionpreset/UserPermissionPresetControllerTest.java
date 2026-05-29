@@ -106,7 +106,7 @@ class UserPermissionPresetControllerTest {
     // ── assign: BTN authority → 201 + Location 헤더 ───────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void assign_withBtnAuthority_returns201WithLocation() throws Exception {
         AssignUserPermissionPresetRequest req = new AssignUserPermissionPresetRequest(1L, 2L);
         UserPermissionPresetRow row = new UserPermissionPresetRow(10L, 1L, 2L, "PRESET_A", "Preset A", true);
@@ -127,7 +127,7 @@ class UserPermissionPresetControllerTest {
     // ── assign: userId null → 400 ─────────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void assign_nullUserId_returns400() throws Exception {
         String body = """
                 {"userId":null,"presetId":2}
@@ -141,7 +141,7 @@ class UserPermissionPresetControllerTest {
     // ── assign: 이미 부여됨 → 409 ─────────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void assign_alreadyAssigned_returns409() throws Exception {
         AssignUserPermissionPresetRequest req = new AssignUserPermissionPresetRequest(1L, 2L);
 
@@ -158,7 +158,7 @@ class UserPermissionPresetControllerTest {
     // ── revoke: BTN authority → 200 ───────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void revoke_withBtnAuthority_returns200() throws Exception {
         willDoNothing().given(revokeUseCase).revokeUserPermissionPreset(10L);
 
@@ -169,7 +169,7 @@ class UserPermissionPresetControllerTest {
     // ── revoke: 미존재 id → 404 ───────────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void revoke_notFound_returns404() throws Exception {
         willThrow(ApplicationException.notFound("USER_PERMISSION_PRESET_NOT_FOUND",
                 MessageCode.USER_PERMISSION_PRESET_NOT_FOUND.getMessage()))

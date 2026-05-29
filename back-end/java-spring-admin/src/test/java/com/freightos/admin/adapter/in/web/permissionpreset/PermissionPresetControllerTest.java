@@ -152,7 +152,7 @@ class PermissionPresetControllerTest {
     // ── create: BTN authority → 201 + Location 헤더 + id 반환 ─────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void create_withBtnAuthority_returns201WithLocationAndId() throws Exception {
         CreatePermissionPresetRequest req = new CreatePermissionPresetRequest("PRESET_TEST", "Test", null, true);
 
@@ -170,7 +170,7 @@ class PermissionPresetControllerTest {
     // ── create: code @NotBlank 미충족 → 400 ──────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void create_blankCode_returns400() throws Exception {
         String body = """
                 {"code":"","name":"Test","active":true}
@@ -184,7 +184,7 @@ class PermissionPresetControllerTest {
     // ── update: BTN authority → 200 ───────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void update_withBtnAuthority_returns200() throws Exception {
         UpdatePermissionPresetRequest req = new UpdatePermissionPresetRequest("Updated", null, true);
 
@@ -200,7 +200,7 @@ class PermissionPresetControllerTest {
     // ── delete: BTN authority → 200 ───────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_DELETE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void delete_withBtnAuthority_returns200() throws Exception {
         willDoNothing().given(deleteUseCase).deletePermissionPreset(1L);
 
@@ -211,7 +211,7 @@ class PermissionPresetControllerTest {
     // ── delete: RESTRICT(부여된 user 존재) → 409 ──────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_DELETE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void delete_presetInUse_returns409() throws Exception {
         willThrow(ApplicationException.conflict(
                 "PERMISSION_PRESET_IN_USE_CANNOT_DELETE",
@@ -225,7 +225,7 @@ class PermissionPresetControllerTest {
     // ── assignAttributeValues: BTN authority → 200 ────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_UPDATE")
+    @WithMockUser(authorities = "BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE")
     void assignAttributeValues_withBtnAuthority_returns200() throws Exception {
         AssignAttributeValuesRequest req = new AssignAttributeValuesRequest(List.of(10L), List.of(5L));
 

@@ -103,10 +103,10 @@ class CustomerControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].customerCode").value("CUS-001"));
     }
 
-    // ── BTN_ADMIN_CUSTOMER_LIST_CREATE authority → 201 ────────────────────────
+    // ── BTN_ADMIN_CUSTOMER_LIST_SAVE authority → 201 ──────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_SAVE")
     void create_returns201WithLocationAndId() throws Exception {
         given(customerAssembler.toCreateCommand(any())).willReturn(
                 new CreateCustomerCommand("CUS-001", CustomerType.CUSTOMER, "테스트 포워더",
@@ -128,7 +128,7 @@ class CustomerControllerWebMvcTest {
     // ── customerCode @NotBlank → 400 ─────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_SAVE")
     void create_blankCustomerCode_returns400() throws Exception {
         String body = """
                 {"customerCode":"","customerType":"CUSTOMER","name":"테스트","active":true}
@@ -142,7 +142,7 @@ class CustomerControllerWebMvcTest {
     // ── name @NotBlank → 400 ─────────────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_SAVE")
     void create_blankName_returns400() throws Exception {
         String body = """
                 {"customerCode":"CUS-001","customerType":"CUSTOMER","name":"","active":true}
@@ -153,10 +153,10 @@ class CustomerControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── BTN_ADMIN_CUSTOMER_LIST_DELETE authority → 200 ────────────────────────
+    // ── BTN_ADMIN_CUSTOMER_LIST_SAVE authority → 200 ──────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_DELETE")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_SAVE")
     void delete_returns200() throws Exception {
         willDoNothing().given(customerUseCase).deleteCustomer(any());
 

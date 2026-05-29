@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateUserRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest req) {
@@ -82,21 +82,21 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         userUseCase.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.USER_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         userUseCase.deleteUsers(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.USER_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_USER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveUserChangesRequest req) {
         SaveChangesResult result = userUseCase.saveUserChanges(userAssembler.toSaveChangesCommand(req));

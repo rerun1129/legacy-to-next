@@ -62,7 +62,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCustomerRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -73,7 +73,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCustomerRequest req) {
@@ -82,21 +82,21 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         customerUseCase.deleteCustomer(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CUSTOMER_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         customerUseCase.deleteCustomers(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CUSTOMER_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CUSTOMER_LIST_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCustomerChangesRequest req) {
         SaveChangesResult result = customerUseCase.saveCustomerChanges(customerAssembler.toSaveChangesCommand(req));

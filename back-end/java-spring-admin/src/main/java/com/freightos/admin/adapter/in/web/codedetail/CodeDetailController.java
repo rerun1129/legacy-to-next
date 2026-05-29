@@ -55,7 +55,7 @@ public class CodeDetailController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DETAIL_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCodeDetailRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -66,7 +66,7 @@ public class CodeDetailController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DETAIL_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCodeDetailRequest req) {
@@ -75,21 +75,21 @@ public class CodeDetailController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DETAIL_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         codeDetailUseCase.deleteCodeDetailById(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_DETAIL_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DETAIL_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         codeDetailUseCase.deleteCodeDetails(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_DETAIL_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DETAIL_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCodeDetailChangesRequest req) {
         SaveChangesResult result = codeDetailUseCase.saveCodeDetailChanges(codeDetailAssembler.toSaveChangesCommand(req));

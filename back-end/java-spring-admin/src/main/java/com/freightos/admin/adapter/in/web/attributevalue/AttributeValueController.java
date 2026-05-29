@@ -53,12 +53,14 @@ public class AttributeValueController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> create(@Valid @RequestBody CreateAttributeValueRequest req) {
         attributeValueUseCase.createAttributeValue(attributeValueAssembler.toCreateCommand(req));
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_VALUE_CREATED.getMessage()));
     }
 
     @PutMapping("/{attributeKey}/{value}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable String attributeKey,
             @PathVariable String value,
@@ -68,6 +70,7 @@ public class AttributeValueController {
     }
 
     @DeleteMapping("/{attributeKey}/{value}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteByKey(
             @PathVariable String attributeKey, @PathVariable String value) {
         attributeValueUseCase.deleteAttributeValueByKey(attributeKey, value);
@@ -75,7 +78,7 @@ public class AttributeValueController {
     }
 
     @DeleteMapping("/{attributeKey}/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(
             @PathVariable String attributeKey,
             @Valid @RequestBody BulkDeleteByCodeRequest req) {
@@ -84,6 +87,7 @@ public class AttributeValueController {
     }
 
     @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveAttributeValueChangesRequest req) {
         SaveChangesResult result = saveChangesUseCase.saveAttributeValueChanges(attributeValueAssembler.toSaveChangesCommand(req));

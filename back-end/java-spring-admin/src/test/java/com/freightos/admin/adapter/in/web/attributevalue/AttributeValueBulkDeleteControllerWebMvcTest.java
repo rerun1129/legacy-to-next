@@ -69,10 +69,10 @@ class AttributeValueBulkDeleteControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE authority → 200 ────────────────────
+    // ── BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE authority → 200 ────────────────
 
     @Test
-    @WithMockUser(authorities = {"ROLE_ADMIN", "BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE"})
+    @WithMockUser(authorities = {"ROLE_ADMIN", "BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE"})
     void bulkDelete_validRequest_returns200() throws Exception {
         willDoNothing().given(attributeValueUseCase).deleteAttributeValues(anyString(), any());
         BulkDeleteByCodeRequest req = new BulkDeleteByCodeRequest(List.of("val1", "val2", "val3"));

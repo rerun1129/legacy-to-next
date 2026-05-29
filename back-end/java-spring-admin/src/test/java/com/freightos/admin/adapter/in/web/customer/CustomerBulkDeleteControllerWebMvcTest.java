@@ -64,10 +64,10 @@ class CustomerBulkDeleteControllerWebMvcTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ── BTN_ADMIN_CUSTOMER_LIST_DELETE authority → 200 ────────────────────────
+    // ── BTN_ADMIN_CUSTOMER_LIST_SAVE authority → 200 ──────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_DELETE")
+    @WithMockUser(authorities = "BTN_ADMIN_CUSTOMER_LIST_SAVE")
     void bulkDelete_validRequest_returns200() throws Exception {
         willDoNothing().given(customerUseCase).deleteCustomers(any());
         BulkDeleteRequest req = new BulkDeleteRequest(List.of(1L, 2L, 3L));

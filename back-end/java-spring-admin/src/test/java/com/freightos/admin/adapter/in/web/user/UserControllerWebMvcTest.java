@@ -103,10 +103,10 @@ class UserControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].username").value("alice"));
     }
 
-    // ── BTN_ADMIN_USER_LIST_CREATE authority → 201 ────────────────────────────
+    // ── BTN_ADMIN_USER_LIST_SAVE authority → 201 ──────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_SAVE")
     void create_returns201WithLocationAndId() throws Exception {
         Map<String, List<String>> attrsUser = Map.of("role", List.of("USER"));
         given(userAssembler.toCreateCommand(any())).willReturn(
@@ -127,7 +127,7 @@ class UserControllerWebMvcTest {
     // ── username @NotBlank → 400 ──────────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_SAVE")
     void create_blankUsername_returns400() throws Exception {
         String body = """
                 {"username":"","email":"a@b.com","password":"pass1234","active":true,"attributes":{}}
@@ -141,7 +141,7 @@ class UserControllerWebMvcTest {
     // ── password @Size(min=8) → 400 ───────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_SAVE")
     void create_shortPassword_returns400() throws Exception {
         // 7자 비밀번호 → min=8 위반
         String body = """
@@ -153,10 +153,10 @@ class UserControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── BTN_ADMIN_USER_LIST_DELETE authority → 200 ────────────────────────────
+    // ── BTN_ADMIN_USER_LIST_SAVE authority → 200 ──────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_DELETE")
+    @WithMockUser(authorities = "BTN_ADMIN_USER_LIST_SAVE")
     void delete_returns200() throws Exception {
         willDoNothing().given(userUseCase).deleteUser(any());
 

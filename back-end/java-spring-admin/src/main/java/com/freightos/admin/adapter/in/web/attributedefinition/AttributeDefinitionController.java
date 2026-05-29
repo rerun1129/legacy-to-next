@@ -65,6 +65,7 @@ public class AttributeDefinitionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, String>>> create(
             @Valid @RequestBody CreateAttributeDefinitionRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -75,6 +76,7 @@ public class AttributeDefinitionController {
     }
 
     @PutMapping("/{attributeKey}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable String attributeKey,
             @Valid @RequestBody UpdateAttributeDefinitionRequest req) {
@@ -83,19 +85,21 @@ public class AttributeDefinitionController {
     }
 
     @DeleteMapping("/{attributeKey}")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteByKey(@PathVariable String attributeKey) {
         attributeDefinitionUseCase.deleteAttributeDefinitionByKey(attributeKey);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_DEFINITION_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteByCodeRequest req) {
         attributeDefinitionUseCase.deleteAttributeDefinitionsByKeys(req.codes());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.ATTRIBUTE_DEFINITION_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_ACCESS_ATTRIBUTE_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveAttributeDefinitionChangesRequest req) {
         SaveChangesResult result = saveChangesUseCase.saveAttributeDefinitionChanges(attributeDefinitionAssembler.toSaveChangesCommand(req));

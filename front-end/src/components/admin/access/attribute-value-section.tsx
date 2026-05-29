@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Minus, Save } from "lucide-react";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { Button } from "@/components/shared/button";
 import { GridList } from "@/components/shared/grid-list";
 import { toast } from "@/lib/toast-store";
@@ -156,15 +157,13 @@ export function AttributeValueSection({ attributeKey }: Props) {
           >
             <Minus size={12} />
           </Button>
-          <Button
-            variant="transaction"
-            size="sm"
+          <ActionButton
+            buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE"
+            className="btn btn--transaction btn--sm"
             disabled={!isDirty || saveChangesMutation.isPending}
             onClick={handleSave}
-          >
-            <Save size={12} style={{ marginRight: 4 }} />
-            Save
-          </Button>
+            icon={<Save size={12} style={{ marginRight: 4 }} />}
+          />
         </div>
       </div>
 

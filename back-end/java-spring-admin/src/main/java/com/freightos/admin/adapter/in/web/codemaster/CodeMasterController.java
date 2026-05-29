@@ -60,7 +60,7 @@ public class CodeMasterController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Map<String, Long>>> create(
             @Valid @RequestBody CreateCodeMasterRequest req,
             UriComponentsBuilder uriBuilder) {
@@ -71,7 +71,7 @@ public class CodeMasterController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_UPDATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCodeMasterRequest req) {
@@ -80,21 +80,21 @@ public class CodeMasterController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable Long id) {
         codeMasterUseCase.deleteCodeMasterById(id);
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_MASTER_DELETED.getMessage()));
     }
 
     @DeleteMapping("/bulk")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_DELETE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_SAVE')")
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         codeMasterUseCase.deleteCodeMasters(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_MASTER_DELETED.getMessage()));
     }
 
     @PostMapping("/save-changes")
-    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_SAVE')")
     public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
             @Valid @RequestBody SaveCodeMasterChangesRequest req) {
         SaveChangesResult result = codeMasterUseCase.saveCodeMasterChanges(codeMasterAssembler.toSaveChangesCommand(req));

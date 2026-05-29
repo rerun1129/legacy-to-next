@@ -98,10 +98,10 @@ class CodeDetailControllerWebMvcTest {
                 .andExpect(jsonPath("$.data.content[0].codeValue").value("ACTIVE"));
     }
 
-    // ── BTN_ADMIN_CODE_LIST_CREATE authority → 201 ────────────────────────────
+    // ── BTN_ADMIN_CODE_LIST_DETAIL_SAVE authority → 201 ──────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_DETAIL_SAVE")
     void create_returns201WithLocationAndId() throws Exception {
         given(codeDetailAssembler.toCreateCommand(any())).willReturn(null);
         given(codeDetailUseCase.createCodeDetail(any())).willReturn(55L);
@@ -119,7 +119,7 @@ class CodeDetailControllerWebMvcTest {
     // ── 검증 실패 → 400 ────────────────────────────────────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_CREATE")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_DETAIL_SAVE")
     void create_blankCodeValue_returns400() throws Exception {
         // codeValue가 빈 문자열 → @NotBlank 위반
         String body = """
@@ -131,10 +131,10 @@ class CodeDetailControllerWebMvcTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ── BTN_ADMIN_CODE_LIST_DELETE authority → 200 ────────────────────────────
+    // ── BTN_ADMIN_CODE_LIST_DETAIL_SAVE authority → 200 ──────────────────────────
 
     @Test
-    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_DELETE")
+    @WithMockUser(authorities = "BTN_ADMIN_CODE_LIST_DETAIL_SAVE")
     void delete_returns200() throws Exception {
         willDoNothing().given(codeDetailUseCase).deleteCodeDetailById(any());
 
