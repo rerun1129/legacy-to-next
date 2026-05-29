@@ -1,10 +1,8 @@
 package com.freightos.admin.application.menu;
 
 import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
-import com.freightos.admin.application.button.port.out.ButtonPort;
 import com.freightos.admin.application.menu.command.CreateMenuCommand;
 import com.freightos.admin.application.menu.port.out.MenuPort;
-import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.domain.menu.entity.Menu;
 import com.freightos.admin.domain.attributevalue.entity.AttributeValue;
@@ -22,7 +20,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,12 +33,6 @@ class MenuServiceTest {
 
     @Mock
     private AttributeValuePort attributeValuePort;
-
-    @Mock
-    private ButtonPort buttonPort;
-
-    @Mock
-    private MenuPolicyPort menuPolicyPort;
 
     @InjectMocks
     private MenuService menuService;
@@ -80,28 +71,6 @@ class MenuServiceTest {
         Long id = menuService.createMenu(command);
 
         assertThat(id).isEqualTo(10L);
-    }
-
-    @Test
-    void deleteMenuById_hasChildren_throwsConflict() {
-        given(menuPort.existsById(5L)).willReturn(true);
-        given(menuPort.existsByParentId(5L)).willReturn(true);
-
-        assertThatThrownBy(() -> menuService.deleteMenuById(5L))
-                .isInstanceOf(ApplicationException.class)
-                .satisfies(ex -> assertThat(((ApplicationException) ex).getStatus()).isEqualTo(HttpStatus.CONFLICT));
-    }
-
-    @Test
-    void deleteMenuById_noChildren_callsDelete() {
-        given(menuPort.existsById(5L)).willReturn(true);
-        given(menuPort.existsByParentId(5L)).willReturn(false);
-        given(buttonPort.existsByMenuId(5L)).willReturn(false);
-        given(menuPolicyPort.existsByMenuId(5L)).willReturn(false);
-
-        menuService.deleteMenuById(5L);
-
-        then(menuPort).should().deleteMenuById(5L);
     }
 
     @Test

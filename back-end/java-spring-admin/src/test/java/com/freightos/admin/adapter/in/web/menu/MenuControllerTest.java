@@ -1,7 +1,10 @@
 package com.freightos.admin.adapter.in.web.menu;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.adapter.in.web.menu.dto.AccessibleMenuResponse;
 import com.freightos.admin.application.menu.port.in.MenuUseCase;
+import com.freightos.admin.application.menu.port.in.SaveMenuChangesUseCase;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.common.security.JpaUserDetailsService;
 import com.freightos.admin.common.security.JwtAuthenticationFilter;
 import com.freightos.admin.common.security.JwtTokenProvider;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -26,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,8 +41,14 @@ class MenuControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockitoBean
     private MenuUseCase menuUseCase;
+
+    @MockitoBean
+    private SaveMenuChangesUseCase saveMenuChangesUseCase;
 
     @MockitoBean
     private MenuAssembler menuAssembler;
@@ -104,6 +115,74 @@ class MenuControllerTest {
     @Test
     void accessible_withoutAuthentication_returns401() throws Exception {
         mockMvc.perform(get("/api/admin/access/menu/accessible"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // ── save-changes: MENU + BTN_SAVE 권한 → 200 + 카운트 검증 ────────────────
+
+    @Test
+    @WithMockUser(authorities = { "MENU_ADMIN_ACCESS_MENU", "BTN_ADMIN_ACCESS_MENU_SAVE" })
+    void saveChanges_withMenuAndBtnAuthority_returns200WithCounts() throws Exception {
+        SaveChangesResult result = new SaveChangesResult(1, 0, 0);
+        String body = """
+                {
+                  "creates": [
+                    {
+                      "menuCode": "ADMIN_TEST_MENU",
+                      "parentId": null,
+                      "path": "/test",
+                      "label": "테스트",
+                      "labelEn": null,
+                      "icon": null,
+                      "sortOrder": 0,
+                      "active": true,
+                      "moduleCode": "ADMIN"
+                    }
+                  ],
+                  "updates": []
+                }
+                """;
+
+        given(menuAssembler.toSaveChangesCommand(any())).willReturn(null);
+        given(saveMenuChangesUseCase.saveMenuChanges(any())).willReturn(result);
+
+        mockMvc.perform(post("/api/admin/access/menu/save-changes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.createdCount").value(1))
+                .andExpect(jsonPath("$.data.updatedCount").value(0))
+                .andExpect(jsonPath("$.data.deletedCount").value(0));
+
+        then(saveMenuChangesUseCase).should().saveMenuChanges(any());
+    }
+
+    // ── save-changes: MENU 권한만(BTN_SAVE 없음) → 403 ───────────────────────
+
+    @Test
+    @WithMockUser(authorities = { "MENU_ADMIN_ACCESS_MENU" })
+    void saveChanges_withoutBtnSaveAuthority_returns403() throws Exception {
+        String body = """
+                {"creates": [], "updates": []}
+                """;
+
+        mockMvc.perform(post("/api/admin/access/menu/save-changes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    // ── save-changes: 미인증 → 401 ────────────────────────────────────────────
+
+    @Test
+    void saveChanges_withoutAuthentication_returns401() throws Exception {
+        String body = """
+                {"creates": [], "updates": []}
+                """;
+
+        mockMvc.perform(post("/api/admin/access/menu/save-changes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isUnauthorized());
     }
 }

@@ -1,17 +1,19 @@
 package com.freightos.admin.application.menu;
 
 import com.freightos.admin.application.attributevalue.port.out.AttributeValuePort;
-import com.freightos.admin.application.button.port.out.ButtonPort;
 import com.freightos.admin.application.menu.command.CreateMenuCommand;
+import com.freightos.admin.application.menu.command.SaveMenuChangesCommand;
 import com.freightos.admin.application.menu.command.SearchMenuCommand;
 import com.freightos.admin.application.menu.command.UpdateMenuCommand;
 import com.freightos.admin.application.menu.port.in.MenuUseCase;
+import com.freightos.admin.application.menu.port.in.SaveMenuChangesUseCase;
 import com.freightos.admin.application.menu.port.out.MenuPort;
 import com.freightos.admin.application.menu.projection.MenuSummary;
-import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.menu.entity.Menu;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,13 +27,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MenuService implements MenuUseCase {
+public class MenuService implements MenuUseCase, SaveMenuChangesUseCase {
 
     private final MenuPort menuPort;
     private final MenuFactory menuFactory;
     private final AttributeValuePort attributeValuePort;
-    private final ButtonPort buttonPort;
-    private final MenuPolicyPort menuPolicyPort;
 
     @Override
     public PagedResult<MenuSummary> searchMenus(SearchMenuCommand command) {
@@ -80,25 +80,14 @@ public class MenuService implements MenuUseCase {
 
     @Override
     @Transactional
-    public void deleteMenusByIds(List<Long> ids) {
-        for (Long id : ids) {
-            deleteMenuById(id);
+    public SaveChangesResult saveMenuChanges(SaveMenuChangesCommand command) {
+        for (SaveMenuChangesCommand.UpdateMenuItem item : command.updates()) {
+            updateMenu(item.id(), new UpdateMenuCommand(item.parentId(), item.path(), item.label(), item.labelEn(), item.icon(), item.sortOrder(), item.active(), item.moduleCode()));
         }
-    }
-
-    @Override
-    @Transactional
-    public void deleteMenuById(Long menuId) {
-        if (!menuPort.existsById(menuId)) {
-            throw ApplicationException.notFound("MENU_NOT_FOUND", MessageCode.MENU_NOT_FOUND.getMessage());
+        for (CreateMenuCommand create : command.creates()) {
+            createMenu(create);
         }
-        // 자식 메뉴·버튼·정책 존재 시 삭제 불가
-        if (menuPort.existsByParentId(menuId)
-                || buttonPort.existsByMenuId(menuId)
-                || menuPolicyPort.existsByMenuId(menuId)) {
-            throw ApplicationException.conflict("MENU_HAS_CHILDREN_OR_BUTTONS_CANNOT_DELETE", MessageCode.MENU_HAS_CHILDREN_OR_BUTTONS_CANNOT_DELETE.getMessage());
-        }
-        menuPort.deleteMenuById(menuId);
+        return new SaveChangesResult(command.creates().size(), command.updates().size(), 0);
     }
 
     @Override
@@ -124,5 +113,10 @@ public class MenuService implements MenuUseCase {
         List<Menu> result = new ArrayList<>(leaves);
         result.addAll(survivingRoots);
         return result;
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteMenuCodes(String query, int limit) {
+        return menuPort.autocompleteMenuCodes(query, limit);
     }
 }

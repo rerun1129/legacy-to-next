@@ -4,9 +4,11 @@ import com.freightos.admin.adapter.in.web.menu.dto.AccessibleMenuResponse;
 import com.freightos.admin.adapter.in.web.menu.dto.CreateMenuRequest;
 import com.freightos.admin.adapter.in.web.menu.dto.MenuDetailResponse;
 import com.freightos.admin.adapter.in.web.menu.dto.MenuSummaryResponse;
+import com.freightos.admin.adapter.in.web.menu.dto.SaveMenuChangesRequest;
 import com.freightos.admin.adapter.in.web.menu.dto.SearchMenuRequest;
 import com.freightos.admin.adapter.in.web.menu.dto.UpdateMenuRequest;
 import com.freightos.admin.application.menu.command.CreateMenuCommand;
+import com.freightos.admin.application.menu.command.SaveMenuChangesCommand;
 import com.freightos.admin.application.menu.command.SearchMenuCommand;
 import com.freightos.admin.application.menu.command.UpdateMenuCommand;
 import com.freightos.admin.application.menu.projection.MenuSummary;
@@ -30,6 +32,18 @@ public class MenuAssembler {
 
     public UpdateMenuCommand toUpdateCommand(UpdateMenuRequest req) {
         return new UpdateMenuCommand(req.parentId(), req.path(), req.label(), req.labelEn(), req.icon(), req.sortOrder(), req.active(), req.moduleCode());
+    }
+
+    public SaveMenuChangesCommand toSaveChangesCommand(SaveMenuChangesRequest req) {
+        List<CreateMenuCommand> creates = req.creates() == null ? List.of()
+                : req.creates().stream()
+                        .map(c -> new CreateMenuCommand(c.menuCode(), c.parentId(), c.path(), c.label(), c.labelEn(), c.icon(), c.sortOrder(), c.active(), c.moduleCode()))
+                        .toList();
+        List<SaveMenuChangesCommand.UpdateMenuItem> updates = req.updates() == null ? List.of()
+                : req.updates().stream()
+                        .map(u -> new SaveMenuChangesCommand.UpdateMenuItem(u.id(), u.parentId(), u.path(), u.label(), u.labelEn(), u.icon(), u.sortOrder(), u.active(), u.moduleCode()))
+                        .toList();
+        return new SaveMenuChangesCommand(creates, updates);
     }
 
     public MenuSummaryResponse toSummaryResponse(MenuSummary p) {

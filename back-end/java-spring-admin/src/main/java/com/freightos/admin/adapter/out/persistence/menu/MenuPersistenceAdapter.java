@@ -4,6 +4,7 @@ import com.freightos.admin.application.menu.command.SearchMenuCommand;
 import com.freightos.admin.application.menu.port.out.MenuPort;
 import com.freightos.admin.application.menu.projection.MenuSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.menu.entity.Menu;
@@ -51,14 +52,6 @@ public class MenuPersistenceAdapter implements MenuPort {
     }
 
     @Override
-    public void deleteMenuById(Long menuId) {
-        if (!menuRepository.existsById(menuId)) {
-            throw ApplicationException.notFound("MENU_NOT_FOUND", MessageCode.MENU_NOT_FOUND.getMessage());
-        }
-        menuRepository.deleteById(menuId);
-    }
-
-    @Override
     public boolean existsById(Long menuId) {
         return menuRepository.existsById(menuId);
     }
@@ -93,5 +86,10 @@ public class MenuPersistenceAdapter implements MenuPort {
         parents.forEach(e -> merged.put(e.getId(), e));
 
         return merged.values().stream().map(menuJpaToDomainMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteMenuCodes(String query, int limit) {
+        return menuRepository.autocompleteMenuCodes(query, limit);
     }
 }

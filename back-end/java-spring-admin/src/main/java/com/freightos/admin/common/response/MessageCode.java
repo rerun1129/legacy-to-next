@@ -63,6 +63,7 @@ public enum MessageCode {
     MENU_HAS_CHILDREN_OR_BUTTONS_CANNOT_DELETE("하위 메뉴·버튼·정책이 존재하여 삭제할 수 없습니다."),
     MENU_PARENT_NOT_FOUND("상위 메뉴를 찾을 수 없습니다."),
     MENU_MODULE_NOT_FOUND("지정한 모듈을 찾을 수 없습니다."),
+    MENU_SAVE_CHANGES("메뉴 일괄 저장이 완료되었습니다."),
     BUTTON_CREATED("버튼이 등록되었습니다."),
     BUTTON_UPDATED("버튼이 수정되었습니다."),
     BUTTON_DELETED("버튼이 삭제되었습니다."),
