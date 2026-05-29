@@ -12,6 +12,12 @@
 -- =============================================================================
 
 CREATE SCHEMA IF NOT EXISTS fms;
+
+-- pgcrypto: admin-api Flyway(V38/V41 등)가 fms.crypt()/fms.gen_salt() 로 표준 BCrypt 해시를
+-- 생성하므로 fms 스키마에 익스텐션이 미리 존재해야 함. postgres 이미지에 번들된 contrib
+-- 익스텐션을 "활성화"만 하는 것(추가 패키지 설치 아님). idempotent.
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA fms;
+
 SET search_path TO fms;
 
 -- =============================================================================
