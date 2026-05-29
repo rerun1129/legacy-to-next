@@ -1,79 +1,71 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Minus, Save, Search, RotateCcw, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
+import { ActionButton } from "@/components/admin/access/action-button";
 import { Button } from "@/components/shared/button";
-import { ModalShell } from "@/components/shared/modal-shell";
-import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
-import { accessMenuPort } from "@/lib/ports";
-import { ComboBox } from "@/components/shared/inputs/combo-box";
+import { collectGridChanges } from "@/lib/collect-grid-changes";
 import { accessMenuUseCases } from "@/application/access/menu/use-cases";
 import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
-import { ActionButton } from "@/components/admin/access/action-button";
-import { MenuTreeView } from "@/components/admin/access/menu-tree-view";
-import type { CreateMenuDto, UpdateMenuDto, MenuRow } from "@/domain/access/menu";
+import type { SaveMenuChangesRequest } from "@/domain/access/menu";
+import { MenuTreeView, type MenuTreeHandle } from "@/components/admin/access/menu-tree-view";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
+import { listFilterStore } from "@/lib/use-list-filter-store";
+import {
+  DEFAULT_MENU_FILTER,
+  MenuListFilter,
+  type MenuFilter,
+} from "./menu-list-filter";
+import {
+  ROW_IS_EQUAL,
+  TO_CREATE,
+  TO_UPDATE,
+  toFormRow,
+  type MenuFormRow,
+  type MenuFormValues,
+} from "./menu-list-helpers";
 
-const DEFAULT_FORM: CreateMenuDto = {
-  menuCode: "",
-  parentId: null,
-  path: null,
-  label: "",
-  labelEn: null,
-  icon: null,
-  sortOrder: null,
-  active: true,
-  moduleCode: "",
-};
+const MENU_LIST_SCOPE = "/admin/access/menu/list";
 
-interface UpdateFormValues {
-  parentId: string;
-  path: string;
-  label: string;
-  labelEn: string;
-  icon: string;
-  sortOrder: string;
-  active: boolean;
-  moduleCode: string;
-}
-
-const DEFAULT_UPDATE: UpdateFormValues = {
-  parentId: "",
-  path: "",
-  label: "",
-  labelEn: "",
-  icon: "",
-  sortOrder: "",
-  active: true,
-  moduleCode: "",
-};
-
-function parseNullableStr(v: string): string | null {
-  return v.trim() === "" ? null : v.trim();
-}
-
-function parseNullableNum(v: string): number | null {
-  if (!v.trim()) return null;
-  const n = Number(v);
-  return isNaN(n) ? null : n;
-}
+// ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function AccessMenuListClient() {
   const qc = useQueryClient();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<MenuRow | null>(null);
+
+  const filterForm = useForm<MenuFilter>({ defaultValues: DEFAULT_MENU_FILTER });
+
+  // 필터 폼 입력값 복원/저장 — 메뉴 이동 후 복귀 시 유지
+  useListFilterSync(filterForm, MENU_LIST_SCOPE);
+
+  // activeFilter 영속: 복귀 시 store search 슬롯에서 복원
+  const [activeFilter, setActiveFilter] = useState<MenuFilter | null>(
+    () =>
+      (listFilterStore.getState().getSearch(MENU_LIST_SCOPE)?.extraFilter as MenuFilter | undefined) ??
+      null,
+  );
+
+  const { control, register, getValues, reset, formState: { isDirty } } =
+    useForm<MenuFormValues>({ defaultValues: { rows: [] } });
+  const { fields, append, remove } = useFieldArray({ control, name: "rows" });
+
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
-  const createForm = useForm<CreateMenuDto>({ defaultValues: DEFAULT_FORM });
-  const editForm = useForm<UpdateFormValues>({ defaultValues: DEFAULT_UPDATE });
+
+  // expand/collapse 버튼용 ref
+  const treeRef = useRef<MenuTreeHandle>(null);
+
+  // ─── 데이터 조회 ─────────────────────────────────────────────────────────
 
   const { data, isFetching } = useQuery({
     queryKey: ["access-menu", "list"],
-    queryFn: () => accessMenuPort.search(1, 100),
+    queryFn: () => accessMenuUseCases.search(1, 100),
+    enabled: activeFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
+    structuralSharing: false,
   });
 
   const { data: moduleData } = useQuery({
@@ -83,191 +75,281 @@ export function AccessMenuListClient() {
     gcTime: Infinity,
     refetchOnMount: false,
   });
-  const moduleOptions = (moduleData ?? []).map(v => ({ value: v.value, label: v.label ?? v.value }));
+  const moduleOptions = useMemo(
+    () => (moduleData ?? []).map((v) => ({ value: v.value, label: v.label ?? v.value })),
+    [moduleData],
+  );
 
-  const createMutation = useMutation({
-    mutationFn: (req: CreateMenuDto) => accessMenuPort.create(req),
-    onSuccess: () => {
-      toast.success("메뉴가 등록되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
-      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
-      setCreateOpen(false);
-      createForm.reset(DEFAULT_FORM);
-    },
-  });
+  // ─── 클라이언트 필터링 ────────────────────────────────────────────────────
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, req }: { id: number; req: UpdateMenuDto }) =>
-      accessMenuPort.update(id, req),
-    onSuccess: () => {
-      toast.success("메뉴가 수정되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
-      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
-      setEditTarget(null);
-      editForm.reset(DEFAULT_UPDATE);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => accessMenuPort.delete(id),
-    onSuccess: () => {
-      toast.success("삭제되었습니다.");
-      qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
-      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
-    },
-    onError: () => {
-      toast.error("하위 메뉴가 존재하여 삭제할 수 없습니다.");
-    },
-  });
-
-  const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: number[]) => accessMenuUseCases.deleteMany(ids),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
-      qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
-      setSelectedKeys(new Set());
-      toast.success("선택한 항목이 삭제되었습니다.");
-    },
-    onError: () => {
-      toast.error("하위 메뉴가 존재하는 항목이 포함되어 삭제할 수 없습니다.");
-    },
-  });
-
-  const openEdit = useCallback((row: MenuRow) => {
-    setEditTarget(row);
-    editForm.reset({
-      parentId: row.parentId != null ? String(row.parentId) : "",
-      path: row.path ?? "",
-      label: row.label,
-      labelEn: row.labelEn ?? "",
-      icon: row.icon ?? "",
-      sortOrder: row.sortOrder != null ? String(row.sortOrder) : "",
-      active: row.active,
-      moduleCode: row.moduleCode,
+  const filteredData = useMemo(() => {
+    if (!data || !activeFilter) return [];
+    const codeQ = activeFilter.menuCode.trim().toLowerCase();
+    const modQ = activeFilter.moduleCode;
+    return data.content.filter((r) => {
+      if (modQ && r.moduleCode !== modQ) return false;
+      if (codeQ && !r.menuCode.toLowerCase().includes(codeQ)) return false;
+      if (activeFilter.status === "ACTIVE" && !r.active) return false;
+      if (activeFilter.status === "INACTIVE" && r.active) return false;
+      return true;
     });
-  }, [editForm]);
+  }, [data, activeFilter]);
 
-  function handleEditSave(values: UpdateFormValues) {
-    if (!editTarget) return;
-    const req: UpdateMenuDto = {
-      parentId: parseNullableNum(values.parentId),
-      path: parseNullableStr(values.path),
-      label: values.label.trim(),
-      labelEn: parseNullableStr(values.labelEn),
-      icon: parseNullableStr(values.icon),
-      sortOrder: parseNullableNum(values.sortOrder),
-      active: values.active,
-      moduleCode: values.moduleCode.trim(),
-    };
-    updateMutation.mutate({ id: editTarget.id, req });
+  const originalRows = useMemo<MenuFormRow[]>(
+    () => filteredData.map(toFormRow),
+    [filteredData],
+  );
+
+  useEffect(() => {
+    reset({ rows: originalRows });
+  // reset이 바뀌면 안정성 문제가 없으므로 originalRows만 추적
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originalRows]);
+
+  // ─── entityId → fieldArray index 맵 ─────────────────────────────────────
+
+  const indexByEntityId = useMemo(() => {
+    const map = new Map<number, number>();
+    (fields as unknown as MenuFormRow[]).forEach((row, i) => {
+      map.set(row.entityId, i);
+    });
+    return map;
+  }, [fields]);
+
+  // ─── 신규 행 추가 ────────────────────────────────────────────────────────
+
+  const pendingFocusRef = useRef<number | null>(null);
+
+  function handleAdd() {
+    // 선택된 노드 중 기존(양수 entityId) 하나를 부모로 사용
+    const selectedArr = [...selectedKeys];
+    const parentEntityId = selectedArr.find((k) => k > 0) ?? null;
+    if (parentEntityId === null) return;
+
+    const currentRows = getValues("rows");
+    const parentRow = currentRows.find((r) => r.entityId === parentEntityId);
+    const newEntityId = -Date.now();
+
+    append({
+      entityId: newEntityId,
+      id: 0,
+      menuCode: "",
+      parentId: parentEntityId,
+      path: null,
+      label: "",
+      labelEn: null,
+      icon: null,
+      sortOrder: null,
+      active: true,
+      moduleCode: parentRow?.moduleCode ?? (moduleOptions[0]?.value ?? ""),
+    });
+    pendingFocusRef.current = newEntityId;
   }
 
-  const handleDelete = useCallback(async (id: number, label: string) => {
-    const ok = await confirm({ title: "메뉴 삭제", description: `"${label}" 메뉴를 삭제하시겠습니까?`, variant: "destructive", confirmText: "삭제", cancelText: "취소" });
-    if (!ok) return;
-    deleteMutation.mutate(id);
-  }, [deleteMutation]);
+  // 신규 행 추가 후 menuCode 셀 포커스
+  useEffect(() => {
+    if (pendingFocusRef.current === null) return;
+    pendingFocusRef.current = null;
+    requestAnimationFrame(() => {
+      // tree-row 내 첫 번째 input(menuCode TextBox)으로 포커스
+      const rows = document.querySelectorAll<HTMLElement>(".tree-row.is-new input:not([type=hidden])");
+      if (rows.length > 0) rows[rows.length - 1].focus();
+    });
+  });
 
-  async function handleBulkDelete() {
-    const ok = await confirm({ title: "선택 삭제", description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`, variant: "destructive" });
-    if (ok) bulkDeleteMutation.mutate([...selectedKeys]);
+  // ─── 미저장 신규 행 제거 ─────────────────────────────────────────────────
+
+  function handleRemove() {
+    if (selectedKeys.size === 0) return;
+    const rows = getValues("rows");
+    const indices = rows
+      .map((r, i) => (selectedKeys.has(r.entityId) && r.entityId < 0 ? i : -1))
+      .filter((i) => i !== -1)
+      .sort((a, b) => b - a);
+    for (const idx of indices) remove(idx);
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      rows.forEach((r) => { if (r.entityId < 0) next.delete(r.entityId); });
+      return next;
+    });
   }
 
-  const rows = data?.content ?? [];
+  function handleRemoveNewRow(entityId: number) {
+    const rows = getValues("rows");
+    const idx = rows.findIndex((r) => r.entityId === entityId);
+    if (idx >= 0) remove(idx);
+    setSelectedKeys((prev) => { const next = new Set(prev); next.delete(entityId); return next; });
+  }
+
+  // ─── Save ────────────────────────────────────────────────────────────────
+
+  const invalidateList = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
+    qc.invalidateQueries({ queryKey: ["sidebar-menu", "accessible"] });
+  }, [qc]);
+
+  const saveChangesMutation = useMutation({
+    mutationFn: (vars: SaveMenuChangesRequest) => accessMenuUseCases.saveChanges(vars),
+    onSuccess: (result) => {
+      toast.success(
+        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}`,
+      );
+      invalidateList();
+    },
+  });
+
+  const handleSave = useCallback(() => {
+    const liveRows = getValues("rows");
+    const changes = collectGridChanges(originalRows, liveRows, {
+      rowKey: (r) => r.entityId,
+      toCreate: TO_CREATE,
+      toUpdate: TO_UPDATE,
+      isEqual: ROW_IS_EQUAL,
+    });
+    // deleteIds는 batch payload에 포함하지 않음(하드 삭제 미도입)
+    saveChangesMutation.mutate({ creates: changes.creates, updates: changes.updates });
+  }, [getValues, originalRows, saveChangesMutation]);
+
+  // ─── 선택 노드 중 양수(기존) entityId가 있을 때 Add 활성 ─────────────────
+
+  const canAdd = useMemo(
+    () => [...selectedKeys].some((k) => k > 0),
+    [selectedKeys],
+  );
+
+  const hasRows = fields.length > 0;
+
+  // ─── 렌더 ────────────────────────────────────────────────────────────────
+
+  const liveRows = fields as unknown as MenuFormRow[];
 
   return (
     <>
+      {/* 툴바 */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_ADMIN_ACCESS_MENU_DELETE"
-          className="btn btn--modal btn--sm"
-          disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
-          onClick={handleBulkDelete}
-        >
-          선택 삭제
-        </ActionButton>
-        <Button size="sm" variant="modal" leftIcon={<Plus size={12} />} onClick={() => setCreateOpen(true)}>신규</Button>
+          buttonCode="BTN_ADMIN_ACCESS_MENU_RESET"
+          className="btn btn--normal btn--sm"
+          type="button"
+          onClick={() => {
+            filterForm.reset(DEFAULT_MENU_FILTER);
+            setActiveFilter(null);
+            reset({ rows: [] });
+            setSelectedKeys(new Set());
+            listFilterStore.getState().clearFilter(MENU_LIST_SCOPE);
+          }}
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_MENU_SEARCH"
+          className="btn btn--search btn--sm"
+          type="button"
+          onClick={() =>
+            filterForm.handleSubmit((values) => {
+              qc.invalidateQueries({ queryKey: ["access-menu", "list"] });
+              setActiveFilter(values);
+              listFilterStore.getState().setSearch(MENU_LIST_SCOPE, { extraFilter: values });
+            })()
+          }
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_ADMIN_ACCESS_MENU_SAVE"
+          className="btn btn--transaction btn--sm"
+          type="button"
+          disabled={!isDirty || saveChangesMutation.isPending}
+          onClick={handleSave}
+          icon={<Save size={12} style={{ marginRight: 4 }} />}
+        />
       </div>
-      <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+
+      {/* 검색 필터 */}
+      <MenuListFilter form={filterForm} moduleOptions={moduleOptions} />
+
+      {/* 트리 패널 */}
+      <div
+        className="panel"
+        style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", marginTop: 10 }}
+      >
         <div className="panel__head">
           <div className="panel__title-accent" />
           <span className="panel__title">Menus</span>
-          <span className="panel__rowcount">{rows.length}</span>
+          <span className="panel__rowcount">{liveRows.length}</span>
+          <div className="panel__actions">
+            {/* 모두 펴기 / 모두 접기 */}
+            <Button
+              variant="normal"
+              size="sm"
+              iconOnly
+              type="button"
+              disabled={!hasRows}
+              onClick={() => treeRef.current?.expandAll()}
+              aria-label="모두 펴기"
+            >
+              <ChevronsUpDown size={12} />
+            </Button>
+            <Button
+              variant="normal"
+              size="sm"
+              iconOnly
+              type="button"
+              disabled={!hasRows}
+              onClick={() => treeRef.current?.collapseAll()}
+              aria-label="모두 접기"
+            >
+              <ChevronsDownUp size={12} />
+            </Button>
+            <Button
+              variant="success"
+              size="sm"
+              iconOnly
+              type="button"
+              disabled={!canAdd}
+              onClick={handleAdd}
+            >
+              <Plus size={12} />
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              iconOnly
+              type="button"
+              disabled={[...selectedKeys].every((k) => k > 0)}
+              onClick={handleRemove}
+            >
+              <Minus size={12} />
+            </Button>
+          </div>
         </div>
+
         <div className="list-wrap" style={{ overflowY: "auto" }}>
-          {isFetching && rows.length === 0 ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>로딩 중...</div>
-          ) : rows.length === 0 ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>데이터가 없습니다.</div>
+          {isFetching && liveRows.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
+              로딩 중...
+            </div>
+          ) : activeFilter === null ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
+              Enter search criteria and click Search.
+            </div>
+          ) : liveRows.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
+              No results found.
+            </div>
           ) : (
             <MenuTreeView
-              rows={rows}
+              ref={treeRef}
+              rows={liveRows}
+              indexByEntityId={indexByEntityId}
+              register={register}
+              control={control}
+              moduleOptions={moduleOptions}
               selectedKeys={selectedKeys}
-              deleteIsPending={deleteMutation.isPending}
               onSelectionChange={setSelectedKeys}
-              onEdit={openEdit}
-              onDelete={handleDelete}
+              onRemoveNewRow={handleRemoveNewRow}
             />
           )}
         </div>
       </div>
-
-      {/* 신규 등록 모달 */}
-      <ModalShell isOpen={createOpen} title="메뉴 등록" size="md" style={{ maxWidth: 460 }}>
-        <form onSubmit={createForm.handleSubmit((v) => createMutation.mutate(v))} className="modal__body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn"><span className="lcn__label">menuCode</span><input className="text-box text-box--panel" style={{ width: 170, border: "1px solid var(--border)" }} {...createForm.register("menuCode")} /></div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...createForm.register("label")} /></div>
-            <div className="lcn">
-              <span className="lcn__label">moduleCode</span>
-              <Controller
-                name="moduleCode"
-                control={createForm.control}
-                render={({ field }) => (
-                  <ComboBox variant="panel" style={{ width: 170 }} options={moduleOptions} value={field.value} onChange={field.onChange} />
-                )}
-              />
-            </div>
-            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" style={{ width: 250, border: "1px solid var(--border)" }} {...createForm.register("path")} /></div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...createForm.register("active")} />활성</label></div>
-          </div>
-        </form>
-        <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={createForm.handleSubmit((v) => createMutation.mutate(v))} loading={createMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setCreateOpen(false); createForm.reset(DEFAULT_FORM); }}>닫기</Button>
-        </div>
-      </ModalShell>
-
-      {/* 수정 모달 */}
-      <ModalShell isOpen={editTarget !== null} title="메뉴 수정" size="md" style={{ maxWidth: 460 }}>
-        <form onSubmit={editForm.handleSubmit(handleEditSave)} className="modal__body">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div className="lcn">
-              <span className="lcn__label">menuCode</span>
-              <span className="text-box text-box--panel" style={{ width: 170, background: "var(--surface-2)", color: "var(--ink-3)", display: "inline-flex", alignItems: "center", border: "1px solid var(--border)" }}>
-                {editTarget?.menuCode}
-              </span>
-            </div>
-            <div className="lcn"><span className="lcn__label">label</span><input className="text-box text-box--panel" style={{ width: 220, border: "1px solid var(--border)" }} {...editForm.register("label")} /></div>
-            <div className="lcn">
-              <span className="lcn__label">moduleCode</span>
-              <Controller
-                name="moduleCode"
-                control={editForm.control}
-                render={({ field }) => (
-                  <ComboBox variant="panel" style={{ width: 170 }} options={moduleOptions} value={field.value} onChange={field.onChange} />
-                )}
-              />
-            </div>
-            <div className="lcn"><span className="lcn__label">path</span><input className="text-box text-box--panel" style={{ width: 250, border: "1px solid var(--border)" }} {...editForm.register("path")} /></div>
-            <div className="lcn"><span className="lcn__label">활성</span><label style={{ display: "flex", alignItems: "center", gap: 6 }}><input type="checkbox" {...editForm.register("active")} />활성</label></div>
-          </div>
-        </form>
-        <div className="modal__footer">
-          <Button variant="modal" size="sm" onClick={editForm.handleSubmit(handleEditSave)} loading={updateMutation.isPending}>저장</Button>
-          <Button size="sm" onClick={() => { setEditTarget(null); editForm.reset(DEFAULT_UPDATE); }}>닫기</Button>
-        </div>
-      </ModalShell>
     </>
   );
 }

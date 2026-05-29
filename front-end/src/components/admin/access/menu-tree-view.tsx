@@ -1,27 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
-import { ActionButton } from "@/components/admin/access/action-button";
-import type { MenuRow } from "@/domain/access/menu";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import { Minus, ChevronDown, ChevronRight } from "lucide-react";
+import { Button } from "@/components/shared/button";
+import type { UseFormRegister, Control } from "react-hook-form";
+import { MenuRowCells } from "./menu-grid-columns";
+import type { MenuFormRow, MenuFormValues } from "./menu-list-helpers";
+import { MenuTreeHeader } from "./menu-tree-header";
 
-function collectDescendantIds(nodeId: number, childMap: Map<number, MenuRow[]>): number[] {
-  const children = childMap.get(nodeId) ?? [];
-  return children.flatMap(c => [c.id, ...collectDescendantIds(c.id, childMap)]);
-}
+// ─── 트리 빌더 ────────────────────────────────────────────────────────────────
 
 interface TreeNode {
-  row: MenuRow;
+  row: MenuFormRow;
   children: TreeNode[];
 }
 
-function buildTree(items: MenuRow[]): { roots: TreeNode[]; } {
+function buildTree(items: MenuFormRow[]): TreeNode[] {
   const nodeMap = new Map<number, TreeNode>();
-  items.forEach(row => nodeMap.set(row.id, { row, children: [] }));
+  items.forEach((row) => nodeMap.set(row.entityId, { row, children: [] }));
 
   const roots: TreeNode[] = [];
-  items.forEach(row => {
-    const node = nodeMap.get(row.id)!;
+  items.forEach((row) => {
+    const node = nodeMap.get(row.entityId)!;
     if (row.parentId === null) {
       roots.push(node);
     } else {
@@ -29,31 +29,45 @@ function buildTree(items: MenuRow[]): { roots: TreeNode[]; } {
       if (parent) {
         parent.children.push(node);
       } else {
-        // parentId가 있지만 부모가 같은 모듈 그룹에 없을 수 있으므로 root로 처리
         roots.push(node);
       }
     }
   });
 
   roots.sort((a, b) => (a.row.sortOrder ?? 0) - (b.row.sortOrder ?? 0));
-  nodeMap.forEach(node => {
+  nodeMap.forEach((node) => {
     node.children.sort((a, b) => (a.row.sortOrder ?? 0) - (b.row.sortOrder ?? 0));
   });
 
-  return { roots };
+  return roots;
 }
+
+function collectDescendantEntityIds(
+  entityId: number,
+  childMap: Map<number, MenuFormRow[]>,
+): number[] {
+  const children = childMap.get(entityId) ?? [];
+  return children.flatMap((c) => [
+    c.entityId,
+    ...collectDescendantEntityIds(c.entityId, childMap),
+  ]);
+}
+
+// ─── 행 렌더 ──────────────────────────────────────────────────────────────────
 
 interface TreeRowProps {
   node: TreeNode;
   level: number;
   expandedNodes: Set<number>;
   selectedKeys: Set<number>;
-  childMap: Map<number, MenuRow[]>;
-  onToggleNode: (id: number) => void;
+  childMap: Map<number, MenuFormRow[]>;
+  indexByEntityId: Map<number, number>;
+  register: UseFormRegister<MenuFormValues>;
+  control: Control<MenuFormValues>;
+  moduleOptions: { value: string; label: string }[];
+  onToggleNode: (entityId: number) => void;
   onSelectionChange: (next: Set<number>) => void;
-  onEdit: (row: MenuRow) => void;
-  onDelete: (id: number, label: string) => void;
-  deleteIsPending: boolean;
+  onRemoveNewRow: (entityId: number) => void;
 }
 
 function TreeRow({
@@ -62,211 +76,274 @@ function TreeRow({
   expandedNodes,
   selectedKeys,
   childMap,
+  indexByEntityId,
+  register,
+  control,
+  moduleOptions,
   onToggleNode,
   onSelectionChange,
-  onEdit,
-  onDelete,
-  deleteIsPending,
+  onRemoveNewRow,
 }: TreeRowProps) {
   const { row } = node;
-  const isParent = row.path === null;
-  const isExpanded = expandedNodes.has(row.id);
-  const isSelected = selectedKeys.has(row.id);
-  const paddingLeft = 8 + level * 16;
+  const isParent = row.path === null && row.entityId > 0;
+  const isNew = row.entityId < 0;
+  const isExpanded = expandedNodes.has(row.entityId);
+  const isSelected = selectedKeys.has(row.entityId);
+  const idx = indexByEntityId.get(row.entityId) ?? -1;
+
+  // 들여쓰기는 첫 컬럼(menuCode) 내부에 적용.
+  // 토글/리프 영역을 고정 20px로, 앞에 level*16px 스페이서를 두어
+  // level=0 기준으로 헤더와 정렬되며, 깊은 레벨에서도 2번째 셀부터는 고정 위치 유지.
+  const indentPx = level * 16;
+
+  function handleCheck() {
+    const descendantIds = collectDescendantEntityIds(row.entityId, childMap);
+    const allIds = [row.entityId, ...descendantIds];
+    const next = new Set(selectedKeys);
+    if (next.has(row.entityId)) {
+      allIds.forEach((id) => next.delete(id));
+    } else {
+      allIds.forEach((id) => next.add(id));
+    }
+    onSelectionChange(next);
+  }
 
   return (
     <>
       <div
-        className={`tree-row${isSelected ? " tree-row--selected" : ""}`}
-        style={{ paddingLeft }}
+        className={`tree-row${isSelected ? " tree-row--selected" : ""}${isNew ? " is-new" : ""}`}
+        style={{ paddingLeft: 8, display: "flex", alignItems: "center", gap: 4, minHeight: 32 }}
       >
+        {/* 체크박스: 헤더 체크박스 스페이서(28px)와 매칭 */}
         <input
           type="checkbox"
           className="chk"
           checked={isSelected}
-          onChange={() => {
-            const descendantIds = collectDescendantIds(row.id, childMap);
-            const allIds = [row.id, ...descendantIds];
-            const next = new Set(selectedKeys);
-            if (next.has(row.id)) {
-              allIds.forEach(id => next.delete(id));
-            } else {
-              allIds.forEach(id => next.add(id));
-            }
-            onSelectionChange(next);
-          }}
+          onChange={handleCheck}
           onClick={(e) => e.stopPropagation()}
-          style={{ flexShrink: 0 }}
+          style={{ flexShrink: 0, width: 20 }}
         />
+
+        {/* 들여쓰기 스페이서: level*16px, 첫 컬럼 내부 들여쓰기 구현 */}
+        {indentPx > 0 && (
+          <span style={{ display: "inline-block", width: indentPx, flexShrink: 0 }} />
+        )}
+
+        {/* 토글 또는 리프 인덴트: 헤더 토글 스페이서(20px)와 매칭 */}
         {isParent ? (
           <button
             className="tree-row__toggle"
-            onClick={() => onToggleNode(row.id)}
+            onClick={() => onToggleNode(row.entityId)}
             aria-label={isExpanded ? "접기" : "펼치기"}
+            type="button"
+            style={{ flexShrink: 0 }}
           >
             {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
           </button>
         ) : (
-          <span className="tree-row__leaf-indent" />
+          <span
+            className="tree-row__leaf-indent"
+            style={{ display: "inline-block", width: 20, flexShrink: 0 }}
+          />
         )}
-        <span className="tree-row__code">{row.menuCode}</span>
-        <span className="tree-row__label">{row.label}</span>
-        {row.path && (
-          <span className="tree-row__path">{row.path}</span>
+
+        {/* 셀 그룹: MenuRowCells(menuCode 포함 전체) */}
+        {idx >= 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+            <MenuRowCells
+              row={row}
+              idx={idx}
+              register={register}
+              control={control}
+              moduleOptions={moduleOptions}
+            />
+          </div>
         )}
-        <span className={`tree-row__badge${row.active ? " tree-row__badge--active" : " tree-row__badge--inactive"}`}>
-          {row.active ? "활성" : "비활성"}
-        </span>
-        <div className="tree-row__actions" onClick={(e) => e.stopPropagation()}>
-          <ActionButton
-            buttonCode="BTN_ADMIN_ACCESS_MENU_UPDATE"
-            className="btn btn--sm"
-            onClick={() => onEdit(row)}
-          >
-            <Pencil size={12} />
-          </ActionButton>
-          <ActionButton
-            buttonCode="BTN_ADMIN_ACCESS_MENU_DELETE"
-            className="btn btn--danger btn--sm"
-            onClick={() => onDelete(row.id, row.label)}
-            disabled={deleteIsPending}
-          >
-            <Trash2 size={12} />
-          </ActionButton>
-        </div>
+
+        {/* 신규 행(entityId<0)에만 제거 버튼 노출 */}
+        {isNew && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="danger"
+              size="sm"
+              iconOnly
+              type="button"
+              onClick={() => onRemoveNewRow(row.entityId)}
+            >
+              <Minus size={12} />
+            </Button>
+          </div>
+        )}
       </div>
-      {isParent && isExpanded && node.children.map(child => (
-        <TreeRow
-          key={child.row.id}
-          node={child}
-          level={level + 1}
-          expandedNodes={expandedNodes}
-          selectedKeys={selectedKeys}
-          childMap={childMap}
-          onToggleNode={onToggleNode}
-          onSelectionChange={onSelectionChange}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          deleteIsPending={deleteIsPending}
-        />
-      ))}
+      {isParent && isExpanded &&
+        node.children.map((child) => (
+          <TreeRow
+            key={child.row.entityId}
+            node={child}
+            level={level + 1}
+            expandedNodes={expandedNodes}
+            selectedKeys={selectedKeys}
+            childMap={childMap}
+            indexByEntityId={indexByEntityId}
+            register={register}
+            control={control}
+            moduleOptions={moduleOptions}
+            onToggleNode={onToggleNode}
+            onSelectionChange={onSelectionChange}
+            onRemoveNewRow={onRemoveNewRow}
+          />
+        ))}
     </>
   );
 }
 
+// ─── 공개 인터페이스 ──────────────────────────────────────────────────────────
+
+export interface MenuTreeHandle {
+  expandAll(): void;
+  collapseAll(): void;
+}
+
 export interface MenuTreeViewProps {
-  rows: MenuRow[];
+  rows: MenuFormRow[];
+  indexByEntityId: Map<number, number>;
+  register: UseFormRegister<MenuFormValues>;
+  control: Control<MenuFormValues>;
+  moduleOptions: { value: string; label: string }[];
   selectedKeys: Set<number>;
-  deleteIsPending: boolean;
   onSelectionChange: (next: Set<number>) => void;
-  onEdit: (row: MenuRow) => void;
-  onDelete: (id: number, label: string) => void;
+  onRemoveNewRow: (entityId: number) => void;
 }
 
-export function MenuTreeView({
-  rows,
-  selectedKeys,
-  deleteIsPending,
-  onSelectionChange,
-  onEdit,
-  onDelete,
-}: MenuTreeViewProps) {
-  // grouped를 먼저 계산해 모듈 목록 파악
-  const grouped = useMemo(() => {
-    const map = new Map<string, MenuRow[]>();
-    rows.forEach(row => {
-      const list = map.get(row.moduleCode) ?? [];
-      list.push(row);
-      map.set(row.moduleCode, list);
-    });
-    return map;
-  }, [rows]);
-
-  // 부모→자식 id 맵: 체크박스 하위 일괄 토글에 사용
-  const childMap = useMemo(() => {
-    const map = new Map<number, MenuRow[]>();
-    rows.forEach(row => {
-      if (row.parentId !== null) {
-        const list = map.get(row.parentId) ?? [];
+export const MenuTreeView = forwardRef<MenuTreeHandle, MenuTreeViewProps>(
+  function MenuTreeView(
+    {
+      rows,
+      indexByEntityId,
+      register,
+      control,
+      moduleOptions,
+      selectedKeys,
+      onSelectionChange,
+      onRemoveNewRow,
+    },
+    ref,
+  ) {
+    const grouped = useMemo(() => {
+      const map = new Map<string, MenuFormRow[]>();
+      rows.forEach((row) => {
+        const list = map.get(row.moduleCode) ?? [];
         list.push(row);
-        map.set(row.parentId, list);
-      }
-    });
-    return map;
-  }, [rows]);
+        map.set(row.moduleCode, list);
+      });
+      return map;
+    }, [rows]);
 
-  // 초기값: 모든 모듈 펼침, 노드는 접힘
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(
-    () => new Set(rows.map(r => r.moduleCode))
-  );
-  const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
+    const childMap = useMemo(() => {
+      const map = new Map<number, MenuFormRow[]>();
+      rows.forEach((row) => {
+        if (row.parentId !== null) {
+          const list = map.get(row.parentId) ?? [];
+          list.push(row);
+          map.set(row.parentId, list);
+        }
+      });
+      return map;
+    }, [rows]);
 
-  function toggleModule(code: string) {
-    setExpandedModules(prev => {
-      const next = new Set(prev);
-      if (next.has(code)) next.delete(code);
-      else next.add(code);
-      return next;
-    });
-  }
+    const [expandedModules, setExpandedModules] = useState<Set<string>>(
+      () => new Set(rows.map((r) => r.moduleCode)),
+    );
+    const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
 
-  function toggleNode(id: number) {
-    setExpandedNodes(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
+    const treesByModule = useMemo(() => {
+      const result = new Map<string, TreeNode[]>();
+      grouped.forEach((items, code) => {
+        result.set(code, buildTree(items));
+      });
+      return result;
+    }, [grouped]);
 
-  const treesByModule = useMemo(() => {
-    const result = new Map<string, ReturnType<typeof buildTree>>();
-    grouped.forEach((items, code) => {
-      result.set(code, buildTree(items));
-    });
-    return result;
-  }, [grouped]);
+    const moduleSorted = useMemo(() => [...grouped.keys()].sort(), [grouped]);
 
-  const moduleSorted = useMemo(
-    () => [...grouped.keys()].sort(),
-    [grouped]
-  );
-
-  return (
-    <div className="menu-tree">
-      {moduleSorted.map(moduleCode => {
-        const isModuleExpanded = expandedModules.has(moduleCode);
-        const tree = treesByModule.get(moduleCode);
-        if (!tree) return null;
-
-        return (
-          <div key={moduleCode} className="menu-tree__module">
-            <div
-              className="menu-tree__module-header"
-              onClick={() => toggleModule(moduleCode)}
-            >
-              {isModuleExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              <span>{moduleCode}</span>
-              <span className="menu-tree__module-count">{grouped.get(moduleCode)?.length ?? 0}</span>
-            </div>
-            {isModuleExpanded && tree.roots.map(node => (
-              <TreeRow
-                key={node.row.id}
-                node={node}
-                level={0}
-                expandedNodes={expandedNodes}
-                selectedKeys={selectedKeys}
-                childMap={childMap}
-                onToggleNode={toggleNode}
-                onSelectionChange={onSelectionChange}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                deleteIsPending={deleteIsPending}
-              />
-            ))}
-          </div>
+    // expandAll: 모든 모듈 펼치기 + 모든 부모 노드(path===null && entityId>0) 펼치기
+    // collapseAll: 모듈·노드 모두 접기
+    useImperativeHandle(ref, () => ({
+      expandAll() {
+        setExpandedModules(new Set(rows.map((r) => r.moduleCode)));
+        const parentIds = new Set(
+          rows
+            .filter((r) => r.path === null && r.entityId > 0)
+            .map((r) => r.entityId),
         );
-      })}
-    </div>
-  );
-}
+        setExpandedNodes(parentIds);
+      },
+      collapseAll() {
+        setExpandedModules(new Set());
+        setExpandedNodes(new Set());
+      },
+    }), [rows]);
+
+    function toggleModule(code: string) {
+      setExpandedModules((prev) => {
+        const next = new Set(prev);
+        if (next.has(code)) next.delete(code);
+        else next.add(code);
+        return next;
+      });
+    }
+
+    function toggleNode(entityId: number) {
+      setExpandedNodes((prev) => {
+        const next = new Set(prev);
+        if (next.has(entityId)) next.delete(entityId);
+        else next.add(entityId);
+        return next;
+      });
+    }
+
+    return (
+      <div className="menu-tree">
+        <MenuTreeHeader />
+        {moduleSorted.map((moduleCode) => {
+          const isModuleExpanded = expandedModules.has(moduleCode);
+          const tree = treesByModule.get(moduleCode);
+          if (!tree) return null;
+
+          return (
+            <div key={moduleCode} className="menu-tree__module">
+              <div
+                className="menu-tree__module-header"
+                onClick={() => toggleModule(moduleCode)}
+              >
+                {isModuleExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <span>{moduleCode}</span>
+                <span className="menu-tree__module-count">
+                  {grouped.get(moduleCode)?.length ?? 0}
+                </span>
+              </div>
+              {isModuleExpanded &&
+                tree.map((node) => (
+                  <TreeRow
+                    key={node.row.entityId}
+                    node={node}
+                    level={0}
+                    expandedNodes={expandedNodes}
+                    selectedKeys={selectedKeys}
+                    childMap={childMap}
+                    indexByEntityId={indexByEntityId}
+                    register={register}
+                    control={control}
+                    moduleOptions={moduleOptions}
+                    onToggleNode={toggleNode}
+                    onSelectionChange={onSelectionChange}
+                    onRemoveNewRow={onRemoveNewRow}
+                  />
+                ))}
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
+);

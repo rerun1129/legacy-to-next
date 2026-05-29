@@ -1,6 +1,12 @@
 import { z } from "zod";
 import type { MenuPort, MenuPageResult } from "@/application/access/menu/ports";
-import type { MenuRow, MenuDetail, CreateMenuDto, UpdateMenuDto } from "@/domain/access/menu";
+import type {
+  MenuRow,
+  MenuDetail,
+  SaveMenuChangesRequest,
+  SaveChangesResult,
+  MenuAutocompleteItem,
+} from "@/domain/access/menu";
 import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
 
@@ -37,6 +43,12 @@ const MENU_DETAIL_SCHEMA = z.object({
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
 }) satisfies z.ZodType<MenuDetail>;
 
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+}) satisfies z.ZodType<SaveChangesResult>;
+
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
@@ -58,7 +70,13 @@ export const API_MENU_PORT: MenuPort = {
     const parsed = apiResponse(pagedResult(MENU_ROW_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid menu search response: ${parsed.error.message}`);
     const d = parsed.data.data;
-    return { content: d.content as MenuRow[], totalPages: d.totalPages, totalElements: d.totalElements, page: d.page + 1, size: d.size };
+    return {
+      content: d.content as MenuRow[],
+      totalPages: d.totalPages,
+      totalElements: d.totalElements,
+      page: d.page + 1,
+      size: d.size,
+    };
   },
 
   async getById(id) {
@@ -68,25 +86,26 @@ export const API_MENU_PORT: MenuPort = {
     return parsed.data.data as MenuDetail;
   },
 
-  async create(req: CreateMenuDto) {
-    const json = await adminFetchJson(BASE, { method: "POST", body: JSON.stringify(req) });
-    const parsed = apiResponse(z.object({ id: z.number() })).safeParse(json);
-    if (!parsed.success) throw new ResponseParseError(`Invalid menu create response: ${parsed.error.message}`);
-    return parsed.data.data.id;
-  },
-
-  async update(id, req: UpdateMenuDto) {
-    await adminFetchJson(`${BASE}/${id}`, { method: "PUT", body: JSON.stringify(req) });
-  },
-
-  async delete(id) {
-    await adminFetchJson(`${BASE}/${id}`, { method: "DELETE" });
-  },
-
-  async deleteMany(ids) {
-    await adminFetchJson(`${BASE}/bulk`, {
-      method: "DELETE",
-      body: JSON.stringify({ ids }),
+  async saveChanges(req: SaveMenuChangesRequest): Promise<SaveChangesResult> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
     });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid menu save-changes response: ${parsed.error.message}`);
+    }
+    return parsed.data.data as SaveChangesResult;
+  },
+
+  async autocomplete(query: string): Promise<MenuAutocompleteItem[]> {
+    const json = await adminFetchJson(
+      `${BASE}/autocomplete?query=${encodeURIComponent(query)}`
+    );
+    const parsed = apiResponse(z.array(z.object({ code: z.string(), name: z.string() }))).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid menu autocomplete response: ${parsed.error.message}`);
+    }
+    return parsed.data.data as MenuAutocompleteItem[];
   },
 };

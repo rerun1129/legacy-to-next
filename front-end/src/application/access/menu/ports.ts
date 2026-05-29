@@ -1,8 +1,9 @@
 import type {
   MenuRow,
   MenuDetail,
-  CreateMenuDto,
-  UpdateMenuDto,
+  SaveMenuChangesRequest,
+  SaveChangesResult,
+  MenuAutocompleteItem,
 } from "@/domain/access/menu";
 
 export interface MenuPageResult {
@@ -16,8 +17,6 @@ export interface MenuPageResult {
 export interface MenuPort {
   search(page: number, size?: number): Promise<MenuPageResult>;
   getById(id: number): Promise<MenuDetail>;
-  create(req: CreateMenuDto): Promise<number>;
-  update(id: number, req: UpdateMenuDto): Promise<void>;
-  delete(id: number): Promise<void>;
-  deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveMenuChangesRequest): Promise<SaveChangesResult>;
+  autocomplete(query: string): Promise<MenuAutocompleteItem[]>;
 }
