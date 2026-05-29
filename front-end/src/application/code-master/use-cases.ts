@@ -10,4 +10,5 @@ export const codeMasterUseCases = {
   delete: (id: number) => codeMasterPort.delete(id),
   deleteMany: (ids: number[]) => codeMasterPort.deleteMany(ids),
   saveChanges: (req: SaveCodeMasterChangesRequest) => codeMasterPort.saveChanges(req),
+  autocomplete: (q: string, limit?: number) => codeMasterPort.autocomplete(q, limit),
 };

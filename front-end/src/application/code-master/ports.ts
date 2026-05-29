@@ -7,6 +7,7 @@ import type {
   SaveCodeMasterChangesRequest,
   SaveChangesResult,
 } from "@/domain/code-master";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 
 export interface CodeMasterPageResult {
   content: CodeMasterRow[];
@@ -24,4 +25,5 @@ export interface CodeMasterPort {
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
   saveChanges(req: SaveCodeMasterChangesRequest): Promise<SaveChangesResult>;
+  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
 }

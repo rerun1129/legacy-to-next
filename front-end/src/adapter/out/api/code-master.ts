@@ -9,6 +9,7 @@ import type {
   SaveCodeMasterChangesRequest,
   SaveChangesResult,
 } from "@/domain/code-master";
+import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
 
@@ -54,6 +55,11 @@ const SAVE_CHANGES_RESULT_SCHEMA = z.object({
   updatedCount: z.number(),
   deletedCount: z.number(),
 });
+
+const AUTOCOMPLETE_ITEM_SCHEMA = z.object({
+  code: z.string(),
+  name: z.string().nullable().transform((v) => v ?? ""),
+}) satisfies z.ZodType<CodeBoxSuggestion>;
 
 function activeForBackend(active: CodeMasterFilter["active"]): boolean | null {
   if (active === "ALL") return null;
@@ -137,6 +143,14 @@ export const API_CODE_MASTER_PORT: CodeMasterPort = {
     if (!parsed.success) {
       throw new ResponseParseError(`Invalid code-master save-changes response: ${parsed.error.message}`);
     }
+    return parsed.data.data;
+  },
+
+  async autocomplete(q: string, limit = 20): Promise<CodeBoxSuggestion[]> {
+    const params = new URLSearchParams({ q, limit: String(limit) });
+    const json = await adminFetchJson(`${BASE}/autocomplete?${params}`);
+    const parsed = apiResponse(z.array(AUTOCOMPLETE_ITEM_SCHEMA)).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid code-master autocomplete response: ${parsed.error.message}`);
     return parsed.data.data;
   },
 };
