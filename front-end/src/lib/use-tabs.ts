@@ -46,6 +46,7 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/fms/truck-bl/entry": "Truck B/L Entry",
   "/fms/non-bl/list":    "Non B/L List",
   "/fms/non-bl/entry":   "Non B/L Entry",
+  "/admin/code/list":    "Code Master Common Code",
 };
 
 const SKIP_SEGMENTS = new Set(["admin", "code", "fms", "cms", "access"]);

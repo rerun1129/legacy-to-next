@@ -3,6 +3,7 @@ export interface CodeDetailRow {
   masterId: number;
   codeValue: string;
   codeLabel: string;
+  remark: string | null;
   sortOrder: number | null;
   active: boolean;
   updatedAt: string;

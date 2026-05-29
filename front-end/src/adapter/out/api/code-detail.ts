@@ -18,6 +18,7 @@ const CODE_DETAIL_ROW_SCHEMA = z.object({
   masterId: z.number(),
   codeValue: z.string(),
   codeLabel: z.string(),
+  remark: z.string().nullable().optional().transform((v) => v ?? null),
   sortOrder: z.number().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
   updatedAt: z.string(),

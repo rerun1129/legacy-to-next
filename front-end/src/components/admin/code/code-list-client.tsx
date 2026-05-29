@@ -1,112 +1,144 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
+import { RotateCcw, Search } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
+import { ActionButton } from "@/components/admin/access/action-button";
+import { CodeMasterListFilter } from "./code-master-list-filter";
 import { CodeMasterListGrid } from "./code-master-list-grid";
 import { CodeDetailListGrid } from "./code-detail-list-grid";
-import { CodeMasterEntryModal } from "./code-master-entry-modal";
-import type { CodeMasterEntryModalState } from "./code-master-entry-modal";
-import { codeMasterUseCases } from "@/application/code-master/use-cases";
-import { codeDetailUseCases } from "@/application/code-detail/use-cases";
 import { confirm } from "@/components/confirm";
-import { toast } from "@/lib/toast-store";
+import type { CodeMasterFilter } from "@/domain/code-master";
 
 const SCOPE = "/admin/code/list";
 
-type CodeSearchState = SavedSearchState & { selectedMasterId: number | null };
+const DEFAULT_FILTER: CodeMasterFilter = {
+  masterCode: "",
+  masterName: "",
+  active: "ALL",
+};
+
+type CodeSearchState = SavedSearchState & {
+  submittedFilter: CodeMasterFilter | null;
+  masterPage: number;
+  selectedMasterId: number | null;
+};
 
 export function CodeListClient() {
   const qc = useQueryClient();
+
+  const filterForm = useForm<CodeMasterFilter>({ defaultValues: DEFAULT_FILTER });
+  // 필터 폼 값 영속/복원
+  useListFilterSync(filterForm, SCOPE);
+
+  const [submittedFilter, setSubmittedFilter] = useState<CodeMasterFilter | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as CodeSearchState | undefined;
+    return s?.submittedFilter ?? null;
+  });
+  const [masterPage, setMasterPage] = useState(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE);
+    return s?.currentPage ?? 1;
+  });
   const [selectedMasterId, setSelectedMasterId] = useState<number | null>(() => {
     const s = listFilterStore.getState().getSearch(SCOPE) as CodeSearchState | undefined;
     return s?.selectedMasterId ?? null;
   });
-  const [editModalState, setEditModalState] = useState<CodeMasterEntryModalState | null>(null);
+  const [detailDirty, setDetailDirty] = useState(false);
 
-  const [masterSelectedKeys, setMasterSelectedKeys] = useState<Set<number>>(new Set());
-  const [detailSelectedKeys, setDetailSelectedKeys] = useState<Set<number>>(new Set());
-
+  // 검색 상태 영속화
   useEffect(() => {
-    listFilterStore.getState().setSearch(SCOPE, { selectedMasterId });
-  }, [selectedMasterId]);
-
-  const masterBulkDeleteMutation = useMutation({
-    mutationFn: (ids: number[]) => codeMasterUseCases.deleteMany(ids),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-code-master", "list"] });
-      setMasterSelectedKeys(new Set());
-      toast.success("선택한 항목이 삭제되었습니다.");
-    },
-  });
-
-  const detailBulkDeleteMutation = useMutation({
-    mutationFn: (ids: number[]) => codeDetailUseCases.deleteMany(ids),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-code-detail", "list"] });
-      setDetailSelectedKeys(new Set());
-      toast.success("선택한 항목이 삭제되었습니다.");
-    },
-  });
-
-  async function handleMasterBulkDelete() {
-    const ok = await confirm({
-      title: "선택 삭제",
-      description: `선택한 ${masterSelectedKeys.size}개 항목을 삭제하시겠습니까?`,
-      variant: "destructive",
+    listFilterStore.getState().setSearch(SCOPE, {
+      submittedFilter,
+      currentPage: masterPage,
+      selectedMasterId,
     });
-    if (ok) masterBulkDeleteMutation.mutate([...masterSelectedKeys]);
+  }, [submittedFilter, masterPage, selectedMasterId]);
+
+  async function handleSelectMaster(id: number) {
+    if (id === selectedMasterId) return;
+    if (detailDirty) {
+      const ok = await confirm({
+        title: "미저장 변경",
+        description: "저장하지 않은 Detail 변경이 있습니다. 버리고 이동할까요?",
+        variant: "destructive",
+      });
+      if (!ok) return;
+    }
+    setSelectedMasterId(id);
   }
 
-  async function handleDetailBulkDelete() {
-    const ok = await confirm({
-      title: "선택 삭제",
-      description: `선택한 ${detailSelectedKeys.size}개 항목을 삭제하시겠습니까?`,
-      variant: "destructive",
-    });
-    if (ok) detailBulkDeleteMutation.mutate([...detailSelectedKeys]);
+  function handleReset() {
+    filterForm.reset(DEFAULT_FILTER);
+    setSubmittedFilter(null);
+    setSelectedMasterId(null);
+    setMasterPage(1);
+    qc.invalidateQueries({ queryKey: ["admin-code-master", "list"] });
+    qc.invalidateQueries({ queryKey: ["admin-code-detail", "list"] });
+  }
+
+  function handleSearch() {
+    filterForm.handleSubmit((values) => {
+      qc.invalidateQueries({ queryKey: ["admin-code-master", "list"] });
+      qc.invalidateQueries({ queryKey: ["admin-code-detail", "list"] });
+      setSubmittedFilter(values);
+      setMasterPage(1);
+      setSelectedMasterId(null);
+    })();
   }
 
   return (
-    // ResizablePanel 미사용 — 프로젝트에 shadcn ui 컴포넌트 없음, 고정+가변 그리드 레이아웃 사용
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "400px 1fr",
-        gap: 12,
-        flex: 1,
-        minHeight: 0,
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-        <CodeMasterListGrid
-          selectedId={selectedMasterId}
-          onSelect={(id) => { setSelectedMasterId(id); setDetailSelectedKeys(new Set()); }}
-          onRowDoubleClick={(id) => setEditModalState({ mode: "edit", id })}
-          selectedKeys={masterSelectedKeys}
-          onSelectionChange={setMasterSelectedKeys}
-          onBulkDelete={handleMasterBulkDelete}
-          isBulkDeletePending={masterBulkDeleteMutation.isPending}
+    <>
+      {/* 공용 상단 툴바: Reset/Search 만 */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_RESET"
+          className="btn btn--normal btn--sm"
+          onClick={handleReset}
+          icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
         />
-      </div>
-      <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-        {/* key로 master 변경 시 컴포넌트 remount → currentPage 등 내부 state 자연 초기화. detailSelectedKeys는 onSelect에서 명시 초기화. */}
-        <CodeDetailListGrid
-          key={selectedMasterId ?? "none"}
-          masterId={selectedMasterId}
-          selectedKeys={detailSelectedKeys}
-          onSelectionChange={setDetailSelectedKeys}
-          onBulkDelete={handleDetailBulkDelete}
-          isBulkDeletePending={detailBulkDeleteMutation.isPending}
+        <ActionButton
+          buttonCode="BTN_ADMIN_CODE_LIST_SEARCH"
+          className="btn btn--search btn--sm"
+          onClick={handleSearch}
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
         />
       </div>
 
-      <CodeMasterEntryModal
-        state={editModalState}
-        onClose={() => setEditModalState(null)}
-        onSaved={() => setEditModalState(null)}
-      />
-    </div>
+      {/* 필터 카드 */}
+      <CodeMasterListFilter form={filterForm} />
+
+      {/* 2분할 컨테이너 */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "400px 1fr",
+          gap: 12,
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+          marginTop: 10,
+        }}
+      >
+        <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <CodeMasterListGrid
+            submittedFilter={submittedFilter}
+            masterPage={masterPage}
+            onMasterPageChange={setMasterPage}
+            selectedMasterId={selectedMasterId}
+            onSelectMaster={handleSelectMaster}
+          />
+        </div>
+        <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <CodeDetailListGrid
+            key={selectedMasterId ?? "none"}
+            masterId={selectedMasterId}
+            onDirtyChange={setDetailDirty}
+          />
+        </div>
+      </div>
+    </>
   );
 }
