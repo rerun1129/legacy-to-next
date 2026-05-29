@@ -4,12 +4,14 @@ import com.freightos.admin.application.codemaster.command.SearchCodeMasterComman
 import com.freightos.admin.application.codemaster.port.out.CodeMasterPort;
 import com.freightos.admin.application.codemaster.projection.CodeMasterSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.codemaster.entity.CodeMaster;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -56,5 +58,10 @@ public class CodeMasterPersistenceAdapter implements CodeMasterPort {
     @Override
     public boolean existsById(Long id) {
         return codeMasterRepository.existsById(id);
+    }
+
+    @Override
+    public List<AutocompleteItem> autocomplete(String query, int limit) {
+        return codeMasterRepository.autocomplete(query, limit);
     }
 }

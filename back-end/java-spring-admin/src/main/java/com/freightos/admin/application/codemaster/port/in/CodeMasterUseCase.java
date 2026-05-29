@@ -5,6 +5,7 @@ import com.freightos.admin.application.codemaster.command.SaveCodeMasterChangesC
 import com.freightos.admin.application.codemaster.command.SearchCodeMasterCommand;
 import com.freightos.admin.application.codemaster.command.UpdateCodeMasterCommand;
 import com.freightos.admin.application.codemaster.projection.CodeMasterSummary;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.codemaster.entity.CodeMaster;
@@ -19,4 +20,5 @@ public interface CodeMasterUseCase {
     void deleteCodeMasterById(Long id);
     void deleteCodeMasters(List<Long> ids);
     SaveChangesResult saveCodeMasterChanges(SaveCodeMasterChangesCommand command);
+    List<AutocompleteItem> autocompleteCodeMasters(String query, int limit);
 }

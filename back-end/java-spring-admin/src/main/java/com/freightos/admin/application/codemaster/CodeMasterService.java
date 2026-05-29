@@ -9,6 +9,7 @@ import com.freightos.admin.application.codemaster.port.in.CodeMasterUseCase;
 import com.freightos.admin.application.codemaster.port.out.CodeMasterPort;
 import com.freightos.admin.application.codemaster.projection.CodeMasterSummary;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.response.SaveChangesResult;
@@ -95,5 +96,10 @@ public class CodeMasterService implements CodeMasterUseCase {
                 command.updates().size(),
                 command.deleteIds().size()
         );
+    }
+
+    @Override
+    public List<AutocompleteItem> autocompleteCodeMasters(String query, int limit) {
+        return codeMasterPort.autocomplete(query, limit);
     }
 }
