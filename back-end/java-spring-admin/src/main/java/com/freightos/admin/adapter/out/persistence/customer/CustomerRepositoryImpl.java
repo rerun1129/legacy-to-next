@@ -54,17 +54,19 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
     }
 
     @Override
-    public List<AutocompleteItem> autocomplete(String query, int limit) {
+    public List<AutocompleteItem> autocomplete(String query, String type, int limit) {
         String sql = """
                 SELECT customer_code, name FROM admin.customer
                 WHERE deleted_at IS NULL
                   AND (customer_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
+                  AND (:type IS NULL OR customer_type = :type)
                 ORDER BY customer_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern
         List<?> rows = em.createNativeQuery(sql)
                 .setParameter("q", query)
+                .setParameter("type", type)
                 .setParameter("limit", limit)
                 .getResultList();
         return rows.stream()

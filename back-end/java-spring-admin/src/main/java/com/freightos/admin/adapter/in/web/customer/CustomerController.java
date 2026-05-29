@@ -104,10 +104,11 @@ public class CustomerController {
     }
 
     @GetMapping("/autocomplete")
-    @PreAuthorize("hasAuthority('MENU_ADMIN_CUSTOMER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
             @RequestParam String q,
+            @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
-        return ResponseEntity.ok(ApiResponse.of(customerUseCase.autocompleteCustomers(q, limit)));
+        return ResponseEntity.ok(ApiResponse.of(customerUseCase.autocompleteCustomers(q, type, limit)));
     }
 }

@@ -57,7 +57,7 @@ public class CustomerPersistenceAdapter implements CustomerPort {
     }
 
     @Override
-    public List<AutocompleteItem> autocomplete(String query, int limit) {
-        return customerRepository.autocomplete(query, limit);
+    public List<AutocompleteItem> autocomplete(String query, String type, int limit) {
+        return customerRepository.autocomplete(query, type, limit);
     }
 }

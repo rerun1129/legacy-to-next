@@ -102,7 +102,7 @@ public class CustomerService implements CustomerUseCase {
     }
 
     @Override
-    public List<AutocompleteItem> autocompleteCustomers(String query, int limit) {
-        return customerPort.autocomplete(query, limit);
+    public List<AutocompleteItem> autocompleteCustomers(String query, String type, int limit) {
+        return customerPort.autocomplete(query, type, limit);
     }
 }

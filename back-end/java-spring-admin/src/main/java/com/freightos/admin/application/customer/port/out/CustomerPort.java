@@ -15,5 +15,5 @@ public interface CustomerPort {
     Long save(Customer customer);
     void update(Long id, Customer patchData);
     void softDelete(Long id);
-    List<AutocompleteItem> autocomplete(String query, int limit);
+    List<AutocompleteItem> autocomplete(String query, String type, int limit);
 }

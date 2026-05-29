@@ -20,5 +20,5 @@ public interface CustomerUseCase {
     void deleteCustomer(Long id);
     void deleteCustomers(List<Long> ids);
     SaveChangesResult saveCustomerChanges(SaveCustomerChangesCommand command);
-    List<AutocompleteItem> autocompleteCustomers(String query, int limit);
+    List<AutocompleteItem> autocompleteCustomers(String query, String type, int limit);
 }

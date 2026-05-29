@@ -63,9 +63,12 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     @Override
     public List<AutocompleteItem> autocomplete(String query, int limit) {
         String sql = """
-                SELECT username, email FROM admin.admin_user
+                SELECT username, COALESCE(user_eng_name, email) AS display_name
+                FROM admin.admin_user
                 WHERE deleted_at IS NULL
-                  AND (username ILIKE :q || '%' OR email ILIKE '%' || :q || '%')
+                  AND (username ILIKE :q || '%'
+                       OR user_eng_name ILIKE '%' || :q || '%'
+                       OR email ILIKE '%' || :q || '%')
                 ORDER BY username
                 LIMIT :limit
                 """;

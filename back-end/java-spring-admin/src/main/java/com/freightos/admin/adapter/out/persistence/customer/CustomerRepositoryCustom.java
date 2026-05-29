@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface CustomerRepositoryCustom {
     PagedResult<CustomerSummary> searchSummaries(SearchCustomerCommand command);
-    List<AutocompleteItem> autocomplete(String query, int limit);
+    List<AutocompleteItem> autocomplete(String query, String type, int limit);
 }

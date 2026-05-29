@@ -8,6 +8,8 @@ import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { LcnLabel } from "@/components/shared/inputs/lcn-label";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { useSeaHouseEnums } from "@/lib/use-sea-house-enums";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { SeaHouseFilter } from "@/domain/sea-house";
 import { usePathname } from "next/navigation";
 import {
@@ -25,13 +27,22 @@ interface Props {
 export function SeaHouseListFilter({ form }: Props) {
   const pathname = usePathname();
   useListFilterSync(form, pathname);
-  const { register } = form;
+  const { register, setValue } = form;
 
   const { shipmentType, salesClass, incoterms, loadType } = useSeaHouseEnums();
   const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentType.options];
   const salesClassOptionsWithAll   = [{ value: "", label: "ALL" }, ...salesClass.options];
   const incotermsOptionsWithAll    = [{ value: "", label: "ALL" }, ...incoterms.options];
   const loadTypeOptionsWithAll     = [{ value: "", label: "ALL" }, ...loadType.options];
+
+  // 자동완성 훅 — 소스별 1:1
+  const party           = useCodeAutocomplete(CODE_SOURCES.customer);
+  const actualCustomer  = useCodeAutocomplete(CODE_SOURCES.customer);
+  const partner         = useCodeAutocomplete(CODE_SOURCES.partner);
+  const liner           = useCodeAutocomplete(CODE_SOURCES.carrier);
+  const port            = useCodeAutocomplete(CODE_SOURCES.port);
+  const operator        = useCodeAutocomplete(CODE_SOURCES.user);
+  const salesMan        = useCodeAutocomplete(CODE_SOURCES.user);
 
   return (
     <div className="search-card">
@@ -121,6 +132,13 @@ export function SeaHouseListFilter({ form }: Props) {
                 codeProps={{ ...register("partyCode"), placeholder: "Code" }}
                 nameProps={{ ...register("partyName"), placeholder: "Name" }}
                 onLookup={() => {}}
+                onSearch={party.onSearch}
+                suggestions={party.suggestions}
+                suggestionsLoading={party.suggestionsLoading}
+                onSelect={(it) => {
+                  setValue("partyCode", it.code);
+                  setValue("partyName", it.name);
+                }}
               />
             )}
           />
@@ -132,6 +150,13 @@ export function SeaHouseListFilter({ form }: Props) {
             codeProps={{ ...register("actualCustomerCode"), placeholder: "Code" }}
             nameProps={{ ...register("actualCustomerName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={actualCustomer.onSearch}
+            suggestions={actualCustomer.suggestions}
+            suggestionsLoading={actualCustomer.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("actualCustomerCode", it.code);
+              setValue("actualCustomerName", it.name);
+            }}
           />
 
           {/* 6. Settle Partner / Doc Partner */}
@@ -147,6 +172,13 @@ export function SeaHouseListFilter({ form }: Props) {
                 codeProps={{ ...register("partnerCode"), placeholder: "Code" }}
                 nameProps={{ ...register("partnerName"), placeholder: "Name" }}
                 onLookup={() => {}}
+                onSearch={partner.onSearch}
+                suggestions={partner.suggestions}
+                suggestionsLoading={partner.suggestionsLoading}
+                onSelect={(it) => {
+                  setValue("partnerCode", it.code);
+                  setValue("partnerName", it.name);
+                }}
               />
             )}
           />
@@ -158,6 +190,13 @@ export function SeaHouseListFilter({ form }: Props) {
             codeProps={{ ...register("linerCode"), placeholder: "Code" }}
             nameProps={{ ...register("linerName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={liner.onSearch}
+            suggestions={liner.suggestions}
+            suggestionsLoading={liner.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("linerCode", it.code);
+              setValue("linerName", it.name);
+            }}
           />
 
           {/* 8. POL/POD */}
@@ -173,6 +212,13 @@ export function SeaHouseListFilter({ form }: Props) {
                 codeProps={{ ...register("portCode"), placeholder: "Code" }}
                 nameProps={{ ...register("portName"), placeholder: "Name" }}
                 onLookup={() => {}}
+                onSearch={port.onSearch}
+                suggestions={port.suggestions}
+                suggestionsLoading={port.suggestionsLoading}
+                onSelect={(it) => {
+                  setValue("portCode", it.code);
+                  setValue("portName", it.name);
+                }}
               />
             )}
           />
@@ -221,7 +267,7 @@ export function SeaHouseListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 11. Team */}
+          {/* 11. Team — autocomplete 미배선 (모달 방식 유지) */}
           <CodeBox
             kind="lcn"
             label="Team"
@@ -237,6 +283,13 @@ export function SeaHouseListFilter({ form }: Props) {
             codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
             nameProps={{ ...register("operatorName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={operator.onSearch}
+            suggestions={operator.suggestions}
+            suggestionsLoading={operator.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("operatorCode", it.code);
+              setValue("operatorName", it.name);
+            }}
           />
 
           {/* 13. Sales Class */}
@@ -268,6 +321,13 @@ export function SeaHouseListFilter({ form }: Props) {
             codeProps={{ ...register("salesManCode"), placeholder: "Code" }}
             nameProps={{ ...register("salesManName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={salesMan.onSearch}
+            suggestions={salesMan.suggestions}
+            suggestionsLoading={salesMan.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("salesManCode", it.code);
+              setValue("salesManName", it.name);
+            }}
           />
 
           {/* 15. Incoterms */}

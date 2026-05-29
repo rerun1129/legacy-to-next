@@ -167,8 +167,9 @@ export const API_CUSTOMER_PORT: CustomerPort = {
     return parsed.data.data;
   },
 
-  async autocomplete(q: string, limit = 20): Promise<CodeBoxSuggestion[]> {
+  async autocomplete(q: string, limit = 20, type?: string): Promise<CodeBoxSuggestion[]> {
     const params = new URLSearchParams({ q, limit: String(limit) });
+    if (type) params.set("type", type);
     const json = await adminFetchJson(`${BASE}/autocomplete?${params}`);
     const parsed = apiResponse(z.array(AUTOCOMPLETE_ITEM_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid customer autocomplete response: ${parsed.error.message}`);
