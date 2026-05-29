@@ -6,6 +6,8 @@ import type {
   CodeMasterFilter,
   CreateCodeMasterRequestDto,
   UpdateCodeMasterRequestDto,
+  SaveCodeMasterChangesRequest,
+  SaveChangesResult,
 } from "@/domain/code-master";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
@@ -46,6 +48,12 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
     page: z.number(),
     size: z.number(),
   });
+
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+});
 
 function activeForBackend(active: CodeMasterFilter["active"]): boolean | null {
   if (active === "ALL") return null;
@@ -118,5 +126,17 @@ export const API_CODE_MASTER_PORT: CodeMasterPort = {
       method: "DELETE",
       body: JSON.stringify({ ids }),
     });
+  },
+
+  async saveChanges(req: SaveCodeMasterChangesRequest): Promise<SaveChangesResult> {
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid code-master save-changes response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
   },
 };

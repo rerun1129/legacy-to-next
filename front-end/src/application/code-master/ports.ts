@@ -4,6 +4,8 @@ import type {
   CodeMasterFilter,
   CreateCodeMasterRequestDto,
   UpdateCodeMasterRequestDto,
+  SaveCodeMasterChangesRequest,
+  SaveChangesResult,
 } from "@/domain/code-master";
 
 export interface CodeMasterPageResult {
@@ -21,4 +23,5 @@ export interface CodeMasterPort {
   update(id: number, req: UpdateCodeMasterRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveCodeMasterChangesRequest): Promise<SaveChangesResult>;
 }

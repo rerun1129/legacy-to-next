@@ -36,3 +36,23 @@ export interface UpdateCodeMasterRequestDto {
   sortOrder: number | null;
   active: boolean;
 }
+
+export interface UpdateCodeMasterItem {
+  id: number;
+  masterName: string;
+  description: string | null;
+  sortOrder: number | null;
+  active: boolean;
+}
+
+export interface SaveCodeMasterChangesRequest {
+  creates: CreateCodeMasterRequestDto[];
+  updates: UpdateCodeMasterItem[];
+  deleteIds: number[];
+}
+
+export interface SaveChangesResult {
+  createdCount: number;
+  updatedCount: number;
+  deletedCount: number;
+}

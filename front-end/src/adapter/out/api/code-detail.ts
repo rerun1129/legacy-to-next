@@ -5,6 +5,8 @@ import type {
   CodeDetailDetail,
   CreateCodeDetailRequestDto,
   UpdateCodeDetailRequestDto,
+  SaveCodeDetailChangesRequest,
+  SaveChangesResult,
 } from "@/domain/code-detail";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
@@ -37,6 +39,12 @@ const CODE_DETAIL_DETAIL_SCHEMA = z.object({
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
+
+const SAVE_CHANGES_RESULT_SCHEMA = z.object({
+  createdCount: z.number(),
+  updatedCount: z.number(),
+  deletedCount: z.number(),
+});
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({
@@ -114,5 +122,25 @@ export const API_CODE_DETAIL_PORT: CodeDetailPort = {
       method: "DELETE",
       body: JSON.stringify({ ids }),
     });
+  },
+
+  async saveChanges(req: SaveCodeDetailChangesRequest): Promise<SaveChangesResult> {
+    // BE CreateCodeDetailRequest.masterId 에 @NotNull + @Valid cascade 가 있어,
+    // creates 각 항목에도 상위 masterId 를 주입해야 검증을 통과한다.
+    const body = {
+      masterId: req.masterId,
+      creates: req.creates.map((c) => ({ ...c, masterId: req.masterId })),
+      updates: req.updates,
+      deleteIds: req.deleteIds,
+    };
+    const json = await adminFetchJson(`${BASE}/save-changes`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+    const parsed = apiResponse(SAVE_CHANGES_RESULT_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid code-detail save-changes response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
   },
 };

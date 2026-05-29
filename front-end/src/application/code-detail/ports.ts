@@ -3,6 +3,8 @@ import type {
   CodeDetailDetail,
   CreateCodeDetailRequestDto,
   UpdateCodeDetailRequestDto,
+  SaveCodeDetailChangesRequest,
+  SaveChangesResult,
 } from "@/domain/code-detail";
 
 export interface CodeDetailPageResult {
@@ -20,4 +22,5 @@ export interface CodeDetailPort {
   update(id: number, req: UpdateCodeDetailRequestDto): Promise<void>;
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
+  saveChanges(req: SaveCodeDetailChangesRequest): Promise<SaveChangesResult>;
 }
