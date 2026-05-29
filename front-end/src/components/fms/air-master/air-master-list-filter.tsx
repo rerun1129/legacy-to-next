@@ -8,6 +8,8 @@ import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
 import { LcnLabel } from "@/components/shared/inputs/lcn-label";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { AirMasterFilter } from "@/domain/air-master";
 import { usePathname } from "next/navigation";
 
@@ -36,7 +38,12 @@ interface Props {
 export function AirMasterListFilter({ form }: Props) {
   const pathname = usePathname();
   useListFilterSync(form, pathname);
-  const { register } = form;
+  const { register, setValue } = form;
+
+  // 자동완성 훅 — 소스별 1:1
+  const party   = useCodeAutocomplete(CODE_SOURCES.customer);
+  const airline = useCodeAutocomplete(CODE_SOURCES.carrier);
+  const port    = useCodeAutocomplete(CODE_SOURCES.port);
 
   const { options: shipmentTypeOptions, isLoading: shipmentTypeLoading, placeholder: shipmentTypePlaceholder } = useEnumOptions("ShipmentType");
   const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentTypeOptions];
@@ -118,6 +125,13 @@ export function AirMasterListFilter({ form }: Props) {
                 codeProps={{ ...register("partyCode"), placeholder: "Code" }}
                 nameProps={{ ...register("partyName"), placeholder: "Name" }}
                 onLookup={() => {}}
+                onSearch={party.onSearch}
+                suggestions={party.suggestions}
+                suggestionsLoading={party.suggestionsLoading}
+                onSelect={(it) => {
+                  setValue("partyCode", it.code);
+                  setValue("partyName", it.name);
+                }}
               />
             )}
           />
@@ -129,6 +143,13 @@ export function AirMasterListFilter({ form }: Props) {
             codeProps={{ ...register("airlineCode"), placeholder: "Code" }}
             nameProps={{ ...register("airlineName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={airline.onSearch}
+            suggestions={airline.suggestions}
+            suggestionsLoading={airline.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("airlineCode", it.code);
+              setValue("airlineName", it.name);
+            }}
           />
 
           {/* 6. Departure/Destination */}
@@ -144,6 +165,13 @@ export function AirMasterListFilter({ form }: Props) {
                 codeProps={{ ...register("portCode"), placeholder: "Code" }}
                 nameProps={{ ...register("portName"), placeholder: "Name" }}
                 onLookup={() => {}}
+                onSearch={port.onSearch}
+                suggestions={port.suggestions}
+                suggestionsLoading={port.suggestionsLoading}
+                onSelect={(it) => {
+                  setValue("portCode", it.code);
+                  setValue("portName", it.name);
+                }}
               />
             )}
           />
