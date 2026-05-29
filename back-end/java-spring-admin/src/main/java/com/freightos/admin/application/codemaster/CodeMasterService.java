@@ -2,6 +2,7 @@ package com.freightos.admin.application.codemaster;
 
 import com.freightos.admin.application.codedetail.port.out.CodeDetailPort;
 import com.freightos.admin.application.codemaster.command.CreateCodeMasterCommand;
+import com.freightos.admin.application.codemaster.command.SaveCodeMasterChangesCommand;
 import com.freightos.admin.application.codemaster.command.SearchCodeMasterCommand;
 import com.freightos.admin.application.codemaster.command.UpdateCodeMasterCommand;
 import com.freightos.admin.application.codemaster.port.in.CodeMasterUseCase;
@@ -10,6 +11,7 @@ import com.freightos.admin.application.codemaster.projection.CodeMasterSummary;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.codemaster.entity.CodeMaster;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,5 +76,24 @@ public class CodeMasterService implements CodeMasterUseCase {
         for (Long id : ids) {
             deleteCodeMasterById(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveCodeMasterChanges(SaveCodeMasterChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteCodeMasterById(id);
+        }
+        for (SaveCodeMasterChangesCommand.UpdateEntry entry : command.updates()) {
+            updateCodeMaster(entry.id(), entry.command());
+        }
+        for (CreateCodeMasterCommand create : command.creates()) {
+            createCodeMaster(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
     }
 }

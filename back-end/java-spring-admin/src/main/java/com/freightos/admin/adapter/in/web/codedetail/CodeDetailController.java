@@ -3,6 +3,7 @@ package com.freightos.admin.adapter.in.web.codedetail;
 import com.freightos.admin.adapter.in.web.codedetail.dto.CodeDetailDetailResponse;
 import com.freightos.admin.adapter.in.web.codedetail.dto.CodeDetailSummaryResponse;
 import com.freightos.admin.adapter.in.web.codedetail.dto.CreateCodeDetailRequest;
+import com.freightos.admin.adapter.in.web.codedetail.dto.SaveCodeDetailChangesRequest;
 import com.freightos.admin.adapter.in.web.codedetail.dto.SearchCodeDetailRequest;
 import com.freightos.admin.adapter.in.web.codedetail.dto.UpdateCodeDetailRequest;
 import com.freightos.admin.application.codedetail.port.in.CodeDetailUseCase;
@@ -11,6 +12,7 @@ import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -84,5 +86,13 @@ public class CodeDetailController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         codeDetailUseCase.deleteCodeDetails(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_DETAIL_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveCodeDetailChangesRequest req) {
+        SaveChangesResult result = codeDetailUseCase.saveCodeDetailChanges(codeDetailAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.CODE_DETAIL_SAVE_CHANGES.getMessage()));
     }
 }

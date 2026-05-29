@@ -3,6 +3,7 @@ package com.freightos.admin.adapter.in.web.codemaster;
 import com.freightos.admin.adapter.in.web.codemaster.dto.CodeMasterDetailResponse;
 import com.freightos.admin.adapter.in.web.codemaster.dto.CodeMasterSummaryResponse;
 import com.freightos.admin.adapter.in.web.codemaster.dto.CreateCodeMasterRequest;
+import com.freightos.admin.adapter.in.web.codemaster.dto.SaveCodeMasterChangesRequest;
 import com.freightos.admin.adapter.in.web.codemaster.dto.SearchCodeMasterRequest;
 import com.freightos.admin.adapter.in.web.codemaster.dto.UpdateCodeMasterRequest;
 import com.freightos.admin.application.codemaster.port.in.CodeMasterUseCase;
@@ -11,6 +12,7 @@ import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -84,5 +86,13 @@ public class CodeMasterController {
     public ResponseEntity<ApiResponse<Void>> bulkDelete(@Valid @RequestBody BulkDeleteRequest req) {
         codeMasterUseCase.deleteCodeMasters(req.ids());
         return ResponseEntity.ok(ApiResponse.ok(MessageCode.CODE_MASTER_DELETED.getMessage()));
+    }
+
+    @PostMapping("/save-changes")
+    @PreAuthorize("hasAuthority('BTN_ADMIN_CODE_LIST_CREATE')")
+    public ResponseEntity<ApiResponse<SaveChangesResult>> saveChanges(
+            @Valid @RequestBody SaveCodeMasterChangesRequest req) {
+        SaveChangesResult result = codeMasterUseCase.saveCodeMasterChanges(codeMasterAssembler.toSaveChangesCommand(req));
+        return ResponseEntity.ok(ApiResponse.of(result, MessageCode.CODE_MASTER_SAVE_CHANGES.getMessage()));
     }
 }

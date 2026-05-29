@@ -1,6 +1,7 @@
 package com.freightos.admin.application.codedetail;
 
 import com.freightos.admin.application.codedetail.command.CreateCodeDetailCommand;
+import com.freightos.admin.application.codedetail.command.SaveCodeDetailChangesCommand;
 import com.freightos.admin.application.codedetail.command.SearchCodeDetailCommand;
 import com.freightos.admin.application.codedetail.command.UpdateCodeDetailCommand;
 import com.freightos.admin.application.codedetail.port.in.CodeDetailUseCase;
@@ -10,6 +11,7 @@ import com.freightos.admin.application.codemaster.port.out.CodeMasterPort;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.codedetail.entity.CodeDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,5 +76,24 @@ public class CodeDetailService implements CodeDetailUseCase {
         for (Long id : ids) {
             deleteCodeDetailById(id);
         }
+    }
+
+    @Override
+    @Transactional
+    public SaveChangesResult saveCodeDetailChanges(SaveCodeDetailChangesCommand command) {
+        for (Long id : command.deleteIds()) {
+            deleteCodeDetailById(id);
+        }
+        for (SaveCodeDetailChangesCommand.UpdateEntry entry : command.updates()) {
+            updateCodeDetail(entry.id(), entry.command());
+        }
+        for (CreateCodeDetailCommand create : command.creates()) {
+            createCodeDetail(create);
+        }
+        return new SaveChangesResult(
+                command.creates().size(),
+                command.updates().size(),
+                command.deleteIds().size()
+        );
     }
 }
