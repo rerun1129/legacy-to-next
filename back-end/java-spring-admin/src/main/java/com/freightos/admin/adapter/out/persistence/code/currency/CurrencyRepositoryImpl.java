@@ -58,7 +58,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepositoryCustom {
                 SELECT currency_code, name FROM admin.currency
                 WHERE deleted_at IS NULL
                   AND (currency_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                ORDER BY currency_code
+                ORDER BY CASE WHEN currency_code ILIKE :q || '%' THEN 0 ELSE 1 END, currency_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern

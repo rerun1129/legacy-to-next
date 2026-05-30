@@ -58,7 +58,7 @@ public class HsCodeRepositoryImpl implements HsCodeRepositoryCustom {
                 SELECT hs_code, name FROM admin.hs_code
                 WHERE deleted_at IS NULL
                   AND (hs_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                ORDER BY hs_code
+                ORDER BY CASE WHEN hs_code ILIKE :q || '%' THEN 0 ELSE 1 END, hs_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern
