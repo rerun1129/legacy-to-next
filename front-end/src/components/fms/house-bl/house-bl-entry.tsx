@@ -92,7 +92,7 @@ export function HouseBLEntry({ variant }: Props) {
     });
 
   const toolbarFields = getToolbarFields(variant);
-  const canSwitchBl = isEdit && id != null && variant.key.startsWith("sea-");
+  const canSwitchBl = isEdit && id != null && (variant.key === "sea-exp" || variant.key === "air-exp");
 
   function handleTabChange(key: string) {
     setCanEdit(key === "main" || key === "freight");

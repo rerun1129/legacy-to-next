@@ -47,9 +47,11 @@ export function useSwitchBlForm({
     },
   });
 
+  // 모달 unmount(닫기) 시 캐시를 즉시 폐기 → 재오픈 시 항상 서버에서 새로 조회
   const { data: existing, isLoading, refetch } = useQuery({
     queryKey: ["switch-bl", "byHouseBl", houseBlId],
     queryFn: () => switchBlPort.getByHouseBlId(houseBlId),
+    gcTime: 0,
   });
 
   // 서버 데이터 로드 시 폼 reset
