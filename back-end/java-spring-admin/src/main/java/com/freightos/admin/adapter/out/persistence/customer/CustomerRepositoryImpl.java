@@ -56,7 +56,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
     @Override
     public List<AutocompleteItem> autocomplete(String query, String type, int limit) {
         String sql = """
-                SELECT customer_code, name FROM admin.customer
+                SELECT customer_code, name, customer_english_address FROM admin.customer
                 WHERE deleted_at IS NULL
                   AND (customer_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
                   AND (:type IS NULL OR customer_type = :type)
@@ -70,7 +70,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
                 .setParameter("limit", limit)
                 .getResultList();
         return rows.stream()
-                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1]); })
+                .map(row -> { Object[] cols = (Object[]) row; return new AutocompleteItem((String) cols[0], (String) cols[1], (String) cols[2]); })
                 .toList();
     }
 
