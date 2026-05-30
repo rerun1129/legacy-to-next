@@ -89,6 +89,7 @@ const SAVE_CHANGES_RESULT_SCHEMA = z.object({
 const AUTOCOMPLETE_ITEM_SCHEMA = z.object({
   code: z.string(),
   name: z.string().nullable().transform((v) => v ?? ""),
+  address: z.string().nullable().optional().transform((v) => v ?? undefined),
 }) satisfies z.ZodType<CodeBoxSuggestion>;
 
 function scopeForBackend(scope: CustomerScope): CustomerScope {

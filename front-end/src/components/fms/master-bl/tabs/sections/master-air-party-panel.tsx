@@ -47,7 +47,7 @@ function PartyBlock({ role, isImp }: { role: PartyRole; isImp: boolean }) {
             onSearch={src.onSearch}
             suggestions={src.suggestions}
             suggestionsLoading={src.suggestionsLoading}
-            onSelect={(it) => { setValue(codeField, it.code); }}
+            onSelect={(it) => { setValue(codeField, it.code); setValue(addrField, it.address ?? ""); }}
           />
         </div>
         {role === "CONSIGNEE" && (

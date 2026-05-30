@@ -66,7 +66,7 @@ function PartyBlockConnected({
             onSearch={src.onSearch}
             suggestions={src.suggestions}
             suggestionsLoading={src.suggestionsLoading}
-            onSelect={(it) => { form.setValue(codeField, it.code); }}
+            onSelect={(it) => { form.setValue(codeField, it.code); form.setValue(addrField, it.address ?? ""); }}
           />
         </div>
         {PARTY_BTNS[role] && (

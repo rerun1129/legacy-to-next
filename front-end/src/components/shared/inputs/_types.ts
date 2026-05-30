@@ -3,6 +3,7 @@ import type { InputHTMLAttributes } from "react";
 export interface CodeBoxSuggestion {
   code: string;
   name: string;
+  address?: string;
 }
 
 export type BoxVariant = "panel" | "cell" | "label";

@@ -57,7 +57,7 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
             onSearch={src.onSearch}
             suggestions={src.suggestions}
             suggestionsLoading={src.suggestionsLoading}
-            onSelect={(it) => { setValue(codeField, it.code); setValue(nameField, it.name); }}
+            onSelect={(it) => { setValue(codeField, it.code); setValue(nameField, it.name); setValue(addrField, it.address ?? ""); }}
           />
         </div>
         {cfg.role === "CONSIGNEE" && (

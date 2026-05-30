@@ -53,7 +53,7 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
             onSearch={src.onSearch}
             suggestions={src.suggestions}
             suggestionsLoading={src.suggestionsLoading}
-            onSelect={(it) => { setValue(party.codeKey, it.code); setValue(party.nameKey, it.name); }}
+            onSelect={(it) => { setValue(party.codeKey, it.code); setValue(party.nameKey, it.name); setValue(party.addrKey, it.address ?? ""); }}
           />
         </div>
         {party.btn && (
