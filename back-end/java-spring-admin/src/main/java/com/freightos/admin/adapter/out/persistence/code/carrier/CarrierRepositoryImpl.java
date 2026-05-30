@@ -59,7 +59,7 @@ public class CarrierRepositoryImpl implements CarrierRepositoryCustom {
                 SELECT carrier_code, name FROM admin.carrier
                 WHERE deleted_at IS NULL
                   AND (carrier_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                  AND (:type IS NULL OR carrier_type = :type)
+                  AND (CAST(:type AS text) IS NULL OR carrier_type = CAST(:type AS text))
                 ORDER BY CASE WHEN carrier_code ILIKE :q || '%' THEN 0 ELSE 1 END, carrier_code
                 LIMIT :limit
                 """;

@@ -59,7 +59,7 @@ public class PortRepositoryImpl implements PortRepositoryCustom {
                 SELECT port_code, name FROM admin.port
                 WHERE deleted_at IS NULL
                   AND (port_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                  AND (:type IS NULL OR port_type = :type)
+                  AND (CAST(:type AS text) IS NULL OR port_type = CAST(:type AS text))
                 ORDER BY CASE WHEN port_code ILIKE :q || '%' THEN 0 ELSE 1 END, port_code
                 LIMIT :limit
                 """;
