@@ -6,9 +6,15 @@ import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-
 import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function SeaTradePanel() {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
+
+  const payableAt      = useCodeAutocomplete(CODE_SOURCES.port);
+  const actualCustomer = useCodeAutocomplete(CODE_SOURCES.customer);
+  const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
   const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
   const { options: incotermsOptions, placeholder: incotermPlaceholder } = useEnumOptions("Incoterms");
 
@@ -70,6 +76,10 @@ export function SeaTradePanel() {
         codeProps={{ ...register("seaDetail.payableAt") }}
         nameProps={{ ...register("seaDetail.payableAtName") }}
         onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+        onSearch={payableAt.onSearch}
+        suggestions={payableAt.suggestions}
+        suggestionsLoading={payableAt.suggestionsLoading}
+        onSelect={(it) => { setValue("seaDetail.payableAt", it.code); setValue("seaDetail.payableAtName", it.name); }}
       />
     ),
   };
@@ -86,6 +96,10 @@ export function SeaTradePanel() {
           codeProps={{ ...register("actualCustomerCode") }}
           nameProps={{ ...register("actualCustomerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={actualCustomer.onSearch}
+          suggestions={actualCustomer.suggestions}
+          suggestionsLoading={actualCustomer.suggestionsLoading}
+          onSelect={(it) => { setValue("actualCustomerCode", it.code); setValue("actualCustomerName", it.name); }}
         />
       ),
     },
@@ -100,6 +114,10 @@ export function SeaTradePanel() {
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={settlePartner.onSearch}
+          suggestions={settlePartner.suggestions}
+          suggestionsLoading={settlePartner.suggestionsLoading}
+          onSelect={(it) => { setValue("settlePartnerCode", it.code); setValue("settlePartnerName", it.name); }}
         />
       ),
     },

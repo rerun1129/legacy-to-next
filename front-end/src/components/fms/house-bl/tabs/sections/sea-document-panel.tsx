@@ -5,9 +5,14 @@ import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function SeaDocumentPanel() {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
+
+  const salesMan = useCodeAutocomplete(CODE_SOURCES.user);
+  const operator = useCodeAutocomplete(CODE_SOURCES.user);
   const { options: salesClassOptions, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
@@ -38,6 +43,10 @@ export function SeaDocumentPanel() {
           codeProps={{ ...register("salesManCode") }}
           nameProps={{ ...register("salesManName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={salesMan.onSearch}
+          suggestions={salesMan.suggestions}
+          suggestionsLoading={salesMan.suggestionsLoading}
+          onSelect={(it) => { setValue("salesManCode", it.code); setValue("salesManName", it.name); }}
         />
       ),
     },
@@ -52,6 +61,10 @@ export function SeaDocumentPanel() {
           codeProps={{ ...register("operatorCode") }}
           nameProps={{ ...register("operatorName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={operator.onSearch}
+          suggestions={operator.suggestions}
+          suggestionsLoading={operator.suggestionsLoading}
+          onSelect={(it) => { setValue("operatorCode", it.code); setValue("operatorName", it.name); }}
         />
       ),
     },

@@ -224,6 +224,21 @@
 .lcn__code > input[readonly], .lcn__name[readonly] { background: var(--bg-sunken); color: var(--ink); opacity: 1; cursor: default; }
 .lcn__icon { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; color: var(--ink-3); cursor: pointer; }
 .lcn__icon:hover { color: var(--accent); }
+/* lcn--cell: 그리드 셀 내 code-only — 테두리 없는 투명 input으로 다른 셀(.grid__cell-input)과 통일 */
+.lcn--cell { display: block; width: 100%; padding: 0; gap: 0; }
+.lcn--cell .lcn__code { height: 100%; }
+.lcn--cell .lcn__code > input {
+  border: none;
+  background: transparent;
+  height: 100%;
+  border-radius: 0;
+}
+.lcn--cell .lcn__code > input:focus {
+  background: var(--accent-soft);
+  border-color: transparent;
+  box-shadow: none;
+}
+
 .lcn__name { height: 22px; padding: 0 8px; font-size: 10px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; color: var(--ink); min-width: 0; width: 100%; }
 .lcn__name:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .lcn__select { height: 26px; padding: 0 8px; font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }

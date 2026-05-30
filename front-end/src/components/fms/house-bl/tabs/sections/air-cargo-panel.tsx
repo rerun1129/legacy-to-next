@@ -6,11 +6,14 @@ import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
 
 export function AirCargoPanel({ variant }: Props) {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
   const panelScope = variant ? `air-cargo-panel.${variant.key}` : "air-cargo-panel";
   const { options: weightUnitOptions }                               = useEnumOptions("WeightUnit");
   const { options: rateClassOptions, placeholder: rateClassPlaceholder } = useEnumOptions("RateClass");
@@ -25,7 +28,16 @@ export function AirCargoPanel({ variant }: Props) {
             <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
             {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능), SEA 동일 패턴 */}
             <div style={{ flex: "0 0 80px" }}>
-              <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+              <CodeBox
+                kind="code-only"
+                variant="panel"
+                codeProps={{ ...register("pkgUnit") }}
+                onLookup={() => {}}
+                onSearch={pkgUnit.onSearch}
+                suggestions={pkgUnit.suggestions}
+                suggestionsLoading={pkgUnit.suggestionsLoading}
+                onSelect={(it) => { setValue("pkgUnit", it.code); }}
+              />
             </div>
           </div>
         </div>

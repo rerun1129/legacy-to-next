@@ -4,6 +4,8 @@ import { CodeBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig; isExp?: boolean }
 
@@ -26,10 +28,19 @@ const ROLE_FIELDS: Record<
   "DOC PARTNER": ["docPartnerCode", "docPartnerName", "docPartnerAddress"],
 };
 
+/** role → autocomplete 소스 매핑 */
+const ROLE_SOURCE = {
+  "SHIPPER":     CODE_SOURCES.customer,
+  "CONSIGNEE":   CODE_SOURCES.customer,
+  "NOTIFY":      CODE_SOURCES.customer,
+  "DOC PARTNER": CODE_SOURCES.partner,
+} satisfies Record<PartyRole, typeof CODE_SOURCES.customer | typeof CODE_SOURCES.partner>;
+
 function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
   const isRequired = cfg.role === "CONSIGNEE" ? !isExp : cfg.required;
   const [codeField, nameField, addrField] = ROLE_FIELDS[cfg.role];
+  const src = useCodeAutocomplete(ROLE_SOURCE[cfg.role]);
 
   return (
     <>
@@ -43,6 +54,10 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
             codeProps={{ ...register(codeField) }}
             nameProps={{ ...register(nameField) }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+            onSearch={src.onSearch}
+            suggestions={src.suggestions}
+            suggestionsLoading={src.suggestionsLoading}
+            onSelect={(it) => { setValue(codeField, it.code); setValue(nameField, it.name); }}
           />
         </div>
         {cfg.role === "CONSIGNEE" && (

@@ -3,6 +3,8 @@ import { TextBox, CodeBox, DateBox, ComboBox } from "@/components/shared/inputs"
 import { type FieldItemDef } from "@/components/widget/field-item-grid";
 import { FieldItemGrid } from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 // 라벨 → RHF 필드명 매핑 (Issue Information 섹션)
 export const ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
@@ -62,7 +64,8 @@ interface IssueSectionProps {
 }
 
 export function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPlaceholder }: IssueSectionProps) {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
+  const issuePlace = useCodeAutocomplete(CODE_SOURCES.port);
   const issueItems: FieldItemDef[] = issueFields.map(f => {
     const fieldName = ISSUE_LABEL_TO_FIELD[f];
     if (f === "No. of B/L") {
@@ -101,6 +104,10 @@ export function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPla
             codeProps={{ ...register("seaDetail.issuePlace") }}
             nameProps={{ ...register("seaDetail.issuePlaceName") }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+            onSearch={issuePlace.onSearch}
+            suggestions={issuePlace.suggestions}
+            suggestionsLoading={issuePlace.suggestionsLoading}
+            onSelect={(it) => { setValue("seaDetail.issuePlace", it.code); setValue("seaDetail.issuePlaceName", it.name); }}
           />
         ),
       };

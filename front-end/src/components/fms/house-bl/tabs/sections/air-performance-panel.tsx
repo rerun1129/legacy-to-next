@@ -4,9 +4,14 @@ import { useFormContext } from "react-hook-form";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import { CodeBox } from "@/components/shared/inputs";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function AirPerformancePanel() {
-  const { register } = useFormContext<HouseBlFormValues>();
+  const { register, setValue } = useFormContext<HouseBlFormValues>();
+
+  const actualCustomer = useCodeAutocomplete(CODE_SOURCES.customer);
+  const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
 
   const PERF_ITEMS: FieldItemDef[] = [
     {
@@ -20,6 +25,10 @@ export function AirPerformancePanel() {
           codeProps={{ ...register("actualCustomerCode") }}
           nameProps={{ ...register("actualCustomerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={actualCustomer.onSearch}
+          suggestions={actualCustomer.suggestions}
+          suggestionsLoading={actualCustomer.suggestionsLoading}
+          onSelect={(it) => { setValue("actualCustomerCode", it.code); setValue("actualCustomerName", it.name); }}
         />
       ),
     },
@@ -33,6 +42,10 @@ export function AirPerformancePanel() {
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={settlePartner.onSearch}
+          suggestions={settlePartner.suggestions}
+          suggestionsLoading={settlePartner.suggestionsLoading}
+          onSelect={(it) => { setValue("settlePartnerCode", it.code); setValue("settlePartnerName", it.name); }}
         />
       ),
     },

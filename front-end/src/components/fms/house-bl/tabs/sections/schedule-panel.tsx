@@ -6,12 +6,19 @@ import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { IssueSection } from "./schedule-panel-helpers";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
 
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
+
+  const pol      = useCodeAutocomplete(CODE_SOURCES.port);
+  const pod      = useCodeAutocomplete(CODE_SOURCES.port);
+  const delivery = useCodeAutocomplete(CODE_SOURCES.port);
+  const liner    = useCodeAutocomplete(CODE_SOURCES.carrier);
   const { options: noOfBlOptions, placeholder: noOfBlPlaceholder } = useEnumOptions("NoOfBl");
 
   if (!variant) return null;
@@ -29,6 +36,10 @@ export function SchedulePanel({ variant }: Props) {
           codeProps={{ ...register("pol"), placeholder: "UNLOC" }}
           nameProps={{ ...register("seaDetail.polName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={pol.onSearch}
+          suggestions={pol.suggestions}
+          suggestionsLoading={pol.suggestionsLoading}
+          onSelect={(it) => { setValue("pol", it.code); setValue("seaDetail.polName", it.name); }}
         />
       ),
     },
@@ -43,6 +54,10 @@ export function SchedulePanel({ variant }: Props) {
           codeProps={{ ...register("pod"), placeholder: "UNLOC" }}
           nameProps={{ ...register("seaDetail.podName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={pod.onSearch}
+          suggestions={pod.suggestions}
+          suggestionsLoading={pod.suggestionsLoading}
+          onSelect={(it) => { setValue("pod", it.code); setValue("seaDetail.podName", it.name); }}
         />
       ),
     },
@@ -56,6 +71,10 @@ export function SchedulePanel({ variant }: Props) {
           codeProps={{ ...register("seaDetail.deliveryCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("seaDetail.deliveryName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={delivery.onSearch}
+          suggestions={delivery.suggestions}
+          suggestionsLoading={delivery.suggestionsLoading}
+          onSelect={(it) => { setValue("seaDetail.deliveryCode", it.code); setValue("seaDetail.deliveryName", it.name); }}
         />
       ),
     },
@@ -71,6 +90,10 @@ export function SchedulePanel({ variant }: Props) {
         codeProps={{ ...register("seaDetail.linerCode"), placeholder: "UNLOC" }}
         nameProps={{ ...register("linerName") }}
         onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+        onSearch={liner.onSearch}
+        suggestions={liner.suggestions}
+        suggestionsLoading={liner.suggestionsLoading}
+        onSelect={(it) => { setValue("seaDetail.linerCode", it.code); setValue("linerName", it.name); }}
       />
     ),
   };

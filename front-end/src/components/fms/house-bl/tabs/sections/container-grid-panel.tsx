@@ -5,11 +5,30 @@ import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { Button } from "@/components/shared/button";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 type ContainerRow = NonNullable<HouseBlFormValues["containers"]>[number];
+
+function PkgUnitCell({ index }: { index: number }) {
+  const { register, setValue } = useFormContext<HouseBlFormValues>();
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  return (
+    <CodeBox
+      kind="code-only"
+      variant="cell"
+      codeProps={{ ...register(`containers.${index}.pkgUnit`) }}
+      onLookup={() => {}}
+      onSearch={pkgUnit.onSearch}
+      suggestions={pkgUnit.suggestions}
+      suggestionsLoading={pkgUnit.suggestionsLoading}
+      onSelect={(it) => { setValue(`containers.${index}.pkgUnit`, it.code); }}
+    />
+  );
+}
 
 const EMPTY_CONTAINER_ROW: ContainerRow = {
   containerNo: "",
@@ -50,7 +69,7 @@ export function ContainerGridPanel() {
     { key: "sealNo2",      label: "SEAL NO. 2",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "sealNo3",      label: "SEAL NO. 3",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
     { key: "pkgQty",       label: "Pkg",          width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
-    { key: "pkgUnit",      label: "Unit",         width: 60,  render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.pkgUnit`)} /> },
+    { key: "pkgUnit",      label: "Unit",         width: 60,  render: (_, __, i) => <PkgUnitCell index={i} /> },
     { key: "grossWeightKg", label: "G/W",         width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
     { key: "cbm",          label: "CBM",          width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
     { key: "vgmKg",        label: "VGM",          width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.vgmKg`}         decimalPlaces={3} valueAsNumber={false} /> },

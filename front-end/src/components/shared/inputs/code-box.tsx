@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState, useCallback } from "react";
+import { forwardRef, useState, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 import type { CodeBoxProps, CodeBoxSuggestion } from "./_types";
 import { LcnLabel } from "./lcn-label";
@@ -36,6 +36,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
   function CodeBox(
     {
       kind = "lcn",
+      variant,
       label,
       required,
       readOnly = false,
@@ -59,13 +60,30 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
     const [isOpen, setIsOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [expandCount, setExpandCount] = useState(0);
+    const [widthPx, setWidthPx] = useState<number | undefined>(undefined);
+    const anchorRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    // 첫 확장 시 자연 너비를 캡처 — 이벤트 핸들러 안에서만 접근
+    const baseWidthRef = useRef(0);
 
-    const handleExpand = useCallback(() => setExpandCount((c) => c + 1), []);
-    const handleShrink = useCallback(() => setExpandCount((c) => Math.max(0, c - 1)), []);
+    const handleExpand = useCallback(() => {
+      if (!dropdownRef.current) return;
+      // 0→1→2→3→0 순환: 4번째 클릭은 초기 자연 너비로 복귀
+      if (expandCount === 0) baseWidthRef.current = dropdownRef.current.offsetWidth;
+      const next = expandCount >= 3 ? 0 : expandCount + 1;
+      setWidthPx(next === 0 ? undefined : baseWidthRef.current * (1 + next));
+      setExpandCount(next);
+    }, [expandCount]);
+
+    const handleShrink = useCallback(() => {
+      const next = Math.max(0, expandCount - 1);
+      setExpandCount(next);
+      setWidthPx(next === 0 ? undefined : baseWidthRef.current * (1 + next));
+    }, [expandCount]);
 
     const wrappedSetIsOpen = useCallback((v: boolean) => {
       setIsOpen(v);
-      if (v) setExpandCount(0);
+      if (v) { setExpandCount(0); setWidthPx(undefined); }
     }, []);
 
     const hasSuggestions = Boolean(onSearch);
@@ -115,7 +133,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       const baseCodeCn = codeCn ?? (mono ? "text-mono" : undefined);
       const mergedCodeCn = [baseCodeCn, required ? "is-required" : undefined].filter(Boolean).join(" ") || undefined;
       return (
-        <div className="lcn" style={style}>
+        <div className={variant === "cell" ? "lcn lcn--cell" : "lcn"} style={style}>
           {(label || labelOptions) && (
             <LcnLabel
               options={labelOptions}
@@ -126,7 +144,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
               {label}
             </LcnLabel>
           )}
-          <div className="lcn__code" style={{ position: "relative" }}>
+          <div ref={anchorRef} className="lcn__code" style={{ position: "relative" }}>
             <input
               ref={ref}
               autoComplete="off"
@@ -159,6 +177,9 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
                 visible={isOpen}
                 expandCount={expandCount}
                 onExpand={handleExpand}
+                anchorRef={anchorRef}
+                dropdownRef={dropdownRef}
+                width={widthPx}
               />
             )}
           </div>
@@ -173,7 +194,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
           <div className="party-block__head">
             <span className={required ? "is-required" : undefined}>{label}</span>
             <div className="party-cn">
-              <div className="party-cn__code" style={{ position: "relative" }}>
+              <div ref={anchorRef} className="party-cn__code" style={{ position: "relative" }}>
                 <input
                   ref={ref}
                   autoComplete="off"
@@ -206,6 +227,9 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
                     visible={isOpen}
                     expandCount={expandCount}
                     onExpand={handleExpand}
+                    anchorRef={anchorRef}
+                    dropdownRef={dropdownRef}
+                    width={widthPx}
                   />
                 )}
               </div>
@@ -239,7 +263,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
             {label}
           </LcnLabel>
         )}
-        <div className="lcn__code" style={{ position: "relative" }}>
+        <div ref={anchorRef} className="lcn__code" style={{ position: "relative" }}>
           <input
             ref={ref}
             autoComplete="off"
@@ -272,6 +296,9 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
               visible={isOpen}
               expandCount={expandCount}
               onExpand={handleExpand}
+              anchorRef={anchorRef}
+              dropdownRef={dropdownRef}
+              width={widthPx}
             />
           )}
         </div>

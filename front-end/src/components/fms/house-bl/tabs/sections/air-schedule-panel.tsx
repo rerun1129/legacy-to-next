@@ -10,11 +10,17 @@ import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/air-schedule-legs-cols";
 import { Button } from "@/components/shared/button";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
 
 export function AirSchedulePanel({ variant }: Props) {
-  const { register, control } = useFormContext<HouseBlFormValues>();
+  const { register, control, setValue } = useFormContext<HouseBlFormValues>();
+
+  const airline     = useCodeAutocomplete(CODE_SOURCES.carrier);
+  const departure   = useCodeAutocomplete(CODE_SOURCES.port);
+  const destination = useCodeAutocomplete(CODE_SOURCES.port);
   const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
 
   if (!variant) return null;
@@ -32,6 +38,10 @@ export function AirSchedulePanel({ variant }: Props) {
           codeProps={{ ...register("airDetail.airlineCode"), placeholder: "IATA" }}
           nameProps={{ ...register("airDetail.airlineName"), placeholder: "Airline Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={airline.onSearch}
+          suggestions={airline.suggestions}
+          suggestionsLoading={airline.suggestionsLoading}
+          onSelect={(it) => { setValue("airDetail.airlineCode", it.code); setValue("airDetail.airlineName", it.name); }}
         />
       ),
     },
@@ -46,6 +56,10 @@ export function AirSchedulePanel({ variant }: Props) {
           codeProps={{ ...register("pol"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={departure.onSearch}
+          suggestions={departure.suggestions}
+          suggestionsLoading={departure.suggestionsLoading}
+          onSelect={(it) => { setValue("pol", it.code); setValue("polName", it.name); }}
         />
       ),
     },
@@ -111,6 +125,10 @@ export function AirSchedulePanel({ variant }: Props) {
                 codeProps={{ ...register("pod"), placeholder: "UNLOC" }}
                 nameProps={{ ...register("podName"), placeholder: "Port Name" }}
                 onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+                onSearch={destination.onSearch}
+                suggestions={destination.suggestions}
+                suggestionsLoading={destination.suggestionsLoading}
+                onSelect={(it) => { setValue("pod", it.code); setValue("podName", it.name); }}
               />
             ),
           }]}
