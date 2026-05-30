@@ -20,5 +20,5 @@ public interface PortUseCase {
     void deletePort(Long id);
     void deletePorts(List<Long> ids);
     SaveChangesResult savePortChanges(SavePortChangesCommand command);
-    List<AutocompleteItem> autocompletePorts(String query, int limit);
+    List<AutocompleteItem> autocompletePorts(String query, String type, int limit);
 }

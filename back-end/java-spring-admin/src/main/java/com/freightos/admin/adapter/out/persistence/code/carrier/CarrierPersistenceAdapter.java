@@ -57,7 +57,7 @@ public class CarrierPersistenceAdapter implements CarrierPort {
     }
 
     @Override
-    public List<AutocompleteItem> autocomplete(String query, int limit) {
-        return carrierRepository.autocomplete(query, limit);
+    public List<AutocompleteItem> autocomplete(String query, String type, int limit) {
+        return carrierRepository.autocomplete(query, type, limit);
     }
 }

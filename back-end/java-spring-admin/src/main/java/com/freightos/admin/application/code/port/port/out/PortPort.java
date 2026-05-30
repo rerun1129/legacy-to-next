@@ -15,5 +15,5 @@ public interface PortPort {
     Long save(Port port);
     void update(Long id, Port patchData);
     void softDelete(Long id);
-    List<AutocompleteItem> autocomplete(String query, int limit);
+    List<AutocompleteItem> autocomplete(String query, String type, int limit);
 }

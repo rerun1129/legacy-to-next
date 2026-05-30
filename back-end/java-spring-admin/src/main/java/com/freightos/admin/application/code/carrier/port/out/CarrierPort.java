@@ -15,5 +15,5 @@ public interface CarrierPort {
     Long save(Carrier carrier);
     void update(Long id, Carrier patchData);
     void softDelete(Long id);
-    List<AutocompleteItem> autocomplete(String query, int limit);
+    List<AutocompleteItem> autocomplete(String query, String type, int limit);
 }

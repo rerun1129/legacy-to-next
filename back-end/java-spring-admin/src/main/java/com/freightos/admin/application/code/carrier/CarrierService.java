@@ -98,7 +98,7 @@ public class CarrierService implements CarrierUseCase {
     }
 
     @Override
-    public List<AutocompleteItem> autocompleteCarriers(String query, int limit) {
-        return carrierPort.autocomplete(query, limit);
+    public List<AutocompleteItem> autocompleteCarriers(String query, String type, int limit) {
+        return carrierPort.autocomplete(query, type, limit);
     }
 }

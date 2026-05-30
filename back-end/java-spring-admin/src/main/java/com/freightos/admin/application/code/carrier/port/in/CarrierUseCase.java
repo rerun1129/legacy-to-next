@@ -20,5 +20,5 @@ public interface CarrierUseCase {
     void deleteCarrier(Long id);
     void deleteCarriers(List<Long> ids);
     SaveChangesResult saveCarrierChanges(SaveCarrierChangesCommand command);
-    List<AutocompleteItem> autocompleteCarriers(String query, int limit);
+    List<AutocompleteItem> autocompleteCarriers(String query, String type, int limit);
 }

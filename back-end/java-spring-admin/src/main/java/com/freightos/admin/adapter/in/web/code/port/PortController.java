@@ -107,7 +107,8 @@ public class PortController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
             @RequestParam String q,
+            @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
-        return ResponseEntity.ok(ApiResponse.of(portUseCase.autocompletePorts(q, limit)));
+        return ResponseEntity.ok(ApiResponse.of(portUseCase.autocompletePorts(q, type, limit)));
     }
 }

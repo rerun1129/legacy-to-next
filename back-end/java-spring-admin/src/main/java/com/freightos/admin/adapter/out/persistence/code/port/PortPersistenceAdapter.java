@@ -57,7 +57,7 @@ public class PortPersistenceAdapter implements PortPort {
     }
 
     @Override
-    public List<AutocompleteItem> autocomplete(String query, int limit) {
-        return portRepository.autocomplete(query, limit);
+    public List<AutocompleteItem> autocomplete(String query, String type, int limit) {
+        return portRepository.autocomplete(query, type, limit);
     }
 }

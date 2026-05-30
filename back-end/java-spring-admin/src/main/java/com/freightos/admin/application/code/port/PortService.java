@@ -98,7 +98,7 @@ public class PortService implements PortUseCase {
     }
 
     @Override
-    public List<AutocompleteItem> autocompletePorts(String query, int limit) {
-        return portPort.autocomplete(query, limit);
+    public List<AutocompleteItem> autocompletePorts(String query, String type, int limit) {
+        return portPort.autocomplete(query, type, limit);
     }
 }
