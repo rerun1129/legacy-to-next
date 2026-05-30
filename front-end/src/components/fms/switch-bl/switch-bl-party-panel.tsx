@@ -5,6 +5,8 @@ import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { CodeBox } from "@/components/shared/inputs";
 import { Button } from "@/components/shared/button";
 import type { SwitchBlFormValues } from "./switch-bl-modal";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 type PartyRole = "SHIPPER" | "CONSIGNEE" | "NOTIFY";
 
@@ -29,6 +31,7 @@ interface PartyBlockProps {
 function PartyBlock({ cfg, isExp }: PartyBlockProps) {
   const { register, control, getValues, setValue } = useFormContext<SwitchBlFormValues>();
   const isNotify = cfg.role === "NOTIFY";
+  const src = useCodeAutocomplete(CODE_SOURCES.customer);
 
   const isRequired =
     cfg.role === "SHIPPER"   ? isExp  :
@@ -56,6 +59,13 @@ function PartyBlock({ cfg, isExp }: PartyBlockProps) {
             required={isRequired}
             codeProps={{ ...register(cfg.codeField), placeholder: `${cfg.role} code` }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+            onSearch={src.onSearch}
+            suggestions={src.suggestions}
+            suggestionsLoading={src.suggestionsLoading}
+            onSelect={(it) => {
+              setValue(cfg.codeField, it.code, { shouldDirty: true });
+              setValue(cfg.addrField, it.address ?? "", { shouldDirty: true });
+            }}
           />
         </div>
         {isNotify && (
