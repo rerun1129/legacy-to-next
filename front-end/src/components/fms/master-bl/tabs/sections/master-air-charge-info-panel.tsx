@@ -5,9 +5,11 @@ import { useFormContext, useFieldArray, useWatch, Controller, type Control } fro
 import { Plus, Minus } from "lucide-react";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { Button } from "@/components/shared/button";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 type ChargeRow = NonNullable<MasterBlFormValues["airCharges"]>[number];
 
@@ -21,6 +23,23 @@ const EMPTY_CHARGE_ROW: ChargeRow = {
   chargeWeightKg: undefined,
   rate:           undefined,
 };
+
+function CurrencyCell({ index }: { index: number }) {
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const currency = useCodeAutocomplete(CODE_SOURCES.currency);
+  return (
+    <CodeBox
+      kind="code-only"
+      variant="cell"
+      codeProps={{ ...register(`airCharges.${index}.currencyCode`) }}
+      onLookup={() => {}}
+      onSearch={currency.onSearch}
+      suggestions={currency.suggestions}
+      suggestionsLoading={currency.suggestionsLoading}
+      onSelect={(it) => { setValue(`airCharges.${index}.currencyCode`, it.code); }}
+    />
+  );
+}
 
 function TotalAmountCell({ control, index }: { control: Control<MasterBlFormValues>; index: number }) {
   const rate  = useWatch({ control, name: `airCharges.${index}.rate` });
@@ -62,7 +81,7 @@ export function MasterAirChargeInfoPanel() {
       key: "currencyCode",
       label: "Currency",
       width: 60,
-      render: (_, __, i) => <TextBox variant="cell" {...register(`airCharges.${i}.currencyCode`)} />,
+      render: (_, __, i) => <CurrencyCell index={i} />,
     },
     {
       key: "per",

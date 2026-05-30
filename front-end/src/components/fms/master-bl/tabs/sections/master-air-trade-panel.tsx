@@ -3,12 +3,31 @@
 import { useFormContext, Controller } from "react-hook-form";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
-import { TextBox, ComboBox } from "@/components/shared/inputs";
+import { TextBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
+
+function CurrencyField() {
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const currency = useCodeAutocomplete(CODE_SOURCES.currency);
+  return (
+    <CodeBox
+      kind="code-only"
+      variant="panel"
+      codeProps={{ ...register("airDetail.currencyCode") }}
+      onLookup={() => {}}
+      onSearch={currency.onSearch}
+      suggestions={currency.suggestions}
+      suggestionsLoading={currency.suggestionsLoading}
+      onSelect={(it) => { setValue("airDetail.currencyCode", it.code); }}
+    />
+  );
+}
 
 // incoterms / fhd 제외 — 7 필드
 export function MasterAirTradePanel({ variant }: Props) {
@@ -25,7 +44,7 @@ export function MasterAirTradePanel({ variant }: Props) {
         <div className="li">
           <span className="li__label">Currency</span>
           <div className="li__input">
-            <TextBox variant="panel" {...register("airDetail.currencyCode")} />
+            <CurrencyField />
           </div>
         </div>
       ),

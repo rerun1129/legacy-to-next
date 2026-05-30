@@ -104,7 +104,7 @@ public class CurrencyController {
     }
 
     @GetMapping("/autocomplete")
-    @PreAuthorize("hasAuthority('MENU_ADMIN_CODE_CURRENCY')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AutocompleteItem>>> autocomplete(
             @RequestParam String q,
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
