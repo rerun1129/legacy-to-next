@@ -278,6 +278,7 @@ public class HouseBlFactory {
                 entity.getUpdatedAt(),
                 Nullables.mapOrNull(entity.getIncoterms(), Incoterms::name),
                 Nullables.mapOrNull(entity.getSalesClass(), SalesClass::name),
+                entity.getHsCode(),
                 Nullables.mapOrNull(nonBl, n -> VoMapper.mapOrNull(n.getOriginalBlRef(), BlNumber::value)),
                 Nullables.mapOrNull(nonBl, n -> Nullables.mapOrNull(n.getWorkDivision(), WorkDivision::name)),
                 Nullables.mapOrNull(nonBl, HouseBlNonBl::getLinerCode),

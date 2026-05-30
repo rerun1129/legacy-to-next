@@ -3,6 +3,7 @@ package com.freightos.fms.application.nonbl;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
@@ -13,6 +14,7 @@ import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.application.nonbl.port.out.NonBlPersistencePort;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
+import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.vo.BlNumber;
@@ -23,7 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -35,6 +40,7 @@ public class NonBlService implements NonBlUseCase {
     private final HouseBlPort houseBlPort;
     private final NonBlPersistencePort nonBlPersistencePort;
     private final NonBlSearchPort nonBlSearchPort;
+    private final CodeNameResolver codeNameResolver;
 
     @Override
     public PagedResult<NonBlSummary> searchNonBls(SearchNonBlCommand cmd, PageRequest pageRequest) {
@@ -42,8 +48,30 @@ public class NonBlService implements NonBlUseCase {
     }
 
     @Override
-    public NonBlDetailResult findNonBlById(Long id) {
-        return NonBlDetailResult.from(findNonBlDomainById(id));
+    public NonBlDetailView findNonBlById(Long id) {
+        NonBlDetailResult base = NonBlDetailResult.from(findNonBlDomainById(id));
+        return enrichDetail(base);
+    }
+
+    private NonBlDetailView enrichDetail(NonBlDetailResult base) {
+        Map<String, String> hsCodeNames = resolveHsCodeNames(base);
+        return new NonBlDetailView(base, nameOrEmpty(hsCodeNames, base.hsCode()));
+    }
+
+    /** base.hsCode 1종 조회. */
+    private Map<String, String> resolveHsCodeNames(NonBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        if (base.hsCode() != null && !base.hsCode().isBlank()) {
+            codes.add(base.hsCode());
+        }
+        return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    private static String nameOrEmpty(Map<String, String> nameMap, String code) {
+        if (code == null || code.isBlank()) {
+            return "";
+        }
+        return nameMap.getOrDefault(code, "");
     }
 
     @Override

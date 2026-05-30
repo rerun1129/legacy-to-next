@@ -2,11 +2,13 @@ package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.FmsException;
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.masterbl.command.ChangeMasterBlNoCommand;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
@@ -28,7 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -41,6 +46,7 @@ public class MasterBlService implements MasterBlUseCase {
     private final AirMasterPersistencePort airMasterPersistencePort;
     private final HouseBlPort houseBlPort;
     private final MasterBlFactory masterBlFactory;
+    private final CodeNameResolver codeNameResolver;
 
     @Override
     public PagedResult<MasterBlSummaryResult> searchMasterBls(SearchMasterBlCommand cmd, PageRequest pageRequest) {
@@ -48,11 +54,33 @@ public class MasterBlService implements MasterBlUseCase {
     }
 
     @Override
-    public MasterBlDetailResult findMasterBlById(Long id) {
+    public MasterBlDetailView findMasterBlById(Long id) {
         MasterBl entity = findEntityById(id);
         List<ConsoledHouseBlSummary> consoled = loadConsolidatedHouseBls(id, entity);
         List<ConsoledSeaContainer> containers = loadConsoledSeaContainers(id, entity);
-        return masterBlFactory.toDetailResult(entity, consoled, containers);
+        MasterBlDetailResult base = masterBlFactory.toDetailResult(entity, consoled, containers);
+        return enrichDetail(base);
+    }
+
+    private MasterBlDetailView enrichDetail(MasterBlDetailResult base) {
+        Map<String, String> hsCodeNames = resolveHsCodeNames(base);
+        return new MasterBlDetailView(base, nameOrEmpty(hsCodeNames, base.hsCode()));
+    }
+
+    /** base.hsCode 1종 조회. */
+    private Map<String, String> resolveHsCodeNames(MasterBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        if (base.hsCode() != null && !base.hsCode().isBlank()) {
+            codes.add(base.hsCode());
+        }
+        return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    private static String nameOrEmpty(Map<String, String> nameMap, String code) {
+        if (code == null || code.isBlank()) {
+            return "";
+        }
+        return nameMap.getOrDefault(code, "");
     }
 
     @Override

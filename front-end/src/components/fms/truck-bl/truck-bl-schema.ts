@@ -71,6 +71,8 @@ export const TRUCK_BL_SCHEMA = z.object({
   grossWeightKg:  z.number().optional(),
   cbm:            z.number().optional(),
   chargeWeightKg: z.number().optional(),
+  hsCode:         z.string().optional(),
+  hsCodeName:     z.string().optional(),
 
   // Document
   pickupDate:  z.string().optional(),

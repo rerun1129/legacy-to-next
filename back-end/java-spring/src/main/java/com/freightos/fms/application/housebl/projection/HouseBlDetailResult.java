@@ -48,6 +48,7 @@ public record HouseBlDetailResult(
         // 거래 조건
         String incoterms,
         String salesClass,
+        String hsCode,
 
         // Non B/L 전용 필드
         String originalBlRef,

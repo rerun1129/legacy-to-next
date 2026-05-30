@@ -2,10 +2,12 @@ package com.freightos.fms.application.nonbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.common.model.PageRequest;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.housebl.HouseBlFactory;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
+import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.domain.nonbl.entity.HouseBlNonBl;
@@ -16,8 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -31,6 +36,7 @@ class NonBlServiceTest {
     @Mock private HouseBlPort houseBlPort;
     @Mock private HouseBlFactory houseBlFactory;
     @Mock private NonBlSearchPort nonBlSearchPort;
+    @Mock private CodeNameResolver codeNameResolver;
 
     @InjectMocks
     private NonBlService nonBlService;
@@ -54,13 +60,17 @@ class NonBlServiceTest {
     }
 
     @Test
-    @DisplayName("findNonBlById: 존재하는 경우 NonBlDetailResult 반환")
+    @DisplayName("findNonBlById: 존재하는 경우 NonBlDetailView 반환 — hsCodeName resolved")
     void findNonBlById_found_returnsDetailResult() {
         HouseBlNonBl domain = HouseBlNonBl.create(HouseBlNonBl.WorkDivision.SEA, Bound.EXP);
         given(nonBlSearchPort.findNonBlById(1L)).willReturn(Optional.of(domain));
+        given(codeNameResolver.findHsCodeNames(any(Collection.class))).willReturn(Map.of());
 
-        nonBlService.findNonBlById(1L);
+        NonBlDetailView view = nonBlService.findNonBlById(1L);
 
         then(nonBlSearchPort).should().findNonBlById(1L);
+        then(codeNameResolver).should().findHsCodeNames(any(Collection.class));
+        assertThat(view.base()).isNotNull();
+        assertThat(view.hsCodeName()).isNotNull();
     }
 }

@@ -72,6 +72,7 @@ export const mockMasterBlPort: MasterBlPort = {
       consoledSeaContainers: [],
       mainItemName: null,
       hsCode: null,
+      hsCodeName: null,
       settlePartnerCode: null,
       desc: null,
       updatedAt: null,

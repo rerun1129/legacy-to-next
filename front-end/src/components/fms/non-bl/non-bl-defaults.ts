@@ -19,7 +19,7 @@ export function createEmptyNonBlFormValues(): NonBlFormValues {
     podCode:      "", podName:      "",
     finalDestCode: "", finalDestName: "",
     finalEta:     "",
-    mainItem:  "", hsCode:    "",
+    mainItem:  "", hsCode:    "", hsCodeName: "",
     cargoQty:  undefined, pkgUnit: "", weightUnit: "",
     grossWt:   undefined, volWt:     undefined,
     totalCbm:  undefined, rton:      1,

@@ -107,6 +107,7 @@ const NON_BL_DETAIL_SCHEMA = z.object({
   teamCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   mainItemName: z.string().nullable().optional().transform((v) => v ?? undefined),
   hsCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  hsCodeName: z.string().nullable().optional().transform((v) => v ?? undefined),
   workDivision: z.string().nullable().optional().transform((v) => v ?? undefined),
   originalBlRef: z.string().nullable().optional().transform((v) => v ?? undefined),
   rton: z.number().nullable().optional().transform((v) => v ?? undefined),

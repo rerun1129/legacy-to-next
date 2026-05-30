@@ -94,6 +94,7 @@ export interface HouseBlDetail extends HouseBlRow {
   loadType?: string;
   seaDetail?: {
     linerCode?: string;
+    linerName?: string;
     vesselCode?: string;
     vesselName?: string;
     voyageNo?: string;
@@ -103,14 +104,18 @@ export interface HouseBlDetail extends HouseBlRow {
     issueDate?: string;
     noOfBl?: string;
     issuePlace?: string;
+    // §BE-sync — SeaDetailResponse name 4종 (issuePlaceName, payableAtName, deliveryName, linerName)
+    issuePlaceName?: string;
     doDate?: string;
     payableAt?: string;
+    payableAtName?: string;
     triangle?: boolean;
     serviceTerm?: string;
     vesselNationality?: string;
     rton?: number;
     sayInformation?: string;
     noOfContainerOrPackages?: string;
+    deliveryName?: string;
     // §BE-sync — BE SeaDetailResponse.containers / .desc (seaDetail nested)
     containers?: HouseBlSeaContainerView[];
     desc?: HouseBlSeaDescView;
@@ -157,6 +162,17 @@ export interface HouseBlDetail extends HouseBlRow {
   consigneeAddress: string | null;
   notifyAddress: string | null;
   docPartnerAddress: string | null;
+  // §BE-sync — HouseBlDetailResponse name 필드 (8종 + salesManName, operatorName)
+  shipperName?: string;
+  consigneeName?: string;
+  notifyName?: string;
+  docPartnerName?: string;
+  settlePartnerName?: string;
+  actualCustomerName?: string;
+  polName?: string;
+  podName?: string;
+  salesManName?: string;
+  operatorName?: string;
   linerCode?: string;
   linerName?: string;
   vesselName?: string;
@@ -172,6 +188,8 @@ export interface HouseBlDetail extends HouseBlRow {
   mblNo?: string;
   masterRefNo?: string;
   settlePartnerCode?: string;
+  hsCode?: string;
+  hsCodeName?: string;
 }
 
 export interface HouseBlFilter {

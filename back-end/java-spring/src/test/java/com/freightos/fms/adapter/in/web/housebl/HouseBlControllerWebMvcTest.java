@@ -8,7 +8,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
-import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailView;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.common.security.JwtAuthenticationFilter;
 import com.freightos.common.security.JwtTokenProvider;
@@ -129,7 +129,7 @@ class HouseBlControllerWebMvcTest {
         Long id = 1L;
         HouseBlDetailResponse mockResponse = mock(HouseBlDetailResponse.class);
 
-        given(houseBlUseCase.findHouseBlById(id)).willReturn(mock(HouseBlDetailResult.class));
+        given(houseBlUseCase.findHouseBlById(id)).willReturn(mock(HouseBlDetailView.class));
         given(houseBlAssembler.toDetail(any())).willReturn(mockResponse);
 
         mockMvc.perform(get("/api/house-bl/{id}", id))

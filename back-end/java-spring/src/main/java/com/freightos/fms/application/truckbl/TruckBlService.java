@@ -1,6 +1,7 @@
 package com.freightos.fms.application.truckbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
@@ -9,6 +10,7 @@ import com.freightos.fms.application.truckbl.port.in.TruckBlUseCase;
 import com.freightos.fms.application.truckbl.port.out.TruckBlPersistencePort;
 import com.freightos.fms.application.truckbl.port.out.TruckBlSearchPort;
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailResult;
+import com.freightos.fms.application.truckbl.projection.TruckBlDetailView;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
@@ -19,7 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -31,10 +36,33 @@ public class TruckBlService implements TruckBlUseCase {
     private final TruckBlFactory truckBlFactory;
     private final TruckBlPersistencePort truckBlPersistencePort;
     private final TruckBlSearchPort truckBlSearchPort;
+    private final CodeNameResolver codeNameResolver;
 
     @Override
-    public TruckBlDetailResult findTruckBlById(Long id) {
-        return truckBlFactory.toDetailResult(findTruckDomainById(id));
+    public TruckBlDetailView findTruckBlById(Long id) {
+        TruckBlDetailResult base = truckBlFactory.toDetailResult(findTruckDomainById(id));
+        return enrichDetail(base);
+    }
+
+    private TruckBlDetailView enrichDetail(TruckBlDetailResult base) {
+        Map<String, String> hsCodeNames = resolveHsCodeNames(base);
+        return new TruckBlDetailView(base, nameOrEmpty(hsCodeNames, base.hsCode()));
+    }
+
+    /** base.hsCode 1종 조회. */
+    private Map<String, String> resolveHsCodeNames(TruckBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        if (base.hsCode() != null && !base.hsCode().isBlank()) {
+            codes.add(base.hsCode());
+        }
+        return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    private static String nameOrEmpty(Map<String, String> nameMap, String code) {
+        if (code == null || code.isBlank()) {
+            return "";
+        }
+        return nameMap.getOrDefault(code, "");
     }
 
     @Override

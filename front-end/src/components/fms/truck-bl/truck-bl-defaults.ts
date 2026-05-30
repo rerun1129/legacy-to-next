@@ -27,6 +27,8 @@ export function createEmptyTruckBlFormValues(): TruckBlFormValues {
     grossWeightKg: undefined,
     cbm:           undefined,
     chargeWeightKg: undefined,
+    hsCode:        "",
+    hsCodeName:    "",
 
     // Document
     pickupDate:  "",

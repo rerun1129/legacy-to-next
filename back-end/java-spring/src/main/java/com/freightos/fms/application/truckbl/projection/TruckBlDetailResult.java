@@ -56,6 +56,9 @@ public record TruckBlDetailResult(
         String vesselName,
         String voyageNo,
 
+        // 거래 조건
+        String hsCode,
+
         // Marks/Description 패널
         String remark,
 

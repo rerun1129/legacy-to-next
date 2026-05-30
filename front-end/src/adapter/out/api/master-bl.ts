@@ -160,6 +160,7 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   // §BE 보강 — root 승격 cargo 식별 필드
   mainItemName:      z.string().nullable().optional().transform((v) => v ?? null),
   hsCode:            z.string().nullable().optional().transform((v) => v ?? null),
+  hsCodeName:        z.string().nullable().optional().transform((v) => v ?? null),
   settlePartnerCode: z.string().nullable().optional().transform((v) => v ?? null),
   desc:              MASTER_BL_DESC_VIEW_SCHEMA.nullable().optional(),
   consolidatedHouseBls: z.array(CONSOLIDATED_HBL_SCHEMA),

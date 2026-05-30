@@ -46,6 +46,7 @@ export function createEmptyHouseBlFormValues(): HouseBlFormValues {
     salesClass: "",
     mainItemName: "",
     hsCode: "",
+    hsCodeName: "",
     freightTerm: "",
     currency: "",
     otherTerm: "",

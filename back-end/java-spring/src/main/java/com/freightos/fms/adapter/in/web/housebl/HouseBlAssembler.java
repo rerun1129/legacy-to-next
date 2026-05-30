@@ -9,7 +9,7 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
-import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailView;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +27,8 @@ public class HouseBlAssembler {
         return source.map(HouseBlSummaryResponse::from);
     }
 
-    public HouseBlDetailResponse toDetail(HouseBlDetailResult result) {
-        return HouseBlDetailResponse.from(result);
+    public HouseBlDetailResponse toDetail(HouseBlDetailView view) {
+        return HouseBlDetailResponse.from(view);
     }
 
     public SearchHouseBlCommand toSearchCommand(SearchHouseBlRequest req) {

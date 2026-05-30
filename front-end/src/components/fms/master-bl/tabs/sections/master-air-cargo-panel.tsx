@@ -16,7 +16,8 @@ export function MasterAirCargoPanel({ variant }: Props) {
   const panelScope = variant ? `master-air-cargo-panel.${variant.key}` : "master-air-cargo-panel";
   const { options: weightUnitOptions }                               = useEnumOptions("WeightUnit");
   const { options: rateClassOptions, placeholder: rateClassPlaceholder } = useEnumOptions("RateClass");
-  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  const pkgUnit  = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  const hsCodeAc = useCodeAutocomplete(CODE_SOURCES.hsCode);
 
   const cargoItems: FieldItemDef[] = [
     {
@@ -121,6 +122,23 @@ export function MasterAirCargoPanel({ variant }: Props) {
             <NumberBox variant="panel" decimalPlaces={3} {...register("cbm")} />
           </div>
         </div>
+      ),
+    },
+    {
+      key: "hs-code",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="HS Code"
+          codeProps={{ ...register("hsCode"), placeholder: "Code" }}
+          nameProps={{ ...register("hsCodeName"), placeholder: "HS Code Name" }}
+          onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={hsCodeAc.onSearch}
+          suggestions={hsCodeAc.suggestions}
+          suggestionsLoading={hsCodeAc.suggestionsLoading}
+          onSelect={(it) => { setValue("hsCode", it.code); setValue("hsCodeName", it.name); }}
+        />
       ),
     },
   ];

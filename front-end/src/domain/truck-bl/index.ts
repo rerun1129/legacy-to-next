@@ -115,6 +115,8 @@ export interface TruckBlDetail {
   vesselName?: string;
   remark?: string;
   volumeDivisor?: string | null;
+  hsCode?: string;
+  hsCodeName?: string;
   truckOrders?: TruckOrderDetail[];
   desc?: DescDetail;
   dims?: TruckBlDimView[];

@@ -4,11 +4,14 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailView;
+import com.freightos.fms.application.housebl.projection.SeaDetailProjection;
 import com.freightos.fms.application.housebl.port.out.AirBlPersistencePort;
 import com.freightos.fms.application.seahbl.port.out.SeaHblPersistencePort;
 import com.freightos.fms.domain.common.vo.BlNumber;
@@ -19,7 +22,10 @@ import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +40,7 @@ public class HouseBlService implements HouseBlUseCase {
     private final HouseBlFactory houseBlFactory;
     private final SeaHblPersistencePort seaHblPersistencePort;
     private final AirBlPersistencePort airBlPersistencePort;
+    private final CodeNameResolver codeNameResolver;
 
     @Override
     public PagedResult<HouseBlSummary> searchHouseBls(SearchHouseBlCommand cmd, PageRequest pageRequest) {
@@ -41,8 +48,124 @@ public class HouseBlService implements HouseBlUseCase {
     }
 
     @Override
-    public HouseBlDetailResult findHouseBlById(Long id) {
-        return houseBlFactory.toDetailResult(findEntityById(id));
+    public HouseBlDetailView findHouseBlById(Long id) {
+        HouseBlDetailResult base = houseBlFactory.toDetailResult(findEntityById(id));
+        return enrichDetail(base);
+    }
+
+    private HouseBlDetailView enrichDetail(HouseBlDetailResult base) {
+        Map<String, String> customerNames = resolveCustomerNames(base);
+        Map<String, String> portNames = resolvePortNames(base);
+        Map<String, String> userNames = resolveUserNames(base);
+        Map<String, String> carrierNames = resolveCarrierNames(base);
+        Map<String, String> hsCodeNames = resolveHsCodeNames(base);
+        return new HouseBlDetailView(
+                base,
+                nameOrEmpty(customerNames, base.shipperCode()),
+                nameOrEmpty(customerNames, base.consigneeCode()),
+                nameOrEmpty(customerNames, base.notifyCode()),
+                nameOrEmpty(customerNames, base.docPartnerCode()),
+                nameOrEmpty(customerNames, base.settlePartnerCode()),
+                nameOrEmpty(customerNames, base.actualCustomerCode()),
+                nameOrEmpty(portNames, base.polCode()),
+                nameOrEmpty(portNames, base.podCode()),
+                nameOrEmpty(userNames, base.salesManCode()),
+                nameOrEmpty(userNames, base.operatorCode()),
+                seaPortName(portNames, base, SeaPortField.ISSUE_PLACE),
+                seaPortName(portNames, base, SeaPortField.PAYABLE_AT),
+                seaPortName(portNames, base, SeaPortField.DELIVERY),
+                seaLinerName(carrierNames, base),
+                nameOrEmpty(hsCodeNames, base.hsCode())
+        );
+    }
+
+    /** top-level customer 코드 6종을 distinct 수집 후 1회 조회. */
+    private Map<String, String> resolveCustomerNames(HouseBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        addIfHasText(codes, base.shipperCode());
+        addIfHasText(codes, base.consigneeCode());
+        addIfHasText(codes, base.notifyCode());
+        addIfHasText(codes, base.docPartnerCode());
+        addIfHasText(codes, base.settlePartnerCode());
+        addIfHasText(codes, base.actualCustomerCode());
+        return codeNameResolver.findCustomerNames(codes);
+    }
+
+    /**
+     * port 코드 일괄 조회: top-level(pol/pod) + seaDetail(issuePlace/payableAt/delivery) 합쳐 1회.
+     */
+    private Map<String, String> resolvePortNames(HouseBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        addIfHasText(codes, base.polCode());
+        addIfHasText(codes, base.podCode());
+        SeaDetailProjection sea = base.seaDetail();
+        if (sea != null) {
+            addIfHasText(codes, sea.issuePlace());
+            addIfHasText(codes, sea.payableAt());
+        }
+        addIfHasText(codes, base.deliveryCode());
+        return codeNameResolver.findPortNames(codes);
+    }
+
+    /** salesMan/operator username 2종 distinct 수집 후 1회 조회. */
+    private Map<String, String> resolveUserNames(HouseBlDetailResult base) {
+        Set<String> usernames = new HashSet<>();
+        addIfHasText(usernames, base.salesManCode());
+        addIfHasText(usernames, base.operatorCode());
+        return codeNameResolver.findUserNames(usernames);
+    }
+
+    /** base.hsCode 1종 조회. */
+    private Map<String, String> resolveHsCodeNames(HouseBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        addIfHasText(codes, base.hsCode());
+        return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    /** seaDetail.linerCode 1종 조회. seaDetail null이면 빈 맵. */
+    private Map<String, String> resolveCarrierNames(HouseBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        SeaDetailProjection sea = base.seaDetail();
+        if (sea != null) {
+            addIfHasText(codes, sea.linerCode());
+        }
+        return codeNameResolver.findCarrierNames(codes);
+    }
+
+    private enum SeaPortField { ISSUE_PLACE, PAYABLE_AT, DELIVERY }
+
+    private static String seaPortName(Map<String, String> portNames, HouseBlDetailResult base, SeaPortField field) {
+        SeaDetailProjection sea = base.seaDetail();
+        if (sea == null) {
+            return "";
+        }
+        String code = switch (field) {
+            case ISSUE_PLACE -> sea.issuePlace();
+            case PAYABLE_AT  -> sea.payableAt();
+            case DELIVERY    -> base.deliveryCode();
+        };
+        return nameOrEmpty(portNames, code);
+    }
+
+    private static String seaLinerName(Map<String, String> carrierNames, HouseBlDetailResult base) {
+        SeaDetailProjection sea = base.seaDetail();
+        if (sea == null) {
+            return "";
+        }
+        return nameOrEmpty(carrierNames, sea.linerCode());
+    }
+
+    private static void addIfHasText(Set<String> target, String code) {
+        if (code != null && !code.isBlank()) {
+            target.add(code);
+        }
+    }
+
+    private static String nameOrEmpty(Map<String, String> nameMap, String code) {
+        if (code == null || code.isBlank()) {
+            return "";
+        }
+        return nameMap.getOrDefault(code, "");
     }
 
     @Override

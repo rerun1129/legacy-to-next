@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.in.web.masterbl.dto;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
 import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,9 +21,9 @@ class MasterBlDetailResponseTest {
     void recordComponents_haveExactlyThirtyFiveFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(38);
-        assertThat(components[29].getName()).isEqualTo("consolidatedHouseBls");
-        assertThat(components[29].getType()).isEqualTo(List.class);
+        assertThat(components).hasSize(39);
+        assertThat(components[30].getName()).isEqualTo("consolidatedHouseBls");
+        assertThat(components[30].getType()).isEqualTo(List.class);
     }
 
     // ── from(MasterBlDetailResult) 매핑 검증 ─────────────────────────
@@ -55,7 +56,7 @@ class MasterBlDetailResponseTest {
                 List.of(), List.of(), List.of()
         );
 
-        MasterBlDetailResponse response = MasterBlDetailResponse.from(result);
+        MasterBlDetailResponse response = MasterBlDetailResponse.from(new MasterBlDetailView(result, null));
 
         assertThat(response).isNotNull();
         assertThat(response.consolidatedHouseBls()).hasSize(1);
@@ -89,7 +90,7 @@ class MasterBlDetailResponseTest {
                 List.of(), List.of(), List.of()
         );
 
-        MasterBlDetailResponse response = MasterBlDetailResponse.from(result);
+        MasterBlDetailResponse response = MasterBlDetailResponse.from(new MasterBlDetailView(result, null));
 
         assertThat(response.consolidatedHouseBls()).isNotNull().isEmpty();
     }

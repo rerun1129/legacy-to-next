@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.in.web.truckbl.dto;
 
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailResult;
+import com.freightos.fms.application.truckbl.projection.TruckBlDetailView;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -54,6 +55,10 @@ public record TruckBlDetailResponse(
         String vesselName,
         String voyageNo,
 
+        // 거래 조건
+        String hsCode,
+        String hsCodeName,
+
         // Marks/Description 패널
         String remark,
 
@@ -94,7 +99,8 @@ public record TruckBlDetailResponse(
         }
     }
 
-    public static TruckBlDetailResponse from(TruckBlDetailResult result) {
+    public static TruckBlDetailResponse from(TruckBlDetailView view) {
+        TruckBlDetailResult result = view.base();
         List<TruckOrderView> truckOrderViews = result.truckOrders() == null ? null
                 : result.truckOrders().stream()
                         .map(o -> new TruckOrderView(
@@ -152,6 +158,8 @@ public record TruckBlDetailResponse(
                 result.serviceTerm(),
                 result.vesselName(),
                 result.voyageNo(),
+                result.hsCode(),
+                view.hsCodeName(),
                 result.remark(),
                 truckOrderViews,
                 descView,

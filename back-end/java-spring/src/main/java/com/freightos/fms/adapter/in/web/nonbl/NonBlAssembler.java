@@ -10,7 +10,7 @@ import com.freightos.fms.adapter.in.web.nonbl.dto.UpdateNonBlRequest;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
-import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
+import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +28,8 @@ public class NonBlAssembler {
         return source.map(NonBlSummaryResponse::from);
     }
 
-    public NonBlDetailResponse toDetail(NonBlDetailResult result) {
-        return NonBlDetailResponse.from(result);
+    public NonBlDetailResponse toDetail(NonBlDetailView view) {
+        return NonBlDetailResponse.from(view);
     }
 
     public SearchNonBlCommand toSearchCommand(SearchNonBlRequest req) {

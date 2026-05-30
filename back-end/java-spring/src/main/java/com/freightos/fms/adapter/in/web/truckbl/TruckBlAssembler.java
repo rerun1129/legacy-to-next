@@ -9,7 +9,7 @@ import com.freightos.fms.adapter.in.web.truckbl.dto.UpdateTruckBlRequest;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.truckbl.command.SearchTruckBlCommand;
-import com.freightos.fms.application.truckbl.projection.TruckBlDetailResult;
+import com.freightos.fms.application.truckbl.projection.TruckBlDetailView;
 import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +42,8 @@ public class TruckBlAssembler {
         );
     }
 
-    public TruckBlDetailResponse toDetail(TruckBlDetailResult result) {
-        return TruckBlDetailResponse.from(result);
+    public TruckBlDetailResponse toDetail(TruckBlDetailView view) {
+        return TruckBlDetailResponse.from(view);
     }
 
     public CreateHouseBlCommand toCreateCommand(CreateTruckBlRequest req) {

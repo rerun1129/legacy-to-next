@@ -5,7 +5,7 @@ import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlDetailResponse;
 import com.freightos.fms.adapter.in.web.masterbl.dto.MasterBlSummaryResponse;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
-import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
@@ -172,10 +172,10 @@ class AirMasterBlControllerWebMvcTest {
     @DisplayName("GET /api/master-bl/10: AIR 단건 조회 → 200")
     void findMasterBlById_airHappyPath_returns200() throws Exception {
         Long id = 10L;
-        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
+        MasterBlDetailView mockView = mock(MasterBlDetailView.class);
         MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
-        given(masterBlUseCase.findMasterBlById(id)).willReturn(mockResult);
-        given(masterBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
+        given(masterBlUseCase.findMasterBlById(id)).willReturn(mockView);
+        given(masterBlAssembler.toDetail(mockView)).willReturn(mockResponse);
 
         mockMvc.perform(get("/api/master-bl/{id}", id)).andExpect(status().isOk());
 

@@ -11,6 +11,7 @@ import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 export function SeaCargoPanel() {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
   const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  const hsCode  = useCodeAutocomplete(CODE_SOURCES.hsCode);
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
 
   const CARGO_ITEMS: FieldItemDef[] = [
@@ -80,6 +81,26 @@ export function SeaCargoPanel() {
     },
   ];
 
+  const HS_CODE_ITEMS: FieldItemDef[] = [
+    {
+      key: "hs-code",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="HS Code"
+          codeProps={{ ...register("hsCode") }}
+          nameProps={{ ...register("hsCodeName") }}
+          onLookup={() => {}}
+          onSearch={hsCode.onSearch}
+          suggestions={hsCode.suggestions}
+          suggestionsLoading={hsCode.suggestionsLoading}
+          onSelect={(it) => { setValue("hsCode", it.code); setValue("hsCodeName", it.name); }}
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="panel panel--col-flex sea-cargo-panel">
       <div className="panel__head">
@@ -88,6 +109,7 @@ export function SeaCargoPanel() {
       </div>
       <div className="panel__body panel__body--scroll">
         <FieldItemGrid itemScope="sea-cargo-panel" items={CARGO_ITEMS} />
+        <FieldItemGrid itemScope="sea-cargo-panel.hs" items={HS_CODE_ITEMS} cols={1} />
       </div>
     </div>
   );

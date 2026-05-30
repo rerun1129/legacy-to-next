@@ -21,6 +21,7 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
     pkgUnit: "",
     weightUnit: "",
     hsCode: "",
+    hsCodeName: "",
     mainItemName: "",
     settlePartnerCode: "",
     operatorCode: "",

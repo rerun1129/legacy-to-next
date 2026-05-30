@@ -27,6 +27,7 @@ export function mapNonBlDetailToFormValues(detail: NonBlDetail): NonBlFormValues
     finalEta:           detail.finalEta ?? "",
     mainItem:           detail.mainItemName ?? "",
     hsCode:             detail.hsCode ?? "",
+    hsCodeName:         detail.hsCodeName ?? "",
     cargoQty:           detail.pkgQty,
     pkgUnit:            detail.pkgUnit ?? "",
     weightUnit:         detail.weightUnit ?? "",

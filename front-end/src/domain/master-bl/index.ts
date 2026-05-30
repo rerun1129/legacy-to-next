@@ -118,6 +118,7 @@ export interface MasterBlDetail extends MasterBlRow {
   // §BE 보강 — root 승격 cargo 식별 필드
   mainItemName: string | null;
   hsCode: string | null;
+  hsCodeName: string | null;
   settlePartnerCode: string | null;
   desc: MasterBlDescView | null;
   consolidatedHouseBls: ConsolidatedHouseBlSummary[];

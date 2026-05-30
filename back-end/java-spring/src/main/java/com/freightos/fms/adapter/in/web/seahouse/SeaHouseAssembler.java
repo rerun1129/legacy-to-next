@@ -4,13 +4,13 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.seahouse.dto.SearchSeaHouseRequest;
 import com.freightos.fms.adapter.in.web.seahouse.dto.SeaHouseSummaryResponse;
 import com.freightos.fms.application.seahouse.command.SearchSeaHouseCommand;
-import com.freightos.fms.application.seahouse.projection.SeaHouseSummary;
+import com.freightos.fms.application.seahouse.projection.SeaHouseListItem;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SeaHouseAssembler {
 
-    public PagedResult<SeaHouseSummaryResponse> toSummaryPage(PagedResult<SeaHouseSummary> source) {
+    public PagedResult<SeaHouseSummaryResponse> toSummaryPage(PagedResult<SeaHouseListItem> source) {
         return source.map(SeaHouseSummaryResponse::from);
     }
 

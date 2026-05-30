@@ -154,6 +154,7 @@ export const MASTER_BL_SCHEMA = z.object({
   grossWeightKg:     z.number().min(0).optional(),
   cbm:               z.number().min(0).optional(),
   hsCode:            z.string().optional(),
+  hsCodeName:        z.string().optional(),
   mainItemName:      z.string().optional(),
   settlePartnerCode: z.string().optional(),
   operatorCode:      z.string().optional(),

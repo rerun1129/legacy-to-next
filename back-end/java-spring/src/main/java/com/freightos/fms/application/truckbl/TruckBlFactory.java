@@ -98,6 +98,7 @@ public class TruckBlFactory {
                 Nullables.mapOrNull(truck.getServiceTerm(), ServiceTerm::name),
                 VoMapper.mapOrNull(truck.getVesselVoyage(), VesselVoyage::vesselName),
                 VoMapper.mapOrNull(truck.getVesselVoyage(), VesselVoyage::voyageNo),
+                truck.getHsCode(),
                 truck.getRemark(),
                 toTruckOrderViews(truck.getTruckOrders()),
                 toDescView(truck.getDesc()),

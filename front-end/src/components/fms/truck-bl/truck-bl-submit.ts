@@ -133,6 +133,7 @@ export function buildTruckBlCreateRequest(form: TruckBlFormValues): CreateTruckB
     loadType:           toStr(form.loadType),
     serviceTerm:        toStr(form.serviceTerm),
     voyageNo:           toStr(form.voyNo),
+    hsCode:             toStr(form.hsCode),
     remark:             toStr(form.remark),
     volumeDivisor:      toStr(form.dimensionDivisor),
     desc:               buildDescRequest(form),

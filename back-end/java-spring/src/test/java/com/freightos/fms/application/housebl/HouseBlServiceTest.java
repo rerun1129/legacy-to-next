@@ -1,11 +1,13 @@
 package com.freightos.fms.application.housebl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.projection.HouseBlDetailResult;
+import com.freightos.fms.application.housebl.projection.HouseBlDetailView;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
@@ -24,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,23 +46,50 @@ class HouseBlServiceTest {
     @Mock
     private HouseBlFactory houseBlFactory;
 
+    @Mock
+    private CodeNameResolver codeNameResolver;
+
     @InjectMocks
     private HouseBlService houseBlService;
 
     @Test
-    @DisplayName("findHouseBlById - 존재하는 ID 조회 시 HouseBlDetailResult 반환")
+    @DisplayName("findHouseBlById - 존재하는 ID 조회 시 base 보존 + name 채워진 HouseBlDetailView 반환")
     void findHouseBlById_existingId_returnsDetailResult() {
         Long id = 1L;
         HouseBl mockEntity = mock(HouseBl.class);
-        HouseBlDetailResult mockResult = mock(HouseBlDetailResult.class);
+        HouseBlDetailResult mockBase = mock(HouseBlDetailResult.class);
+        given(mockBase.shipperCode()).willReturn("SHIP01");
+        given(mockBase.consigneeCode()).willReturn(null);
+        given(mockBase.notifyCode()).willReturn(null);
+        given(mockBase.docPartnerCode()).willReturn(null);
+        given(mockBase.settlePartnerCode()).willReturn(null);
+        given(mockBase.actualCustomerCode()).willReturn(null);
+        given(mockBase.polCode()).willReturn("KRPUS");
+        given(mockBase.podCode()).willReturn(null);
+        given(mockBase.salesManCode()).willReturn("john.doe");
+        given(mockBase.operatorCode()).willReturn(null);
+        given(mockBase.deliveryCode()).willReturn(null);
+        given(mockBase.seaDetail()).willReturn(null);
+        given(mockBase.hsCode()).willReturn("8471.30");
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
-        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mockResult);
+        given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mockBase);
+        given(codeNameResolver.findCustomerNames(any())).willReturn(Map.of("SHIP01", "ShipperCo"));
+        given(codeNameResolver.findPortNames(any())).willReturn(Map.of("KRPUS", "Busan Port"));
+        given(codeNameResolver.findUserNames(any())).willReturn(Map.of("john.doe", "John Doe"));
+        given(codeNameResolver.findCarrierNames(any())).willReturn(Map.of());
+        given(codeNameResolver.findHsCodeNames(any())).willReturn(Map.of("8471.30", "휴대용 자동자료처리기계"));
 
-        HouseBlDetailResult result = houseBlService.findHouseBlById(id);
+        HouseBlDetailView result = houseBlService.findHouseBlById(id);
 
-        assertThat(result).isEqualTo(mockResult);
-        then(houseBlPort).should().findHouseBlById(id);
+        assertThat(result.base()).isEqualTo(mockBase);
+        assertThat(result.base().shipperCode()).isEqualTo("SHIP01");
+        assertThat(result.shipperName()).isEqualTo("ShipperCo");
+        assertThat(result.polName()).isEqualTo("Busan Port");
+        assertThat(result.salesManName()).isEqualTo("John Doe");
+        assertThat(result.operatorName()).isEqualTo("");
+        assertThat(result.hsCodeName()).isEqualTo("휴대용 자동자료처리기계");
         then(houseBlFactory).should().toDetailResult(mockEntity);
+        then(codeNameResolver).should().findHsCodeNames(any());
     }
 
     @Test

@@ -31,6 +31,26 @@ function LiText({ label, name }: { label: string; name: string }) {
   );
 }
 
+// ── HS Code LCN 필드 (bare: 외부 li__label 없이 label prop만) ─────────────────
+function HsCodeLcnField() {
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const hsCodeAc = useCodeAutocomplete(CODE_SOURCES.hsCode);
+  return (
+    <CodeBox
+      kind="lcn"
+      variant="panel"
+      label="HS Code"
+      codeProps={{ ...register("hsCode"), placeholder: "Code" }}
+      nameProps={{ ...register("hsCodeName"), placeholder: "HS Code Name" }}
+      onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={hsCodeAc.onSearch}
+      suggestions={hsCodeAc.suggestions}
+      suggestionsLoading={hsCodeAc.suggestionsLoading}
+      onSelect={(it) => { setValue("hsCode", it.code); setValue("hsCodeName", it.name); }}
+    />
+  );
+}
+
 // ── SEA Document LCN 필드 ──────────────────────────────────────────────────
 // schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
 function SettlePartnerLcnField() {
@@ -142,7 +162,6 @@ export function MasterCargoDocPanel({ variant }: Props) {
 
   const cargoBase: FieldItemDef[] = [
     { key: "main-item", render: () => <LiText label="Main Item" name="mainItemName" /> },
-    { key: "hs-code",   render: () => <LiText label="HS Code"   name="hsCode" /> },
     { key: "package",   render: () => <PackageField /> },
     { key: "gw",        render: () => <GWField /> },
     { key: "cbm",       render: () => (
@@ -207,6 +226,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
         <>
           <div className="subhead"><div className="subhead__bar" />Cargo</div>
           <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} />
+          <FieldItemGrid itemScope={`${panelScope}.hs`} items={[{ key: "hs-code", render: () => <HsCodeLcnField /> }]} cols={1} />
         </>
       ),
     },

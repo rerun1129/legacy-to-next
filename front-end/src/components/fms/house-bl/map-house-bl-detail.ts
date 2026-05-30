@@ -21,12 +21,16 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     expImp:      detail.bound,
     // party
     shipperCode:        detail.shipperCode    ?? "",
+    shipperName:        detail.shipperName    ?? "",
     shipperAddress:     detail.shipperAddress ?? "",
     consigneeCode:      detail.consigneeCode  ?? "",
+    consigneeName:      detail.consigneeName  ?? "",
     consigneeAddress:   detail.consigneeAddress ?? "",
     notifyCode:         detail.notifyCode     ?? "",
+    notifyName:         detail.notifyName     ?? "",
     notifyAddress:      detail.notifyAddress  ?? "",
     docPartnerCode:     detail.docPartnerCode ?? "",
+    docPartnerName:     detail.docPartnerName ?? "",
     docPartnerAddress:  detail.docPartnerAddress ?? "",
     // cargo summary
     pkgQty:          detail.pkgQty    != null ? String(detail.pkgQty)    : "",
@@ -37,16 +41,29 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     volumeWeightKg:  detail.volumeWeightKg != null ? String(detail.volumeWeightKg) : "",
     // performance
     actualCustomerCode: detail.actualCustomerCode ?? "",
-    operatorCode:        detail.operatorCode  ?? "",
-    teamCode:            detail.teamCode      ?? "",
-    salesManCode:        detail.salesManCode  ?? "",
-    settlePartnerCode:   detail.settlePartnerCode ?? "",
-    // schedule — linerCode/linerName은 toolbar 표시용 본체 필드 (SEA: seaDetail에도 중복 있음)
+    actualCustomerName: detail.actualCustomerName ?? "",
+    operatorCode:       detail.operatorCode  ?? "",
+    operatorName:       detail.operatorName  ?? "",
+    teamCode:           detail.teamCode      ?? "",
+    salesManCode:       detail.salesManCode  ?? "",
+    salesManName:       detail.salesManName  ?? "",
+    settlePartnerCode:  detail.settlePartnerCode ?? "",
+    settlePartnerName:  detail.settlePartnerName ?? "",
+    // schedule — linerCode/linerName은 toolbar 표시용 본체 필드
+    // SEA: schedule-panel이 root linerName을 register하므로 seaDetail.linerName을 root에 매핑
+    // Non-BL/TRUCK: root linerName 직접 사용
     linerCode:  detail.linerCode  ?? "",
-    linerName:  detail.linerName  ?? "",
+    linerName:  detail.jobDiv === 'SEA'
+      ? (detail.seaDetail?.linerName ?? "")
+      : (detail.linerName ?? ""),
+    // polName/podName: AIR는 root 필드(air-schedule-panel register), SEA는 seaDetail.polName 사용
+    polName:    detail.polName    ?? "",
+    podName:    detail.podName    ?? "",
     // trade
     incoterms:  detail.incoterms  ?? "",
     salesClass: detail.salesClass ?? "",
+    hsCode:     detail.hsCode     ?? "",
+    hsCodeName: detail.hsCodeName ?? "",
     // remark (본체 — SEA: HouseBlSea.remark, 화면: sea-remark-panel)
     remark: detail.remark ?? "",
     // SEA nested detail — BE Phase A-1에서 추가된 seaDetail 서브 엔티티 매핑
@@ -62,10 +79,10 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       issueDate:               detail.seaDetail?.issueDate             ?? "",
       noOfBl:                  detail.seaDetail?.noOfBl                ?? "",
       issuePlace:              detail.seaDetail?.issuePlace            ?? "",
-      issuePlaceName:          "",
+      issuePlaceName:          detail.seaDetail?.issuePlaceName        ?? "",
       doDate:                  detail.seaDetail?.doDate                ?? "",
       payableAt:               detail.seaDetail?.payableAt             ?? "",
-      payableAtName:           "",
+      payableAtName:           detail.seaDetail?.payableAtName         ?? "",
       triangle:                detail.seaDetail?.triangle              ?? false,
       serviceTerm:             detail.seaDetail?.serviceTerm           ?? "",
       vesselNationality:       detail.seaDetail?.vesselNationality     ?? "",
@@ -74,9 +91,9 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       noOfContainerOrPackages: detail.seaDetail?.noOfContainerOrPackages ?? "",
       blType:                  detail.blType                           ?? "",
       deliveryCode:            detail.deliveryCode                     ?? "",
-      polName:                 "",
-      podName:                 "",
-      deliveryName:            "",
+      polName:                 detail.polName    ?? "",
+      podName:                 detail.podName    ?? "",
+      deliveryName:            detail.seaDetail?.deliveryName          ?? "",
       freightTermDetail:       "",
       signature:               "",
     },

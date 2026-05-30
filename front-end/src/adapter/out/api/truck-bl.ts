@@ -152,6 +152,8 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
   vesselName: z.string().nullable().optional().transform((v) => v ?? undefined),
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
   volumeDivisor: z.string().nullable().optional(),
+  hsCode:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  hsCodeName: z.string().nullable().optional().transform((v) => v ?? undefined),
   truckOrders: z.array(TRUCK_ORDER_DETAIL_SCHEMA).nullable().optional().transform((v) => v ?? undefined),
   desc: DESC_DETAIL_SCHEMA,
   dims: z.array(TRUCK_BL_DIM_SCHEMA).default([]),

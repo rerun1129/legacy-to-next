@@ -224,6 +224,7 @@ export const HOUSE_BL_SCHEMA = z.object({
   salesClass:   z.string().optional(),
   mainItemName: z.string().optional(),
   hsCode:       z.string().optional(),
+  hsCodeName:   z.string().optional(),
   freightTerm:  z.enum(['', 'PREPAID', 'COLLECT']),
   currency:     z.string().optional(),
   otherTerm:    z.string().optional(),

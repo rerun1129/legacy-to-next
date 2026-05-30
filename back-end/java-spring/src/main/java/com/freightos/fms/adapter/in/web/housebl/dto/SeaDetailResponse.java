@@ -7,9 +7,10 @@ import com.freightos.fms.application.housebl.projection.SeaDetailProjection;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** SEA 본체 상세 응답 DTO. SeaDetailProjection을 1:1 매핑한다. */
+/** SEA 본체 상세 응답 DTO. SeaDetailProjection 코드 필드 + view에서 주입된 name 필드를 포함한다. */
 public record SeaDetailResponse(
         String linerCode,
+        String linerName,
         String vesselCode,
         String vesselName,
         String voyageNo,
@@ -19,20 +20,34 @@ public record SeaDetailResponse(
         String issueDate,
         String noOfBl,
         String issuePlace,
+        String issuePlaceName,
         String doDate,
         String payableAt,
+        String payableAtName,
         boolean triangle,
         String serviceTerm,
         String vesselNationality,
         BigDecimal rton,
         String sayInformation,
         String noOfContainerOrPackages,
+        String deliveryName,
         List<SeaContainerView> containers,
         SeaDescView desc
 ) {
-    public static SeaDetailResponse from(SeaDetailProjection p) {
+    /**
+     * SeaDetailProjection(코드) + view에서 별도 전달받은 name 4종으로 빌드.
+     * SeaDetailProjection은 변경하지 않는다.
+     */
+    public static SeaDetailResponse from(
+            SeaDetailProjection p,
+            String issuePlaceName,
+            String payableAtName,
+            String deliveryName,
+            String linerName
+    ) {
         return new SeaDetailResponse(
                 p.linerCode(),
+                linerName,
                 p.vesselCode(),
                 p.vesselName(),
                 p.voyageNo(),
@@ -42,14 +57,17 @@ public record SeaDetailResponse(
                 p.issueDate(),
                 p.noOfBl(),
                 p.issuePlace(),
+                issuePlaceName,
                 p.doDate(),
                 p.payableAt(),
+                payableAtName,
                 p.triangle(),
                 p.serviceTerm(),
                 p.vesselNationality(),
                 p.rton(),
                 p.sayInformation(),
                 p.noOfContainerOrPackages(),
+                deliveryName,
                 p.containers() == null ? List.of() : p.containers().stream().map(SeaContainerView::from).toList(),
                 p.desc() != null ? SeaDescView.from(p.desc()) : null
         );

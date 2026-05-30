@@ -101,6 +101,7 @@ export interface NonBlDetail {
   teamCode?: string;
   mainItemName?: string;
   hsCode?: string;
+  hsCodeName?: string;
   workDivision?: string;
   originalBlRef?: string;
   rton?: number;

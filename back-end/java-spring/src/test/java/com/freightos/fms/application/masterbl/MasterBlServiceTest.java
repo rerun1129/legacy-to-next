@@ -1,8 +1,10 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
 import com.freightos.fms.application.masterbl.projection.MasterBlSummaryResult;
 import com.freightos.fms.domain.common.enums.Bound;
 import com.freightos.common.model.PageRequest;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,23 +51,31 @@ class MasterBlServiceTest {
     @Mock
     private MasterBlFactory masterBlFactory;
 
+    @Mock
+    private CodeNameResolver codeNameResolver;
+
     @InjectMocks
     private MasterBlService masterBlService;
 
     @Test
-    @DisplayName("findMasterBlById - 존재하는 ID 조회 시 MasterBlDetailResult 반환")
-    void findMasterBlById_existingId_returnsDetailResult() {
+    @DisplayName("findMasterBlById - 존재하는 ID 조회 시 MasterBlDetailView(base+hsCodeName) 반환")
+    void findMasterBlById_existingId_returnsDetailView() {
         Long id = 1L;
         MasterBlSea mockEntity = MasterBlSea.create(Bound.EXP);
-        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
+        MasterBlDetailResult mockBase = mock(MasterBlDetailResult.class);
+        given(mockBase.hsCode()).willReturn("8471.30");
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlPort.findConsoledSeaSummariesByMasterBlId(id)).willReturn(List.of());
-        given(masterBlFactory.toDetailResult(mockEntity, List.of(), List.of())).willReturn(mockResult);
+        given(houseBlPort.findConsoledSeaContainersByMasterBlId(id)).willReturn(List.of());
+        given(masterBlFactory.toDetailResult(mockEntity, List.of(), List.of())).willReturn(mockBase);
+        given(codeNameResolver.findHsCodeNames(any())).willReturn(Map.of("8471.30", "컴퓨터"));
 
-        MasterBlDetailResult result = masterBlService.findMasterBlById(id);
+        MasterBlDetailView view = masterBlService.findMasterBlById(id);
 
-        assertThat(result).isEqualTo(mockResult);
+        assertThat(view.base()).isEqualTo(mockBase);
+        assertThat(view.hsCodeName()).isEqualTo("컴퓨터");
         then(masterBlPort).should().findMasterBlById(id);
+        then(codeNameResolver).should().findHsCodeNames(any());
     }
 
     @Test

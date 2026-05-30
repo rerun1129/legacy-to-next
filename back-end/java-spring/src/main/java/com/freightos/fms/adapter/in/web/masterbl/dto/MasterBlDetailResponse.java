@@ -7,6 +7,7 @@ import com.freightos.fms.application.masterbl.projection.ConsoledSeaContainerVie
 import com.freightos.fms.application.masterbl.projection.DescProjection;
 import com.freightos.fms.application.masterbl.projection.DimProjection;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
 import com.freightos.fms.application.masterbl.projection.ScheduleLegProjection;
 import com.freightos.fms.application.masterbl.projection.SeaDetailProjection;
 
@@ -42,6 +43,7 @@ public record MasterBlDetailResponse(
         BigDecimal cbm,
         String mainItemName,
         String hsCode,
+        String hsCodeName,
         String settlePartnerCode,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
@@ -55,7 +57,8 @@ public record MasterBlDetailResponse(
         List<ScheduleLegView> scheduleLegs,
         List<AirChargeView> airCharges
 ) {
-    public static MasterBlDetailResponse from(MasterBlDetailResult result) {
+    public static MasterBlDetailResponse from(MasterBlDetailView view) {
+        MasterBlDetailResult result = view.base();
         SeaDetailProjection seaDetailProjection = result.seaDetail();
         AirDetailProjection airDetailProjection = result.airDetail();
         return new MasterBlDetailResponse(
@@ -85,6 +88,7 @@ public record MasterBlDetailResponse(
                 result.cbm(),
                 result.mainItemName(),
                 result.hsCode(),
+                view.hsCodeName(),
                 result.settlePartnerCode(),
                 result.createdAt(),
                 result.updatedAt(),

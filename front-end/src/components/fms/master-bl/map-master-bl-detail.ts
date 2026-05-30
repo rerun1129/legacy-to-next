@@ -38,6 +38,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     // §BE 보강 — root 승격 cargo 식별 필드
     mainItemName:      detail.mainItemName      ?? "",
     hsCode:            detail.hsCode            ?? "",
+    hsCodeName:        detail.hsCodeName        ?? "",
     settlePartnerCode: detail.settlePartnerCode ?? "",
     // performance
     operatorCode: detail.operatorCode ?? "",

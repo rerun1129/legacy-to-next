@@ -6,7 +6,7 @@ import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.masterbl.command.CreateMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.command.UpdateMasterBlCommand;
-import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
+import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
@@ -75,11 +75,11 @@ class MasterBlControllerWebMvcTest {
     @DisplayName("GET /api/master-bl/{id}: useCase.findMasterBlById 호출, 200 응답")
     void getMasterBlById_invokesFindMasterBlByIdUseCase() throws Exception {
         Long id = 1L;
-        MasterBlDetailResult mockResult = mock(MasterBlDetailResult.class);
+        MasterBlDetailView mockView = mock(MasterBlDetailView.class);
         MasterBlDetailResponse mockResponse = mock(MasterBlDetailResponse.class);
 
-        given(masterBlUseCase.findMasterBlById(id)).willReturn(mockResult);
-        given(masterBlAssembler.toDetail(mockResult)).willReturn(mockResponse);
+        given(masterBlUseCase.findMasterBlById(id)).willReturn(mockView);
+        given(masterBlAssembler.toDetail(mockView)).willReturn(mockResponse);
 
         mockMvc.perform(get("/api/master-bl/{id}", id)).andExpect(status().isOk());
 

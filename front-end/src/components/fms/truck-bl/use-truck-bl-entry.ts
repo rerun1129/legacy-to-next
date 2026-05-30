@@ -98,6 +98,8 @@ export function useTruckBlEntry() {
       truckerCode:        detail.truckerCode        ?? "",
       truckerPic:         detail.truckerPic         ?? "",
       pickupDate:         detail.pickupDate         ?? "",
+      hsCode:             detail.hsCode             ?? "",
+      hsCodeName:         detail.hsCodeName         ?? "",
       truckOrders: detail.truckOrders?.map((o) => ({
         id:            o.id,
         truckOrderNo:  o.truckOrderNo   ?? "",

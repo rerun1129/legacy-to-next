@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
+import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -46,6 +47,7 @@ public record NonBlDetailResponse(
         String salesClass,
         String mainItemName,
         String hsCode,
+        String hsCodeName,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String remark,
@@ -76,7 +78,8 @@ public record NonBlDetailResponse(
             BigDecimal volumeWeightKg
     ) {}
 
-    public static NonBlDetailResponse from(NonBlDetailResult result) {
+    public static NonBlDetailResponse from(NonBlDetailView view) {
+        NonBlDetailResult result = view.base();
         return new NonBlDetailResponse(
                 result.id(),
                 result.hblNo(),
@@ -113,6 +116,7 @@ public record NonBlDetailResponse(
                 result.salesClass(),
                 result.mainItemName(),
                 result.hsCode(),
+                view.hsCodeName(),
                 result.createdAt(),
                 result.updatedAt(),
                 result.remark(),

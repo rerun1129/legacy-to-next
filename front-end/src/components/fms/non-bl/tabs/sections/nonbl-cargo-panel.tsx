@@ -11,7 +11,8 @@ import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 export function NonBLCargoPanel() {
   const { register, control, setValue } = useFormContext<NonBlFormValues>();
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
-  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  const pkgUnit  = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  const hsCodeAc = useCodeAutocomplete(CODE_SOURCES.hsCode);
 
   const CARGO_ITEMS: FieldItemDef[] = [
     {
@@ -21,17 +22,6 @@ export function NonBLCargoPanel() {
           <span className="li__label">Main Item</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Main Item" {...register("mainItem")} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "hs-code",
-      render: () => (
-        <div className="li">
-          <span className="li__label">HS Code</span>
-          <div className="li__input">
-            <TextBox variant="panel" placeholder="HS Code" {...register("hsCode")} />
           </div>
         </div>
       ),
@@ -125,6 +115,27 @@ export function NonBLCargoPanel() {
       </div>
       <div className="panel__body panel__body--scroll">
         <FieldItemGrid itemScope="nonbl-cargo-panel" items={CARGO_ITEMS} />
+        <FieldItemGrid
+          itemScope="nonbl-cargo-panel.hs"
+          items={[{
+            key: "hs-code",
+            render: () => (
+              <CodeBox
+                kind="lcn"
+                variant="panel"
+                label="HS Code"
+                codeProps={{ ...register("hsCode"), placeholder: "Code" }}
+                nameProps={{ ...register("hsCodeName"), placeholder: "HS Code Name" }}
+                onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+                onSearch={hsCodeAc.onSearch}
+                suggestions={hsCodeAc.suggestions}
+                suggestionsLoading={hsCodeAc.suggestionsLoading}
+                onSelect={(it) => { setValue("hsCode", it.code); setValue("hsCodeName", it.name); }}
+              />
+            ),
+          }]}
+          cols={1}
+        />
       </div>
     </div>
   );

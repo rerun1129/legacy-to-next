@@ -14,6 +14,7 @@ interface Props { variant?: AnyVariantConfig }
 export function AirCargoPanel({ variant }: Props) {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
   const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  const hsCode  = useCodeAutocomplete(CODE_SOURCES.hsCode);
   const panelScope = variant ? `air-cargo-panel.${variant.key}` : "air-cargo-panel";
   const { options: weightUnitOptions }                               = useEnumOptions("WeightUnit");
   const { options: rateClassOptions, placeholder: rateClassPlaceholder } = useEnumOptions("RateClass");
@@ -121,6 +122,23 @@ export function AirCargoPanel({ variant }: Props) {
             <NumberBox variant="panel" decimalPlaces={3} {...register("cbm")} />
           </div>
         </div>
+      ),
+    },
+    {
+      key: "hs-code",
+      render: () => (
+        <CodeBox
+          kind="lcn"
+          variant="panel"
+          label="HS Code"
+          codeProps={{ ...register("hsCode") }}
+          nameProps={{ ...register("hsCodeName") }}
+          onLookup={() => {}}
+          onSearch={hsCode.onSearch}
+          suggestions={hsCode.suggestions}
+          suggestionsLoading={hsCode.suggestionsLoading}
+          onSelect={(it) => { setValue("hsCode", it.code); setValue("hsCodeName", it.name); }}
+        />
       ),
     },
   ];
