@@ -6,10 +6,14 @@ import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { CodeBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
+
+type PartyRole = "SHIPPER" | "CONSIGNEE" | "NOTIFY" | "DOC PARTNER";
 
 type PartyDef = {
   key:     string;
-  role:    string;
+  role:    PartyRole;
   btn:     string | null;
   codeKey: Path<TruckBlFormValues>;
   nameKey: Path<TruckBlFormValues>;
@@ -23,8 +27,17 @@ const TRUCK_PARTIES: PartyDef[] = [
   { key: "doc-partner", role: "DOC PARTNER", btn: null,           codeKey: "docPartnerCode", nameKey: "docPartnerName", addrKey: "docPartnerAddress"  },
 ];
 
+/** role → autocomplete 소스 매핑 */
+const ROLE_SOURCE: Record<PartyRole, typeof CODE_SOURCES.customer | typeof CODE_SOURCES.partner> = {
+  "SHIPPER":     CODE_SOURCES.customer,
+  "CONSIGNEE":   CODE_SOURCES.customer,
+  "NOTIFY":      CODE_SOURCES.customer,
+  "DOC PARTNER": CODE_SOURCES.partner,
+};
+
 function TruckPartyBlock({ party }: { party: PartyDef }) {
-  const { register, control } = useFormContext<TruckBlFormValues>();
+  const { register, control, setValue } = useFormContext<TruckBlFormValues>();
+  const src = useCodeAutocomplete(ROLE_SOURCE[party.role]);
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -37,6 +50,10 @@ function TruckPartyBlock({ party }: { party: PartyDef }) {
             codeProps={{ ...register(party.codeKey) }}
             nameProps={{ ...register(party.nameKey) }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+            onSearch={src.onSearch}
+            suggestions={src.suggestions}
+            suggestionsLoading={src.suggestionsLoading}
+            onSelect={(it) => { setValue(party.codeKey, it.code); setValue(party.nameKey, it.name); }}
           />
         </div>
         {party.btn && (

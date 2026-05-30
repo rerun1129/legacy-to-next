@@ -3,9 +3,12 @@
 import { useFormContext, Controller } from "react-hook-form";
 import { CodeBox, TextBox, DateBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function TruckDocumentPanel() {
-  const { register, control } = useFormContext<TruckBlFormValues>();
+  const { register, control, setValue } = useFormContext<TruckBlFormValues>();
+  const trucker = useCodeAutocomplete(CODE_SOURCES.trucker);
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Document</span></div>
@@ -36,6 +39,10 @@ export function TruckDocumentPanel() {
           codeProps={{ ...register("truckerCode"), placeholder: "Code" }}
           nameProps={{ ...register("truckerName"), placeholder: "Trucker Name" }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={trucker.onSearch}
+          suggestions={trucker.suggestions}
+          suggestionsLoading={trucker.suggestionsLoading}
+          onSelect={(it) => { setValue("truckerCode", it.code); setValue("truckerName", it.name); }}
         />
         {/* Trucker PIC */}
         <div className="li">

@@ -5,10 +5,13 @@ import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item
 import { NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 function TruckCargoFields() {
-  const { register, control } = useFormContext<TruckBlFormValues>();
+  const { register, control, setValue } = useFormContext<TruckBlFormValues>();
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
 
   const CARGO_ITEMS: FieldItemDef[] = [
     {
@@ -20,7 +23,16 @@ function TruckCargoFields() {
             <NumberBox name="pkgQty" variant="panel" decimalPlaces={0} placeholder="0" />
             {/* pkgUnit: Non B/L §10 정책 준용 — CodeBox code-only (자유 텍스트) */}
             <div style={{ flex: "0 0 80px" }}>
-              <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+              <CodeBox
+                kind="code-only"
+                variant="panel"
+                codeProps={{ ...register("pkgUnit") }}
+                onLookup={() => {}}
+                onSearch={pkgUnit.onSearch}
+                suggestions={pkgUnit.suggestions}
+                suggestionsLoading={pkgUnit.suggestionsLoading}
+                onSelect={(it) => { setValue("pkgUnit", it.code); }}
+              />
             </div>
           </div>
         </div>

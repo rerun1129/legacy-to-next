@@ -5,6 +5,8 @@ import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 function TruckScheduleVessel() {
   const { register } = useFormContext<TruckBlFormValues>();
@@ -80,7 +82,8 @@ function TruckScheduleDates() {
 }
 
 function TruckSchedulePol() {
-  const { register } = useFormContext<TruckBlFormValues>();
+  const { register, setValue } = useFormContext<TruckBlFormValues>();
+  const pol = useCodeAutocomplete(CODE_SOURCES.port);
   const ITEMS: FieldItemDef[] = [
     {
       key: "pol",
@@ -92,6 +95,10 @@ function TruckSchedulePol() {
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Location" }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={pol.onSearch}
+          suggestions={pol.suggestions}
+          suggestionsLoading={pol.suggestionsLoading}
+          onSelect={(it) => { setValue("polCode", it.code); setValue("polName", it.name); }}
         />
       ),
     },
@@ -100,7 +107,8 @@ function TruckSchedulePol() {
 }
 
 function TruckSchedulePod() {
-  const { register } = useFormContext<TruckBlFormValues>();
+  const { register, setValue } = useFormContext<TruckBlFormValues>();
+  const pod = useCodeAutocomplete(CODE_SOURCES.port);
   const ITEMS: FieldItemDef[] = [
     {
       key: "pod",
@@ -112,6 +120,10 @@ function TruckSchedulePod() {
           codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("podName"), placeholder: "Location" }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={pod.onSearch}
+          suggestions={pod.suggestions}
+          suggestionsLoading={pod.suggestionsLoading}
+          onSelect={(it) => { setValue("podCode", it.code); setValue("podName", it.name); }}
         />
       ),
     },

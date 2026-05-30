@@ -6,9 +6,28 @@ import { Plus, Minus } from "lucide-react";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 import { EMPTY_TRUCK_ORDER_ROW } from "@/components/fms/truck-bl/truck-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { TextBox, NumberBox, ComboBox } from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { Button } from "@/components/shared/button";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
+
+function PkgUnitCell({ index }: { index: number }) {
+  const { register, setValue } = useFormContext<TruckBlFormValues>();
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  return (
+    <CodeBox
+      kind="code-only"
+      variant="cell"
+      codeProps={{ ...register(`truckOrders.${index}.pkgUnit`) }}
+      onLookup={() => {}}
+      onSearch={pkgUnit.onSearch}
+      suggestions={pkgUnit.suggestions}
+      suggestionsLoading={pkgUnit.suggestionsLoading}
+      onSelect={(it) => { setValue(`truckOrders.${index}.pkgUnit`, it.code); }}
+    />
+  );
+}
 
 type TruckOrderRow = NonNullable<TruckBlFormValues["truckOrders"]>[number];
 
@@ -28,7 +47,7 @@ export function TruckOrderGridPanel() {
     { key: "_no",           label: "#",              width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
     { key: "truckOrderNo",  label: "Truck Order No", width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckOrderNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
     { key: "pkgQty",        label: "Package",        width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
-    { key: "pkgUnit",       label: "Unit",           width: 60,  render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.pkgUnit`)} /> },
+    { key: "pkgUnit",       label: "Unit",           width: 60,  render: (_, __, i) => <PkgUnitCell index={i} /> },
     { key: "grossWeightKg", label: "Gross W/T",      width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
     { key: "cbm",           label: "CBM",            width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
     { key: "truckNo",       label: "Truck No.",      width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
