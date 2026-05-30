@@ -1,6 +1,7 @@
 import type { InputHTMLAttributes } from "react";
 
 export interface CodeBoxSuggestion {
+  id?: number;
   code: string;
   name: string;
   address?: string;

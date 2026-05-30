@@ -3,7 +3,6 @@ import type { UserPort, UserPageResult } from "@/application/user/ports";
 import type {
   UserRow,
   UserDetail,
-  UserFilter,
   CreateUserRequestDto,
   UpdateUserRequestDto,
   SaveUserChangesRequestDto,
@@ -24,6 +23,7 @@ const USER_ROW_SCHEMA = z.object({
   deletedAt: z.string().nullable().optional().transform((v) => v ?? null),
   updatedAt: z.string(),
   attributes: z.record(z.string(), z.array(z.string())).optional().transform((v) => v ?? {}),
+  teamId: z.number().nullable().optional().transform((v) => v ?? null),
 }) satisfies z.ZodType<UserRow>;
 
 const USER_DETAIL_SCHEMA = z.object({
@@ -37,6 +37,7 @@ const USER_DETAIL_SCHEMA = z.object({
   createdBy: z.string().nullable().optional().transform((v) => v ?? null),
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
   attributes: z.record(z.string(), z.array(z.string())).default({}),
+  teamId: z.number().nullable().optional().transform((v) => v ?? null),
 }) satisfies z.ZodType<UserDetail>;
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>

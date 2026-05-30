@@ -12,6 +12,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { Button } from "@/components/shared/button";
 import type { UserFilter } from "@/domain/user";
 import { userUseCases } from "@/application/user/use-cases";
+import { teamUseCases } from "@/application/team/use-cases";
 import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
 import { collectGridChanges } from "@/lib/collect-grid-changes";
 import { toast } from "@/lib/toast-store";
@@ -57,7 +58,8 @@ export function UserListClient() {
     listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage });
   }, [extraFilter, currentPage]);
 
-  const { control, register, getValues, setValue, reset, formState: { isDirty } } = useForm<FormValues>({ defaultValues: { rows: [] } });
+  const methods = useForm<FormValues>({ defaultValues: { rows: [] } });
+  const { control, register, getValues, setValue, reset, formState: { isDirty } } = methods;
   const { fields, append, remove } = useFieldArray({ control, name: "rows" });
 
   const { data, isFetching } = useQuery({
@@ -75,6 +77,14 @@ export function UserListClient() {
     queryFn: () => accessAttributeValueUseCases.listByKey("module"),
     staleTime: Infinity,
   });
+
+  const { data: teamsRaw } = useQuery({
+    queryKey: ["admin-team", "list-all"],
+    queryFn: () => teamUseCases.listAll(),
+    staleTime: Infinity,
+  });
+  // ?? [] 인라인 시 매 렌더 새 참조 → useMemo 안정화
+  const teams = useMemo(() => teamsRaw ?? [], [teamsRaw]);
 
   const moduleValueOptions = useMemo(
     () => moduleValues.map((v) => ({ value: v.value, label: v.label ?? v.value })),
@@ -153,6 +163,7 @@ export function UserListClient() {
       role: "USER",
       modules: "",
       active: true,
+      teamId: null,
       _originalAttributes: {},
     });
     pendingFocusRef.current = id;
@@ -209,8 +220,8 @@ export function UserListClient() {
   });
 
   const columns = useMemo(
-    () => buildUserColumns(register, control, moduleValueOptions, handleUsernameDoubleClick),
-    [register, control, moduleValueOptions, handleUsernameDoubleClick],
+    () => buildUserColumns(register, control, moduleValueOptions, handleUsernameDoubleClick, teams),
+    [register, control, moduleValueOptions, handleUsernameDoubleClick, teams],
   );
 
   const totalPages = data?.totalPages ?? 0;

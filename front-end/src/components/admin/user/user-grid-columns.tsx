@@ -1,10 +1,14 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import type { UseFormRegister, Control } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useController } from "react-hook-form";
 import type { GridColumn } from "@/components/shared/grid-list";
-import { TextBox, ComboBox } from "@/components/shared/inputs";
+import { TextBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { MultiSelectBox } from "@/components/shared/inputs/multi-select-box";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
+import type { TeamRow } from "@/domain/team";
 
 export interface UserFormRow {
   entityId: number;
@@ -14,11 +18,47 @@ export interface UserFormRow {
   role: string;
   modules: string;
   active: boolean;
+  teamId: number | null;
   _originalAttributes: Record<string, string[]>;
 }
 
 export interface FormValues {
   rows: UserFormRow[];
+}
+
+// 표시(teamCode)와 저장(teamId) 분리: input에는 code 노출, 폼 값은 FK id
+function TeamCell({
+  index,
+  teams,
+  control,
+}: {
+  index: number;
+  teams: TeamRow[];
+  control: Control<FormValues>;
+}) {
+  const { field } = useController({ control, name: `rows.${index}.teamId` });
+  const team = useCodeAutocomplete(CODE_SOURCES.team);
+  const displayCode = teams.find((t) => t.id === field.value)?.teamCode ?? "";
+  const ref = useRef<HTMLInputElement>(null);
+
+  // 외부에서 field.value가 바뀔 때 포커스 없는 경우만 표시값 동기화
+  useEffect(() => {
+    const el = ref.current;
+    if (el && document.activeElement !== el) el.value = displayCode;
+  }, [displayCode]);
+
+  return (
+    <CodeBox
+      ref={ref}
+      kind="code-only"
+      variant="cell"
+      codeProps={{ name: `rows.${index}.teamId__display`, defaultValue: displayCode }}
+      onSearch={team.onSearch}
+      suggestions={team.suggestions}
+      suggestionsLoading={team.suggestionsLoading}
+      onSelect={(it) => field.onChange(it.id ?? null)}
+    />
+  );
 }
 
 export const ROLE_OPTIONS = [
@@ -37,6 +77,7 @@ export function buildUserColumns(
   control: Control<FormValues>,
   moduleValueOptions: { value: string; label: string }[],
   onUsernameDoubleClick?: (entityId: number) => void,
+  teams: TeamRow[] = [],
 ): GridColumn<UserFormRow>[] {
   return [
     {
@@ -158,6 +199,12 @@ export function buildUserColumns(
         />
       ),
     },
+    {
+      key: "teamId",
+      label: "Team",
+      width: 140,
+      render: (_v, _row, i) => <TeamCell index={i} teams={teams} control={control} />,
+    },
   ];
 }
 
@@ -172,6 +219,7 @@ export function getUserRowClassName(
     orig.email !== row.email ||
     orig.role !== row.role ||
     orig.modules !== row.modules ||
-    orig.active !== row.active;
+    orig.active !== row.active ||
+    orig.teamId !== row.teamId;
   return changed ? "is-modified" : undefined;
 }

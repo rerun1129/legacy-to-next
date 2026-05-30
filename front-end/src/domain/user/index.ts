@@ -6,6 +6,7 @@ export interface UserRow {
   deletedAt: string | null;
   updatedAt: string;
   attributes: Record<string, string[]>;
+  teamId: number | null;
 }
 
 export interface UserDetail {
@@ -19,6 +20,7 @@ export interface UserDetail {
   createdBy: string | null;
   updatedBy: string | null;
   attributes: Record<string, string[]>;
+  teamId: number | null;
 }
 
 export type UserScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
@@ -34,6 +36,7 @@ export interface CreateUserRequestDto {
   password: string;
   active: boolean;
   attributes: Record<string, string[]>;
+  teamId: number | null;
 }
 
 export interface UpdateUserRequestDto {
@@ -41,6 +44,7 @@ export interface UpdateUserRequestDto {
   password: string | null; // null/empty → BE 미갱신
   active: boolean;
   attributes: Record<string, string[]>;
+  teamId: number | null;
 }
 
 export interface UpdateUserItemDto {
@@ -49,6 +53,7 @@ export interface UpdateUserItemDto {
   password: string | null;
   active: boolean;
   attributes: Record<string, string[]>;
+  teamId: number | null;
 }
 
 export interface SaveUserChangesRequestDto {

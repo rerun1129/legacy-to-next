@@ -9,7 +9,8 @@ export const ROW_IS_EQUAL = (a: UserFormRow, b: UserFormRow): boolean =>
   a.email === b.email &&
   a.role === b.role &&
   a.modules === b.modules &&
-  a.active === b.active;
+  a.active === b.active &&
+  a.teamId === b.teamId;
 
 // password는 비교 제외 (original은 항상 "")
 
@@ -22,6 +23,7 @@ export const TO_CREATE = (row: UserFormRow) => ({
     role: [row.role],
     module: row.modules.split(",").map((s) => s.trim()).filter(Boolean),
   },
+  teamId: row.teamId,
 });
 
 export const TO_UPDATE = (row: UserFormRow) => ({
@@ -34,6 +36,7 @@ export const TO_UPDATE = (row: UserFormRow) => ({
     role: [row.role],
     module: row.modules.split(",").map((s) => s.trim()).filter(Boolean),
   },
+  teamId: row.teamId,
 });
 
 export function toFormRow(row: UserRow): UserFormRow {
@@ -45,6 +48,7 @@ export function toFormRow(row: UserRow): UserFormRow {
     role: row.attributes?.role?.[0] ?? "USER",
     modules: (row.attributes?.module ?? []).join(","),
     active: row.active,
+    teamId: row.teamId ?? null,
     _originalAttributes: row.attributes ?? {},
   };
 }
