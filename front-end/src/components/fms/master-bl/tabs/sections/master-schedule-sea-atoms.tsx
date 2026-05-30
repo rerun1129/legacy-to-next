@@ -7,10 +7,13 @@ import { TextBox }  from "@/components/shared/inputs/text-box";
 import { CodeBox }  from "@/components/shared/inputs/code-box";
 import { DateBox }  from "@/components/shared/inputs/date-box";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 // ── Liner / Vessel / Voyage ─────────────────────────────────────────────────
 export function LinerLcnField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const liner = useCodeAutocomplete(CODE_SOURCES.carrierSea);
   return (
     <CodeBox
       kind="lcn"
@@ -20,6 +23,10 @@ export function LinerLcnField() {
       codeProps={{ ...register("seaDetail.linerCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Liner Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={liner.onSearch}
+      suggestions={liner.suggestions}
+      suggestionsLoading={liner.suggestionsLoading}
+      onSelect={(it) => { setValue("seaDetail.linerCode", it.code); }}
     />
   );
 }
@@ -129,7 +136,8 @@ export function IssueDateField() {
 // ── Port lcn 필드 (POR/POL/POD/FinalDest) ─────────────────────────────────
 // schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
 export function PorField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const por = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
@@ -138,12 +146,17 @@ export function PorField() {
       codeProps={{ ...register("seaDetail.porCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={por.onSearch}
+      suggestions={por.suggestions}
+      suggestionsLoading={por.suggestionsLoading}
+      onSelect={(it) => { setValue("seaDetail.porCode", it.code); }}
     />
   );
 }
 
 export function PolField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const pol = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
@@ -153,12 +166,17 @@ export function PolField() {
       codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={pol.onSearch}
+      suggestions={pol.suggestions}
+      suggestionsLoading={pol.suggestionsLoading}
+      onSelect={(it) => { setValue("polCode", it.code); }}
     />
   );
 }
 
 export function PodField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const pod = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
@@ -168,12 +186,17 @@ export function PodField() {
       codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={pod.onSearch}
+      suggestions={pod.suggestions}
+      suggestionsLoading={pod.suggestionsLoading}
+      onSelect={(it) => { setValue("podCode", it.code); }}
     />
   );
 }
 
 export function FinalDestField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const finalDest = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
@@ -182,6 +205,10 @@ export function FinalDestField() {
       codeProps={{ ...register("seaDetail.finalDestCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={finalDest.onSearch}
+      suggestions={finalDest.suggestions}
+      suggestionsLoading={finalDest.suggestionsLoading}
+      onSelect={(it) => { setValue("seaDetail.finalDestCode", it.code); }}
     />
   );
 }

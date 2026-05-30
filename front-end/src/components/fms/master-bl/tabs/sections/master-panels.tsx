@@ -8,6 +8,8 @@ import { ComboBox }           from "@/components/shared/inputs/combo-box";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props {
   variant?: AnyVariantConfig;
@@ -48,6 +50,7 @@ function PartyBlockConnected({
   const codeField = PARTY_CODE_FIELD[role];
   const addrField = PARTY_ADDR_FIELD[role];
   const isConsigneeRequired = role === "CONSIGNEE" && isImp;
+  const src = useCodeAutocomplete(CODE_SOURCES.customer);
 
   return (
     <div className="party-block">
@@ -60,6 +63,10 @@ function PartyBlockConnected({
             required={isConsigneeRequired}
             codeProps={{ ...form.register(codeField) }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+            onSearch={src.onSearch}
+            suggestions={src.suggestions}
+            suggestionsLoading={src.suggestionsLoading}
+            onSelect={(it) => { form.setValue(codeField, it.code); }}
           />
         </div>
         {PARTY_BTNS[role] && (

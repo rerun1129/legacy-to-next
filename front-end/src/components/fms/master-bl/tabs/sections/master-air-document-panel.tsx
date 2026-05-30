@@ -4,12 +4,16 @@ import { useFormContext } from "react-hook-form";
 import { CodeBox } from "@/components/shared/inputs";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 // Master AIR Document: Operator / Team / Settle Partner 3슬롯
 // Sales Man / Sales Class 제외 (House 4슬롯과의 차이)
 // Master schema: operatorCode/teamCode/settlePartnerCode (name 필드 없음 — code-only)
 export function MasterAirDocumentPanel() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const operator       = useCodeAutocomplete(CODE_SOURCES.user);
+  const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
     {
@@ -22,6 +26,10 @@ export function MasterAirDocumentPanel() {
           required
           codeProps={{ ...register("operatorCode") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={operator.onSearch}
+          suggestions={operator.suggestions}
+          suggestionsLoading={operator.suggestionsLoading}
+          onSelect={(it) => { setValue("operatorCode", it.code); }}
         />
       ),
     },
@@ -47,6 +55,10 @@ export function MasterAirDocumentPanel() {
           label="Settle Partner"
           codeProps={{ ...register("settlePartnerCode") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={settlePartner.onSearch}
+          suggestions={settlePartner.suggestions}
+          suggestionsLoading={settlePartner.suggestionsLoading}
+          onSelect={(it) => { setValue("settlePartnerCode", it.code); }}
         />
       ),
     },

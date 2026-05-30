@@ -6,6 +6,8 @@ import { CodeBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
 
@@ -24,11 +26,12 @@ const ROLE_ADDR_FIELD: Record<PartyRole, "shipperAddress" | "consigneeAddress" |
 };
 
 function PartyBlock({ role, isImp }: { role: PartyRole; isImp: boolean }) {
-  const { register, control } = useFormContext<MasterBlFormValues>();
+  const { register, control, setValue } = useFormContext<MasterBlFormValues>();
   const codeField = ROLE_CODE_FIELD[role];
   const addrField = ROLE_ADDR_FIELD[role];
   // CONSIGNEE는 IMP에서 required (BE SSOT — HTML5/zodResolver required 금지)
   const isRequired = role === "CONSIGNEE" ? isImp : false;
+  const src = useCodeAutocomplete(CODE_SOURCES.customer);
 
   return (
     <>
@@ -41,6 +44,10 @@ function PartyBlock({ role, isImp }: { role: PartyRole; isImp: boolean }) {
             required={isRequired}
             codeProps={{ ...register(codeField) }}
             onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+            onSearch={src.onSearch}
+            suggestions={src.suggestions}
+            suggestionsLoading={src.suggestionsLoading}
+            onSelect={(it) => { setValue(codeField, it.code); }}
           />
         </div>
         {role === "CONSIGNEE" && (

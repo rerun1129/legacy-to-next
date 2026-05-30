@@ -10,6 +10,8 @@ import { NumberBox }  from "@/components/shared/inputs/number-box";
 import { CodeBox }    from "@/components/shared/inputs/code-box";
 import { ComboBox }   from "@/components/shared/inputs/combo-box";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props {
   variant?: AnyVariantConfig;
@@ -32,7 +34,8 @@ function LiText({ label, name }: { label: string; name: string }) {
 // ── SEA Document LCN 필드 ──────────────────────────────────────────────────
 // schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
 function SettlePartnerLcnField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const settlePartner = useCodeAutocomplete(CODE_SOURCES.partner);
   return (
     <CodeBox
       kind="lcn"
@@ -41,12 +44,17 @@ function SettlePartnerLcnField() {
       codeProps={{ ...register("settlePartnerCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Partner Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={settlePartner.onSearch}
+      suggestions={settlePartner.suggestions}
+      suggestionsLoading={settlePartner.suggestionsLoading}
+      onSelect={(it) => { setValue("settlePartnerCode", it.code); }}
     />
   );
 }
 
 function OperatorLcnField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const operatorAc = useCodeAutocomplete(CODE_SOURCES.user);
   return (
     <CodeBox
       kind="lcn"
@@ -56,6 +64,10 @@ function OperatorLcnField() {
       codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Operator Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={operatorAc.onSearch}
+      suggestions={operatorAc.suggestions}
+      suggestionsLoading={operatorAc.suggestionsLoading}
+      onSelect={(it) => { setValue("operatorCode", it.code); }}
     />
   );
 }
@@ -98,7 +110,8 @@ function GWField() {
 
 // ── Package Qty 필드 ────────────────────────────────────────────────────────
 function PackageField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
   return (
     <div className="li">
       <span className="li__label">Package</span>
@@ -106,7 +119,16 @@ function PackageField() {
         <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
         {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능) */}
         <div style={{ flex: "0 0 60px" }}>
-          <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+          <CodeBox
+            kind="code-only"
+            variant="panel"
+            codeProps={{ ...register("pkgUnit") }}
+            onLookup={() => {}}
+            onSearch={pkgUnit.onSearch}
+            suggestions={pkgUnit.suggestions}
+            suggestionsLoading={pkgUnit.suggestionsLoading}
+            onSelect={(it) => { setValue("pkgUnit", it.code); }}
+          />
         </div>
       </div>
     </div>

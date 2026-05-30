@@ -6,14 +6,17 @@ import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
 
 export function MasterAirCargoPanel({ variant }: Props) {
-  const { register, control } = useFormContext<MasterBlFormValues>();
+  const { register, control, setValue } = useFormContext<MasterBlFormValues>();
   const panelScope = variant ? `master-air-cargo-panel.${variant.key}` : "master-air-cargo-panel";
   const { options: weightUnitOptions }                               = useEnumOptions("WeightUnit");
   const { options: rateClassOptions, placeholder: rateClassPlaceholder } = useEnumOptions("RateClass");
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
 
   const cargoItems: FieldItemDef[] = [
     {
@@ -25,7 +28,16 @@ export function MasterAirCargoPanel({ variant }: Props) {
             <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
             {/* pkgUnit: 자유 텍스트(비표준 단위 가능) */}
             <div style={{ flex: "0 0 80px" }}>
-              <CodeBox kind="code-only" variant="panel" codeProps={{ ...register("pkgUnit") }} onLookup={() => {}} />
+              <CodeBox
+                kind="code-only"
+                variant="panel"
+                codeProps={{ ...register("pkgUnit") }}
+                onLookup={() => {}}
+                onSearch={pkgUnit.onSearch}
+                suggestions={pkgUnit.suggestions}
+                suggestionsLoading={pkgUnit.suggestionsLoading}
+                onSelect={(it) => { setValue("pkgUnit", it.code); }}
+              />
             </div>
           </div>
         </div>

@@ -10,12 +10,18 @@ import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { buildAirScheduleLegCols, type LegRow } from "@/components/fms/_shared/air-schedule-legs-cols";
 import { Button } from "@/components/shared/button";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 interface Props { variant?: AnyVariantConfig }
 
 export function MasterAirSchedulePanel({ variant }: Props) {
-  const { register, control } = useFormContext<MasterBlFormValues>();
+  const { register, control, setValue } = useFormContext<MasterBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
+
+  const airline     = useCodeAutocomplete(CODE_SOURCES.carrierAir);
+  const departure   = useCodeAutocomplete(CODE_SOURCES.portAir);
+  const destination = useCodeAutocomplete(CODE_SOURCES.portAir);
 
   if (!variant) return null;
   const panelScope = `master-air-schedule-panel.${variant.key}`;
@@ -32,6 +38,10 @@ export function MasterAirSchedulePanel({ variant }: Props) {
           required
           codeProps={{ ...register("airDetail.airlineCode"), placeholder: "IATA" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={airline.onSearch}
+          suggestions={airline.suggestions}
+          suggestionsLoading={airline.suggestionsLoading}
+          onSelect={(it) => { setValue("airDetail.airlineCode", it.code); }}
         />
       ),
     },
@@ -46,6 +56,10 @@ export function MasterAirSchedulePanel({ variant }: Props) {
           required
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={departure.onSearch}
+          suggestions={departure.suggestions}
+          suggestionsLoading={departure.suggestionsLoading}
+          onSelect={(it) => { setValue("polCode", it.code); }}
         />
       ),
     },
@@ -111,6 +125,10 @@ export function MasterAirSchedulePanel({ variant }: Props) {
                 required
                 codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
                 onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+                onSearch={destination.onSearch}
+                suggestions={destination.suggestions}
+                suggestionsLoading={destination.suggestionsLoading}
+                onSelect={(it) => { setValue("podCode", it.code); }}
               />
             ),
           }]}
