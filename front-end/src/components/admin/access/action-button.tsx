@@ -8,13 +8,13 @@ interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   icon?: ReactNode;
 }
 
-export function ActionButton({ buttonCode, icon, children, ...rest }: ActionButtonProps) {
+export function ActionButton({ buttonCode, icon, children, type = "button", ...rest }: ActionButtonProps) {
   const [session] = useState(() => getSession());
   const allowed = hasButtonAccess(session, buttonCode);
   if (!allowed) return null;
   const dbLabel = getButtonLabel(session, buttonCode);
   if (dbLabel !== null && icon !== undefined) {
-    return <button {...rest}>{icon}{dbLabel}</button>;
+    return <button type={type} {...rest}>{icon}{dbLabel}</button>;
   }
-  return <button {...rest}>{children}</button>;
+  return <button type={type} {...rest}>{children}</button>;
 }
