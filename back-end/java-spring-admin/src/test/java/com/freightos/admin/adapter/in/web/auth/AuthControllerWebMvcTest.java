@@ -111,7 +111,7 @@ class AuthControllerWebMvcTest {
     @Test
     void login_validCredentials_returns200() throws Exception {
         Map<String, List<String>> attrsAdmin = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin, null);
         user.assignIdentity(1L, null, null, null, null);
         LoginResult loginResult = new LoginResult("access.token", "refresh.token", user,
                 attrsAdmin, List.of(), List.of());
@@ -150,7 +150,7 @@ class AuthControllerWebMvcTest {
     @Test
     void refresh_validToken_returns200() throws Exception {
         Map<String, List<String>> attrsAdmin = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin, null);
         user.assignIdentity(1L, null, null, null, null);
         LoginResult refreshResult = new LoginResult("new.access.token", "new.refresh.token", user,
                 attrsAdmin, List.of(), List.of());

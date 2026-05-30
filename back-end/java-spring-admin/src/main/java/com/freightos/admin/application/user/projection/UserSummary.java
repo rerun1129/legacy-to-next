@@ -11,5 +11,6 @@ public record UserSummary(
         boolean active,
         LocalDateTime deletedAt,
         LocalDateTime updatedAt,
-        Map<String, List<String>> attributes
+        Map<String, List<String>> attributes,
+        Long teamId
 ) {}

@@ -17,20 +17,22 @@ public class AdminUser extends BaseEntity {
     private boolean active;
     private LocalDateTime deletedAt;
     private Map<String, List<String>> attributes;
+    private Long teamId;
 
     private AdminUser(String username, String email, String passwordHash, boolean active,
-                      Map<String, List<String>> attributes) {
+                      Map<String, List<String>> attributes, Long teamId) {
         this.username     = username;
         this.email        = email;
         this.passwordHash = passwordHash;
         this.active       = active;
         this.deletedAt    = null;
         this.attributes   = attributes == null ? Collections.emptyMap() : Collections.unmodifiableMap(attributes);
+        this.teamId       = teamId;
     }
 
     public static AdminUser create(String username, String email, String passwordHash,
-                                   boolean active, Map<String, List<String>> attributes) {
-        return new AdminUser(username, email, passwordHash, active, attributes);
+                                   boolean active, Map<String, List<String>> attributes, Long teamId) {
+        return new AdminUser(username, email, passwordHash, active, attributes, teamId);
     }
 
     /**
@@ -38,10 +40,11 @@ public class AdminUser extends BaseEntity {
      * passwordHash가 null 또는 빈 문자열이면 기존 값 유지.
      */
     public void applyUpdate(String email, String passwordHashOrNull, boolean active,
-                            Map<String, List<String>> attributes) {
+                            Map<String, List<String>> attributes, Long teamId) {
         this.email      = email;
         this.active     = active;
         this.attributes = attributes == null ? Collections.emptyMap() : Collections.unmodifiableMap(attributes);
+        this.teamId     = teamId;
         if (passwordHashOrNull != null && !passwordHashOrNull.isBlank()) {
             this.passwordHash = passwordHashOrNull;
         }
@@ -76,5 +79,13 @@ public class AdminUser extends BaseEntity {
      */
     public void assignAttributes(Map<String, List<String>> attrs) {
         this.attributes = attrs == null ? Collections.emptyMap() : Collections.unmodifiableMap(attrs);
+    }
+
+    /**
+     * 어댑터 계층이 JPA→Domain 변환 시 teamId를 주입할 때 사용한다.
+     * 도메인 외부(어댑터)에서만 호출해야 한다.
+     */
+    public void assignTeamId(Long teamId) {
+        this.teamId = teamId;
     }
 }

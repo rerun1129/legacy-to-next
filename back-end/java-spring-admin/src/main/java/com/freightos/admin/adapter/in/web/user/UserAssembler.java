@@ -30,16 +30,16 @@ public class UserAssembler {
 
     public CreateUserCommand toCreateCommand(CreateUserRequest req) {
         return new CreateUserCommand(req.username(), req.email(), req.password(), req.active(),
-                req.attributes() != null ? req.attributes() : Collections.emptyMap());
+                req.attributes() != null ? req.attributes() : Collections.emptyMap(), req.teamId());
     }
 
     public UpdateUserCommand toUpdateCommand(UpdateUserRequest req) {
         return new UpdateUserCommand(req.email(), req.password(), req.active(),
-                req.attributes() != null ? req.attributes() : Collections.emptyMap());
+                req.attributes() != null ? req.attributes() : Collections.emptyMap(), req.teamId());
     }
 
     public UserSummaryResponse toSummaryResponse(UserSummary p) {
-        return new UserSummaryResponse(p.id(), p.username(), p.email(), p.active(), p.deletedAt(), p.updatedAt(), p.attributes());
+        return new UserSummaryResponse(p.id(), p.username(), p.email(), p.active(), p.deletedAt(), p.updatedAt(), p.attributes(), p.teamId());
     }
 
     public UserDetailResponse toDetail(AdminUser domain) {
@@ -47,7 +47,7 @@ public class UserAssembler {
                 domain.getId(), domain.getUsername(), domain.getEmail(),
                 domain.isActive(), domain.getDeletedAt(), domain.getAttributes(),
                 domain.getCreatedAt(), domain.getUpdatedAt(),
-                domain.getCreatedBy(), domain.getUpdatedBy()
+                domain.getCreatedBy(), domain.getUpdatedBy(), domain.getTeamId()
         );
     }
 
@@ -61,7 +61,7 @@ public class UserAssembler {
         List<SaveUserChangesCommand.UpdateEntry> updates = req.updates() == null ? List.of()
                 : req.updates().stream()
                         .map(u -> new SaveUserChangesCommand.UpdateEntry(u.id(),
-                            new UpdateUserCommand(u.email(), u.password(), u.active(), u.attributes())))
+                            new UpdateUserCommand(u.email(), u.password(), u.active(), u.attributes(), u.teamId())))
                         .toList();
         List<Long> deleteIds = req.deleteIds() == null ? List.of() : req.deleteIds();
         return new SaveUserChangesCommand(creates, updates, deleteIds);

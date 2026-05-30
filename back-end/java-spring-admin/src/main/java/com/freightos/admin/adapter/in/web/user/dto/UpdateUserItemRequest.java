@@ -12,5 +12,6 @@ public record UpdateUserItemRequest(
         @Email @Size(max = 200) String email,
         @Size(min = 8, max = 100) String password,
         @NotNull Boolean active,
-        @NotNull Map<String, List<String>> attributes
+        @NotNull Map<String, List<String>> attributes,
+        Long teamId
 ) {}

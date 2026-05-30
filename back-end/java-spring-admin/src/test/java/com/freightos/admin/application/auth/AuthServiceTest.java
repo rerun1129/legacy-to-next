@@ -78,7 +78,7 @@ class AuthServiceTest {
     @Test
     void login_validCredentials_returnsLoginResult() {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -110,7 +110,7 @@ class AuthServiceTest {
 
     @Test
     void login_wrongPassword_throwsBadCredentials() {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap());
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -135,7 +135,7 @@ class AuthServiceTest {
 
     @Test
     void login_inactiveUser_throwsBadCredentials() {
-        AdminUser inactiveUser = AdminUser.create("bob", "bob@example.com", "hashedPw", false, Collections.emptyMap());
+        AdminUser inactiveUser = AdminUser.create("bob", "bob@example.com", "hashedPw", false, Collections.emptyMap(), null);
         inactiveUser.assignIdentity(2L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("bob")).willReturn(inactiveUser);
@@ -151,7 +151,7 @@ class AuthServiceTest {
     @Test
     void refresh_validToken_revokesOldAndIssuesNew() {
         RefreshToken oldToken = RefreshToken.issue(1L, "oldHash", LocalDateTime.now().plusDays(7));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap());
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
@@ -204,7 +204,7 @@ class AuthServiceTest {
     @Test
     void getMe_returnsProjectionWithAccessibleMenusAndButtons() {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);

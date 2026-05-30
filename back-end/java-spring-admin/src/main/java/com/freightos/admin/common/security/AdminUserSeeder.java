@@ -1,5 +1,6 @@
 package com.freightos.admin.common.security;
 
+import com.freightos.admin.adapter.out.persistence.team.TeamRepository;
 import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * admin 모듈 부트 시 'admin' 계정이 없으면 BCrypt hash로 시드 INSERT.
- * Flyway 활성화(G7) + DB 사용자 관리 UI를 통한 시드 절차 도입 전까지의 임시.
+ * admin 모듈 부트 시 'admin'/'fms' 계정이 없으면 BCrypt hash로 시드 INSERT.
+ * Flyway(V52)가 ApplicationRunner보다 먼저 실행되므로 admin.team이 이미 존재한다.
  */
 @Slf4j
 @Component
@@ -25,28 +26,37 @@ public class AdminUserSeeder implements ApplicationRunner {
     private static final String FMS_RAW_PASSWORD = "fms12345";
 
     private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         if (userRepository.findByUsernameAndDeletedAtIsNull(ADMIN_USERNAME).isEmpty()) {
+            Long strategyTeamId = teamRepository.findByTeamCode("STRATEGY")
+                    .map(t -> t.getId())
+                    .orElse(null);
             UserJpaEntity entity = new UserJpaEntity();
             entity.setUsername(ADMIN_USERNAME);
             entity.setEmail(null);
             entity.setPasswordHash(passwordEncoder.encode(ADMIN_RAW_PASSWORD));
             entity.setActive(true);
             entity.setAttributes("{\"role\":[\"ADMIN\"],\"module\":[\"ADMIN\"]}");
+            entity.setTeamId(strategyTeamId);
             userRepository.save(entity);
             log.info("AdminUserSeeder: seeded '{}' user", ADMIN_USERNAME);
         }
         if (userRepository.findByUsernameAndDeletedAtIsNull(FMS_USERNAME).isEmpty()) {
+            Long salesTeamId = teamRepository.findByTeamCode("SALES")
+                    .map(t -> t.getId())
+                    .orElse(null);
             UserJpaEntity fmsEntity = new UserJpaEntity();
             fmsEntity.setUsername(FMS_USERNAME);
             fmsEntity.setEmail(null);
             fmsEntity.setPasswordHash(passwordEncoder.encode(FMS_RAW_PASSWORD));
             fmsEntity.setActive(true);
             fmsEntity.setAttributes("{\"role\":[\"USER\"],\"module\":[\"FMS\"],\"fms_scope\":[\"SEA\",\"AIR\",\"TRUCK\",\"NON_BL\"]}");
+            fmsEntity.setTeamId(salesTeamId);
             userRepository.save(fmsEntity);
             log.info("AdminUserSeeder: seeded '{}' user", FMS_USERNAME);
         }

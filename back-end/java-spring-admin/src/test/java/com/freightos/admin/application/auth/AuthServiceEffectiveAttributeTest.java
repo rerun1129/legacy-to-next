@@ -72,7 +72,7 @@ class AuthServiceEffectiveAttributeTest {
     @Test
     void login_directAttributesOnly_usesDirectAttrsAsEffective() {
         Map<String, List<String>> directAttrs = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "a@b.com", "hash", true, directAttrs);
+        AdminUser user = AdminUser.create("admin", "a@b.com", "hash", true, directAttrs, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -102,7 +102,7 @@ class AuthServiceEffectiveAttributeTest {
         Map<String, List<String>> directAttrs = Collections.emptyMap();
         Map<String, List<String>> effectiveAttrs = Map.of("module", List.of("FMS"));
 
-        AdminUser user = AdminUser.create("user2", "u@b.com", "hash", true, directAttrs);
+        AdminUser user = AdminUser.create("user2", "u@b.com", "hash", true, directAttrs, null);
         user.assignIdentity(2L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("user2")).willReturn(user);
@@ -131,7 +131,7 @@ class AuthServiceEffectiveAttributeTest {
         Map<String, List<String>> directAttrs = Map.of("role", List.of("ADMIN"));
         Map<String, List<String>> effectiveAttrs = Map.of("role", List.of("ADMIN"), "module", List.of("FMS"));
 
-        AdminUser user = AdminUser.create("combo", "c@b.com", "hash", true, directAttrs);
+        AdminUser user = AdminUser.create("combo", "c@b.com", "hash", true, directAttrs, null);
         user.assignIdentity(3L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("combo")).willReturn(user);
@@ -161,7 +161,7 @@ class AuthServiceEffectiveAttributeTest {
         Map<String, List<String>> directAttrs = Collections.emptyMap();
         Map<String, List<String>> effectiveAttrs = Collections.emptyMap();
 
-        AdminUser user = AdminUser.create("nobody", "n@b.com", "hash", true, directAttrs);
+        AdminUser user = AdminUser.create("nobody", "n@b.com", "hash", true, directAttrs, null);
         user.assignIdentity(4L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("nobody")).willReturn(user);

@@ -72,7 +72,7 @@ public class UserService implements UserUseCase {
                 throw ApplicationException.conflict("LAST_ADMIN", MessageCode.USER_LAST_ADMIN.getMessage());
             }
         }
-        existing.applyUpdate(command.email(), userFactory.hashIfPresent(command.rawPasswordOrNull()), command.active(), command.attributes());
+        existing.applyUpdate(command.email(), userFactory.hashIfPresent(command.rawPasswordOrNull()), command.active(), command.attributes(), command.teamId());
         userPort.update(id, existing);
     }
 
@@ -109,7 +109,7 @@ public class UserService implements UserUseCase {
             AdminUser existing = findUserById(entry.id());
             Map<String, List<String>> merged = new HashMap<>(existing.getAttributes());
             merged.putAll(entry.command().attributes());
-            UpdateUserCommand mergedCmd = new UpdateUserCommand(entry.command().email(), entry.command().rawPasswordOrNull(), entry.command().active(), merged);
+            UpdateUserCommand mergedCmd = new UpdateUserCommand(entry.command().email(), entry.command().rawPasswordOrNull(), entry.command().active(), merged, entry.command().teamId());
             updateUser(entry.id(), mergedCmd);
         }
         for (CreateUserCommand create : command.creates()) {

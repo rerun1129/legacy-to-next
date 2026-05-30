@@ -8,5 +8,6 @@ public record CreateUserCommand(
         String email,
         String rawPassword,
         boolean active,
-        Map<String, List<String>> attributes
+        Map<String, List<String>> attributes,
+        Long teamId
 ) {}

@@ -46,8 +46,8 @@ class UserServiceTest {
 
     @Test
     void createUser_callsFactoryAndPortSaveReturnsId() {
-        CreateUserCommand command = new CreateUserCommand("alice", "alice@example.com", "pass1234", true, ATTRS_USER);
-        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
+        CreateUserCommand command = new CreateUserCommand("alice", "alice@example.com", "pass1234", true, ATTRS_USER, null);
+        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
         given(userFactory.from(command)).willReturn(domain);
         given(userPort.save(domain)).willReturn(7L);
 
@@ -77,7 +77,7 @@ class UserServiceTest {
 
     @Test
     void findUserById_found_returnsDomain() {
-        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
+        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
         given(userPort.findById(1L)).willReturn(Optional.of(domain));
 
         AdminUser result = userService.findUserById(1L);
@@ -104,8 +104,8 @@ class UserServiceTest {
 
     @Test
     void updateUser_normal_callsPortUpdate() {
-        AdminUser existing = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
-        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, true, ATTRS_USER);
+        AdminUser existing = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
+        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, true, ATTRS_USER, null);
         given(userPort.findById(1L)).willReturn(Optional.of(existing));
         given(userFactory.hashIfPresent(null)).willReturn(null);
 
@@ -118,9 +118,9 @@ class UserServiceTest {
 
     @Test
     void updateUser_lastAdminDeactivate_throwsConflict() {
-        AdminUser existing = AdminUser.create("admin", null, "hashed", true, ATTRS_ADMIN);
+        AdminUser existing = AdminUser.create("admin", null, "hashed", true, ATTRS_ADMIN, null);
         // 비활성화 시도: active=false, attributes에 ADMIN 유지
-        UpdateUserCommand command = new UpdateUserCommand(null, null, false, ATTRS_ADMIN);
+        UpdateUserCommand command = new UpdateUserCommand(null, null, false, ATTRS_ADMIN, null);
         given(userPort.findById(1L)).willReturn(Optional.of(existing));
         given(userPort.countActiveAdmins()).willReturn(1L);
 
@@ -137,9 +137,9 @@ class UserServiceTest {
 
     @Test
     void updateUser_lastAdminDemote_throwsConflict() {
-        AdminUser existing = AdminUser.create("admin", null, "hashed", true, ATTRS_ADMIN);
+        AdminUser existing = AdminUser.create("admin", null, "hashed", true, ATTRS_ADMIN, null);
         // role 강등 시도: active=true, attributes에서 ADMIN 제거
-        UpdateUserCommand command = new UpdateUserCommand(null, null, true, ATTRS_USER);
+        UpdateUserCommand command = new UpdateUserCommand(null, null, true, ATTRS_USER, null);
         given(userPort.findById(1L)).willReturn(Optional.of(existing));
         given(userPort.countActiveAdmins()).willReturn(1L);
 
@@ -156,8 +156,8 @@ class UserServiceTest {
 
     @Test
     void updateUser_nullPassword_hashIfPresentReturnsNull() {
-        AdminUser existing = AdminUser.create("alice", "alice@example.com", "original_hash", true, ATTRS_USER);
-        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, true, ATTRS_USER);
+        AdminUser existing = AdminUser.create("alice", "alice@example.com", "original_hash", true, ATTRS_USER, null);
+        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, true, ATTRS_USER, null);
         given(userPort.findById(1L)).willReturn(Optional.of(existing));
         given(userFactory.hashIfPresent(null)).willReturn(null);
 
@@ -172,7 +172,7 @@ class UserServiceTest {
 
     @Test
     void deleteUser_normal_callsSoftDelete() {
-        AdminUser existing = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
+        AdminUser existing = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
         given(userPort.findById(5L)).willReturn(Optional.of(existing));
 
         userService.deleteUser(5L);
@@ -184,7 +184,7 @@ class UserServiceTest {
 
     @Test
     void deleteUser_lastAdmin_throwsConflict() {
-        AdminUser existing = AdminUser.create("admin", null, "hashed", true, ATTRS_ADMIN);
+        AdminUser existing = AdminUser.create("admin", null, "hashed", true, ATTRS_ADMIN, null);
         given(userPort.findById(1L)).willReturn(Optional.of(existing));
         given(userPort.countActiveAdmins()).willReturn(1L);
 
@@ -201,8 +201,8 @@ class UserServiceTest {
 
     @Test
     void createUser_duplicateUsername_throwsConflict() {
-        CreateUserCommand command = new CreateUserCommand("alice", "alice@example.com", "pass1234", true, ATTRS_USER);
-        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
+        CreateUserCommand command = new CreateUserCommand("alice", "alice@example.com", "pass1234", true, ATTRS_USER, null);
+        AdminUser domain = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
         given(userFactory.from(command)).willReturn(domain);
         given(userPort.save(domain)).willThrow(new DataIntegrityViolationException("uq_admin_user_username"));
 
@@ -219,9 +219,9 @@ class UserServiceTest {
 
     @Test
     void updateUser_deletedUser_throwsConflict() {
-        AdminUser deleted = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
+        AdminUser deleted = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
         deleted.assignDeletedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
-        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, true, ATTRS_USER);
+        UpdateUserCommand command = new UpdateUserCommand("new@example.com", null, true, ATTRS_USER, null);
         given(userPort.findById(1L)).willReturn(Optional.of(deleted));
 
         assertThatThrownBy(() -> userService.updateUser(1L, command))
@@ -237,7 +237,7 @@ class UserServiceTest {
 
     @Test
     void deleteUser_deletedUser_throwsConflict() {
-        AdminUser deleted = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER);
+        AdminUser deleted = AdminUser.create("alice", "alice@example.com", "hashed", true, ATTRS_USER, null);
         deleted.assignDeletedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
         given(userPort.findById(5L)).willReturn(Optional.of(deleted));
 

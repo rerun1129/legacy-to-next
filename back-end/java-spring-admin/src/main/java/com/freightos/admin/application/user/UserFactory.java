@@ -18,7 +18,8 @@ public class UserFactory {
                 command.email(),
                 passwordEncoder.encode(command.rawPassword()),
                 command.active(),
-                command.attributes()
+                command.attributes(),
+                command.teamId()
         );
     }
 

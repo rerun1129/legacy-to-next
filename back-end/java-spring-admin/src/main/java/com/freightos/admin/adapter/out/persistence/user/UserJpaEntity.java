@@ -45,4 +45,7 @@ public class UserJpaEntity extends BaseJpaEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attributes", columnDefinition = "jsonb", nullable = false)
     private String attributes;
+
+    @Column(name = "team_id")
+    private Long teamId;
 }
