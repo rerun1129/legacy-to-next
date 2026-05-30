@@ -5,10 +5,13 @@ import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/input
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function NonBLCargoPanel() {
-  const { register, control } = useFormContext<NonBlFormValues>();
+  const { register, control, setValue } = useFormContext<NonBlFormValues>();
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
 
   const CARGO_ITEMS: FieldItemDef[] = [
     {
@@ -46,7 +49,16 @@ export function NonBLCargoPanel() {
               placeholder="0"
             />
             <div style={{ flex: "0 0 80px" }}>
-              <CodeBox kind="code-only" variant="panel" codeProps={register("pkgUnit")} onLookup={() => {}} />
+              <CodeBox
+                kind="code-only"
+                variant="panel"
+                codeProps={register("pkgUnit")}
+                onLookup={() => {}}
+                onSearch={pkgUnit.onSearch}
+                suggestions={pkgUnit.suggestions}
+                suggestionsLoading={pkgUnit.suggestionsLoading}
+                onSelect={(it) => { setValue("pkgUnit", it.code); }}
+              />
             </div>
           </div>
         </div>

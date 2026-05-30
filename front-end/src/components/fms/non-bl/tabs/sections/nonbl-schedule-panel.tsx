@@ -6,9 +6,17 @@ import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function NonBLSchedulePanel() {
-  const { register, control } = useFormContext<NonBlFormValues>();
+  const { register, control, setValue } = useFormContext<NonBlFormValues>();
+
+  // Non-BL은 SEA/AIR 구분 없이 전체 소스 사용
+  const liner    = useCodeAutocomplete(CODE_SOURCES.carrier);
+  const pol      = useCodeAutocomplete(CODE_SOURCES.port);
+  const pod      = useCodeAutocomplete(CODE_SOURCES.port);
+  const finalDest = useCodeAutocomplete(CODE_SOURCES.port);
 
   const linerVesselItems: FieldItemDef[] = useMemo(() => [
     {
@@ -21,6 +29,10 @@ export function NonBLSchedulePanel() {
           codeProps={{ ...register("linerCode"), placeholder: "Code" }}
           nameProps={{ ...register("linerName"), placeholder: "Liner" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={liner.onSearch}
+          suggestions={liner.suggestions}
+          suggestionsLoading={liner.suggestionsLoading}
+          onSelect={(it) => { setValue("linerCode", it.code); setValue("linerName", it.name); }}
         />
       ),
     },
@@ -94,7 +106,7 @@ export function NonBLSchedulePanel() {
         </div>
       ),
     },
-  ], [register, control]);
+  ], [register, control, liner, setValue]);
 
   const portItems: FieldItemDef[] = useMemo(() => [
     {
@@ -108,6 +120,10 @@ export function NonBLSchedulePanel() {
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={pol.onSearch}
+          suggestions={pol.suggestions}
+          suggestionsLoading={pol.suggestionsLoading}
+          onSelect={(it) => { setValue("polCode", it.code); setValue("polName", it.name); }}
         />
       ),
     },
@@ -122,6 +138,10 @@ export function NonBLSchedulePanel() {
           codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("podName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={pod.onSearch}
+          suggestions={pod.suggestions}
+          suggestionsLoading={pod.suggestionsLoading}
+          onSelect={(it) => { setValue("podCode", it.code); setValue("podName", it.name); }}
         />
       ),
     },
@@ -135,6 +155,10 @@ export function NonBLSchedulePanel() {
           codeProps={{ ...register("finalDestCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("finalDestName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={finalDest.onSearch}
+          suggestions={finalDest.suggestions}
+          suggestionsLoading={finalDest.suggestionsLoading}
+          onSelect={(it) => { setValue("finalDestCode", it.code); setValue("finalDestName", it.name); }}
         />
       ),
     },
@@ -161,7 +185,7 @@ export function NonBLSchedulePanel() {
         </div>
       ),
     },
-  ], [register, control]);
+  ], [register, control, pol, pod, finalDest, setValue]);
 
   const fields: FieldWidgetDef[] = [
     {

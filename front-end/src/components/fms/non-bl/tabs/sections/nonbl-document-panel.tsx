@@ -5,10 +5,14 @@ import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { NonBlFormValues } from "@/components/fms/non-bl/non-bl-schema";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function NonBLDocumentPanel() {
-  const { register, control } = useFormContext<NonBlFormValues>();
+  const { register, control, setValue } = useFormContext<NonBlFormValues>();
   const { options: salesClassOptions, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
+  const salesMan = useCodeAutocomplete(CODE_SOURCES.user);
+  const operator = useCodeAutocomplete(CODE_SOURCES.user);
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
     {
@@ -38,6 +42,10 @@ export function NonBLDocumentPanel() {
           codeProps={{ ...register("salesManCode") }}
           nameProps={{ ...register("salesManName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={salesMan.onSearch}
+          suggestions={salesMan.suggestions}
+          suggestionsLoading={salesMan.suggestionsLoading}
+          onSelect={(it) => { setValue("salesManCode", it.code); setValue("salesManName", it.name); }}
         />
       ),
     },
@@ -52,6 +60,10 @@ export function NonBLDocumentPanel() {
           codeProps={{ ...register("operatorCode") }}
           nameProps={{ ...register("operatorName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={operator.onSearch}
+          suggestions={operator.suggestions}
+          suggestionsLoading={operator.suggestionsLoading}
+          onSelect={(it) => { setValue("operatorCode", it.code); setValue("operatorName", it.name); }}
         />
       ),
     },

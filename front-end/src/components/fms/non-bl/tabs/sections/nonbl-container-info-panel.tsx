@@ -4,11 +4,13 @@ import { useState, useMemo, useRef }              from "react";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
-import { TextBox, NumberBox, ComboBox }           from "@/components/shared/inputs";
+import { TextBox, NumberBox, ComboBox, CodeBox }  from "@/components/shared/inputs";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
 import type { NonBlFormValues }                  from "../../non-bl-schema";
 import { EMPTY_CONTAINER_ROW }                   from "../../non-bl-schema";
 import { Button }                                from "@/components/shared/button";
+import { useCodeAutocomplete }                   from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES }                          from "@/lib/autocomplete-sources";
 
 interface ContainerInfoRow {
   id: number;
@@ -21,6 +23,23 @@ interface ContainerInfoRow {
   pkgUnit: string;
   grossWt: number;
   cbm: number;
+}
+
+function PkgUnitCell({ index }: { index: number }) {
+  const { register, setValue } = useFormContext<NonBlFormValues>();
+  const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
+  return (
+    <CodeBox
+      kind="code-only"
+      variant="cell"
+      codeProps={{ ...register(`containers.${index}.pkgUnit`) }}
+      onLookup={() => {}}
+      onSearch={pkgUnit.onSearch}
+      suggestions={pkgUnit.suggestions}
+      suggestionsLoading={pkgUnit.suggestionsLoading}
+      onSelect={(it) => { setValue(`containers.${index}.pkgUnit`, it.code); }}
+    />
+  );
 }
 
 export function NonBLContainerInfoPanel() {
@@ -45,7 +64,7 @@ export function NonBLContainerInfoPanel() {
     { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo2`)} /> },
     { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo3`)} /> },
     { key: "pkg",      width: 80, label: "Package",     render: (_, __, i) => <NumberBox name={`containers.${i}.pkg`} variant="cell" decimalPlaces={0} /> },
-    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.pkgUnit`)} /> },
+    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <PkgUnitCell index={i} /> },
     { key: "grossWt",  width: 80, label: "Gross W/T",   render: (_, __, i) => <NumberBox name={`containers.${i}.grossWt`} variant="cell" decimalPlaces={3} /> },
     { key: "cbm",      width: 80, label: "CBM",         render: (_, __, i) => <NumberBox name={`containers.${i}.cbm`} variant="cell" decimalPlaces={3} /> },
   ], [register, control, contTypeOptions]);
