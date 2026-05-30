@@ -69,7 +69,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                   AND (username ILIKE :q || '%'
                        OR user_eng_name ILIKE '%' || :q || '%'
                        OR email ILIKE '%' || :q || '%')
-                ORDER BY username
+                ORDER BY CASE WHEN username ILIKE :q || '%' THEN 0 ELSE 1 END, username
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern

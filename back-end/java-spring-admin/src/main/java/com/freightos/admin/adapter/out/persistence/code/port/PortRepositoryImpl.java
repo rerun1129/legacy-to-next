@@ -59,7 +59,7 @@ public class PortRepositoryImpl implements PortRepositoryCustom {
                 SELECT port_code, name FROM admin.port
                 WHERE deleted_at IS NULL
                   AND (port_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                ORDER BY port_code
+                ORDER BY CASE WHEN port_code ILIKE :q || '%' THEN 0 ELSE 1 END, port_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern

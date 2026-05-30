@@ -60,7 +60,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
                 WHERE deleted_at IS NULL
                   AND (customer_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
                   AND (:type IS NULL OR customer_type = :type)
-                ORDER BY customer_code
+                ORDER BY CASE WHEN customer_code ILIKE :q || '%' THEN 0 ELSE 1 END, customer_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern

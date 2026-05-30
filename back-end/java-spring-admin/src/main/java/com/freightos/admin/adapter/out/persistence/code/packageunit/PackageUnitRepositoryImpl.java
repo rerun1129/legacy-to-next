@@ -58,7 +58,7 @@ public class PackageUnitRepositoryImpl implements PackageUnitRepositoryCustom {
                 SELECT package_code, name FROM admin.package_unit
                 WHERE deleted_at IS NULL
                   AND (package_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                ORDER BY package_code
+                ORDER BY CASE WHEN package_code ILIKE :q || '%' THEN 0 ELSE 1 END, package_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern

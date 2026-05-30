@@ -59,7 +59,7 @@ public class CarrierRepositoryImpl implements CarrierRepositoryCustom {
                 SELECT carrier_code, name FROM admin.carrier
                 WHERE deleted_at IS NULL
                   AND (carrier_code ILIKE :q || '%' OR name ILIKE '%' || :q || '%')
-                ORDER BY carrier_code
+                ORDER BY CASE WHEN carrier_code ILIKE :q || '%' THEN 0 ELSE 1 END, carrier_code
                 LIMIT :limit
                 """;
         // JPA 2.x createNativeQuery(sql) returns raw Query; Object[] cast is the standard pattern
