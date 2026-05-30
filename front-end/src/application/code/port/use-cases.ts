@@ -9,5 +9,5 @@ export const portUseCases = {
   delete: (id: number) => portPort.delete(id),
   deleteMany: (ids: number[]) => portPort.deleteMany(ids),
   saveChanges: (req: SavePortChangesRequestDto) => portPort.saveChanges(req),
-  autocomplete: (q: string, limit?: number) => portPort.autocomplete(q, limit),
+  autocomplete: (q: string, limit?: number, type?: string) => portPort.autocomplete(q, limit, type),
 };

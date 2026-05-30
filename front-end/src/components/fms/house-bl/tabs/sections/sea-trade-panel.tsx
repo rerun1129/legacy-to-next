@@ -12,7 +12,7 @@ import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 export function SeaTradePanel() {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
-  const payableAt      = useCodeAutocomplete(CODE_SOURCES.port);
+  const payableAt      = useCodeAutocomplete(CODE_SOURCES.portSea);
   const actualCustomer = useCodeAutocomplete(CODE_SOURCES.customer);
   const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
   const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");

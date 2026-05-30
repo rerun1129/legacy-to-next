@@ -25,5 +25,5 @@ export interface CarrierPort {
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
   saveChanges(req: SaveCarrierChangesRequestDto): Promise<SaveChangesResultDto>;
-  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
+  autocomplete(q: string, limit?: number, type?: string): Promise<CodeBoxSuggestion[]>;
 }

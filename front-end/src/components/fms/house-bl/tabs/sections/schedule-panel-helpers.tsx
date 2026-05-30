@@ -65,7 +65,7 @@ interface IssueSectionProps {
 
 export function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPlaceholder }: IssueSectionProps) {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
-  const issuePlace = useCodeAutocomplete(CODE_SOURCES.port);
+  const issuePlace = useCodeAutocomplete(CODE_SOURCES.portSea);
   const issueItems: FieldItemDef[] = issueFields.map(f => {
     const fieldName = ISSUE_LABEL_TO_FIELD[f];
     if (f === "No. of B/L") {

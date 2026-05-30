@@ -42,8 +42,8 @@ export function AirMasterListFilter({ form }: Props) {
 
   // 자동완성 훅 — 소스별 1:1
   const party   = useCodeAutocomplete(CODE_SOURCES.customer);
-  const airline = useCodeAutocomplete(CODE_SOURCES.carrier);
-  const port    = useCodeAutocomplete(CODE_SOURCES.port);
+  const airline = useCodeAutocomplete(CODE_SOURCES.carrierAir);
+  const port    = useCodeAutocomplete(CODE_SOURCES.portAir);
 
   const { options: shipmentTypeOptions, isLoading: shipmentTypeLoading, placeholder: shipmentTypePlaceholder } = useEnumOptions("ShipmentType");
   const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentTypeOptions];

@@ -42,8 +42,8 @@ export function SeaMasterListFilter({ form }: Props) {
 
   // 자동완성 훅 — 소스별 1:1
   const party = useCodeAutocomplete(CODE_SOURCES.customer);
-  const liner = useCodeAutocomplete(CODE_SOURCES.carrier);
-  const port  = useCodeAutocomplete(CODE_SOURCES.port);
+  const liner = useCodeAutocomplete(CODE_SOURCES.carrierSea);
+  const port  = useCodeAutocomplete(CODE_SOURCES.portSea);
 
   const { options: shipmentTypeOptions, isLoading: shipmentTypeLoading, placeholder: shipmentTypePlaceholder } = useEnumOptions("ShipmentType");
   const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentTypeOptions];

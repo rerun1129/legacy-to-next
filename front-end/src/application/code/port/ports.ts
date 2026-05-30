@@ -25,5 +25,5 @@ export interface PortPort {
   delete(id: number): Promise<void>;
   deleteMany(ids: number[]): Promise<void>;
   saveChanges(req: SavePortChangesRequestDto): Promise<SaveChangesResultDto>;
-  autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
+  autocomplete(q: string, limit?: number, type?: string): Promise<CodeBoxSuggestion[]>;
 }

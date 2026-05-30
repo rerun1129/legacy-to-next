@@ -18,9 +18,9 @@ interface Props { variant?: AnyVariantConfig }
 export function AirSchedulePanel({ variant }: Props) {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
-  const airline     = useCodeAutocomplete(CODE_SOURCES.carrier);
-  const departure   = useCodeAutocomplete(CODE_SOURCES.port);
-  const destination = useCodeAutocomplete(CODE_SOURCES.port);
+  const airline     = useCodeAutocomplete(CODE_SOURCES.carrierAir);
+  const departure   = useCodeAutocomplete(CODE_SOURCES.portAir);
+  const destination = useCodeAutocomplete(CODE_SOURCES.portAir);
   const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
 
   if (!variant) return null;

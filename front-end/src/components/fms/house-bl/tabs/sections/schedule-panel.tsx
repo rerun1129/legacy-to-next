@@ -15,10 +15,10 @@ interface Props { variant?: AnyVariantConfig }
 export function SchedulePanel({ variant }: Props) {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
-  const pol      = useCodeAutocomplete(CODE_SOURCES.port);
-  const pod      = useCodeAutocomplete(CODE_SOURCES.port);
-  const delivery = useCodeAutocomplete(CODE_SOURCES.port);
-  const liner    = useCodeAutocomplete(CODE_SOURCES.carrier);
+  const pol      = useCodeAutocomplete(CODE_SOURCES.portSea);
+  const pod      = useCodeAutocomplete(CODE_SOURCES.portSea);
+  const delivery = useCodeAutocomplete(CODE_SOURCES.portSea);
+  const liner    = useCodeAutocomplete(CODE_SOURCES.carrierSea);
   const { options: noOfBlOptions, placeholder: noOfBlPlaceholder } = useEnumOptions("NoOfBl");
 
   if (!variant) return null;

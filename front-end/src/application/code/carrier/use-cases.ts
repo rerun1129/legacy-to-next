@@ -9,5 +9,5 @@ export const carrierUseCases = {
   delete: (id: number) => carrierPort.delete(id),
   deleteMany: (ids: number[]) => carrierPort.deleteMany(ids),
   saveChanges: (req: SaveCarrierChangesRequestDto) => carrierPort.saveChanges(req),
-  autocomplete: (q: string, limit?: number) => carrierPort.autocomplete(q, limit),
+  autocomplete: (q: string, limit?: number, type?: string) => carrierPort.autocomplete(q, limit, type),
 };

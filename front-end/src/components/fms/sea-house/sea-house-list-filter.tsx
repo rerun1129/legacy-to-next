@@ -39,8 +39,8 @@ export function SeaHouseListFilter({ form }: Props) {
   const party           = useCodeAutocomplete(CODE_SOURCES.customer);
   const actualCustomer  = useCodeAutocomplete(CODE_SOURCES.customer);
   const partner         = useCodeAutocomplete(CODE_SOURCES.partner);
-  const liner           = useCodeAutocomplete(CODE_SOURCES.carrier);
-  const port            = useCodeAutocomplete(CODE_SOURCES.port);
+  const liner           = useCodeAutocomplete(CODE_SOURCES.carrierSea);
+  const port            = useCodeAutocomplete(CODE_SOURCES.portSea);
   const operator        = useCodeAutocomplete(CODE_SOURCES.user);
   const salesMan        = useCodeAutocomplete(CODE_SOURCES.user);
 

@@ -44,8 +44,8 @@ export function AirHouseListFilter({ form }: Props) {
   const party          = useCodeAutocomplete(CODE_SOURCES.customer);
   const actualCustomer = useCodeAutocomplete(CODE_SOURCES.customer);
   const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
-  const airline        = useCodeAutocomplete(CODE_SOURCES.carrier);
-  const port           = useCodeAutocomplete(CODE_SOURCES.port);
+  const airline        = useCodeAutocomplete(CODE_SOURCES.carrierAir);
+  const port           = useCodeAutocomplete(CODE_SOURCES.portAir);
   const operator       = useCodeAutocomplete(CODE_SOURCES.user);
   const salesMan       = useCodeAutocomplete(CODE_SOURCES.user);
 

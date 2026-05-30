@@ -10,7 +10,11 @@ export const CODE_SOURCES = {
   partner:     { key: "ac-customer-partner", fetch: (q: string) => customerUseCases.autocomplete(q, undefined, "PARTNER") },
   trucker:     { key: "ac-customer-trucker", fetch: (q: string) => customerUseCases.autocomplete(q, undefined, "TRUCKER") },
   carrier:     { key: "ac-code-carrier",     fetch: (q: string) => carrierUseCases.autocomplete(q) },
+  carrierSea:  { key: "ac-code-carrier-sea", fetch: (q: string) => carrierUseCases.autocomplete(q, undefined, "SEA") },
+  carrierAir:  { key: "ac-code-carrier-air", fetch: (q: string) => carrierUseCases.autocomplete(q, undefined, "AIR") },
   port:        { key: "ac-code-port",        fetch: (q: string) => portUseCases.autocomplete(q) },
+  portSea:     { key: "ac-code-port-sea",    fetch: (q: string) => portUseCases.autocomplete(q, undefined, "SEA") },
+  portAir:     { key: "ac-code-port-air",    fetch: (q: string) => portUseCases.autocomplete(q, undefined, "AIR") },
   user:        { key: "ac-user",             fetch: (q: string) => userUseCases.autocomplete(q) },
   packageUnit: { key: "ac-code-package",     fetch: (q: string) => packageUnitUseCases.autocomplete(q) },
 } satisfies Record<string, AutocompleteSource>;
