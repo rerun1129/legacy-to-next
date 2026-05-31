@@ -79,7 +79,8 @@ public class SeaMasterRepositoryImpl implements SeaMasterRepositoryCustom {
                 containsIgnoreCase(sea.vesselName, filter.vesselName()),
                 containsIgnoreCase(sea.voyageNo, filter.voyageNo()),
                 Nullables.mapOrNull(filter.loadType(), t -> sea.loadType.eq(t)),
-                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t))
+                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t)),
+                eqString(m.teamCode, filter.teamCode())
             )
             .orderBy(m.createdAt.desc())
             .offset((long) pageRequest.getPage() * pageRequest.getSize())
@@ -102,7 +103,8 @@ public class SeaMasterRepositoryImpl implements SeaMasterRepositoryCustom {
                 containsIgnoreCase(sea.vesselName, filter.vesselName()),
                 containsIgnoreCase(sea.voyageNo, filter.voyageNo()),
                 Nullables.mapOrNull(filter.loadType(), t -> sea.loadType.eq(t)),
-                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t))
+                Nullables.mapOrNull(filter.shipmentType(), t -> m.shipmentType.eq(t)),
+                eqString(m.teamCode, filter.teamCode())
             )
             .fetchOne();
 

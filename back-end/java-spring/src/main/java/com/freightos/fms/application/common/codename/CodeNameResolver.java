@@ -37,4 +37,8 @@ public class CodeNameResolver {
     public Map<String, String> findHsCodeNames(Collection<String> codes) {
         return codeNamePort.findHsCodeNames(codes);
     }
+
+    public Map<String, String> findTeamNames(Collection<String> codes) {
+        return codeNamePort.findTeamNames(codes);
+    }
 }

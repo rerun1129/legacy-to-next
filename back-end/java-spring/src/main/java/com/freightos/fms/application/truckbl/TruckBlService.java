@@ -46,16 +46,32 @@ public class TruckBlService implements TruckBlUseCase {
 
     private TruckBlDetailView enrichDetail(TruckBlDetailResult base) {
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
-        return new TruckBlDetailView(base, nameOrEmpty(hsCodeNames, base.hsCode()));
+        Map<String, String> teamNames = resolveTeamNames(base);
+        return new TruckBlDetailView(
+                base,
+                nameOrEmpty(hsCodeNames, base.hsCode()),
+                nameOrEmpty(teamNames, base.teamCode())
+        );
     }
 
     /** base.hsCode 1종 조회. */
     private Map<String, String> resolveHsCodeNames(TruckBlDetailResult base) {
         Set<String> codes = new HashSet<>();
-        if (base.hsCode() != null && !base.hsCode().isBlank()) {
-            codes.add(base.hsCode());
-        }
+        addIfHasText(codes, base.hsCode());
         return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    /** base.teamCode 1종 조회. */
+    private Map<String, String> resolveTeamNames(TruckBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        addIfHasText(codes, base.teamCode());
+        return codeNameResolver.findTeamNames(codes);
+    }
+
+    private static void addIfHasText(Set<String> target, String code) {
+        if (code != null && !code.isBlank()) {
+            target.add(code);
+        }
     }
 
     private static String nameOrEmpty(Map<String, String> nameMap, String code) {

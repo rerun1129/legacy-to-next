@@ -59,6 +59,7 @@ public class HouseBlService implements HouseBlUseCase {
         Map<String, String> userNames = resolveUserNames(base);
         Map<String, String> carrierNames = resolveCarrierNames(base);
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
+        Map<String, String> teamNames = resolveTeamNames(base);
         return new HouseBlDetailView(
                 base,
                 nameOrEmpty(customerNames, base.shipperCode()),
@@ -71,6 +72,7 @@ public class HouseBlService implements HouseBlUseCase {
                 nameOrEmpty(portNames, base.podCode()),
                 nameOrEmpty(userNames, base.salesManCode()),
                 nameOrEmpty(userNames, base.operatorCode()),
+                nameOrEmpty(teamNames, base.teamCode()),
                 seaPortName(portNames, base, SeaPortField.ISSUE_PLACE),
                 seaPortName(portNames, base, SeaPortField.PAYABLE_AT),
                 seaPortName(portNames, base, SeaPortField.DELIVERY),
@@ -120,6 +122,13 @@ public class HouseBlService implements HouseBlUseCase {
         Set<String> codes = new HashSet<>();
         addIfHasText(codes, base.hsCode());
         return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    /** base.teamCode 1종 조회. */
+    private Map<String, String> resolveTeamNames(HouseBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        addIfHasText(codes, base.teamCode());
+        return codeNameResolver.findTeamNames(codes);
     }
 
     /** seaDetail.linerCode 1종 조회. seaDetail null이면 빈 맵. */

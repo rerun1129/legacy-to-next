@@ -4,13 +4,13 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.seamaster.dto.SearchSeaMasterRequest;
 import com.freightos.fms.adapter.in.web.seamaster.dto.SeaMasterSummaryResponse;
 import com.freightos.fms.application.seamaster.command.SearchSeaMasterCommand;
-import com.freightos.fms.application.seamaster.projection.SeaMasterSummary;
+import com.freightos.fms.application.seamaster.projection.SeaMasterListItem;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SeaMasterAssembler {
 
-    public PagedResult<SeaMasterSummaryResponse> toSummaryPage(PagedResult<SeaMasterSummary> source) {
+    public PagedResult<SeaMasterSummaryResponse> toSummaryPage(PagedResult<SeaMasterListItem> source) {
         return source.map(SeaMasterSummaryResponse::from);
     }
 
@@ -27,6 +27,7 @@ public class SeaMasterAssembler {
                 req.voyageNo(),
                 req.shipmentType(),
                 req.loadType(),
+                req.teamCode(),
                 req.page(), req.size()
         );
     }

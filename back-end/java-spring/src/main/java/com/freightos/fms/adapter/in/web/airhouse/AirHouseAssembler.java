@@ -4,13 +4,13 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.airhouse.dto.SearchAirHouseRequest;
 import com.freightos.fms.adapter.in.web.airhouse.dto.AirHouseSummaryResponse;
 import com.freightos.fms.application.airhouse.command.SearchAirHouseCommand;
-import com.freightos.fms.application.airhouse.projection.AirHouseSummary;
+import com.freightos.fms.application.airhouse.projection.AirHouseListItem;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AirHouseAssembler {
 
-    public PagedResult<AirHouseSummaryResponse> toSummaryPage(PagedResult<AirHouseSummary> source) {
+    public PagedResult<AirHouseSummaryResponse> toSummaryPage(PagedResult<AirHouseListItem> source) {
         return source.map(AirHouseSummaryResponse::from);
     }
 

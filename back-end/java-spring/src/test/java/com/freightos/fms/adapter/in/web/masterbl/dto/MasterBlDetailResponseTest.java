@@ -17,13 +17,14 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 35개이고, consolidatedHouseBls 위치 정합")
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 40개이고, consolidatedHouseBls 위치 정합")
     void recordComponents_haveExactlyThirtyFiveFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(39);
-        assertThat(components[30].getName()).isEqualTo("consolidatedHouseBls");
-        assertThat(components[30].getType()).isEqualTo(List.class);
+        assertThat(components).hasSize(40);
+        assertThat(components[19].getName()).isEqualTo("teamName");
+        assertThat(components[31].getName()).isEqualTo("consolidatedHouseBls");
+        assertThat(components[31].getType()).isEqualTo(List.class);
     }
 
     // ── from(MasterBlDetailResult) 매핑 검증 ─────────────────────────
@@ -56,7 +57,7 @@ class MasterBlDetailResponseTest {
                 List.of(), List.of(), List.of()
         );
 
-        MasterBlDetailResponse response = MasterBlDetailResponse.from(new MasterBlDetailView(result, null));
+        MasterBlDetailResponse response = MasterBlDetailResponse.from(new MasterBlDetailView(result, null, null));
 
         assertThat(response).isNotNull();
         assertThat(response.consolidatedHouseBls()).hasSize(1);
@@ -90,7 +91,7 @@ class MasterBlDetailResponseTest {
                 List.of(), List.of(), List.of()
         );
 
-        MasterBlDetailResponse response = MasterBlDetailResponse.from(new MasterBlDetailView(result, null));
+        MasterBlDetailResponse response = MasterBlDetailResponse.from(new MasterBlDetailView(result, null, null));
 
         assertThat(response.consolidatedHouseBls()).isNotNull().isEmpty();
     }

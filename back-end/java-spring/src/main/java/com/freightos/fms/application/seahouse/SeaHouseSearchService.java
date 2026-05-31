@@ -70,8 +70,9 @@ public class SeaHouseSearchService implements SeaHouseSearchUseCase {
 
         Map<String, String> customerNames = resolveCustomerNames(summaries.getContent());
         Map<String, String> carrierNames = resolveCarrierNames(summaries.getContent());
+        Map<String, String> teamNames = resolveTeamNames(summaries.getContent());
 
-        return summaries.map(s -> toListItem(s, customerNames, carrierNames));
+        return summaries.map(s -> toListItem(s, customerNames, carrierNames, teamNames));
     }
 
     /** 페이지 전체에서 고객 관련 코드 6종을 distinct 수집 후 1회 조회. */
@@ -97,6 +98,15 @@ public class SeaHouseSearchService implements SeaHouseSearchUseCase {
         return codeNameResolver.findCarrierNames(codes);
     }
 
+    /** 페이지 전체에서 team 코드를 distinct 수집 후 1회 조회. */
+    private Map<String, String> resolveTeamNames(List<SeaHouseSummary> summaries) {
+        Set<String> codes = new HashSet<>();
+        for (SeaHouseSummary s : summaries) {
+            addIfHasText(codes, s.teamCode());
+        }
+        return codeNameResolver.findTeamNames(codes);
+    }
+
     private static void addIfHasText(Set<String> target, String code) {
         if (code != null && !code.isBlank()) {
             target.add(code);
@@ -106,7 +116,8 @@ public class SeaHouseSearchService implements SeaHouseSearchUseCase {
     private static SeaHouseListItem toListItem(
             SeaHouseSummary s,
             Map<String, String> customerNames,
-            Map<String, String> carrierNames
+            Map<String, String> carrierNames,
+            Map<String, String> teamNames
     ) {
         return new SeaHouseListItem(
                 s.id(),
@@ -141,6 +152,7 @@ public class SeaHouseSearchService implements SeaHouseSearchUseCase {
                 nameOrEmpty(customerNames, s.actualCustomerCode()),
                 s.salesManCode(),
                 s.teamCode(),
+                nameOrEmpty(teamNames, s.teamCode()),
                 s.loadType(),
                 s.cbm(),
                 s.deliveryCode(),

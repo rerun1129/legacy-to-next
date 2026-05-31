@@ -10,7 +10,7 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.truckbl.command.SearchTruckBlCommand;
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailView;
-import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
+import com.freightos.fms.application.truckbl.projection.TruckBlListItem;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
 @Component
 public class TruckBlAssembler {
 
-    public PagedResult<TruckBlSummaryResponse> toSummaryPage(PagedResult<TruckBlSummary> source) {
+    public PagedResult<TruckBlSummaryResponse> toSummaryPage(PagedResult<TruckBlListItem> source) {
         return source.map(TruckBlSummaryResponse::from);
     }
 

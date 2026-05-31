@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.in.web.airmaster.dto;
 
-import com.freightos.fms.application.airmaster.projection.AirMasterSummary;
+import com.freightos.fms.application.airmaster.projection.AirMasterListItem;
 
 import java.math.BigDecimal;
 
@@ -27,32 +27,34 @@ public record AirMasterSummaryResponse(
         String     masterRefNo,
         String     freightTerm,
         String     operatorCode,
-        String     teamCode
+        String     teamCode,
+        String     teamName
 ) {
-    public static AirMasterSummaryResponse from(AirMasterSummary summary) {
+    public static AirMasterSummaryResponse from(AirMasterListItem item) {
         return new AirMasterSummaryResponse(
-                summary.id(),
-                summary.bound(),
-                summary.mblNo(),
-                summary.shipmentType(),
-                summary.etd(),
-                summary.eta(),
-                summary.grossWeightKg(),
-                summary.chargeWeightKg(),
-                summary.pkgQty(),
-                summary.pkgUnit(),
-                summary.houseBlCount(),
-                summary.polCode(),
-                summary.podCode(),
-                summary.shipperCode(),
-                summary.consigneeCode(),
-                summary.notifyCode(),
-                summary.settlePartnerCode(),
-                summary.airlineCode(),
-                summary.masterRefNo(),
-                summary.freightTerm(),
-                summary.operatorCode(),
-                summary.teamCode()
+                item.id(),
+                item.bound(),
+                item.mblNo(),
+                item.shipmentType(),
+                item.etd(),
+                item.eta(),
+                item.grossWeightKg(),
+                item.chargeWeightKg(),
+                item.pkgQty(),
+                item.pkgUnit(),
+                item.houseBlCount(),
+                item.polCode(),
+                item.podCode(),
+                item.shipperCode(),
+                item.consigneeCode(),
+                item.notifyCode(),
+                item.settlePartnerCode(),
+                item.airlineCode(),
+                item.masterRefNo(),
+                item.freightTerm(),
+                item.operatorCode(),
+                item.teamCode(),
+                item.teamName()
         );
     }
 }

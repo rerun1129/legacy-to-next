@@ -5,6 +5,7 @@ import com.freightos.fms.adapter.out.persistence.codename.entity.QCarrierRefJpaE
 import com.freightos.fms.adapter.out.persistence.codename.entity.QCustomerRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QHsCodeRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QPortRefJpaEntity;
+import com.freightos.fms.adapter.out.persistence.codename.entity.QTeamRefJpaEntity;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -142,6 +143,33 @@ public class CodeNameQueryRepository {
             .collect(Collectors.toMap(
                 t -> t.get(h.hsCode),
                 t -> t.get(h.name) != null ? t.get(h.name) : ""
+            ));
+    }
+
+    /**
+     * team_code → name 일괄 조회.
+     * admin.team은 deleted_at이 없고 active BOOLEAN으로 활성 여부를 관리하므로
+     * deletedAt.isNull() 대신 active.isTrue() 필터를 사용한다.
+     */
+    Map<String, String> fetchTeamNames(Collection<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        QTeamRefJpaEntity t = QTeamRefJpaEntity.teamRefJpaEntity;
+        BooleanExpression inCodes = t.teamCode.in(codes);
+        BooleanExpression isActive = t.active.isTrue();
+
+        List<Tuple> rows = queryFactory
+            .select(t.teamCode, t.name)
+            .from(t)
+            .where(inCodes, isActive)
+            .fetch();
+
+        return rows.stream()
+            .filter(row -> row.get(t.teamCode) != null)
+            .collect(Collectors.toMap(
+                row -> row.get(t.teamCode),
+                row -> row.get(t.name) != null ? row.get(t.name) : ""
             ));
     }
 }

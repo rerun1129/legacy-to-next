@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.in.web.airhouse.dto;
 
-import com.freightos.fms.application.airhouse.projection.AirHouseSummary;
+import com.freightos.fms.application.airhouse.projection.AirHouseListItem;
 
 import java.math.BigDecimal;
 
@@ -30,35 +30,37 @@ public record AirHouseSummaryResponse(
         String     incoterms,
         String     actualCustomerCode,
         String     salesManCode,
-        String     teamCode
+        String     teamCode,
+        String     teamName
 ) {
-    public static AirHouseSummaryResponse from(AirHouseSummary summary) {
+    public static AirHouseSummaryResponse from(AirHouseListItem item) {
         return new AirHouseSummaryResponse(
-                summary.id(),
-                summary.hblNo(),
-                summary.bound(),
-                summary.mblNo(),
-                summary.shipmentType(),
-                summary.etd(),
-                summary.eta(),
-                summary.grossWeightKg(),
-                summary.chargeWeightKg(),
-                summary.pkgQty(),
-                summary.pkgUnit(),
-                summary.polCode(),
-                summary.podCode(),
-                summary.shipperCode(),
-                summary.consigneeCode(),
-                summary.notifyCode(),
-                summary.settlePartnerCode(),
-                summary.docPartnerCode(),
-                summary.airlineCode(),
-                summary.masterRefNo(),
-                summary.freightTerm(),
-                summary.incoterms(),
-                summary.actualCustomerCode(),
-                summary.salesManCode(),
-                summary.teamCode()
+                item.id(),
+                item.hblNo(),
+                item.bound(),
+                item.mblNo(),
+                item.shipmentType(),
+                item.etd(),
+                item.eta(),
+                item.grossWeightKg(),
+                item.chargeWeightKg(),
+                item.pkgQty(),
+                item.pkgUnit(),
+                item.polCode(),
+                item.podCode(),
+                item.shipperCode(),
+                item.consigneeCode(),
+                item.notifyCode(),
+                item.settlePartnerCode(),
+                item.docPartnerCode(),
+                item.airlineCode(),
+                item.masterRefNo(),
+                item.freightTerm(),
+                item.incoterms(),
+                item.actualCustomerCode(),
+                item.salesManCode(),
+                item.teamCode(),
+                item.teamName()
         );
     }
 }

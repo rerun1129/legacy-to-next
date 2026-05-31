@@ -26,4 +26,10 @@ public interface CodeNamePort {
      * deleted_at IS NULL 활성 코드만 포함. 미존재·삭제 코드는 맵에 포함되지 않음(예외 아님).
      */
     Map<String, String> findHsCodeNames(Collection<String> codes);
+
+    /**
+     * team_code → name 일괄 조회. active = true 활성 팀만 포함.
+     * 미존재·비활성 코드는 맵에 포함되지 않음(예외 아님). 빈 입력은 빈 맵.
+     */
+    Map<String, String> findTeamNames(Collection<String> codes);
 }

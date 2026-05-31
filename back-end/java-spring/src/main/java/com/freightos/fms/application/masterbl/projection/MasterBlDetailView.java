@@ -9,5 +9,8 @@ public record MasterBlDetailView(
         MasterBlDetailResult base,
 
         // hs_code → name (findHsCodeNames)
-        String hsCodeName
+        String hsCodeName,
+
+        // team_code → name (findTeamNames)
+        String teamName
 ) {}

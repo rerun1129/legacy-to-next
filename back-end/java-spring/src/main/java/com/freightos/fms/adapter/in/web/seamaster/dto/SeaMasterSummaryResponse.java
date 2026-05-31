@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.in.web.seamaster.dto;
 
-import com.freightos.fms.application.seamaster.projection.SeaMasterSummary;
+import com.freightos.fms.application.seamaster.projection.SeaMasterListItem;
 
 import java.math.BigDecimal;
 
@@ -28,39 +28,41 @@ public record SeaMasterSummaryResponse(
         String     freightTerm,
         String     operatorCode,
         String     teamCode,
+        String     teamName,
         String     vesselName,
         String     voyageNo,
         String     loadType,
         BigDecimal cbm
 ) {
-    public static SeaMasterSummaryResponse from(SeaMasterSummary summary) {
+    public static SeaMasterSummaryResponse from(SeaMasterListItem item) {
         return new SeaMasterSummaryResponse(
-                summary.id(),
-                summary.bound(),
-                summary.mblNo(),
-                summary.shipmentType(),
-                summary.etd(),
-                summary.eta(),
-                summary.grossWeightKg(),
-                summary.rton(),
-                summary.pkgQty(),
-                summary.pkgUnit(),
-                summary.houseBlCount(),
-                summary.polCode(),
-                summary.podCode(),
-                summary.shipperCode(),
-                summary.consigneeCode(),
-                summary.notifyCode(),
-                summary.settlePartnerCode(),
-                summary.linerCode(),
-                summary.masterRefNo(),
-                summary.freightTerm(),
-                summary.operatorCode(),
-                summary.teamCode(),
-                summary.vesselName(),
-                summary.voyageNo(),
-                summary.loadType(),
-                summary.cbm()
+                item.id(),
+                item.bound(),
+                item.mblNo(),
+                item.shipmentType(),
+                item.etd(),
+                item.eta(),
+                item.grossWeightKg(),
+                item.rton(),
+                item.pkgQty(),
+                item.pkgUnit(),
+                item.houseBlCount(),
+                item.polCode(),
+                item.podCode(),
+                item.shipperCode(),
+                item.consigneeCode(),
+                item.notifyCode(),
+                item.settlePartnerCode(),
+                item.linerCode(),
+                item.masterRefNo(),
+                item.freightTerm(),
+                item.operatorCode(),
+                item.teamCode(),
+                item.teamName(),
+                item.vesselName(),
+                item.voyageNo(),
+                item.loadType(),
+                item.cbm()
         );
     }
 }

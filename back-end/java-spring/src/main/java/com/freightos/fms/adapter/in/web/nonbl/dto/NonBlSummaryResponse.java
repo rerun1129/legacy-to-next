@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
-import com.freightos.fms.application.nonbl.projection.NonBlSummary;
+import com.freightos.fms.application.nonbl.projection.NonBlListItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,33 +28,37 @@ public record NonBlSummaryResponse(
         String        vesselName,
         String        voyageNo,
         String        linerCode,
-        String        linerName
+        String        linerName,
+        String        teamCode,
+        String        teamName
 ) {
-    /** QueryDSL projection 결과로부터 응답 DTO 생성. NonBlSummary 필드는 이미 String 타입. */
-    public static NonBlSummaryResponse from(NonBlSummary summary) {
+    /** NonBlListItem으로부터 응답 DTO 생성. */
+    public static NonBlSummaryResponse from(NonBlListItem item) {
         return new NonBlSummaryResponse(
-                summary.id(),
-                summary.hblNo(),
-                summary.jobDiv(),
-                summary.bound(),
-                summary.polCode(),
-                summary.podCode(),
-                summary.etd(),
-                summary.eta(),
-                summary.shipperCode(),
-                summary.consigneeCode(),
-                summary.pkgQty(),
-                summary.pkgUnit(),
-                summary.createdAt(),
-                summary.notifyCode(),
-                summary.settlePartnerCode(),
-                summary.actualCustomerCode(),
-                summary.grossWeightKg(),
-                summary.cbm(),
-                summary.vesselName(),
-                summary.voyageNo(),
-                summary.linerCode(),
-                summary.linerName()
+                item.id(),
+                item.hblNo(),
+                item.jobDiv(),
+                item.bound(),
+                item.polCode(),
+                item.podCode(),
+                item.etd(),
+                item.eta(),
+                item.shipperCode(),
+                item.consigneeCode(),
+                item.pkgQty(),
+                item.pkgUnit(),
+                item.createdAt(),
+                item.notifyCode(),
+                item.settlePartnerCode(),
+                item.actualCustomerCode(),
+                item.grossWeightKg(),
+                item.cbm(),
+                item.vesselName(),
+                item.voyageNo(),
+                item.linerCode(),
+                item.linerName(),
+                item.teamCode(),
+                item.teamName()
         );
     }
 }

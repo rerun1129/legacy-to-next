@@ -16,6 +16,7 @@ public record SearchSeaMasterCommand(
     String voyageNo,
     String shipmentType,
     String loadType,
+    String teamCode,
     Integer page,
     Integer size
 ) {}

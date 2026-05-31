@@ -40,6 +40,7 @@ public record SeaHouseListItem(
         String actualCustomerName,
         String salesManCode,
         String teamCode,
+        String teamName,
         String loadType,
         BigDecimal cbm,
         String deliveryCode,

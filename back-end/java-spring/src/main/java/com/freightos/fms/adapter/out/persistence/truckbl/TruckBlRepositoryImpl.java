@@ -52,7 +52,8 @@ public class TruckBlRepositoryImpl implements TruckBlRepositoryCustom {
                 h.pkgUnit,
                 h.grossWeightKg,
                 h.cbm,
-                h.createdAt
+                h.createdAt,
+                h.teamCode
             ))
             .from(h)
             .leftJoin(truck).on(truck.houseBl.houseBlId.eq(h.houseBlId))

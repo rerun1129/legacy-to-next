@@ -19,6 +19,7 @@ public record SearchSeaMasterRequest(
     String voyageNo,
     String shipmentType,
     String loadType,
+    String teamCode,
     @NotNull @Min(0) Integer page,
     @NotNull @Min(1) Integer size
 ) {}

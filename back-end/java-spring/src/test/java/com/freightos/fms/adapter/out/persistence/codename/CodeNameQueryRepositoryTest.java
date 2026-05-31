@@ -217,4 +217,38 @@ class CodeNameQueryRepositoryTest {
 
         assertThat(result).isEmpty();
     }
+
+    // ── team ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("fetchTeamNames - active=true 팀에 대해 teamCode→name 정확 매핑")
+    void fetchTeamNames_activeTeam_returnsCorrectName() {
+        Map<String, String> result = queryRepository.fetchTeamNames(List.of("TEAM-A"));
+
+        assertThat(result).containsEntry("TEAM-A", "영업팀");
+    }
+
+    @Test
+    @DisplayName("fetchTeamNames - active=false 팀은 결과에 포함되지 않음")
+    void fetchTeamNames_inactiveTeam_excluded() {
+        Map<String, String> result = queryRepository.fetchTeamNames(List.of("TEAM-Z"));
+
+        assertThat(result).doesNotContainKey("TEAM-Z");
+    }
+
+    @Test
+    @DisplayName("fetchTeamNames - 미존재 코드는 맵에 없음(예외 아님)")
+    void fetchTeamNames_nonexistentCode_absentWithoutException() {
+        Map<String, String> result = queryRepository.fetchTeamNames(List.of("NO-SUCH-TEAM"));
+
+        assertThat(result).doesNotContainKey("NO-SUCH-TEAM");
+    }
+
+    @Test
+    @DisplayName("fetchTeamNames - 빈 입력은 빈 맵 반환")
+    void fetchTeamNames_emptyCodes_returnsEmptyMap() {
+        Map<String, String> result = queryRepository.fetchTeamNames(List.of());
+
+        assertThat(result).isEmpty();
+    }
 }

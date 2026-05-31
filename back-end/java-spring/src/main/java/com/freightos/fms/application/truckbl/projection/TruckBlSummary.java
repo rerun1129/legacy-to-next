@@ -26,5 +26,6 @@ public record TruckBlSummary(
     String pkgUnit,
     BigDecimal grossWeightKg,
     BigDecimal cbm,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    String teamCode
 ) {}

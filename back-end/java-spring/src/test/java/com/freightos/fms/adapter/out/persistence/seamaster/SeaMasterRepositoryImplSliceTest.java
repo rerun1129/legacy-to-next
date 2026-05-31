@@ -95,11 +95,11 @@ class SeaMasterRepositoryImplSliceTest {
     }
 
     private static SeaMasterFilter filterWithBoundOnly(Bound bound) {
-        return SeaMasterFilter.of(bound, null, null, null, null, null, null, null, null, null, null, null);
+        return SeaMasterFilter.of(bound, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private static SeaMasterFilter filterWithBoundAndMblNo(Bound bound, String mblNo) {
-        return SeaMasterFilter.of(bound, null, null, "MBL", mblNo, null, null, null, null, null, null, null);
+        return SeaMasterFilter.of(bound, null, null, "MBL", mblNo, null, null, null, null, null, null, null, null);
     }
 
     // ── 테스트 케이스 ────────────────────────────────────────────────
@@ -191,7 +191,7 @@ class SeaMasterRepositoryImplSliceTest {
         persistMasterBlWithMblAndRef(Bound.EXP, "TESTMBL", "OTHERREF");
         em.flush();
 
-        SeaMasterFilter filter = SeaMasterFilter.of(Bound.EXP, null, null, "MBL", "TESTM", null, null, null, null, null, null, null);
+        SeaMasterFilter filter = SeaMasterFilter.of(Bound.EXP, null, null, "MBL", "TESTM", null, null, null, null, null, null, null, null);
         PagedResult<SeaMasterSummary> result = seaMasterRepositoryCustom.searchSeaMasterSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);
@@ -203,7 +203,7 @@ class SeaMasterRepositoryImplSliceTest {
         persistMasterBlWithMblAndRef(Bound.EXP, "OTHERMBL", "TESTREF");
         em.flush();
 
-        SeaMasterFilter filter = SeaMasterFilter.of(Bound.EXP, null, null, "REF", "TESTRE", null, null, null, null, null, null, null);
+        SeaMasterFilter filter = SeaMasterFilter.of(Bound.EXP, null, null, "REF", "TESTRE", null, null, null, null, null, null, null, null);
         PagedResult<SeaMasterSummary> result = seaMasterRepositoryCustom.searchSeaMasterSummaries(filter, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(1);

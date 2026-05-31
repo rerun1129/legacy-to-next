@@ -11,7 +11,7 @@ import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
-import com.freightos.fms.application.nonbl.projection.NonBlSummary;
+import com.freightos.fms.application.nonbl.projection.NonBlListItem;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
 @Component
 public class NonBlAssembler {
 
-    public PagedResult<NonBlSummaryResponse> toSummaryPage(PagedResult<NonBlSummary> source) {
+    public PagedResult<NonBlSummaryResponse> toSummaryPage(PagedResult<NonBlListItem> source) {
         return source.map(NonBlSummaryResponse::from);
     }
 

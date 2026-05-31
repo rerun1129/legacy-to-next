@@ -31,5 +31,6 @@ public record NonBlSummary(
     String vesselName,
     String voyageNo,
     String linerCode,
-    String linerName
+    String linerName,
+    String teamCode
 ) {}

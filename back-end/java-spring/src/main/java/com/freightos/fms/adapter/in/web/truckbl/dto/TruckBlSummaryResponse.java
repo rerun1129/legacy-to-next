@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.in.web.truckbl.dto;
 
-import com.freightos.fms.application.truckbl.projection.TruckBlSummary;
+import com.freightos.fms.application.truckbl.projection.TruckBlListItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,28 +24,32 @@ public record TruckBlSummaryResponse(
         String        pkgUnit,
         BigDecimal    grossWeightKg,
         BigDecimal    cbm,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String        teamCode,
+        String        teamName
 ) {
-    public static TruckBlSummaryResponse from(TruckBlSummary summary) {
+    public static TruckBlSummaryResponse from(TruckBlListItem item) {
         return new TruckBlSummaryResponse(
-                summary.id(),
-                summary.hblNo(),
-                summary.jobDiv(),
-                summary.bound(),
-                summary.polCode(),
-                summary.podCode(),
-                summary.etd(),
-                summary.eta(),
-                summary.shipperCode(),
-                summary.consigneeCode(),
-                summary.notifyCode(),
-                summary.docPartnerCode(),
-                summary.truckerCode(),
-                summary.pkgQty(),
-                summary.pkgUnit(),
-                summary.grossWeightKg(),
-                summary.cbm(),
-                summary.createdAt()
+                item.id(),
+                item.hblNo(),
+                item.jobDiv(),
+                item.bound(),
+                item.polCode(),
+                item.podCode(),
+                item.etd(),
+                item.eta(),
+                item.shipperCode(),
+                item.consigneeCode(),
+                item.notifyCode(),
+                item.docPartnerCode(),
+                item.truckerCode(),
+                item.pkgQty(),
+                item.pkgUnit(),
+                item.grossWeightKg(),
+                item.cbm(),
+                item.createdAt(),
+                item.teamCode(),
+                item.teamName()
         );
     }
 }

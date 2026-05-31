@@ -4,13 +4,13 @@ import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.airmaster.dto.SearchAirMasterRequest;
 import com.freightos.fms.adapter.in.web.airmaster.dto.AirMasterSummaryResponse;
 import com.freightos.fms.application.airmaster.command.SearchAirMasterCommand;
-import com.freightos.fms.application.airmaster.projection.AirMasterSummary;
+import com.freightos.fms.application.airmaster.projection.AirMasterListItem;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AirMasterAssembler {
 
-    public PagedResult<AirMasterSummaryResponse> toSummaryPage(PagedResult<AirMasterSummary> source) {
+    public PagedResult<AirMasterSummaryResponse> toSummaryPage(PagedResult<AirMasterListItem> source) {
         return source.map(AirMasterSummaryResponse::from);
     }
 

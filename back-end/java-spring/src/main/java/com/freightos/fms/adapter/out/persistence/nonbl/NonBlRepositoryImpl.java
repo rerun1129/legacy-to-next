@@ -62,7 +62,8 @@ public class NonBlRepositoryImpl implements NonBlRepositoryCustom {
                 nonBl.vesselName,
                 nonBl.voyageNo,
                 nonBl.linerCode,
-                nonBl.linerName
+                nonBl.linerName,
+                h.teamCode
             ))
             .from(h)
             .innerJoin(nonBl).on(nonBl.houseBl.houseBlId.eq(h.houseBlId))

@@ -46,3 +46,15 @@ VALUES ('8471.30', '휴대용 자동자료처리기계');
 -- deleted_at 채움 → fetchHsCodeNames 에서 제외 대상
 INSERT INTO admin.hs_code (hs_code, name, deleted_at)
 VALUES ('9999.99', '삭제된 HS코드', CURRENT_TIMESTAMP);
+
+-- TeamRefJpaEntity 컬럼 기준: team_id, team_code, name, active (sort_order 미선언 → 삽입 금지)
+-- active=true 활성 팀 2행
+INSERT INTO admin.team (team_code, name, active)
+VALUES ('TEAM-A', '영업팀', TRUE);
+
+INSERT INTO admin.team (team_code, name, active)
+VALUES ('TEAM-B', '운영팀', TRUE);
+
+-- active=false 비활성 팀 → fetchTeamNames 에서 제외 대상
+INSERT INTO admin.team (team_code, name, active)
+VALUES ('TEAM-Z', '해산된 팀', FALSE);

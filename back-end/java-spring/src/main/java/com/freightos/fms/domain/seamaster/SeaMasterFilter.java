@@ -27,7 +27,8 @@ public record SeaMasterFilter(
     String vesselName,
     String voyageNo,
     ShipmentType shipmentType,
-    LoadType loadType
+    LoadType loadType,
+    String teamCode
 ) {
     public static SeaMasterFilter of(
             Bound bound,
@@ -41,7 +42,8 @@ public record SeaMasterFilter(
             String vesselName,
             String voyageNo,
             ShipmentType shipmentType,
-            LoadType loadType) {
+            LoadType loadType,
+            String teamCode) {
         return new SeaMasterFilter(
                 bound, null, dateFrom, dateTo,
                 masterBlKind, masterBlValue,
@@ -49,7 +51,8 @@ public record SeaMasterFilter(
                 linerCode,
                 null, portCode,
                 vesselName, voyageNo,
-                shipmentType, loadType);
+                shipmentType, loadType,
+                teamCode);
     }
 
     public SeaMasterFilter withKinds(DateKind dateKind, PartyKind partyKind, PortKind portKind) {
@@ -61,6 +64,7 @@ public record SeaMasterFilter(
                 this.linerCode(),
                 portKind, this.portCode(),
                 this.vesselName(), this.voyageNo(),
-                this.shipmentType(), this.loadType());
+                this.shipmentType(), this.loadType(),
+                this.teamCode());
     }
 }

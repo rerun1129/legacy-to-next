@@ -24,6 +24,9 @@ public record HouseBlDetailView(
         String salesManName,
         String operatorName,
 
+        // team_code → name (findTeamNames)
+        String teamName,
+
         // SEA detail port name 3종 (findPortNames — pol/pod와 합쳐 1회 조회)
         String issuePlaceName,
         String payableAtName,

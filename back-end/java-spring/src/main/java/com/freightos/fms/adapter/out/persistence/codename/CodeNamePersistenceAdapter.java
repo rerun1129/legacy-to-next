@@ -42,4 +42,9 @@ public class CodeNamePersistenceAdapter implements CodeNamePort {
     public Map<String, String> findHsCodeNames(Collection<String> codes) {
         return queryRepository.fetchHsCodeNames(codes);
     }
+
+    @Override
+    public Map<String, String> findTeamNames(Collection<String> codes) {
+        return queryRepository.fetchTeamNames(codes);
+    }
 }

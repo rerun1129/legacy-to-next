@@ -15,6 +15,7 @@ import com.freightos.fms.application.nonbl.port.out.NonBlPersistencePort;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
+import com.freightos.fms.application.nonbl.projection.NonBlListItem;
 import com.freightos.fms.application.nonbl.projection.NonBlSummary;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.fms.domain.common.vo.BlNumber;
@@ -43,8 +44,48 @@ public class NonBlService implements NonBlUseCase {
     private final CodeNameResolver codeNameResolver;
 
     @Override
-    public PagedResult<NonBlSummary> searchNonBls(SearchNonBlCommand cmd, PageRequest pageRequest) {
-        return nonBlSearchPort.searchNonBlSummaries(cmd.toFilter(), pageRequest);
+    public PagedResult<NonBlListItem> searchNonBls(SearchNonBlCommand cmd, PageRequest pageRequest) {
+        PagedResult<NonBlSummary> summaries = nonBlSearchPort.searchNonBlSummaries(cmd.toFilter(), pageRequest);
+        Map<String, String> teamNames = resolveListTeamNames(summaries.getContent());
+        return summaries.map(s -> toListItem(s, teamNames));
+    }
+
+    /** 리스트 페이지 전체에서 team 코드를 distinct 수집 후 1회 조회. */
+    private Map<String, String> resolveListTeamNames(List<NonBlSummary> summaries) {
+        Set<String> codes = new HashSet<>();
+        for (NonBlSummary s : summaries) {
+            addIfHasText(codes, s.teamCode());
+        }
+        return codeNameResolver.findTeamNames(codes);
+    }
+
+    private static NonBlListItem toListItem(NonBlSummary s, Map<String, String> teamNames) {
+        return new NonBlListItem(
+                s.id(),
+                s.hblNo(),
+                s.jobDiv(),
+                s.bound(),
+                s.polCode(),
+                s.podCode(),
+                s.etd(),
+                s.eta(),
+                s.shipperCode(),
+                s.consigneeCode(),
+                s.pkgQty(),
+                s.pkgUnit(),
+                s.createdAt(),
+                s.notifyCode(),
+                s.settlePartnerCode(),
+                s.actualCustomerCode(),
+                s.grossWeightKg(),
+                s.cbm(),
+                s.vesselName(),
+                s.voyageNo(),
+                s.linerCode(),
+                s.linerName(),
+                s.teamCode(),
+                nameOrEmpty(teamNames, s.teamCode())
+        );
     }
 
     @Override
@@ -55,16 +96,32 @@ public class NonBlService implements NonBlUseCase {
 
     private NonBlDetailView enrichDetail(NonBlDetailResult base) {
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
-        return new NonBlDetailView(base, nameOrEmpty(hsCodeNames, base.hsCode()));
+        Map<String, String> teamNames = resolveTeamNames(base);
+        return new NonBlDetailView(
+                base,
+                nameOrEmpty(hsCodeNames, base.hsCode()),
+                nameOrEmpty(teamNames, base.teamCode())
+        );
     }
 
     /** base.hsCode 1종 조회. */
     private Map<String, String> resolveHsCodeNames(NonBlDetailResult base) {
         Set<String> codes = new HashSet<>();
-        if (base.hsCode() != null && !base.hsCode().isBlank()) {
-            codes.add(base.hsCode());
-        }
+        addIfHasText(codes, base.hsCode());
         return codeNameResolver.findHsCodeNames(codes);
+    }
+
+    /** base.teamCode 1종 조회. */
+    private Map<String, String> resolveTeamNames(NonBlDetailResult base) {
+        Set<String> codes = new HashSet<>();
+        addIfHasText(codes, base.teamCode());
+        return codeNameResolver.findTeamNames(codes);
+    }
+
+    private static void addIfHasText(Set<String> target, String code) {
+        if (code != null && !code.isBlank()) {
+            target.add(code);
+        }
     }
 
     private static String nameOrEmpty(Map<String, String> nameMap, String code) {
