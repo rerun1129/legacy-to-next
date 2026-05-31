@@ -24,6 +24,7 @@ const USER_ROW_SCHEMA = z.object({
   updatedAt: z.string(),
   attributes: z.record(z.string(), z.array(z.string())).optional().transform((v) => v ?? {}),
   teamId: z.number().nullable().optional().transform((v) => v ?? null),
+  subscriberId: z.number().nullable().optional().transform((v) => v ?? null),
 }) satisfies z.ZodType<UserRow>;
 
 const USER_DETAIL_SCHEMA = z.object({
@@ -38,6 +39,7 @@ const USER_DETAIL_SCHEMA = z.object({
   updatedBy: z.string().nullable().optional().transform((v) => v ?? null),
   attributes: z.record(z.string(), z.array(z.string())).default({}),
   teamId: z.number().nullable().optional().transform((v) => v ?? null),
+  subscriberId: z.number().nullable().optional().transform((v) => v ?? null),
 }) satisfies z.ZodType<UserDetail>;
 
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>

@@ -9,6 +9,7 @@ import { MultiSelectBox } from "@/components/shared/inputs/multi-select-box";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { TeamRow } from "@/domain/team";
+import type { SubscriberRow } from "@/domain/subscriber";
 
 export interface UserFormRow {
   entityId: number;
@@ -19,6 +20,7 @@ export interface UserFormRow {
   modules: string;
   active: boolean;
   teamId: number | null;
+  subscriberId: number | null;
   _originalAttributes: Record<string, string[]>;
 }
 
@@ -61,6 +63,45 @@ function TeamCell({
   );
 }
 
+// 표시(subscriberCode)와 저장(subscriberId) 분리: input에는 code 노출, 폼 값은 FK id
+function SubscriberCell({
+  index,
+  subscribers,
+  control,
+}: {
+  index: number;
+  subscribers: SubscriberRow[];
+  control: Control<FormValues>;
+}) {
+  const { field } = useController({ control, name: `rows.${index}.subscriberId` });
+  const subscriber = useCodeAutocomplete(CODE_SOURCES.subscriber);
+  const displayCode = subscribers.find((s) => s.id === field.value)?.subscriberCode ?? "";
+  const ref = useRef<HTMLInputElement>(null);
+
+  // 외부에서 field.value가 바뀔 때 포커스 없는 경우만 표시값 동기화
+  useEffect(() => {
+    const el = ref.current;
+    if (el && document.activeElement !== el) el.value = displayCode;
+  }, [displayCode]);
+
+  return (
+    <CodeBox
+      ref={ref}
+      kind="code-only"
+      variant="cell"
+      codeProps={{ name: `rows.${index}.subscriberId__display`, defaultValue: displayCode }}
+      onSearch={subscriber.onSearch}
+      suggestions={subscriber.suggestions}
+      suggestionsLoading={subscriber.suggestionsLoading}
+      onSelect={(it) => {
+        // autocomplete 응답에 id 없음 → subscriberCode로 목록 역조회
+        const matched = subscribers.find((s) => s.subscriberCode === it.code);
+        field.onChange(matched?.id ?? null);
+      }}
+    />
+  );
+}
+
 type ColsT = (key: string) => string;
 type OptionsT = (key: string) => string;
 
@@ -72,6 +113,7 @@ export function buildUserColumns(
   tOptions: OptionsT,
   onUsernameDoubleClick?: (entityId: number) => void,
   teams: TeamRow[] = [],
+  subscribers: SubscriberRow[] = [],
 ): GridColumn<UserFormRow>[] {
   const roleOptions = [
     { value: "ADMIN", label: "ADMIN" },
@@ -210,6 +252,12 @@ export function buildUserColumns(
       width: 140,
       render: (_v, _row, i) => <TeamCell index={i} teams={teams} control={control} />,
     },
+    {
+      key: "subscriberId",
+      label: tCols("subscriber"),
+      width: 160,
+      render: (_v, _row, i) => <SubscriberCell index={i} subscribers={subscribers} control={control} />,
+    },
   ];
 }
 
@@ -225,6 +273,7 @@ export function getUserRowClassName(
     orig.role !== row.role ||
     orig.modules !== row.modules ||
     orig.active !== row.active ||
-    orig.teamId !== row.teamId;
+    orig.teamId !== row.teamId ||
+    orig.subscriberId !== row.subscriberId;
   return changed ? "is-modified" : undefined;
 }

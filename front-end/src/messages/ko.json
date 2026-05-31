@@ -1367,7 +1367,8 @@
         "role": "권한",
         "modules": "모듈",
         "status": "사용",
-        "team": "팀"
+        "team": "팀",
+        "subscriber": "소속 고객사"
       },
       "options": {
         "active": "사용",
@@ -1637,6 +1638,52 @@
         "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
         "noResults":     "검색 결과가 없습니다.",
         "saveSuccess":   "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "subscriber": {
+      "cols": {
+        "no": "#",
+        "subscriberCode": "구독사 코드",
+        "name": "구독사명",
+        "nameEn": "영문명",
+        "businessNo": "Biz No",
+        "representative": "대표자",
+        "phone": "전화번호",
+        "email": "Email",
+        "memo": "메모",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "subscriberCode": "구독사 코드",
+        "subscriberCodePlaceholder": "구독사 코드",
+        "name": "구독사명",
+        "namePlaceholder": "구독사명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "구독사 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      },
+      "section": {
+        "title": "모듈 구독 — {subscriberCode}",
+        "colModule": "모듈",
+        "colStartDate": "시작일",
+        "colEndDate": "종료일",
+        "colStatus": "사용",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}",
+        "empty": "구독 정보가 없습니다."
       }
     },
     "guard": {

@@ -1367,7 +1367,8 @@
         "role": "Role",
         "modules": "Modules",
         "status": "Status",
-        "team": "Team"
+        "team": "Team",
+        "subscriber": "Subscriber"
       },
       "options": {
         "active": "Active",
@@ -1637,6 +1638,52 @@
         "enterCriteria": "Enter search criteria and click Search.",
         "noResults":     "No results found.",
         "saveSuccess":   "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "subscriber": {
+      "cols": {
+        "no": "#",
+        "subscriberCode": "Subscriber Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "businessNo": "Biz No",
+        "representative": "Representative",
+        "phone": "Phone",
+        "email": "Email",
+        "memo": "Memo",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "subscriberCode": "Subscriber Code",
+        "subscriberCodePlaceholder": "Subscriber Code",
+        "name": "Subscriber Name",
+        "namePlaceholder": "Subscriber Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "Subscriber"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      },
+      "section": {
+        "title": "Module Subscriptions — {subscriberCode}",
+        "colModule": "Module",
+        "colStartDate": "Start Date",
+        "colEndDate": "End Date",
+        "colStatus": "Status",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}",
+        "empty": "No subscription records."
       }
     },
     "guard": {

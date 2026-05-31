@@ -7,6 +7,7 @@ export interface UserRow {
   updatedAt: string;
   attributes: Record<string, string[]>;
   teamId: number | null;
+  subscriberId: number | null;
 }
 
 export interface UserDetail {
@@ -21,6 +22,7 @@ export interface UserDetail {
   updatedBy: string | null;
   attributes: Record<string, string[]>;
   teamId: number | null;
+  subscriberId: number | null;
 }
 
 export type UserScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
@@ -37,6 +39,7 @@ export interface CreateUserRequestDto {
   active: boolean;
   attributes: Record<string, string[]>;
   teamId: number | null;
+  subscriberId: number | null;
 }
 
 export interface UpdateUserRequestDto {
@@ -45,6 +48,7 @@ export interface UpdateUserRequestDto {
   active: boolean;
   attributes: Record<string, string[]>;
   teamId: number | null;
+  subscriberId: number | null;
 }
 
 export interface UpdateUserItemDto {
@@ -54,6 +58,7 @@ export interface UpdateUserItemDto {
   active: boolean;
   attributes: Record<string, string[]>;
   teamId: number | null;
+  subscriberId: number | null;
 }
 
 export interface SaveUserChangesRequestDto {

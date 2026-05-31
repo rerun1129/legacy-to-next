@@ -8,53 +8,50 @@ import { RotateCcw, Search, Plus, Minus, Save } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { UserListFilter } from "./user-list-filter";
+import { SubscriberListFilter } from "./subscriber-list-filter";
 import { GridList } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
 import { Button } from "@/components/shared/button";
-import type { UserFilter } from "@/domain/user";
-import { userUseCases } from "@/application/user/use-cases";
-import { teamUseCases } from "@/application/team/use-cases";
+import type { SubscriberFilter } from "@/domain/subscriber";
 import { subscriberUseCases } from "@/application/subscriber/use-cases";
-import { accessAttributeValueUseCases } from "@/application/access/attribute-value/use-cases";
 import { collectGridChanges } from "@/lib/collect-grid-changes";
 import { toast } from "@/lib/toast-store";
 import {
-  buildUserColumns,
-  getUserRowClassName,
-  type UserFormRow,
+  buildSubscriberColumns,
+  getSubscriberRowClassName,
+  type SubscriberFormRow,
   type FormValues,
-} from "./user-grid-columns";
+} from "./subscriber-grid-columns";
 import {
-  PASTE_COLS,
   ROW_IS_EQUAL,
   TO_CREATE,
   TO_UPDATE,
   toFormRow,
-} from "./user-list-helpers";
-import { UserPermissionPresetsSection } from "./user-permission-presets-section";
+} from "./subscriber-list-helpers";
+import { SubscriberSubscriptionSection } from "./subscriber-subscription-section";
+import { useSubscriberGridPaste } from "./use-subscriber-grid-paste";
 
-
-const DEFAULT_FILTER: UserFilter = {
-  username: "",
+const DEFAULT_FILTER: SubscriberFilter = {
+  subscriberCode: "",
+  name: "",
   scope: "ALL",
 };
 
-const SCOPE = "/admin/user/list";
+const SCOPE = "/admin/subscriber/list";
 
-type UserSearchState = SavedSearchState & { extraFilter: UserFilter | null };
+type SubscriberSearchState = SavedSearchState & { extraFilter: SubscriberFilter | null };
 
-export function UserListClient() {
-  const tMsg = useTranslations("admin.user.msg");
-  const tPanel = useTranslations("admin.user.panel");
-  const tCols = useTranslations("admin.user.cols");
-  const tOptions = useTranslations("admin.user.options");
+export function SubscriberListClient() {
+  const tMsg = useTranslations("admin.subscriber.msg");
+  const tPanel = useTranslations("admin.subscriber.panel");
+  const tCols = useTranslations("admin.subscriber.cols");
+  const tOptions = useTranslations("admin.subscriber.options");
 
-  const filterForm = useForm<UserFilter>({ defaultValues: DEFAULT_FILTER });
+  const filterForm = useForm<SubscriberFilter>({ defaultValues: DEFAULT_FILTER });
   const qc = useQueryClient();
 
-  const [extraFilter, setExtraFilter] = useState<UserFilter | null>(() => {
-    const s = listFilterStore.getState().getSearch(SCOPE) as UserSearchState | undefined;
+  const [extraFilter, setExtraFilter] = useState<SubscriberFilter | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as SubscriberSearchState | undefined;
     return s?.extraFilter ?? null;
   });
   const [currentPage, setCurrentPage] = useState(() => {
@@ -66,13 +63,14 @@ export function UserListClient() {
     listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage });
   }, [extraFilter, currentPage]);
 
-  const methods = useForm<FormValues>({ defaultValues: { rows: [] } });
-  const { control, register, getValues, setValue, reset, formState: { isDirty } } = methods;
+  const { control, register, getValues, setValue, reset, formState: { isDirty } } = useForm<FormValues>({
+    defaultValues: { rows: [] },
+  });
   const { fields, append, remove } = useFieldArray({ control, name: "rows" });
 
   const { data, isFetching } = useQuery({
-    queryKey: ["admin-user", "list", extraFilter, currentPage],
-    queryFn: () => userUseCases.search(extraFilter!, currentPage, DEFAULT_PAGE_SIZE),
+    queryKey: ["admin-subscriber", "list", extraFilter, currentPage],
+    queryFn: () => subscriberUseCases.search(extraFilter!, currentPage, DEFAULT_PAGE_SIZE),
     enabled: extraFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -80,33 +78,7 @@ export function UserListClient() {
     structuralSharing: false,
   });
 
-  const { data: moduleValues = [] } = useQuery({
-    queryKey: ["admin-access-attribute-value", "module"],
-    queryFn: () => accessAttributeValueUseCases.listByKey("module"),
-    staleTime: Infinity,
-  });
-
-  const { data: teamsRaw } = useQuery({
-    queryKey: ["admin-team", "list-all"],
-    queryFn: () => teamUseCases.listAll(),
-    staleTime: Infinity,
-  });
-  // ?? [] 인라인 시 매 렌더 새 참조 → useMemo 안정화
-  const teams = useMemo(() => teamsRaw ?? [], [teamsRaw]);
-
-  const { data: subscribersRaw } = useQuery({
-    queryKey: ["admin-subscriber", "list-all"],
-    queryFn: () => subscriberUseCases.listAll(),
-    staleTime: Infinity,
-  });
-  const subscribers = useMemo(() => subscribersRaw ?? [], [subscribersRaw]);
-
-  const moduleValueOptions = useMemo(
-    () => moduleValues.map((v) => ({ value: v.value, label: v.label ?? v.value })),
-    [moduleValues],
-  );
-
-  const originalRows = useMemo<UserFormRow[]>(
+  const originalRows = useMemo<SubscriberFormRow[]>(
     () => (data?.content ?? []).map(toFormRow),
     [data],
   );
@@ -116,54 +88,15 @@ export function UserListClient() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalRows]);
 
-  useEffect(() => {
-    function handlePaste(e: ClipboardEvent) {
-      const active = document.activeElement as HTMLElement | null;
-      const td = active?.closest("td[data-row-key][data-col-key]") as HTMLElement | null;
-      if (!td) return;
-
-      const text = e.clipboardData?.getData("text/plain");
-      if (!text) return;
-
-      const rows = getValues("rows");
-      const startRowKey = td.dataset.rowKey!;
-      const startColKey = td.dataset.colKey!;
-      const startRowIdx = rows.findIndex((r) => String(r.entityId) === startRowKey);
-      const startColIdx = PASTE_COLS.indexOf(startColKey as typeof PASTE_COLS[number]);
-      if (startRowIdx === -1 || startColIdx === -1) return;
-
-      e.preventDefault();
-      const pastedRows = text.split(/\r?\n/).filter((l) => l.length > 0).map((l) => l.split("\t"));
-
-      for (let ri = 0; ri < pastedRows.length; ri++) {
-        const rowIdx = startRowIdx + ri;
-        if (rowIdx >= rows.length) break;
-        for (let ci = 0; ci < pastedRows[ri].length; ci++) {
-          const colIdx = startColIdx + ci;
-          if (colIdx >= PASTE_COLS.length) break;
-          const col = PASTE_COLS[colIdx];
-          const val = pastedRows[ri][ci];
-          if (col === "active") {
-            setValue(`rows.${rowIdx}.active`, val === "true" || val === "Active", { shouldDirty: true });
-          } else {
-            setValue(`rows.${rowIdx}.${col}`, val, { shouldDirty: true });
-          }
-        }
-      }
-    }
-
-    document.addEventListener("paste", handlePaste);
-    return () => document.removeEventListener("paste", handlePaste);
-  }, [getValues, setValue]);
+  useSubscriberGridPaste(getValues, setValue);
 
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
-  const [presetTargetUserId, setPresetTargetUserId] = useState<number | null>(null);
+  const [subscriptionTargetId, setSubscriptionTargetId] = useState<number | null>(null);
 
-  const handleUsernameDoubleClick = useCallback((entityId: number) => {
-    // 신규 행(entityId < 0)은 아직 저장되지 않았으므로 preset 노출 대상 제외
+  const handleCodeDoubleClick = useCallback((entityId: number) => {
+    // 신규 행(entityId < 0)은 아직 저장되지 않았으므로 구독 섹션 노출 대상 제외
     if (entityId < 0) return;
-    // 더블클릭은 열기 전용 — 닫기 트리거는 Reset/Search/Save 버튼
-    setPresetTargetUserId(entityId);
+    setSubscriptionTargetId(entityId);
   }, []);
 
   const pendingFocusRef = useRef<number | null>(null);
@@ -172,15 +105,15 @@ export function UserListClient() {
     const id = -Date.now();
     append({
       entityId: id,
-      username: "",
+      subscriberCode: "",
+      name: "",
+      nameEn: "",
+      businessNo: "",
+      representative: "",
+      phone: "",
       email: "",
-      password: "",
-      role: "USER",
-      modules: "",
+      memo: "",
       active: true,
-      teamId: null,
-      subscriberId: null,
-      _originalAttributes: {},
     });
     pendingFocusRef.current = id;
   }
@@ -191,7 +124,7 @@ export function UserListClient() {
     pendingFocusRef.current = null;
     requestAnimationFrame(() => {
       const td = document.querySelector(
-        `td[data-row-key="${key}"][data-col-key="username"]`,
+        `td[data-row-key="${key}"][data-col-key="subscriberCode"]`,
       ) as HTMLElement | null;
       const input = td?.querySelector("input:not([type=hidden])") as HTMLInputElement | null;
       input?.focus();
@@ -209,7 +142,7 @@ export function UserListClient() {
     setSelectedKeys(new Set());
   }
 
-  const invalidateList = () => qc.invalidateQueries({ queryKey: ["admin-user", "list"] });
+  const invalidateList = () => qc.invalidateQueries({ queryKey: ["admin-subscriber", "list"] });
 
   const saveChangesMutation = useMutation({
     mutationFn: () => {
@@ -220,7 +153,7 @@ export function UserListClient() {
         toUpdate: TO_UPDATE,
         isEqual: ROW_IS_EQUAL,
       });
-      return userUseCases.saveChanges({
+      return subscriberUseCases.saveChanges({
         creates: changes.creates,
         updates: changes.updates,
         deleteIds: changes.deleteIds,
@@ -234,14 +167,14 @@ export function UserListClient() {
           deleted: result.deletedCount,
         }),
       );
-      setPresetTargetUserId(null);
+      setSubscriptionTargetId(null);
       invalidateList();
     },
   });
 
   const columns = useMemo(
-    () => buildUserColumns(register, control, moduleValueOptions, tCols, tOptions, handleUsernameDoubleClick, teams, subscribers),
-    [register, control, moduleValueOptions, tCols, tOptions, handleUsernameDoubleClick, teams, subscribers],
+    () => buildSubscriberColumns(register, control, tCols, tOptions, handleCodeDoubleClick),
+    [register, control, tCols, tOptions, handleCodeDoubleClick],
   );
 
   const totalPages = data?.totalPages ?? 0;
@@ -250,32 +183,32 @@ export function UserListClient() {
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_ADMIN_USER_LIST_RESET"
+          buttonCode="BTN_ADMIN_SUBSCRIBER_LIST_RESET"
           className="btn btn--normal btn--sm"
           onClick={() => {
             filterForm.reset(DEFAULT_FILTER);
             invalidateList();
             setExtraFilter(null);
             setCurrentPage(1);
-            setPresetTargetUserId(null);
+            setSubscriptionTargetId(null);
           }}
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
         />
         <ActionButton
-          buttonCode="BTN_ADMIN_USER_LIST_SEARCH"
+          buttonCode="BTN_ADMIN_SUBSCRIBER_LIST_SEARCH"
           className="btn btn--search btn--sm"
           onClick={() =>
             filterForm.handleSubmit((values) => {
               invalidateList();
               setExtraFilter(values);
               setCurrentPage(1);
-              setPresetTargetUserId(null);
+              setSubscriptionTargetId(null);
             })()
           }
           icon={<Search size={12} style={{ marginRight: 4 }} />}
         />
         <ActionButton
-          buttonCode="BTN_ADMIN_USER_LIST_SAVE"
+          buttonCode="BTN_ADMIN_SUBSCRIBER_LIST_SAVE"
           className="btn btn--transaction btn--sm"
           disabled={!isDirty || saveChangesMutation.isPending}
           onClick={() => saveChangesMutation.mutate()}
@@ -283,7 +216,7 @@ export function UserListClient() {
         />
       </div>
 
-      <UserListFilter form={filterForm} />
+      <SubscriberListFilter form={filterForm} />
 
       <div
         className="panel"
@@ -310,11 +243,11 @@ export function UserListClient() {
         </div>
 
         <div className="list-wrap">
-          <GridList<UserFormRow>
+          <GridList<SubscriberFormRow>
             columns={columns}
-            data={fields as unknown as UserFormRow[]}
+            data={fields as unknown as SubscriberFormRow[]}
             rowKey={(row) => row.entityId}
-            rowClassName={(row) => getUserRowClassName(row, originalRows)}
+            rowClassName={(row) => getSubscriberRowClassName(row, originalRows)}
             isLoading={isFetching}
             emptyMessage={
               extraFilter === null
@@ -335,9 +268,15 @@ export function UserListClient() {
         />
       </div>
 
-      {presetTargetUserId !== null && (() => {
-        const userRow = data?.content.find((r) => r.id === presetTargetUserId);
-        return <UserPermissionPresetsSection key={presetTargetUserId} userId={presetTargetUserId} username={userRow?.username} />;
+      {subscriptionTargetId !== null && (() => {
+        const row = data?.content.find((r) => r.id === subscriptionTargetId);
+        return (
+          <SubscriberSubscriptionSection
+            key={subscriptionTargetId}
+            subscriberId={subscriptionTargetId}
+            subscriberCode={row?.subscriberCode}
+          />
+        );
       })()}
     </>
   );

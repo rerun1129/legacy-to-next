@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { authUseCases } from "@/application/auth/use-cases";
+import { ApiError } from "@/adapter/out/api/errors";
 import { setSession, firstAccessibleRoute } from "@/lib/admin-session";
 import type { AdminSession } from "@/lib/admin-session";
 import { toast } from "@/lib/toast-store";
@@ -47,6 +48,11 @@ export default function LoginPage() {
       setSession(session);
       router.replace(target);
     } catch (e) {
+      if (e instanceof ApiError && e.errorCode === "SUBSCRIPTION_EXPIRED") {
+        toast.error("구독 기간이 만료하였으므로 사용이 불가능합니다.");
+        setError("subscription-expired");
+        return;
+      }
       const status = (e as { statusCode?: number })?.statusCode;
       if (status === 401 || status === 403) {
         toast.error("로그인 실패: 사용자 또는 비밀번호가 올바르지 않습니다.");
@@ -115,7 +121,11 @@ export default function LoginPage() {
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
         {error && <span style={{ color: "var(--danger, #dc2626)", fontSize: 12 }}>
-          {error === "no-access" ? "접근 가능한 페이지가 없습니다." : "로그인에 실패했습니다."}
+          {error === "no-access"
+            ? "접근 가능한 페이지가 없습니다."
+            : error === "subscription-expired"
+            ? "구독 기간이 만료하였으므로 사용이 불가능합니다."
+            : "로그인에 실패했습니다."}
         </span>}
       </form>
     </div>

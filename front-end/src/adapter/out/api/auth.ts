@@ -46,7 +46,17 @@ async function postJson(path: string, body: unknown, authHeader?: string): Promi
   } catch (e) {
     throw new ApiError("Network error", undefined, e);
   }
-  if (!res.ok) throw new ApiError(`HTTP ${res.status}`, res.status);
+  if (!res.ok) {
+    const isProblem = res.headers.get("content-type")?.includes("application/problem+json")
+      || res.headers.get("content-type")?.includes("application/json");
+    if (isProblem) {
+      const pd = await res.json().catch(() => null) as
+        | { type?: string; title?: string; detail?: string; status?: number; errorCode?: string }
+        | null;
+      throw new ApiError(pd?.detail ?? pd?.title ?? `HTTP ${res.status}`, res.status, pd, pd?.errorCode, pd?.detail);
+    }
+    throw new ApiError(`HTTP ${res.status}`, res.status);
+  }
   if (res.status === 204 || res.headers.get("content-length") === "0") return null;
   try {
     return await res.json();
