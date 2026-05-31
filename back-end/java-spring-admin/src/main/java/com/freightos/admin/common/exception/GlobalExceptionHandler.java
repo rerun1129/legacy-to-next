@@ -44,6 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setType(URI.create(TYPE_BASE + ex.getErrorCode()));
         pd.setTitle(ex.getStatus().getReasonPhrase());
         pd.setDetail(ex.getMessage());
+        pd.setProperty("errorCode", ex.getErrorCode());
         return ResponseEntity.status(ex.getStatus())
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(pd);

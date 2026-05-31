@@ -19,7 +19,8 @@ public class UserFactory {
                 passwordEncoder.encode(command.rawPassword()),
                 command.active(),
                 command.attributes(),
-                command.teamId()
+                command.teamId(),
+                command.subscriberId()
         );
     }
 

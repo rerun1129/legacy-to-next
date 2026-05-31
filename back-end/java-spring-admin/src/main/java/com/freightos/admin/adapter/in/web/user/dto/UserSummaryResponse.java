@@ -12,5 +12,6 @@ public record UserSummaryResponse(
         LocalDateTime deletedAt,
         LocalDateTime updatedAt,
         Map<String, List<String>> attributes,
-        Long teamId
+        Long teamId,
+        Long subscriberId
 ) {}

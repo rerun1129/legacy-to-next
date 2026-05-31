@@ -5,6 +5,7 @@ import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
 import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
+import com.freightos.admin.application.auth.port.out.SubscriptionQueryPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
@@ -20,11 +21,14 @@ import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +47,8 @@ public class AuthService implements AuthUseCase {
     private final MenuPolicyPort menuPolicyPort;
     private final ButtonPolicyPort buttonPolicyPort;
     private final ComputeEffectiveAttributeValuesService effectiveAttributesService;
+    private final SubscriptionQueryPort subscriptionQueryPort;
+    private final Clock clock;
 
     @Override
     @Transactional
@@ -59,6 +65,7 @@ public class AuthService implements AuthUseCase {
         if (!user.isActive()) {
             throw new BadCredentialsException("비활성 사용자입니다.");
         }
+        verifySubscriptionOrThrow(user);
 
         // direct ∪ active preset attribute_value union
         Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
@@ -92,6 +99,7 @@ public class AuthService implements AuthUseCase {
         if (!user.isActive()) {
             throw new BadCredentialsException("비활성 사용자입니다.");
         }
+        verifySubscriptionOrThrow(user);
 
         // direct ∪ active preset attribute_value union
         Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
@@ -122,6 +130,7 @@ public class AuthService implements AuthUseCase {
     @Override
     public MeProjection getMe(String username) {
         AdminUser user = userUseCase.findUserByUsername(username);
+        verifySubscriptionOrThrow(user);
         // direct ∪ active preset attribute_value union
         Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
         Set<String> accessibleMenus = evaluateMenus(attrs);
@@ -135,6 +144,21 @@ public class AuthService implements AuthUseCase {
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
                 accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label(), ab.labelEn())).toList()
         );
+    }
+
+    /**
+     * 유저의 module 권한과 소속 고객사 유효 구독 교집합이 없으면 FORBIDDEN 예외를 던진다.
+     * module 권한 자체가 없으면 안전망으로 통과시킨다.
+     */
+    private void verifySubscriptionOrThrow(AdminUser user) {
+        List<String> modules = user.getAttributes().getOrDefault("module", List.of());
+        if (modules.isEmpty()) {
+            return;
+        }
+        Set<String> valid = subscriptionQueryPort.findValidModuleCodes(user.getSubscriberId(), LocalDate.now(clock));
+        if (modules.stream().noneMatch(valid::contains)) {
+            throw new ApplicationException(HttpStatus.FORBIDDEN, "SUBSCRIPTION_EXPIRED", "구독 기간이 만료하였으므로 사용이 불가능합니다.");
+        }
     }
 
     private Set<String> evaluateMenus(Map<String, List<String>> attrs) {

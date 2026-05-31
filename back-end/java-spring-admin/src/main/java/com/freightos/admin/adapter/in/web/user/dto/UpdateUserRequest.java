@@ -12,5 +12,6 @@ public record UpdateUserRequest(
         @Size(min = 8, max = 100) String password,
         @NotNull Boolean active,
         @NotNull Map<String, List<String>> attributes,
-        Long teamId
+        Long teamId,
+        Long subscriberId
 ) {}

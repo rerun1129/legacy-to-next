@@ -26,6 +26,7 @@ public class UserDomainToJpaMapper {
         entity.setDeletedAt(domain.getDeletedAt());
         entity.setAttributes(serializeAttributes(domain.getAttributes()));
         entity.setTeamId(domain.getTeamId());
+        entity.setSubscriberId(domain.getSubscriberId());
         return entity;
     }
 
@@ -38,6 +39,7 @@ public class UserDomainToJpaMapper {
         entity.setActive(patch.isActive());
         entity.setAttributes(serializeAttributes(patch.getAttributes()));
         entity.setTeamId(patch.getTeamId());
+        entity.setSubscriberId(patch.getSubscriberId());
         if (patch.getPasswordHash() != null) {
             entity.setPasswordHash(patch.getPasswordHash());
         }

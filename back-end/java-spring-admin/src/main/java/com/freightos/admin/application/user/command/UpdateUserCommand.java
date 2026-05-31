@@ -8,5 +8,6 @@ public record UpdateUserCommand(
         String rawPasswordOrNull,
         boolean active,
         Map<String, List<String>> attributes,
-        Long teamId
+        Long teamId,
+        Long subscriberId
 ) {}

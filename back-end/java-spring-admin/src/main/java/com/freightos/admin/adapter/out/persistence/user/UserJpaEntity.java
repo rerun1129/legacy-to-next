@@ -48,4 +48,7 @@ public class UserJpaEntity extends BaseJpaEntity {
 
     @Column(name = "team_id")
     private Long teamId;
+
+    @Column(name = "subscriber_id")
+    private Long subscriberId;
 }

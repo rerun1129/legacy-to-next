@@ -3,6 +3,7 @@ package com.freightos.admin.application.auth;
 import com.freightos.admin.application.auth.command.LoginCommand;
 import com.freightos.admin.application.auth.command.LogoutCommand;
 import com.freightos.admin.application.auth.command.RefreshCommand;
+import com.freightos.admin.application.auth.port.out.SubscriptionQueryPort;
 import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
 import com.freightos.admin.common.security.AccessibleButton;
 import com.freightos.admin.common.security.ButtonEvalRow;
@@ -17,16 +18,19 @@ import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
@@ -70,15 +76,38 @@ class AuthServiceTest {
     @Mock
     private ComputeEffectiveAttributeValuesService effectiveAttributesService;
 
-    @InjectMocks
+    @Mock
+    private SubscriptionQueryPort subscriptionQueryPort;
+
     private AuthService authService;
+
+    // 고정 시각: 2026-05-31 UTC — 구독 검증 시 비결정적 시간 의존 제거(T1)
+    private static final Clock FIXED_CLOCK = Clock.fixed(Instant.parse("2026-05-31T00:00:00Z"), ZoneOffset.UTC);
+    private static final LocalDate TODAY = LocalDate.of(2026, 5, 31);
+
+    @BeforeEach
+    void setUp() {
+        // @InjectMocks 대신 수동 조립 — Clock 고정이 필요하므로 생성자 직접 호출
+        authService = new AuthService(
+                userUseCase,
+                passwordEncoder,
+                jwtTokenProvider,
+                refreshTokenPort,
+                policyEvaluator,
+                menuPolicyPort,
+                buttonPolicyPort,
+                effectiveAttributesService,
+                subscriptionQueryPort,
+                FIXED_CLOCK
+        );
+    }
 
     // ── login: 정상 → LoginResult 반환, refresh save 호출 ──────────────────────
 
     @Test
     void login_validCredentials_returnsLoginResult() {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -101,7 +130,7 @@ class AuthServiceTest {
         assertThat(result.user()).isSameAs(user);
         assertThat(result.accessibleMenus()).contains("MENU_ADMIN_CODE_LIST");
 
-        ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
+        org.mockito.ArgumentCaptor<RefreshToken> tokenCaptor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
         then(refreshTokenPort).should().save(tokenCaptor.capture());
         assertThat(tokenCaptor.getValue().getTokenHash()).isEqualTo("hashedRefresh");
     }
@@ -110,7 +139,7 @@ class AuthServiceTest {
 
     @Test
     void login_wrongPassword_throwsBadCredentials() {
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -135,7 +164,7 @@ class AuthServiceTest {
 
     @Test
     void login_inactiveUser_throwsBadCredentials() {
-        AdminUser inactiveUser = AdminUser.create("bob", "bob@example.com", "hashedPw", false, Collections.emptyMap(), null);
+        AdminUser inactiveUser = AdminUser.create("bob", "bob@example.com", "hashedPw", false, Collections.emptyMap(), null, null);
         inactiveUser.assignIdentity(2L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("bob")).willReturn(inactiveUser);
@@ -151,7 +180,7 @@ class AuthServiceTest {
     @Test
     void refresh_validToken_revokesOldAndIssuesNew() {
         RefreshToken oldToken = RefreshToken.issue(1L, "oldHash", LocalDateTime.now().plusDays(7));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
@@ -204,7 +233,7 @@ class AuthServiceTest {
     @Test
     void getMe_returnsProjectionWithAccessibleMenusAndButtons() {
         Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null);
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -219,10 +248,136 @@ class AuthServiceTest {
         MeProjection projection = authService.getMe("admin");
 
         assertThat(projection.username()).isEqualTo("admin");
-        // role 필드는 MeProjection에서 제거됨 — attributes에서 확인
         assertThat(projection.attributes().get("role")).contains("ADMIN");
         assertThat(projection.accessibleMenus()).contains("MENU_ADMIN_USER_LIST");
         assertThat(projection.accessibleButtons().stream().map(AccessibleButton::code).toList())
             .contains("BTN_ADMIN_USER_LIST_CREATE");
+    }
+
+    // ── 구독 만료 신규 케이스들 ─────────────────────────────────────────────────
+
+    // ① login_subscriptionExpired: module=["FMS"], valid={} → SUBSCRIPTION_EXPIRED
+
+    @Test
+    void login_subscriptionExpired_throwsForbidden() {
+        Map<String, List<String>> attrs = Map.of("module", List.of("FMS"));
+        AdminUser user = AdminUser.create("fms", "fms@example.com", "hashedPw", true, attrs, null, 42L);
+        user.assignIdentity(10L, null, null, null, null);
+
+        given(userUseCase.findUserByUsername("fms")).willReturn(user);
+        given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
+        given(subscriptionQueryPort.findValidModuleCodes(eq(42L), eq(TODAY))).willReturn(Set.of());
+
+        assertThatThrownBy(() -> authService.login(new LoginCommand("fms", "rawPw")))
+            .isInstanceOf(ApplicationException.class)
+            .satisfies(ex -> {
+                ApplicationException appEx = (ApplicationException) ex;
+                assertThat(appEx.getErrorCode()).isEqualTo("SUBSCRIPTION_EXPIRED");
+                assertThat(appEx.getStatus()).isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN);
+            });
+    }
+
+    // ② login_subscriptionValid: module=["FMS"], valid={"FMS"} → 통과
+
+    @Test
+    void login_subscriptionValid_passes() {
+        Map<String, List<String>> attrs = Map.of("module", List.of("FMS"));
+        AdminUser user = AdminUser.create("fms", "fms@example.com", "hashedPw", true, attrs, null, 42L);
+        user.assignIdentity(10L, null, null, null, null);
+
+        given(userUseCase.findUserByUsername("fms")).willReturn(user);
+        given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
+        given(subscriptionQueryPort.findValidModuleCodes(eq(42L), eq(TODAY))).willReturn(Set.of("FMS"));
+        given(effectiveAttributesService.computeEffectiveAttributes(10L, attrs)).willReturn(attrs);
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
+        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("tok");
+        given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
+        given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
+        given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
+        willDoNothing().given(refreshTokenPort).save(any());
+
+        LoginResult result = authService.login(new LoginCommand("fms", "rawPw"));
+
+        assertThat(result.accessToken()).isEqualTo("tok");
+    }
+
+    // ③ login_noModule: module 키 없음 → 안전망, subscriptionQueryPort 미호출
+
+    @Test
+    void login_noModule_passesWithoutSubscriptionCheck() {
+        Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null, null);
+        user.assignIdentity(1L, null, null, null, null);
+
+        given(userUseCase.findUserByUsername("admin")).willReturn(user);
+        given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
+        given(effectiveAttributesService.computeEffectiveAttributes(1L, attrs)).willReturn(attrs);
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
+        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("tok");
+        given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
+        given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
+        given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
+        willDoNothing().given(refreshTokenPort).save(any());
+
+        authService.login(new LoginCommand("admin", "rawPw"));
+
+        // module 권한 없으면 포트 호출 없음
+        then(subscriptionQueryPort).shouldHaveNoInteractions();
+    }
+
+    // ④ login_partialOverlap: module=["ADMIN","FMS"], valid={"FMS"} → 통과
+
+    @Test
+    void login_partialOverlap_passes() {
+        Map<String, List<String>> attrs = Map.of("module", List.of("ADMIN", "FMS"));
+        AdminUser user = AdminUser.create("combo", "combo@example.com", "hashedPw", true, attrs, null, 42L);
+        user.assignIdentity(11L, null, null, null, null);
+
+        given(userUseCase.findUserByUsername("combo")).willReturn(user);
+        given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
+        given(subscriptionQueryPort.findValidModuleCodes(eq(42L), eq(TODAY))).willReturn(Set.of("FMS"));
+        given(effectiveAttributesService.computeEffectiveAttributes(11L, attrs)).willReturn(attrs);
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
+        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("tok");
+        given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
+        given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
+        given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
+        willDoNothing().given(refreshTokenPort).save(any());
+
+        LoginResult result = authService.login(new LoginCommand("combo", "rawPw"));
+
+        assertThat(result.accessToken()).isEqualTo("tok");
+    }
+
+    // ⑤ refresh_subscriptionExpired: refresh 시 구독 만료 → SUBSCRIPTION_EXPIRED
+
+    @Test
+    void refresh_subscriptionExpired_throwsForbidden() {
+        RefreshToken oldToken = RefreshToken.issue(10L, "oldHash", LocalDateTime.now().plusDays(7));
+        Map<String, List<String>> attrs = Map.of("module", List.of("FMS"));
+        AdminUser user = AdminUser.create("fms", "fms@example.com", "hashedPw", true, attrs, null, 42L);
+        user.assignIdentity(10L, null, null, null, null);
+
+        given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
+        given(refreshTokenPort.findActiveByTokenHash("oldHash")).willReturn(Optional.of(oldToken));
+        willDoNothing().given(refreshTokenPort).revokeByTokenHash("oldHash");
+        given(userUseCase.findUserById(10L)).willReturn(user);
+        given(subscriptionQueryPort.findValidModuleCodes(eq(42L), eq(TODAY))).willReturn(Set.of());
+
+        assertThatThrownBy(() -> authService.refresh(new RefreshCommand("rawOld")))
+            .isInstanceOf(ApplicationException.class)
+            .satisfies(ex -> {
+                ApplicationException appEx = (ApplicationException) ex;
+                assertThat(appEx.getErrorCode()).isEqualTo("SUBSCRIPTION_EXPIRED");
+            });
     }
 }

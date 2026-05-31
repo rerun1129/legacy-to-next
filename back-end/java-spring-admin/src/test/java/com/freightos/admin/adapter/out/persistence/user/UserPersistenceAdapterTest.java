@@ -49,7 +49,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void save_thenFindById_fieldsMatch() {
-        AdminUser user = AdminUser.create("alice", "alice@example.com", "hashed_pw", true, ATTRS_USER, null);
+        AdminUser user = AdminUser.create("alice", "alice@example.com", "hashed_pw", true, ATTRS_USER, null, null);
 
         Long id = adapter.save(user);
 
@@ -69,7 +69,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void findByUsername_deletedUserExcluded() {
-        AdminUser user = AdminUser.create("bob", "bob@example.com", "hashed_pw", true, ATTRS_USER, null);
+        AdminUser user = AdminUser.create("bob", "bob@example.com", "hashed_pw", true, ATTRS_USER, null, null);
         Long id = adapter.save(user);
 
         // soft delete 수행
@@ -84,7 +84,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void softDelete_thenFindByUsername_returnsEmpty() {
-        AdminUser user = AdminUser.create("carol", null, "hashed_pw", true, ATTRS_ADMIN, null);
+        AdminUser user = AdminUser.create("carol", null, "hashed_pw", true, ATTRS_ADMIN, null, null);
         Long id = adapter.save(user);
 
         adapter.softDelete(id);
@@ -97,7 +97,7 @@ class UserPersistenceAdapterTest {
 
     @Test
     void findById_softDeletedUser_returnsDomain() {
-        AdminUser user = AdminUser.create("carol2", null, "hashed_pw", true, ATTRS_ADMIN, null);
+        AdminUser user = AdminUser.create("carol2", null, "hashed_pw", true, ATTRS_ADMIN, null, null);
         Long id = adapter.save(user);
 
         adapter.softDelete(id);
@@ -113,9 +113,9 @@ class UserPersistenceAdapterTest {
 
     @Test
     void searchSummaries_filterAndPage() {
-        adapter.save(AdminUser.create("alice", "alice@example.com", "h1", true, ATTRS_USER, null));
-        adapter.save(AdminUser.create("adam", "adam@example.com", "h2", true, ATTRS_ADMIN, null));
-        adapter.save(AdminUser.create("bob", "bob@example.com", "h3", false, ATTRS_USER, null));
+        adapter.save(AdminUser.create("alice", "alice@example.com", "h1", true, ATTRS_USER, null, null));
+        adapter.save(AdminUser.create("adam", "adam@example.com", "h2", true, ATTRS_ADMIN, null, null));
+        adapter.save(AdminUser.create("bob", "bob@example.com", "h3", false, ATTRS_USER, null, null));
 
         // username 앞일치 "a" 필터
         SearchUserCommand command = new SearchUserCommand("a", UserScope.ALL, 0, 20);
@@ -131,9 +131,9 @@ class UserPersistenceAdapterTest {
 
     @Test
     void countActiveAdmins_returnsCorrectCount() {
-        adapter.save(AdminUser.create("admin1", null, "h1", true, ATTRS_ADMIN, null));
-        adapter.save(AdminUser.create("admin2", null, "h2", true, ATTRS_ADMIN, null));
-        adapter.save(AdminUser.create("admin3", null, "h3", false, ATTRS_ADMIN, null));
+        adapter.save(AdminUser.create("admin1", null, "h1", true, ATTRS_ADMIN, null, null));
+        adapter.save(AdminUser.create("admin2", null, "h2", true, ATTRS_ADMIN, null, null));
+        adapter.save(AdminUser.create("admin3", null, "h3", false, ATTRS_ADMIN, null, null));
 
         long activeCount = adapter.countActiveAdmins();
 
@@ -145,8 +145,8 @@ class UserPersistenceAdapterTest {
 
     @Test
     void searchSummaries_scopeDeleted_returnsOnlySoftDeleted() {
-        adapter.save(AdminUser.create("scopeAdmin", "sa@example.com", "h1", true, ATTRS_ADMIN, null));
-        Long testerId = adapter.save(AdminUser.create("scopeTester", "st@example.com", "h2", true, ATTRS_USER, null));
+        adapter.save(AdminUser.create("scopeAdmin", "sa@example.com", "h1", true, ATTRS_ADMIN, null, null));
+        Long testerId = adapter.save(AdminUser.create("scopeTester", "st@example.com", "h2", true, ATTRS_USER, null, null));
 
         // tester만 soft delete
         adapter.softDelete(testerId);
@@ -173,11 +173,11 @@ class UserPersistenceAdapterTest {
 
     @Test
     void update_attributes_persisted() {
-        AdminUser user = AdminUser.create("updatetest", null, "hashed", true, ATTRS_USER, null);
+        AdminUser user = AdminUser.create("updatetest", null, "hashed", true, ATTRS_USER, null, null);
         Long id = adapter.save(user);
 
         AdminUser existing = adapter.findById(id).orElseThrow();
-        existing.applyUpdate(null, null, true, ATTRS_ADMIN, null);
+        existing.applyUpdate(null, null, true, ATTRS_ADMIN, null, null);
         adapter.update(id, existing);
 
         AdminUser updated = adapter.findById(id).orElseThrow();

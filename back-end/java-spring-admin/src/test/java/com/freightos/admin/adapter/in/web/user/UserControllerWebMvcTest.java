@@ -85,7 +85,7 @@ class UserControllerWebMvcTest {
     void search_authenticated_returns200() throws Exception {
         UserSummaryResponse summaryResponse = new UserSummaryResponse(
                 1L, "alice", "alice@example.com", true,
-                null, LocalDateTime.of(2024, 1, 1, 0, 0), Map.of(), null);
+                null, LocalDateTime.of(2024, 1, 1, 0, 0), Map.of(), null, null);
         PagedResult<UserSummary> summaryPage = PagedResult.of(List.of(), 1L, 1, 0, 20);
         PagedResult<UserSummaryResponse> responsePage = PagedResult.of(List.of(summaryResponse), 1L, 1, 0, 20);
 
@@ -110,11 +110,11 @@ class UserControllerWebMvcTest {
     void create_returns201WithLocationAndId() throws Exception {
         Map<String, List<String>> attrsUser = Map.of("role", List.of("USER"));
         given(userAssembler.toCreateCommand(any())).willReturn(
-                new CreateUserCommand("alice", "alice@example.com", "pass1234", true, attrsUser, null));
+                new CreateUserCommand("alice", "alice@example.com", "pass1234", true, attrsUser, null, null));
         given(userUseCase.createUser(any())).willReturn(42L);
 
         CreateUserRequest req = new CreateUserRequest("alice", "alice@example.com", "pass1234",
-                Boolean.TRUE, attrsUser, null);
+                Boolean.TRUE, attrsUser, null, null);
 
         mockMvc.perform(post("/api/admin/user")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -174,7 +174,7 @@ class UserControllerWebMvcTest {
                 1L, "alice", "alice@example.com", true, null, attrsUser,
                 LocalDateTime.of(2024, 1, 1, 0, 0),
                 LocalDateTime.of(2024, 1, 2, 0, 0),
-                "admin", "admin", null);
+                "admin", "admin", null, null);
 
         given(userUseCase.findUserById(1L)).willReturn(null);
         given(userAssembler.toDetail(any())).willReturn(detail);

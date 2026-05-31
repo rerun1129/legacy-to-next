@@ -22,14 +22,14 @@ public class UserJpaToDomainMapper {
 
     public AdminUser toDomain(UserJpaEntity e) {
         AdminUser domain = AdminUser.create(
-                e.getUsername(), e.getEmail(), e.getPasswordHash(), e.getActive(), parseAttributes(e.getAttributes()), e.getTeamId());
+                e.getUsername(), e.getEmail(), e.getPasswordHash(), e.getActive(), parseAttributes(e.getAttributes()), e.getTeamId(), e.getSubscriberId());
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         domain.assignDeletedAt(e.getDeletedAt());
         return domain;
     }
 
     public UserSummary toSummary(UserJpaEntity e) {
-        return new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt(), parseAttributesForSummary(e.getAttributes()), e.getTeamId());
+        return new UserSummary(e.getId(), e.getUsername(), e.getEmail(), e.getActive(), e.getDeletedAt(), e.getUpdatedAt(), parseAttributesForSummary(e.getAttributes()), e.getTeamId(), e.getSubscriberId());
     }
 
     /** UserRepositoryImpl에서 UserSummary 생성 시 attributes 파싱에 공유 사용 */

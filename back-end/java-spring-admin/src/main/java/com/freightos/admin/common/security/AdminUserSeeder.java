@@ -1,5 +1,6 @@
 package com.freightos.admin.common.security;
 
+import com.freightos.admin.adapter.out.persistence.subscriber.SubscriberRepository;
 import com.freightos.admin.adapter.out.persistence.team.TeamRepository;
 import com.freightos.admin.adapter.out.persistence.user.UserJpaEntity;
 import com.freightos.admin.adapter.out.persistence.user.UserRepository;
@@ -27,11 +28,17 @@ public class AdminUserSeeder implements ApplicationRunner {
 
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
+    private final SubscriberRepository subscriberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        // SELF 고객사 ID는 두 시드 모두 공통으로 사용하므로 한 번만 조회
+        Long selfSubscriberId = subscriberRepository.findBySubscriberCode("SELF")
+                .map(s -> s.getSubscriberId())
+                .orElse(null);
+
         if (userRepository.findByUsernameAndDeletedAtIsNull(ADMIN_USERNAME).isEmpty()) {
             Long strategyTeamId = teamRepository.findByTeamCode("STRATEGY")
                     .map(t -> t.getId())
@@ -43,6 +50,7 @@ public class AdminUserSeeder implements ApplicationRunner {
             entity.setActive(true);
             entity.setAttributes("{\"role\":[\"ADMIN\"],\"module\":[\"ADMIN\"]}");
             entity.setTeamId(strategyTeamId);
+            entity.setSubscriberId(selfSubscriberId);
             userRepository.save(entity);
             log.info("AdminUserSeeder: seeded '{}' user", ADMIN_USERNAME);
         }
@@ -57,6 +65,7 @@ public class AdminUserSeeder implements ApplicationRunner {
             fmsEntity.setActive(true);
             fmsEntity.setAttributes("{\"role\":[\"USER\"],\"module\":[\"FMS\"],\"fms_scope\":[\"SEA\",\"AIR\",\"TRUCK\",\"NON_BL\"]}");
             fmsEntity.setTeamId(salesTeamId);
+            fmsEntity.setSubscriberId(selfSubscriberId);
             userRepository.save(fmsEntity);
             log.info("AdminUserSeeder: seeded '{}' user", FMS_USERNAME);
         }

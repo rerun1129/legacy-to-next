@@ -12,7 +12,6 @@ import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.user.entity.AdminUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,15 +63,27 @@ class AuthServiceEffectiveAttributeTest {
     @Mock
     private ComputeEffectiveAttributeValuesService effectiveAttributesService;
 
-    @InjectMocks
+    @Mock
+    private com.freightos.admin.application.auth.port.out.SubscriptionQueryPort subscriptionQueryPort;
+
     private AuthService authService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        authService = new AuthService(
+                userUseCase, passwordEncoder, jwtTokenProvider, refreshTokenPort,
+                policyEvaluator, menuPolicyPort, buttonPolicyPort, effectiveAttributesService,
+                subscriptionQueryPort,
+                java.time.Clock.systemDefaultZone()
+        );
+    }
 
     // ── 직접 부여만 있는 경우: effective = directAttrs ────────────────────────
 
     @Test
     void login_directAttributesOnly_usesDirectAttrsAsEffective() {
         Map<String, List<String>> directAttrs = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "a@b.com", "hash", true, directAttrs, null);
+        AdminUser user = AdminUser.create("admin", "a@b.com", "hash", true, directAttrs, null, null);
         user.assignIdentity(1L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
@@ -102,7 +113,7 @@ class AuthServiceEffectiveAttributeTest {
         Map<String, List<String>> directAttrs = Collections.emptyMap();
         Map<String, List<String>> effectiveAttrs = Map.of("module", List.of("FMS"));
 
-        AdminUser user = AdminUser.create("user2", "u@b.com", "hash", true, directAttrs, null);
+        AdminUser user = AdminUser.create("user2", "u@b.com", "hash", true, directAttrs, null, null);
         user.assignIdentity(2L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("user2")).willReturn(user);
@@ -131,7 +142,7 @@ class AuthServiceEffectiveAttributeTest {
         Map<String, List<String>> directAttrs = Map.of("role", List.of("ADMIN"));
         Map<String, List<String>> effectiveAttrs = Map.of("role", List.of("ADMIN"), "module", List.of("FMS"));
 
-        AdminUser user = AdminUser.create("combo", "c@b.com", "hash", true, directAttrs, null);
+        AdminUser user = AdminUser.create("combo", "c@b.com", "hash", true, directAttrs, null, null);
         user.assignIdentity(3L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("combo")).willReturn(user);
@@ -161,7 +172,7 @@ class AuthServiceEffectiveAttributeTest {
         Map<String, List<String>> directAttrs = Collections.emptyMap();
         Map<String, List<String>> effectiveAttrs = Collections.emptyMap();
 
-        AdminUser user = AdminUser.create("nobody", "n@b.com", "hash", true, directAttrs, null);
+        AdminUser user = AdminUser.create("nobody", "n@b.com", "hash", true, directAttrs, null, null);
         user.assignIdentity(4L, null, null, null, null);
 
         given(userUseCase.findUserByUsername("nobody")).willReturn(user);

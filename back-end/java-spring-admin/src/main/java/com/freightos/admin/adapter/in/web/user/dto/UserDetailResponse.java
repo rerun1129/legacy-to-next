@@ -16,5 +16,6 @@ public record UserDetailResponse(
         LocalDateTime updatedAt,
         String createdBy,
         String updatedBy,
-        Long teamId
+        Long teamId,
+        Long subscriberId
 ) {}
