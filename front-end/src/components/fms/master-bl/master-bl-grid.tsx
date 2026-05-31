@@ -13,7 +13,9 @@ import type { MasterBlRow, MasterBlFilter } from "@/domain/master-bl";
 import type { Bound } from "@/domain/house-bl";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
+import { Pagination } from "@/components/shared/pagination";
 import { getModeLabels } from "@/lib/bl-mode-labels";
+import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
 
 interface Props {
   variantKey: string;
@@ -28,14 +30,40 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const setFocus = useEntryFocusStore((s) => s.setFocus);
   const addTab = useTabs((s) => s.addTab);
   const [selected, setSelected] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const modeLabels = getModeLabels(variant.mode);
 
+  const handleCyclePageSize = () => {
+    setPageSize(cyclePageSize(pageSize));
+    setCurrentPage(1);
+  };
+
+  // 렌더 중 이전 값 비교 — variantKey/extraFilter 변경 시 currentPage를 1로 리셋
+  // (React "Adjusting state when a prop changes" 패턴, effect 내 setState 금지 규칙 준수)
+  const filterKey = JSON.stringify(extraFilter ?? {});
+  const [prevKeys, setPrevKeys] = useState({ variantKey, filterKey });
+  if (prevKeys.variantKey !== variantKey || prevKeys.filterKey !== filterKey) {
+    setPrevKeys({ variantKey, filterKey });
+    setCurrentPage(1);
+  }
+
   // TRUCK/NON_BL은 direction이 null이므로 해당 variant에서는 쿼리를 실행하지 않음
-  const { data: rows = [], isFetching, error } = useQuery({
-    queryKey: ["master-bl", "list", variantKey, extraFilter],
-    queryFn: () => masterBlPort.list({ bound: variant.direction as Bound, ...extraFilter }),
+  const { data, isFetching, error } = useQuery({
+    queryKey: ["master-bl", "list", variantKey, extraFilter, currentPage, pageSize],
+    queryFn: () => masterBlPort.list(
+      { bound: variant.direction as Bound, ...extraFilter },
+      currentPage,
+      pageSize,
+    ),
     enabled: variant.direction !== null,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
   });
+
+  const rows = data?.content ?? [];
+  const totalPages = data?.totalPages ?? 0;
 
   const columns: GridColumn<MasterBlRow>[] = [
     {
@@ -156,7 +184,7 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
       <div className="panel__head">
         <div className="panel__title-accent" />
         <span className="panel__title">Master B/L</span>
-        <span className="panel__rowcount">{rows.length}</span>
+        <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
         <ColumnVisibilityMenu<MasterBlRow> gridId="master-bl" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
@@ -171,6 +199,14 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
           scrollPositionKey={`list-scroll:master-bl:${variantKey}`}
         />
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        disabled={isFetching}
+        pageSize={pageSize}
+        onCyclePageSize={handleCyclePageSize}
+      />
     </div>
   );
 }

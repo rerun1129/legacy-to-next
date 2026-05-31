@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Minus, Save } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { GridList } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
 import { Button } from "@/components/shared/button";
@@ -46,7 +47,7 @@ export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
 
   const { data, isFetching } = useQuery({
     queryKey: ["admin-code-detail", "list", masterId, detailPage],
-    queryFn: () => codeDetailUseCases.search(masterId!, detailPage, 50),
+    queryFn: () => codeDetailUseCases.search(masterId!, detailPage, DEFAULT_PAGE_SIZE),
     enabled,
     staleTime: Infinity,
     gcTime: Infinity,

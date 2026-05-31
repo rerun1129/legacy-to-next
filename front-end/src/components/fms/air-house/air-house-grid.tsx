@@ -12,17 +12,16 @@ import { Pagination } from "@/components/shared/pagination";
 import { airHousePort } from "@/lib/ports";
 import { fmtDate, fmtWeight } from "@/lib/grid-formatters";
 import type { AirHouseRow, AirHouseFilter } from "@/domain/air-house";
-
 interface Props {
   extraFilter: AirHouseFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
-  showAll: boolean;
-  onToggleShowAll: () => void;
+  pageSize: number;
+  onCyclePageSize: () => void;
   bound: "EXP" | "IMP";
 }
 
-export function AirHouseGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll, bound }: Props) {
+export function AirHouseGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize, bound }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -30,11 +29,11 @@ export function AirHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["air-house", "list", bound, extraFilter, showAll ? "all" : currentPage],
+    queryKey: ["air-house", "list", bound, extraFilter, currentPage, pageSize],
     queryFn: () => airHousePort.list(
       { ...extraFilter!, bound },
-      showAll ? 1 : currentPage,
-      showAll ? 10000000 : 50,
+      currentPage,
+      pageSize,
     ),
     enabled: extraFilter !== null,
     staleTime: Infinity,
@@ -76,8 +75,8 @@ export function AirHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
     { key: "shipmentType",     label: "Shipment Type",            minWidth: 100 },
     { key: "etd",              label: "ETD",                      minWidth: 100, render: (v) => fmtDate(v) },
     { key: "eta",              label: "ETA",                      minWidth: 100, render: (v) => fmtDate(v) },
-    { key: "grossWeightKg",    label: "Gross W/T",                minWidth: 100, render: (v) => fmtWeight(v) },
-    { key: "chargeWeightKg",   label: "Charge W/T",               minWidth: 100, render: (v) => fmtWeight(v) },
+    { key: "grossWeightKg",    label: "Gross W/T",                minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "chargeWeightKg",   label: "Charge W/T",               minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
     { key: "pkgQty",           label: "Package",                  minWidth: 90,
       render: (v, row) => (v ? `${v} ${row.pkgUnit}`.trim() : '') },
     { key: "polCode",          label: "Departure",           minWidth: 100 },
@@ -144,8 +143,8 @@ export function AirHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
         totalPages={totalPages}
         onPageChange={onPageChange}
         disabled={isFetching}
-        showAll={showAll}
-        onToggleShowAll={onToggleShowAll}
+        pageSize={pageSize}
+        onCyclePageSize={onCyclePageSize}
       />
     </div>
   );

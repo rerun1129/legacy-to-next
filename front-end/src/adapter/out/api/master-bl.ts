@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import type { MasterBlPort } from '@/application/master-bl/ports';
+import type { MasterBlPort, MasterBlPageResult } from '@/application/master-bl/ports';
 import type { MasterBlRow, MasterBlDetail, MasterBlFilter, CreateMasterBlRequest, UpdateMasterBlRequest } from '@/domain/master-bl';
 import { ResponseParseError } from './errors';
 import { toSearchParams, fetchJson } from './utils';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 const MASTER_BL_BASE = '/api/master-bl';
 
@@ -198,11 +199,17 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
 export const API_MASTER_BL_PORT: MasterBlPort = {
-  async list(filter: MasterBlFilter): Promise<MasterBlRow[]> {
-    const json = await fetchJson(`${MASTER_BL_BASE}?${toSearchParams(filter as unknown as Record<string, unknown>)}`);
+  async list(filter: MasterBlFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<MasterBlPageResult> {
+    const params = toSearchParams({
+      ...(filter as unknown as Record<string, unknown>),
+      page: page - 1,
+      size,
+    });
+    const json = await fetchJson(`${MASTER_BL_BASE}?${params}`);
     const parsed = apiResponse(pagedResult(MASTER_BL_ROW_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid list response: ${parsed.error.message}`);
-    return parsed.data.data.content as unknown as MasterBlRow[];
+    const { content, totalPages, totalElements, page: p, size: s } = parsed.data.data;
+    return { content: content as unknown as MasterBlRow[], totalPages, totalElements, page: p + 1, size: s };
   },
 
   async getById(id: number): Promise<MasterBlDetail> {

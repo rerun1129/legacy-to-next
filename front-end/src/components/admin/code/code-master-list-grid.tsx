@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Minus, Save } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { GridList } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
 import { Button } from "@/components/shared/button";
@@ -49,7 +50,7 @@ export function CodeMasterListGrid({
 
   const { data, isFetching } = useQuery({
     queryKey: ["admin-code-master", "list", submittedFilter, masterPage],
-    queryFn: () => codeMasterUseCases.search(submittedFilter!, masterPage, 50),
+    queryFn: () => codeMasterUseCases.search(submittedFilter!, masterPage, DEFAULT_PAGE_SIZE),
     enabled: submittedFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,

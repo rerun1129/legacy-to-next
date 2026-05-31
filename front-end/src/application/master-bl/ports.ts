@@ -1,7 +1,15 @@
 import type { MasterBlRow, MasterBlFilter, MasterBlDetail, CreateMasterBlRequest, UpdateMasterBlRequest } from '@/domain/master-bl';
 
+export interface MasterBlPageResult {
+  content: MasterBlRow[];
+  totalPages: number;
+  totalElements: number;
+  page: number;
+  size: number;
+}
+
 export interface MasterBlPort {
-  list(filter: MasterBlFilter): Promise<MasterBlRow[]>;
+  list(filter: MasterBlFilter, page: number, size?: number): Promise<MasterBlPageResult>;
   getById(id: number): Promise<MasterBlDetail>;
   // §6.54 — create는 ID-only 반환 (BE Phase 3 정합)
   create(req: CreateMasterBlRequest): Promise<{ id: number }>;

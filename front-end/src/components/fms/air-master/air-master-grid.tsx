@@ -18,12 +18,12 @@ interface Props {
   extraFilter: AirMasterFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
-  showAll: boolean;
-  onToggleShowAll: () => void;
+  pageSize: number;
+  onCyclePageSize: () => void;
   bound: "EXP" | "IMP";
 }
 
-export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll, bound }: Props) {
+export function AirMasterGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize, bound }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -32,11 +32,11 @@ export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["air-master", "list", bound, extraFilter, showAll ? "all" : currentPage],
+    queryKey: ["air-master", "list", bound, extraFilter, currentPage, pageSize],
     queryFn: () => airMasterPort.list(
       { ...extraFilter!, bound },
-      showAll ? 1 : currentPage,
-      showAll ? 10000000 : 50,
+      currentPage,
+      pageSize,
     ),
     enabled: extraFilter !== null,
     staleTime: Infinity,
@@ -76,11 +76,11 @@ export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
     { key: "shipmentType",   label: "Shipment Type",        minWidth: 100 },
     { key: "etd",            label: "ETD",                  minWidth: 100, render: (v) => fmtDate(v) },
     { key: "eta",            label: "ETA",                  minWidth: 100, render: (v) => fmtDate(v) },
-    { key: "grossWeightKg",  label: "Gross W/T",            minWidth: 100, render: (v) => fmtWeight(v) },
-    { key: "chargeWeightKg", label: "Charge W/T",           minWidth: 100, render: (v) => fmtWeight(v) },
+    { key: "grossWeightKg",  label: "Gross W/T",            minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "chargeWeightKg", label: "Charge W/T",           minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
     { key: "pkgQty",         label: "Package",              minWidth: 90,
       render: (v, row) => (v ? `${v} ${row.pkgUnit}`.trim() : '') },
-    { key: "houseBlCount",   label: "House AWB Count",      minWidth: 120 },
+    { key: "houseBlCount",   label: "House AWB Count",      minWidth: 120, aggregate: "sum", aggregateDecimals: 0 },
     { key: "polCode",        label: "Departure",            minWidth: 90 },
     { key: "podCode",        label: "Destination",          minWidth: 100 },
     { key: "shipperCode",    label: "Shipper",              minWidth: 90 },
@@ -136,8 +136,8 @@ export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
         totalPages={totalPages}
         onPageChange={onPageChange}
         disabled={isFetching}
-        showAll={showAll}
-        onToggleShowAll={onToggleShowAll}
+        pageSize={pageSize}
+        onCyclePageSize={onCyclePageSize}
       />
     </div>
   );

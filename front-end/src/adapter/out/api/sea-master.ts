@@ -3,6 +3,7 @@ import type { SeaMasterPort, SeaMasterPageResult } from '@/application/sea-maste
 import type { SeaMasterRow, SeaMasterFilter } from '@/domain/sea-master';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 const SEA_MASTER_BASE = '/api/sea-master';
 
@@ -79,7 +80,7 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
 export const API_SEA_MASTER_PORT: SeaMasterPort = {
-  async list(filter: SeaMasterFilter, page: number, size = 50): Promise<SeaMasterPageResult> {
+  async list(filter: SeaMasterFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<SeaMasterPageResult> {
     const body: Record<string, unknown> = { page: page - 1, size };
     body.bound = filter.bound;
     body.dateKind = filter.dateKind;

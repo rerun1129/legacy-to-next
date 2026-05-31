@@ -1,6 +1,7 @@
-import type { MasterBlPort } from '@/application/master-bl/ports';
+import type { MasterBlPort, MasterBlPageResult } from '@/application/master-bl/ports';
 import type { MasterBlRow, MasterBlDetail, MasterBlFilter, CreateMasterBlRequest, UpdateMasterBlRequest } from '@/domain/master-bl';
 import { NotFoundError } from '@/adapter/out/api/errors';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 // Master B/L fixture data: basic rows for filter/search smoke test
 const masterBlRows: MasterBlRow[] = [
@@ -29,7 +30,7 @@ const seaDetailSample = {
 };
 
 export const mockMasterBlPort: MasterBlPort = {
-  async list(filter: MasterBlFilter): Promise<MasterBlRow[]> {
+  async list(filter: MasterBlFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<MasterBlPageResult> {
     let rows = filter.jobDiv
       ? masterBlRows.filter((r) => r.jobDiv === filter.jobDiv && r.bound === filter.bound)
       : masterBlRows.filter((r) => r.bound === filter.bound);
@@ -54,7 +55,11 @@ export const mockMasterBlPort: MasterBlPort = {
     if (filter.etdTo) {
       rows = rows.filter((r) => r.etd != null && r.etd <= filter.etdTo!);
     }
-    return rows;
+    const totalElements = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const start = (page - 1) * size;
+    const content = rows.slice(start, start + size);
+    return { content, totalPages, totalElements, page, size };
   },
 
   async getById(id: number): Promise<MasterBlDetail> {

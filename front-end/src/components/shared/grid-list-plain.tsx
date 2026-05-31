@@ -5,6 +5,7 @@ import { useScrollRestore } from "@/lib/use-scroll-restore";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { GridListProps, ROW_HEIGHT_PX } from "./grid-list";
 import { GridRow } from "./grid-list-row";
+import { GridFooter } from "./grid-list-footer";
 import { useGridCellSelection } from "@/lib/use-grid-cell-selection";
 import { useStableOptionalCallback } from "@/lib/use-stable-callback";
 
@@ -65,6 +66,7 @@ export function PlainGridList<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
+  totalAggregates,
 }: Omit<GridListProps<T>, "gridId">) {
   const { colWidths, handleResizePointerDown } = useColResize();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -281,6 +283,14 @@ export function PlainGridList<T>({
             </>
           )}
         </tbody>
+        {!isLoading && (
+          <GridFooter<T>
+            columns={resolvedColumns}
+            data={data}
+            totalAggregates={totalAggregates}
+            selectable={selectable}
+          />
+        )}
       </table>
       <div ref={selectionOverlayRef} className="grid-selection-overlay" aria-hidden="true" />
       <div ref={copiedOverlayRef} className="grid-copied-overlay" aria-hidden="true" />

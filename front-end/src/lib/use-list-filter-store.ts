@@ -3,7 +3,7 @@ import { create } from "zustand";
 export interface SavedSearchState {
   extraFilter?: unknown;
   currentPage?: number;
-  showAll?: boolean;
+  pageSize?: number;
   [key: string]: unknown;
 }
 

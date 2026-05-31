@@ -7,26 +7,26 @@ export interface PaginationProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   disabled?: boolean;
-  showAll?: boolean;
-  onToggleShowAll?: () => void;
+  pageSize?: number;
+  onCyclePageSize?: () => void;
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange, disabled, showAll, onToggleShowAll }: PaginationProps) {
-  if (!onToggleShowAll && totalPages <= 1) return null;
+export function Pagination({ currentPage, totalPages, onPageChange, disabled, pageSize, onCyclePageSize }: PaginationProps) {
+  if (!onCyclePageSize && totalPages <= 1) return null;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", padding: "6px 0" }}>
-      {onToggleShowAll && (
+      {onCyclePageSize && (
         <Button
           size="sm"
-          variant={showAll ? "search" : "normal"}
+          variant="normal"
           disabled={disabled}
-          onClick={onToggleShowAll}
+          onClick={onCyclePageSize}
         >
-          All
+          {pageSize}
         </Button>
       )}
-      {!showAll && totalPages > 1 && (
+      {totalPages > 1 && (
         <>
           <Button
             size="sm"

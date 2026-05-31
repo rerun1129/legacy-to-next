@@ -10,6 +10,7 @@ import type { SeaMasterFilter } from '@/domain/sea-master';
 import { SeaMasterListFilter } from './sea-master-list-filter';
 import { SeaMasterGrid } from './sea-master-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
+import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -68,14 +69,19 @@ export function SeaMasterListClient({ bound }: Props) {
     const s = listFilterStore.getState().getSearch(pathname);
     return s?.currentPage ?? 1;
   });
-  const [showAll, setShowAll] = useState(() => {
+  const [pageSize, setPageSize] = useState(() => {
     const s = listFilterStore.getState().getSearch(pathname);
-    return s?.showAll ?? true;
+    return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
+  const handleCyclePageSize = () => {
+    setPageSize(cyclePageSize(pageSize));
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
-    listFilterStore.getState().setSearch(pathname, { extraFilter, currentPage, showAll });
-  }, [extraFilter, currentPage, showAll, pathname]);
+    listFilterStore.getState().setSearch(pathname, { extraFilter, currentPage, pageSize });
+  }, [extraFilter, currentPage, pageSize, pathname]);
 
   return (
     <>
@@ -106,7 +112,6 @@ export function SeaMasterListClient({ bound }: Props) {
               });
               setExtraFilter(null);
               setCurrentPage(1);
-              setShowAll(true);
             }}
             icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
           <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
@@ -125,8 +130,8 @@ export function SeaMasterListClient({ bound }: Props) {
           extraFilter={extraFilter}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
-          showAll={showAll}
-          onToggleShowAll={() => setShowAll(v => !v)}
+          pageSize={pageSize}
+          onCyclePageSize={handleCyclePageSize}
           bound={bound}
         />
       </div>

@@ -3,6 +3,7 @@ import type { SeaHousePort, SeaHousePageResult } from '@/application/sea-house/p
 import type { SeaHouseRow, SeaHouseFilter } from '@/domain/sea-house';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 const SEA_HOUSE_BASE = '/api/sea-house';
 
@@ -105,7 +106,7 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
 export const API_SEA_HOUSE_PORT: SeaHousePort = {
-  async list(filter: SeaHouseFilter, page: number, size = 50): Promise<SeaHousePageResult> {
+  async list(filter: SeaHouseFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<SeaHousePageResult> {
     const body: Record<string, unknown> = { page: page - 1, size };
     body.bound = filter.bound;
     body.dateKind = filter.dateKind;

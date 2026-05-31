@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { RotateCcw, Search, Plus, Minus, Save } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { CountryListFilter } from "./country-list-filter";
 import { GridList } from "@/components/shared/grid-list";
@@ -71,7 +72,7 @@ export function CountryListClient() {
 
   const { data, isFetching } = useQuery({
     queryKey: ["admin-code-country", "list", extraFilter, currentPage],
-    queryFn: () => countryUseCases.search(extraFilter!, currentPage, 50),
+    queryFn: () => countryUseCases.search(extraFilter!, currentPage, DEFAULT_PAGE_SIZE),
     enabled: extraFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,

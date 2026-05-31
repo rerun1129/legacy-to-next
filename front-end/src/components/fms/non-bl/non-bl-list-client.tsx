@@ -9,6 +9,7 @@ import type { NonBlFilter } from '@/domain/non-bl';
 import { NonBlListFilter } from './non-bl-list-filter';
 import { NonBlGrid } from './non-bl-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
+import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -67,10 +68,15 @@ export function NonBlListClient() {
     const s = listFilterStore.getState().getSearch(SCOPE);
     return s?.currentPage ?? 1;
   });
-  const [showAll, setShowAll] = useState(() => {
+  const [pageSize, setPageSize] = useState(() => {
     const s = listFilterStore.getState().getSearch(SCOPE);
-    return s?.showAll ?? true;
+    return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
+
+  const handleCyclePageSize = () => {
+    setPageSize(cyclePageSize(pageSize));
+    setCurrentPage(1);
+  };
 
   // inject가 있었으면 form 세팅 + 슬롯 clear (form은 mount 후 존재)
   useEffect(() => {
@@ -81,8 +87,8 @@ export function NonBlListClient() {
   }, [form, initialInject]);
 
   useEffect(() => {
-    listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, showAll });
-  }, [extraFilter, currentPage, showAll]);
+    listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, pageSize });
+  }, [extraFilter, currentPage, pageSize]);
 
   return (
     <>
@@ -92,7 +98,6 @@ export function NonBlListClient() {
               form.reset(DEFAULT_VALUES);
               setExtraFilter(null);
               setCurrentPage(1);
-              setShowAll(true);
             }}
             icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
           <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
@@ -111,8 +116,8 @@ export function NonBlListClient() {
           extraFilter={extraFilter}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
-          showAll={showAll}
-          onToggleShowAll={() => setShowAll(v => !v)}
+          pageSize={pageSize}
+          onCyclePageSize={handleCyclePageSize}
         />
       </div>
     </>

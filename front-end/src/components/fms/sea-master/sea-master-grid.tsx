@@ -18,12 +18,12 @@ interface Props {
   extraFilter: SeaMasterFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
-  showAll: boolean;
-  onToggleShowAll: () => void;
+  pageSize: number;
+  onCyclePageSize: () => void;
   bound: "EXP" | "IMP";
 }
 
-export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll, bound }: Props) {
+export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize, bound }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -32,11 +32,11 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["sea-master", "list", bound, extraFilter, showAll ? "all" : currentPage],
+    queryKey: ["sea-master", "list", bound, extraFilter, currentPage, pageSize],
     queryFn: () => seaMasterPort.list(
       { ...extraFilter!, bound },
-      showAll ? 1 : currentPage,
-      showAll ? 10000000 : 50,
+      currentPage,
+      pageSize,
     ),
     enabled: extraFilter !== null,
     staleTime: Infinity,
@@ -88,11 +88,11 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
     { key: "linerCode",     label: "Liner",                minWidth: 90 },
     { key: "linerName",     label: "Liner Name",           minWidth: 140 },
     { key: "loadType",      label: "Load Type",            minWidth: 100, render: (v) => String(v ?? '') },
-    { key: "houseBlCount",  label: "House B/L Count",      minWidth: 120 },
+    { key: "houseBlCount",  label: "House B/L Count",      minWidth: 120, aggregate: "sum", aggregateDecimals: 0 },
     { key: "pkgQty",        label: "Package",              minWidth: 90 },
     { key: "pkgUnit",       label: "Unit",                 minWidth: 70 },
-    { key: "grossWeightKg", label: "Gross W/T",            minWidth: 100, render: (v) => fmtWeight(v) },
-    { key: "cbm",           label: "CBM",                  minWidth: 90,  render: (v) => (v != null ? Number(v).toFixed(3) : '') },
+    { key: "grossWeightKg", label: "Gross W/T",            minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cbm",           label: "CBM",                  minWidth: 90,  render: (v) => (v != null ? Number(v).toFixed(3) : ''), aggregate: "sum", aggregateDecimals: 3 },
     { key: "operatorCode",  label: "Operator",             minWidth: 90 },
     { key: "teamCode",      label: "Team",                 minWidth: 90 },
     { key: "teamName",      label: "Team Name",            minWidth: 140 },
@@ -138,8 +138,8 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
         totalPages={totalPages}
         onPageChange={onPageChange}
         disabled={isFetching}
-        showAll={showAll}
-        onToggleShowAll={onToggleShowAll}
+        pageSize={pageSize}
+        onCyclePageSize={onCyclePageSize}
       />
     </div>
   );

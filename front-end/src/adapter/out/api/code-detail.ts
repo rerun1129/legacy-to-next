@@ -10,6 +10,7 @@ import type {
 } from "@/domain/code-detail";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 
 const BASE = "/api/admin/code-detail";
 
@@ -60,7 +61,7 @@ export const API_CODE_DETAIL_PORT: CodeDetailPort = {
   async search(
     masterId: number,
     page: number,
-    size = 50,
+    size = DEFAULT_PAGE_SIZE,
   ): Promise<CodeDetailPageResult> {
     const body: Record<string, unknown> = {
       masterId,

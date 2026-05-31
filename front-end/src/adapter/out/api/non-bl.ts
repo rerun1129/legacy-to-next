@@ -3,6 +3,7 @@ import type { NonBlPort, NonBlPageResult } from '@/application/non-bl/ports';
 import type { NonBlRow, NonBlFilter, NonBlDetail, CreateNonBlRequest, UpdateNonBlRequest } from '@/domain/non-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 const NON_BL_BASE = '/api/non-bl';
 
@@ -190,7 +191,7 @@ function toBeRequest(req: CreateNonBlRequest) {
 
 export const API_NON_BL_PORT: NonBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
-  async list(filter: NonBlFilter, page: number, size = 50): Promise<NonBlPageResult> {
+  async list(filter: NonBlFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<NonBlPageResult> {
     // FE NonBlFilter 키 → BE JSON body 키 명시 매핑 (이름 불일치 항목: nonBlNo→hblNo, dateFrom→etdFrom, dateTo→etdTo)
     const body: Record<string, unknown> = { page: page - 1, size };
     if (filter.bound)        body.bound        = filter.bound;

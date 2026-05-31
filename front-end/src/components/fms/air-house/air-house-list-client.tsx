@@ -10,6 +10,7 @@ import type { AirHouseFilter } from '@/domain/air-house';
 import { AirHouseListFilter } from './air-house-list-filter';
 import { AirHouseGrid } from './air-house-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
+import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -76,14 +77,19 @@ export function AirHouseListClient({ bound }: Props) {
     const s = listFilterStore.getState().getSearch(pathname);
     return s?.currentPage ?? 1;
   });
-  const [showAll, setShowAll] = useState(() => {
+  const [pageSize, setPageSize] = useState(() => {
     const s = listFilterStore.getState().getSearch(pathname);
-    return s?.showAll ?? true;
+    return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
+  const handleCyclePageSize = () => {
+    setPageSize(cyclePageSize(pageSize));
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
-    listFilterStore.getState().setSearch(pathname, { extraFilter, currentPage, showAll });
-  }, [extraFilter, currentPage, showAll, pathname]);
+    listFilterStore.getState().setSearch(pathname, { extraFilter, currentPage, pageSize });
+  }, [extraFilter, currentPage, pageSize, pathname]);
 
   return (
     <>
@@ -122,7 +128,6 @@ export function AirHouseListClient({ bound }: Props) {
               });
               setExtraFilter(null);
               setCurrentPage(1);
-              setShowAll(true);
             }}
             icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
           <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
@@ -141,8 +146,8 @@ export function AirHouseListClient({ bound }: Props) {
           extraFilter={extraFilter}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
-          showAll={showAll}
-          onToggleShowAll={() => setShowAll(v => !v)}
+          pageSize={pageSize}
+          onCyclePageSize={handleCyclePageSize}
           bound={bound}
         />
       </div>

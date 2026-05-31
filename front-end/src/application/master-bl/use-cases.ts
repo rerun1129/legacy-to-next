@@ -3,7 +3,7 @@ import type { MasterBlFilter, CreateMasterBlRequest, UpdateMasterBlRequest } fro
 
 export function createMasterBlUseCases(port: MasterBlPort) {
   return {
-    list: (filter: MasterBlFilter) => port.list(filter),
+    list: (filter: MasterBlFilter, page: number, size?: number) => port.list(filter, page, size),
     getById: (id: number) => port.getById(id),
     create: (req: CreateMasterBlRequest) => port.create(req),
     update: (id: number, req: UpdateMasterBlRequest) => port.update(id, req),

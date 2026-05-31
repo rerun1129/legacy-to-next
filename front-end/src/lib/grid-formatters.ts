@@ -29,3 +29,14 @@ export function fmtNumber(v: unknown, decimals = 0): string {
 export function fmtWeight(v: unknown): string {
   return fmtNumber(v, 3);
 }
+
+/**
+ * 합계 표시용. 천단위 콤마 + 지정 소수 자리.
+ * fmtNumber는 콤마 미지원이므로 합계 가독성을 위해 별도 신설.
+ * 빈값/NaN은 '' 반환.
+ */
+export function fmtSum(total: unknown, decimals = 0): string {
+  const n = Number(total);
+  if (total == null || total === '' || isNaN(n)) return '';
+  return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}

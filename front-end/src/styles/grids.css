@@ -74,13 +74,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .grid tbody tr.is-selected td { background: var(--accent-soft); }
 .grid__empty { height: var(--row-h); padding: 0 8px; text-align: center; vertical-align: middle; color: var(--ink-3); font-size: var(--fs-xs); }
 .grid-wrap { position: relative; overflow: auto; border-top: 1px solid var(--divider); }
-.grid-foot {
-  display: flex; align-items: center; gap: 12px; padding: 8px 14px;
-  border-top: 1px solid var(--divider); background: var(--surface-2);
-  font-size: var(--fs-xs); color: var(--ink-3);
-}
-.grid-foot__total { font-family: var(--font-mono); }
-.grid-foot__spacer { flex: 1; }
+/* grid-foot / grid-foot__total / grid-foot__spacer 제거 — 미사용(2026-05-31). tfoot 방식으로 전환. */
 .row-num { font-family: var(--font-mono); font-size: 10px; color: var(--ink-4); width: 32px; text-align: right; padding-right: 10px; }
 .chk {
   appearance: none; width: 14px; height: 14px; border: 1.5px solid var(--border-strong);
@@ -97,6 +91,15 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .grid--list { width: max-content; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
 .grid--list thead { position: sticky; top: 0; z-index: 2; }
 .grid--list thead th { background: var(--surface-2); font-size: 10px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.04em; text-transform: uppercase; border-bottom: 1px solid var(--border-strong); border-right: 1px solid var(--divider); padding: 4px 4px; white-space: nowrap; box-sizing: border-box; }
+/* thead sticky와 대칭 — 스크롤 시 합계 행이 하단에 고정된다 */
+.grid--list tfoot { position: sticky; bottom: 0; z-index: 2; }
+.grid--list tfoot td {
+  background: var(--surface-2); border-top: 1px solid var(--border-strong);
+  border-right: 1px solid var(--divider); padding: 4px 4px; font-size: 10px;
+  font-weight: 600; color: var(--ink-2); white-space: nowrap; box-sizing: border-box;
+  text-align: right; font-family: var(--font-mono);
+}
+.grid--list tfoot td.grid-foot-label { text-align: left; font-family: inherit; color: var(--ink-3); }
 .grid--list thead th.is-sorted { background: var(--accent-soft); color: var(--accent-ink); }
 .grid--list thead th .sort-ind { margin-left: 4px; color: var(--accent); font-size: 11px; }
 .grid--list tbody td { padding: 4px 4px; border-bottom: 1px solid var(--divider); border-right: 1px solid var(--divider); font-size: 10px; color: var(--ink); white-space: nowrap; background: var(--surface); box-sizing: border-box; }

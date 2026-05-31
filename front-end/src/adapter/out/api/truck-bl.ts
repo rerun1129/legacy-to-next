@@ -9,6 +9,7 @@ import type {
 } from '@/domain/truck-bl';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 const TRUCK_BL_BASE = '/api/truck-bl';
 
@@ -166,7 +167,7 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
 
 export const API_TRUCK_BL_PORT: TruckBlPort = {
   // BE는 0-based page, FE는 1-based page — 어댑터에서 변환
-  async list(filter: TruckBlFilter, page: number, size = 50): Promise<TruckBlPageResult> {
+  async list(filter: TruckBlFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<TruckBlPageResult> {
     // FE TruckBlFilter 키 → BE JSON body 키 명시 매핑 (이름 불일치 항목: truckBlNo→hblNo, dateFrom→etdFrom, dateTo→etdTo)
     const body: Record<string, unknown> = { page: page - 1, size };
     if (filter.bound)        body.bound        = filter.bound;

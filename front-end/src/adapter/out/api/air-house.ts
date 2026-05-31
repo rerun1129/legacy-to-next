@@ -3,6 +3,7 @@ import type { AirHousePort, AirHousePageResult } from '@/application/air-house/p
 import type { AirHouseRow, AirHouseFilter } from '@/domain/air-house';
 import { ResponseParseError } from './errors';
 import { fetchJson } from './utils';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 const AIR_HOUSE_BASE = '/api/air-house';
 
@@ -82,7 +83,7 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
 export const API_AIR_HOUSE_PORT: AirHousePort = {
-  async list(filter: AirHouseFilter, page: number, size = 50): Promise<AirHousePageResult> {
+  async list(filter: AirHouseFilter, page: number, size = DEFAULT_PAGE_SIZE): Promise<AirHousePageResult> {
     const body: Record<string, unknown> = { page: page - 1, size };
     body.bound = filter.bound;
     body.dateKind = filter.dateKind;

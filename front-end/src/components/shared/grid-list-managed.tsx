@@ -19,6 +19,7 @@ import { useColumnLayout } from "@/lib/use-column-layout";
 import { SortableTh } from "./grid-list-header";
 import { GridListProps, ROW_HEIGHT_PX } from "./grid-list";
 import { GridRow } from "./grid-list-row";
+import { GridFooter } from "./grid-list-footer";
 import { useGridCellSelection } from "@/lib/use-grid-cell-selection";
 import { useStableOptionalCallback } from "@/lib/use-stable-callback";
 
@@ -41,6 +42,7 @@ export function ManagedGridList<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
+  totalAggregates,
 }: GridListProps<T> & { gridId: string }) {
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
@@ -300,6 +302,14 @@ export function ManagedGridList<T>({
               </>
             )}
           </tbody>
+          {!isLoading && (
+            <GridFooter<T>
+              columns={visibleColumns}
+              data={data}
+              totalAggregates={totalAggregates}
+              selectable={selectable}
+            />
+          )}
         </table>
         <div ref={selectionOverlayRef} className="grid-selection-overlay" aria-hidden="true" />
         <div ref={copiedOverlayRef} className="grid-copied-overlay" aria-hidden="true" />

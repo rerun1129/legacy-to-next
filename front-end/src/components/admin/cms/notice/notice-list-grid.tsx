@@ -8,6 +8,7 @@ import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu
 import { Pagination } from "@/components/shared/pagination";
 import { noticeUseCases } from "@/application/notice/use-cases";
 import type { NoticeRow, NoticeFilter } from "@/domain/notice";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 
 interface Props {
   extraFilter: NoticeFilter | null;
@@ -47,7 +48,7 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
 
   const { data, isFetching, error } = useQuery({
     queryKey: ["admin-notice", "list", extraFilter, currentPage],
-    queryFn: () => noticeUseCases.search(extraFilter!, currentPage, 50),
+    queryFn: () => noticeUseCases.search(extraFilter!, currentPage, DEFAULT_PAGE_SIZE),
     enabled: extraFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,

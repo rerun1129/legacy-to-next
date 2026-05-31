@@ -9,6 +9,7 @@ import type { TruckBlFilter } from '@/domain/truck-bl';
 import { TruckBlListFilter } from './truck-bl-list-filter';
 import { TruckBlGrid } from './truck-bl-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
+import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -58,14 +59,19 @@ export function TruckBlListClient() {
     const s = listFilterStore.getState().getSearch(SCOPE);
     return s?.currentPage ?? 1;
   });
-  const [showAll, setShowAll] = useState(() => {
+  const [pageSize, setPageSize] = useState(() => {
     const s = listFilterStore.getState().getSearch(SCOPE);
-    return s?.showAll ?? true;
+    return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
+  const handleCyclePageSize = () => {
+    setPageSize(cyclePageSize(pageSize));
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
-    listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, showAll });
-  }, [extraFilter, currentPage, showAll]);
+    listFilterStore.getState().setSearch(SCOPE, { extraFilter, currentPage, pageSize });
+  }, [extraFilter, currentPage, pageSize]);
 
   return (
     <>
@@ -75,7 +81,6 @@ export function TruckBlListClient() {
               form.reset(DEFAULT_VALUES);
               setExtraFilter(null);
               setCurrentPage(1);
-              setShowAll(true);
             }}
             icon={<RotateCcw size={12} style={{ marginRight: 4 }} />} />
           <ActionButton buttonCode={`BTN_${menuCode}_SEARCH`} className="btn btn--search btn--sm" onClick={() => form.handleSubmit((values) => {
@@ -94,8 +99,8 @@ export function TruckBlListClient() {
           extraFilter={extraFilter}
           currentPage={currentPage}
           onPageChange={setCurrentPage}
-          showAll={showAll}
-          onToggleShowAll={() => setShowAll(v => !v)}
+          pageSize={pageSize}
+          onCyclePageSize={handleCyclePageSize}
         />
       </div>
     </>

@@ -13,16 +13,15 @@ import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store"
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { fmtDate } from "@/lib/grid-formatters";
 import type { TruckBlRow, TruckBlFilter } from "@/domain/truck-bl";
-
 interface Props {
   extraFilter: TruckBlFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
-  showAll: boolean;
-  onToggleShowAll: () => void;
+  pageSize: number;
+  onCyclePageSize: () => void;
 }
 
-export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll }: Props) {
+export function TruckBlGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize }: Props) {
   const router = useRouter();
   const addTab = useTabs((s) => s.addTab);
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -32,8 +31,8 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["truck-bl", "list", extraFilter, showAll ? "all" : currentPage],
-    queryFn: () => truckBlPort.list(extraFilter!, showAll ? 1 : currentPage, showAll ? 10000000 : 50),
+    queryKey: ["truck-bl", "list", extraFilter, currentPage, pageSize],
+    queryFn: () => truckBlPort.list(extraFilter!, currentPage, pageSize),
     enabled: extraFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity, // staleTime: Infinity만으로는 gcTime 기본 5분에 막혀 무력화됨 (§6.36)
@@ -91,8 +90,8 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
     { key: "docPartnerName", label: "DOC Partner Name", minWidth: 140 },
     { key: "pkgQty", label: "Package", minWidth: 80 },
     { key: "pkgUnit", label: "Package Unit", minWidth: 90 },
-    { key: "grossWt", label: "Gross W/T", minWidth: 100 },
-    { key: "cbm", label: "CBM", minWidth: 90 },
+    { key: "grossWt", label: "Gross W/T", minWidth: 100, aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cbm", label: "CBM", minWidth: 90, aggregate: "sum", aggregateDecimals: 3 },
     { key: "teamCode", label: "Team", minWidth: 90 },
     { key: "teamName", label: "Team Name", minWidth: 140 },
   ];
@@ -136,8 +135,8 @@ export function TruckBlGrid({ extraFilter, currentPage, onPageChange, showAll, o
         totalPages={totalPages}
         onPageChange={onPageChange}
         disabled={isFetching}
-        showAll={showAll}
-        onToggleShowAll={onToggleShowAll}
+        pageSize={pageSize}
+        onCyclePageSize={onCyclePageSize}
       />
     </div>
   );

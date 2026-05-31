@@ -195,8 +195,6 @@ export interface MasterBlFilter {
   podCode?: string;
   etdFrom?: string;
   etdTo?: string;
-  page?: number;
-  size?: number;
 }
 
 // §BE-sync — CreateMasterBlRequest.SeaDetailRequest (BE Phase 3 정합, desc root 승격으로 제거됨)

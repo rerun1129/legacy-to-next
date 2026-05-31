@@ -12,17 +12,16 @@ import { Pagination } from "@/components/shared/pagination";
 import { seaHousePort } from "@/lib/ports";
 import { fmtDate, fmtWeight } from "@/lib/grid-formatters";
 import type { SeaHouseRow, SeaHouseFilter } from "@/domain/sea-house";
-
 interface Props {
   extraFilter: SeaHouseFilter | null;
   currentPage: number;
   onPageChange: (page: number) => void;
-  showAll: boolean;
-  onToggleShowAll: () => void;
+  pageSize: number;
+  onCyclePageSize: () => void;
   bound: "EXP" | "IMP";
 }
 
-export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, onToggleShowAll, bound }: Props) {
+export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize, bound }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -30,11 +29,11 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
   const [selected, setSelected] = useState<number | null>(null);
 
   const { data, isFetching, error } = useQuery({
-    queryKey: ["sea-house", "list", bound, extraFilter, showAll ? "all" : currentPage],
+    queryKey: ["sea-house", "list", bound, extraFilter, currentPage, pageSize],
     queryFn: () => seaHousePort.list(
       { ...extraFilter!, bound },
-      showAll ? 1 : currentPage,
-      showAll ? 10000000 : 50,
+      currentPage,
+      pageSize,
     ),
     enabled: extraFilter !== null,
     staleTime: Infinity,
@@ -101,11 +100,11 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
     { key: "actualCustomerName",  label: "Actual Customer Name",   minWidth: 160 },
     { key: "pkgQty",              label: "Package",                minWidth: 90 },
     { key: "pkgUnit",             label: "Unit",                   minWidth: 70 },
-    { key: "grossWeightKg",       label: "Gross W/T",              minWidth: 100, render: (v) => fmtWeight(v) },
-    { key: "cbm",                 label: "CBM",                    minWidth: 90,  render: (v) => (v != null ? (v as number).toFixed(3) : '') },
-    { key: "cntr20Qty",           label: "20FT",                   minWidth: 70 },
-    { key: "cntr40Qty",           label: "40FT",                   minWidth: 70 },
-    { key: "teuQty",              label: "TEU",                    minWidth: 70,  render: (v) => (v != null ? (v as number).toFixed(2) : '') },
+    { key: "grossWeightKg",       label: "Gross W/T",              minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cbm",                 label: "CBM",                    minWidth: 90,  render: (v) => (v != null ? (v as number).toFixed(3) : ''), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cntr20Qty",           label: "20FT",                   minWidth: 70,  aggregate: "sum", aggregateDecimals: 0 },
+    { key: "cntr40Qty",           label: "40FT",                   minWidth: 70,  aggregate: "sum", aggregateDecimals: 0 },
+    { key: "teuQty",              label: "TEU",                    minWidth: 70,  render: (v) => (v != null ? (v as number).toFixed(2) : ''), aggregate: "sum", aggregateDecimals: 2 },
     { key: "salesManCode",        label: "Sales Man",              minWidth: 90 },
     { key: "teamCode",            label: "Team",                   minWidth: 90 },
     { key: "teamName",            label: "Team Name",              minWidth: 140 },
@@ -151,8 +150,8 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
         totalPages={totalPages}
         onPageChange={onPageChange}
         disabled={isFetching}
-        showAll={showAll}
-        onToggleShowAll={onToggleShowAll}
+        pageSize={pageSize}
+        onCyclePageSize={onCyclePageSize}
       />
     </div>
   );
