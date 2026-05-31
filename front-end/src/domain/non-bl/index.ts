@@ -24,6 +24,7 @@ export interface NonBlRow {
   pkgUnit: string;
   grossWt: string;
   cbm: string;
+  teamCode: string;
   teamName: string;
 }
 
@@ -99,6 +100,8 @@ export interface NonBlDetail {
   operatorCode?: string;
   salesManCode?: string;
   teamCode?: string;
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName?: string | null;
   mainItemName?: string;
   hsCode?: string;
   hsCodeName?: string;

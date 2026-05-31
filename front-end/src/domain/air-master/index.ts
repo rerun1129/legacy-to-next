@@ -24,6 +24,7 @@ export interface AirMasterRow {
   masterRefNo: string
   freightTerm: string
   teamCode: string
+  teamName: string
 }
 
 export interface AirMasterFilter {

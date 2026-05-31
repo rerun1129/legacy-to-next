@@ -28,6 +28,8 @@ const NON_BL_ROW_SCHEMA = z.object({
   actualCustomerCode: z.string().nullable().transform((v) => v ?? ''),
   linerCode: z.string().nullable().transform((v) => v ?? ''),
   linerName: z.string().nullable().transform((v) => v ?? ''),
+  teamCode: z.string().nullable().transform((v) => v ?? ''),
+  teamName: z.string().nullable().transform((v) => v ?? ''),
   pkgQty: z.number().nullable().transform((v) => String(v ?? '')),
   pkgUnit: z.string().nullable().transform((v) => v ?? ''),
   grossWeightKg: z.number().nullable().transform((v) => String(v ?? '')),
@@ -58,7 +60,8 @@ const NON_BL_ROW_SCHEMA = z.object({
   pkgUnit: raw.pkgUnit,
   grossWt: raw.grossWeightKg,
   cbm: raw.cbm,
-  teamName: '',
+  teamCode: raw.teamCode,
+  teamName: raw.teamName,
 } satisfies NonBlRow));
 
 const NON_BL_CONTAINER_SCHEMA = z.object({
@@ -105,6 +108,8 @@ const NON_BL_DETAIL_SCHEMA = z.object({
   operatorCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   salesManCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   teamCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName: z.string().nullable().optional().transform((v) => v ?? undefined),
   mainItemName: z.string().nullable().optional().transform((v) => v ?? undefined),
   hsCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   hsCodeName: z.string().nullable().optional().transform((v) => v ?? undefined),

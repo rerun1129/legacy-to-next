@@ -94,7 +94,8 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
     { key: "grossWeightKg", label: "Gross W/T",            minWidth: 100, render: (v) => fmtWeight(v) },
     { key: "cbm",           label: "CBM",                  minWidth: 90,  render: (v) => (v != null ? Number(v).toFixed(3) : '') },
     { key: "operatorCode",  label: "Operator",             minWidth: 90 },
-    { key: "teamCode",      label: "Team Name",            minWidth: 90 },
+    { key: "teamCode",      label: "Team",                 minWidth: 90 },
+    { key: "teamName",      label: "Team Name",            minWidth: 140 },
   ];
 
   if (error) {

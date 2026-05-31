@@ -100,7 +100,8 @@ export function AirHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
     { key: "actualCustomerCode", label: "Actual Customer",        minWidth: 120 },
     { key: "actualCustomerName", label: "Actual Customer Name",   minWidth: 160 },
     { key: "salesManCode",     label: "Sales Man",                minWidth: 90 },
-    { key: "teamCode",         label: "Team Name",                minWidth: 90 },
+    { key: "teamCode",         label: "Team",                     minWidth: 90 },
+    { key: "teamName",         label: "Team Name",                minWidth: 140 },
   ];
 
   if (error) {

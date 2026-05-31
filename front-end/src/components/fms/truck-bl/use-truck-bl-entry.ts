@@ -93,6 +93,7 @@ export function useTruckBlEntry() {
       actualCustomerCode: detail.actualCustomerCode ?? "",
       operatorCode:       detail.operatorCode       ?? "",
       teamCode:           detail.teamCode           ?? "",
+      teamName:           detail.teamName           ?? "",
       salesManCode:       detail.salesManCode       ?? "",
       settlePartnerCode:  detail.settlePartnerCode  ?? "",
       truckerCode:        detail.truckerCode        ?? "",

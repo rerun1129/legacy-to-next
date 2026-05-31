@@ -32,6 +32,7 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
     flightType: "",
     securityStatus: "",
     teamCode: "",
+    teamName: "",
     remark: "",
     // §BE-sync — airDetail nested 빈 객체 (18 필드, BE Phase 2 AirDetailRequest 정합)
     airDetail: {

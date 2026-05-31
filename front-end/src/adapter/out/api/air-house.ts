@@ -32,6 +32,7 @@ const AIR_HOUSE_ROW_SCHEMA = z.object({
   actualCustomerCode: z.string().nullable().transform((v) => v ?? ''),
   salesManCode: z.string().nullable().transform((v) => v ?? ''),
   teamCode: z.string().nullable().transform((v) => v ?? ''),
+  teamName: z.string().nullable().transform((v) => v ?? ''),
 }).transform((raw) => ({
   id: raw.id,
   hblNo: raw.hblNo,
@@ -65,6 +66,7 @@ const AIR_HOUSE_ROW_SCHEMA = z.object({
   actualCustomerName: '',
   salesManCode: raw.salesManCode,
   teamCode: raw.teamCode,
+  teamName: raw.teamName,
 } satisfies AirHouseRow));
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

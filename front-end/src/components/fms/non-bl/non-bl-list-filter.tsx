@@ -37,6 +37,7 @@ export function NonBlListFilter({ form }: Props) {
   const liner    = useCodeAutocomplete(CODE_SOURCES.carrier);
   const port     = useCodeAutocomplete(CODE_SOURCES.port);
   const operator = useCodeAutocomplete(CODE_SOURCES.user);
+  const team     = useCodeAutocomplete(CODE_SOURCES.team);
 
   return (
     <div className="search-card">
@@ -201,6 +202,13 @@ export function NonBlListFilter({ form }: Props) {
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={team.onSearch}
+            suggestions={team.suggestions}
+            suggestionsLoading={team.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("teamCode", it.code);
+              setValue("teamName", it.name);
+            }}
           />
         </div>
       </div>

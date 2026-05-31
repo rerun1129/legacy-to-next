@@ -39,6 +39,7 @@ export interface SeaHouseRow {
   teuQty: number | null
   salesManCode: string
   teamCode: string
+  teamName: string
 }
 
 export interface SeaHouseFilter {

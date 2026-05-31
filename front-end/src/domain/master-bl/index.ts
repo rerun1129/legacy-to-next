@@ -126,6 +126,8 @@ export interface MasterBlDetail extends MasterBlRow {
   updatedAt: string | null;
   remark?: string;
   teamCode: string | null;
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName?: string | null;
   // party code + address (§BE Phase 2 — CustomerCode VO 기반 노출)
   shipperCode: string | null;
   shipperAddress: string | null;

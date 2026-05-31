@@ -167,6 +167,8 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   consoledSeaContainers: z.array(CONSOLED_SEA_CONTAINER_API_SCHEMA),
   updatedAt: z.string().nullable(),
   teamCode: z.string().nullable(),
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName: z.string().nullable().optional().transform((v) => v ?? undefined),
   // §BE Phase 2 — party address 3 필드
   shipperAddress: z.string().nullable(),
   consigneeAddress: z.string().nullable(),

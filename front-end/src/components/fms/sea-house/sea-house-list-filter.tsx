@@ -43,6 +43,7 @@ export function SeaHouseListFilter({ form }: Props) {
   const port            = useCodeAutocomplete(CODE_SOURCES.portSea);
   const operator        = useCodeAutocomplete(CODE_SOURCES.user);
   const salesMan        = useCodeAutocomplete(CODE_SOURCES.user);
+  const team            = useCodeAutocomplete(CODE_SOURCES.team);
 
   return (
     <div className="search-card">
@@ -267,13 +268,20 @@ export function SeaHouseListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 11. Team — autocomplete 미배선 (모달 방식 유지) */}
+          {/* 11. Team */}
           <CodeBox
             kind="lcn"
             label="Team"
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={team.onSearch}
+            suggestions={team.suggestions}
+            suggestionsLoading={team.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("teamCode", it.code);
+              setValue("teamName", it.name);
+            }}
           />
 
           {/* 12. Operator */}

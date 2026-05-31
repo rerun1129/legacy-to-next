@@ -43,6 +43,7 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
     // performance
     operatorCode: detail.operatorCode ?? "",
     teamCode:     detail.teamCode      ?? "",
+    teamName:     detail.teamName      ?? "",
     // remark (root 본체)
     remark: detail.remark ?? "",
     // §BE 보강 — root desc (marks/description/descClause1/descClause2 + remark panel 표시)

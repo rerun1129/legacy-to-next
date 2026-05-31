@@ -178,9 +178,11 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   actualCustomerName: z.string().nullable().optional().transform((v) => v ?? ''),
   polName: z.string().nullable().optional().transform((v) => v ?? ''),
   podName: z.string().nullable().optional().transform((v) => v ?? ''),
-  // §BE-sync — HouseBlDetailResponse top-level name 추가 (salesManName, operatorName)
+  // §BE-sync — HouseBlDetailResponse top-level name 추가 (salesManName, operatorName, teamName)
   salesManName: z.string().nullable().optional().transform((v) => v ?? ''),
   operatorName: z.string().nullable().optional().transform((v) => v ?? ''),
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName: z.string().nullable().optional().transform((v) => v ?? undefined),
   loadType: z.string().nullable().optional().transform((v) => v ?? undefined),
   linerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   linerName: z.string().nullable().optional().transform((v) => v ?? undefined),

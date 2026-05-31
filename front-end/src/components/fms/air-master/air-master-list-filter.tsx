@@ -44,6 +44,7 @@ export function AirMasterListFilter({ form }: Props) {
   const party   = useCodeAutocomplete(CODE_SOURCES.customer);
   const airline = useCodeAutocomplete(CODE_SOURCES.carrierAir);
   const port    = useCodeAutocomplete(CODE_SOURCES.portAir);
+  const team    = useCodeAutocomplete(CODE_SOURCES.team);
 
   const { options: shipmentTypeOptions, isLoading: shipmentTypeLoading, placeholder: shipmentTypePlaceholder } = useEnumOptions("ShipmentType");
   const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentTypeOptions];
@@ -205,6 +206,13 @@ export function AirMasterListFilter({ form }: Props) {
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}
+            onSearch={team.onSearch}
+            suggestions={team.suggestions}
+            suggestionsLoading={team.suggestionsLoading}
+            onSelect={(it) => {
+              setValue("teamCode", it.code);
+              setValue("teamName", it.name);
+            }}
           />
         </div>
       </div>

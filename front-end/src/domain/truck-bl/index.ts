@@ -20,6 +20,7 @@ export interface TruckBlRow {
   pkgUnit: string;
   grossWt: string;
   cbm: string;
+  teamCode: string;
   teamName: string;
 }
 
@@ -98,6 +99,8 @@ export interface TruckBlDetail {
   actualCustomerCode?: string;
   operatorCode?: string;
   teamCode?: string;
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName?: string | null;
   salesManCode?: string;
   incoterms?: string;
   createdAt?: string;

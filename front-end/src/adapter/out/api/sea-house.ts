@@ -47,6 +47,7 @@ const SEA_HOUSE_ROW_SCHEMA = z.object({
   teuQty: z.number().nullable().optional().default(null),
   salesManCode: z.string().nullable().transform((v) => v ?? ''),
   teamCode: z.string().nullable().transform((v) => v ?? ''),
+  teamName: z.string().nullable().transform((v) => v ?? ''),
 }).transform((raw) => ({
   id: raw.id,
   hblNo: raw.hblNo,
@@ -88,6 +89,7 @@ const SEA_HOUSE_ROW_SCHEMA = z.object({
   teuQty: raw.teuQty ?? null,
   salesManCode: raw.salesManCode,
   teamCode: raw.teamCode,
+  teamName: raw.teamName,
 } satisfies SeaHouseRow));
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

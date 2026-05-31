@@ -28,6 +28,7 @@ const SEA_MASTER_ROW_SCHEMA = z.object({
   masterRefNo: z.string().nullable().transform((v) => v ?? ''),
   freightTerm: z.string().nullable().transform((v) => v ?? ''),
   teamCode: z.string().nullable().transform((v) => v ?? ''),
+  teamName: z.string().nullable().transform((v) => v ?? ''),
   vesselName: z.string().nullable().optional().default(null),
   voyageNo: z.string().nullable().optional().default(null),
   loadType: z.string().nullable().optional().default(null),
@@ -58,6 +59,7 @@ const SEA_MASTER_ROW_SCHEMA = z.object({
   masterRefNo: raw.masterRefNo,
   freightTerm: raw.freightTerm,
   teamCode: raw.teamCode,
+  teamName: raw.teamName,
   vesselName: raw.vesselName,
   voyageNo: raw.voyageNo,
   loadType: raw.loadType,
@@ -94,6 +96,7 @@ export const API_SEA_MASTER_PORT: SeaMasterPort = {
     if (filter.voyageNo)         body.voyageNo        = filter.voyageNo;
     if (filter.shipmentType)     body.shipmentType    = filter.shipmentType;
     if (filter.loadType)         body.loadType        = filter.loadType;
+    if (filter.teamCode)         body.teamCode        = filter.teamCode;
     const json = await fetchJson(`${SEA_MASTER_BASE}/search`, {
       method: 'POST',
       body: JSON.stringify(body),

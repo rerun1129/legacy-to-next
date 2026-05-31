@@ -13,6 +13,7 @@ export function TruckPerformancePanel() {
   const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
   const salesMan       = useCodeAutocomplete(CODE_SOURCES.user);
   const operator       = useCodeAutocomplete(CODE_SOURCES.user);
+  const team           = useCodeAutocomplete(CODE_SOURCES.team);
 
   const PERF_ITEMS: FieldItemDef[] = [
     {
@@ -92,6 +93,10 @@ export function TruckPerformancePanel() {
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+          onSearch={team.onSearch}
+          suggestions={team.suggestions}
+          suggestionsLoading={team.suggestionsLoading}
+          onSelect={(it) => { setValue("teamCode", it.code); setValue("teamName", it.name); }}
         />
       ),
     },

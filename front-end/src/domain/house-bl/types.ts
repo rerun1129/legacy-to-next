@@ -173,6 +173,8 @@ export interface HouseBlDetail extends HouseBlRow {
   podName?: string;
   salesManName?: string;
   operatorName?: string;
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName?: string | null;
   linerCode?: string;
   linerName?: string;
   vesselName?: string;

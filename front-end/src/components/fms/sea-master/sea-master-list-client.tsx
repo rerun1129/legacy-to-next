@@ -54,6 +54,8 @@ export function SeaMasterListClient({ bound }: Props) {
       voyageNo: '',
       shipmentType: '',
       loadType: '',
+      teamCode: '',
+      teamName: '',
     },
   });
   const qc = useQueryClient();
@@ -99,6 +101,8 @@ export function SeaMasterListClient({ bound }: Props) {
                 voyageNo: '',
                 shipmentType: '',
                 loadType: '',
+                teamCode: '',
+                teamName: '',
               });
               setExtraFilter(null);
               setCurrentPage(1);

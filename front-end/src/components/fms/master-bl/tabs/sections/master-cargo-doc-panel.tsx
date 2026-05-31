@@ -93,7 +93,8 @@ function OperatorLcnField() {
 }
 
 function TeamLcnField() {
-  const { register } = useFormContext<MasterBlFormValues>();
+  const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const teamAc = useCodeAutocomplete(CODE_SOURCES.team);
   return (
     <CodeBox
       kind="lcn"
@@ -101,8 +102,12 @@ function TeamLcnField() {
       label="Team"
       required
       codeProps={{ ...register("teamCode"), placeholder: "Code" }}
-      nameProps={{ placeholder: "Team Name" }}
+      nameProps={{ ...register("teamName"), placeholder: "Team Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
+      onSearch={teamAc.onSearch}
+      suggestions={teamAc.suggestions}
+      suggestionsLoading={teamAc.suggestionsLoading}
+      onSelect={(it) => { setValue("teamCode", it.code); setValue("teamName", it.name); }}
     />
   );
 }

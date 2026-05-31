@@ -169,6 +169,8 @@ export const MASTER_BL_SCHEMA = z.object({
   flightType:     z.string().optional(),
   securityStatus: z.string().optional(),
   teamCode:       z.string().optional(),
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용, submit 미포함.
+  teamName:       z.string().optional(),
   remark:         z.string().optional(),
 
   // §BE-sync — seaDetail nested (BE Phase 2 SeaDetailResponse 16 필드 정합)

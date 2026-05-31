@@ -13,6 +13,7 @@ export function AirDocumentPanel() {
 
   const salesMan = useCodeAutocomplete(CODE_SOURCES.user);
   const operator = useCodeAutocomplete(CODE_SOURCES.user);
+  const team     = useCodeAutocomplete(CODE_SOURCES.team);
   const { options: salesClassOptions, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
 
   const DOCUMENT_ITEMS: FieldItemDef[] = [
@@ -62,6 +63,10 @@ export function AirDocumentPanel() {
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
+          onSearch={team.onSearch}
+          suggestions={team.suggestions}
+          suggestionsLoading={team.suggestionsLoading}
+          onSelect={(it) => { setValue("teamCode", it.code); setValue("teamName", it.name); }}
         />
       ),
     },

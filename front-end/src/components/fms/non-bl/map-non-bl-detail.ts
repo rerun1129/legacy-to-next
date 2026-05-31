@@ -38,6 +38,7 @@ export function mapNonBlDetailToFormValues(detail: NonBlDetail): NonBlFormValues
     operatorCode:       detail.operatorCode ?? "",
     salesManCode:       detail.salesManCode ?? "",
     teamCode:           detail.teamCode ?? "",
+    teamName:           detail.teamName ?? "",
     salesClass:         detail.salesClass ?? undefined,
     // BE 응답 volumeDivisor → form 필드 dimensionDivisor
     dimensionDivisor:   detail.volumeDivisor ?? "CM6000",

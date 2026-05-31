@@ -95,7 +95,8 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, showAll, onT
     { key: "pkgUnit", label: "Package Unit", minWidth: 90 },
     { key: "grossWt", label: "Gross W/T", minWidth: 100 },
     { key: "cbm", label: "CBM", minWidth: 90 },
-    { key: "teamName", label: "Team Name", minWidth: 90 },
+    { key: "teamCode", label: "Team", minWidth: 90 },
+    { key: "teamName", label: "Team Name", minWidth: 140 },
   ];
 
   if (error) {

@@ -92,7 +92,8 @@ export function AirMasterGrid({ extraFilter, currentPage, onPageChange, showAll,
     { key: "airlineCode",    label: "AirLine",              minWidth: 90 },
     { key: "airlineName",    label: "AirLine Name",         minWidth: 140 },
     { key: "operatorCode",   label: "Operator",             minWidth: 90 },
-    { key: "teamCode",       label: "Team Name",            minWidth: 90 },
+    { key: "teamCode",       label: "Team",                 minWidth: 90 },
+    { key: "teamName",       label: "Team Name",            minWidth: 140 },
   ];
 
   if (error) {

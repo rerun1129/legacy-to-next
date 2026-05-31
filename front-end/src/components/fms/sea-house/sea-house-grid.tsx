@@ -107,7 +107,8 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, showAll, 
     { key: "cntr40Qty",           label: "40FT",                   minWidth: 70 },
     { key: "teuQty",              label: "TEU",                    minWidth: 70,  render: (v) => (v != null ? (v as number).toFixed(2) : '') },
     { key: "salesManCode",        label: "Sales Man",              minWidth: 90 },
-    { key: "teamCode",            label: "Team Name",              minWidth: 90 },
+    { key: "teamCode",            label: "Team",                   minWidth: 90 },
+    { key: "teamName",            label: "Team Name",              minWidth: 140 },
   ];
 
   if (error) {

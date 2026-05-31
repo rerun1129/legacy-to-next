@@ -30,6 +30,8 @@ const TRUCK_BL_ROW_SCHEMA = z.object({
   consigneeCode: z.string().nullable().transform((v) => v ?? ''),
   notifyCode: z.string().nullable().transform((v) => v ?? ''),
   docPartnerCode: z.string().nullable().transform((v) => v ?? ''),
+  teamCode: z.string().nullable().transform((v) => v ?? ''),
+  teamName: z.string().nullable().transform((v) => v ?? ''),
   pkgQty: z.number().nullable().transform((v) => String(v ?? '')),
   pkgUnit: z.string().nullable().transform((v) => v ?? ''),
   grossWeightKg: z.number().nullable().transform((v) => String(v ?? '')),
@@ -56,7 +58,8 @@ const TRUCK_BL_ROW_SCHEMA = z.object({
   pkgUnit: raw.pkgUnit,
   grossWt: raw.grossWeightKg,
   cbm: raw.cbm,
-  teamName: '',
+  teamCode: raw.teamCode,
+  teamName: raw.teamName,
 } satisfies TruckBlRow));
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
@@ -135,6 +138,8 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
   actualCustomerCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   operatorCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   teamCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  // §BE-sync — BE 조회 시 admin.team 조인 응답. 표시 전용.
+  teamName: z.string().nullable().optional().transform((v) => v ?? undefined),
   salesManCode: z.string().nullable().optional().transform((v) => v ?? undefined),
   incoterms: z.string().nullable().optional().transform((v) => v ?? undefined),
   createdAt: z.string().nullable().optional().transform((v) => v ?? undefined),

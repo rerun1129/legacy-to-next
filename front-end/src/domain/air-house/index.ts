@@ -31,6 +31,7 @@ export interface AirHouseRow {
   actualCustomerName: string
   salesManCode: string
   teamCode: string
+  teamName: string
 }
 
 export interface AirHouseFilter {

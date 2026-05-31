@@ -28,6 +28,7 @@ const AIR_MASTER_ROW_SCHEMA = z.object({
   masterRefNo: z.string().nullable().transform((v) => v ?? ''),
   freightTerm: z.string().nullable().transform((v) => v ?? ''),
   teamCode: z.string().nullable().transform((v) => v ?? ''),
+  teamName: z.string().nullable().transform((v) => v ?? ''),
 }).transform((raw) => ({
   id: raw.id,
   bound: raw.bound,
@@ -54,6 +55,7 @@ const AIR_MASTER_ROW_SCHEMA = z.object({
   masterRefNo: raw.masterRefNo,
   freightTerm: raw.freightTerm,
   teamCode: raw.teamCode,
+  teamName: raw.teamName,
 } satisfies AirMasterRow));
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

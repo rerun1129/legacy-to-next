@@ -24,6 +24,7 @@ export interface SeaMasterRow {
   masterRefNo: string
   freightTerm: string
   teamCode: string
+  teamName: string
   vesselName: string | null
   voyageNo: string | null
   loadType: string | null
@@ -49,4 +50,6 @@ export interface SeaMasterFilter {
   voyageNo: string;
   shipmentType: string;
   loadType: string;
+  teamCode: string;
+  teamName: string;
 }

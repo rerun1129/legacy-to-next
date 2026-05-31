@@ -45,6 +45,7 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
     operatorCode:       detail.operatorCode  ?? "",
     operatorName:       detail.operatorName  ?? "",
     teamCode:           detail.teamCode      ?? "",
+    teamName:           detail.teamName      ?? "",
     salesManCode:       detail.salesManCode  ?? "",
     salesManName:       detail.salesManName  ?? "",
     settlePartnerCode:  detail.settlePartnerCode ?? "",
