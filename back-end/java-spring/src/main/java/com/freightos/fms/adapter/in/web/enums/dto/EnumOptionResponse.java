@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.freightos.fms.application.enums.projection.EnumOption;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record EnumOptionResponse(String code, String label, String description) {
+public record EnumOptionResponse(String code, String label, String description, String labelKo) {
+
+    public EnumOptionResponse(String code, String label, String description) {
+        this(code, label, description, null);
+    }
 
     public static EnumOptionResponse from(EnumOption option) {
-        return new EnumOptionResponse(option.code(), option.label(), option.description());
+        return new EnumOptionResponse(option.code(), option.label(), option.description(), option.labelKo());
     }
 }

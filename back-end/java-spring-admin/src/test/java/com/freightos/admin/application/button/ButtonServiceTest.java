@@ -57,7 +57,7 @@ class ButtonServiceTest {
     @Test
     void createButton_valid_savesAndReturnsId() {
         CreateButtonCommand command = new CreateButtonCommand("SAVE_BTN", 1L, "저장", "CREATE", "POST", "/api/save", 1, true);
-        Button domain = Button.create("SAVE_BTN", 1L, "저장", com.freightos.admin.domain.button.entity.ActionType.CREATE, "POST", "/api/save", 1, true);
+        Button domain = Button.create("SAVE_BTN", 1L, "저장", null, com.freightos.admin.domain.button.entity.ActionType.CREATE, "POST", "/api/save", 1, true);
         given(buttonPort.existsByButtonCode("SAVE_BTN")).willReturn(false);
         given(menuPort.existsById(1L)).willReturn(true);
         given(buttonFactory.from(command)).willReturn(domain);

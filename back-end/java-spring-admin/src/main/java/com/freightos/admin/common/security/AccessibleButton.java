@@ -1,3 +1,3 @@
 package com.freightos.admin.common.security;
 
-public record AccessibleButton(String code, String label) {}
+public record AccessibleButton(String code, String label, String labelEn) {}

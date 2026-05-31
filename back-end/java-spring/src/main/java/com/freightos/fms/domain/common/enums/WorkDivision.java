@@ -1,14 +1,19 @@
 package com.freightos.fms.domain.common.enums;
 
 public enum WorkDivision {
-    SEA("Sea"),
-    AIR("Air"),
-    WAREHOUSE("Warehouse"),
-    TRUCKING("Trucking");
+    SEA("Sea", "해상"),
+    AIR("Air", "항공"),
+    WAREHOUSE("Warehouse", "창고"),
+    TRUCKING("Trucking", "육상운송");
 
     private final String label;
+    private final String labelKo;
 
-    WorkDivision(String label) { this.label = label; }
+    WorkDivision(String label, String labelKo) {
+        this.label = label;
+        this.labelKo = labelKo;
+    }
 
     public String getLabel() { return label; }
+    public String getLabelKo() { return labelKo; }
 }

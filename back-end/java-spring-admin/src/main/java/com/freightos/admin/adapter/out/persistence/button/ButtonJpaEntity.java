@@ -32,6 +32,9 @@ public class ButtonJpaEntity extends BaseJpaEntity {
     @Column(name = "label", nullable = false, length = 200)
     private String label;
 
+    @Column(name = "label_en", length = 200)
+    private String labelEn;
+
     @Column(name = "action_type", nullable = false, length = 20)
     private String actionType;
 

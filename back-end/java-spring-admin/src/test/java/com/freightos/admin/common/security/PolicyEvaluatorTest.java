@@ -148,9 +148,9 @@ class PolicyEvaluatorTest {
     void accessibleButtonCodes_returnsOnlyMatchingButtons() {
         Map<String, List<String>> attrs = Map.of("role", List.of("USER"));
         List<ButtonEvalRow> buttonRows = List.of(
-                new ButtonEvalRow(1L, "BTN_CREATE", "", List.of(new PolicyRow("role", "ADMIN"))),
-                new ButtonEvalRow(2L, "BTN_VIEW",   "", List.of(new PolicyRow("role", "USER"))),
-                new ButtonEvalRow(3L, "BTN_PUBLIC", "", List.of())
+                new ButtonEvalRow(1L, "BTN_CREATE", "", null, List.of(new PolicyRow("role", "ADMIN"))),
+                new ButtonEvalRow(2L, "BTN_VIEW",   "", null, List.of(new PolicyRow("role", "USER"))),
+                new ButtonEvalRow(3L, "BTN_PUBLIC", "", null, List.of())
         );
 
         Set<String> result = evaluator.accessibleButtonCodes(attrs, buttonRows);

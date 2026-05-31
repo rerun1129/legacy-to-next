@@ -8,6 +8,7 @@ const ENUMS_BASE = '/api/enums'
 const ENUM_OPTION_SCHEMA = z.object({
   code: z.string(),
   label: z.string(),
+  labelKo: z.string().nullish(),
   description: z.string().optional(),
 })
 

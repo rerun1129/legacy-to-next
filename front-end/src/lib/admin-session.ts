@@ -58,9 +58,11 @@ export function hasButtonAccess(session: AdminSession | null, buttonCode: string
   return session.accessibleButtons.some(b => b.code === buttonCode);
 }
 
-export function getButtonLabel(session: AdminSession | null, buttonCode: string): string | null {
+export function getButtonLabel(session: AdminSession | null, buttonCode: string, locale?: string): string | null {
   if (!session) return null;
-  return session.accessibleButtons.find(b => b.code === buttonCode)?.label ?? null;
+  const b = session.accessibleButtons.find(b => b.code === buttonCode);
+  if (!b) return null;
+  return locale === "en" && b.labelEn ? b.labelEn : b.label;
 }
 
 // login·guard 양측에서 공유하는 "이 세션으로 진입 가능한 첫 번째 라우트" 헬퍼

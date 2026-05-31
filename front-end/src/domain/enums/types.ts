@@ -1,6 +1,7 @@
 export interface EnumOption {
   code: string
   label: string
+  labelKo?: string | null
   description?: string
 }
 

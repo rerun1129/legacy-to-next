@@ -1,6 +1,7 @@
 export interface AccessibleButtonInfo {
   code: string;
   label: string;
+  labelEn?: string | null;
 }
 
 export interface MeInfo {

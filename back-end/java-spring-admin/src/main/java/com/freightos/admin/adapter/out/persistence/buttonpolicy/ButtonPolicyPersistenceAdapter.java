@@ -32,7 +32,7 @@ public class ButtonPolicyPersistenceAdapter implements ButtonPolicyPort {
         List<ButtonPolicyEvalProjection> rows = buttonPolicyRepository.findAllActiveButtonsWithPolicies();
         Map<Long, ButtonEvalRow> byButtonId = new HashMap<>();
         for (ButtonPolicyEvalProjection row : rows) {
-            byButtonId.computeIfAbsent(row.getButtonId(), id -> new ButtonEvalRow(id, row.getButtonCode(), row.getLabel(), new ArrayList<>()));
+            byButtonId.computeIfAbsent(row.getButtonId(), id -> new ButtonEvalRow(id, row.getButtonCode(), row.getLabel(), row.getLabelEn(), new ArrayList<>()));
             if (row.getAttributeKey() != null) {
                 ((ArrayList<PolicyRow>) byButtonId.get(row.getButtonId()).policies())
                         .add(new PolicyRow(row.getAttributeKey(), row.getRequiredValue()));

@@ -29,11 +29,11 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.getCode(), e.getDescription(), e.getDescription()));
         // common enums — label 통일
         register(map, "Bound", Bound.values(),
-                e -> new EnumOption(e.name(), e.getLabel(), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         register(map, "BlType", BlType.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "FreightTerm", FreightTerm.values(),
-                e -> new EnumOption(e.name(), e.getLabel(), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         register(map, "Incoterms", Incoterms.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "ServiceTerm", ServiceTerm.values(),
@@ -49,7 +49,7 @@ public class EnumRegistryFactory {
         register(map, "ShipmentType", ShipmentType.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "WorkDivision", WorkDivision.values(),
-                e -> new EnumOption(e.name(), e.getLabel(), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         register(map, "SortDirection", SortDirection.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         register(map, "VolumeDivisor", VolumeDivisor.values(),
@@ -63,7 +63,7 @@ public class EnumRegistryFactory {
         register(map, "Fhd", Fhd.values(),
                 e -> new EnumOption(e.name(), e.getDescription(), e.getDescription()));
         register(map, "FlightType", FlightType.values(),
-                e -> new EnumOption(e.name(), e.getDescription(), e.getDescription()));
+                e -> new EnumOption(e.name(), e.getDescription(), e.getDescription(), e.getLabelKo()));
         register(map, "FreightCondition", FreightCondition.values(),
                 e -> new EnumOption(e.name(), e.getDescription(), e.getDescription()));
         register(map, "CargoType", CargoType.values(),
@@ -81,9 +81,9 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.name(), e.getLabel(), null));
         // 같은 이름의 JobDiv가 housebl/masterbl 양쪽에 있으므로 네임스페이스로 구분
         register(map, "housebl.JobDiv", JobDiv.values(),
-                e -> new EnumOption(e.name(), e.getLabel(), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         register(map, "masterbl.MasterBlJobDiv", MasterBlJobDiv.values(),
-                e -> new EnumOption(e.name(), e.getLabel(), null));
+                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         return EnumRegistry.of(map);
     }
 

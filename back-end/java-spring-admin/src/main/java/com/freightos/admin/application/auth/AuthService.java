@@ -76,7 +76,7 @@ public class AuthService implements AuthUseCase {
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, refreshRaw, user, attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label())).toList());
+                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label(), ab.labelEn())).toList());
     }
 
     @Override
@@ -109,7 +109,7 @@ public class AuthService implements AuthUseCase {
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, newRefreshRaw, user, attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label())).toList());
+                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label(), ab.labelEn())).toList());
     }
 
     @Override
@@ -133,7 +133,7 @@ public class AuthService implements AuthUseCase {
                 user.getEmail(),
                 attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label())).toList()
+                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label(), ab.labelEn())).toList()
         );
     }
 
@@ -147,7 +147,7 @@ public class AuthService implements AuthUseCase {
         Set<String> accessibleCodes = policyEvaluator.accessibleButtonCodes(attrs, buttonRows);
         return buttonRows.stream()
                 .filter(row -> accessibleCodes.contains(row.buttonCode()))
-                .map(row -> new AccessibleButton(row.buttonCode(), row.label()))
+                .map(row -> new AccessibleButton(row.buttonCode(), row.label(), row.labelEn()))
                 .toList();
     }
 

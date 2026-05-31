@@ -7,6 +7,7 @@ import { ApiError, ResponseParseError } from "./errors";
 const ACCESSIBLE_BUTTON_SCHEMA = z.object({
   code: z.string(),
   label: z.string(),
+  labelEn: z.string().nullish(),
 }) satisfies z.ZodType<AccessibleButtonInfo>;
 
 const ME_SCHEMA = z.object({

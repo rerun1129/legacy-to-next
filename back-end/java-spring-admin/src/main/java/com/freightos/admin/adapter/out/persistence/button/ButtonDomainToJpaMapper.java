@@ -11,6 +11,7 @@ public class ButtonDomainToJpaMapper {
         entity.setButtonCode(domain.getButtonCode());
         entity.setMenuId(domain.getMenuId());
         entity.setLabel(domain.getLabel());
+        entity.setLabelEn(domain.getLabelEn());
         entity.setActionType(domain.getActionType().name());
         entity.setApiMethod(domain.getApiMethod());
         entity.setApiPath(domain.getApiPath());

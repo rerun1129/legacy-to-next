@@ -13,6 +13,7 @@ public class ButtonFactory {
                 command.buttonCode(),
                 command.menuId(),
                 command.label(),
+                null,
                 ActionType.valueOf(command.actionType()),
                 command.apiMethod(),
                 command.apiPath(),

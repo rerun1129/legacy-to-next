@@ -8,6 +8,7 @@ public interface ButtonPolicyEvalProjection {
     Long getButtonId();
     String getButtonCode();
     String getLabel();
+    String getLabelEn();
     String getAttributeKey();
     String getRequiredValue();
 }

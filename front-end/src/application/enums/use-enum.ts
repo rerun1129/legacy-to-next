@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
 import type { ComboBoxOption } from '@/components/shared/inputs/_types'
 import type { EnumName } from '@/domain/enums/types'
@@ -34,11 +35,13 @@ export function useEnumOptions(name: EnumName): {
   error: unknown
   placeholder: string | undefined
 } {
+  const locale = useLocale()
+  const t = useTranslations('common')
   const { data, isLoading, error } = useEnum(name)
   return {
-    options: data?.map((o) => ({ value: o.code, label: o.label })) ?? [],
+    options: data?.map((o) => ({ value: o.code, label: locale === 'ko' && o.labelKo ? o.labelKo : o.label })) ?? [],
     isLoading,
     error,
-    placeholder: isLoading ? '로딩 중...' : undefined,
+    placeholder: isLoading ? t('loading') : undefined,
   }
 }

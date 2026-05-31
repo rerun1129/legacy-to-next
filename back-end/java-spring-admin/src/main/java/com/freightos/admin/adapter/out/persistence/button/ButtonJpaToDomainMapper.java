@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class ButtonJpaToDomainMapper {
 
     public Button toDomain(ButtonJpaEntity e) {
-        Button domain = Button.create(e.getButtonCode(), e.getMenuId(), e.getLabel(), ActionType.valueOf(e.getActionType()), e.getApiMethod(), e.getApiPath(), e.getSortOrder(), e.getActive());
+        Button domain = Button.create(e.getButtonCode(), e.getMenuId(), e.getLabel(), e.getLabelEn(), ActionType.valueOf(e.getActionType()), e.getApiMethod(), e.getApiPath(), e.getSortOrder(), e.getActive());
         domain.assignIdentity(e.getId(), e.getCreatedAt(), e.getUpdatedAt(), e.getCreatedBy(), e.getUpdatedBy());
         return domain;
     }

@@ -211,7 +211,7 @@ class AuthServiceTest {
         given(effectiveAttributesService.computeEffectiveAttributes(1L, attrs)).willReturn(attrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of(
-            new ButtonEvalRow(1L, "ADMIN_USER_LIST_CREATE", "신규", List.of())
+            new ButtonEvalRow(1L, "ADMIN_USER_LIST_CREATE", "신규", null, List.of())
         ));
         given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of("ADMIN_USER_LIST"));
         given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of("ADMIN_USER_LIST_CREATE"));
