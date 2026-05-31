@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
@@ -10,6 +11,10 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function NonBLSchedulePanel() {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tf = useTranslations("fms.nonBl.entry.fields");
+  const tp = useTranslations("fms.nonBl.entry.panels");
+
   const { register, control, setValue } = useFormContext<NonBlFormValues>();
 
   // Non-BL은 SEA/AIR 구분 없이 전체 소스 사용
@@ -25,9 +30,9 @@ export function NonBLSchedulePanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Liner"
+          label={tf("liner")}
           codeProps={{ ...register("linerCode"), placeholder: "Code" }}
-          nameProps={{ ...register("linerName"), placeholder: "Liner" }}
+          nameProps={{ ...register("linerName"), placeholder: tf("liner") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
           onSearch={liner.onSearch}
           suggestions={liner.suggestions}
@@ -40,7 +45,7 @@ export function NonBLSchedulePanel() {
       key: "vessel",
       render: () => (
         <div className="li">
-          <span className="li__label">Vessel</span>
+          <span className="li__label">{tf("vessel")}</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Vessel Name" {...register("vesselName")} />
           </div>
@@ -51,7 +56,7 @@ export function NonBLSchedulePanel() {
       key: "voy",
       render: () => (
         <div className="li">
-          <span className="li__label">Voy</span>
+          <span className="li__label">{tf("voy")}</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Voyage No" {...register("voyNo")} />
           </div>
@@ -62,7 +67,7 @@ export function NonBLSchedulePanel() {
       key: "etd",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">ETD</span>
+          <span className="li__label is-required">{tf("etd")}</span>
           <div className="li__input">
             <Controller
               control={control}
@@ -86,7 +91,7 @@ export function NonBLSchedulePanel() {
       key: "eta",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">ETA</span>
+          <span className="li__label is-required">{tf("eta")}</span>
           <div className="li__input">
             <Controller
               control={control}
@@ -106,7 +111,7 @@ export function NonBLSchedulePanel() {
         </div>
       ),
     },
-  ], [register, control, liner, setValue]);
+  ], [register, control, liner, setValue, tf]);
 
   const portItems: FieldItemDef[] = useMemo(() => [
     {
@@ -115,7 +120,7 @@ export function NonBLSchedulePanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="POL"
+          label={tf("pol")}
           required
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Port Name" }}
@@ -133,7 +138,7 @@ export function NonBLSchedulePanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="POD"
+          label={tf("pod")}
           required
           codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("podName"), placeholder: "Port Name" }}
@@ -151,7 +156,7 @@ export function NonBLSchedulePanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Final Dest."
+          label={tf("finalDest")}
           codeProps={{ ...register("finalDestCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("finalDestName"), placeholder: "Port Name" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -166,7 +171,7 @@ export function NonBLSchedulePanel() {
       key: "final-eta",
       render: () => (
         <div className="li">
-          <span className="li__label">Final ETA</span>
+          <span className="li__label">{tf("finalEta")}</span>
           <div className="li__input">
             <Controller
               control={control}
@@ -185,17 +190,17 @@ export function NonBLSchedulePanel() {
         </div>
       ),
     },
-  ], [register, control, pol, pod, finalDest, setValue]);
+  ], [register, control, pol, pod, finalDest, setValue, tf]);
 
   const fields: FieldWidgetDef[] = [
     {
       key:    "liner-vessel",
-      label:  "Liner & Vessel",
+      label:  tf("linerVessel"),
       render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.liner" items={linerVesselItems} />,
     },
     {
       key:    "ports",
-      label:  "Ports",
+      label:  tf("ports"),
       render: () => <FieldItemGrid itemScope="nonbl-schedule-panel.ports" items={portItems} />,
     },
   ];
@@ -204,7 +209,7 @@ export function NonBLSchedulePanel() {
     <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Schedule</span>
+        <span className="panel__title">{tp("schedule")}</span>
       </div>
       <div className="panel__body panel__body--scroll">
         <FieldWidgetList panelScope="nonbl-schedule-panel" fields={fields} />

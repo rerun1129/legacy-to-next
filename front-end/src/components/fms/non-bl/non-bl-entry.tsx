@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations }                        from "next-intl";
 import { FormProvider, Controller }               from "react-hook-form";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainNonBL }     from "./tabs/main-non-bl";
@@ -10,11 +11,27 @@ import { useNonBlEntry }                          from "./use-non-bl-entry";
 import { NonBlEntryHeader }                       from "./non-bl-entry-header";
 
 export function NonBLEntry() {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tb  = useTranslations("fms.nonBl.entry.toolbar");
+  const tts = useTranslations("fms.nonBl.entry.tabs");
+  const tm  = useTranslations("fms.nonBl.entry.msg");
+
   const entry = useNonBlEntry();
+
+  const loadingMessage = entry.deleteMutation.isPending
+    ? tm("deleting")
+    : entry.isSavePending
+      ? tm("saving")
+      : tm("fetching");
+
+  const tabs = [
+    { key: "main",    label: tts("main")    },
+    { key: "freight", label: tts("freight") },
+  ];
 
   return (
     <FormProvider {...entry.methods}>
-    <ScreenGuard visible={entry.isLoading} message={entry.loadingMessage} />
+    <ScreenGuard visible={entry.isLoading} message={loadingMessage} />
     <form
       onSubmit={entry.methods.handleSubmit(entry.handleSubmit)}
       onKeyDown={(e) => {
@@ -38,16 +55,16 @@ export function NonBLEntry() {
         onChangeBlNo={entry.handleChangeBlNo}
       />
 
-      {/* gridTemplateColumns는 툴바 레이아웃에 필수이므로 인라인 유지 */}
+      {/* Toolbar: 4필드 — gridTemplateColumns는 툴바 레이아웃에 필수이므로 인라인 유지 */}
       <div className="toolbar" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
         <div className="field is-required">
-          <div className="field__label is-required">Non B/L No</div>
+          <div className="field__label is-required">{tb("nonBlNo")}</div>
           <div className="field__input">
             <TextBox variant="panel" placeholder="Auto on save" {...entry.register("nonBlNo")} />
           </div>
         </div>
         <div className="field is-required">
-          <div className="field__label is-required">Work Division</div>
+          <div className="field__label is-required">{tb("workDiv")}</div>
           <div className="field__input">
             <Controller
               name="workDiv"
@@ -59,7 +76,7 @@ export function NonBLEntry() {
           </div>
         </div>
         <div className="field is-required">
-          <div className="field__label is-required">Bound</div>
+          <div className="field__label is-required">{tb("bound")}</div>
           <div className="field__input">
             <Controller
               name="bound"
@@ -71,15 +88,16 @@ export function NonBLEntry() {
           </div>
         </div>
         <div className="field">
-          <div className="field__label">Ref. No.</div>
+          <div className="field__label">{tb("refNo")}</div>
           <div className="field__input">
             <TextBox variant="panel" placeholder="Ref. No." {...entry.register("refNo")} />
           </div>
         </div>
       </div>
 
+      {/* Tabbar — 2 tabs only */}
       <div className="tabbar">
-        {[{ key: "main", label: "Main" }, { key: "freight", label: "Freight" }].map(t => (
+        {tabs.map((t) => (
           <button
             key={t.key}
             type="button"

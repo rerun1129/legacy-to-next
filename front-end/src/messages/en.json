@@ -112,7 +112,19 @@
           "deleteWarning": "Deleted data cannot be recovered.",
           "loadingDelete": "Deleting…",
           "loadingSave": "Saving…",
-          "loadingFetch": "Loading…"
+          "loadingFetch": "Loading…",
+          "enterBlNo": "Please enter a B/L No.",
+          "searchError": "Error searching B/L: {message}",
+          "noResults": "No matching B/L found.",
+          "multipleFound": "Multiple B/L Nos found — please select from the List.",
+          "blNoChanged": "B/L No. has been changed."
+        },
+        "modal": {
+          "changeBlNo": {
+            "title": "Change B/L No",
+            "currentBlNo": "Current B/L No",
+            "newBlNo": "New B/L No"
+          }
         },
         "freight": {
           "panels": {
@@ -257,9 +269,26 @@
           "draft": "DRAFT"
         },
         "msg": {
-          "deleting": "Deleting…",
-          "saving":   "Saving…",
-          "fetching": "Loading…"
+          "deleting":      "Deleting…",
+          "saving":        "Saving…",
+          "fetching":      "Loading…",
+          "searchBlFirst": "Please search for a Master B/L first.",
+          "noResults":     "No matching B/L found.",
+          "multipleFound": "Multiple MBL Nos found — please select from the List.",
+          "searchError":   "Error searching B/L: {message}",
+          "confirmSave":   "Save changes?",
+          "confirmDelete": "Delete this record?",
+          "deleteWarning": "Deleted data cannot be recovered.",
+          "blNoChanged":   "B/L No. has been changed."
+        },
+        "modal": {
+          "changeBlNo": {
+            "title":          "Change B/L No",
+            "currentBlNo":    "Current {blNoLabel}",
+            "newBlNo":        "New {blNoLabel}",
+            "currentMasterRef": "Current Master Ref",
+            "newMasterRef":   "New Master Ref"
+          }
         },
         "panels": {
           "houseBLList":          "House B/L List",
@@ -396,7 +425,10 @@
     },
     "airHouse": {
       "list": {
-        "title": "Air House B/L List",
+        "title": {
+          "exp": "Air Export List",
+          "imp": "Air Import List"
+        },
         "panel": "Air House B/L",
         "cols": {
           "hblNo": "House AWB No.",
@@ -457,6 +489,7 @@
     },
     "truckBl": {
       "list": {
+        "title": "Truck B/L List",
         "panel": "Truck B/L",
         "cols": {
           "truckBlNo": "Truck B/L No",
@@ -499,10 +532,202 @@
           "portKindPol": "POL",
           "portKindPod": "POD"
         }
+      },
+      "entry": {
+        "toolbar": {
+          "truckBlNo": "Truck B/L No",
+          "bound": "Bound",
+          "loadType": "Load Type",
+          "serviceTerm": "Service Term"
+        },
+        "title": {
+          "main": "Truck B/L Entry"
+        },
+        "tabs": {
+          "main": "Main",
+          "freight": "Freight"
+        },
+        "status": {
+          "saved": "SAVED",
+          "draft": "DRAFT"
+        },
+        "msg": {
+          "deleting": "Deleting…",
+          "saving": "Saving…",
+          "fetching": "Loading…",
+          "searchBlFirst": "Please search for a Truck B/L first.",
+          "enterBlNo":     "Enter a Truck B/L No.",
+          "noResults":     "No results found.",
+          "multipleFound": "Multiple results found. Please select from the List.",
+          "confirmSave":   "Save changes?",
+          "confirmDelete": "Delete this record?",
+          "deleteWarning": "Deleted data cannot be recovered."
+        },
+        "panels": {
+          "party": "Party",
+          "schedule": "Schedule",
+          "cargo": "Cargo",
+          "document": "Document",
+          "performance": "Performance",
+          "dimension": "Dimension",
+          "remark": "Remark",
+          "truckInformation": "Truck Information",
+          "marksNumbers": "Marks & Numbers",
+          "description": "Description"
+        },
+        "fields": {
+          "shipper": "SHIPPER",
+          "consignee": "CONSIGNEE",
+          "notify": "NOTIFY",
+          "docPartner": "DOC PARTNER",
+          "toOrder": "To Order",
+          "sameAsCne": "Same as Cne.",
+          "vessel": "Vessel",
+          "dates": "Dates",
+          "pol": "POL",
+          "pod": "POD",
+          "etd": "ETD",
+          "eta": "ETA",
+          "package": "Package",
+          "grossWt": "G/W",
+          "cbm": "CBM",
+          "chargeWt": "Charge W/T",
+          "hsCode": "HS Code",
+          "pickupDate": "Pick-up Date",
+          "trucker": "Trucker",
+          "truckerPic": "Trucker PIC",
+          "actualCustomer": "Actual Customer",
+          "settlePartner": "Settle Partner",
+          "salesMan": "Sales Man",
+          "operator": "Operator",
+          "team": "Team",
+          "truckOrderNo": "Truck Order No",
+          "unit": "Unit",
+          "grossWT": "Gross W/T",
+          "truckNo": "Truck No.",
+          "type": "Type",
+          "driver": "Driver",
+          "mobileNo": "Mobile No",
+          "containerNo": "Container No.",
+          "contType": "Cont. Type",
+          "sealNo1": "Seal No.1",
+          "sealNo2": "Seal No.2",
+          "sealNo3": "Seal No.3",
+          "length": "Length",
+          "width": "Width",
+          "height": "Height",
+          "qty": "Qty",
+          "volumeWt": "Volume Wt."
+        },
+        "modal": {
+          "changeBlNo": {
+            "title": "Change B/L No",
+            "currentBlNo": "Current B/L No",
+            "newBlNo": "New B/L No",
+            "update": "Update",
+            "updating": "Updating…",
+            "close": "Close",
+            "blNoChanged": "B/L No. has been changed."
+          }
+        }
       }
     },
     "nonBl": {
+      "entry": {
+        "toolbar": {
+          "nonBlNo":  "Non B/L No",
+          "workDiv":  "Work Division",
+          "bound":    "Bound",
+          "refNo":    "Ref. No."
+        },
+        "title": {
+          "main": "Non B/L Entry"
+        },
+        "tabs": {
+          "main":    "Main",
+          "freight": "Freight"
+        },
+        "status": {
+          "saved": "SAVED",
+          "draft": "DRAFT"
+        },
+        "msg": {
+          "deleting":      "Deleting…",
+          "saving":        "Saving…",
+          "fetching":      "Loading…",
+          "searchBlFirst": "Please search for a Non B/L first.",
+          "enterBlNo":     "Enter a Non B/L No.",
+          "noResults":     "No results found.",
+          "multipleFound": "Multiple results found. Please select from the List.",
+          "confirmSave":   "Save changes?",
+          "confirmDelete": "Delete this record?",
+          "deleteWarning": "Deleted data cannot be recovered."
+        },
+        "panels": {
+          "party":         "Party",
+          "schedule":      "Schedule",
+          "cargo":         "Cargo",
+          "document":      "Document",
+          "dimension":     "Dimension",
+          "containerInfo": "Container Information",
+          "remark":        "Remark"
+        },
+        "fields": {
+          "actualCustomer": "ACTUAL CUSTOMER",
+          "shipper":        "SHIPPER",
+          "consignee":      "CONSIGNEE",
+          "notify":         "NOTIFY",
+          "settlePartner":  "SETTLE PARTNER",
+          "linerVessel":    "Liner & Vessel",
+          "liner":          "Liner",
+          "vessel":         "Vessel",
+          "voy":            "Voy",
+          "etd":            "ETD",
+          "eta":            "ETA",
+          "ports":          "Ports",
+          "pol":            "POL",
+          "pod":            "POD",
+          "finalDest":      "Final Dest.",
+          "finalEta":       "Final ETA",
+          "mainItem":       "Main Item",
+          "package":        "Package",
+          "grossWt":        "Gross W/T",
+          "volumeWt":       "Volume W/T",
+          "cbm":            "CBM",
+          "rton":           "R/Ton",
+          "hsCode":         "HS Code",
+          "salesClass":     "Sales Class",
+          "salesMan":       "Sales Man",
+          "operator":       "Operator",
+          "team":           "Team",
+          "containerNo":    "Container No.",
+          "contType":       "Cont. Type",
+          "sealNo1":        "Seal No. 1",
+          "sealNo2":        "Seal No. 2",
+          "sealNo3":        "Seal No. 3",
+          "pkg":            "Package",
+          "unit":           "Unit",
+          "length":         "Length",
+          "width":          "Width",
+          "height":         "Height",
+          "qty":            "Qty",
+          "volumeWtCol":    "Volume Wt.",
+          "remark":         "Remark"
+        },
+        "modal": {
+          "changeBlNo": {
+            "title":       "Change B/L No",
+            "currentBlNo": "Current B/L No",
+            "newBlNo":     "New B/L No",
+            "update":      "Update",
+            "updating":    "Updating…",
+            "close":       "Close",
+            "blNoChanged": "B/L No. has been changed."
+          }
+        }
+      },
       "list": {
+        "title": "Non B/L List",
         "panel": "Non B/L",
         "cols": {
           "nonBlNo": "Non B/L No",
@@ -553,7 +778,10 @@
     },
     "seaHouse": {
       "list": {
-        "title": "Sea Export List",
+        "title": {
+          "exp": "Sea Export List",
+          "imp": "Sea Import List"
+        },
         "panel": "Sea House B/L",
         "cols": {
           "hblNo": "House B/L No.",
@@ -621,6 +849,110 @@
           "partnerKindDoc": "Doc Partner",
           "portKindPol": "POL",
           "portKindPod": "POD"
+        }
+      }
+    },
+    "seaMaster": {
+      "list": {
+        "title": {
+          "exp": "Master B/L Sea Export List",
+          "imp": "Master B/L Sea Import List"
+        },
+        "panel": "Sea Master B/L",
+        "cols": {
+          "mblNo": "Master B/L No",
+          "masterRefNo": "Master Reference No.",
+          "bound": "Bound",
+          "etd": "ETD",
+          "eta": "ETA",
+          "polCode": "POL",
+          "podCode": "POD",
+          "vesselName": "Vessel Name",
+          "voyageNo": "Voyage",
+          "shipperCode": "Shipper",
+          "shipperName": "Shipper Name",
+          "consigneeCode": "Consignee",
+          "consigneeName": "Consignee Name",
+          "notifyCode": "Notify",
+          "notifyName": "Notify Name",
+          "linerCode": "Liner",
+          "linerName": "Liner Name",
+          "loadType": "Load Type",
+          "houseBlCount": "House B/L Count",
+          "pkgQty": "Package",
+          "pkgUnit": "Unit",
+          "grossWeightKg": "Gross W/T",
+          "cbm": "CBM",
+          "operatorCode": "Operator",
+          "teamCode": "Team",
+          "teamName": "Team Name"
+        },
+        "filter": {
+          "all": "ALL",
+          "vesselName": "Vessel Name",
+          "voyageNo": "Voyage",
+          "shipmentType": "Shipment Type",
+          "loadType": "Load Type",
+          "liner": "Liner",
+          "team": "Team",
+          "dateKindEtd": "ETD",
+          "dateKindEta": "ETA",
+          "masterBlKindMbl": "Master B/L No",
+          "masterBlKindRef": "Master Ref. No",
+          "partyKindShipper": "Shipper",
+          "partyKindConsignee": "Consignee",
+          "partyKindNotify": "Notify",
+          "portKindPol": "POL",
+          "portKindPod": "POD"
+        }
+      }
+    },
+    "airMaster": {
+      "list": {
+        "title": {
+          "exp": "Master B/L Air Export List",
+          "imp": "Master B/L Air Import List"
+        },
+        "panel": "Air Master B/L",
+        "cols": {
+          "mblNo": "Master AWB No.",
+          "masterRefNo": "Master Reference No.",
+          "bound": "Bound",
+          "shipmentType": "Shipment Type",
+          "etd": "ETD",
+          "eta": "ETA",
+          "grossWeightKg": "Gross W/T",
+          "chargeWeightKg": "Charge W/T",
+          "pkgQty": "Package",
+          "houseBlCount": "House AWB Count",
+          "polCode": "Departure",
+          "podCode": "Destination",
+          "shipperCode": "Shipper",
+          "shipperName": "Shipper Name",
+          "consigneeCode": "Consignee",
+          "consigneeName": "Consignee Name",
+          "notifyCode": "Notify",
+          "notifyName": "Notify Name",
+          "airlineCode": "Airline",
+          "airlineName": "Airline Name",
+          "operatorCode": "Operator",
+          "teamCode": "Team",
+          "teamName": "Team Name"
+        },
+        "filter": {
+          "all": "ALL",
+          "shipmentType": "Shipment Type",
+          "airline": "Airline",
+          "team": "Team",
+          "dateKindEtd": "ETD",
+          "dateKindEta": "ETA",
+          "masterAwbKindMawb": "Master AWB No",
+          "masterAwbKindRef": "Master Ref. No",
+          "partyKindShipper": "Shipper",
+          "partyKindConsignee": "Consignee",
+          "partyKindNotify": "Notify",
+          "portKindDeparture": "Departure",
+          "portKindDestination": "Destination"
         }
       }
     }

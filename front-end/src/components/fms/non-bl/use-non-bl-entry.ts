@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm }                                from "react-hook-form";
 import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
+import { useTranslations }                       from "next-intl";
 import { useBlDraftSync }                        from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore }                       from "@/lib/use-bl-draft-store";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
@@ -16,6 +17,7 @@ import { useSearchNonBl }                        from "./use-search-non-bl";
 import { useNonBlEntryMutations }                from "./use-non-bl-entry-mutations";
 
 export function useNonBlEntry() {
+  const t = useTranslations("fms.nonBl.entry.msg");
   const [tab, setTab] = useState("main");
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
@@ -93,14 +95,13 @@ export function useNonBlEntry() {
 
   function handleChangeBlNo() {
     if (!isEdit || !id) {
-      toast.info("먼저 Non B/L을 조회해주세요.");
+      toast.info(t("searchBlFirst"));
       return;
     }
     setIsChangeBlNoModalOpen(true);
   }
 
   const isLoading = isDetailFetching || isSavePending || deleteMutation.isPending;
-  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : isSavePending ? "저장 중..." : "조회 중...";
 
   return {
     methods,
@@ -110,7 +111,6 @@ export function useNonBlEntry() {
     id,
     detail,
     isLoading,
-    loadingMessage,
     deleteMutation,
     isSavePending,
     tab,

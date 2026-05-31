@@ -1,6 +1,7 @@
 import type { UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { houseBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
@@ -18,6 +19,7 @@ export function useSearchBl(
     onAfterFound?: (targetId: number, sameAsCurrent: boolean) => void;
   },
 ) {
+  const t = useTranslations("fms.houseBl.entry.msg");
   const router = useRouter();
   const queryClient = useQueryClient();
   const clearDraft = useBLDraftStore((s) => s.clearDraft);
@@ -26,7 +28,7 @@ export function useSearchBl(
   async function handleSearchBl() {
     const blNo = form.getValues("hbl")?.trim();
     if (!blNo) {
-      toast.info("B/L No.를 입력하세요.");
+      toast.info(t("enterBlNo"));
       return;
     }
 
@@ -36,17 +38,17 @@ export function useSearchBl(
       ids = await houseBlPort.findByHblNo(blNo, jobDiv);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      toast.error(`B/L 조회 중 오류가 발생했습니다: ${message}`);
+      toast.error(t("searchError", { message }));
       return;
     }
 
     if (ids.length === 0) {
-      toast.info("일치하는 B/L이 없습니다.");
+      toast.info(t("noResults"));
       return;
     }
 
     if (ids.length > 1) {
-      toast.info("동일 B/L No. 다건 발견 — List 화면에서 선택해주세요.");
+      toast.info(t("multipleFound"));
       // setInject → router.push 순서 동기 호출 유지 (§non-bl 패턴 정합)
       listFilterStore.getState().setInject(`/fms/house-bl/${variant.key}/list`, { hblNo: blNo });
       router.push(`/fms/house-bl/${variant.key}/list`);

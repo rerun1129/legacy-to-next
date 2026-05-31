@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import { CodeBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
@@ -8,6 +9,10 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function TruckPerformancePanel() {
+  // Rules of Hooks: unconditionally at top
+  const tf = useTranslations("fms.truckBl.entry.fields");
+  const tp = useTranslations("fms.truckBl.entry.panels");
+
   const { register, setValue } = useFormContext<TruckBlFormValues>();
   const actualCustomer = useCodeAutocomplete(CODE_SOURCES.customer);
   const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
@@ -21,7 +26,7 @@ export function TruckPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="Actual Customer"
+          label={tf("actualCustomer")}
           required
           codeProps={{ ...register("actualCustomerCode") }}
           nameProps={{ ...register("actualCustomerName") }}
@@ -38,7 +43,7 @@ export function TruckPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="Settle Partner"
+          label={tf("settlePartner")}
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -54,7 +59,7 @@ export function TruckPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="Sales Man"
+          label={tf("salesMan")}
           required
           codeProps={{ ...register("salesManCode") }}
           nameProps={{ ...register("salesManName") }}
@@ -71,7 +76,7 @@ export function TruckPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="Operator"
+          label={tf("operator")}
           required
           codeProps={{ ...register("operatorCode") }}
           nameProps={{ ...register("operatorName") }}
@@ -88,7 +93,7 @@ export function TruckPerformancePanel() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="Team"
+          label={tf("team")}
           required
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
@@ -104,7 +109,7 @@ export function TruckPerformancePanel() {
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Performance</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("performance")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldItemGrid itemScope="truck-performance-panel" items={PERF_ITEMS} cols={1} />
       </div>

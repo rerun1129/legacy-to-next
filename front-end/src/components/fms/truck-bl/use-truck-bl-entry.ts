@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm }                                from "react-hook-form";
 import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
+import { useTranslations }                       from "next-intl";
 import { useBlDraftSync }                        from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore }                       from "@/lib/use-bl-draft-store";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
@@ -15,6 +16,7 @@ import { useTruckBlEntryMutations }              from "./use-truck-bl-entry-muta
 import { useSearchTruckBl }                      from "./use-search-truck-bl";
 
 export function useTruckBlEntry() {
+  const t = useTranslations("fms.truckBl.entry.msg");
   const [tab, setTab] = useState("main");
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
@@ -161,14 +163,13 @@ export function useTruckBlEntry() {
 
   function handleChangeBlNo() {
     if (!isEdit || !id) {
-      toast.info("먼저 Truck B/L을 조회해주세요.");
+      toast.info(t("searchBlFirst"));
       return;
     }
     setIsChangeBlNoModalOpen(true);
   }
 
   const isLoading = isDetailFetching || isSavePending || deleteMutation.isPending;
-  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : isSavePending ? "저장 중..." : "조회 중...";
 
   return {
     form,
@@ -178,7 +179,7 @@ export function useTruckBlEntry() {
     id,
     detail,
     isLoading,
-    loadingMessage,
+    isDetailFetching,
     deleteMutation,
     isSavePending,
     tab,

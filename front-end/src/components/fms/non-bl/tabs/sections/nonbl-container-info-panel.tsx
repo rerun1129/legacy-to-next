@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef }              from "react";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Plus, Minus }                           from "lucide-react";
+import { useTranslations }                       from "next-intl";
 import { GridList, type GridColumn }             from "@/components/shared/grid-list";
 import { TextBox, NumberBox, ComboBox, CodeBox }  from "@/components/shared/inputs";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
@@ -43,15 +44,19 @@ function PkgUnitCell({ index }: { index: number }) {
 }
 
 export function NonBLContainerInfoPanel() {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tf = useTranslations("fms.nonBl.entry.fields");
+  const tp = useTranslations("fms.nonBl.entry.panels");
+
   const { control, register } = useFormContext<NonBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "containers" });
   const { options: rawOptions } = useEnumOptions("ContainerType");
   const contTypeOptions = useMemo(() => rawOptions.map(o => ({ value: o.value, label: o.label })), [rawOptions]);
 
   const cols = useMemo<GridColumn<ContainerInfoRow>[]>(() => [
-    { key: "_no",      width: 50, label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "cno",      width: 80, label: "Container No.", render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.cno`)} /> },
-    { key: "contType", width: 80, label: "Cont.Type",   render: (_, __, i) => (
+    { key: "_no",      width: 50, label: "#",                   className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "cno",      width: 80, label: tf("containerNo"),     render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.cno`)} /> },
+    { key: "contType", width: 80, label: tf("contType"),        render: (_, __, i) => (
       <Controller
         name={`containers.${i}.contType`}
         control={control}
@@ -60,14 +65,14 @@ export function NonBLContainerInfoPanel() {
         )}
       />
     )},
-    { key: "sealNo1",  width: 80, label: "Seal No. 1",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo1`)} /> },
-    { key: "sealNo2",  width: 80, label: "Seal No. 2",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo2`)} /> },
-    { key: "sealNo3",  width: 80, label: "Seal No. 3",  render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo3`)} /> },
-    { key: "pkg",      width: 80, label: "Package",     render: (_, __, i) => <NumberBox name={`containers.${i}.pkg`} variant="cell" decimalPlaces={0} /> },
-    { key: "pkgUnit",  width: 80, label: "Unit",        render: (_, __, i) => <PkgUnitCell index={i} /> },
-    { key: "grossWt",  width: 80, label: "Gross W/T",   render: (_, __, i) => <NumberBox name={`containers.${i}.grossWt`} variant="cell" decimalPlaces={3} /> },
-    { key: "cbm",      width: 80, label: "CBM",         render: (_, __, i) => <NumberBox name={`containers.${i}.cbm`} variant="cell" decimalPlaces={3} /> },
-  ], [register, control, contTypeOptions]);
+    { key: "sealNo1",  width: 80, label: tf("sealNo1"),         render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo1`)} /> },
+    { key: "sealNo2",  width: 80, label: tf("sealNo2"),         render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo2`)} /> },
+    { key: "sealNo3",  width: 80, label: tf("sealNo3"),         render: (_, __, i) => <TextBox variant="cell" {...register(`containers.${i}.sealNo3`)} /> },
+    { key: "pkg",      width: 80, label: tf("pkg"),             render: (_, __, i) => <NumberBox name={`containers.${i}.pkg`} variant="cell" decimalPlaces={0} /> },
+    { key: "pkgUnit",  width: 80, label: tf("unit"),            render: (_, __, i) => <PkgUnitCell index={i} /> },
+    { key: "grossWt",  width: 80, label: tf("grossWt"),         render: (_, __, i) => <NumberBox name={`containers.${i}.grossWt`} variant="cell" decimalPlaces={3} /> },
+    { key: "cbm",      width: 80, label: tf("cbm"),             render: (_, __, i) => <NumberBox name={`containers.${i}.cbm`} variant="cell" decimalPlaces={3} /> },
+  ], [register, control, contTypeOptions, tf]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
 
@@ -106,7 +111,7 @@ export function NonBLContainerInfoPanel() {
     <div className="panel panel--col">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Container Information</span>
+        <span className="panel__title">{tp("containerInfo")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>

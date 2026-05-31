@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Save, X } from "lucide-react";
 import { houseBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
@@ -24,6 +25,8 @@ function HouseChangeBlNoModalInner({
   onClose,
   onChanged,
 }: Omit<HouseChangeBlNoModalProps, "isOpen">) {
+  const t = useTranslations("fms.houseBl.entry.msg");
+  const tm = useTranslations("fms.houseBl.entry.modal.changeBlNo");
   const queryClient = useQueryClient();
   // BE SSOT — zodResolver/required/pattern 사용 금지
   const form = useForm<FormValues>({ defaultValues: { newHblNo: "" } });
@@ -31,7 +34,7 @@ function HouseChangeBlNoModalInner({
   const mutation = useMutation({
     mutationFn: (values: FormValues) => houseBlPort.changeHblNo(houseBlId, values.newHblNo),
     onSuccess: () => {
-      toast.success("B/L No가 변경되었습니다.");
+      toast.success(t("blNoChanged"));
       // List 자동 invalidate 금지 (§6.21) — detail만 갱신
       queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", houseBlId] });
       onChanged?.();
@@ -45,13 +48,13 @@ function HouseChangeBlNoModalInner({
     <>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="modal__body">
         <div className="field">
-          <div className="field__label">현재 B/L No</div>
+          <div className="field__label">{tm("currentBlNo")}</div>
           <div className="field__input">
             <input value={currentHblNo ?? ""} readOnly />
           </div>
         </div>
         <div className="field">
-          <div className="field__label">변경할 B/L No</div>
+          <div className="field__label">{tm("newBlNo")}</div>
           <div className="field__input">
             <input {...form.register("newHblNo")} placeholder="New B/L No" autoFocus />
           </div>

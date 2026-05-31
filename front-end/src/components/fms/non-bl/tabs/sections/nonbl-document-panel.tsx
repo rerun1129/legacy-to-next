@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
@@ -9,18 +10,22 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function NonBLDocumentPanel() {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tf = useTranslations("fms.nonBl.entry.fields");
+  const tp = useTranslations("fms.nonBl.entry.panels");
+
   const { register, control, setValue } = useFormContext<NonBlFormValues>();
   const { options: salesClassOptions, placeholder: salesClassPlaceholder } = useEnumOptions("SalesClass");
   const salesMan = useCodeAutocomplete(CODE_SOURCES.user);
   const operator = useCodeAutocomplete(CODE_SOURCES.user);
   const team     = useCodeAutocomplete(CODE_SOURCES.team);
 
-  const DOCUMENT_ITEMS: FieldItemDef[] = [
+  const documentItems: FieldItemDef[] = [
     {
       key: "sales-class",
       render: () => (
         <div className="li">
-          <span className="li__label">Sales Class</span>
+          <span className="li__label">{tf("salesClass")}</span>
           <div className="li__input">
             <Controller
               name="salesClass"
@@ -39,7 +44,7 @@ export function NonBLDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Sales Man"
+          label={tf("salesMan")}
           codeProps={{ ...register("salesManCode") }}
           nameProps={{ ...register("salesManName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -56,7 +61,7 @@ export function NonBLDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Operator"
+          label={tf("operator")}
           required
           codeProps={{ ...register("operatorCode") }}
           nameProps={{ ...register("operatorName") }}
@@ -74,7 +79,7 @@ export function NonBLDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Team"
+          label={tf("team")}
           required
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
@@ -92,10 +97,10 @@ export function NonBLDocumentPanel() {
     <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Document</span>
+        <span className="panel__title">{tp("document")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
-        <FieldItemGrid itemScope="nonbl-document-panel" items={DOCUMENT_ITEMS} />
+        <FieldItemGrid itemScope="nonbl-document-panel" items={documentItems} />
       </div>
     </div>
   );

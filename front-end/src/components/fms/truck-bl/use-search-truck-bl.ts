@@ -2,6 +2,7 @@ import type { MutableRefObject } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { truckBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
@@ -14,6 +15,7 @@ export function useSearchTruckBl(args: {
   detailLoadedRef: MutableRefObject<boolean>;
 }): { handleSearch: () => Promise<void> } {
   const { form, id, detailLoadedRef } = args;
+  const t = useTranslations("fms.truckBl.entry.msg");
   const router = useRouter();
   const queryClient = useQueryClient();
   const clearDraft = useBLDraftStore((s) => s.clearDraft);
@@ -21,19 +23,19 @@ export function useSearchTruckBl(args: {
   async function handleSearch() {
     const truckBlNo = form.getValues("truckBlNo")?.trim();
     if (!truckBlNo) {
-      toast.info("Truck B/L No를 입력하세요.");
+      toast.info(t("enterBlNo"));
       return;
     }
 
     const ids = await truckBlPort.findByHblNo(truckBlNo);
 
     if (ids.length === 0) {
-      toast.info("조회 결과가 없습니다.");
+      toast.info(t("noResults"));
       return;
     }
 
     if (ids.length > 1) {
-      toast.info("여러 건이 검색되었습니다. List에서 선택하세요.");
+      toast.info(t("multipleFound"));
       router.push("/fms/truck-bl/list");
       return;
     }

@@ -9,7 +9,7 @@ export default async function SeaExpListPage() {
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><Ship size={14} /></div>
-          {t("title")}
+          {t("title.exp")}
         </div>
       </div>
       <SeaHouseListClient bound="EXP" />

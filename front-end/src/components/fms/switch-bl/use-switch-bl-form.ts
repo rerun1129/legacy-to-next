@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { useMutation, useQuery, type UseMutationResult } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { switchBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { confirm } from "@/components/confirm";
@@ -31,6 +32,9 @@ export function useSwitchBlForm({
   initialFromHouseBl,
   onClose,
 }: UseSwitchBlFormArgs): UseSwitchBlFormResult {
+  const t  = useTranslations("fms.houseBl.entry.msg");
+  const tc = useTranslations("common");
+
   const form = useForm<SwitchBlFormValues>({
     defaultValues: {
       switchBlNo: "",
@@ -117,7 +121,7 @@ export function useSwitchBlForm({
 
   async function handleSubmit(values: SwitchBlFormValues) {
     const ok = await confirm({
-      title: "저장하시겠습니까?",
+      title: t("confirmSave"),
       variant: "default",
     });
     if (!ok) return;
@@ -127,9 +131,9 @@ export function useSwitchBlForm({
   async function handleDelete() {
     const ok = await confirm({
       variant: "destructive",
-      title: "삭제하시겠습니까?",
-      confirmText: "삭제",
-      description: "삭제된 데이터는 복구할 수 없습니다.",
+      title: t("confirmDelete"),
+      confirmText: tc("delete"),
+      description: t("deleteWarning"),
     });
     if (!ok) return;
     deleteMutation.mutate();

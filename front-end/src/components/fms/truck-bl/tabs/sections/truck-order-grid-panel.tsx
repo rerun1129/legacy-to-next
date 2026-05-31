@@ -1,16 +1,17 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
-import { useFormContext, useFieldArray, Controller } from "react-hook-form";
-import { Plus, Minus } from "lucide-react";
-import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
-import { EMPTY_TRUCK_ORDER_ROW } from "@/components/fms/truck-bl/truck-bl-schema";
-import { GridList, type GridColumn } from "@/components/shared/grid-list";
-import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
-import { useEnumOptions } from "@/application/enums/use-enum";
-import { Button } from "@/components/shared/button";
-import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
-import { CODE_SOURCES } from "@/lib/autocomplete-sources";
+import { useMemo, useState, useRef }                    from "react";
+import { useFormContext, useFieldArray, Controller }    from "react-hook-form";
+import { useTranslations }                              from "next-intl";
+import { Plus, Minus }                                 from "lucide-react";
+import type { TruckBlFormValues }                      from "@/components/fms/truck-bl/truck-bl-schema";
+import { EMPTY_TRUCK_ORDER_ROW }                       from "@/components/fms/truck-bl/truck-bl-schema";
+import { GridList, type GridColumn }                   from "@/components/shared/grid-list";
+import { TextBox, NumberBox, ComboBox, CodeBox }       from "@/components/shared/inputs";
+import { useEnumOptions }                              from "@/application/enums/use-enum";
+import { Button }                                      from "@/components/shared/button";
+import { useCodeAutocomplete }                         from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES }                                from "@/lib/autocomplete-sources";
 
 function PkgUnitCell({ index }: { index: number }) {
   const { register, setValue } = useFormContext<TruckBlFormValues>();
@@ -32,6 +33,10 @@ function PkgUnitCell({ index }: { index: number }) {
 type TruckOrderRow = NonNullable<TruckBlFormValues["truckOrders"]>[number];
 
 export function TruckOrderGridPanel() {
+  // Rules of Hooks: unconditionally at top
+  const tf = useTranslations("fms.truckBl.entry.fields");
+  const tp = useTranslations("fms.truckBl.entry.panels");
+
   const { control, register } = useFormContext<TruckBlFormValues>();
   const { options: truckTypeOptions }            = useEnumOptions("TruckType");
   const { options: containerTypeOptionsRaw }     = useEnumOptions("ContainerType");
@@ -44,14 +49,14 @@ export function TruckOrderGridPanel() {
   const focusedRowKeyRef = useRef<string | null>(null);
 
   const columns = useMemo<GridColumn<TruckOrderRow>[]>(() => [
-    { key: "_no",           label: "#",              width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "truckOrderNo",  label: "Truck Order No", width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckOrderNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
-    { key: "pkgQty",        label: "Package",        width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
-    { key: "pkgUnit",       label: "Unit",           width: 60,  render: (_, __, i) => <PkgUnitCell index={i} /> },
-    { key: "grossWeightKg", label: "Gross W/T",      width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
-    { key: "cbm",           label: "CBM",            width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
-    { key: "truckNo",       label: "Truck No.",      width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "truckType",     label: "Type",           width: 70,  render: (_, __, i) => (
+    { key: "_no",           label: "#",                    width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "truckOrderNo",  label: tf("truckOrderNo"),     width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckOrderNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
+    { key: "pkgQty",        label: tf("package"),          width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
+    { key: "pkgUnit",       label: tf("unit"),             width: 60,  render: (_, __, i) => <PkgUnitCell index={i} /> },
+    { key: "grossWeightKg", label: tf("grossWT"),          width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
+    { key: "cbm",           label: tf("cbm"),              width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`truckOrders.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
+    { key: "truckNo",       label: tf("truckNo"),          width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.truckNo`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "truckType",     label: tf("type"),             width: 70,  render: (_, __, i) => (
       <Controller
         name={`truckOrders.${i}.truckType`}
         control={control}
@@ -60,10 +65,10 @@ export function TruckOrderGridPanel() {
         )}
       />
     ) },
-    { key: "driver",        label: "Driver",         width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.driver`)} /> },
-    { key: "mobileNo",      label: "Mobile No",      width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.mobileNo`)} /> },
-    { key: "containerNo",   label: "Container No.",  width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerNo`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "containerType", label: "Cont. Type",     width: 70,  render: (_, __, i) => (
+    { key: "driver",        label: tf("driver"),           width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.driver`)} /> },
+    { key: "mobileNo",      label: tf("mobileNo"),         width: 120, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.mobileNo`)} /> },
+    { key: "containerNo",   label: tf("containerNo"),      width: 130, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.containerNo`)}   style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "containerType", label: tf("contType"),         width: 70,  render: (_, __, i) => (
       <Controller
         name={`truckOrders.${i}.containerType`}
         control={control}
@@ -72,10 +77,10 @@ export function TruckOrderGridPanel() {
         )}
       />
     ) },
-    { key: "sealNo1",       label: "Seal No.1",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "sealNo2",       label: "Seal No.2",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "sealNo3",       label: "Seal No.3",      width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-  ], [register, control, truckTypeOptions, containerTypeOptions]);
+    { key: "sealNo1",       label: tf("sealNo1"),          width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo2",       label: tf("sealNo2"),          width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo3",       label: tf("sealNo3"),          width: 100, render: (_, __, i) => <TextBox   variant="cell" {...register(`truckOrders.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+  ], [register, control, truckTypeOptions, containerTypeOptions, tf]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
@@ -112,7 +117,7 @@ export function TruckOrderGridPanel() {
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Truck Information</span>
+        <span className="panel__title">{tp("truckInformation")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>

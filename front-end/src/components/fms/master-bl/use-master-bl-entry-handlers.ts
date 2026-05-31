@@ -2,6 +2,7 @@ import type { Dispatch, MutableRefObject, RefObject, SetStateAction } from "reac
 import type { UseFormReturn }   from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { QueryClient }     from "@tanstack/react-query";
+import { useTranslations }      from "next-intl";
 import { confirm }              from "@/components/confirm";
 import { masterBlPort }         from "@/lib/ports";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
@@ -32,6 +33,9 @@ export function useMasterBlEntryHandlers(args: {
   handleSave: (raw: MasterBlFormValues) => Promise<void>;
   handleDelete: () => Promise<void>;
 } {
+  const t  = useTranslations("fms.masterBl.entry.msg");
+  const tc = useTranslations("common");
+
   const {
     id,
     variantKey,
@@ -57,11 +61,11 @@ export function useMasterBlEntryHandlers(args: {
       .findByMblNo(mblValue)
       .then((ids) => {
         if (ids.length === 0) {
-          alert("해당 B/L을 찾을 수 없습니다.");
+          toast.info(t("noResults"));
           return;
         }
         if (ids.length > 1) {
-          alert("동일 MBL No. 다건 발견 — List 화면에서 선택해주세요.");
+          toast.info(t("multipleFound"));
           return;
         }
         const targetId = ids[0];
@@ -81,7 +85,7 @@ export function useMasterBlEntryHandlers(args: {
       })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
-        alert(`B/L 조회 중 오류가 발생했습니다: ${message}`);
+        toast.error(t("searchError", { message }));
       });
   }
 
@@ -101,7 +105,7 @@ export function useMasterBlEntryHandlers(args: {
 
   function handleChangeBlNo() {
     if (!isEdit || !id) {
-      toast.info("먼저 Master B/L을 조회해주세요.");
+      toast.info(t("searchBlFirst"));
       return;
     }
     setIsChangeBlNoModalOpen(true);
@@ -110,7 +114,7 @@ export function useMasterBlEntryHandlers(args: {
   // Save confirm 모달 (House 패턴 정합 — Non B/L 16dbc0b 패턴)
   async function handleSave(raw: MasterBlFormValues) {
     const ok = await confirm({
-      title: "저장하시겠습니까?",
+      title: t("confirmSave"),
       variant: "default",
     });
     if (!ok) return;
@@ -120,10 +124,10 @@ export function useMasterBlEntryHandlers(args: {
   async function handleDelete() {
     if (!isEdit) return;
     const ok = await confirm({
-      title: "삭제하시겠습니까?",
-      description: "삭제된 데이터는 복구할 수 없습니다.",
+      title: t("confirmDelete"),
+      description: t("deleteWarning"),
       variant: "destructive",
-      confirmText: "삭제",
+      confirmText: tc("delete"),
     });
     if (!ok) return;
     deleteMutation.mutate();

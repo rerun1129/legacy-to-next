@@ -1,31 +1,36 @@
 "use client";
 
-import { useState, useMemo, useRef }              from "react";
-import { useFormContext, useFieldArray, Controller } from "react-hook-form";
-import { Plus, Minus }                           from "lucide-react";
-import { GridList, type GridColumn }             from "@/components/shared/grid-list";
-import { ComboBox, NumberBox }                    from "@/components/shared/inputs";
-import { useEnumOptions }                        from "@/application/enums/use-enum";
-import type { TruckBlFormValues }                from "@/components/fms/truck-bl/truck-bl-schema";
-import { EMPTY_TRUCK_DIM_ROW }                   from "@/components/fms/truck-bl/truck-bl-schema";
-import { Button }                                from "@/components/shared/button";
+import { useState, useMemo, useRef }                    from "react";
+import { useFormContext, useFieldArray, Controller }    from "react-hook-form";
+import { useTranslations }                              from "next-intl";
+import { Plus, Minus }                                 from "lucide-react";
+import { GridList, type GridColumn }                   from "@/components/shared/grid-list";
+import { ComboBox, NumberBox }                         from "@/components/shared/inputs";
+import { useEnumOptions }                              from "@/application/enums/use-enum";
+import type { TruckBlFormValues }                      from "@/components/fms/truck-bl/truck-bl-schema";
+import { EMPTY_TRUCK_DIM_ROW }                         from "@/components/fms/truck-bl/truck-bl-schema";
+import { Button }                                      from "@/components/shared/button";
 
 interface DimRow { id: number; length: string; width: string; height: string; qty: string; cbm: string; volWt: string; }
 
 export function TruckDimensionPanel() {
+  // Rules of Hooks: unconditionally at top
+  const tf = useTranslations("fms.truckBl.entry.fields");
+  const tp = useTranslations("fms.truckBl.entry.panels");
+
   const { control } = useFormContext<TruckBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "dimensions" });
   const { options: volumeDivisorOptions, placeholder: volumeDivisorPlaceholder } = useEnumOptions("VolumeDivisor");
 
   const cols = useMemo<GridColumn<DimRow>[]>(() => [
-    { key: "_no",    label: "#",           width: 50, className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "length", label: "Length",     width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.length`} variant="cell" valueAsNumber={false} /> },
-    { key: "width",  label: "Width",      width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.width`} variant="cell" valueAsNumber={false} /> },
-    { key: "height", label: "Height",     width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.height`} variant="cell" valueAsNumber={false} /> },
-    { key: "qty",    label: "Qty",        width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.qty`} variant="cell" valueAsNumber={false} /> },
-    { key: "cbm",    label: "CBM",        width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.cbm`} variant="cell" valueAsNumber={false} decimalPlaces={3} /> },
-    { key: "volWt",  label: "Volume Wt.", width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.volWt`} variant="cell" valueAsNumber={false} decimalPlaces={3} /> },
-  ], []);
+    { key: "_no",    label: "#",            width: 50, className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "length", label: tf("length"),   width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.length`} variant="cell" valueAsNumber={false} /> },
+    { key: "width",  label: tf("width"),    width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.width`} variant="cell" valueAsNumber={false} /> },
+    { key: "height", label: tf("height"),   width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.height`} variant="cell" valueAsNumber={false} /> },
+    { key: "qty",    label: tf("qty"),      width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.qty`} variant="cell" valueAsNumber={false} /> },
+    { key: "cbm",    label: tf("cbm"),      width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.cbm`} variant="cell" valueAsNumber={false} decimalPlaces={3} /> },
+    { key: "volWt",  label: tf("volumeWt"), width: 80, render: (_, __, i) => <NumberBox name={`dimensions.${i}.volWt`} variant="cell" valueAsNumber={false} decimalPlaces={3} /> },
+  ], [tf]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
 
@@ -64,7 +69,7 @@ export function TruckDimensionPanel() {
     <div className="panel panel--col">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Dimension</span>
+        <span className="panel__title">{tp("dimension")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <Controller

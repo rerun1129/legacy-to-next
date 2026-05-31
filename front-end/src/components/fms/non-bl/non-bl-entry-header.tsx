@@ -1,6 +1,7 @@
 "use client";
 
 import { Package, FilePlus, Search, Save, Trash2, SquarePen } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ActionButton } from "@/components/admin/access/action-button";
 
 export function NonBlEntryHeader(props: {
@@ -13,17 +14,22 @@ export function NonBlEntryHeader(props: {
   onDelete: () => void;
   onChangeBlNo: () => void;
 }) {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tt = useTranslations("fms.nonBl.entry.title");
+  const ts = useTranslations("fms.nonBl.entry.status");
+  const tc = useTranslations("common");
+
   const { isEdit, isSavePending, isDeletePending, onNew, onSearch, onSave, onDelete, onChangeBlNo } = props;
 
   return (
     <div className="page-head">
       <div className="page-head__title">
         <div className="page-head__title-icon"><Package size={14} /></div>
-        Non B/L Entry
+        {tt("main")}
       </div>
       <div className="page-head__meta">
         <span className={`badge ${isEdit ? "badge--saved" : "badge--draft"}`}>
-          {isEdit ? "SAVED" : "DRAFT"}
+          {isEdit ? ts("saved") : ts("draft")}
         </span>
       </div>
       <div className="page-head__actions">
@@ -45,7 +51,7 @@ export function NonBlEntryHeader(props: {
           disabled={isSavePending}
           onClick={onSave}
         >
-          <Save size={12} style={{ marginRight: 4 }} />{isSavePending ? "Saving..." : "Save"}
+          <Save size={12} style={{ marginRight: 4 }} />{isSavePending ? tc("saving") : tc("save")}
         </ActionButton>
         <ActionButton
           buttonCode="BTN_FMS_NON_BL_ENTRY_DELETE"

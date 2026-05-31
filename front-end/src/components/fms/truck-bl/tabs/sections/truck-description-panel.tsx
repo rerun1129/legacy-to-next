@@ -1,12 +1,16 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 
 export function TruckDescriptionPanel() {
+  // Rules of Hooks: unconditionally at top
+  const tp = useTranslations("fms.truckBl.entry.panels");
+
   const { control } = useFormContext<TruckBlFormValues>();
   const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
   const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
@@ -15,7 +19,7 @@ export function TruckDescriptionPanel() {
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Description</span>
+        <span className="panel__title">{tp("description")}</span>
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", gap: 4, marginBottom: 8, flexShrink: 0 }}>

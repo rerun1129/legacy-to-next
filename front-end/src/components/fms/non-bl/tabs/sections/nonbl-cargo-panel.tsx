@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { TextBox, NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
@@ -9,17 +10,21 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function NonBLCargoPanel() {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tf = useTranslations("fms.nonBl.entry.fields");
+  const tp = useTranslations("fms.nonBl.entry.panels");
+
   const { register, control, setValue } = useFormContext<NonBlFormValues>();
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
   const pkgUnit  = useCodeAutocomplete(CODE_SOURCES.packageUnit);
   const hsCodeAc = useCodeAutocomplete(CODE_SOURCES.hsCode);
 
-  const CARGO_ITEMS: FieldItemDef[] = [
+  const cargoItems: FieldItemDef[] = [
     {
       key: "main-item",
       render: () => (
         <div className="li">
-          <span className="li__label">Main Item</span>
+          <span className="li__label">{tf("mainItem")}</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Main Item" {...register("mainItem")} />
           </div>
@@ -30,7 +35,7 @@ export function NonBLCargoPanel() {
       key: "package",
       render: () => (
         <div className="li">
-          <span className="li__label">Package</span>
+          <span className="li__label">{tf("package")}</span>
           <div className="li__input li__input--tight">
             <NumberBox
               name="cargoQty"
@@ -58,7 +63,7 @@ export function NonBLCargoPanel() {
       key: "gross-wt",
       render: () => (
         <div className="li">
-          <span className="li__label">Gross W/T</span>
+          <span className="li__label">{tf("grossWt")}</span>
           <div className="li__input li__input--tight">
             <NumberBox name="grossWt" variant="panel" decimalPlaces={3} />
             <Controller
@@ -76,7 +81,7 @@ export function NonBLCargoPanel() {
       key: "volume-wt",
       render: () => (
         <div className="li">
-          <span className="li__label">Volume W/T</span>
+          <span className="li__label">{tf("volumeWt")}</span>
           <div className="li__input">
             <NumberBox name="volWt" variant="panel" decimalPlaces={3} />
           </div>
@@ -87,7 +92,7 @@ export function NonBLCargoPanel() {
       key: "cbm",
       render: () => (
         <div className="li">
-          <span className="li__label">CBM</span>
+          <span className="li__label">{tf("cbm")}</span>
           <div className="li__input">
             <NumberBox name="totalCbm" variant="panel" decimalPlaces={3} />
           </div>
@@ -98,7 +103,7 @@ export function NonBLCargoPanel() {
       key: "rton",
       render: () => (
         <div className="li">
-          <span className="li__label">R/Ton</span>
+          <span className="li__label">{tf("rton")}</span>
           <div className="li__input">
             <NumberBox name="rton" variant="panel" decimalPlaces={3} />
           </div>
@@ -111,10 +116,10 @@ export function NonBLCargoPanel() {
     <div className="panel panel--col-flex nonbl-cargo-panel">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Cargo</span>
+        <span className="panel__title">{tp("cargo")}</span>
       </div>
       <div className="panel__body panel__body--scroll">
-        <FieldItemGrid itemScope="nonbl-cargo-panel" items={CARGO_ITEMS} />
+        <FieldItemGrid itemScope="nonbl-cargo-panel" items={cargoItems} />
         <FieldItemGrid
           itemScope="nonbl-cargo-panel.hs"
           items={[{
@@ -123,7 +128,7 @@ export function NonBLCargoPanel() {
               <CodeBox
                 kind="lcn"
                 variant="panel"
-                label="HS Code"
+                label={tf("hsCode")}
                 codeProps={{ ...register("hsCode"), placeholder: "Code" }}
                 nameProps={{ ...register("hsCodeName"), placeholder: "HS Code Name" }}
                 onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}

@@ -112,7 +112,19 @@
           "deleteWarning": "삭제된 데이터는 복구할 수 없습니다.",
           "loadingDelete": "삭제 중…",
           "loadingSave": "저장 중…",
-          "loadingFetch": "조회 중…"
+          "loadingFetch": "조회 중…",
+          "enterBlNo": "B/L No.를 입력하세요.",
+          "searchError": "B/L 조회 중 오류가 발생했습니다: {message}",
+          "noResults": "일치하는 B/L이 없습니다.",
+          "multipleFound": "동일 B/L No. 다건 발견 — List 화면에서 선택해주세요.",
+          "blNoChanged": "B/L No가 변경되었습니다."
+        },
+        "modal": {
+          "changeBlNo": {
+            "title": "B/L No 변경",
+            "currentBlNo": "현재 B/L No",
+            "newBlNo": "변경할 B/L No"
+          }
         },
         "freight": {
           "panels": {
@@ -257,9 +269,26 @@
           "draft": "DRAFT"
         },
         "msg": {
-          "deleting": "삭제 중…",
-          "saving":   "저장 중…",
-          "fetching": "조회 중…"
+          "deleting":      "삭제 중…",
+          "saving":        "저장 중…",
+          "fetching":      "조회 중…",
+          "searchBlFirst": "먼저 Master B/L을 조회해주세요.",
+          "noResults":     "해당 B/L을 찾을 수 없습니다.",
+          "multipleFound": "동일 MBL No. 다건 발견 — List 화면에서 선택해주세요.",
+          "searchError":   "B/L 조회 중 오류가 발생했습니다: {message}",
+          "confirmSave":   "저장하시겠습니까?",
+          "confirmDelete": "삭제하시겠습니까?",
+          "deleteWarning": "삭제된 데이터는 복구할 수 없습니다.",
+          "blNoChanged":   "B/L No가 변경되었습니다."
+        },
+        "modal": {
+          "changeBlNo": {
+            "title":          "B/L No 변경",
+            "currentBlNo":    "현재 {blNoLabel}",
+            "newBlNo":        "변경할 {blNoLabel}",
+            "currentMasterRef": "현재 Master Ref",
+            "newMasterRef":   "변경할 Master Ref"
+          }
         },
         "panels": {
           "houseBLList":          "House B/L 목록",
@@ -396,7 +425,10 @@
     },
     "airHouse": {
       "list": {
-        "title": "항공 House B/L 목록",
+        "title": {
+          "exp": "항공 수출 목록",
+          "imp": "항공 수입 목록"
+        },
         "panel": "Air House B/L",
         "cols": {
           "hblNo": "House AWB No.",
@@ -457,6 +489,7 @@
     },
     "truckBl": {
       "list": {
+        "title": "Truck B/L 목록",
         "panel": "Truck B/L",
         "cols": {
           "truckBlNo": "Truck B/L No",
@@ -499,10 +532,202 @@
           "portKindPol": "POL",
           "portKindPod": "POD"
         }
+      },
+      "entry": {
+        "toolbar": {
+          "truckBlNo": "Truck B/L No",
+          "bound": "수출입",
+          "loadType": "화물 유형",
+          "serviceTerm": "서비스 조건"
+        },
+        "title": {
+          "main": "Truck B/L Entry"
+        },
+        "tabs": {
+          "main": "메인",
+          "freight": "운임"
+        },
+        "status": {
+          "saved": "저장됨",
+          "draft": "임시"
+        },
+        "msg": {
+          "deleting": "삭제 중…",
+          "saving": "저장 중…",
+          "fetching": "조회 중…",
+          "searchBlFirst": "먼저 Truck B/L을 조회해주세요.",
+          "enterBlNo":     "Truck B/L No를 입력하세요.",
+          "noResults":     "조회된 건이 없습니다.",
+          "multipleFound": "여러 건이 검색되었습니다. List에서 선택하세요.",
+          "confirmSave":   "저장하시겠습니까?",
+          "confirmDelete": "삭제하시겠습니까?",
+          "deleteWarning": "삭제된 데이터는 복구할 수 없습니다."
+        },
+        "panels": {
+          "party": "당사자",
+          "schedule": "스케줄",
+          "cargo": "화물",
+          "document": "서류",
+          "performance": "실적",
+          "dimension": "치수",
+          "remark": "비고",
+          "truckInformation": "트럭 정보",
+          "marksNumbers": "화인 및 번호",
+          "description": "화물 명세"
+        },
+        "fields": {
+          "shipper": "SHIPPER",
+          "consignee": "CONSIGNEE",
+          "notify": "NOTIFY",
+          "docPartner": "DOC PARTNER",
+          "toOrder": "To Order",
+          "sameAsCne": "Same as Cne.",
+          "vessel": "선박",
+          "dates": "일자",
+          "pol": "POL",
+          "pod": "POD",
+          "etd": "ETD",
+          "eta": "ETA",
+          "package": "포장",
+          "grossWt": "G/W",
+          "cbm": "CBM",
+          "chargeWt": "운임 중량",
+          "hsCode": "HS Code",
+          "pickupDate": "픽업 일자",
+          "trucker": "운송사",
+          "truckerPic": "운송사 담당자",
+          "actualCustomer": "실화주",
+          "settlePartner": "정산 파트너",
+          "salesMan": "영업 담당",
+          "operator": "운영 담당",
+          "team": "팀",
+          "truckOrderNo": "Truck Order No",
+          "unit": "단위",
+          "grossWT": "총중량",
+          "truckNo": "Truck No.",
+          "type": "유형",
+          "driver": "기사",
+          "mobileNo": "휴대폰 번호",
+          "containerNo": "Container No.",
+          "contType": "컨테이너 유형",
+          "sealNo1": "Seal No.1",
+          "sealNo2": "Seal No.2",
+          "sealNo3": "Seal No.3",
+          "length": "길이",
+          "width": "너비",
+          "height": "높이",
+          "qty": "수량",
+          "volumeWt": "부피 중량"
+        },
+        "modal": {
+          "changeBlNo": {
+            "title": "B/L No 변경",
+            "currentBlNo": "현재 B/L No",
+            "newBlNo": "변경할 B/L No",
+            "update": "Update",
+            "updating": "Updating…",
+            "close": "Close",
+            "blNoChanged": "B/L No가 변경되었습니다."
+          }
+        }
       }
     },
     "nonBl": {
+      "entry": {
+        "toolbar": {
+          "nonBlNo":  "Non B/L No",
+          "workDiv":  "업무 구분",
+          "bound":    "수출입",
+          "refNo":    "Ref. No."
+        },
+        "title": {
+          "main": "Non B/L Entry"
+        },
+        "tabs": {
+          "main":    "메인",
+          "freight": "운임"
+        },
+        "status": {
+          "saved": "저장됨",
+          "draft": "임시"
+        },
+        "msg": {
+          "deleting":      "삭제 중…",
+          "saving":        "저장 중…",
+          "fetching":      "조회 중…",
+          "searchBlFirst": "먼저 Non B/L을 조회해주세요.",
+          "enterBlNo":     "Non B/L No를 입력하세요.",
+          "noResults":     "조회된 건이 없습니다.",
+          "multipleFound": "여러 건이 검색되었습니다. List에서 선택하세요.",
+          "confirmSave":   "저장하시겠습니까?",
+          "confirmDelete": "삭제하시겠습니까?",
+          "deleteWarning": "삭제된 데이터는 복구할 수 없습니다."
+        },
+        "panels": {
+          "party":         "당사자",
+          "schedule":      "스케줄",
+          "cargo":         "화물",
+          "document":      "서류",
+          "dimension":     "치수",
+          "containerInfo": "컨테이너 정보",
+          "remark":        "비고"
+        },
+        "fields": {
+          "actualCustomer": "실화주",
+          "shipper":        "송하인",
+          "consignee":      "수하인",
+          "notify":         "통지처",
+          "settlePartner":  "정산 파트너",
+          "linerVessel":    "선사 및 선박",
+          "liner":          "선사",
+          "vessel":         "선박",
+          "voy":            "항차",
+          "etd":            "ETD",
+          "eta":            "ETA",
+          "ports":          "항구",
+          "pol":            "POL",
+          "pod":            "POD",
+          "finalDest":      "최종 도착지",
+          "finalEta":       "Final ETA",
+          "mainItem":       "주요 품목",
+          "package":        "포장",
+          "grossWt":        "총중량",
+          "volumeWt":       "용적 중량",
+          "cbm":            "CBM",
+          "rton":           "R/Ton",
+          "hsCode":         "HS Code",
+          "salesClass":     "영업 분류",
+          "salesMan":       "영업 담당",
+          "operator":       "운영 담당",
+          "team":           "팀",
+          "containerNo":    "컨테이너 번호",
+          "contType":       "컨테이너 유형",
+          "sealNo1":        "봉인 번호 1",
+          "sealNo2":        "봉인 번호 2",
+          "sealNo3":        "봉인 번호 3",
+          "pkg":            "포장",
+          "unit":           "단위",
+          "length":         "길이",
+          "width":          "너비",
+          "height":         "높이",
+          "qty":            "수량",
+          "volumeWtCol":    "용적 중량",
+          "remark":         "비고"
+        },
+        "modal": {
+          "changeBlNo": {
+            "title":       "B/L No 변경",
+            "currentBlNo": "현재 B/L No",
+            "newBlNo":     "변경할 B/L No",
+            "update":      "Update",
+            "updating":    "Updating…",
+            "close":       "Close",
+            "blNoChanged": "B/L No가 변경되었습니다."
+          }
+        }
+      },
       "list": {
+        "title": "Non B/L 목록",
         "panel": "Non B/L",
         "cols": {
           "nonBlNo": "Non B/L No",
@@ -553,7 +778,10 @@
     },
     "seaHouse": {
       "list": {
-        "title": "해상 수출 목록",
+        "title": {
+          "exp": "해상 수출 목록",
+          "imp": "해상 수입 목록"
+        },
         "panel": "Sea House B/L",
         "cols": {
           "hblNo": "House B/L No.",
@@ -621,6 +849,110 @@
           "partnerKindDoc": "DOC 파트너",
           "portKindPol": "POL",
           "portKindPod": "POD"
+        }
+      }
+    },
+    "seaMaster": {
+      "list": {
+        "title": {
+          "exp": "해상 수출 Master B/L 목록",
+          "imp": "해상 수입 Master B/L 목록"
+        },
+        "panel": "Sea Master B/L",
+        "cols": {
+          "mblNo": "Master B/L No",
+          "masterRefNo": "Master Reference No.",
+          "bound": "수출입",
+          "etd": "ETD",
+          "eta": "ETA",
+          "polCode": "POL",
+          "podCode": "POD",
+          "vesselName": "선박명",
+          "voyageNo": "항차",
+          "shipperCode": "송하인",
+          "shipperName": "송하인명",
+          "consigneeCode": "수하인",
+          "consigneeName": "수하인명",
+          "notifyCode": "통지처",
+          "notifyName": "통지처명",
+          "linerCode": "선사",
+          "linerName": "선사명",
+          "loadType": "적재 유형",
+          "houseBlCount": "House B/L 건수",
+          "pkgQty": "포장 수량",
+          "pkgUnit": "단위",
+          "grossWeightKg": "총중량",
+          "cbm": "CBM",
+          "operatorCode": "운영 담당",
+          "teamCode": "팀",
+          "teamName": "팀명"
+        },
+        "filter": {
+          "all": "전체",
+          "vesselName": "선박명",
+          "voyageNo": "항차",
+          "shipmentType": "운송 유형",
+          "loadType": "적재 유형",
+          "liner": "선사",
+          "team": "팀",
+          "dateKindEtd": "ETD",
+          "dateKindEta": "ETA",
+          "masterBlKindMbl": "Master B/L No",
+          "masterBlKindRef": "Master Ref. No",
+          "partyKindShipper": "송하인",
+          "partyKindConsignee": "수하인",
+          "partyKindNotify": "통지처",
+          "portKindPol": "POL",
+          "portKindPod": "POD"
+        }
+      }
+    },
+    "airMaster": {
+      "list": {
+        "title": {
+          "exp": "항공 수출 Master B/L 목록",
+          "imp": "항공 수입 Master B/L 목록"
+        },
+        "panel": "Air Master B/L",
+        "cols": {
+          "mblNo": "Master AWB No.",
+          "masterRefNo": "Master Reference No.",
+          "bound": "수출입",
+          "shipmentType": "운송 유형",
+          "etd": "ETD",
+          "eta": "ETA",
+          "grossWeightKg": "총중량",
+          "chargeWeightKg": "운임 중량",
+          "pkgQty": "포장 수량",
+          "houseBlCount": "House AWB 건수",
+          "polCode": "출발지",
+          "podCode": "도착지",
+          "shipperCode": "송하인",
+          "shipperName": "송하인명",
+          "consigneeCode": "수하인",
+          "consigneeName": "수하인명",
+          "notifyCode": "통지처",
+          "notifyName": "통지처명",
+          "airlineCode": "항공사",
+          "airlineName": "항공사명",
+          "operatorCode": "운영 담당",
+          "teamCode": "팀",
+          "teamName": "팀명"
+        },
+        "filter": {
+          "all": "전체",
+          "shipmentType": "운송 유형",
+          "airline": "항공사",
+          "team": "팀",
+          "dateKindEtd": "ETD",
+          "dateKindEta": "ETA",
+          "masterAwbKindMawb": "Master AWB No",
+          "masterAwbKindRef": "Master Ref. No",
+          "partyKindShipper": "송하인",
+          "partyKindConsignee": "수하인",
+          "partyKindNotify": "통지처",
+          "portKindDeparture": "출발지",
+          "portKindDestination": "도착지"
         }
       }
     }

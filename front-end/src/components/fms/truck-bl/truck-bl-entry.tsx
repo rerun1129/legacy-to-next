@@ -1,20 +1,37 @@
 "use client";
 
-import { FormProvider, Controller }              from "react-hook-form";
+import { useTranslations }               from "next-intl";
+import { FormProvider, Controller }       from "react-hook-form";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }     from "./tabs/main-truck";
-import { TextBox, ComboBox }                     from "@/components/shared/inputs";
-import { ScreenGuard }                           from "@/components/shared/screen-guard";
-import { TruckBlEntryHeader }                    from "./truck-bl-entry-header";
-import { TruckChangeBlNoModal }                  from "./truck-change-bl-no-modal";
-import { useTruckBlEntry }                       from "./use-truck-bl-entry";
+import { TextBox, ComboBox }              from "@/components/shared/inputs";
+import { ScreenGuard }                   from "@/components/shared/screen-guard";
+import { TruckBlEntryHeader }            from "./truck-bl-entry-header";
+import { TruckChangeBlNoModal }          from "./truck-change-bl-no-modal";
+import { useTruckBlEntry }               from "./use-truck-bl-entry";
 
 export function TruckBLEntry() {
+  // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const tb  = useTranslations("fms.truckBl.entry.toolbar");
+  const tts = useTranslations("fms.truckBl.entry.tabs");
+  const tm  = useTranslations("fms.truckBl.entry.msg");
+
   const entry = useTruckBlEntry();
+
+  const loadingMessage = entry.deleteMutation.isPending
+    ? tm("deleting")
+    : entry.isSavePending
+      ? tm("saving")
+      : tm("fetching");
+
+  const tabs = [
+    { key: "main",    label: tts("main")    },
+    { key: "freight", label: tts("freight") },
+  ];
 
   return (
     <FormProvider {...entry.form}>
-    <ScreenGuard visible={entry.isLoading} message={entry.loadingMessage} />
+    <ScreenGuard visible={entry.isLoading} message={loadingMessage} />
     <form
       onSubmit={entry.form.handleSubmit(entry.handleSubmit)}
       onKeyDown={(e) => {
@@ -41,13 +58,13 @@ export function TruckBLEntry() {
       {/* Toolbar: 4필드 — gridTemplateColumns는 툴바 레이아웃에 필수이므로 인라인 유지 */}
       <div className="toolbar" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
         <div className="field is-required">
-          <div className="field__label is-required">Truck B/L No</div>
+          <div className="field__label is-required">{tb("truckBlNo")}</div>
           <div className="field__input">
             <TextBox variant="panel" placeholder="Auto on save" {...entry.register("truckBlNo")} />
           </div>
         </div>
         <div className="field is-required">
-          <div className="field__label is-required">Bound</div>
+          <div className="field__label is-required">{tb("bound")}</div>
           <div className="field__input">
             <Controller
               name="bound"
@@ -65,7 +82,7 @@ export function TruckBLEntry() {
           </div>
         </div>
         <div className="field">
-          <div className="field__label">Load Type</div>
+          <div className="field__label">{tb("loadType")}</div>
           <div className="field__input">
             <Controller
               name="loadType"
@@ -83,7 +100,7 @@ export function TruckBLEntry() {
           </div>
         </div>
         <div className="field">
-          <div className="field__label">Service Term</div>
+          <div className="field__label">{tb("serviceTerm")}</div>
           <div className="field__input">
             <Controller
               name="serviceTerm"
@@ -104,7 +121,7 @@ export function TruckBLEntry() {
 
       {/* Tabbar — 2 tabs only */}
       <div className="tabbar">
-        {[{ key: "main", label: "Main" }, { key: "freight", label: "Freight" }].map((t) => (
+        {tabs.map((t) => (
           <button
             key={t.key}
             type="button"

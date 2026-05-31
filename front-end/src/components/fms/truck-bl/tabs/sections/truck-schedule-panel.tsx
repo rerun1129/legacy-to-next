@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
@@ -8,14 +9,14 @@ import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schem
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
-function TruckScheduleVessel() {
+function TruckScheduleVessel({ vesselLabel }: { vesselLabel: string }) {
   const { register } = useFormContext<TruckBlFormValues>();
   const ITEMS: FieldItemDef[] = [
     {
       key: "vessel",
       render: () => (
         <div className="li">
-          <span className="li__label">Vessel</span>
+          <span className="li__label">{vesselLabel}</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Vessel Name" {...register("vesselName")} />
           </div>
@@ -26,14 +27,14 @@ function TruckScheduleVessel() {
   return <FieldItemGrid itemScope="truck-schedule-panel.vessel" items={ITEMS} shouldShowRowControls={false} />;
 }
 
-function TruckScheduleDates() {
+function TruckScheduleDates({ etdLabel, etaLabel }: { etdLabel: string; etaLabel: string }) {
   const { control } = useFormContext<TruckBlFormValues>();
   const ITEMS: FieldItemDef[] = [
     {
       key: "etd",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">ETD</span>
+          <span className="li__label is-required">{etdLabel}</span>
           <div className="li__input">
             <Controller
               control={control}
@@ -57,7 +58,7 @@ function TruckScheduleDates() {
       key: "eta",
       render: () => (
         <div className="li">
-          <span className="li__label is-required">ETA</span>
+          <span className="li__label is-required">{etaLabel}</span>
           <div className="li__input">
             <Controller
               control={control}
@@ -81,7 +82,7 @@ function TruckScheduleDates() {
   return <FieldItemGrid itemScope="truck-schedule-panel.dates" items={ITEMS} shouldShowRowControls={false} />;
 }
 
-function TruckSchedulePol() {
+function TruckSchedulePol({ polLabel }: { polLabel: string }) {
   const { register, setValue } = useFormContext<TruckBlFormValues>();
   const pol = useCodeAutocomplete(CODE_SOURCES.port);
   const ITEMS: FieldItemDef[] = [
@@ -90,7 +91,7 @@ function TruckSchedulePol() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="POL"
+          label={polLabel}
           required
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Location" }}
@@ -106,7 +107,7 @@ function TruckSchedulePol() {
   return <FieldItemGrid itemScope="truck-schedule-panel.pol" items={ITEMS} cols={1} shouldShowRowControls={false} />;
 }
 
-function TruckSchedulePod() {
+function TruckSchedulePod({ podLabel }: { podLabel: string }) {
   const { register, setValue } = useFormContext<TruckBlFormValues>();
   const pod = useCodeAutocomplete(CODE_SOURCES.port);
   const ITEMS: FieldItemDef[] = [
@@ -115,7 +116,7 @@ function TruckSchedulePod() {
       render: () => (
         <CodeBox
           kind="lcn"
-          label="POD"
+          label={podLabel}
           required
           codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
           nameProps={{ ...register("podName"), placeholder: "Location" }}
@@ -132,16 +133,20 @@ function TruckSchedulePod() {
 }
 
 export function TruckSchedulePanel() {
+  // Rules of Hooks: unconditionally at top
+  const tf = useTranslations("fms.truckBl.entry.fields");
+  const tp = useTranslations("fms.truckBl.entry.panels");
+
   const fields: FieldWidgetDef[] = [
-    { key: "vessel", label: "Vessel", render: () => <TruckScheduleVessel /> },
-    { key: "dates",  label: "Dates",  render: () => <TruckScheduleDates /> },
-    { key: "pol",    label: "POL",    render: () => <TruckSchedulePol /> },
-    { key: "pod",    label: "POD",    render: () => <TruckSchedulePod /> },
+    { key: "vessel", label: tf("vessel"), render: () => <TruckScheduleVessel vesselLabel={tf("vessel")} /> },
+    { key: "dates",  label: tf("dates"),  render: () => <TruckScheduleDates etdLabel={tf("etd")} etaLabel={tf("eta")} /> },
+    { key: "pol",    label: tf("pol"),    render: () => <TruckSchedulePol polLabel={tf("pol")} /> },
+    { key: "pod",    label: tf("pod"),    render: () => <TruckSchedulePod podLabel={tf("pod")} /> },
   ];
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Schedule</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("schedule")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope="truck-schedule-panel" fields={fields} />
       </div>

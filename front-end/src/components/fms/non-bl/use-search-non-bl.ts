@@ -2,6 +2,7 @@ import type { MutableRefObject } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { nonBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
 import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
@@ -18,6 +19,7 @@ export function useSearchNonBl(args: {
   detailLoadedRef: MutableRefObject<boolean>;
 }): { handleSearch: () => Promise<void> } {
   const { methods, id, detailLoadedRef } = args;
+  const t = useTranslations("fms.nonBl.entry.msg");
   const router = useRouter();
   const queryClient = useQueryClient();
   const clearDraft = useBLDraftStore((s) => s.clearDraft);
@@ -25,19 +27,19 @@ export function useSearchNonBl(args: {
   async function handleSearch() {
     const nonBlNo = methods.getValues("nonBlNo")?.trim();
     if (!nonBlNo) {
-      toast.info("hbl_no를 입력하세요.");
+      toast.info(t("enterBlNo"));
       return;
     }
 
     const ids = await nonBlPort.findByHblNo(nonBlNo);
 
     if (ids.length === 0) {
-      toast.info("조회된 건이 없습니다.");
+      toast.info(t("noResults"));
       return;
     }
 
     if (ids.length > 1) {
-      toast.info("여러 건이 검색되었습니다. List에서 선택하세요.");
+      toast.info(t("multipleFound"));
       // setInject → router.push 순서 동기 호출 유지 (commit a7f9e17 회귀 방지)
       listFilterStore.getState().setInject(NON_BL_LIST_SCOPE, { nonBlNo: nonBlNo });
       router.push("/fms/non-bl/list");

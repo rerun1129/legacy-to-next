@@ -2,6 +2,7 @@ import type { MutableRefObject } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { nonBlPort } from "@/lib/ports";
 import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
 import { confirm } from "@/components/confirm";
@@ -23,6 +24,8 @@ export function useNonBlEntryMutations(args: {
   handleSubmit: (data: NonBlFormValues) => Promise<void>;
   handleDelete: () => Promise<void>;
 } {
+  const t  = useTranslations("fms.nonBl.entry.msg");
+  const tc = useTranslations("common");
   const { id, methods, detailLoadedRef, clearDraft, bumpResetVersion } = args;
   const queryClient = useQueryClient();
   const isEdit = Boolean(id);
@@ -64,7 +67,7 @@ export function useNonBlEntryMutations(args: {
 
   async function handleSubmit(data: NonBlFormValues) {
     const ok = await confirm({
-      title: "저장하시겠습니까?",
+      title: t("confirmSave"),
       variant: "default",
     });
     if (!ok) return;
@@ -78,10 +81,10 @@ export function useNonBlEntryMutations(args: {
   async function handleDelete() {
     if (!isEdit) return;
     const ok = await confirm({
-      title: "삭제하시겠습니까?",
-      description: "삭제된 데이터는 복구할 수 없습니다.",
+      title: t("confirmDelete"),
+      description: t("deleteWarning"),
       variant: "destructive",
-      confirmText: "삭제",
+      confirmText: tc("delete"),
     });
     if (!ok) return;
     deleteMutation.mutate();

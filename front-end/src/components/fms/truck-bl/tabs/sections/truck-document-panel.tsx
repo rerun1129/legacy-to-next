@@ -1,21 +1,26 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox, TextBox, DateBox } from "@/components/shared/inputs";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function TruckDocumentPanel() {
+  // Rules of Hooks: unconditionally at top
+  const tf = useTranslations("fms.truckBl.entry.fields");
+  const tp = useTranslations("fms.truckBl.entry.panels");
+
   const { register, control, setValue } = useFormContext<TruckBlFormValues>();
   const trucker = useCodeAutocomplete(CODE_SOURCES.trucker);
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Document</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("document")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1, padding: "8px 0" }}>
         {/* Pick-up Date */}
         <div className="li">
-          <span className="li__label">Pick-up Date</span>
+          <span className="li__label">{tf("pickupDate")}</span>
           <div className="li__input">
             <Controller
               control={control}
@@ -35,7 +40,7 @@ export function TruckDocumentPanel() {
         {/* Trucker */}
         <CodeBox
           kind="lcn"
-          label="Trucker"
+          label={tf("trucker")}
           codeProps={{ ...register("truckerCode"), placeholder: "Code" }}
           nameProps={{ ...register("truckerName"), placeholder: "Trucker Name" }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -46,7 +51,7 @@ export function TruckDocumentPanel() {
         />
         {/* Trucker PIC */}
         <div className="li">
-          <span className="li__label">Trucker PIC</span>
+          <span className="li__label">{tf("truckerPic")}</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Trucker PIC" {...register("truckerPic")} />
           </div>

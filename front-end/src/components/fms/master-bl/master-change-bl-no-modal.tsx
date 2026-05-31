@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Save, X } from "lucide-react";
 import { masterBlPort } from "@/lib/ports";
 import { toast } from "@/lib/toast-store";
@@ -31,6 +32,8 @@ function MasterChangeBlNoModalInner({
   onClose,
   onChanged,
 }: Omit<MasterChangeBlNoModalProps, "isOpen">) {
+  const t  = useTranslations("fms.masterBl.entry.msg");
+  const tm = useTranslations("fms.masterBl.entry.modal.changeBlNo");
   const queryClient = useQueryClient();
   // BE SSOT — zodResolver/required/pattern 사용 금지
   const form = useForm<FormValues>({ defaultValues: { newMblNo: "", newMasterRefNo: "" } });
@@ -39,7 +42,7 @@ function MasterChangeBlNoModalInner({
     mutationFn: (values: FormValues) =>
       masterBlPort.changeMblNo(masterBlId, values.newMblNo, values.newMasterRefNo),
     onSuccess: () => {
-      toast.success("B/L No가 변경되었습니다.");
+      toast.success(t("blNoChanged"));
       // List 자동 invalidate 금지 — detail만 갱신
       queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", masterBlId] });
       onChanged?.();
@@ -53,25 +56,25 @@ function MasterChangeBlNoModalInner({
     <>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="modal__body">
         <div className="field">
-          <div className="field__label">현재 {blNoLabel}</div>
+          <div className="field__label">{tm("currentBlNo", { blNoLabel })}</div>
           <div className="field__input">
             <input value={currentMblNo ?? ""} readOnly />
           </div>
         </div>
         <div className="field">
-          <div className="field__label">변경할 {blNoLabel}</div>
+          <div className="field__label">{tm("newBlNo", { blNoLabel })}</div>
           <div className="field__input">
             <input {...form.register("newMblNo")} placeholder={`New ${blNoLabel}`} autoFocus />
           </div>
         </div>
         <div className="field">
-          <div className="field__label">현재 Master Ref</div>
+          <div className="field__label">{tm("currentMasterRef")}</div>
           <div className="field__input">
             <input value={currentMasterRefNo ?? ""} readOnly />
           </div>
         </div>
         <div className="field">
-          <div className="field__label">변경할 Master Ref</div>
+          <div className="field__label">{tm("newMasterRef")}</div>
           <div className="field__input">
             <input {...form.register("newMasterRefNo")} placeholder="New Master Ref" />
           </div>

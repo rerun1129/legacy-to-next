@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
@@ -12,24 +14,13 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { AirMasterFilter } from "@/domain/air-master";
 import { usePathname } from "next/navigation";
-
-const DATE_KIND_OPTIONS = [
-  { value: "ETD", label: "ETD" },
-  { value: "ETA", label: "ETA" },
-];
-const MASTER_AWB_KIND_OPTIONS = [
-  { value: "MBL", label: "Master AWB No" },
-  { value: "REF", label: "Master Ref. No" },
-];
-const PARTY_KIND_OPTIONS = [
-  { value: "SHIPPER", label: "Shipper" },
-  { value: "CONSIGNEE", label: "Consignee" },
-  { value: "NOTIFY", label: "Notify" },
-];
-const PORT_KIND_OPTIONS = [
-  { value: "POL", label: "Departure" },
-  { value: "POD", label: "Destination" },
-];
+import {
+  DATE_KIND_OPTIONS,
+  MASTER_AWB_KIND_OPTIONS,
+  PARTY_KIND_OPTIONS,
+  PORT_KIND_OPTIONS,
+} from "./air-master-list-filter-options";
+import type { LabelOption } from "@/components/shared/inputs/_types";
 
 interface Props {
   form: UseFormReturn<AirMasterFilter>;
@@ -39,6 +30,25 @@ export function AirMasterListFilter({ form }: Props) {
   const pathname = usePathname();
   useListFilterSync(form, pathname);
   const { register, setValue } = form;
+  const t = useTranslations("fms.airMaster.list.filter");
+
+  // labelKey 배열 → 해석된 LabelOption 배열 (useMemo로 t 참조 변경 시에만 재계산)
+  const dateKindOptions = useMemo<LabelOption[]>(
+    () => DATE_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const masterAwbKindOptions = useMemo<LabelOption[]>(
+    () => MASTER_AWB_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const partyKindOptions = useMemo<LabelOption[]>(
+    () => PARTY_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const portKindOptions = useMemo<LabelOption[]>(
+    () => PORT_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
 
   // 자동완성 훅 — 소스별 1:1
   const party   = useCodeAutocomplete(CODE_SOURCES.customer);
@@ -47,7 +57,11 @@ export function AirMasterListFilter({ form }: Props) {
   const team    = useCodeAutocomplete(CODE_SOURCES.team);
 
   const { options: shipmentTypeOptions, isLoading: shipmentTypeLoading, placeholder: shipmentTypePlaceholder } = useEnumOptions("ShipmentType");
-  const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentTypeOptions];
+  const allOption = useMemo(() => ({ value: "", label: t("all") }), [t]);
+  const shipmentTypeOptionsWithAll = useMemo(
+    () => [allOption, ...shipmentTypeOptions],
+    [allOption, shipmentTypeOptions]
+  );
 
   return (
     <div className="search-card">
@@ -67,7 +81,7 @@ export function AirMasterListFilter({ form }: Props) {
                     name="dateTo"
                     render={({ field: toField }) => (
                       <DateRangeBox
-                        labelOptions={DATE_KIND_OPTIONS}
+                        labelOptions={dateKindOptions}
                         labelValue={kindField.value}
                         onLabelChange={kindField.onChange}
                         required
@@ -100,7 +114,7 @@ export function AirMasterListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <div className="lcn">
                 <LcnLabel
-                  options={MASTER_AWB_KIND_OPTIONS}
+                  options={masterAwbKindOptions}
                   value={kindField.value}
                   onChange={kindField.onChange}
                 />
@@ -120,7 +134,7 @@ export function AirMasterListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PARTY_KIND_OPTIONS}
+                labelOptions={partyKindOptions}
                 labelValue={kindField.value}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("partyCode"), placeholder: "Code" }}
@@ -140,7 +154,7 @@ export function AirMasterListFilter({ form }: Props) {
           {/* 4. Airline */}
           <CodeBox
             kind="lcn"
-            label="Airline"
+            label={t("airline")}
             codeProps={{ ...register("airlineCode"), placeholder: "Code" }}
             nameProps={{ ...register("airlineName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -153,14 +167,14 @@ export function AirMasterListFilter({ form }: Props) {
             }}
           />
 
-          {/* 6. Departure/Destination */}
+          {/* 5. Departure/Destination */}
           <Controller
             control={form.control}
             name="portKind"
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PORT_KIND_OPTIONS}
+                labelOptions={portKindOptions}
                 labelValue={kindField.value}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("portCode"), placeholder: "Code" }}
@@ -177,9 +191,9 @@ export function AirMasterListFilter({ form }: Props) {
             )}
           />
 
-          {/* 7. Shipment Type */}
+          {/* 6. Shipment Type */}
           <div className="lcn">
-            <span className="lcn__label">Shipment Type</span>
+            <span className="lcn__label">{t("shipmentType")}</span>
             <Controller
               control={form.control}
               name="shipmentType"
@@ -199,10 +213,10 @@ export function AirMasterListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 8. Team */}
+          {/* 7. Team */}
           <CodeBox
             kind="lcn"
-            label="Team"
+            label={t("team")}
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}
