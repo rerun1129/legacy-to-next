@@ -35,7 +35,9 @@ function pruneListLru(queryCache: QueryCache): void {
       .slice(0, arr.length - LIST_LRU_LIMIT)
       .forEach(({ queryKey }) => {
         const target = queryCache.find({ queryKey, exact: true });
-        if (target) queryCache.remove(target);
+        // 제거 직전 재확인: findAll 이후 짧은 간격에 observer가 붙었을 수 있으므로
+        // observer > 0(활성) 쿼리는 절대 제거하지 않는다(무한 refetch 방지).
+        if (target && target.getObserversCount() === 0) queryCache.remove(target);
       });
   }
 }
@@ -66,10 +68,19 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
     });
 
     // List 캐시 LRU(화면별 5개) — gcTime: Infinity 환경에서 검색 조건 다양화 시 누적 차단 (§6.36)
+    // subscribe 콜백에서 queryCache.remove()를 동기 호출하면 'added'/'removed' 이벤트가
+    // 재진입하며, dev StrictMode의 observer 전환 레이스와 맞물려 활성 list 쿼리가
+    // 제거→refetch되는 무한 루프가 발생한다. microtask로 분리하고 재진입 가드를 둔다.
     const queryCache = c.getQueryCache();
+    let prunePending = false;
     queryCache.subscribe((event) => {
       if (event.type !== "added" && event.type !== "observerRemoved") return;
-      pruneListLru(queryCache);
+      if (prunePending) return;
+      prunePending = true;
+      queueMicrotask(() => {
+        prunePending = false;
+        pruneListLru(queryCache);
+      });
     });
 
     return c;
