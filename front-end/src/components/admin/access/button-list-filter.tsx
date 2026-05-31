@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { accessButtonUseCases } from "@/application/access/button/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
@@ -23,21 +24,22 @@ export const DEFAULT_BUTTON_FILTER: ButtonFilter = {
   status: "ALL",
 };
 
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-] as const;
-
 interface Props {
   form: UseFormReturn<ButtonFilter>;
   moduleOptions: { value: string; label: string }[];
 }
 
 export function ButtonListFilter({ form, moduleOptions }: Props) {
+  const t = useTranslations("admin.button.filter");
   const { register, setValue, control } = form;
 
-  const allModuleOptions = [{ value: "", label: "All" }, ...moduleOptions];
+  const statusOptions = [
+    { value: "ALL",      label: t("all")      },
+    { value: "ACTIVE",   label: t("active")   },
+    { value: "INACTIVE", label: t("inactive") },
+  ];
+
+  const allModuleOptions = [{ value: "", label: t("allModules") }, ...moduleOptions];
 
   const [acQuery, setAcQuery] = useState("");
 
@@ -59,7 +61,7 @@ export function ButtonListFilter({ form, moduleOptions }: Props) {
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <div className="lcn">
-            <span className="lcn__label">Module</span>
+            <span className="lcn__label">{t("module")}</span>
             <Controller
               name="moduleCode"
               control={control}
@@ -75,21 +77,21 @@ export function ButtonListFilter({ form, moduleOptions }: Props) {
           </div>
           <CodeBox
             kind="code-only"
-            label="Button Code"
+            label={t("buttonCode")}
             onSearch={setAcQuery}
             suggestions={suggestions}
             onSelect={handleSelect}
-            codeProps={{ placeholder: "Button Code", ...register("buttonCode") }}
+            codeProps={{ placeholder: t("buttonCodePlaceholder"), ...register("buttonCode") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="status"
               control={control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...STATUS_OPTIONS]}
+                  options={statusOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

@@ -61,28 +61,33 @@ function TeamCell({
   );
 }
 
-export const ROLE_OPTIONS = [
-  { value: "ADMIN", label: "ADMIN" },
-  { value: "USER", label: "USER" },
-  { value: "MANAGER", label: "MANAGER" },
-] as const;
-
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildUserColumns(
   register: UseFormRegister<FormValues>,
   control: Control<FormValues>,
   moduleValueOptions: { value: string; label: string }[],
+  tCols: ColsT,
+  tOptions: OptionsT,
   onUsernameDoubleClick?: (entityId: number) => void,
   teams: TeamRow[] = [],
 ): GridColumn<UserFormRow>[] {
+  const roleOptions = [
+    { value: "ADMIN", label: "ADMIN" },
+    { value: "USER", label: "USER" },
+    { value: "MANAGER", label: "MANAGER" },
+  ];
+
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -94,7 +99,7 @@ export function buildUserColumns(
     },
     {
       key: "username",
-      label: "Username",
+      label: tCols("username"),
       width: 160,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -111,7 +116,7 @@ export function buildUserColumns(
     },
     {
       key: "email",
-      label: "Email",
+      label: tCols("email"),
       width: 220,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.email`)} />
@@ -119,7 +124,7 @@ export function buildUserColumns(
     },
     {
       key: "password",
-      label: "Password",
+      label: tCols("password"),
       width: 160,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -144,7 +149,7 @@ export function buildUserColumns(
     },
     {
       key: "role",
-      label: "Role",
+      label: tCols("role"),
       width: 110,
       render: (_v, _row, i) => (
         <Controller
@@ -153,7 +158,7 @@ export function buildUserColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ROLE_OPTIONS]}
+              options={roleOptions}
               value={field.value ?? ""}
               onChange={(e) => field.onChange(e.target.value)}
             />
@@ -163,7 +168,7 @@ export function buildUserColumns(
     },
     {
       key: "modules",
-      label: "Modules",
+      label: tCols("modules"),
       width: 160,
       render: (_v, _row, i) => (
         <Controller
@@ -182,7 +187,7 @@ export function buildUserColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -191,7 +196,7 @@ export function buildUserColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />
@@ -201,7 +206,7 @@ export function buildUserColumns(
     },
     {
       key: "teamId",
-      label: "Team",
+      label: tCols("team"),
       width: 140,
       render: (_v, _row, i) => <TeamCell index={i} teams={teams} control={control} />,
     },

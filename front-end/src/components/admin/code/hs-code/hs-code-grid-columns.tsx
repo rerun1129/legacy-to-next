@@ -18,19 +18,24 @@ export interface FormValues {
   rows: HsCodeFormRow[];
 }
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildHsCodeColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<HsCodeFormRow>[] {
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -42,7 +47,7 @@ export function buildHsCodeColumns(
     },
     {
       key: "hsCode",
-      label: "HS Code",
+      label: tCols("hsCode"),
       width: 140,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -58,7 +63,7 @@ export function buildHsCodeColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -66,7 +71,7 @@ export function buildHsCodeColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -74,7 +79,7 @@ export function buildHsCodeColumns(
     },
     {
       key: "countryCode",
-      label: "Country Code",
+      label: tCols("countryCode"),
       width: 120,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.countryCode`)} />
@@ -82,7 +87,7 @@ export function buildHsCodeColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -91,7 +96,7 @@ export function buildHsCodeColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

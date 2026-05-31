@@ -17,16 +17,20 @@ export interface PresetFormValues {
   rows: PresetFormRow[];
 }
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type T = ReturnType<typeof import("next-intl").useTranslations>;
 
 export function buildPresetColumns(
   register: UseFormRegister<PresetFormValues>,
   control: Control<PresetFormValues>,
+  tCols: T,
+  tOptions: T,
   onCodeDoubleClick?: (entityId: number) => void,
 ): GridColumn<PresetFormRow>[] {
+  const activeOptions = [
+    { value: "true",  label: tOptions("active")   },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
@@ -42,7 +46,7 @@ export function buildPresetColumns(
     },
     {
       key: "code",
-      label: "Code",
+      label: tCols("code"),
       width: 180,
       render: (_v, row, i) => (
         <TextBox
@@ -56,7 +60,7 @@ export function buildPresetColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -64,7 +68,7 @@ export function buildPresetColumns(
     },
     {
       key: "description",
-      label: "Description",
+      label: tCols("description"),
       width: 260,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.description`)} />
@@ -72,7 +76,7 @@ export function buildPresetColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("active"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -81,7 +85,7 @@ export function buildPresetColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

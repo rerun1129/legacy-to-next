@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shared/button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
@@ -17,17 +18,20 @@ interface Props {
   presetCode: string;
 }
 
-const ASSIGNED_COLUMNS: GridColumn<AttributeValueRef>[] = [
-  { key: "attributeKey", label: "attributeKey", minWidth: 140 },
-  { key: "value", label: "value", minWidth: 100 },
-  { key: "label", label: "label", minWidth: 140 },
-];
-
 export function PermissionPresetAttributeValuesSection({ presetId, presetCode }: Props) {
+  // useTranslations MUST be called unconditionally before any early return
+  const tSection = useTranslations("admin.permissionPreset.section");
+
   const qc = useQueryClient();
   const [assignedSelected, setAssignedSelected] = useState<Set<string>>(new Set());
   // MultiSelectBox는 string[] value를 사용; id를 문자열로 매핑
   const [addCandidates, setAddCandidates] = useState<string[]>([]);
+
+  const assignedColumns = useMemo<GridColumn<AttributeValueRef>[]>(() => [
+    { key: "attributeKey", label: tSection("colAttributeKey"), minWidth: 140 },
+    { key: "value",        label: tSection("colValue"),        minWidth: 100 },
+    { key: "label",        label: tSection("colLabel"),        minWidth: 140 },
+  ], [tSection]);
 
   // preset 상세: attributeValues 배열 (id 포함)
   const { data: preset, isFetching: presetFetching } = useQuery({
@@ -74,7 +78,7 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
     mutationFn: (addIds: number[]) =>
       permissionPresetPort.assignAttributeValues(presetId, { addIds, removeIds: [] }),
     onSuccess: () => {
-      toast.success("선택한 attribute_value가 추가되었습니다.");
+      toast.success(tSection("addSuccess"));
       qc.invalidateQueries({ queryKey: ["permission-preset", "detail", presetId] });
       qc.invalidateQueries({ queryKey: ["permission-preset", "list"] });
       setAddCandidates([]);
@@ -85,7 +89,7 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
     mutationFn: (removeIds: number[]) =>
       permissionPresetPort.assignAttributeValues(presetId, { addIds: [], removeIds }),
     onSuccess: () => {
-      toast.success("선택한 attribute_value가 제거되었습니다.");
+      toast.success(tSection("removeSuccess"));
       qc.invalidateQueries({ queryKey: ["permission-preset", "detail", presetId] });
       qc.invalidateQueries({ queryKey: ["permission-preset", "list"] });
       setAssignedSelected(new Set());
@@ -101,18 +105,18 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
   const handleRemove = useCallback(async () => {
     if (assignedSelected.size === 0) return;
     const ok = await confirm({
-      title: "attribute_value 제거",
-      description: `선택한 ${assignedSelected.size}개 항목을 이 프리셋에서 제거하시겠습니까?`,
+      title: tSection("removeConfirmTitle"),
+      description: tSection("removeConfirmDesc", { count: assignedSelected.size }),
       variant: "destructive",
-      confirmText: "제거",
-      cancelText: "취소",
+      confirmText: tSection("removeConfirmOk"),
+      cancelText: tSection("removeConfirmCancel"),
     });
     if (!ok) return;
     const removeIds = assignedRows
       .filter((row) => assignedSelected.has(String(row.id)))
       .map((row) => row.id);
     removeMutation.mutate(removeIds);
-  }, [assignedSelected, assignedRows, removeMutation]);
+  }, [assignedSelected, assignedRows, removeMutation, tSection]);
 
   const isMutating = addMutation.isPending || removeMutation.isPending;
 
@@ -120,7 +124,7 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
     <div className="panel" style={{ marginTop: 16, display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Attribute Values — {presetCode}</span>
+        <span className="panel__title">{tSection("title", { presetCode })}</span>
         <span className="panel__rowcount">{assignedRows.length}</span>
       </div>
 
@@ -130,18 +134,19 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
           options={poolOptions}
           value={addCandidates}
           onChange={setAddCandidates}
-          placeholder={poolFetching ? "로딩 중…" : "추가할 attribute_value 선택"}
+          placeholder={poolFetching ? tSection("loading") : tSection("addPlaceholder")}
           style={{ flex: 1 }}
           disabled={poolFetching || isMutating}
         />
         <Button
           size="sm"
           variant="modal"
+          type="button"
           disabled={addCandidates.length === 0 || isMutating}
           onClick={handleAdd}
           loading={addMutation.isPending}
         >
-          추가
+          {tSection("addBtn")}
         </Button>
       </div>
 
@@ -149,16 +154,17 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
       <div style={{ display: "flex", justifyContent: "flex-end", padding: "6px 12px" }}>
         <Button
           size="sm"
+          type="button"
           disabled={assignedSelected.size === 0 || isMutating}
           onClick={handleRemove}
           loading={removeMutation.isPending}
         >
-          선택 제거
+          {tSection("revokeBtn")}
         </Button>
       </div>
       <div className="list-wrap" style={{ minHeight: 300 }}>
         <GridList<AttributeValueRef>
-          columns={ASSIGNED_COLUMNS}
+          columns={assignedColumns}
           data={assignedRows}
           gridId="preset-attr-value-assigned"
           rowKey={(row) => String(row.id)}
@@ -166,7 +172,7 @@ export function PermissionPresetAttributeValuesSection({ presetId, presetCode }:
           selectedKeys={assignedSelected}
           onSelectionChange={(next) => setAssignedSelected(new Set([...next].map(String)))}
           isLoading={presetFetching}
-          emptyMessage="보유한 attribute_value가 없습니다."
+          emptyMessage={tSection("emptyAssigned")}
         />
       </div>
     </div>

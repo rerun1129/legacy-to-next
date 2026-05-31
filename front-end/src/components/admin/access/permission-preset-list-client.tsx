@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Plus, Minus, Save, Search, RotateCcw } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
@@ -35,6 +36,11 @@ import {
 // ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function PermissionPresetListClient() {
+  const tCols = useTranslations("admin.permissionPreset.cols");
+  const tOptions = useTranslations("admin.permissionPreset.options");
+  const tPanel = useTranslations("admin.permissionPreset.panel");
+  const tMsg = useTranslations("admin.permissionPreset.msg");
+
   const qc = useQueryClient();
 
   const filterForm = useForm<PermissionPresetFilter>({
@@ -173,7 +179,7 @@ export function PermissionPresetListClient() {
       permissionPresetUseCases.saveChanges(vars),
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`,
+        tMsg("saveSuccess", { created: result.createdCount, updated: result.updatedCount, deleted: result.deletedCount }),
       );
       setPresetTargetId(null);
       invalidateList();
@@ -198,8 +204,8 @@ export function PermissionPresetListClient() {
   // ─── 컬럼 ────────────────────────────────────────────────────────────────
 
   const columns = useMemo(
-    () => buildPresetColumns(register, control, handleCodeDoubleClick),
-    [register, control, handleCodeDoubleClick],
+    () => buildPresetColumns(register, control, tCols, tOptions, handleCodeDoubleClick),
+    [register, control, tCols, tOptions, handleCodeDoubleClick],
   );
 
   // ─── 렌더 ────────────────────────────────────────────────────────────────
@@ -211,6 +217,7 @@ export function PermissionPresetListClient() {
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_PERMISSION_PRESET_RESET"
           className="btn btn--normal btn--sm"
+          type="button"
           onClick={() => {
             setActiveFilter(null);
             filterForm.reset(DEFAULT_PERMISSION_PRESET_FILTER);
@@ -223,6 +230,7 @@ export function PermissionPresetListClient() {
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_PERMISSION_PRESET_SEARCH"
           className="btn btn--search btn--sm"
+          type="button"
           onClick={() =>
             filterForm.handleSubmit((values) => {
               invalidateList();
@@ -235,6 +243,7 @@ export function PermissionPresetListClient() {
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_PERMISSION_PRESET_SAVE"
           className="btn btn--transaction btn--sm"
+          type="button"
           disabled={!isDirty || saveChangesMutation.isPending}
           onClick={handleSave}
           icon={<Save size={12} style={{ marginRight: 4 }} />}
@@ -256,16 +265,17 @@ export function PermissionPresetListClient() {
       >
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Permission Presets</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
           <div className="panel__actions">
-            <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
+            <Button variant="success" size="sm" iconOnly type="button" onClick={handleAdd}>
               <Plus size={12} />
             </Button>
             <Button
               variant="danger"
               size="sm"
               iconOnly
+              type="button"
               onClick={handleRemove}
               disabled={selectedKeys.size === 0}
             >
@@ -283,8 +293,8 @@ export function PermissionPresetListClient() {
             isLoading={isFetching}
             emptyMessage={
               activeFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
+                ? tMsg("enterCriteria")
+                : tMsg("noResults")
             }
             selectable
             selectedKeys={selectedKeys}

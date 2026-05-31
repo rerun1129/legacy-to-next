@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { accessAttributeUseCases } from "@/application/access/attribute/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
@@ -21,18 +22,19 @@ export const DEFAULT_ATTRIBUTE_FILTER: AttributeFilter = {
   status: "ALL",
 };
 
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-] as const;
-
 interface Props {
   form: UseFormReturn<AttributeFilter>;
 }
 
 export function AttributeListFilter({ form }: Props) {
+  const t = useTranslations("admin.attribute.filter");
   const { register, setValue, control } = form;
+
+  const statusOptions = [
+    { value: "ALL",      label: t("all")      },
+    { value: "ACTIVE",   label: t("active")   },
+    { value: "INACTIVE", label: t("inactive") },
+  ];
 
   const [acQuery, setAcQuery] = useState("");
 
@@ -54,21 +56,21 @@ export function AttributeListFilter({ form }: Props) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="Attribute Key"
+            label={t("attributeKey")}
             onSearch={setAcQuery}
             suggestions={suggestions}
             onSelect={handleSelect}
-            codeProps={{ placeholder: "Attribute Key", ...register("attributeKey") }}
+            codeProps={{ placeholder: t("attributeKeyPlaceholder"), ...register("attributeKey") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="status"
               control={control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...STATUS_OPTIONS]}
+                  options={statusOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

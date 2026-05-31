@@ -625,6 +625,692 @@
       }
     }
   },
+  "admin": {
+    "code": {
+      "master": {
+        "cols": {
+          "no": "#",
+          "masterCode": "Master Code",
+          "masterName": "Master Name",
+          "description": "Description",
+          "sortOrder": "Sort Order",
+          "status": "Status"
+        },
+        "options": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "filter": {
+          "masterCode": "Master Code",
+          "masterName": "Master Name",
+          "status": "Status",
+          "all": "All",
+          "active": "Active",
+          "inactive": "Inactive",
+          "masterCodePlaceholder": "Master Code",
+          "masterNamePlaceholder": "Master Name"
+        },
+        "panel": {
+          "title": "Common Code"
+        },
+        "msg": {
+          "enterCriteria": "Enter search criteria and click Search.",
+          "noResults": "No results found.",
+          "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+        }
+      },
+      "detail": {
+        "cols": {
+          "no": "#",
+          "codeValue": "Code Value",
+          "codeLabel": "Code Label",
+          "sortOrder": "Sort Order",
+          "status": "Status",
+          "remark": "Remark"
+        },
+        "options": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "panel": {
+          "title": "Code Detail"
+        },
+        "msg": {
+          "selectMaster": "Select a master code on the left.",
+          "saveMasterFirst": "Save the master code first.",
+          "noResults": "No results found.",
+          "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+        }
+      },
+      "list": {
+        "msg": {
+          "unsavedTitle": "Unsaved Changes",
+          "unsavedDescription": "There are unsaved changes in Detail. Discard and continue?"
+        }
+      }
+    },
+    "carrier": {
+      "cols": {
+        "no": "#",
+        "carrierCode": "Carrier Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "carrierType": "Type",
+        "carrierAddress": "Address",
+        "ediCode": "EDI Code",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "filter": {
+        "carrierCode": "Carrier Code",
+        "carrierCodePlaceholder": "Carrier Code",
+        "name": "Carrier Name",
+        "namePlaceholder": "Carrier Name (partial)",
+        "type": "Type",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted",
+        "typeAll": "All",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "panel": {
+        "title": "Carrier"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "country": {
+      "cols": {
+        "no": "#",
+        "countryCode": "Country Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "countryCode": "Country Code",
+        "countryCodePlaceholder": "Country Code",
+        "name": "Country Name",
+        "namePlaceholder": "Country Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "Country"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "currency": {
+      "cols": {
+        "no": "#",
+        "currencyCode": "Currency Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "symbol": "Symbol",
+        "currencyUnit": "Unit",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "currencyCode": "Currency Code",
+        "currencyCodePlaceholder": "Currency Code",
+        "name": "Currency Name",
+        "namePlaceholder": "Currency Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "Currency"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "exchangeRate": {
+      "cols": {
+        "no": "#",
+        "fromCurrencyCode": "From",
+        "toCurrencyCode": "To",
+        "exchangeDate": "Date",
+        "cashSellExchangeRate": "Cash Sell",
+        "cashBuyExchangeRate": "Cash Buy",
+        "wireSendExchangeRate": "Wire Send",
+        "wireReceiveExchangeRate": "Wire Receive",
+        "standardExchangeRate": "Standard",
+        "name": "Name",
+        "nameEn": "English Name",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "fromCurrencyCode": "From Currency",
+        "fromCurrencyCodePlaceholder": "e.g. USD",
+        "toCurrencyCode": "To Currency",
+        "toCurrencyCodePlaceholder": "e.g. KRW",
+        "name": "Name",
+        "namePlaceholder": "Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "Exchange Rate"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "freight": {
+      "cols": {
+        "no": "#",
+        "freightCode": "Freight Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "description": "Description",
+        "freightUnit": "Unit",
+        "freightGroup": "Group",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "groupOther": "OTHER",
+        "groupFreight": "FREIGHT",
+        "groupSurcharge": "SURCHARGE",
+        "groupWharfage": "WHARFAGE"
+      },
+      "filter": {
+        "freightCode": "Freight Code",
+        "freightCodePlaceholder": "Freight Code",
+        "name": "Freight Name",
+        "namePlaceholder": "Freight Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "Freight"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "hsCode": {
+      "cols": {
+        "no": "#",
+        "hsCode": "HS Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "countryCode": "Country Code",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "hsCode": "HS Code",
+        "hsCodePlaceholder": "HS Code",
+        "name": "HS Code Name",
+        "namePlaceholder": "HS Code Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "HS Code"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "packageUnit": {
+      "cols": {
+        "no": "#",
+        "packageCode": "Package Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "packageCode": "Package Code",
+        "packageCodePlaceholder": "Package Code",
+        "name": "Package Name",
+        "namePlaceholder": "Package Name (partial)",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "Package Unit"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "port": {
+      "cols": {
+        "no": "#",
+        "portCode": "Port Code",
+        "name": "Name",
+        "nameEn": "English Name",
+        "countryCode": "Country",
+        "portType": "Type",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "filter": {
+        "portCode": "Port Code",
+        "portCodePlaceholder": "Port Code",
+        "name": "Port Name",
+        "namePlaceholder": "Port Name (partial)",
+        "countryCode": "Country Code",
+        "countryCodePlaceholder": "Country Code",
+        "type": "Type",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted",
+        "typeAll": "All",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "panel": {
+        "title": "Port"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "customer": {
+      "cols": {
+        "no": "#",
+        "customerCode": "Customer Code",
+        "customerType": "Type",
+        "name": "Name",
+        "nameEn": "English Name",
+        "businessNo": "Biz No",
+        "representative": "Representative",
+        "phone": "Phone",
+        "email": "Email",
+        "localAddress": "Local Address",
+        "englishAddress": "English Address",
+        "memo": "Memo",
+        "country": "Country",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "customerCode": "Customer Code",
+        "customerCodePlaceholder": "Customer Code",
+        "name": "Customer Name",
+        "namePlaceholder": "Customer Name (partial)",
+        "type": "Type",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted",
+        "typeAll": "All"
+      },
+      "panel": {
+        "title": "Customer"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "user": {
+      "cols": {
+        "no": "#",
+        "username": "Username",
+        "email": "Email",
+        "password": "Password",
+        "role": "Role",
+        "modules": "Modules",
+        "status": "Status",
+        "team": "Team"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "username": "Username",
+        "usernamePlaceholder": "Username",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "panel": {
+        "title": "User"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      },
+      "section": {
+        "title": "Permission Presets",
+        "titleWithUser": "Permission Presets — {username}",
+        "colCode": "Code",
+        "colName": "Name",
+        "colActive": "Active",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "addPlaceholder": "Select Permission Presets to assign",
+        "loading": "Loading…",
+        "addBtn": "Add",
+        "revokeBtn": "Revoke Selected",
+        "emptyAssigned": "No Permission Presets assigned.",
+        "assignSuccess": "Permission Preset assigned.",
+        "revokeSuccess": "Permission Preset revoked.",
+        "revokeConfirmTitle": "Revoke Presets",
+        "revokeConfirmDesc": "Revoke {count} selected Preset(s) from this user?",
+        "revokeConfirmOk": "Revoke",
+        "revokeConfirmCancel": "Cancel"
+      }
+    },
+    "notice": {
+      "cols": {
+        "title": "Title",
+        "pinned": "Pinned",
+        "status": "Status",
+        "publishedAt": "Published At",
+        "expiresAt": "Expires At",
+        "updatedAt": "Updated At"
+      },
+      "filter": {
+        "title": "Title",
+        "titlePlaceholder": "Title (partial)",
+        "pinnedLabel": "Pinned",
+        "pinned": "Pinned",
+        "unpinned": "Unpinned",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted",
+        "publishedOnlyLabel": "Published Only",
+        "publishedCheckbox": "Published"
+      },
+      "panel": {
+        "title": "Notice"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults": "No results found.",
+        "loadFailed": "Failed to load data.",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "statusDeleted": "Deleted",
+        "bulkDeleteTitle": "Delete Selected",
+        "bulkDeleteDesc": "Delete {count} selected item(s)?",
+        "bulkDeleteSuccess": "Selected items deleted."
+      },
+      "modal": {
+        "titleCreate": "Create Notice",
+        "titleEdit": "Edit Notice",
+        "fieldTitle": "Title *",
+        "fieldTitlePlaceholder": "Notice title",
+        "fieldContent": "Content *",
+        "fieldContentPlaceholder": "Notice content",
+        "fieldPublishedAt": "Published At",
+        "fieldExpiresAt": "Expires At",
+        "fieldPinned": "Pinned",
+        "fieldPinnedCheckbox": "Pinned",
+        "fieldActive": "Active",
+        "fieldActiveCheckbox": "Active",
+        "loading": "Loading...",
+        "deletedNotice": "Deleted notice (deleted at: {deletedAt}). Read only.",
+        "btnDelete": "Delete",
+        "btnSave": "Save",
+        "btnClose": "Close",
+        "createSuccess": "Notice created.",
+        "updateSuccess": "Notice updated.",
+        "deleteSuccess": "Notice deleted.",
+        "deleteConfirmTitle": "Delete Notice",
+        "deleteConfirmDesc": "Delete \"{title}\"?",
+        "deleteConfirmOk": "Delete",
+        "deleteConfirmCancel": "Cancel"
+      }
+    },
+    "menu": {
+      "cols": {
+        "menuCode":   "Menu Code",
+        "label":      "Label",
+        "labelEn":    "Label (EN)",
+        "path":       "Path",
+        "icon":       "Icon",
+        "sortOrder":  "Sort Order",
+        "moduleCode": "Module",
+        "active":     "Status"
+      },
+      "options": {
+        "active":   "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "module":               "Module",
+        "allModules":           "All",
+        "menuCode":             "Menu Code",
+        "menuCodePlaceholder":  "Menu Code",
+        "status":               "Status",
+        "all":                  "All",
+        "active":               "Active",
+        "inactive":             "Inactive"
+      },
+      "panel": {
+        "title": "Menus"
+      },
+      "msg": {
+        "loading":        "Loading…",
+        "enterCriteria":  "Enter search criteria and click Search.",
+        "noResults":      "No results found.",
+        "saveSuccess":    "Saved — created {created}, updated {updated}",
+        "expandAll":      "Expand all",
+        "collapseAll":    "Collapse all",
+        "expand":         "Expand",
+        "collapse":       "Collapse"
+      }
+    },
+    "button": {
+      "cols": {
+        "buttonCode": "Button Code",
+        "label":      "Label",
+        "actionType": "Action",
+        "apiMethod":  "API Method",
+        "apiPath":    "API Path",
+        "sortOrder":  "Sort Order",
+        "active":     "Status"
+      },
+      "options": {
+        "active":   "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "module":                "Module",
+        "allModules":            "All",
+        "buttonCode":            "Button Code",
+        "buttonCodePlaceholder": "Button Code",
+        "status":                "Status",
+        "all":                   "All",
+        "active":                "Active",
+        "inactive":              "Inactive"
+      },
+      "panel": {
+        "title": "Buttons"
+      },
+      "msg": {
+        "loading":                "Loading…",
+        "enterCriteria":          "Enter search criteria and click Search.",
+        "noResults":              "No results found.",
+        "saveSuccess":            "Saved — created {created}, updated {updated}",
+        "expandAll":              "Expand all",
+        "collapseAll":            "Collapse all",
+        "expand":                 "Expand",
+        "collapse":               "Collapse",
+        "addButtonUnder":         "Add button under {menuCode}"
+      }
+    },
+    "attribute": {
+      "cols": {
+        "attributeKey": "Attribute Key",
+        "name":         "Name",
+        "valueType":    "Value Type",
+        "allowMulti":   "Allow Multi",
+        "active":       "Status"
+      },
+      "valueCols": {
+        "value":     "Value",
+        "label":     "Label",
+        "sortOrder": "Sort Order",
+        "active":    "Status"
+      },
+      "options": {
+        "active":   "Active",
+        "inactive": "Inactive",
+        "yes":      "Yes",
+        "no":       "No"
+      },
+      "filter": {
+        "attributeKey":            "Attribute Key",
+        "attributeKeyPlaceholder": "Attribute Key",
+        "status":                  "Status",
+        "all":                     "All",
+        "active":                  "Active",
+        "inactive":                "Inactive"
+      },
+      "panel": {
+        "title": "Attributes"
+      },
+      "section": {
+        "title": "Attribute Values — {attributeKey}"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults":     "No results found.",
+        "saveSuccess":   "Saved — created {created}, updated {updated}, deleted {deleted}",
+        "noValues":      "No values found."
+      }
+    },
+    "permissionPreset": {
+      "cols": {
+        "code":        "Code",
+        "name":        "Name",
+        "description": "Description",
+        "active":      "Status"
+      },
+      "options": {
+        "active":   "Active",
+        "inactive": "Inactive"
+      },
+      "filter": {
+        "code":            "Code",
+        "codePlaceholder": "Code",
+        "status":          "Status",
+        "all":             "All",
+        "active":          "Active",
+        "inactive":        "Inactive"
+      },
+      "panel": {
+        "title": "Permission Presets"
+      },
+      "section": {
+        "title":           "Attribute Values — {presetCode}",
+        "addPlaceholder":  "Select attribute_value to add",
+        "loading":         "Loading…",
+        "addBtn":          "Add",
+        "revokeBtn":       "Revoke Selected",
+        "colAttributeKey": "attributeKey",
+        "colValue":        "value",
+        "colLabel":        "label",
+        "emptyAssigned":   "No attribute values assigned.",
+        "addSuccess":      "Attribute value added.",
+        "removeSuccess":   "Attribute value removed.",
+        "removeConfirmTitle": "Remove Attribute Value",
+        "removeConfirmDesc":  "Remove {count} selected item(s) from this preset?",
+        "removeConfirmOk":    "Remove",
+        "removeConfirmCancel": "Cancel"
+      },
+      "msg": {
+        "enterCriteria": "Enter search criteria and click Search.",
+        "noResults":     "No results found.",
+        "saveSuccess":   "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
+    "guard": {
+      "noAccess": "You do not have access permission."
+    }
+  },
   "shell": {
     "topbar": {
       "showSidebar": "Show sidebar",

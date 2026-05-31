@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { RotateCcw, Search, Plus, Minus, Save } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
@@ -61,6 +62,11 @@ const TO_UPDATE = (row: PortFormRow) => ({
 });
 
 export function PortListClient() {
+  const tMsg = useTranslations("admin.port.msg");
+  const tPanel = useTranslations("admin.port.panel");
+  const tCols = useTranslations("admin.port.cols");
+  const tOptions = useTranslations("admin.port.options");
+
   const filterForm = useForm<PortFilter>({ defaultValues: DEFAULT_FILTER });
   const qc = useQueryClient();
 
@@ -201,15 +207,19 @@ export function PortListClient() {
     },
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`
+        tMsg("saveSuccess", {
+          created: result.createdCount,
+          updated: result.updatedCount,
+          deleted: result.deletedCount,
+        }),
       );
       invalidateList();
     },
   });
 
   const columns = useMemo(
-    () => buildPortColumns(register, control),
-    [register, control]
+    () => buildPortColumns(register, control, tCols, tOptions),
+    [register, control, tCols, tOptions],
   );
 
   const totalPages = data?.totalPages ?? 0;
@@ -257,7 +267,7 @@ export function PortListClient() {
       >
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">항구 관리</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
           <div className="panel__actions">
             <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
@@ -284,8 +294,8 @@ export function PortListClient() {
             isLoading={isFetching}
             emptyMessage={
               extraFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
+                ? tMsg("enterCriteria")
+                : tMsg("noResults")
             }
             selectable
             selectedKeys={selectedKeys}

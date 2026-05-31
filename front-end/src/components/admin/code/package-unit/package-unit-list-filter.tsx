@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type { PackageUnitFilter } from "@/domain/code/package-unit";
 import { packageUnitUseCases } from "@/application/code/package-unit/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
@@ -15,16 +16,17 @@ interface Props {
   form: UseFormReturn<PackageUnitFilter>;
 }
 
-const SCOPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "DELETED", label: "Deleted" },
-] as const;
-
 export function PackageUnitListFilter({ form }: Props) {
+  const t = useTranslations("admin.packageUnit.filter");
   useListFilterSync(form, "/admin/code/package/list");
   const { register, setValue } = form;
+
+  const scopeOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "ACTIVE", label: t("active") },
+    { value: "INACTIVE", label: t("inactive") },
+    { value: "DELETED", label: t("deleted") },
+  ];
 
   const [acQuery, setAcQuery] = useState("");
   const { data: suggestions = [] } = useQuery({
@@ -44,29 +46,29 @@ export function PackageUnitListFilter({ form }: Props) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="Package Code"
+            label={t("packageCode")}
             onSearch={setAcQuery}
             suggestions={suggestions}
             onSelect={handleSelect}
-            codeProps={{ placeholder: "Package Code", ...register("packageCode") }}
+            codeProps={{ placeholder: t("packageCodePlaceholder"), ...register("packageCode") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Package Name</span>
+            <span className="lcn__label">{t("name")}</span>
             <input
               className="box-panel"
-              placeholder="Package Name (partial)"
+              placeholder={t("namePlaceholder")}
               {...register("name")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="scope"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...SCOPE_OPTIONS]}
+                  options={scopeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Save, Search, RotateCcw, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { Button } from "@/components/shared/button";
@@ -35,6 +36,9 @@ const BUTTON_LIST_SCOPE = "/admin/access/button/list";
 // ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function AccessButtonListClient() {
+  const tMsg = useTranslations("admin.button.msg");
+  const tPanel = useTranslations("admin.button.panel");
+
   const qc = useQueryClient();
 
   const filterForm = useForm<ButtonFilter>({ defaultValues: DEFAULT_BUTTON_FILTER });
@@ -165,7 +169,7 @@ export function AccessButtonListClient() {
     mutationFn: (vars: SaveButtonChangesRequest) => accessButtonUseCases.saveChanges(vars),
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}`,
+        tMsg("saveSuccess", { created: result.createdCount, updated: result.updatedCount }),
       );
       qc.invalidateQueries({ queryKey: ["access-button", "list"] });
     },
@@ -238,7 +242,7 @@ export function AccessButtonListClient() {
       >
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Buttons</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{liveRows.length}</span>
           <div className="panel__actions">
             {/* 모두 펴기 / 모두 접기 */}
@@ -249,7 +253,7 @@ export function AccessButtonListClient() {
               type="button"
               disabled={!hasRows}
               onClick={() => treeRef.current?.expandAll()}
-              aria-label="모두 펴기"
+              aria-label={tMsg("expandAll")}
             >
               <ChevronsUpDown size={12} />
             </Button>
@@ -260,7 +264,7 @@ export function AccessButtonListClient() {
               type="button"
               disabled={!hasRows}
               onClick={() => treeRef.current?.collapseAll()}
-              aria-label="모두 접기"
+              aria-label={tMsg("collapseAll")}
             >
               <ChevronsDownUp size={12} />
             </Button>
@@ -270,15 +274,15 @@ export function AccessButtonListClient() {
         <div className="list-wrap" style={{ overflowY: "auto" }}>
           {isFetching && liveRows.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
-              로딩 중...
+              {tMsg("loading")}
             </div>
           ) : activeFilter === null ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
-              Enter search criteria and click Search.
+              {tMsg("enterCriteria")}
             </div>
           ) : liveRows.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--ink-4)", fontSize: 13 }}>
-              No results found.
+              {tMsg("noResults")}
             </div>
           ) : (
             <ButtonTreeView

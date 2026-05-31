@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { RotateCcw, Search, Plus } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -27,6 +28,8 @@ const SCOPE = "/admin/notice/list";
 type NoticeSearchState = SavedSearchState & { extraFilter: NoticeFilter | null };
 
 export function NoticeListClient() {
+  const t = useTranslations("admin.notice.msg");
+
   const form = useForm<NoticeFilter>({ defaultValues: DEFAULT_VALUES });
   const qc = useQueryClient();
 
@@ -50,7 +53,7 @@ export function NoticeListClient() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-notice"] });
       setSelectedKeys(new Set());
-      toast.success("선택한 항목이 삭제되었습니다.");
+      toast.success(t("bulkDeleteSuccess"));
     },
   });
 
@@ -84,8 +87,8 @@ export function NoticeListClient() {
           disabled={selectedKeys.size === 0 || bulkDeleteMutation.isPending}
           onClick={async () => {
             const ok = await confirm({
-              title: "선택 삭제",
-              description: `선택한 ${selectedKeys.size}개 항목을 삭제하시겠습니까?`,
+              title: t("bulkDeleteTitle"),
+              description: t("bulkDeleteDesc", { count: selectedKeys.size }),
               variant: "destructive",
             });
             if (ok) bulkDeleteMutation.mutate([...selectedKeys]);

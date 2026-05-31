@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { getSession, hasMenuAccess, clearSession, firstAccessibleRoute } from "@/lib/admin-session";
 import { useTabs } from "@/lib/use-tabs";
 import { toast } from "@/lib/toast-store";
@@ -14,6 +15,7 @@ interface Props {
 export function AdminGuard({ children, requiredMenuCode }: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("admin.guard");
   // SSR 단계에서는 session을 읽지 않고, mounted 후에만 실제 세션을 평가.
   // mounted=false 동안 SSR 결과(return null)와 CSR 초기 렌더를 일치시켜 hydration mismatch 방지.
   const [mounted, setMounted] = useState(false);
@@ -41,7 +43,7 @@ export function AdminGuard({ children, requiredMenuCode }: Props) {
       if (target) {
         // redirect 전 권한 없는 경로 탭을 제거해 잔존 탭을 통한 무한 redirect 방지
         useTabs.getState().removeTab(pathname);
-        toast.error("접근 권한이 없습니다.");
+        toast.error(t("noAccess"));
         router.replace(target);
       } else {
         // 어떤 라우트도 접근 불가한 비정상 세션이면 정리 후 로그인으로
@@ -50,7 +52,7 @@ export function AdminGuard({ children, requiredMenuCode }: Props) {
         router.replace("/login");
       }
     }
-  }, [mounted, session, authorized, router, pathname]);
+  }, [mounted, session, authorized, router, pathname, t]);
 
   if (!mounted || !authorized) return null;
   return <>{children}</>;

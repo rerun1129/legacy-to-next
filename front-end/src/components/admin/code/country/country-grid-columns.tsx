@@ -17,19 +17,24 @@ export interface FormValues {
   rows: CountryFormRow[];
 }
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildCountryColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<CountryFormRow>[] {
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -41,7 +46,7 @@ export function buildCountryColumns(
     },
     {
       key: "countryCode",
-      label: "Country Code",
+      label: tCols("countryCode"),
       width: 140,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -57,7 +62,7 @@ export function buildCountryColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -65,7 +70,7 @@ export function buildCountryColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -73,7 +78,7 @@ export function buildCountryColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -82,7 +87,7 @@ export function buildCountryColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

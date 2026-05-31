@@ -1,6 +1,7 @@
 "use client";
 
-import { MENU_COLUMNS } from "./menu-grid-columns";
+import { useTranslations } from "next-intl";
+import { buildMenuColumnHeaders } from "./menu-grid-columns";
 
 // 체크박스(28px) + 토글(20px) 스페이서 — TreeRow 레이아웃과 동기화
 const CHECKBOX_W = 28;
@@ -22,9 +23,13 @@ const thStyle: React.CSSProperties = {
 
 /**
  * MenuTreeView 상단 컬럼 라벨 헤더.
- * MENU_COLUMNS의 width와 TreeRow 셀 width가 일치해야 정렬이 맞음.
+ * MENU_COLUMN_DEFS의 width와 TreeRow 셀 width가 일치해야 정렬이 맞음.
  */
 export function MenuTreeHeader() {
+  // useTranslations는 early-return 이전에 무조건 호출
+  const tCols = useTranslations("admin.menu.cols");
+  const columns = buildMenuColumnHeaders(tCols);
+
   return (
     <div
       style={{
@@ -42,7 +47,7 @@ export function MenuTreeHeader() {
       {/* 토글 스페이서 */}
       <div style={{ ...thStyle, width: TOGGLE_W, padding: "6px 0" }} />
       {/* 컬럼 헤더 */}
-      {MENU_COLUMNS.map((col) => (
+      {columns.map((col) => (
         <div key={col.key} style={{ ...thStyle, width: col.width, minWidth: col.width }}>
           {col.label}
         </div>

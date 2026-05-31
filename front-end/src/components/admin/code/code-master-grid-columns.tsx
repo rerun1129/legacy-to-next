@@ -20,19 +20,24 @@ export interface CodeMasterFormValues {
   rows: CodeMasterFormRow[];
 }
 
-const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildCodeMasterColumns(
   register: UseFormRegister<CodeMasterFormValues>,
   control: Control<CodeMasterFormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<CodeMasterFormRow>[] {
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -44,7 +49,7 @@ export function buildCodeMasterColumns(
     },
     {
       key: "masterCode",
-      label: "Master Code",
+      label: tCols("masterCode"),
       width: 140,
       render: (_v, row, i) => (
         <TextBox
@@ -57,7 +62,7 @@ export function buildCodeMasterColumns(
     },
     {
       key: "masterName",
-      label: "Master Name",
+      label: tCols("masterName"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.masterName`)} />
@@ -65,7 +70,7 @@ export function buildCodeMasterColumns(
     },
     {
       key: "description",
-      label: "Description",
+      label: tCols("description"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.description`)} />
@@ -73,7 +78,7 @@ export function buildCodeMasterColumns(
     },
     {
       key: "sortOrder",
-      label: "Sort Order",
+      label: tCols("sortOrder"),
       width: 90,
       render: (_v, _row, i) => (
         <Controller
@@ -94,7 +99,7 @@ export function buildCodeMasterColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -103,7 +108,7 @@ export function buildCodeMasterColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

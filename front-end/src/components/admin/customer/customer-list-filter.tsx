@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type { CustomerFilter } from "@/domain/customer";
 import { customerUseCases } from "@/application/customer/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
@@ -15,27 +16,28 @@ interface Props {
   form: UseFormReturn<CustomerFilter>;
 }
 
-const CUSTOMER_TYPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "CUSTOMER", label: "CUSTOMER" },
-  { value: "PARTNER", label: "PARTNER" },
-  { value: "AIRCARRIER", label: "AIRCARRIER" },
-  { value: "LINER", label: "LINER" },
-  { value: "TRUCKER", label: "TRUCKER" },
-  { value: "WAREHOUSE", label: "WAREHOUSE" },
-  { value: "OTHER", label: "OTHER" },
-] as const;
-
-const SCOPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "DELETED", label: "Deleted" },
-] as const;
-
 export function CustomerListFilter({ form }: Props) {
+  const t = useTranslations("admin.customer.filter");
   useListFilterSync(form, "/admin/customer/list");
   const { register, setValue } = form;
+
+  const customerTypeOptions = [
+    { value: "ALL", label: t("typeAll") },
+    { value: "CUSTOMER", label: "CUSTOMER" },
+    { value: "PARTNER", label: "PARTNER" },
+    { value: "AIRCARRIER", label: "AIRCARRIER" },
+    { value: "LINER", label: "LINER" },
+    { value: "TRUCKER", label: "TRUCKER" },
+    { value: "WAREHOUSE", label: "WAREHOUSE" },
+    { value: "OTHER", label: "OTHER" },
+  ];
+
+  const scopeOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "ACTIVE", label: t("active") },
+    { value: "INACTIVE", label: t("inactive") },
+    { value: "DELETED", label: t("deleted") },
+  ];
 
   const [acQuery, setAcQuery] = useState("");
   const { data: suggestions = [] } = useQuery({
@@ -55,29 +57,29 @@ export function CustomerListFilter({ form }: Props) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="Customer Code"
+            label={t("customerCode")}
             onSearch={setAcQuery}
             suggestions={suggestions}
             onSelect={handleSelect}
-            codeProps={{ placeholder: "Customer Code", ...register("customerCode") }}
+            codeProps={{ placeholder: t("customerCodePlaceholder"), ...register("customerCode") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Customer Name</span>
+            <span className="lcn__label">{t("name")}</span>
             <input
               className="box-panel"
-              placeholder="Customer Name (partial)"
+              placeholder={t("namePlaceholder")}
               {...register("name")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Type</span>
+            <span className="lcn__label">{t("type")}</span>
             <Controller
               name="customerType"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...CUSTOMER_TYPE_OPTIONS]}
+                  options={customerTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -85,14 +87,14 @@ export function CustomerListFilter({ form }: Props) {
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="scope"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...SCOPE_OPTIONS]}
+                  options={scopeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

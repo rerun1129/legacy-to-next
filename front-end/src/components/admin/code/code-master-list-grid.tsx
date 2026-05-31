@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Plus, Minus, Save } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
@@ -42,6 +43,10 @@ export function CodeMasterListGrid({
   selectedMasterId,
   onSelectMaster,
 }: Props) {
+  const tMsg = useTranslations("admin.code.master.msg");
+  const tPanel = useTranslations("admin.code.master.panel");
+  const tCols = useTranslations("admin.code.master.cols");
+  const tOptions = useTranslations("admin.code.master.options");
   const qc = useQueryClient();
 
   const { control, register, getValues, setValue, reset, formState: { isDirty } } =
@@ -161,15 +166,19 @@ export function CodeMasterListGrid({
     },
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`,
+        tMsg("saveSuccess", {
+          created: result.createdCount,
+          updated: result.updatedCount,
+          deleted: result.deletedCount,
+        }),
       );
       invalidateList();
     },
   });
 
   const columns = useMemo(
-    () => buildCodeMasterColumns(register, control),
-    [register, control],
+    () => buildCodeMasterColumns(register, control, tCols, tOptions),
+    [register, control, tCols, tOptions],
   );
 
   return (
@@ -200,7 +209,7 @@ export function CodeMasterListGrid({
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Common Code</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
         </div>
         <div className="list-wrap">
@@ -213,8 +222,8 @@ export function CodeMasterListGrid({
             isLoading={isFetching}
             emptyMessage={
               submittedFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
+                ? tMsg("enterCriteria")
+                : tMsg("noResults")
             }
             selectable
             selectedKeys={selectedKeys}

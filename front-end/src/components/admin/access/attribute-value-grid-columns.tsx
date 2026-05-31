@@ -8,15 +8,19 @@ import type { AttributeValueFormRow, AttributeValueFormValues } from "./attribut
 
 export { type AttributeValueFormRow, type AttributeValueFormValues };
 
-const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type T = ReturnType<typeof import("next-intl").useTranslations>;
 
 export function buildAttributeValueColumns(
   register: UseFormRegister<AttributeValueFormValues>,
   control: Control<AttributeValueFormValues>,
+  tCols: T,
+  tOptions: T,
 ): GridColumn<AttributeValueFormRow>[] {
+  const activeOptions = [
+    { value: "true",  label: tOptions("active")   },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
@@ -32,7 +36,7 @@ export function buildAttributeValueColumns(
     },
     {
       key: "value",
-      label: "Value",
+      label: tCols("value"),
       width: 160,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -53,7 +57,7 @@ export function buildAttributeValueColumns(
     },
     {
       key: "label",
-      label: "Label",
+      label: tCols("label"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.label`)} />
@@ -61,7 +65,7 @@ export function buildAttributeValueColumns(
     },
     {
       key: "sortOrder",
-      label: "Sort Order",
+      label: tCols("sortOrder"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -80,7 +84,7 @@ export function buildAttributeValueColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("active"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -89,7 +93,7 @@ export function buildAttributeValueColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

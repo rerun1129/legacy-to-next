@@ -1,6 +1,7 @@
 "use client";
 
-import { BUTTON_COLUMNS } from "./button-grid-columns";
+import { useTranslations } from "next-intl";
+import { buildButtonColumnHeaders } from "./button-grid-columns";
 
 // 체크박스(28px) + 들여쓰기/토글 영역(20px) + 메뉴 indent 스페이서(20px) 스페이서
 // 버튼 행 기준: paddingLeft(8) + checkbox(20) + gap(4) + leaf-indent(20) = 52px 앞쪽 고정
@@ -24,11 +25,15 @@ const thStyle: React.CSSProperties = {
 
 /**
  * ButtonTreeView 상단 컬럼 라벨 헤더.
- * BUTTON_COLUMNS의 width와 ButtonRowCells 셀 width가 일치해야 정렬이 맞음.
- * 버튼 행(leaf)을 기준으로 정렬하며, 메뉴 노드 헤더는 reads-only이므로 헤더와 완전 정렬이 어렵다.
+ * BUTTON_COLUMN_DEFS의 width와 ButtonRowCells 셀 width가 일치해야 정렬이 맞음.
+ * 버튼 행(leaf)을 기준으로 정렬하며, 메뉴 노드 헤더는 read-only이므로 헤더와 완전 정렬이 어렵다.
  * (메뉴 노드는 menuCode+label 읽기전용 표시, 버튼 행은 인라인 편집 셀)
  */
 export function ButtonTreeHeader() {
+  // useTranslations는 early-return 이전에 무조건 호출
+  const tCols = useTranslations("admin.button.cols");
+  const columns = buildButtonColumnHeaders(tCols);
+
   return (
     <div
       style={{
@@ -46,7 +51,7 @@ export function ButtonTreeHeader() {
       {/* 토글/leaf-indent 스페이서 */}
       <div style={{ ...thStyle, width: TOGGLE_W, padding: "6px 0" }} />
       {/* 컬럼 헤더 */}
-      {BUTTON_COLUMNS.map((col) => (
+      {columns.map((col) => (
         <div key={col.key} style={{ ...thStyle, width: col.width, minWidth: col.width }}>
           {col.label}
         </div>

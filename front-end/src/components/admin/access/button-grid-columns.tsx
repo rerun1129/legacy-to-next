@@ -8,23 +8,21 @@ import type { ButtonFormRow, ButtonFormValues } from "./button-list-helpers";
 
 export type { ButtonFormRow, ButtonFormValues };
 
-// 컬럼 정의 단일 소스 — TreeRow 셀 width 및 헤더 행과 동기화
-export const BUTTON_COLUMNS = [
-  { key: "buttonCode", label: "Code",       width: 160 },
-  { key: "label",      label: "Label",      width: 140 },
-  { key: "actionType", label: "Action",     width: 110 },
-  { key: "apiMethod",  label: "API Method", width: 90  },
-  { key: "apiPath",    label: "API Path",   width: 180 },
-  { key: "sortOrder",  label: "Order",      width: 54  },
-  { key: "active",     label: "Status",     width: 80  },
+// 컬럼 정의 단일 소스 — TreeRow 셀 width 및 헤더 행과 동기화 (label은 소비자가 t()로 주입)
+export const BUTTON_COLUMN_DEFS = [
+  { key: "buttonCode", width: 160 },
+  { key: "label",      width: 140 },
+  { key: "actionType", width: 110 },
+  { key: "apiMethod",  width: 90  },
+  { key: "apiPath",    width: 180 },
+  { key: "sortOrder",  width: 54  },
+  { key: "active",     width: 80  },
 ] as const;
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+export type ButtonColKey = (typeof BUTTON_COLUMN_DEFS)[number]["key"];
 
-export const ACTION_TYPE_OPTIONS = [
+// ACTION_TYPE 값은 BE enum 그대로 표시 (번역 불필요)
+const ACTION_TYPE_OPTIONS = [
   { value: "CREATE", label: "CREATE" },
   { value: "UPDATE", label: "UPDATE" },
   { value: "DELETE", label: "DELETE" },
@@ -32,11 +30,15 @@ export const ACTION_TYPE_OPTIONS = [
   { value: "CUSTOM", label: "CUSTOM" },
 ] as const;
 
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
+
 interface ButtonCellsProps {
   row: ButtonFormRow;
   idx: number;
   register: UseFormRegister<ButtonFormValues>;
   control: Control<ButtonFormValues>;
+  tOptions: OptionsT;
 }
 
 /**
@@ -44,8 +46,13 @@ interface ButtonCellsProps {
  * buttonCode: 신규행(entityId<0)만 편집 가능, 기존행은 read-only span.
  * 나머지 필드: 신규/기존 모두 편집 가능.
  */
-export function ButtonRowCells({ row, idx, register, control }: ButtonCellsProps) {
+export function ButtonRowCells({ row, idx, register, control, tOptions }: ButtonCellsProps) {
   const isNew = row.entityId < 0;
+
+  const activeOptions = [
+    { value: "true",  label: tOptions("active")   },
+    { value: "false", label: tOptions("inactive") },
+  ];
 
   return (
     <>
@@ -144,7 +151,7 @@ export function ButtonRowCells({ row, idx, register, control }: ButtonCellsProps
         render={({ field }) => (
           <ComboBox
             variant="cell"
-            options={[...ACTIVE_OPTIONS]}
+            options={activeOptions}
             value={String(field.value)}
             onChange={(e) => field.onChange(e.target.value === "true")}
             style={{ width: 80 }}
@@ -153,4 +160,12 @@ export function ButtonRowCells({ row, idx, register, control }: ButtonCellsProps
       />
     </>
   );
+}
+
+/** 헤더용: key+width에 번역된 label을 붙인 컬럼 배열을 반환 */
+export function buildButtonColumnHeaders(tCols: ColsT) {
+  return BUTTON_COLUMN_DEFS.map((col) => ({
+    ...col,
+    label: tCols(col.key),
+  }));
 }

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shared/button";
 import { confirm } from "@/components/confirm";
 import { toast } from "@/lib/toast-store";
@@ -17,22 +18,23 @@ interface Props {
   username?: string;
 }
 
-const ASSIGNED_COLUMNS: GridColumn<UserPermissionPresetRef>[] = [
-  { key: "presetCode", label: "code", minWidth: 140 },
-  { key: "presetName", label: "name", minWidth: 160 },
-  {
-    key: "presetActive",
-    label: "active",
-    minWidth: 70,
-    align: "center",
-    render: (v) => (v ? "활성" : "비활성"),
-  },
-];
-
 export function UserPermissionPresetsSection({ userId, username }: Props) {
+  const t = useTranslations("admin.user.section");
   const qc = useQueryClient();
   const [assignedSelected, setAssignedSelected] = useState<Set<number>>(new Set());
   const [addCandidates, setAddCandidates] = useState<string[]>([]);
+
+  const assignedColumns: GridColumn<UserPermissionPresetRef>[] = useMemo(() => [
+    { key: "presetCode", label: t("colCode"), minWidth: 140 },
+    { key: "presetName", label: t("colName"), minWidth: 160 },
+    {
+      key: "presetActive",
+      label: t("colActive"),
+      minWidth: 70,
+      align: "center",
+      render: (v) => (v ? t("statusActive") : t("statusInactive")),
+    },
+  ], [t]);
 
   // Query 1: 해당 user 에 부여된 preset 목록
   const { data: assigned = [], isFetching: assignedFetching } = useQuery({
@@ -75,7 +77,7 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
       }
     },
     onSuccess: () => {
-      toast.success("Permission Preset이 부여되었습니다.");
+      toast.success(t("assignSuccess"));
       qc.invalidateQueries({ queryKey: ["access-user-permission-preset", "by-user", userId] });
       setAddCandidates([]);
     },
@@ -89,7 +91,7 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
       }
     },
     onSuccess: () => {
-      toast.success("Permission Preset이 해제되었습니다.");
+      toast.success(t("revokeSuccess"));
       qc.invalidateQueries({ queryKey: ["access-user-permission-preset", "by-user", userId] });
       setAssignedSelected(new Set());
     },
@@ -103,21 +105,21 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
   const handleRevoke = useCallback(async () => {
     if (assignedSelected.size === 0) return;
     const ok = await confirm({
-      title: "Preset 해제",
-      description: `선택한 ${assignedSelected.size}개 Preset을 이 사용자에서 해제하시겠습니까?`,
+      title: t("revokeConfirmTitle"),
+      description: t("revokeConfirmDesc", { count: assignedSelected.size }),
       variant: "destructive",
-      confirmText: "해제",
-      cancelText: "취소",
+      confirmText: t("revokeConfirmOk"),
+      cancelText: t("revokeConfirmCancel"),
     });
     if (!ok) return;
     const revokeIds = assigned
       .filter((r) => assignedSelected.has(r.id))
       .map((r) => r.id);
     revokeMutation.mutate(revokeIds);
-  }, [assignedSelected, assigned, revokeMutation]);
+  }, [assignedSelected, assigned, revokeMutation, t]);
 
   const isMutating = assignMutation.isPending || revokeMutation.isPending;
-  const sectionTitle = username ? `Permission Presets — ${username}` : "Permission Presets";
+  const sectionTitle = username ? t("titleWithUser", { username }) : t("title");
 
   return (
     <div className="panel" style={{ marginTop: 16, display: "flex", flexDirection: "column" }}>
@@ -141,7 +143,7 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
           options={poolOptions}
           value={addCandidates}
           onChange={setAddCandidates}
-          placeholder={poolFetching ? "로딩 중…" : "부여할 Permission Preset 선택"}
+          placeholder={poolFetching ? t("loading") : t("addPlaceholder")}
           style={{ flex: 1 }}
           disabled={poolFetching || isMutating}
         />
@@ -152,7 +154,7 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
           onClick={handleAdd}
           loading={assignMutation.isPending}
         >
-          추가
+          {t("addBtn")}
         </Button>
       </div>
 
@@ -164,13 +166,13 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
           onClick={handleRevoke}
           loading={revokeMutation.isPending}
         >
-          선택 해제
+          {t("revokeBtn")}
         </Button>
       </div>
 
       <div className="list-wrap" style={{ minHeight: 300 }}>
         <GridList<UserPermissionPresetRef>
-          columns={ASSIGNED_COLUMNS}
+          columns={assignedColumns}
           data={assigned}
           gridId="user-permission-preset-assigned"
           rowKey={(row) => String(row.id)}
@@ -178,7 +180,7 @@ export function UserPermissionPresetsSection({ userId, username }: Props) {
           selectedKeys={assignedSelected}
           onSelectionChange={(next) => setAssignedSelected(new Set([...next].map(Number)))}
           isLoading={assignedFetching}
-          emptyMessage="부여된 Permission Preset이 없습니다."
+          emptyMessage={t("emptyAssigned")}
         />
       </div>
     </div>

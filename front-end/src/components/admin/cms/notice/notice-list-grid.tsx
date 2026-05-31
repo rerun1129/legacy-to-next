@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { GridList } from "@/components/shared/grid-list";
 import type { GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
@@ -19,32 +20,36 @@ interface Props {
   onSelectionChange: (next: Set<number>) => void;
 }
 
-const COLUMNS: GridColumn<NoticeRow>[] = [
-  { key: "title", label: "Title", minWidth: 300 },
-  {
-    key: "pinned",
-    label: "Pinned",
-    minWidth: 70,
-    align: "center",
-    render: (v) => (v ? "Y" : ""),
-  },
-  {
-    key: "active",
-    label: "Status",
-    minWidth: 90,
-    align: "center",
-    render: (_v, row) => {
-      if (row.deletedAt) return "Deleted";
-      return row.active ? "Active" : "Inactive";
-    },
-  },
-  { key: "publishedAt", label: "Published At", minWidth: 160 },
-  { key: "expiresAt", label: "Expires At", minWidth: 160 },
-  { key: "updatedAt", label: "Updated At", minWidth: 160 },
-];
-
 export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDoubleClick, selectedKeys, onSelectionChange }: Props) {
+  const tCols = useTranslations("admin.notice.cols");
+  const tMsg = useTranslations("admin.notice.msg");
+  const tPanel = useTranslations("admin.notice.panel");
+
   const [selected, setSelected] = useState<number | null>(null);
+
+  const columns = useMemo<GridColumn<NoticeRow>[]>(() => [
+    { key: "title", label: tCols("title"), minWidth: 300 },
+    {
+      key: "pinned",
+      label: tCols("pinned"),
+      minWidth: 70,
+      align: "center",
+      render: (v) => (v ? "Y" : ""),
+    },
+    {
+      key: "active",
+      label: tCols("status"),
+      minWidth: 90,
+      align: "center",
+      render: (_v, row) => {
+        if (row.deletedAt) return tMsg("statusDeleted");
+        return row.active ? tMsg("statusActive") : tMsg("statusInactive");
+      },
+    },
+    { key: "publishedAt", label: tCols("publishedAt"), minWidth: 160 },
+    { key: "expiresAt", label: tCols("expiresAt"), minWidth: 160 },
+    { key: "updatedAt", label: tCols("updatedAt"), minWidth: 160 },
+  ], [tCols, tMsg]);
 
   const { data, isFetching, error } = useQuery({
     queryKey: ["admin-notice", "list", extraFilter, currentPage],
@@ -63,13 +68,13 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Notice</span>
+          <span className="panel__title">{tPanel("title")}</span>
         </div>
         <div
           className="list-wrap"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <span style={{ color: "var(--ink-3)" }}>Enter search criteria and click Search.</span>
+          <span style={{ color: "var(--ink-3)" }}>{tMsg("enterCriteria")}</span>
         </div>
       </div>
     );
@@ -80,13 +85,13 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Notice</span>
+          <span className="panel__title">{tPanel("title")}</span>
         </div>
         <div
           className="list-wrap"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
-          <span className="text-error">Failed to load data.</span>
+          <span className="text-error">{tMsg("loadFailed")}</span>
         </div>
       </div>
     );
@@ -106,19 +111,19 @@ export function NoticeListGrid({ extraFilter, currentPage, onPageChange, onRowDo
     >
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">공지사항 관리</span>
+        <span className="panel__title">{tPanel("title")}</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
-        <ColumnVisibilityMenu<NoticeRow> gridId="admin-notice" defaultColumns={COLUMNS} />
+        <ColumnVisibilityMenu<NoticeRow> gridId="admin-notice" defaultColumns={columns} />
       </div>
       <div className="list-wrap">
         <GridList<NoticeRow>
-          columns={COLUMNS}
+          columns={columns}
           data={rows}
           onRowClick={(row) => setSelected(row.id)}
           rowKey={(row) => row.id}
           rowClassName={(row) => (selected === row.id ? "is-selected" : undefined)}
           isLoading={isFetching}
-          emptyMessage="No results found."
+          emptyMessage={tMsg("noResults")}
           onClearRow={() => setSelected(null)}
           selectable
           selectedKeys={selectedKeys}

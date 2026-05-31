@@ -8,6 +8,8 @@ import type { AttributeFormRow, AttributeFormValues } from "./attribute-list-hel
 
 export { type AttributeFormRow, type AttributeFormValues };
 
+type T = ReturnType<typeof import("next-intl").useTranslations>;
+
 const VALUE_TYPE_OPTIONS = [
   { value: "STRING", label: "STRING" },
   { value: "NUMBER", label: "NUMBER" },
@@ -15,16 +17,23 @@ const VALUE_TYPE_OPTIONS = [
   { value: "ENUM", label: "ENUM" },
 ] as const;
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
-
 export function buildAttributeColumns(
   register: UseFormRegister<AttributeFormValues>,
   control: Control<AttributeFormValues>,
+  tCols: T,
+  tOptions: T,
   onKeyDoubleClick?: (entityId: number, allowMulti: boolean) => void,
 ): GridColumn<AttributeFormRow>[] {
+  const activeOptions = [
+    { value: "true",  label: tOptions("active")   },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
+  const allowMultiOptions = [
+    { value: "true",  label: tOptions("yes") },
+    { value: "false", label: tOptions("no")  },
+  ];
+
   return [
     {
       key: "_no",
@@ -40,7 +49,7 @@ export function buildAttributeColumns(
     },
     {
       key: "attributeKey",
-      label: "Attribute Key",
+      label: tCols("attributeKey"),
       width: 200,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -77,7 +86,7 @@ export function buildAttributeColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -85,7 +94,7 @@ export function buildAttributeColumns(
     },
     {
       key: "valueType",
-      label: "Value Type",
+      label: tCols("valueType"),
       width: 120,
       render: (_v, _row, i) => (
         <Controller
@@ -104,7 +113,7 @@ export function buildAttributeColumns(
     },
     {
       key: "allowMulti",
-      label: "Allow Multi",
+      label: tCols("allowMulti"),
       width: 110,
       render: (_v, _row, i) => (
         <Controller
@@ -113,10 +122,7 @@ export function buildAttributeColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[
-                { value: "true", label: "Yes" },
-                { value: "false", label: "No" },
-              ]}
+              options={allowMultiOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />
@@ -126,7 +132,7 @@ export function buildAttributeColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("active"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -135,7 +141,7 @@ export function buildAttributeColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

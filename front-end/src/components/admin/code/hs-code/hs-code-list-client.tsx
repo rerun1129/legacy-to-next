@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { RotateCcw, Search, Plus, Minus, Save } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
@@ -56,6 +57,11 @@ const TO_UPDATE = (row: HsCodeFormRow) => ({
 });
 
 export function HsCodeListClient() {
+  const tMsg = useTranslations("admin.hsCode.msg");
+  const tPanel = useTranslations("admin.hsCode.panel");
+  const tCols = useTranslations("admin.hsCode.cols");
+  const tOptions = useTranslations("admin.hsCode.options");
+
   const filterForm = useForm<HsCodeFilter>({ defaultValues: DEFAULT_FILTER });
   const qc = useQueryClient();
 
@@ -195,15 +201,19 @@ export function HsCodeListClient() {
     },
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`
+        tMsg("saveSuccess", {
+          created: result.createdCount,
+          updated: result.updatedCount,
+          deleted: result.deletedCount,
+        }),
       );
       invalidateList();
     },
   });
 
   const columns = useMemo(
-    () => buildHsCodeColumns(register, control),
-    [register, control]
+    () => buildHsCodeColumns(register, control, tCols, tOptions),
+    [register, control, tCols, tOptions],
   );
 
   const totalPages = data?.totalPages ?? 0;
@@ -251,7 +261,7 @@ export function HsCodeListClient() {
       >
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">HS Code 관리</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
           <div className="panel__actions">
             <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
@@ -278,8 +288,8 @@ export function HsCodeListClient() {
             isLoading={isFetching}
             emptyMessage={
               extraFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
+                ? tMsg("enterCriteria")
+                : tMsg("noResults")
             }
             selectable
             selectedKeys={selectedKeys}

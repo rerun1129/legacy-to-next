@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Plus, Minus, Save } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { Button } from "@/components/shared/button";
@@ -29,6 +30,12 @@ interface Props {
 }
 
 export function AttributeValueSection({ attributeKey }: Props) {
+  // useTranslations MUST be called unconditionally before any early return
+  const tSection = useTranslations("admin.attribute.section");
+  const tValueCols = useTranslations("admin.attribute.valueCols");
+  const tOptions = useTranslations("admin.attribute.options");
+  const tMsg = useTranslations("admin.attribute.msg");
+
   const qc = useQueryClient();
 
   const { control, register, getValues, reset, formState: { isDirty } } =
@@ -104,7 +111,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
       accessAttributeValueUseCases.saveChanges(vars),
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`,
+        tMsg("saveSuccess", { created: result.createdCount, updated: result.updatedCount, deleted: result.deletedCount }),
       );
       invalidateList();
     },
@@ -129,8 +136,8 @@ export function AttributeValueSection({ attributeKey }: Props) {
   // ─── 컬럼 ────────────────────────────────────────────────────────────────
 
   const columns = useMemo(
-    () => buildAttributeValueColumns(register, control),
-    [register, control],
+    () => buildAttributeValueColumns(register, control, tValueCols, tOptions),
+    [register, control, tValueCols, tOptions],
   );
 
   // ─── 렌더 ────────────────────────────────────────────────────────────────
@@ -142,16 +149,17 @@ export function AttributeValueSection({ attributeKey }: Props) {
     >
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Attribute Values — {attributeKey}</span>
+        <span className="panel__title">{tSection("title", { attributeKey })}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
-          <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
+          <Button variant="success" size="sm" iconOnly type="button" onClick={handleAdd}>
             <Plus size={12} />
           </Button>
           <Button
             variant="danger"
             size="sm"
             iconOnly
+            type="button"
             onClick={handleRemove}
             disabled={selectedKeys.size === 0}
           >
@@ -160,6 +168,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
           <ActionButton
             buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_VALUE_SAVE"
             className="btn btn--transaction btn--sm"
+            type="button"
             disabled={!isDirty || saveChangesMutation.isPending}
             onClick={handleSave}
             icon={<Save size={12} style={{ marginRight: 4 }} />}
@@ -174,7 +183,7 @@ export function AttributeValueSection({ attributeKey }: Props) {
           rowKey={(row) => row.entityId}
           rowClassName={(row) => getAttributeValueRowClassName(row, originalRows)}
           isLoading={isFetching}
-          emptyMessage="No values found."
+          emptyMessage={tMsg("noValues")}
           selectable
           selectedKeys={selectedKeys}
           onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}

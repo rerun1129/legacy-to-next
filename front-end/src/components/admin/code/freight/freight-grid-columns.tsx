@@ -21,27 +21,32 @@ export interface FormValues {
   rows: FreightFormRow[];
 }
 
-export const FREIGHT_GROUP_OPTIONS = [
-  { value: "", label: "—" },
-  { value: "OTHER", label: "OTHER" },
-  { value: "FREIGHT", label: "FREIGHT" },
-  { value: "SURCHARGE", label: "SURCHARGE" },
-  { value: "WHARFAGE", label: "WHARFAGE" },
-] as const;
-
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildFreightColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<FreightFormRow>[] {
+  const freightGroupOptions = [
+    { value: "", label: "—" },
+    { value: "OTHER", label: tOptions("groupOther") },
+    { value: "FREIGHT", label: tOptions("groupFreight") },
+    { value: "SURCHARGE", label: tOptions("groupSurcharge") },
+    { value: "WHARFAGE", label: tOptions("groupWharfage") },
+  ];
+
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -53,7 +58,7 @@ export function buildFreightColumns(
     },
     {
       key: "freightCode",
-      label: "Freight Code",
+      label: tCols("freightCode"),
       width: 140,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -69,7 +74,7 @@ export function buildFreightColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -77,7 +82,7 @@ export function buildFreightColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -85,7 +90,7 @@ export function buildFreightColumns(
     },
     {
       key: "description",
-      label: "Description",
+      label: tCols("description"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.description`)} />
@@ -93,7 +98,7 @@ export function buildFreightColumns(
     },
     {
       key: "freightUnit",
-      label: "Unit",
+      label: tCols("freightUnit"),
       width: 100,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.freightUnit`)} />
@@ -101,7 +106,7 @@ export function buildFreightColumns(
     },
     {
       key: "freightGroup",
-      label: "Group",
+      label: tCols("freightGroup"),
       width: 120,
       render: (_v, _row, i) => (
         <Controller
@@ -110,7 +115,7 @@ export function buildFreightColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...FREIGHT_GROUP_OPTIONS]}
+              options={freightGroupOptions}
               value={field.value ?? ""}
               onChange={(e) => field.onChange(e.target.value || null)}
             />
@@ -120,7 +125,7 @@ export function buildFreightColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -129,7 +134,7 @@ export function buildFreightColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

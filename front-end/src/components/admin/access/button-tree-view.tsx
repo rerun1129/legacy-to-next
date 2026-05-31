@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Plus, Minus, ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shared/button";
 import type { UseFormRegister, Control } from "react-hook-form";
 import type { MenuRow } from "@/domain/access/menu";
@@ -41,6 +42,9 @@ function buildMenuTree(items: MenuRow[]): MenuTreeNode[] {
 
 // ─── 메뉴 노드 행 (읽기전용 그룹 헤더) ───────────────────────────────────────
 
+type MsgT = ReturnType<typeof useTranslations>;
+type OptionsT = (key: string) => string;
+
 interface MenuNodeRowProps {
   node: MenuTreeNode;
   level: number;
@@ -49,6 +53,8 @@ interface MenuNodeRowProps {
   indexByEntityId: Map<number, number>;
   register: UseFormRegister<ButtonFormValues>;
   control: Control<ButtonFormValues>;
+  tMsg: MsgT;
+  tOptions: OptionsT;
   onToggleNode: (id: number) => void;
   onAddButton: (menuId: number, moduleCode: string) => void;
   onRemoveNewRow: (entityId: number) => void;
@@ -62,6 +68,8 @@ function MenuNodeRow({
   indexByEntityId,
   register,
   control,
+  tMsg,
+  tOptions,
   onToggleNode,
   onAddButton,
   onRemoveNewRow,
@@ -92,14 +100,14 @@ function MenuNodeRow({
         <button
           className="tree-row__toggle"
           onClick={() => onToggleNode(row.id)}
-          aria-label={isExpanded ? "접기" : "펼치기"}
+          aria-label={isExpanded ? tMsg("collapse") : tMsg("expand")}
           type="button"
           style={{ flexShrink: 0 }}
         >
           {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </button>
 
-        {/* 메뉴 코드 + 라벨 (읽기전용) */}
+        {/* 메뉴 코드 + 라벨 (읽기전용, DB 데이터이므로 번역 불필요) */}
         <span
           style={{
             fontFamily: "var(--font-mono)",
@@ -121,7 +129,7 @@ function MenuNodeRow({
             iconOnly
             type="button"
             onClick={() => onAddButton(row.id, row.moduleCode)}
-            aria-label={`${row.menuCode} 아래 버튼 추가`}
+            aria-label={tMsg("addButtonUnder", { menuCode: row.menuCode })}
           >
             <Plus size={10} />
           </Button>
@@ -141,6 +149,8 @@ function MenuNodeRow({
               indexByEntityId={indexByEntityId}
               register={register}
               control={control}
+              tMsg={tMsg}
+              tOptions={tOptions}
               onToggleNode={onToggleNode}
               onAddButton={onAddButton}
               onRemoveNewRow={onRemoveNewRow}
@@ -154,6 +164,7 @@ function MenuNodeRow({
               indexByEntityId={indexByEntityId}
               register={register}
               control={control}
+              tOptions={tOptions}
               onRemoveNewRow={onRemoveNewRow}
             />
           ))}
@@ -171,6 +182,7 @@ interface ButtonLeafRowProps {
   indexByEntityId: Map<number, number>;
   register: UseFormRegister<ButtonFormValues>;
   control: Control<ButtonFormValues>;
+  tOptions: OptionsT;
   onRemoveNewRow: (entityId: number) => void;
 }
 
@@ -180,6 +192,7 @@ function ButtonLeafRow({
   indexByEntityId,
   register,
   control,
+  tOptions,
   onRemoveNewRow,
 }: ButtonLeafRowProps) {
   const isNew = row.entityId < 0;
@@ -209,7 +222,7 @@ function ButtonLeafRow({
       {/* 셀 그룹 */}
       {idx >= 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <ButtonRowCells row={row} idx={idx} register={register} control={control} />
+          <ButtonRowCells row={row} idx={idx} register={register} control={control} tOptions={tOptions} />
         </div>
       )}
 
@@ -253,6 +266,10 @@ export const ButtonTreeView = forwardRef<ButtonTreeHandle, ButtonTreeViewProps>(
     { menus, rows, indexByEntityId, register, control, onAddButton, onRemoveNewRow },
     ref,
   ) {
+    // useTranslations는 early-return 이전에 무조건 호출 (Rules of Hooks)
+    const tMsg = useTranslations("admin.button.msg");
+    const tOptions = useTranslations("admin.button.options");
+
     // 메뉴를 moduleCode로 그룹핑
     const menusByModule = useMemo(() => {
       const map = new Map<string, MenuRow[]>();
@@ -357,6 +374,8 @@ export const ButtonTreeView = forwardRef<ButtonTreeHandle, ButtonTreeViewProps>(
                     indexByEntityId={indexByEntityId}
                     register={register}
                     control={control}
+                    tMsg={tMsg}
+                    tOptions={tOptions}
                     onToggleNode={toggleNode}
                     onAddButton={onAddButton}
                     onRemoveNewRow={onRemoveNewRow}

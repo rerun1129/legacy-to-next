@@ -20,24 +20,29 @@ export interface FormValues {
   rows: PortFormRow[];
 }
 
-export const PORT_TYPE_OPTIONS = [
-  { value: "SEA", label: "SEA" },
-  { value: "AIR", label: "AIR" },
-] as const;
-
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildPortColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<PortFormRow>[] {
+  const portTypeOptions = [
+    { value: "SEA", label: tOptions("typeSea") },
+    { value: "AIR", label: tOptions("typeAir") },
+  ];
+
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -49,7 +54,7 @@ export function buildPortColumns(
     },
     {
       key: "portCode",
-      label: "Port Code",
+      label: tCols("portCode"),
       width: 140,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -65,7 +70,7 @@ export function buildPortColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -73,7 +78,7 @@ export function buildPortColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -81,7 +86,7 @@ export function buildPortColumns(
     },
     {
       key: "countryCode",
-      label: "Country",
+      label: tCols("countryCode"),
       width: 120,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.countryCode`)} />
@@ -89,7 +94,7 @@ export function buildPortColumns(
     },
     {
       key: "portType",
-      label: "Type",
+      label: tCols("portType"),
       width: 90,
       render: (_v, _row, i) => (
         <Controller
@@ -98,7 +103,7 @@ export function buildPortColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...PORT_TYPE_OPTIONS]}
+              options={portTypeOptions}
               value={field.value ?? ""}
               onChange={(e) => field.onChange(e.target.value)}
             />
@@ -108,7 +113,7 @@ export function buildPortColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -117,7 +122,7 @@ export function buildPortColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

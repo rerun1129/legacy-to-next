@@ -2,6 +2,7 @@
 
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import type { NoticeFilter } from "@/domain/notice";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
@@ -10,44 +11,45 @@ interface Props {
   form: UseFormReturn<NoticeFilter>;
 }
 
-const PINNED_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "PINNED", label: "Pinned" },
-  { value: "UNPINNED", label: "Unpinned" },
-] as const;
-
-const SCOPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "DELETED", label: "Deleted" },
-] as const;
-
 export function NoticeListFilter({ form }: Props) {
+  const t = useTranslations("admin.notice.filter");
   useListFilterSync(form, "/admin/notice/list");
   const { register } = form;
+
+  const pinnedOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "PINNED", label: t("pinned") },
+    { value: "UNPINNED", label: t("unpinned") },
+  ];
+
+  const scopeOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "ACTIVE", label: t("active") },
+    { value: "INACTIVE", label: t("inactive") },
+    { value: "DELETED", label: t("deleted") },
+  ];
 
   return (
     <div className="search-card">
       <div className="search-card__body">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <div className="lcn">
-            <span className="lcn__label">Title</span>
+            <span className="lcn__label">{t("title")}</span>
             <input
               className="box-panel"
-              placeholder="Title (partial)"
+              placeholder={t("titlePlaceholder")}
               {...register("title")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Pinned</span>
+            <span className="lcn__label">{t("pinnedLabel")}</span>
             <Controller
               name="pinned"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...PINNED_OPTIONS]}
+                  options={pinnedOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -55,14 +57,14 @@ export function NoticeListFilter({ form }: Props) {
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="scope"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...SCOPE_OPTIONS]}
+                  options={scopeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -70,10 +72,10 @@ export function NoticeListFilter({ form }: Props) {
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Published Only</span>
+            <span className="lcn__label">{t("publishedOnlyLabel")}</span>
             <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <input type="checkbox" {...register("publishedOnly")} />
-              Published
+              {t("publishedCheckbox")}
             </label>
           </div>
         </div>

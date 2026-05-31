@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type { CarrierFilter } from "@/domain/code/carrier";
 import { carrierUseCases } from "@/application/code/carrier/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
@@ -15,22 +16,23 @@ interface Props {
   form: UseFormReturn<CarrierFilter>;
 }
 
-const SCOPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "DELETED", label: "Deleted" },
-] as const;
-
-const CARRIER_TYPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "SEA", label: "SEA" },
-  { value: "AIR", label: "AIR" },
-] as const;
-
 export function CarrierListFilter({ form }: Props) {
+  const t = useTranslations("admin.carrier.filter");
   useListFilterSync(form, "/admin/code/carrier/list");
   const { register, setValue } = form;
+
+  const scopeOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "ACTIVE", label: t("active") },
+    { value: "INACTIVE", label: t("inactive") },
+    { value: "DELETED", label: t("deleted") },
+  ];
+
+  const carrierTypeOptions = [
+    { value: "ALL", label: t("typeAll") },
+    { value: "SEA", label: t("typeSea") },
+    { value: "AIR", label: t("typeAir") },
+  ];
 
   const [acQuery, setAcQuery] = useState("");
   const { data: suggestions = [] } = useQuery({
@@ -50,29 +52,29 @@ export function CarrierListFilter({ form }: Props) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="Carrier Code"
+            label={t("carrierCode")}
             onSearch={setAcQuery}
             suggestions={suggestions}
             onSelect={handleSelect}
-            codeProps={{ placeholder: "Carrier Code", ...register("carrierCode") }}
+            codeProps={{ placeholder: t("carrierCodePlaceholder"), ...register("carrierCode") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Carrier Name</span>
+            <span className="lcn__label">{t("name")}</span>
             <input
               className="box-panel"
-              placeholder="Carrier Name (partial)"
+              placeholder={t("namePlaceholder")}
               {...register("name")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Type</span>
+            <span className="lcn__label">{t("type")}</span>
             <Controller
               name="carrierType"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...CARRIER_TYPE_OPTIONS]}
+                  options={carrierTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />
@@ -80,14 +82,14 @@ export function CarrierListFilter({ form }: Props) {
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="scope"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...SCOPE_OPTIONS]}
+                  options={scopeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

@@ -21,24 +21,29 @@ export interface FormValues {
   rows: CarrierFormRow[];
 }
 
-export const CARRIER_TYPE_OPTIONS = [
-  { value: "SEA", label: "SEA" },
-  { value: "AIR", label: "AIR" },
-] as const;
-
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildCarrierColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<CarrierFormRow>[] {
+  const carrierTypeOptions = [
+    { value: "SEA", label: tOptions("typeSea") },
+    { value: "AIR", label: tOptions("typeAir") },
+  ];
+
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -50,7 +55,7 @@ export function buildCarrierColumns(
     },
     {
       key: "carrierCode",
-      label: "Carrier Code",
+      label: tCols("carrierCode"),
       width: 140,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -66,7 +71,7 @@ export function buildCarrierColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -74,7 +79,7 @@ export function buildCarrierColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -82,7 +87,7 @@ export function buildCarrierColumns(
     },
     {
       key: "carrierType",
-      label: "Type",
+      label: tCols("carrierType"),
       width: 90,
       render: (_v, _row, i) => (
         <Controller
@@ -91,7 +96,7 @@ export function buildCarrierColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...CARRIER_TYPE_OPTIONS]}
+              options={carrierTypeOptions}
               value={field.value ?? ""}
               onChange={(e) => field.onChange(e.target.value)}
             />
@@ -101,7 +106,7 @@ export function buildCarrierColumns(
     },
     {
       key: "carrierAddress",
-      label: "Address",
+      label: tCols("carrierAddress"),
       width: 250,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.carrierAddress`)} />
@@ -109,7 +114,7 @@ export function buildCarrierColumns(
     },
     {
       key: "ediCode",
-      label: "EDI Code",
+      label: tCols("ediCode"),
       width: 120,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.ediCode`)} />
@@ -117,7 +122,7 @@ export function buildCarrierColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -126,7 +131,7 @@ export function buildCarrierColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { Button } from "@/components/shared/button";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -63,36 +64,39 @@ function toISOOrNull(localStr: string): string | null {
 }
 
 // ─── 필드 영역 분리 (readOnly 상태 전파) ────────────────────────────────────
+type TModalFn = ReturnType<typeof useTranslations>;
+
 interface FormFieldsProps {
   register: ReturnType<typeof useForm<NoticeFormValues>>["register"];
   isReadOnly: boolean;
+  tModal: TModalFn;
 }
 
-function NoticeFormFields({ register, isReadOnly }: FormFieldsProps) {
+function NoticeFormFields({ register, isReadOnly, tModal }: FormFieldsProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div className="lcn">
-        <span className="lcn__label">Title *</span>
+        <span className="lcn__label">{tModal("fieldTitle")}</span>
         <input
           className="box-panel"
-          placeholder="Notice title"
+          placeholder={tModal("fieldTitlePlaceholder")}
           readOnly={isReadOnly}
           {...register("title")}
         />
       </div>
       <div className="lcn" style={{ alignItems: "flex-start" }}>
-        <span className="lcn__label" style={{ paddingTop: 4 }}>Content *</span>
+        <span className="lcn__label" style={{ paddingTop: 4 }}>{tModal("fieldContent")}</span>
         <textarea
           className="box-panel"
           rows={8}
-          placeholder="Notice content"
+          placeholder={tModal("fieldContentPlaceholder")}
           style={{ resize: "vertical", whiteSpace: "pre-wrap" }}
           readOnly={isReadOnly}
           {...register("content")}
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">Published At</span>
+        <span className="lcn__label">{tModal("fieldPublishedAt")}</span>
         <input
           type="datetime-local"
           className="box-panel"
@@ -102,7 +106,7 @@ function NoticeFormFields({ register, isReadOnly }: FormFieldsProps) {
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">Expires At</span>
+        <span className="lcn__label">{tModal("fieldExpiresAt")}</span>
         <input
           type="datetime-local"
           className="box-panel"
@@ -112,17 +116,17 @@ function NoticeFormFields({ register, isReadOnly }: FormFieldsProps) {
         />
       </div>
       <div className="lcn">
-        <span className="lcn__label">Pinned</span>
+        <span className="lcn__label">{tModal("fieldPinned")}</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("pinned")} />
-          Pinned
+          {tModal("fieldPinnedCheckbox")}
         </label>
       </div>
       <div className="lcn">
-        <span className="lcn__label">Active</span>
+        <span className="lcn__label">{tModal("fieldActive")}</span>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input type="checkbox" disabled={isReadOnly} {...register("active")} />
-          Active
+          {tModal("fieldActiveCheckbox")}
         </label>
       </div>
     </div>
@@ -131,6 +135,7 @@ function NoticeFormFields({ register, isReadOnly }: FormFieldsProps) {
 
 // ─── 모달 내부 (isOpen=true일 때만 mount) ───────────────────────────────────
 function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
+  const tModal = useTranslations("admin.notice.modal");
   const isEdit = state?.mode === "edit";
   const qc = useQueryClient();
 
@@ -169,7 +174,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
     mutationFn: (req: CreateNoticeRequestDto) => noticeUseCases.create(req),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-notice"] });
-      toast.success("공지사항이 등록되었습니다.");
+      toast.success(tModal("createSuccess"));
       onSaved();
     },
   });
@@ -179,7 +184,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
       noticeUseCases.update(id, req),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-notice"] });
-      toast.success("공지사항이 수정되었습니다.");
+      toast.success(tModal("updateSuccess"));
       onSaved();
     },
   });
@@ -188,7 +193,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
     mutationFn: (id: number) => noticeUseCases.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-notice"] });
-      toast.success("공지사항이 삭제되었습니다.");
+      toast.success(tModal("deleteSuccess"));
       onSaved();
     },
   });
@@ -220,11 +225,11 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
   async function handleDelete() {
     if (!state?.id) return;
     const ok = await confirm({
-      title: "공지사항 삭제",
-      description: `"${getValues("title")}" 을(를) 삭제하시겠습니까?`,
+      title: tModal("deleteConfirmTitle"),
+      description: tModal("deleteConfirmDesc", { title: getValues("title") }),
       variant: "destructive",
-      confirmText: "삭제",
-      cancelText: "취소",
+      confirmText: tModal("deleteConfirmOk"),
+      cancelText: tModal("deleteConfirmCancel"),
     });
     if (!ok) return;
     deleteMutation.mutate(state.id);
@@ -242,7 +247,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
   return (
     <>
       {isDetailLoading ? (
-        <div className="modal__loading">Loading...</div>
+        <div className="modal__loading">{tModal("loading")}</div>
       ) : (
         <form onSubmit={form.handleSubmit(handleSave)} className="modal__body">
           {isReadOnly && (
@@ -255,10 +260,10 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
               color: "var(--danger, #dc2626)",
               fontSize: 13,
             }}>
-              Deleted notice (deleted at: {detail?.deletedAt ?? "—"}). Read only.
+              {tModal("deletedNotice", { deletedAt: detail?.deletedAt ?? "—" })}
             </div>
           )}
-          <NoticeFormFields register={register} isReadOnly={isReadOnly} />
+          <NoticeFormFields register={register} isReadOnly={isReadOnly} tModal={tModal} />
         </form>
       )}
       <div className="modal__footer">
@@ -269,7 +274,7 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
             onClick={handleDelete}
             disabled={isBusy || isReadOnly}
           >
-            삭제
+            {tModal("btnDelete")}
           </ActionButton>
         )}
         <ActionButton
@@ -278,10 +283,10 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
           onClick={form.handleSubmit(handleSave)}
           disabled={isBusy || isReadOnly}
         >
-          저장
+          {tModal("btnSave")}
         </ActionButton>
         <Button size="sm" onClick={onClose} disabled={isBusy}>
-          닫기
+          {tModal("btnClose")}
         </Button>
       </div>
     </>
@@ -290,8 +295,9 @@ function NoticeEntryModalInner({ state, onClose, onSaved }: Props) {
 
 // ─── 외부 래퍼 (isOpen 가드 — false 시 unmount로 hook·캐시 초기화) ───────────
 export function NoticeEntryModal({ state, onClose, onSaved }: Props) {
+  const tModal = useTranslations("admin.notice.modal");
   const isOpen = state !== null;
-  const title = state?.mode === "edit" ? "공지사항 수정" : "공지사항 등록";
+  const title = state?.mode === "edit" ? tModal("titleEdit") : tModal("titleCreate");
   return (
     <ModalShell isOpen={isOpen} title={title} size="md">
       <NoticeEntryModalInner state={state} onClose={onClose} onSaved={onSaved} />

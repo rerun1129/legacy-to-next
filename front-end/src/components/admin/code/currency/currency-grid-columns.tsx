@@ -20,19 +20,24 @@ export interface FormValues {
   rows: CurrencyFormRow[];
 }
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildCurrencyColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<CurrencyFormRow>[] {
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -44,7 +49,7 @@ export function buildCurrencyColumns(
     },
     {
       key: "currencyCode",
-      label: "Currency Code",
+      label: tCols("currencyCode"),
       width: 130,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -60,7 +65,7 @@ export function buildCurrencyColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -68,7 +73,7 @@ export function buildCurrencyColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -76,7 +81,7 @@ export function buildCurrencyColumns(
     },
     {
       key: "symbol",
-      label: "Symbol",
+      label: tCols("symbol"),
       width: 80,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.symbol`)} />
@@ -84,7 +89,7 @@ export function buildCurrencyColumns(
     },
     {
       key: "currencyUnit",
-      label: "Unit",
+      label: tCols("currencyUnit"),
       width: 90,
       render: (_v, _row, i) => (
         <Controller
@@ -103,7 +108,7 @@ export function buildCurrencyColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -112,7 +117,7 @@ export function buildCurrencyColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />

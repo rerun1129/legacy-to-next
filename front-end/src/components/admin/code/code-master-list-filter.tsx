@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type { CodeMasterFilter } from "@/domain/code-master";
 import { codeMasterUseCases } from "@/application/code-master/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
@@ -14,14 +15,15 @@ interface Props {
   form: UseFormReturn<CodeMasterFilter>;
 }
 
-const ACTIVE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-] as const;
-
 export function CodeMasterListFilter({ form }: Props) {
+  const t = useTranslations("admin.code.master.filter");
   const { register, setValue } = form;
+
+  const activeOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "ACTIVE", label: t("active") },
+    { value: "INACTIVE", label: t("inactive") },
+  ];
 
   const [acQuery, setAcQuery] = useState("");
   const { data: suggestions = [] } = useQuery({
@@ -41,29 +43,29 @@ export function CodeMasterListFilter({ form }: Props) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="Master Code"
+            label={t("masterCode")}
             onSearch={setAcQuery}
             suggestions={suggestions}
             onSelect={handleSelect}
-            codeProps={{ placeholder: "Master Code", ...register("masterCode") }}
+            codeProps={{ placeholder: t("masterCodePlaceholder"), ...register("masterCode") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Master Name</span>
+            <span className="lcn__label">{t("masterName")}</span>
             <input
               className="box-panel"
-              placeholder="Master Name"
+              placeholder={t("masterNamePlaceholder")}
               {...register("masterName")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="active"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...ACTIVE_OPTIONS]}
+                  options={activeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

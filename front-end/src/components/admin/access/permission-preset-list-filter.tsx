@@ -2,6 +2,7 @@
 
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
@@ -18,12 +19,6 @@ export const DEFAULT_PERMISSION_PRESET_FILTER: PermissionPresetFilter = {
   status: "ALL",
 };
 
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-] as const;
-
 interface Props {
   form: UseFormReturn<PermissionPresetFilter>;
   suggestions: CodeBoxSuggestion[];
@@ -37,7 +32,14 @@ export function PermissionPresetListFilter({
   onCodeSearch,
   onCodeSelect,
 }: Props) {
+  const t = useTranslations("admin.permissionPreset.filter");
   const { register, control } = form;
+
+  const statusOptions = [
+    { value: "ALL",      label: t("all")      },
+    { value: "ACTIVE",   label: t("active")   },
+    { value: "INACTIVE", label: t("inactive") },
+  ];
 
   return (
     <div className="search-card">
@@ -45,21 +47,21 @@ export function PermissionPresetListFilter({
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="Code"
+            label={t("code")}
             onSearch={onCodeSearch}
             suggestions={suggestions}
             onSelect={onCodeSelect}
-            codeProps={{ placeholder: "Code", ...register("code") }}
+            codeProps={{ placeholder: t("codePlaceholder"), ...register("code") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="status"
               control={control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...STATUS_OPTIONS]}
+                  options={statusOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

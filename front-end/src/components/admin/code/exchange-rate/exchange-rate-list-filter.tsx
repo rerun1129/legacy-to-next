@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type { ExchangeRateFilter } from "@/domain/code/exchange-rate";
 import { currencyUseCases } from "@/application/code/currency/use-cases";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
@@ -15,16 +16,17 @@ interface Props {
   form: UseFormReturn<ExchangeRateFilter>;
 }
 
-const SCOPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "DELETED", label: "Deleted" },
-] as const;
-
 export function ExchangeRateListFilter({ form }: Props) {
+  const t = useTranslations("admin.exchangeRate.filter");
   useListFilterSync(form, "/admin/code/exchange-rate/list");
   const { register, setValue } = form;
+
+  const scopeOptions = [
+    { value: "ALL", label: t("all") },
+    { value: "ACTIVE", label: t("active") },
+    { value: "INACTIVE", label: t("inactive") },
+    { value: "DELETED", label: t("deleted") },
+  ];
 
   const [fromAcQuery, setFromAcQuery] = useState("");
   const [toAcQuery, setToAcQuery] = useState("");
@@ -57,37 +59,37 @@ export function ExchangeRateListFilter({ form }: Props) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <CodeBox
             kind="code-only"
-            label="From Currency"
+            label={t("fromCurrencyCode")}
             onSearch={setFromAcQuery}
             suggestions={fromSuggestions}
             onSelect={handleFromSelect}
-            codeProps={{ placeholder: "e.g. USD", ...register("fromCurrencyCode") }}
+            codeProps={{ placeholder: t("fromCurrencyCodePlaceholder"), ...register("fromCurrencyCode") }}
           />
           <CodeBox
             kind="code-only"
-            label="To Currency"
+            label={t("toCurrencyCode")}
             onSearch={setToAcQuery}
             suggestions={toSuggestions}
             onSelect={handleToSelect}
-            codeProps={{ placeholder: "e.g. KRW", ...register("toCurrencyCode") }}
+            codeProps={{ placeholder: t("toCurrencyCodePlaceholder"), ...register("toCurrencyCode") }}
           />
           <div className="lcn">
-            <span className="lcn__label">Name</span>
+            <span className="lcn__label">{t("name")}</span>
             <input
               className="box-panel"
-              placeholder="Name (partial)"
+              placeholder={t("namePlaceholder")}
               {...register("name")}
             />
           </div>
           <div className="lcn">
-            <span className="lcn__label">Status</span>
+            <span className="lcn__label">{t("status")}</span>
             <Controller
               name="scope"
               control={form.control}
               render={({ field }) => (
                 <ComboBox
                   variant="panel"
-                  options={[...SCOPE_OPTIONS]}
+                  options={scopeOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

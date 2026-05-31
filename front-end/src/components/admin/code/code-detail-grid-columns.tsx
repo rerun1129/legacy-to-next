@@ -20,19 +20,24 @@ export interface CodeDetailFormValues {
   rows: CodeDetailFormRow[];
 }
 
-const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildCodeDetailColumns(
   register: UseFormRegister<CodeDetailFormValues>,
   control: Control<CodeDetailFormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<CodeDetailFormRow>[] {
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -44,7 +49,7 @@ export function buildCodeDetailColumns(
     },
     {
       key: "codeValue",
-      label: "Code Value",
+      label: tCols("codeValue"),
       width: 130,
       render: (_v, row, i) => (
         <TextBox
@@ -57,7 +62,7 @@ export function buildCodeDetailColumns(
     },
     {
       key: "codeLabel",
-      label: "Code Label",
+      label: tCols("codeLabel"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.codeLabel`)} />
@@ -65,7 +70,7 @@ export function buildCodeDetailColumns(
     },
     {
       key: "sortOrder",
-      label: "Sort Order",
+      label: tCols("sortOrder"),
       width: 90,
       render: (_v, _row, i) => (
         <Controller
@@ -86,7 +91,7 @@ export function buildCodeDetailColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -95,7 +100,7 @@ export function buildCodeDetailColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />
@@ -105,7 +110,7 @@ export function buildCodeDetailColumns(
     },
     {
       key: "remark",
-      label: "Remark",
+      label: tCols("remark"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.remark`)} />

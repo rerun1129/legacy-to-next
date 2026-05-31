@@ -625,6 +625,692 @@
       }
     }
   },
+  "admin": {
+    "code": {
+      "master": {
+        "cols": {
+          "no": "#",
+          "masterCode": "마스터 코드",
+          "masterName": "마스터명",
+          "description": "설명",
+          "sortOrder": "정렬 순서",
+          "status": "사용"
+        },
+        "options": {
+          "active": "사용",
+          "inactive": "미사용"
+        },
+        "filter": {
+          "masterCode": "마스터 코드",
+          "masterName": "마스터명",
+          "status": "사용",
+          "all": "전체",
+          "active": "사용",
+          "inactive": "미사용",
+          "masterCodePlaceholder": "마스터 코드",
+          "masterNamePlaceholder": "마스터명"
+        },
+        "panel": {
+          "title": "공통 코드"
+        },
+        "msg": {
+          "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+          "noResults": "검색 결과가 없습니다.",
+          "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+        }
+      },
+      "detail": {
+        "cols": {
+          "no": "#",
+          "codeValue": "코드 값",
+          "codeLabel": "코드명",
+          "sortOrder": "정렬 순서",
+          "status": "사용",
+          "remark": "비고"
+        },
+        "options": {
+          "active": "사용",
+          "inactive": "미사용"
+        },
+        "panel": {
+          "title": "코드 상세"
+        },
+        "msg": {
+          "selectMaster": "좌측에서 마스터 코드를 선택하세요.",
+          "saveMasterFirst": "마스터를 먼저 저장하세요.",
+          "noResults": "검색 결과가 없습니다.",
+          "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+        }
+      },
+      "list": {
+        "msg": {
+          "unsavedTitle": "미저장 변경",
+          "unsavedDescription": "저장하지 않은 Detail 변경이 있습니다. 버리고 이동할까요?"
+        }
+      }
+    },
+    "carrier": {
+      "cols": {
+        "no": "#",
+        "carrierCode": "선사 코드",
+        "name": "선사명",
+        "nameEn": "영문명",
+        "carrierType": "유형",
+        "carrierAddress": "주소",
+        "ediCode": "EDI 코드",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "filter": {
+        "carrierCode": "선사 코드",
+        "carrierCodePlaceholder": "선사 코드",
+        "name": "선사명",
+        "namePlaceholder": "선사명 (부분 일치)",
+        "type": "유형",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨",
+        "typeAll": "전체",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "panel": {
+        "title": "선사 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "country": {
+      "cols": {
+        "no": "#",
+        "countryCode": "국가 코드",
+        "name": "국가명",
+        "nameEn": "영문명",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "countryCode": "국가 코드",
+        "countryCodePlaceholder": "국가 코드",
+        "name": "국가명",
+        "namePlaceholder": "국가명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "국가 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "currency": {
+      "cols": {
+        "no": "#",
+        "currencyCode": "통화 코드",
+        "name": "통화명",
+        "nameEn": "영문명",
+        "symbol": "기호",
+        "currencyUnit": "단위",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "currencyCode": "통화 코드",
+        "currencyCodePlaceholder": "통화 코드",
+        "name": "통화명",
+        "namePlaceholder": "통화명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "통화 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "exchangeRate": {
+      "cols": {
+        "no": "#",
+        "fromCurrencyCode": "From",
+        "toCurrencyCode": "To",
+        "exchangeDate": "기준일",
+        "cashSellExchangeRate": "현찰 매도",
+        "cashBuyExchangeRate": "현찰 매수",
+        "wireSendExchangeRate": "전신환 송금",
+        "wireReceiveExchangeRate": "전신환 수취",
+        "standardExchangeRate": "기준 환율",
+        "name": "통화쌍명",
+        "nameEn": "영문명",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "fromCurrencyCode": "From 통화",
+        "fromCurrencyCodePlaceholder": "예: USD",
+        "toCurrencyCode": "To 통화",
+        "toCurrencyCodePlaceholder": "예: KRW",
+        "name": "통화쌍명",
+        "namePlaceholder": "통화쌍명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "환율 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "freight": {
+      "cols": {
+        "no": "#",
+        "freightCode": "운임 코드",
+        "name": "운임명",
+        "nameEn": "영문명",
+        "description": "설명",
+        "freightUnit": "단위",
+        "freightGroup": "그룹",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용",
+        "groupOther": "OTHER",
+        "groupFreight": "FREIGHT",
+        "groupSurcharge": "SURCHARGE",
+        "groupWharfage": "WHARFAGE"
+      },
+      "filter": {
+        "freightCode": "운임 코드",
+        "freightCodePlaceholder": "운임 코드",
+        "name": "운임명",
+        "namePlaceholder": "운임명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "운임 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "hsCode": {
+      "cols": {
+        "no": "#",
+        "hsCode": "HS Code",
+        "name": "품목명",
+        "nameEn": "영문명",
+        "countryCode": "국가 코드",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "hsCode": "HS Code",
+        "hsCodePlaceholder": "HS Code",
+        "name": "품목명",
+        "namePlaceholder": "품목명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "HS Code 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "packageUnit": {
+      "cols": {
+        "no": "#",
+        "packageCode": "포장 코드",
+        "name": "포장 단위명",
+        "nameEn": "영문명",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "packageCode": "포장 코드",
+        "packageCodePlaceholder": "포장 코드",
+        "name": "포장 단위명",
+        "namePlaceholder": "포장 단위명 (부분 일치)",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "포장 단위 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "port": {
+      "cols": {
+        "no": "#",
+        "portCode": "항구 코드",
+        "name": "항구명",
+        "nameEn": "영문명",
+        "countryCode": "국가",
+        "portType": "유형",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "filter": {
+        "portCode": "항구 코드",
+        "portCodePlaceholder": "항구 코드",
+        "name": "항구명",
+        "namePlaceholder": "항구명 (부분 일치)",
+        "countryCode": "국가 코드",
+        "countryCodePlaceholder": "국가 코드",
+        "type": "유형",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨",
+        "typeAll": "전체",
+        "typeSea": "SEA",
+        "typeAir": "AIR"
+      },
+      "panel": {
+        "title": "항구 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "customer": {
+      "cols": {
+        "no": "#",
+        "customerCode": "거래처 코드",
+        "customerType": "유형",
+        "name": "거래처명",
+        "nameEn": "영문명",
+        "businessNo": "Biz No",
+        "representative": "대표자",
+        "phone": "전화번호",
+        "email": "Email",
+        "localAddress": "국문 주소",
+        "englishAddress": "영문 주소",
+        "memo": "메모",
+        "country": "국가",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "customerCode": "거래처 코드",
+        "customerCodePlaceholder": "거래처 코드",
+        "name": "거래처명",
+        "namePlaceholder": "거래처명 (부분 일치)",
+        "type": "유형",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨",
+        "typeAll": "전체"
+      },
+      "panel": {
+        "title": "거래처 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "user": {
+      "cols": {
+        "no": "#",
+        "username": "사용자 ID",
+        "email": "Email",
+        "password": "비밀번호",
+        "role": "권한",
+        "modules": "모듈",
+        "status": "사용",
+        "team": "팀"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "username": "사용자 ID",
+        "usernamePlaceholder": "사용자 ID",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨"
+      },
+      "panel": {
+        "title": "사용자 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      },
+      "section": {
+        "title": "Permission Presets",
+        "titleWithUser": "Permission Presets — {username}",
+        "colCode": "코드",
+        "colName": "이름",
+        "colActive": "사용",
+        "statusActive": "사용",
+        "statusInactive": "미사용",
+        "addPlaceholder": "부여할 Permission Preset 선택",
+        "loading": "불러오는 중…",
+        "addBtn": "추가",
+        "revokeBtn": "선택 해제",
+        "emptyAssigned": "부여된 Permission Preset이 없습니다.",
+        "assignSuccess": "Permission Preset이 부여되었습니다.",
+        "revokeSuccess": "Permission Preset이 해제되었습니다.",
+        "revokeConfirmTitle": "Preset 해제",
+        "revokeConfirmDesc": "선택한 {count}개 Preset을 이 사용자에서 해제하시겠습니까?",
+        "revokeConfirmOk": "해제",
+        "revokeConfirmCancel": "취소"
+      }
+    },
+    "notice": {
+      "cols": {
+        "title": "제목",
+        "pinned": "고정",
+        "status": "상태",
+        "publishedAt": "게시 일시",
+        "expiresAt": "만료 일시",
+        "updatedAt": "수정 일시"
+      },
+      "filter": {
+        "title": "제목",
+        "titlePlaceholder": "제목 (부분 일치)",
+        "pinnedLabel": "고정 여부",
+        "pinned": "고정",
+        "unpinned": "미고정",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용",
+        "deleted": "삭제됨",
+        "publishedOnlyLabel": "게시된 항목만",
+        "publishedCheckbox": "게시됨"
+      },
+      "panel": {
+        "title": "공지사항 관리"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults": "검색 결과가 없습니다.",
+        "loadFailed": "데이터를 불러오지 못했습니다.",
+        "statusActive": "사용",
+        "statusInactive": "미사용",
+        "statusDeleted": "삭제됨",
+        "bulkDeleteTitle": "선택 삭제",
+        "bulkDeleteDesc": "선택한 {count}개 항목을 삭제하시겠습니까?",
+        "bulkDeleteSuccess": "선택한 항목이 삭제되었습니다."
+      },
+      "modal": {
+        "titleCreate": "공지사항 등록",
+        "titleEdit": "공지사항 수정",
+        "fieldTitle": "제목 *",
+        "fieldTitlePlaceholder": "공지사항 제목",
+        "fieldContent": "내용 *",
+        "fieldContentPlaceholder": "공지사항 내용",
+        "fieldPublishedAt": "게시 일시",
+        "fieldExpiresAt": "만료 일시",
+        "fieldPinned": "고정",
+        "fieldPinnedCheckbox": "고정",
+        "fieldActive": "사용",
+        "fieldActiveCheckbox": "사용",
+        "loading": "불러오는 중...",
+        "deletedNotice": "삭제된 공지사항입니다 (삭제 일시: {deletedAt}). 읽기 전용.",
+        "btnDelete": "삭제",
+        "btnSave": "저장",
+        "btnClose": "닫기",
+        "createSuccess": "공지사항이 등록되었습니다.",
+        "updateSuccess": "공지사항이 수정되었습니다.",
+        "deleteSuccess": "공지사항이 삭제되었습니다.",
+        "deleteConfirmTitle": "공지사항 삭제",
+        "deleteConfirmDesc": "\"{title}\" 을(를) 삭제하시겠습니까?",
+        "deleteConfirmOk": "삭제",
+        "deleteConfirmCancel": "취소"
+      }
+    },
+    "menu": {
+      "cols": {
+        "menuCode":   "메뉴 코드",
+        "label":      "라벨",
+        "labelEn":    "라벨 (EN)",
+        "path":       "경로",
+        "icon":       "아이콘",
+        "sortOrder":  "정렬 순서",
+        "moduleCode": "모듈",
+        "active":     "사용"
+      },
+      "options": {
+        "active":   "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "module":               "모듈",
+        "allModules":           "전체",
+        "menuCode":             "메뉴 코드",
+        "menuCodePlaceholder":  "메뉴 코드",
+        "status":               "사용",
+        "all":                  "전체",
+        "active":               "사용",
+        "inactive":             "미사용"
+      },
+      "panel": {
+        "title": "메뉴 관리"
+      },
+      "msg": {
+        "loading":       "불러오는 중…",
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults":     "검색 결과가 없습니다.",
+        "saveSuccess":   "저장 완료 — 생성 {created}, 수정 {updated}",
+        "expandAll":     "모두 펴기",
+        "collapseAll":   "모두 접기",
+        "expand":        "펼치기",
+        "collapse":      "접기"
+      }
+    },
+    "button": {
+      "cols": {
+        "buttonCode": "버튼 코드",
+        "label":      "라벨",
+        "actionType": "액션",
+        "apiMethod":  "API Method",
+        "apiPath":    "API Path",
+        "sortOrder":  "정렬 순서",
+        "active":     "사용"
+      },
+      "options": {
+        "active":   "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "module":                "모듈",
+        "allModules":            "전체",
+        "buttonCode":            "버튼 코드",
+        "buttonCodePlaceholder": "버튼 코드",
+        "status":                "사용",
+        "all":                   "전체",
+        "active":                "사용",
+        "inactive":              "미사용"
+      },
+      "panel": {
+        "title": "버튼 관리"
+      },
+      "msg": {
+        "loading":        "불러오는 중…",
+        "enterCriteria":  "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults":      "검색 결과가 없습니다.",
+        "saveSuccess":    "저장 완료 — 생성 {created}, 수정 {updated}",
+        "expandAll":      "모두 펴기",
+        "collapseAll":    "모두 접기",
+        "expand":         "펼치기",
+        "collapse":       "접기",
+        "addButtonUnder": "{menuCode} 하위에 버튼 추가"
+      }
+    },
+    "attribute": {
+      "cols": {
+        "attributeKey": "속성 키",
+        "name":         "이름",
+        "valueType":    "값 유형",
+        "allowMulti":   "다중 허용",
+        "active":       "사용"
+      },
+      "valueCols": {
+        "value":     "값",
+        "label":     "라벨",
+        "sortOrder": "정렬 순서",
+        "active":    "사용"
+      },
+      "options": {
+        "active":   "사용",
+        "inactive": "미사용",
+        "yes":      "예",
+        "no":       "아니오"
+      },
+      "filter": {
+        "attributeKey":            "속성 키",
+        "attributeKeyPlaceholder": "속성 키",
+        "status":                  "사용",
+        "all":                     "전체",
+        "active":                  "사용",
+        "inactive":                "미사용"
+      },
+      "panel": {
+        "title": "속성 관리"
+      },
+      "section": {
+        "title": "속성 값 — {attributeKey}"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults":     "검색 결과가 없습니다.",
+        "saveSuccess":   "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}",
+        "noValues":      "속성 값이 없습니다."
+      }
+    },
+    "permissionPreset": {
+      "cols": {
+        "code":        "코드",
+        "name":        "이름",
+        "description": "설명",
+        "active":      "사용"
+      },
+      "options": {
+        "active":   "사용",
+        "inactive": "미사용"
+      },
+      "filter": {
+        "code":            "코드",
+        "codePlaceholder": "코드",
+        "status":          "사용",
+        "all":             "전체",
+        "active":          "사용",
+        "inactive":        "미사용"
+      },
+      "panel": {
+        "title": "Permission Preset 관리"
+      },
+      "section": {
+        "title":           "속성 값 — {presetCode}",
+        "addPlaceholder":  "추가할 속성 값 선택",
+        "loading":         "불러오는 중…",
+        "addBtn":          "추가",
+        "revokeBtn":       "선택 제거",
+        "colAttributeKey": "속성 키",
+        "colValue":        "값",
+        "colLabel":        "라벨",
+        "emptyAssigned":   "부여된 속성 값이 없습니다.",
+        "addSuccess":      "속성 값이 추가되었습니다.",
+        "removeSuccess":   "속성 값이 제거되었습니다.",
+        "removeConfirmTitle": "속성 값 제거",
+        "removeConfirmDesc":  "선택한 {count}개 항목을 이 프리셋에서 제거하시겠습니까?",
+        "removeConfirmOk":    "제거",
+        "removeConfirmCancel": "취소"
+      },
+      "msg": {
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
+        "noResults":     "검색 결과가 없습니다.",
+        "saveSuccess":   "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
+    "guard": {
+      "noAccess": "접근 권한이 없습니다."
+    }
+  },
   "shell": {
     "topbar": {
       "showSidebar": "사이드바 표시",

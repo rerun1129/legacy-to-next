@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Minus, ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shared/button";
 import type { UseFormRegister, Control } from "react-hook-form";
 import { MenuRowCells } from "./menu-grid-columns";
@@ -55,6 +56,9 @@ function collectDescendantEntityIds(
 
 // ─── 행 렌더 ──────────────────────────────────────────────────────────────────
 
+type MsgT = ReturnType<typeof useTranslations>;
+type OptionsT = (key: string) => string;
+
 interface TreeRowProps {
   node: TreeNode;
   level: number;
@@ -65,6 +69,8 @@ interface TreeRowProps {
   register: UseFormRegister<MenuFormValues>;
   control: Control<MenuFormValues>;
   moduleOptions: { value: string; label: string }[];
+  tMsg: MsgT;
+  tOptions: OptionsT;
   onToggleNode: (entityId: number) => void;
   onSelectionChange: (next: Set<number>) => void;
   onRemoveNewRow: (entityId: number) => void;
@@ -80,6 +86,8 @@ function TreeRow({
   register,
   control,
   moduleOptions,
+  tMsg,
+  tOptions,
   onToggleNode,
   onSelectionChange,
   onRemoveNewRow,
@@ -134,7 +142,7 @@ function TreeRow({
           <button
             className="tree-row__toggle"
             onClick={() => onToggleNode(row.entityId)}
-            aria-label={isExpanded ? "접기" : "펼치기"}
+            aria-label={isExpanded ? tMsg("collapse") : tMsg("expand")}
             type="button"
             style={{ flexShrink: 0 }}
           >
@@ -156,6 +164,7 @@ function TreeRow({
               register={register}
               control={control}
               moduleOptions={moduleOptions}
+              tOptions={tOptions}
             />
           </div>
         )}
@@ -188,6 +197,8 @@ function TreeRow({
             register={register}
             control={control}
             moduleOptions={moduleOptions}
+            tMsg={tMsg}
+            tOptions={tOptions}
             onToggleNode={onToggleNode}
             onSelectionChange={onSelectionChange}
             onRemoveNewRow={onRemoveNewRow}
@@ -229,6 +240,10 @@ export const MenuTreeView = forwardRef<MenuTreeHandle, MenuTreeViewProps>(
     },
     ref,
   ) {
+    // useTranslations는 early-return 이전에 무조건 호출 (Rules of Hooks)
+    const tMsg = useTranslations("admin.menu.msg");
+    const tOptions = useTranslations("admin.menu.options");
+
     const grouped = useMemo(() => {
       const map = new Map<string, MenuFormRow[]>();
       rows.forEach((row) => {
@@ -335,6 +350,8 @@ export const MenuTreeView = forwardRef<MenuTreeHandle, MenuTreeViewProps>(
                     register={register}
                     control={control}
                     moduleOptions={moduleOptions}
+                    tMsg={tMsg}
+                    tOptions={tOptions}
                     onToggleNode={toggleNode}
                     onSelectionChange={onSelectionChange}
                     onRemoveNewRow={onRemoveNewRow}

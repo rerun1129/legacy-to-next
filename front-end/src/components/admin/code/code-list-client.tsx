@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { RotateCcw, Search } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { useListFilterSync } from "@/lib/use-list-filter-sync";
@@ -28,6 +29,7 @@ type CodeSearchState = SavedSearchState & {
 };
 
 export function CodeListClient() {
+  const tMsg = useTranslations("admin.code.list.msg");
   const qc = useQueryClient();
 
   const filterForm = useForm<CodeMasterFilter>({ defaultValues: DEFAULT_FILTER });
@@ -61,8 +63,8 @@ export function CodeListClient() {
     if (id === selectedMasterId) return;
     if (detailDirty) {
       const ok = await confirm({
-        title: "미저장 변경",
-        description: "저장하지 않은 Detail 변경이 있습니다. 버리고 이동할까요?",
+        title: tMsg("unsavedTitle"),
+        description: tMsg("unsavedDescription"),
         variant: "destructive",
       });
       if (!ok) return;

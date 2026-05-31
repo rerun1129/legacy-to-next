@@ -8,22 +8,22 @@ import type { MenuFormRow, MenuFormValues } from "./menu-list-helpers";
 
 export type { MenuFormRow, MenuFormValues };
 
-// 컬럼 정의 단일 소스 — TreeRow 셀 width 및 헤더 행과 동기화
-export const MENU_COLUMNS = [
-  { key: "menuCode",    label: "Code",       width: 140 },
-  { key: "label",       label: "Label",      width: 140 },
-  { key: "labelEn",     label: "Label (EN)", width: 120 },
-  { key: "path",        label: "Path",       width: 160 },
-  { key: "icon",        label: "Icon",       width: 80  },
-  { key: "sortOrder",   label: "Order",      width: 54  },
-  { key: "moduleCode",  label: "Module",     width: 140 },
-  { key: "active",      label: "Status",     width: 80  },
+// 컬럼 정의 단일 소스 — TreeRow 셀 width 및 헤더 행과 동기화 (label은 소비자가 t()로 주입)
+export const MENU_COLUMN_DEFS = [
+  { key: "menuCode",   width: 140 },
+  { key: "label",      width: 140 },
+  { key: "labelEn",    width: 120 },
+  { key: "path",       width: 160 },
+  { key: "icon",       width: 80  },
+  { key: "sortOrder",  width: 54  },
+  { key: "moduleCode", width: 140 },
+  { key: "active",     width: 80  },
 ] as const;
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
+export type MenuColKey = (typeof MENU_COLUMN_DEFS)[number]["key"];
+
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 interface MenuCellsProps {
   row: MenuFormRow;
@@ -31,6 +31,7 @@ interface MenuCellsProps {
   register: UseFormRegister<MenuFormValues>;
   control: Control<MenuFormValues>;
   moduleOptions: { value: string; label: string }[];
+  tOptions: OptionsT;
 }
 
 /**
@@ -38,8 +39,13 @@ interface MenuCellsProps {
  * menuCode: 신규행(entityId<0)만 편집 가능, 기존행은 read-only span.
  * 나머지 필드: 신규/기존 모두 편집 가능.
  */
-export function MenuRowCells({ row, idx, register, control, moduleOptions }: MenuCellsProps) {
+export function MenuRowCells({ row, idx, register, control, moduleOptions, tOptions }: MenuCellsProps) {
   const isNew = row.entityId < 0;
+
+  const activeOptions = [
+    { value: "true",  label: tOptions("active")   },
+    { value: "false", label: tOptions("inactive") },
+  ];
 
   return (
     <>
@@ -126,7 +132,7 @@ export function MenuRowCells({ row, idx, register, control, moduleOptions }: Men
         render={({ field }) => (
           <ComboBox
             variant="cell"
-            options={[...ACTIVE_OPTIONS]}
+            options={activeOptions}
             value={String(field.value)}
             onChange={(e) => field.onChange(e.target.value === "true")}
             style={{ width: 80 }}
@@ -135,4 +141,12 @@ export function MenuRowCells({ row, idx, register, control, moduleOptions }: Men
       />
     </>
   );
+}
+
+/** 헤더용: key+width에 번역된 label을 붙인 컬럼 배열을 반환 */
+export function buildMenuColumnHeaders(tCols: ColsT) {
+  return MENU_COLUMN_DEFS.map((col) => ({
+    ...col,
+    label: tCols(col.key),
+  }));
 }

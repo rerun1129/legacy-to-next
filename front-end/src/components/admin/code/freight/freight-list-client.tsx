@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { RotateCcw, Search, Plus, Minus, Save } from "lucide-react";
 import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
@@ -62,6 +63,11 @@ const TO_UPDATE = (row: FreightFormRow) => ({
 });
 
 export function FreightListClient() {
+  const tMsg = useTranslations("admin.freight.msg");
+  const tPanel = useTranslations("admin.freight.panel");
+  const tCols = useTranslations("admin.freight.cols");
+  const tOptions = useTranslations("admin.freight.options");
+
   const filterForm = useForm<FreightFilter>({ defaultValues: DEFAULT_FILTER });
   const qc = useQueryClient();
 
@@ -207,15 +213,19 @@ export function FreightListClient() {
     },
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`
+        tMsg("saveSuccess", {
+          created: result.createdCount,
+          updated: result.updatedCount,
+          deleted: result.deletedCount,
+        }),
       );
       invalidateList();
     },
   });
 
   const columns = useMemo(
-    () => buildFreightColumns(register, control),
-    [register, control]
+    () => buildFreightColumns(register, control, tCols, tOptions),
+    [register, control, tCols, tOptions],
   );
 
   const totalPages = data?.totalPages ?? 0;
@@ -263,7 +273,7 @@ export function FreightListClient() {
       >
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">운임 관리</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
           <div className="panel__actions">
             <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
@@ -290,8 +300,8 @@ export function FreightListClient() {
             isLoading={isFetching}
             emptyMessage={
               extraFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
+                ? tMsg("enterCriteria")
+                : tMsg("noResults")
             }
             selectable
             selectedKeys={selectedKeys}

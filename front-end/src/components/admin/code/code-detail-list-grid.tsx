@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Plus, Minus, Save } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
@@ -31,6 +32,10 @@ interface Props {
 }
 
 export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
+  const tMsg = useTranslations("admin.code.detail.msg");
+  const tPanel = useTranslations("admin.code.detail.panel");
+  const tCols = useTranslations("admin.code.detail.cols");
+  const tOptions = useTranslations("admin.code.detail.options");
   const qc = useQueryClient();
   const [detailPage, setDetailPage] = useState(1);
 
@@ -168,15 +173,19 @@ export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
     },
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`,
+        tMsg("saveSuccess", {
+          created: result.createdCount,
+          updated: result.updatedCount,
+          deleted: result.deletedCount,
+        }),
       );
       invalidateList();
     },
   });
 
   const columns = useMemo(
-    () => buildCodeDetailColumns(register, control),
-    [register, control],
+    () => buildCodeDetailColumns(register, control, tCols, tOptions),
+    [register, control, tCols, tOptions],
   );
 
   const isSaveDisabled = !isDirty || saveChangesMutation.isPending || !enabled;
@@ -189,13 +198,13 @@ export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
         <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           <div className="panel__head">
             <div className="panel__title-accent" />
-            <span className="panel__title">Code Detail</span>
+            <span className="panel__title">{tPanel("title")}</span>
           </div>
           <div
             className="list-wrap"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
           >
-            <span style={{ color: "var(--ink-3)" }}>좌측에서 마스터 코드를 선택하세요.</span>
+            <span style={{ color: "var(--ink-3)" }}>{tMsg("selectMaster")}</span>
           </div>
         </div>
       </div>
@@ -230,7 +239,7 @@ export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Code Detail</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
         </div>
         <div className="list-wrap">
@@ -239,7 +248,7 @@ export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
             <div
               style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, padding: 24 }}
             >
-              <span style={{ color: "var(--ink-3)" }}>마스터를 먼저 저장하세요.</span>
+              <span style={{ color: "var(--ink-3)" }}>{tMsg("saveMasterFirst")}</span>
             </div>
           ) : (
             <GridList<CodeDetailFormRow>
@@ -248,7 +257,7 @@ export function CodeDetailListGrid({ masterId, onDirtyChange }: Props) {
               rowKey={(row) => row.entityId}
               rowClassName={(row) => getCodeDetailRowClassName(row, originalRows)}
               isLoading={isFetching}
-              emptyMessage="No results found."
+              emptyMessage={tMsg("noResults")}
               selectable
               selectedKeys={selectedKeys}
               onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Plus, Minus, Save, Search, RotateCcw } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { GridList } from "@/components/shared/grid-list";
@@ -34,6 +35,11 @@ import {
 // ─── 컴포넌트 ────────────────────────────────────────────────────────────────
 
 export function AccessAttributeListClient() {
+  const tCols = useTranslations("admin.attribute.cols");
+  const tOptions = useTranslations("admin.attribute.options");
+  const tPanel = useTranslations("admin.attribute.panel");
+  const tMsg = useTranslations("admin.attribute.msg");
+
   const qc = useQueryClient();
 
   const filterForm = useForm<AttributeFilter>({
@@ -155,7 +161,7 @@ export function AccessAttributeListClient() {
       accessAttributeUseCases.saveChanges(vars),
     onSuccess: (result) => {
       toast.success(
-        `저장 완료 — 생성 ${result.createdCount}, 수정 ${result.updatedCount}, 삭제 ${result.deletedCount}`,
+        tMsg("saveSuccess", { created: result.createdCount, updated: result.updatedCount, deleted: result.deletedCount }),
       );
       setDrillTargetKey(null);
       invalidateList();
@@ -182,8 +188,8 @@ export function AccessAttributeListClient() {
   // ─── 컬럼 ────────────────────────────────────────────────────────────────
 
   const columns = useMemo(
-    () => buildAttributeColumns(register, control, handleKeyDoubleClick),
-    [register, control, handleKeyDoubleClick],
+    () => buildAttributeColumns(register, control, tCols, tOptions, handleKeyDoubleClick),
+    [register, control, tCols, tOptions, handleKeyDoubleClick],
   );
 
   // ─── 렌더 ────────────────────────────────────────────────────────────────
@@ -195,6 +201,7 @@ export function AccessAttributeListClient() {
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_RESET"
           className="btn btn--normal btn--sm"
+          type="button"
           onClick={() => {
             filterForm.reset(DEFAULT_ATTRIBUTE_FILTER);
             setActiveFilter(null);
@@ -207,6 +214,7 @@ export function AccessAttributeListClient() {
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_SEARCH"
           className="btn btn--search btn--sm"
+          type="button"
           onClick={() =>
             filterForm.handleSubmit((values) => {
               invalidateList();
@@ -219,6 +227,7 @@ export function AccessAttributeListClient() {
         <ActionButton
           buttonCode="BTN_ADMIN_ACCESS_ATTRIBUTE_SAVE"
           className="btn btn--transaction btn--sm"
+          type="button"
           disabled={!isDirty || saveChangesMutation.isPending}
           onClick={handleSave}
           icon={<Save size={12} style={{ marginRight: 4 }} />}
@@ -235,16 +244,17 @@ export function AccessAttributeListClient() {
       >
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Attributes</span>
+          <span className="panel__title">{tPanel("title")}</span>
           <span className="panel__rowcount">{fields.length}</span>
           <div className="panel__actions">
-            <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
+            <Button variant="success" size="sm" iconOnly type="button" onClick={handleAdd}>
               <Plus size={12} />
             </Button>
             <Button
               variant="danger"
               size="sm"
               iconOnly
+              type="button"
               onClick={handleRemove}
               disabled={selectedKeys.size === 0}
             >
@@ -262,8 +272,8 @@ export function AccessAttributeListClient() {
             isLoading={isFetching}
             emptyMessage={
               activeFilter === null
-                ? "Enter search criteria and click Search."
-                : "No results found."
+                ? tMsg("enterCriteria")
+                : tMsg("noResults")
             }
             selectable
             selectedKeys={selectedKeys}

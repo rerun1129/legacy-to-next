@@ -27,29 +27,34 @@ export interface FormValues {
   rows: CustomerFormRow[];
 }
 
-export const ACTIVE_OPTIONS = [
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-] as const;
-
-export const CUSTOMER_TYPE_OPTIONS = [
-  { value: "CUSTOMER", label: "CUSTOMER" },
-  { value: "PARTNER", label: "PARTNER" },
-  { value: "AIRCARRIER", label: "AIRCARRIER" },
-  { value: "LINER", label: "LINER" },
-  { value: "TRUCKER", label: "TRUCKER" },
-  { value: "WAREHOUSE", label: "WAREHOUSE" },
-  { value: "OTHER", label: "OTHER" },
-] as const;
+type ColsT = (key: string) => string;
+type OptionsT = (key: string) => string;
 
 export function buildCustomerColumns(
   register: UseFormRegister<FormValues>,
-  control: Control<FormValues>
+  control: Control<FormValues>,
+  tCols: ColsT,
+  tOptions: OptionsT,
 ): GridColumn<CustomerFormRow>[] {
+  const customerTypeOptions = [
+    { value: "CUSTOMER", label: "CUSTOMER" },
+    { value: "PARTNER", label: "PARTNER" },
+    { value: "AIRCARRIER", label: "AIRCARRIER" },
+    { value: "LINER", label: "LINER" },
+    { value: "TRUCKER", label: "TRUCKER" },
+    { value: "WAREHOUSE", label: "WAREHOUSE" },
+    { value: "OTHER", label: "OTHER" },
+  ];
+
+  const activeOptions = [
+    { value: "true", label: tOptions("active") },
+    { value: "false", label: tOptions("inactive") },
+  ];
+
   return [
     {
       key: "_no",
-      label: "#",
+      label: tCols("no"),
       width: 36,
       className: "row-num",
       render: (_v, _row, i) => (
@@ -61,7 +66,7 @@ export function buildCustomerColumns(
     },
     {
       key: "customerCode",
-      label: "Customer Code",
+      label: tCols("customerCode"),
       width: 140,
       render: (_v, row, i) => {
         const isNew = row.entityId < 0;
@@ -77,7 +82,7 @@ export function buildCustomerColumns(
     },
     {
       key: "customerType",
-      label: "Type",
+      label: tCols("customerType"),
       width: 120,
       render: (_v, _row, i) => (
         <Controller
@@ -86,7 +91,7 @@ export function buildCustomerColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...CUSTOMER_TYPE_OPTIONS]}
+              options={customerTypeOptions}
               value={field.value}
               onChange={(e) => field.onChange(e.target.value)}
             />
@@ -96,7 +101,7 @@ export function buildCustomerColumns(
     },
     {
       key: "name",
-      label: "Name",
+      label: tCols("name"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.name`)} />
@@ -104,7 +109,7 @@ export function buildCustomerColumns(
     },
     {
       key: "nameEn",
-      label: "English Name",
+      label: tCols("nameEn"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.nameEn`)} />
@@ -112,7 +117,7 @@ export function buildCustomerColumns(
     },
     {
       key: "businessNo",
-      label: "Business No",
+      label: tCols("businessNo"),
       width: 120,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.businessNo`)} />
@@ -120,7 +125,7 @@ export function buildCustomerColumns(
     },
     {
       key: "representative",
-      label: "Representative",
+      label: tCols("representative"),
       width: 120,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.representative`)} />
@@ -128,7 +133,7 @@ export function buildCustomerColumns(
     },
     {
       key: "phone",
-      label: "Phone",
+      label: tCols("phone"),
       width: 120,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.phone`)} />
@@ -136,7 +141,7 @@ export function buildCustomerColumns(
     },
     {
       key: "email",
-      label: "Email",
+      label: tCols("email"),
       width: 180,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.email`)} />
@@ -144,7 +149,7 @@ export function buildCustomerColumns(
     },
     {
       key: "customerLocalAddress",
-      label: "Local Address",
+      label: tCols("localAddress"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.customerLocalAddress`)} />
@@ -152,7 +157,7 @@ export function buildCustomerColumns(
     },
     {
       key: "customerEnglishAddress",
-      label: "English Address",
+      label: tCols("englishAddress"),
       width: 200,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.customerEnglishAddress`)} />
@@ -160,7 +165,7 @@ export function buildCustomerColumns(
     },
     {
       key: "memo",
-      label: "Memo",
+      label: tCols("memo"),
       width: 150,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.memo`)} />
@@ -168,7 +173,7 @@ export function buildCustomerColumns(
     },
     {
       key: "countryCode",
-      label: "Country",
+      label: tCols("country"),
       width: 80,
       render: (_v, _row, i) => (
         <TextBox variant="cell" {...register(`rows.${i}.countryCode`)} />
@@ -176,7 +181,7 @@ export function buildCustomerColumns(
     },
     {
       key: "active",
-      label: "Status",
+      label: tCols("status"),
       width: 100,
       render: (_v, _row, i) => (
         <Controller
@@ -185,7 +190,7 @@ export function buildCustomerColumns(
           render={({ field }) => (
             <ComboBox
               variant="cell"
-              options={[...ACTIVE_OPTIONS]}
+              options={activeOptions}
               value={String(field.value)}
               onChange={(e) => field.onChange(e.target.value === "true")}
             />
