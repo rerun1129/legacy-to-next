@@ -151,7 +151,18 @@ public enum MessageCode {
     USER_PERMISSION_PRESET_REVOKED("프리셋 부여가 해제되었습니다."),
     PERMISSION_PRESET_REQUIRES_MODULE_AND_SCOPE("권한 프리셋에 module 속성 1개 이상 + admin_scope 또는 fms_scope 속성 1개 이상이 필요합니다."),
     ATTRIBUTE_DEFINITION_SAVE_CHANGES("속성 정의 일괄 저장이 완료되었습니다."),
-    ATTRIBUTE_VALUE_SAVE_CHANGES("속성 값 일괄 저장이 완료되었습니다.");
+    ATTRIBUTE_VALUE_SAVE_CHANGES("속성 값 일괄 저장이 완료되었습니다."),
+    SUBSCRIBER_CREATED("구독사가 등록되었습니다."),
+    SUBSCRIBER_UPDATED("구독사가 수정되었습니다."),
+    SUBSCRIBER_DELETED("구독사가 삭제되었습니다."),
+    SUBSCRIBER_NOT_FOUND("구독사를 찾을 수 없습니다."),
+    SUBSCRIBER_DUPLICATE_CODE("동일한 구독사 코드가 이미 존재합니다."),
+    SUBSCRIBER_ALREADY_DELETED("이미 삭제된 구독사입니다."),
+    SUBSCRIBER_SAVE_CHANGES("구독사 일괄 저장이 완료되었습니다."),
+    SUBSCRIPTION_NOT_FOUND("구독 내역을 찾을 수 없습니다."),
+    SUBSCRIPTION_DUPLICATE_MODULE("해당 구독사에 동일한 모듈 구독이 이미 존재합니다."),
+    SUBSCRIPTION_DATE_RANGE_INVALID("시작일이 종료일보다 늦을 수 없습니다."),
+    SUBSCRIPTION_SAVE_CHANGES("구독 일괄 저장이 완료되었습니다.");
 
     private final String message;
 

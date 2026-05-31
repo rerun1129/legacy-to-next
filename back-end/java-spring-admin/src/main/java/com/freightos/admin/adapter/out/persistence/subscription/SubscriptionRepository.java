@@ -16,4 +16,8 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionJpaEnt
            "  AND s.endDate >= :today")
     List<String> findValidModuleCodes(@Param("subscriberId") Long subscriberId,
                                       @Param("today") LocalDate today);
+
+    List<SubscriptionJpaEntity> findBySubscriberIdOrderByModuleCode(Long subscriberId);
+
+    boolean existsBySubscriberIdAndModuleCode(Long subscriberId, String moduleCode);
 }
