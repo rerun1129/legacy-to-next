@@ -7,6 +7,8 @@ import { useEntryFocusStore, domainFromPath } from "./use-entry-focus-store";
 
 export interface Tab {
   id: string;
+  // label is stored for legacy sessionStorage compat but NOT used for display.
+  // Tab names are resolved at render time via useTranslations('shell.tabs').
   label: string;
   href: string;
 }
@@ -25,6 +27,7 @@ interface TabStore {
 }
 
 // ─── Nav label mapping (mirrors sidebar.tsx NAV data) ───────
+// Used as a fallback when the i18n catalog has no entry for a pathname.
 const PATH_LABEL_MAP: Record<string, string> = {
   "/fms/house-bl/sea-exp/list":  "House B/L Sea Export List",
   "/fms/house-bl/sea-exp/entry": "House B/L Sea Export Entry",

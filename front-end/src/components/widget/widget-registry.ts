@@ -19,6 +19,7 @@ export interface WidgetProps {
 export interface WidgetDef {
   key:             string;    // 엔트리 타입별로 자유롭게 지정
   label:           string;
+  labelKey?:       string;    // i18n 키 (지정 시 localised copy 생성에 사용)
   component:       ComponentType<WidgetProps>;
   defaultPosition: Omit<WidgetPosition, "key">;
   minColSpan:      number;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { Ship } from "lucide-react";
@@ -12,6 +13,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { seaHousePort } from "@/lib/ports";
 import { fmtDate, fmtWeight } from "@/lib/grid-formatters";
 import type { SeaHouseRow, SeaHouseFilter } from "@/domain/sea-house";
+
 interface Props {
   extraFilter: SeaHouseFilter | null;
   currentPage: number;
@@ -27,6 +29,9 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, pageSize,
   const setFocus = useEntryFocusStore((s) => s.setFocus);
   const clearDraft = useBLDraftStore((s) => s.clearDraft);
   const [selected, setSelected] = useState<number | null>(null);
+  const tc = useTranslations("fms.seaHouse.list.cols");
+  const tl = useTranslations("fms.seaHouse.list");
+  const tCommon = useTranslations("common");
 
   const { data, isFetching, error } = useQuery({
     queryKey: ["sea-house", "list", bound, extraFilter, currentPage, pageSize],
@@ -56,10 +61,11 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, pageSize,
     router.push(path);
   }
 
-  const columns: GridColumn<SeaHouseRow>[] = [
+  // 컬럼 배열은 t 참조가 바뀔 때만 재계산 — useMemo([tc])로 render loop 방지
+  const columns = useMemo<GridColumn<SeaHouseRow>[]>(() => [
     {
       key: "hblNo",
-      label: "House B/L No.",
+      label: tc("hblNo"),
       minWidth: 160,
       render: (v, row) => (
         <div
@@ -70,55 +76,58 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, pageSize,
         </div>
       ),
     },
-    { key: "bound",               label: "Bound",                  minWidth: 60 },
-    { key: "mblNo",               label: "Master B/L No",          minWidth: 160 },
-    { key: "masterRefNo",         label: "Master Reference No.",   minWidth: 160 },
-    { key: "shipmentType",        label: "Shipment Type",          minWidth: 100 },
-    { key: "loadType",            label: "Load Type",              minWidth: 90 },
-    { key: "etd",                 label: "ETD",                    minWidth: 100, render: (v) => fmtDate(v) },
-    { key: "eta",                 label: "ETA",                    minWidth: 100, render: (v) => fmtDate(v) },
-    { key: "polCode",             label: "POL",                    minWidth: 100 },
-    { key: "podCode",             label: "POD",                    minWidth: 100 },
-    { key: "deliveryCode",        label: "Delivery",               minWidth: 90 },
-    { key: "vesselName",          label: "Vessel Name",            minWidth: 140 },
-    { key: "voyageNo",            label: "Voyage",                 minWidth: 90 },
-    { key: "shipperCode",         label: "Shipper",                minWidth: 90 },
-    { key: "shipperName",         label: "Shipper Name",           minWidth: 140 },
-    { key: "consigneeCode",       label: "Consignee",              minWidth: 90 },
-    { key: "consigneeName",       label: "Consignee Name",         minWidth: 150 },
-    { key: "notifyCode",          label: "Notify",                 minWidth: 90 },
-    { key: "notifyName",          label: "Notify Name",            minWidth: 140 },
-    { key: "settlePartnerCode",   label: "Settle Partner",         minWidth: 110 },
-    { key: "settlePartnerName",   label: "Settle Partner Name",    minWidth: 160 },
-    { key: "docPartnerCode",      label: "DOC Partner",            minWidth: 100 },
-    { key: "docPartnerName",      label: "DOC Partner Name",       minWidth: 150 },
-    { key: "linerCode",           label: "Liner",                  minWidth: 110 },
-    { key: "linerName",           label: "Liner Name",             minWidth: 160 },
-    { key: "freightTerm",         label: "Freight Term",           minWidth: 100 },
-    { key: "incoterms",           label: "Incoterms",              minWidth: 90 },
-    { key: "actualCustomerCode",  label: "Actual Customer",        minWidth: 120 },
-    { key: "actualCustomerName",  label: "Actual Customer Name",   minWidth: 160 },
-    { key: "pkgQty",              label: "Package",                minWidth: 90 },
-    { key: "pkgUnit",             label: "Unit",                   minWidth: 70 },
-    { key: "grossWeightKg",       label: "Gross W/T",              minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
-    { key: "cbm",                 label: "CBM",                    minWidth: 90,  render: (v) => (v != null ? (v as number).toFixed(3) : ''), aggregate: "sum", aggregateDecimals: 3 },
-    { key: "cntr20Qty",           label: "20FT",                   minWidth: 70,  aggregate: "sum", aggregateDecimals: 0 },
-    { key: "cntr40Qty",           label: "40FT",                   minWidth: 70,  aggregate: "sum", aggregateDecimals: 0 },
-    { key: "teuQty",              label: "TEU",                    minWidth: 70,  render: (v) => (v != null ? (v as number).toFixed(2) : ''), aggregate: "sum", aggregateDecimals: 2 },
-    { key: "salesManCode",        label: "Sales Man",              minWidth: 90 },
-    { key: "teamCode",            label: "Team",                   minWidth: 90 },
-    { key: "teamName",            label: "Team Name",              minWidth: 140 },
-  ];
+    { key: "bound",               label: tc("bound"),               minWidth: 60 },
+    { key: "mblNo",               label: tc("mblNo"),               minWidth: 160 },
+    { key: "masterRefNo",         label: tc("masterRefNo"),         minWidth: 160 },
+    { key: "shipmentType",        label: tc("shipmentType"),        minWidth: 100 },
+    { key: "loadType",            label: tc("loadType"),            minWidth: 90 },
+    { key: "etd",                 label: tc("etd"),                 minWidth: 100, render: (v) => fmtDate(v) },
+    { key: "eta",                 label: tc("eta"),                 minWidth: 100, render: (v) => fmtDate(v) },
+    { key: "polCode",             label: tc("polCode"),             minWidth: 100 },
+    { key: "podCode",             label: tc("podCode"),             minWidth: 100 },
+    { key: "deliveryCode",        label: tc("deliveryCode"),        minWidth: 90 },
+    { key: "vesselName",          label: tc("vesselName"),          minWidth: 140 },
+    { key: "voyageNo",            label: tc("voyageNo"),            minWidth: 90 },
+    { key: "shipperCode",         label: tc("shipperCode"),         minWidth: 90 },
+    { key: "shipperName",         label: tc("shipperName"),         minWidth: 140 },
+    { key: "consigneeCode",       label: tc("consigneeCode"),       minWidth: 90 },
+    { key: "consigneeName",       label: tc("consigneeName"),       minWidth: 150 },
+    { key: "notifyCode",          label: tc("notifyCode"),          minWidth: 90 },
+    { key: "notifyName",          label: tc("notifyName"),          minWidth: 140 },
+    { key: "settlePartnerCode",   label: tc("settlePartnerCode"),   minWidth: 110 },
+    { key: "settlePartnerName",   label: tc("settlePartnerName"),   minWidth: 160 },
+    { key: "docPartnerCode",      label: tc("docPartnerCode"),      minWidth: 100 },
+    { key: "docPartnerName",      label: tc("docPartnerName"),      minWidth: 150 },
+    { key: "linerCode",           label: tc("linerCode"),           minWidth: 110 },
+    { key: "linerName",           label: tc("linerName"),           minWidth: 160 },
+    { key: "freightTerm",         label: tc("freightTerm"),         minWidth: 100 },
+    { key: "incoterms",           label: tc("incoterms"),           minWidth: 90 },
+    { key: "actualCustomerCode",  label: tc("actualCustomerCode"),  minWidth: 120 },
+    { key: "actualCustomerName",  label: tc("actualCustomerName"),  minWidth: 160 },
+    { key: "pkgQty",              label: tc("pkgQty"),              minWidth: 90 },
+    { key: "pkgUnit",             label: tc("pkgUnit"),             minWidth: 70 },
+    { key: "grossWeightKg",       label: tc("grossWeightKg"),       minWidth: 100, render: (v) => fmtWeight(v), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cbm",                 label: tc("cbm"),                 minWidth: 90,  render: (v) => (v != null ? (v as number).toFixed(3) : ''), aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cntr20Qty",           label: tc("cntr20Qty"),           minWidth: 70,  aggregate: "sum", aggregateDecimals: 0 },
+    { key: "cntr40Qty",           label: tc("cntr40Qty"),           minWidth: 70,  aggregate: "sum", aggregateDecimals: 0 },
+    { key: "teuQty",              label: tc("teuQty"),              minWidth: 70,  render: (v) => (v != null ? (v as number).toFixed(2) : ''), aggregate: "sum", aggregateDecimals: 2 },
+    { key: "salesManCode",        label: tc("salesManCode"),        minWidth: 90 },
+    { key: "teamCode",            label: tc("teamCode"),            minWidth: 90 },
+    { key: "teamName",            label: tc("teamName"),            minWidth: 140 },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [tc]);
+  // handleHblDoubleClick은 렌더마다 새 참조지만 안정 deps 포함 시 columns가
+  // 매 렌더 재계산되어 그리드 reset loop 유발 가능 → tc만 의존(행 클릭 핸들러는 render closure 허용)
 
   if (error) {
     return (
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Sea House B/L</span>
+          <span className="panel__title">{tl("panel")}</span>
         </div>
         <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+          <span className="text-error">{tCommon("loadFailed")}</span>
         </div>
       </div>
     );
@@ -129,7 +138,7 @@ export function SeaHouseGrid({ extraFilter, currentPage, onPageChange, pageSize,
       <div className="panel__head">
         <div className="panel__title-accent" />
         <Ship size={14} style={{ marginRight: 4 }} />
-        <span className="panel__title">Sea House B/L</span>
+        <span className="panel__title">{tl("panel")}</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
         <ColumnVisibilityMenu<SeaHouseRow> gridId="sea-house" defaultColumns={columns} />
       </div>

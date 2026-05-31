@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider } from "react-hook-form";
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export function HouseBLEntry({ variant }: Props) {
+  const tt = useTranslations("fms.houseBl.entry.tabs");
   const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
@@ -100,12 +102,13 @@ export function HouseBLEntry({ variant }: Props) {
   }
 
   const tabs = [
-    { key: "main",    label: "Main"    },
-    { key: "freight", label: "Freight" },
+    { key: "main",    label: tt("main")    },
+    { key: "freight", label: tt("freight") },
   ];
 
+  const tm = useTranslations("fms.houseBl.entry.msg");
   const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
-  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+  const loadingMessage = deleteMutation.isPending ? tm("loadingDelete") : mutation.isPending ? tm("loadingSave") : tm("loadingFetch");
 
   return (
     <>

@@ -7,24 +7,33 @@ import type { UseMutationResult } from "@tanstack/react-query";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
-import { getPageTitle } from "@/lib/bl-variants";
 import type { BLVariantConfig } from "@/lib/bl-variants";
 import type { HouseBlFormValues } from "./house-bl-schema";
 import {
-  TOOLBAR_LABEL_TO_FIELD,
-  REQUIRED_TOOLBAR_LABELS,
+  TOOLBAR_FIELD_TO_RHF,
+  REQUIRED_TOOLBAR_FIELDS,
 } from "./house-bl-schema";
+import { useTranslations } from "next-intl";
 
-// variant별 기본값(fieldName 없는 placeholder-only 필드용)
+// variant별 기본값(RHF 바인딩 없는 placeholder-only 필드용) — fieldId 키로 관리
 const DEFAULTS_SEA: Record<string, string> = {
-  "Shipment Type": "", "HBL No": "", "MBL No": "", "Load Type": "",
-  "Service Term": "", "B/L Type": "", "Master Ref": "",
+  shipmentType: "", hblNo: "", mblNo: "", loadType: "",
+  serviceTerm: "", blType: "", masterRef: "",
 };
 const DEFAULTS_AIR: Record<string, string> = {
-  "Shipment Type": "", "HAWB No": "", "MAWB No": "", "Master Ref": "",
+  shipmentType: "", hawbNo: "", mawbNo: "", masterRef: "",
 };
-const DEFAULTS_TRUCK: Record<string, string> = { "Truck B/L No": "" };
-const DEFAULTS_NON_BL: Record<string, string> = { "Non B/L No": "" };
+const DEFAULTS_TRUCK: Record<string, string> = { truckBlNo: "" };
+const DEFAULTS_NON_BL: Record<string, string> = { nonBlNo: "" };
+
+// variant → title i18n 키
+function getVariantTitleKey(variant: BLVariantConfig): string {
+  if (variant.mode === "TRUCK")  return "truck";
+  if (variant.mode === "NON_BL") return "nonBl";
+  const modeKey = variant.mode === "SEA" ? "sea" : "air";
+  const dirKey  = variant.direction === "EXP" ? "Exp" : "Imp";
+  return `${modeKey}${dirKey}`;
+}
 
 function getToolbarDefaults(variant: BLVariantConfig): Record<string, string> {
   if (variant.mode === "SEA")   return DEFAULTS_SEA;
@@ -75,17 +84,23 @@ export function HouseBlEntryPageHead({
   const defaults = getToolbarDefaults(variant);
   const menuCode = VARIANT_TO_MENU[variant.key] ?? "FMS_HOUSE_BL_SEA_EXP_ENTRY";
 
+  const tb = useTranslations("fms.houseBl.entry.toolbar");
+  const tt = useTranslations("fms.houseBl.entry.title");
+  const ts = useTranslations("fms.houseBl.entry.status");
+  const tc = useTranslations("common");
+
   const { options: loadTypeOptions,     placeholder: loadTypePh }     = useEnumOptions("LoadType");
   const { options: serviceTermOptions,  placeholder: serviceTermPh }  = useEnumOptions("ServiceTerm");
   const { options: blTypeOptions,       placeholder: blTypePh }       = useEnumOptions("BlType");
   const { options: shipmentTypeOptions, placeholder: shipmentTypePh } = useEnumOptions("ShipmentType");
 
   // LoadType / ServiceTerm / BlType / ShipmentType 은 모두 e.name() 기반 등록이므로 §6.45 재매핑 불필요
+  // TOOLBAR_ENUM 키는 fieldId 기준
   const TOOLBAR_ENUM: Record<string, { options: typeof loadTypeOptions; placeholder: string | undefined }> = {
-    "Load Type":     { options: loadTypeOptions,     placeholder: loadTypePh },
-    "Service Term":  { options: serviceTermOptions,  placeholder: serviceTermPh },
-    "B/L Type":      { options: blTypeOptions,       placeholder: blTypePh },
-    "Shipment Type": { options: shipmentTypeOptions, placeholder: shipmentTypePh },
+    loadType:    { options: loadTypeOptions,     placeholder: loadTypePh },
+    serviceTerm: { options: serviceTermOptions,  placeholder: serviceTermPh },
+    blType:      { options: blTypeOptions,       placeholder: blTypePh },
+    shipmentType:{ options: shipmentTypeOptions, placeholder: shipmentTypePh },
   };
 
   return (
@@ -93,10 +108,10 @@ export function HouseBlEntryPageHead({
       <div className="page-head">
         <div className="page-head__title">
           <div className="page-head__title-icon"><FileText size={14} /></div>
-          {getPageTitle(variant, "House", "Entry")}
+          {tt(getVariantTitleKey(variant))}
         </div>
         <div className="page-head__meta">
-          <span className="badge badge--draft">DRAFT</span>
+          <span className="badge badge--draft">{ts("draft")}</span>
         </div>
         <div className="page-head__actions">
           <ActionButton
@@ -117,7 +132,7 @@ export function HouseBlEntryPageHead({
             type="submit"
             disabled={mutation.isPending}
           >
-            <Save size={12} style={{ marginRight: 4 }} />{mutation.isPending ? "Saving..." : "Save"}
+            <Save size={12} style={{ marginRight: 4 }} />{mutation.isPending ? tc("saving") : tc("save")}
           </ActionButton>
           <ActionButton
             buttonCode={`BTN_${menuCode}_DELETE`}
@@ -154,11 +169,12 @@ export function HouseBlEntryPageHead({
 
       <div className="toolbar">
         {toolbarFields.map((f) => {
-          const fieldName = TOOLBAR_LABEL_TO_FIELD[f];
-          const isRequired = REQUIRED_TOOLBAR_LABELS.has(f);
+          const fieldName = TOOLBAR_FIELD_TO_RHF[f];
+          const isRequired = REQUIRED_TOOLBAR_FIELDS.has(f);
+          const label = tb(f);
           return (
             <div key={f} className={`field${isRequired ? " is-required" : ""}`}>
-              <div className={`field__label${isRequired ? " is-required" : ""}`}>{f}</div>
+              <div className={`field__label${isRequired ? " is-required" : ""}`}>{label}</div>
               <div className="field__input">
                 {fieldName ? (
                   <>
@@ -178,7 +194,7 @@ export function HouseBlEntryPageHead({
                     ) : (
                       <input
                         {...(form.register as (n: string) => object)(fieldName)}
-                        placeholder={f}
+                        placeholder={label}
                       />
                     )}
                     {(form.formState.errors as Record<string, unknown>)[fieldName] && (
@@ -188,7 +204,7 @@ export function HouseBlEntryPageHead({
                     )}
                   </>
                 ) : (
-                  <input defaultValue={defaults[f] ?? ""} placeholder={f} />
+                  <input defaultValue={defaults[f] ?? ""} placeholder={label} />
                 )}
               </div>
             </div>

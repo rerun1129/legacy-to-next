@@ -1,0 +1,281 @@
+{
+  "common": {
+    "save": "저장",
+    "saving": "저장 중…",
+    "delete": "삭제",
+    "search": "검색",
+    "reset": "초기화",
+    "cancel": "취소",
+    "confirm": "확인",
+    "loadFailed": "데이터를 불러오지 못했습니다.",
+    "loading": "불러오는 중…",
+    "noData": "데이터가 없습니다."
+  },
+  "fms": {
+    "houseBl": {
+      "entry": {
+        "toolbar": {
+          "shipmentType": "선적 유형",
+          "hblNo": "HBL No",
+          "mblNo": "MBL No",
+          "loadType": "적재 유형",
+          "serviceTerm": "서비스 조건",
+          "blType": "B/L Type",
+          "masterRef": "Master Ref",
+          "hawbNo": "HAWB No",
+          "mawbNo": "MAWB No",
+          "truckBlNo": "Truck B/L No",
+          "nonBlNo": "Non B/L No"
+        },
+        "title": {
+          "seaExp": "해상 수출 House B/L 등록",
+          "seaImp": "해상 수입 House B/L 등록",
+          "airExp": "항공 수출 House B/L 등록",
+          "airImp": "항공 수입 House B/L 등록",
+          "truck": "Truck House B/L 등록",
+          "nonBl": "Non House B/L 등록"
+        },
+        "tabs": {
+          "main": "Main",
+          "freight": "Freight"
+        },
+        "status": {
+          "draft": "임시저장"
+        },
+        "panels": {
+          "party": "당사자",
+          "schedule": "스케줄",
+          "tradePerf": "거래 & 실적",
+          "document": "서류",
+          "container": "컨테이너",
+          "cargo": "화물",
+          "marksNumbers": "화인 & 번호",
+          "description": "화물 명세",
+          "remark": "비고"
+        },
+        "msg": {
+          "searchBlFirst": "먼저 House B/L을 조회해주세요.",
+          "confirmSave": "저장하시겠습니까?",
+          "confirmDelete": "삭제하시겠습니까?",
+          "deleteWarning": "삭제된 데이터는 복구할 수 없습니다.",
+          "loadingDelete": "삭제 중…",
+          "loadingSave": "저장 중…",
+          "loadingFetch": "조회 중…"
+        },
+        "freight": {
+          "panels": {
+            "rateHeaders":       "운임 헤더",
+            "sellingDebit":      "Selling / Debit",
+            "buyingCredit":      "Buying / Credit",
+            "accountDocuments":  "정산 문서"
+          },
+          "headers": {
+            "customers":  "거래처",
+            "exRateInfo": "환율 정보"
+          },
+          "customers": {
+            "actualCustomer": "실화주",
+            "liner":          "선사",
+            "settlePartner":  "정산 파트너"
+          },
+          "exRate": {
+            "selling": "매출",
+            "buying":  "매입",
+            "perf":    "PERF."
+          },
+          "cols": {
+            "no":          "#",
+            "chargeCode":  "요금 코드",
+            "description": "내역",
+            "qty":         "Qty",
+            "unit":        "단위",
+            "rate":        "운임",
+            "amount":      "금액",
+            "currency":    "통화",
+            "krwEquiv":    "KRW 환산",
+            "remark":      "비고",
+            "docType":     "문서 유형",
+            "docNo":       "문서 No",
+            "issueDate":   "발행일",
+            "status":      "상태"
+          }
+        },
+        "fields": {
+          "shipper": "송하인",
+          "consignee": "수하인",
+          "notify": "통지처",
+          "docPartner": "DOC 파트너",
+          "toOrder": "To Order",
+          "sameAsCne": "Same as Cne.",
+          "linerVessel": "선사 & 선박",
+          "liner": "선사",
+          "vessel": "선박명",
+          "voyage": "항차",
+          "onBoard": "선적일",
+          "ports": "항구",
+          "issueInformation": "발행 정보",
+          "incoterms": "Incoterms",
+          "freightTerm": "운임 조건",
+          "payableAt": "운임 지급지",
+          "tradeTerms": "거래 조건",
+          "performance": "실적",
+          "actualCustomer": "실화주",
+          "settlePartner": "정산 파트너",
+          "salesClass": "영업 분류",
+          "salesMan": "영업 담당",
+          "operator": "운영 담당",
+          "team": "팀",
+          "package": "포장",
+          "grossWt": "총중량",
+          "cbm": "CBM",
+          "rton": "운임 톤",
+          "hsCode": "HS Code",
+          "containerNo": "컨테이너 번호",
+          "containerType": "유형",
+          "sealNo1": "봉인 번호 1",
+          "sealNo2": "봉인 번호 2",
+          "sealNo3": "봉인 번호 3",
+          "pkg": "수량",
+          "unit": "단위",
+          "gw": "총중량",
+          "vgm": "VGM",
+          "addressPlaceholder": "주소 (자유 입력)"
+        }
+      }
+    },
+    "seaHouse": {
+      "list": {
+        "title": "해상 수출 목록",
+        "panel": "Sea House B/L",
+        "cols": {
+          "hblNo": "House B/L No.",
+          "bound": "수출입",
+          "mblNo": "Master B/L No",
+          "masterRefNo": "Master Reference No.",
+          "shipmentType": "운송 유형",
+          "loadType": "적재 유형",
+          "etd": "ETD",
+          "eta": "ETA",
+          "polCode": "POL",
+          "podCode": "POD",
+          "deliveryCode": "배송지",
+          "vesselName": "선박명",
+          "voyageNo": "항차",
+          "shipperCode": "송하인",
+          "shipperName": "송하인명",
+          "consigneeCode": "수하인",
+          "consigneeName": "수하인명",
+          "notifyCode": "통지처",
+          "notifyName": "통지처명",
+          "settlePartnerCode": "정산 파트너",
+          "settlePartnerName": "정산 파트너명",
+          "docPartnerCode": "DOC 파트너",
+          "docPartnerName": "DOC 파트너명",
+          "linerCode": "선사",
+          "linerName": "선사명",
+          "freightTerm": "운임 조건",
+          "incoterms": "Incoterms",
+          "actualCustomerCode": "실화주",
+          "actualCustomerName": "실화주명",
+          "pkgQty": "포장 수량",
+          "pkgUnit": "단위",
+          "grossWeightKg": "총중량",
+          "cbm": "CBM",
+          "cntr20Qty": "20FT",
+          "cntr40Qty": "40FT",
+          "teuQty": "TEU",
+          "salesManCode": "영업 담당",
+          "teamCode": "팀",
+          "teamName": "팀명"
+        },
+        "filter": {
+          "all": "전체",
+          "hblNo": "House B/L No",
+          "vesselName": "선박명",
+          "voyageNo": "항차",
+          "shipmentType": "운송 유형",
+          "salesClass": "영업 분류",
+          "incoterms": "Incoterms",
+          "loadType": "적재 유형",
+          "actualCustomer": "실화주",
+          "liner": "선사",
+          "team": "팀",
+          "operator": "운영 담당",
+          "salesMan": "영업 담당",
+          "dateKindEtd": "ETD",
+          "dateKindEta": "ETA",
+          "masterBlKindMbl": "Master B/L No",
+          "masterBlKindRef": "Master Reference No.",
+          "partyKindShipper": "송하인",
+          "partyKindConsignee": "수하인",
+          "partyKindNotify": "통지처",
+          "partnerKindSettle": "정산 파트너",
+          "partnerKindDoc": "DOC 파트너",
+          "portKindPol": "POL",
+          "portKindPod": "POD"
+        }
+      }
+    }
+  },
+  "shell": {
+    "topbar": {
+      "showSidebar": "사이드바 표시",
+      "hideSidebar": "사이드바 숨기기",
+      "search": "검색 (⌘K)",
+      "notifications": "알림",
+      "lightMode": "라이트 모드",
+      "darkMode": "다크 모드",
+      "help": "도움말",
+      "logout": "로그아웃",
+      "closeOtherTabs": "다른 탭 닫기",
+      "closeTabsToRight": "우측 탭 닫기",
+      "closeTabsToLeft": "좌측 탭 닫기"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "houseBl": "House B/L",
+      "masterBl": "Master B/L",
+      "truckBl": "Truck B/L",
+      "nonBl": "Non B/L",
+      "seaExportList": "Sea Export 목록",
+      "seaExportEntry": "Sea Export 등록",
+      "seaImportList": "Sea Import 목록",
+      "seaImportEntry": "Sea Import 등록",
+      "airExportList": "Air Export 목록",
+      "airExportEntry": "Air Export 등록",
+      "airImportList": "Air Import 목록",
+      "airImportEntry": "Air Import 등록",
+      "list": "목록",
+      "entry": "등록",
+      "widgetEditMode": "Entry 위젯 편집",
+      "widgetEditTitle": "위젯 편집 모드 on/off",
+      "widgetEditDisabledTitle": "Main / Freight 탭에서만 사용 가능"
+    },
+    "tabs": {
+      "/fms/house-bl/sea-exp/list": "House B/L Sea Export 목록",
+      "/fms/house-bl/sea-exp/entry": "House B/L Sea Export 등록",
+      "/fms/house-bl/sea-imp/list": "House B/L Sea Import 목록",
+      "/fms/house-bl/sea-imp/entry": "House B/L Sea Import 등록",
+      "/fms/house-bl/air-exp/list": "House B/L Air Export 목록",
+      "/fms/house-bl/air-exp/entry": "House B/L Air Export 등록",
+      "/fms/house-bl/air-imp/list": "House B/L Air Import 목록",
+      "/fms/house-bl/air-imp/entry": "House B/L Air Import 등록",
+      "/fms/master-bl/sea-exp/list": "Master B/L Sea Export 목록",
+      "/fms/master-bl/sea-exp/entry": "Master B/L Sea Export 등록",
+      "/fms/master-bl/sea-imp/list": "Master B/L Sea Import 목록",
+      "/fms/master-bl/sea-imp/entry": "Master B/L Sea Import 등록",
+      "/fms/master-bl/air-exp/list": "Master B/L Air Export 목록",
+      "/fms/master-bl/air-exp/entry": "Master B/L Air Export 등록",
+      "/fms/master-bl/air-imp/list": "Master B/L Air Import 목록",
+      "/fms/master-bl/air-imp/entry": "Master B/L Air Import 등록",
+      "/fms/truck-bl/list": "Truck B/L 목록",
+      "/fms/truck-bl/entry": "Truck B/L 등록",
+      "/fms/non-bl/list": "Non B/L 목록",
+      "/fms/non-bl/entry": "Non B/L 등록",
+      "/admin/code/list": "공통 코드 마스터"
+    },
+    "lang": {
+      "toggleTitle": "언어 전환"
+    }
+  }
+}

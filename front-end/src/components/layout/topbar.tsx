@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, HelpCircle, Search, ChevronLeft, LogOut, Moon, Sun } from "lucide-react";
-import { useTabs } from "@/lib/use-tabs";
+import { useTranslations } from "next-intl";
+import { useTabs, inferLabelFromPath } from "@/lib/use-tabs";
 import { useCurrentUser, USERS } from "@/lib/use-current-user";
 import { useTheme } from "@/lib/use-theme";
 import { authUseCases } from "@/application/auth/use-cases";
 import { clearSession, getSession } from "@/lib/admin-session";
+import { LanguageToggle } from "./language-toggle";
 
 const SIDEBAR_W = 220;
 
@@ -41,7 +43,10 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   const [userMenuPos, setUserMenuPos] = useState<{ x: number; y: number } | null>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
-  const displayTabs = tabs.filter(t => t.href !== "/dashboard");
+  const t  = useTranslations('shell.topbar');
+  const tt = useTranslations('shell.tabs');
+
+  const displayTabs = tabs.filter(tab => tab.href !== "/dashboard");
 
   useEffect(() => { initFromPath(pathname); }, [pathname, initFromPath]);
 
@@ -223,7 +228,7 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
               FreightOS
             </span>
           </div>
-          <button className="topbar-icon" onClick={onToggleSidebar} title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"} style={{ flexShrink: 0 }}>
+          <button type="button" className="topbar-icon" onClick={onToggleSidebar} title={sidebarCollapsed ? t('showSidebar') : t('hideSidebar')} style={{ flexShrink: 0 }}>
             <ChevronLeft style={{ transform: sidebarCollapsed ? "rotate(180deg)" : undefined, transition: "transform 180ms ease" }} />
           </button>
         </div>
@@ -233,18 +238,20 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
           {displayTabs.map((tab, index) => {
             const active    = pathname === tab.href;
             const dragged   = isDragging && dragState?.tabId === tab.id;
+            // Translate from pathname at render time so locale switches retranslate open tabs.
+            const tabLabel  = tt.has(tab.href) ? tt(tab.href) : inferLabelFromPath(tab.href);
             return (
               <button
                 key={tab.id}
                 className={`app__tab${active ? " is-active" : ""}${dragged ? " is-dragging" : ""}`}
                 style={getTabStyle(index)}
-                title={tab.label}
+                title={tabLabel}
                 onMouseDown={(e) => handleTabMouseDown(e, tab.id)}
                 onClick={(e) => handleTabClick(e, tab.href)}
                 onContextMenu={(e) => handleContextMenu(e, tab.id)}
               >
                 <span style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {tab.label}
+                  {tabLabel}
                 </span>
                 <span className="app__tab-close" onClick={(e) => handleClose(e, tab.id)}>×</span>
               </button>
@@ -255,12 +262,13 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
         {/* ── Right icons ────────────────────────────────────── */}
         <div className="app__topbar-right" style={{ flexShrink: 0 }}>
           <div className="topbar-icons">
-            <button className="topbar-icon" title="Search (⌘K)"><Search /></button>
-            <button className="topbar-icon" title="Notifications"><Bell /><span className="topbar-icon__dot" /></button>
-            <button className="topbar-icon" title={dark ? "Light mode" : "Dark mode"} onClick={toggleTheme}>
+            <button type="button" className="topbar-icon" title={t('search')}><Search /></button>
+            <button type="button" className="topbar-icon" title={t('notifications')}><Bell /><span className="topbar-icon__dot" /></button>
+            <button type="button" className="topbar-icon" title={dark ? t('lightMode') : t('darkMode')} onClick={toggleTheme}>
               {dark ? <Sun /> : <Moon />}
             </button>
-            <button className="topbar-icon" title="Help"><HelpCircle /></button>
+            <button type="button" className="topbar-icon" title={t('help')}><HelpCircle /></button>
+            <LanguageToggle />
           </div>
           <div
             ref={userRef}
@@ -274,7 +282,7 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
             <div className="app__user-avatar">{currentUser.initials}</div>
             <span>{currentUser.name}</span>
           </div>
-          <button className="topbar-icon" title="Logout" style={{ margin: 4 }} onClick={handleLogout}><LogOut /></button>
+          <button type="button" className="topbar-icon" title={t('logout')} style={{ margin: 4 }} onClick={handleLogout}><LogOut /></button>
         </div>
       </header>
 
@@ -285,9 +293,9 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
           style={{ left: ctxMenu.x, top: ctxMenu.y }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <button onClick={() => handleCloseOthers(ctxMenu.tabId)}>다른 탭 닫기</button>
-          <button onClick={() => handleCloseRight(ctxMenu.tabId)}>우측 탭 닫기</button>
-          <button onClick={() => handleCloseLeft(ctxMenu.tabId)}>좌측 탭 닫기</button>
+          <button type="button" onClick={() => handleCloseOthers(ctxMenu.tabId)}>{t('closeOtherTabs')}</button>
+          <button type="button" onClick={() => handleCloseRight(ctxMenu.tabId)}>{t('closeTabsToRight')}</button>
+          <button type="button" onClick={() => handleCloseLeft(ctxMenu.tabId)}>{t('closeTabsToLeft')}</button>
         </div>,
         document.body
       )}

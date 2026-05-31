@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { DateRangeBox } from "@/components/shared/inputs/date-range-box";
@@ -19,6 +21,7 @@ import {
   PARTNER_KIND_OPTIONS,
   PORT_KIND_OPTIONS,
 } from "./sea-house-list-filter-options";
+import type { LabelOption } from "@/components/shared/inputs/_types";
 
 interface Props {
   form: UseFormReturn<SeaHouseFilter>;
@@ -28,12 +31,48 @@ export function SeaHouseListFilter({ form }: Props) {
   const pathname = usePathname();
   useListFilterSync(form, pathname);
   const { register, setValue } = form;
+  const t = useTranslations("fms.seaHouse.list.filter");
+
+  // labelKey 배열 → 해석된 LabelOption 배열 (useMemo로 t 참조 변경 시에만 재계산)
+  const dateKindOptions = useMemo<LabelOption[]>(
+    () => DATE_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const masterBlKindOptions = useMemo<LabelOption[]>(
+    () => MASTER_BL_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const partyKindOptions = useMemo<LabelOption[]>(
+    () => PARTY_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const partnerKindOptions = useMemo<LabelOption[]>(
+    () => PARTNER_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const portKindOptions = useMemo<LabelOption[]>(
+    () => PORT_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
 
   const { shipmentType, salesClass, incoterms, loadType } = useSeaHouseEnums();
-  const shipmentTypeOptionsWithAll = [{ value: "", label: "ALL" }, ...shipmentType.options];
-  const salesClassOptionsWithAll   = [{ value: "", label: "ALL" }, ...salesClass.options];
-  const incotermsOptionsWithAll    = [{ value: "", label: "ALL" }, ...incoterms.options];
-  const loadTypeOptionsWithAll     = [{ value: "", label: "ALL" }, ...loadType.options];
+  const allOption = useMemo(() => ({ value: "", label: t("all") }), [t]);
+  const shipmentTypeOptionsWithAll = useMemo(
+    () => [allOption, ...shipmentType.options],
+    [allOption, shipmentType.options]
+  );
+  const salesClassOptionsWithAll = useMemo(
+    () => [allOption, ...salesClass.options],
+    [allOption, salesClass.options]
+  );
+  const incotermsOptionsWithAll = useMemo(
+    () => [allOption, ...incoterms.options],
+    [allOption, incoterms.options]
+  );
+  const loadTypeOptionsWithAll = useMemo(
+    () => [allOption, ...loadType.options],
+    [allOption, loadType.options]
+  );
 
   // 자동완성 훅 — 소스별 1:1
   const party           = useCodeAutocomplete(CODE_SOURCES.customer);
@@ -63,7 +102,7 @@ export function SeaHouseListFilter({ form }: Props) {
                     name="dateTo"
                     render={({ field: toField }) => (
                       <DateRangeBox
-                        labelOptions={DATE_KIND_OPTIONS}
+                        labelOptions={dateKindOptions}
                         labelValue={kindField.value}
                         onLabelChange={kindField.onChange}
                         required
@@ -96,7 +135,7 @@ export function SeaHouseListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <div className="lcn">
                 <LcnLabel
-                  options={MASTER_BL_KIND_OPTIONS}
+                  options={masterBlKindOptions}
                   value={kindField.value}
                   onChange={kindField.onChange}
                 />
@@ -111,7 +150,7 @@ export function SeaHouseListFilter({ form }: Props) {
 
           {/* 3. House B/L No */}
           <div className="lcn">
-            <span className="lcn__label">House B/L No</span>
+            <span className="lcn__label">{t("hblNo")}</span>
             <input
               {...register("hblNo")}
               placeholder="House B/L No"
@@ -127,7 +166,7 @@ export function SeaHouseListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PARTY_KIND_OPTIONS}
+                labelOptions={partyKindOptions}
                 labelValue={kindField.value}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("partyCode"), placeholder: "Code" }}
@@ -147,7 +186,7 @@ export function SeaHouseListFilter({ form }: Props) {
           {/* 5. Actual Customer */}
           <CodeBox
             kind="lcn"
-            label="Actual Customer"
+            label={t("actualCustomer")}
             codeProps={{ ...register("actualCustomerCode"), placeholder: "Code" }}
             nameProps={{ ...register("actualCustomerName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -167,7 +206,7 @@ export function SeaHouseListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PARTNER_KIND_OPTIONS}
+                labelOptions={partnerKindOptions}
                 labelValue={kindField.value ?? ""}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("partnerCode"), placeholder: "Code" }}
@@ -187,7 +226,7 @@ export function SeaHouseListFilter({ form }: Props) {
           {/* 7. Liner */}
           <CodeBox
             kind="lcn"
-            label="Liner"
+            label={t("liner")}
             codeProps={{ ...register("linerCode"), placeholder: "Code" }}
             nameProps={{ ...register("linerName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -207,7 +246,7 @@ export function SeaHouseListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PORT_KIND_OPTIONS}
+                labelOptions={portKindOptions}
                 labelValue={kindField.value}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("portCode"), placeholder: "Code" }}
@@ -226,7 +265,7 @@ export function SeaHouseListFilter({ form }: Props) {
 
           {/* 9. Vessel Name */}
           <div className="lcn">
-            <span className="lcn__label">Vessel Name</span>
+            <span className="lcn__label">{t("vesselName")}</span>
             <input
               {...register("vesselName")}
               placeholder="Vessel Name"
@@ -237,7 +276,7 @@ export function SeaHouseListFilter({ form }: Props) {
 
           {/* 10. Voyage */}
           <div className="lcn">
-            <span className="lcn__label">Voyage</span>
+            <span className="lcn__label">{t("voyageNo")}</span>
             <input
               {...register("voyageNo")}
               placeholder="Voyage No"
@@ -246,9 +285,9 @@ export function SeaHouseListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 10. Shipment Type */}
+          {/* 11. Shipment Type */}
           <div className="lcn">
-            <span className="lcn__label">Shipment Type</span>
+            <span className="lcn__label">{t("shipmentType")}</span>
             <Controller
               control={form.control}
               name="shipmentType"
@@ -268,10 +307,10 @@ export function SeaHouseListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 11. Team */}
+          {/* 12. Team */}
           <CodeBox
             kind="lcn"
-            label="Team"
+            label={t("team")}
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -284,10 +323,10 @@ export function SeaHouseListFilter({ form }: Props) {
             }}
           />
 
-          {/* 12. Operator */}
+          {/* 13. Operator */}
           <CodeBox
             kind="lcn"
-            label="Operator"
+            label={t("operator")}
             codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
             nameProps={{ ...register("operatorName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -300,9 +339,9 @@ export function SeaHouseListFilter({ form }: Props) {
             }}
           />
 
-          {/* 13. Sales Class */}
+          {/* 14. Sales Class */}
           <div className="lcn">
-            <span className="lcn__label">Sales Class</span>
+            <span className="lcn__label">{t("salesClass")}</span>
             <Controller
               control={form.control}
               name="salesClass"
@@ -322,10 +361,10 @@ export function SeaHouseListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 14. Sales Man */}
+          {/* 15. Sales Man */}
           <CodeBox
             kind="lcn"
-            label="Sales Man"
+            label={t("salesMan")}
             codeProps={{ ...register("salesManCode"), placeholder: "Code" }}
             nameProps={{ ...register("salesManName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -338,9 +377,9 @@ export function SeaHouseListFilter({ form }: Props) {
             }}
           />
 
-          {/* 15. Incoterms */}
+          {/* 16. Incoterms */}
           <div className="lcn">
-            <span className="lcn__label">Incoterms</span>
+            <span className="lcn__label">{t("incoterms")}</span>
             <Controller
               control={form.control}
               name="incoterms"
@@ -360,9 +399,9 @@ export function SeaHouseListFilter({ form }: Props) {
             />
           </div>
 
-          {/* 16. Load Type */}
+          {/* 17. Load Type */}
           <div className="lcn">
-            <span className="lcn__label">Load Type</span>
+            <span className="lcn__label">{t("loadType")}</span>
             <Controller
               control={form.control}
               name="loadType"

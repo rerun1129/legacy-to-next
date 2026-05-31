@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid,
@@ -16,14 +17,14 @@ import { SidebarAdminTree } from "./sidebar-admin-tree";
 
 // ─── Types ──────────────────────────────────────────────────
 interface NavLeaf {
-  label: string;
+  labelKey: string;
   href: string;
   icon: React.ComponentType<{ size?: number }>;
   requiredMenuCode?: string;
 }
 
 interface NavSection {
-  group: string;
+  sectionKey: string;
   icon: React.ComponentType<{ size?: number }>;
   children: NavLeaf[];
   defaultOpen?: boolean;
@@ -43,43 +44,43 @@ const FMS_NAV_MODULE: NavModule = {
   module: "FMS", defaultOpen: true,
   sections: [
     {
-      group: "House B/L", icon: FileText, defaultOpen: true, requiredMenuCode: "MENU_FMS_HOUSE_BL",
+      sectionKey: "houseBl", icon: FileText, defaultOpen: true, requiredMenuCode: "MENU_FMS_HOUSE_BL",
       children: [
-        { label: "Sea Export List",  href: "/fms/house-bl/sea-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_EXP_LIST" },
-        { label: "Sea Export Entry", href: "/fms/house-bl/sea-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_EXP_ENTRY" },
-        { label: "Sea Import List",  href: "/fms/house-bl/sea-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_IMP_LIST" },
-        { label: "Sea Import Entry", href: "/fms/house-bl/sea-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_IMP_ENTRY" },
-        { label: "Air Export List",  href: "/fms/house-bl/air-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_EXP_LIST" },
-        { label: "Air Export Entry", href: "/fms/house-bl/air-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_EXP_ENTRY" },
-        { label: "Air Import List",  href: "/fms/house-bl/air-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_IMP_LIST" },
-        { label: "Air Import Entry", href: "/fms/house-bl/air-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_IMP_ENTRY" },
+        { labelKey: "seaExportList",  href: "/fms/house-bl/sea-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_EXP_LIST" },
+        { labelKey: "seaExportEntry", href: "/fms/house-bl/sea-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_EXP_ENTRY" },
+        { labelKey: "seaImportList",  href: "/fms/house-bl/sea-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_IMP_LIST" },
+        { labelKey: "seaImportEntry", href: "/fms/house-bl/sea-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_SEA_IMP_ENTRY" },
+        { labelKey: "airExportList",  href: "/fms/house-bl/air-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_EXP_LIST" },
+        { labelKey: "airExportEntry", href: "/fms/house-bl/air-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_EXP_ENTRY" },
+        { labelKey: "airImportList",  href: "/fms/house-bl/air-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_IMP_LIST" },
+        { labelKey: "airImportEntry", href: "/fms/house-bl/air-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_HOUSE_BL_AIR_IMP_ENTRY" },
       ],
     },
     {
-      group: "Master B/L", icon: Layers, defaultOpen: false, requiredMenuCode: "MENU_FMS_MASTER_BL",
+      sectionKey: "masterBl", icon: Layers, defaultOpen: false, requiredMenuCode: "MENU_FMS_MASTER_BL",
       children: [
-        { label: "Sea Export List",  href: "/fms/master-bl/sea-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_EXP_LIST" },
-        { label: "Sea Export Entry", href: "/fms/master-bl/sea-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_EXP_ENTRY" },
-        { label: "Sea Import List",  href: "/fms/master-bl/sea-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_IMP_LIST" },
-        { label: "Sea Import Entry", href: "/fms/master-bl/sea-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_IMP_ENTRY" },
-        { label: "Air Export List",  href: "/fms/master-bl/air-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_EXP_LIST" },
-        { label: "Air Export Entry", href: "/fms/master-bl/air-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_EXP_ENTRY" },
-        { label: "Air Import List",  href: "/fms/master-bl/air-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_IMP_LIST" },
-        { label: "Air Import Entry", href: "/fms/master-bl/air-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_IMP_ENTRY" },
+        { labelKey: "seaExportList",  href: "/fms/master-bl/sea-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_EXP_LIST" },
+        { labelKey: "seaExportEntry", href: "/fms/master-bl/sea-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_EXP_ENTRY" },
+        { labelKey: "seaImportList",  href: "/fms/master-bl/sea-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_IMP_LIST" },
+        { labelKey: "seaImportEntry", href: "/fms/master-bl/sea-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_SEA_IMP_ENTRY" },
+        { labelKey: "airExportList",  href: "/fms/master-bl/air-exp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_EXP_LIST" },
+        { labelKey: "airExportEntry", href: "/fms/master-bl/air-exp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_EXP_ENTRY" },
+        { labelKey: "airImportList",  href: "/fms/master-bl/air-imp/list",  icon: List,     requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_IMP_LIST" },
+        { labelKey: "airImportEntry", href: "/fms/master-bl/air-imp/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_MASTER_BL_AIR_IMP_ENTRY" },
       ],
     },
     {
-      group: "Truck B/L", icon: Truck, defaultOpen: false, requiredMenuCode: "MENU_FMS_TRUCK_BL",
+      sectionKey: "truckBl", icon: Truck, defaultOpen: false, requiredMenuCode: "MENU_FMS_TRUCK_BL",
       children: [
-        { label: "List",  href: "/fms/truck-bl/list",  icon: List,     requiredMenuCode: "MENU_FMS_TRUCK_BL_LIST" },
-        { label: "Entry", href: "/fms/truck-bl/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_TRUCK_BL_ENTRY" },
+        { labelKey: "list",  href: "/fms/truck-bl/list",  icon: List,     requiredMenuCode: "MENU_FMS_TRUCK_BL_LIST" },
+        { labelKey: "entry", href: "/fms/truck-bl/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_TRUCK_BL_ENTRY" },
       ],
     },
     {
-      group: "Non B/L", icon: Package, defaultOpen: false, requiredMenuCode: "MENU_FMS_NON_BL",
+      sectionKey: "nonBl", icon: Package, defaultOpen: false, requiredMenuCode: "MENU_FMS_NON_BL",
       children: [
-        { label: "List",  href: "/fms/non-bl/list",  icon: List,     requiredMenuCode: "MENU_FMS_NON_BL_LIST" },
-        { label: "Entry", href: "/fms/non-bl/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_NON_BL_ENTRY" },
+        { labelKey: "list",  href: "/fms/non-bl/list",  icon: List,     requiredMenuCode: "MENU_FMS_NON_BL_LIST" },
+        { labelKey: "entry", href: "/fms/non-bl/entry", icon: FilePlus, requiredMenuCode: "MENU_FMS_NON_BL_ENTRY" },
       ],
     },
   ],
@@ -105,6 +106,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
   const addTab   = useTabs((s) => s.addTab);
+  const t        = useTranslations('shell.sidebar');
   // SSR 시 session=null이므로 admin 메뉴가 모두 숨겨진 결과물을 렌더.
   // mounted 전에는 동일하게 숨겨서 hydration mismatch를 방지.
   const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
@@ -120,16 +122,18 @@ export function Sidebar() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     FMS_NAV_MODULE.sections.forEach((s) => {
-      init[s.group] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
+      init[s.sectionKey] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
     });
     return init;
   });
 
   const toggleModule  = (module: string) => setOpenModules((p) => ({ ...p, [module]: !p[module] }));
-  const toggleSection = (group: string)  => setOpenSections((p) => ({ ...p, [group]:  !p[group]  }));
+  const toggleSection = (key: string)    => setOpenSections((p) => ({ ...p, [key]: !p[key] }));
 
-  function navigate(label: string, href: string) {
-    addTab(label, href);
+  // Pass href as the label to addTab — the topbar resolves the display label
+  // from the pathname via useTranslations('shell.tabs') at render time.
+  function navigate(href: string) {
+    addTab(href, href);
     router.push(href);
   }
 
@@ -156,10 +160,10 @@ export function Sidebar() {
       {/* Dashboard — 최상단 */}
       <button
         className={`side-item${pathname === DASHBOARD_HREF ? " is-active" : ""}`}
-        onClick={() => navigate("Dashboard", DASHBOARD_HREF)}
+        onClick={() => navigate(DASHBOARD_HREF)}
       >
         <span className="side-item__icon"><LayoutDashboard size={14} /></span>
-        Dashboard
+        {t('dashboard')}
       </button>
 
       {/* FMS 모듈 — 정적, 접근 가능한 섹션이 1개 이상일 때만 렌더 */}
@@ -183,17 +187,17 @@ export function Sidebar() {
 
           {fmsModOpen && fmsAccessibleSections.map((section) => {
             const secActive = sectionActive(pathname, section);
-            const secOpen   = openSections[section.group];
+            const secOpen   = openSections[section.sectionKey];
 
             return (
-              <div key={section.group}>
+              <div key={section.sectionKey}>
                 <button
                   className={`side-item${secActive ? " is-active" : ""}`}
                   style={{ paddingLeft: 12 }}
-                  onClick={() => toggleSection(section.group)}
+                  onClick={() => toggleSection(section.sectionKey)}
                 >
                   <span className="side-item__icon"><section.icon size={13} /></span>
-                  <span style={{ flex: 1, textAlign: "left" }}>{section.group}</span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{t(section.sectionKey)}</span>
                   <ChevronRight
                     size={11}
                     style={{
@@ -216,10 +220,10 @@ export function Sidebar() {
                       key={leaf.href}
                       className={`side-item${active ? " is-active" : ""}`}
                       style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
-                      onClick={() => navigate(`${section.group} ${leaf.label}`, leaf.href)}
+                      onClick={() => navigate(leaf.href)}
                     >
                       <span className="side-item__icon"><leaf.icon size={11} /></span>
-                      {leaf.label}
+                      {t(leaf.labelKey)}
                     </button>
                   );
                 })}
@@ -236,7 +240,7 @@ export function Sidebar() {
         pathname={pathname}
         openSections={openSections}
         onToggleSection={toggleSection}
-        onNavigate={navigate}
+        onNavigate={(_label, href) => navigate(href)}
       />
 
       {/* ── 하단: 위젯 편집 토글 ── */}
@@ -247,10 +251,10 @@ export function Sidebar() {
             className={`side-edit-btn${editMode ? " is-active" : ""}${!canEdit ? " is-disabled" : ""}`}
             onClick={() => canEdit && setEditMode(!editMode)}
             disabled={!canEdit}
-            title={canEdit ? "위젯 편집 모드 on/off" : "Main / Freight 탭에서만 사용 가능"}
+            title={canEdit ? t('widgetEditTitle') : t('widgetEditDisabledTitle')}
           >
             <LayoutGrid size={14} style={{ flexShrink: 0 }} />
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>Entry 위젯 편집</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{t('widgetEditMode')}</span>
           </button>
         </div>
       )}

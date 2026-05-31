@@ -293,33 +293,34 @@ export const HOUSE_BL_SCHEMA = z.object({
 export type HouseBlFormValues = z.infer<typeof HOUSE_BL_SCHEMA>;
 
 // ── Toolbar constants ─────────────────────────────────────
+// fieldId는 i18n 카탈로그 키이자 RHF 바인딩 맵의 키 — 라벨 문자열에서 분리됨
 
 export const TOOLBAR_FIELDS_SEA = [
-  "Shipment Type", "HBL No", "MBL No", "Load Type", "Service Term", "B/L Type", "Master Ref",
+  "shipmentType", "hblNo", "mblNo", "loadType", "serviceTerm", "blType", "masterRef",
 ] as const;
 export const TOOLBAR_FIELDS_AIR = [
-  "Shipment Type", "HAWB No", "MAWB No", "Master Ref",
+  "shipmentType", "hawbNo", "mawbNo", "masterRef",
 ] as const;
 export const TOOLBAR_FIELDS_TRUCK = [
-  "Truck B/L No",
+  "truckBlNo",
 ] as const;
 export const TOOLBAR_FIELDS_NON_BL = [
-  "Non B/L No",
+  "nonBlNo",
 ] as const;
 
-// toolbar 라벨 → RHF field path 매핑
-export const TOOLBAR_LABEL_TO_FIELD: Record<string, string> = {
-  "HBL No":         "hbl",
-  "HAWB No":        "hbl",
-  "Truck B/L No":   "hbl",
-  "Non B/L No":     "hbl",
-  "MBL No":         "mbl",
-  "MAWB No":        "mbl",
-  "Load Type":      "seaDetail.loadType",
-  "Shipment Type":  "sType",
-  "Service Term":   "seaDetail.serviceTerm",
-  "B/L Type":       "seaDetail.blType",
-  "Master Ref":     "masterRefNo",
+// fieldId → RHF field path 매핑
+export const TOOLBAR_FIELD_TO_RHF: Record<string, string> = {
+  shipmentType: "sType",
+  hblNo:        "hbl",
+  hawbNo:       "hbl",
+  truckBlNo:    "hbl",
+  nonBlNo:      "hbl",
+  mblNo:        "mbl",
+  mawbNo:       "mbl",
+  loadType:     "seaDetail.loadType",
+  serviceTerm:  "seaDetail.serviceTerm",
+  blType:       "seaDetail.blType",
+  masterRef:    "masterRefNo",
 };
 
-export const REQUIRED_TOOLBAR_LABELS = new Set(["HBL No", "HAWB No", "Truck B/L No", "Non B/L No", "Shipment Type"]);
+export const REQUIRED_TOOLBAR_FIELDS = new Set(["shipmentType", "hblNo", "hawbNo", "truckBlNo", "nonBlNo"]);

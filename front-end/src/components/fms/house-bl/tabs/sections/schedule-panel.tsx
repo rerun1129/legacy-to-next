@@ -1,4 +1,7 @@
+"use client";
+
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
@@ -13,6 +16,8 @@ interface Props { variant?: AnyVariantConfig }
 
 // ── Schedule Panel ──────────────────────────────────────────
 export function SchedulePanel({ variant }: Props) {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
   const pol      = useCodeAutocomplete(CODE_SOURCES.portSea);
@@ -102,7 +107,7 @@ export function SchedulePanel({ variant }: Props) {
     key: "vessel",
     render: () => (
       <div className="li">
-        <span className="li__label">Vessel</span>
+        <span className="li__label">{tf("vessel")}</span>
         <div className="li__input">
           <TextBox variant="panel" {...register("seaDetail.vesselName")} />
         </div>
@@ -114,7 +119,7 @@ export function SchedulePanel({ variant }: Props) {
     key: "voyage",
     render: () => (
       <div className="li">
-        <span className="li__label">Voyage</span>
+        <span className="li__label">{tf("voyage")}</span>
         <div className="li__input">
           <TextBox variant="panel" {...register("seaDetail.voyageNo")} />
         </div>
@@ -178,7 +183,7 @@ export function SchedulePanel({ variant }: Props) {
     key: "on-board",
     render: () => (
       <div className="li">
-        <span className="li__label">On Board</span>
+        <span className="li__label">{tf("onBoard")}</span>
         <div className="li__input">
           <Controller
             control={control}
@@ -202,7 +207,7 @@ export function SchedulePanel({ variant }: Props) {
   const fields: FieldWidgetDef[] = [
     {
       key:   "liner",
-      label: "Liner & Vessel",
+      label: tf("linerVessel"),
       render: () => (
         <>
           <FieldItemGrid itemScope={`${panelScope}.liner.solo`}         items={[linerItem]}              cols={1} />
@@ -214,16 +219,16 @@ export function SchedulePanel({ variant }: Props) {
     },
     {
       key:   "ports",
-      label: "Ports",
+      label: tf("ports"),
       render: () => (
         <>
-          <div className="subhead"><div className="subhead__bar" />Ports</div>
+          <div className="subhead"><div className="subhead__bar" />{tf("ports")}</div>
           <FieldItemGrid itemScope={`${panelScope}.ports`} items={PORT_ITEMS} cols={1} />
         </>
       ),
     },
     ...(variant.issueFields.length > 0
-      ? [{ key: "issue", label: "Issue Information", render: () => <IssueSection issueFields={variant.issueFields} panelScope={panelScope} noOfBlOptions={noOfBlOptions} noOfBlPlaceholder={noOfBlPlaceholder} /> }]
+      ? [{ key: "issue", label: tf("issueInformation"), render: () => <IssueSection issueFields={variant.issueFields} panelScope={panelScope} noOfBlOptions={noOfBlOptions} noOfBlPlaceholder={noOfBlPlaceholder} /> }]
       : []),
   ];
 
@@ -231,7 +236,7 @@ export function SchedulePanel({ variant }: Props) {
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Schedule</span>
+        <span className="panel__title">{tp("schedule")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />

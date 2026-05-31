@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
 import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -15,18 +16,6 @@ interface AccountRow {
   id: number;
   docType: string; docNo: string; issueDate: string; amount: string; currency: string; status: string;
 }
-
-
-
-// ── Account columns ────────────────────────────────────────
-const ACCOUNT_COLS: GridColumn<AccountRow>[] = [
-  { key: "docType",   label: "Doc Type"  },
-  { key: "docNo",     label: "Doc No"    },
-  { key: "issueDate", label: "Issue Date" },
-  { key: "amount",    label: "Amount",   className: "is-num" },
-  { key: "currency",  label: "Currency"  },
-  { key: "status",    label: "Status"    },
-];
 
 const ACCOUNT_ROWS: AccountRow[] = [];
 
@@ -66,30 +55,34 @@ function ExRateItem({ label }: ExRateItemProps) {
   );
 }
 
-// ── CUSTOMERS — 3-col FieldItemGrid ───────────────────────
-const CUSTOMER_ITEMS: FieldItemDef[] = [
-  { key: "actual-customer", label: "ACTUAL CUSTOMER", render: () => <CustomerItem label="ACTUAL CUSTOMER" code="" name="" /> },
-  { key: "liner",           label: "LINER",           render: () => <CustomerItem label="LINER"           code="" name="" /> },
-  { key: "settle-partner",  label: "SETTLE PARTNER",  render: () => <CustomerItem label="SETTLE PARTNER"  code="" name="" /> },
-];
-
-// ── Ex. Rate Info — 3-col FieldItemGrid ───────────────────
-const EXRATE_ITEMS: FieldItemDef[] = [
-  { key: "selling-rate", label: "SELLING", render: () => <ExRateItem label="SELLING" /> },
-  { key: "buying-rate",  label: "BUYING",  render: () => <ExRateItem label="BUYING"  /> },
-  { key: "perf-rate",    label: "PERF.",   render: () => <ExRateItem label="PERF."   /> },
-];
-
 // ── Rate Headers Panel (FieldWidgetList + 3-col FieldItemGrid) ──
 export function FreightRatePanel() {
+  const tf = useTranslations("fms.houseBl.entry.freight");
+
+  // ── CUSTOMERS — 3-col FieldItemGrid ─────────────────────
+  // layout persisted by itemScope + item key (not label/array identity) — safe to define in-component
+  const customerItems: FieldItemDef[] = [
+    { key: "actual-customer", label: tf("customers.actualCustomer"), render: () => <CustomerItem label={tf("customers.actualCustomer")} code="" name="" /> },
+    { key: "liner",           label: tf("customers.liner"),          render: () => <CustomerItem label={tf("customers.liner")}          code="" name="" /> },
+    { key: "settle-partner",  label: tf("customers.settlePartner"),  render: () => <CustomerItem label={tf("customers.settlePartner")}  code="" name="" /> },
+  ];
+
+  // ── Ex. Rate Info — 3-col FieldItemGrid ─────────────────
+  // layout persisted by itemScope + item key — safe to define in-component
+  const exrateItems: FieldItemDef[] = [
+    { key: "selling-rate", label: tf("exRate.selling"), render: () => <ExRateItem label={tf("exRate.selling")} /> },
+    { key: "buying-rate",  label: tf("exRate.buying"),  render: () => <ExRateItem label={tf("exRate.buying")}  /> },
+    { key: "perf-rate",    label: tf("exRate.perf"),    render: () => <ExRateItem label={tf("exRate.perf")}    /> },
+  ];
+
   const fields: FieldWidgetDef[] = [
-    { key: "customers",    label: "CUSTOMERS",    render: () => <FieldItemGrid itemScope="freight-rate-v2.customers"    items={CUSTOMER_ITEMS} cols={3} /> },
-    { key: "ex-rate-info", label: "Ex. Rate Info", render: () => <FieldItemGrid itemScope="freight-rate-v2.ex-rate-info-v2" items={EXRATE_ITEMS} cols={3} /> },
+    { key: "customers",    label: tf("headers.customers"),  render: () => <FieldItemGrid itemScope="freight-rate-v2.customers"      items={customerItems} cols={3} /> },
+    { key: "ex-rate-info", label: tf("headers.exRateInfo"), render: () => <FieldItemGrid itemScope="freight-rate-v2.ex-rate-info-v2" items={exrateItems}   cols={3} /> },
   ];
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Rate Headers</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tf("panels.rateHeaders")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope="freight-rate-v2" fields={fields} />
       </div>
@@ -99,35 +92,36 @@ export function FreightRatePanel() {
 
 // ── Selling Panel ──────────────────────────────────────────
 export function FreightSellingPanel() {
+  const tf = useTranslations("fms.houseBl.entry.freight");
   const { register } = useFormContext<HouseBlFormValues>();
 
   const sellingCols: GridColumn<FreightRow>[] = useMemo(() => [
-    { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "code", label: "Charge Code", isRequired: true,
+    { key: "_no",  label: tf("cols.no"),          className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "code", label: tf("cols.chargeCode"),   isRequired: true,
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
-    { key: "desc", label: "Description",
+    { key: "desc", label: tf("cols.description"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.desc`)} /> },
-    { key: "qty",  label: "Qty", className: "is-num",
+    { key: "qty",  label: tf("cols.qty"),          className: "is-num",
       render: (_, __, i) => <NumberBox variant="cell" name={`freightSelling.${i}.qty`}  valueAsNumber={false} /> },
-    { key: "unit", label: "Unit",
+    { key: "unit", label: tf("cols.unit"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.unit`)} /> },
-    { key: "sell", label: "Rate", className: "is-num", isRequired: true,
+    { key: "sell", label: tf("cols.rate"),          className: "is-num", isRequired: true,
       render: (_, __, i) => <NumberBox variant="cell" name={`freightSelling.${i}.sell`} valueAsNumber={false} /> },
-    { key: "_amt", label: "Amount", className: "is-num",
+    { key: "_amt", label: tf("cols.amount"),        className: "is-num",
       render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.sell ?? "0") * 2).toFixed(2)} /> },
-    { key: "cur",  label: "Currency",
+    { key: "cur",  label: tf("cols.currency"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "_krw", label: "KRW Equiv.", className: "is-num",
+    { key: "_krw", label: tf("cols.krwEquiv"),      className: "is-num",
       render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.sell ?? "0") * 2 * 1376.5).toFixed(0)} /> },
-    { key: "_rem", label: "Remark",
+    { key: "_rem", label: tf("cols.remark"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightSelling.${i}.remark`)} /> },
-  ], [register]);
+  ], [register, tf]);
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Selling / Debit</span>
+        <span className="panel__title">{tf("panels.sellingDebit")}</span>
       </div>
       <GridList columns={sellingCols} data={RATE_ROWS} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
@@ -136,35 +130,36 @@ export function FreightSellingPanel() {
 
 // ── Buying Panel ───────────────────────────────────────────
 export function FreightBuyingPanel() {
+  const tf = useTranslations("fms.houseBl.entry.freight");
   const { register } = useFormContext<HouseBlFormValues>();
 
   const buyingCols: GridColumn<FreightRow>[] = useMemo(() => [
-    { key: "_no",  label: "#",           className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "code", label: "Charge Code", isRequired: true,
+    { key: "_no",  label: tf("cols.no"),          className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "code", label: tf("cols.chargeCode"),   isRequired: true,
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.code`)} style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--accent-ink)" }} /> },
-    { key: "desc", label: "Description",
+    { key: "desc", label: tf("cols.description"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.desc`)} /> },
-    { key: "qty",  label: "Qty", className: "is-num",
+    { key: "qty",  label: tf("cols.qty"),          className: "is-num",
       render: (_, __, i) => <NumberBox variant="cell" name={`freightBuying.${i}.qty`}  valueAsNumber={false} /> },
-    { key: "unit", label: "Unit",
+    { key: "unit", label: tf("cols.unit"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.unit`)} /> },
-    { key: "buy",  label: "Rate", className: "is-num", isRequired: true,
+    { key: "buy",  label: tf("cols.rate"),          className: "is-num", isRequired: true,
       render: (_, __, i) => <NumberBox variant="cell" name={`freightBuying.${i}.buy`}  valueAsNumber={false} /> },
-    { key: "_amt", label: "Amount", className: "is-num",
+    { key: "_amt", label: tf("cols.amount"),        className: "is-num",
       render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.buy ?? "0") * 2).toFixed(2)} /> },
-    { key: "cur",  label: "Currency",
+    { key: "cur",  label: tf("cols.currency"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.cur`)} style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "_krw", label: "KRW Equiv.", className: "is-num",
+    { key: "_krw", label: tf("cols.krwEquiv"),      className: "is-num",
       render: (_, row) => <TextBox variant="cell" readOnly defaultValue={(parseFloat(row.buy ?? "0") * 2 * 1376.5).toFixed(0)} /> },
-    { key: "_rem", label: "Remark",
+    { key: "_rem", label: tf("cols.remark"),
       render: (_, __, i) => <TextBox variant="cell" {...register(`freightBuying.${i}.remark`)} /> },
-  ], [register]);
+  ], [register, tf]);
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Buying / Credit</span>
+        <span className="panel__title">{tf("panels.buyingCredit")}</span>
       </div>
       <GridList columns={buyingCols} data={RATE_ROWS} rowKey={(row) => row.id} style={{ flex: 1 }} />
     </div>
@@ -173,15 +168,27 @@ export function FreightBuyingPanel() {
 
 // ── Account Documents Panel ────────────────────────────────
 export function FreightAccountPanel() {
+  const tf = useTranslations("fms.houseBl.entry.freight");
+
+  // layout persisted by GridList column key (not label) — safe to define in-component
+  const accountCols: GridColumn<AccountRow>[] = [
+    { key: "docType",   label: tf("cols.docType")   },
+    { key: "docNo",     label: tf("cols.docNo")      },
+    { key: "issueDate", label: tf("cols.issueDate")  },
+    { key: "amount",    label: tf("cols.amount"),    className: "is-num" },
+    { key: "currency",  label: tf("cols.currency")   },
+    { key: "status",    label: tf("cols.status")     },
+  ];
+
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Account Documents</span>
+        <span className="panel__title">{tf("panels.accountDocuments")}</span>
         <span className="panel__rowcount">{ACCOUNT_ROWS.length}</span>
       </div>
       <div className="panel__body--flush">
-        <GridList columns={ACCOUNT_COLS} data={ACCOUNT_ROWS} rowKey={(row) => row.id} />
+        <GridList columns={accountCols} data={ACCOUNT_ROWS} rowKey={(row) => row.id} />
       </div>
     </div>
   );

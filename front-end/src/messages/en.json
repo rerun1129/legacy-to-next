@@ -1,0 +1,281 @@
+{
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "search": "Search",
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loadFailed": "Failed to load data.",
+    "loading": "Loading…",
+    "noData": "No data available."
+  },
+  "fms": {
+    "houseBl": {
+      "entry": {
+        "toolbar": {
+          "shipmentType": "Shipment Type",
+          "hblNo": "HBL No",
+          "mblNo": "MBL No",
+          "loadType": "Load Type",
+          "serviceTerm": "Service Term",
+          "blType": "B/L Type",
+          "masterRef": "Master Ref",
+          "hawbNo": "HAWB No",
+          "mawbNo": "MAWB No",
+          "truckBlNo": "Truck B/L No",
+          "nonBlNo": "Non B/L No"
+        },
+        "title": {
+          "seaExp": "Sea Export House B/L Entry",
+          "seaImp": "Sea Import House B/L Entry",
+          "airExp": "Air Export House B/L Entry",
+          "airImp": "Air Import House B/L Entry",
+          "truck": "Truck House B/L Entry",
+          "nonBl": "Non House B/L Entry"
+        },
+        "tabs": {
+          "main": "Main",
+          "freight": "Freight"
+        },
+        "status": {
+          "draft": "DRAFT"
+        },
+        "panels": {
+          "party": "Party",
+          "schedule": "Schedule",
+          "tradePerf": "Trade & Perf.",
+          "document": "Document",
+          "container": "Container",
+          "cargo": "Cargo",
+          "marksNumbers": "Marks & Numbers",
+          "description": "Description",
+          "remark": "Remark"
+        },
+        "msg": {
+          "searchBlFirst": "Please search for a House B/L first.",
+          "confirmSave": "Save changes?",
+          "confirmDelete": "Delete this record?",
+          "deleteWarning": "Deleted data cannot be recovered.",
+          "loadingDelete": "Deleting…",
+          "loadingSave": "Saving…",
+          "loadingFetch": "Loading…"
+        },
+        "freight": {
+          "panels": {
+            "rateHeaders":       "Rate Headers",
+            "sellingDebit":      "Selling / Debit",
+            "buyingCredit":      "Buying / Credit",
+            "accountDocuments":  "Account Documents"
+          },
+          "headers": {
+            "customers":  "CUSTOMERS",
+            "exRateInfo": "Ex. Rate Info"
+          },
+          "customers": {
+            "actualCustomer": "ACTUAL CUSTOMER",
+            "liner":          "LINER",
+            "settlePartner":  "SETTLE PARTNER"
+          },
+          "exRate": {
+            "selling": "SELLING",
+            "buying":  "BUYING",
+            "perf":    "PERF."
+          },
+          "cols": {
+            "no":          "#",
+            "chargeCode":  "Charge Code",
+            "description": "Description",
+            "qty":         "Qty",
+            "unit":        "Unit",
+            "rate":        "Rate",
+            "amount":      "Amount",
+            "currency":    "Currency",
+            "krwEquiv":    "KRW Equiv.",
+            "remark":      "Remark",
+            "docType":     "Doc Type",
+            "docNo":       "Doc No",
+            "issueDate":   "Issue Date",
+            "status":      "Status"
+          }
+        },
+        "fields": {
+          "shipper": "SHIPPER",
+          "consignee": "CONSIGNEE",
+          "notify": "NOTIFY",
+          "docPartner": "DOC PARTNER",
+          "toOrder": "To Order",
+          "sameAsCne": "Same as Cne.",
+          "linerVessel": "Liner & Vessel",
+          "liner": "Liner",
+          "vessel": "Vessel",
+          "voyage": "Voyage",
+          "onBoard": "On Board",
+          "ports": "Ports",
+          "issueInformation": "Issue Information",
+          "incoterms": "Incoterms",
+          "freightTerm": "Freight Term",
+          "payableAt": "Payable At",
+          "tradeTerms": "Trade Terms",
+          "performance": "Performance",
+          "actualCustomer": "Actual Customer",
+          "settlePartner": "Settle Partner",
+          "salesClass": "Sales Class",
+          "salesMan": "Sales Man",
+          "operator": "Operator",
+          "team": "Team",
+          "package": "Package",
+          "grossWt": "Gross W/T",
+          "cbm": "CBM",
+          "rton": "R/Ton",
+          "hsCode": "HS Code",
+          "containerNo": "Container No",
+          "containerType": "Type",
+          "sealNo1": "SEAL NO. 1",
+          "sealNo2": "SEAL NO. 2",
+          "sealNo3": "SEAL NO. 3",
+          "pkg": "Pkg",
+          "unit": "Unit",
+          "gw": "G/W",
+          "vgm": "VGM",
+          "addressPlaceholder": "Address (free text)"
+        }
+      }
+    },
+    "seaHouse": {
+      "list": {
+        "title": "Sea Export List",
+        "panel": "Sea House B/L",
+        "cols": {
+          "hblNo": "House B/L No.",
+          "bound": "Bound",
+          "mblNo": "Master B/L No",
+          "masterRefNo": "Master Reference No.",
+          "shipmentType": "Shipment Type",
+          "loadType": "Load Type",
+          "etd": "ETD",
+          "eta": "ETA",
+          "polCode": "POL",
+          "podCode": "POD",
+          "deliveryCode": "Delivery",
+          "vesselName": "Vessel Name",
+          "voyageNo": "Voyage",
+          "shipperCode": "Shipper",
+          "shipperName": "Shipper Name",
+          "consigneeCode": "Consignee",
+          "consigneeName": "Consignee Name",
+          "notifyCode": "Notify",
+          "notifyName": "Notify Name",
+          "settlePartnerCode": "Settle Partner",
+          "settlePartnerName": "Settle Partner Name",
+          "docPartnerCode": "DOC Partner",
+          "docPartnerName": "DOC Partner Name",
+          "linerCode": "Liner",
+          "linerName": "Liner Name",
+          "freightTerm": "Freight Term",
+          "incoterms": "Incoterms",
+          "actualCustomerCode": "Actual Customer",
+          "actualCustomerName": "Actual Customer Name",
+          "pkgQty": "Package",
+          "pkgUnit": "Unit",
+          "grossWeightKg": "Gross W/T",
+          "cbm": "CBM",
+          "cntr20Qty": "20FT",
+          "cntr40Qty": "40FT",
+          "teuQty": "TEU",
+          "salesManCode": "Sales Man",
+          "teamCode": "Team",
+          "teamName": "Team Name"
+        },
+        "filter": {
+          "all": "ALL",
+          "hblNo": "House B/L No",
+          "vesselName": "Vessel Name",
+          "voyageNo": "Voyage",
+          "shipmentType": "Shipment Type",
+          "salesClass": "Sales Class",
+          "incoterms": "Incoterms",
+          "loadType": "Load Type",
+          "actualCustomer": "Actual Customer",
+          "liner": "Liner",
+          "team": "Team",
+          "operator": "Operator",
+          "salesMan": "Sales Man",
+          "dateKindEtd": "ETD",
+          "dateKindEta": "ETA",
+          "masterBlKindMbl": "Master B/L No",
+          "masterBlKindRef": "Master Reference No.",
+          "partyKindShipper": "Shipper",
+          "partyKindConsignee": "Consignee",
+          "partyKindNotify": "Notify",
+          "partnerKindSettle": "Settle Partner",
+          "partnerKindDoc": "Doc Partner",
+          "portKindPol": "POL",
+          "portKindPod": "POD"
+        }
+      }
+    }
+  },
+  "shell": {
+    "topbar": {
+      "showSidebar": "Show sidebar",
+      "hideSidebar": "Hide sidebar",
+      "search": "Search (⌘K)",
+      "notifications": "Notifications",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode",
+      "help": "Help",
+      "logout": "Logout",
+      "closeOtherTabs": "Close other tabs",
+      "closeTabsToRight": "Close tabs to right",
+      "closeTabsToLeft": "Close tabs to left"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "houseBl": "House B/L",
+      "masterBl": "Master B/L",
+      "truckBl": "Truck B/L",
+      "nonBl": "Non B/L",
+      "seaExportList": "Sea Export List",
+      "seaExportEntry": "Sea Export Entry",
+      "seaImportList": "Sea Import List",
+      "seaImportEntry": "Sea Import Entry",
+      "airExportList": "Air Export List",
+      "airExportEntry": "Air Export Entry",
+      "airImportList": "Air Import List",
+      "airImportEntry": "Air Import Entry",
+      "list": "List",
+      "entry": "Entry",
+      "widgetEditMode": "Entry Widget Edit",
+      "widgetEditTitle": "Toggle widget edit mode",
+      "widgetEditDisabledTitle": "Only available in Main / Freight tab"
+    },
+    "tabs": {
+      "/fms/house-bl/sea-exp/list": "House B/L Sea Export List",
+      "/fms/house-bl/sea-exp/entry": "House B/L Sea Export Entry",
+      "/fms/house-bl/sea-imp/list": "House B/L Sea Import List",
+      "/fms/house-bl/sea-imp/entry": "House B/L Sea Import Entry",
+      "/fms/house-bl/air-exp/list": "House B/L Air Export List",
+      "/fms/house-bl/air-exp/entry": "House B/L Air Export Entry",
+      "/fms/house-bl/air-imp/list": "House B/L Air Import List",
+      "/fms/house-bl/air-imp/entry": "House B/L Air Import Entry",
+      "/fms/master-bl/sea-exp/list": "Master B/L Sea Export List",
+      "/fms/master-bl/sea-exp/entry": "Master B/L Sea Export Entry",
+      "/fms/master-bl/sea-imp/list": "Master B/L Sea Import List",
+      "/fms/master-bl/sea-imp/entry": "Master B/L Sea Import Entry",
+      "/fms/master-bl/air-exp/list": "Master B/L Air Export List",
+      "/fms/master-bl/air-exp/entry": "Master B/L Air Export Entry",
+      "/fms/master-bl/air-imp/list": "Master B/L Air Import List",
+      "/fms/master-bl/air-imp/entry": "Master B/L Air Import Entry",
+      "/fms/truck-bl/list": "Truck B/L List",
+      "/fms/truck-bl/entry": "Truck B/L Entry",
+      "/fms/non-bl/list": "Non B/L List",
+      "/fms/non-bl/entry": "Non B/L Entry",
+      "/admin/code/list": "Code Master Common Code"
+    },
+    "lang": {
+      "toggleTitle": "Toggle language"
+    }
+  }
+}

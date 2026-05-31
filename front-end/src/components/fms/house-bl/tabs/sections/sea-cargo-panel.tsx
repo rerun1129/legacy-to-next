@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { NumberBox, ComboBox, CodeBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
@@ -9,6 +10,8 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function SeaCargoPanel() {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
   const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
   const hsCode  = useCodeAutocomplete(CODE_SOURCES.hsCode);
@@ -19,7 +22,7 @@ export function SeaCargoPanel() {
       key: "package",
       render: () => (
         <div className="li">
-          <span className="li__label">Package</span>
+          <span className="li__label">{tf("package")}</span>
           <div className="li__input li__input--tight">
             <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
             {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능) */}
@@ -43,7 +46,7 @@ export function SeaCargoPanel() {
       key: "gross-wt",
       render: () => (
         <div className="li">
-          <span className="li__label">Gross W/T</span>
+          <span className="li__label">{tf("grossWt")}</span>
           <div className="li__input li__input--tight">
             <NumberBox variant="panel" decimalPlaces={3} {...register("grossWeightKg")} />
             <Controller
@@ -61,7 +64,7 @@ export function SeaCargoPanel() {
       key: "cbm",
       render: () => (
         <div className="li">
-          <span className="li__label">CBM</span>
+          <span className="li__label">{tf("cbm")}</span>
           <div className="li__input">
             <NumberBox variant="panel" decimalPlaces={3} {...register("cbm")} />
           </div>
@@ -72,7 +75,7 @@ export function SeaCargoPanel() {
       key: "rton",
       render: () => (
         <div className="li">
-          <span className="li__label">R/Ton</span>
+          <span className="li__label">{tf("rton")}</span>
           <div className="li__input">
             <NumberBox variant="panel" decimalPlaces={3} {...register("seaDetail.rton")} />
           </div>
@@ -88,7 +91,7 @@ export function SeaCargoPanel() {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="HS Code"
+          label={tf("hsCode")}
           codeProps={{ ...register("hsCode") }}
           nameProps={{ ...register("hsCodeName") }}
           onLookup={() => {}}
@@ -105,7 +108,7 @@ export function SeaCargoPanel() {
     <div className="panel panel--col-flex sea-cargo-panel">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Cargo</span>
+        <span className="panel__title">{tp("cargo")}</span>
       </div>
       <div className="panel__body panel__body--scroll">
         <FieldItemGrid itemScope="sea-cargo-panel" items={CARGO_ITEMS} />

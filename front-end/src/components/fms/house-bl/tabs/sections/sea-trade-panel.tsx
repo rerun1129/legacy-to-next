@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import { CodeBox, ComboBox } from "@/components/shared/inputs";
@@ -10,6 +11,8 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function SeaTradePanel() {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
   const payableAt      = useCodeAutocomplete(CODE_SOURCES.portSea);
@@ -22,7 +25,7 @@ export function SeaTradePanel() {
     key: "incoterms",
     render: () => (
       <div className="li">
-        <span className="li__label">Incoterms</span>
+        <span className="li__label">{tf("incoterms")}</span>
         <div className="li__input">
           <Controller
             name="incoterms"
@@ -46,7 +49,7 @@ export function SeaTradePanel() {
     key: "freight-term",
     render: () => (
       <div className="li">
-        <span className="li__label">Freight Term</span>
+        <span className="li__label">{tf("freightTerm")}</span>
         <div className="li__input">
           <Controller
             name="freightTerm"
@@ -72,7 +75,7 @@ export function SeaTradePanel() {
       <CodeBox
         kind="lcn"
         variant="panel"
-        label="Payable At"
+        label={tf("payableAt")}
         codeProps={{ ...register("seaDetail.payableAt") }}
         nameProps={{ ...register("seaDetail.payableAtName") }}
         onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -91,7 +94,7 @@ export function SeaTradePanel() {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Actual Customer"
+          label={tf("actualCustomer")}
           required
           codeProps={{ ...register("actualCustomerCode") }}
           nameProps={{ ...register("actualCustomerName") }}
@@ -110,7 +113,7 @@ export function SeaTradePanel() {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Settle Partner"
+          label={tf("settlePartner")}
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -126,7 +129,7 @@ export function SeaTradePanel() {
   const fields: FieldWidgetDef[] = [
     {
       key:   "trade-terms",
-      label: "Trade Terms",
+      label: tf("tradeTerms"),
       render: () => (
         <>
           <FieldItemGrid itemScope="sea-trade-panel.trade-terms.terms"   items={[incotermsItem, freightTermItem]} cols={2} />
@@ -136,10 +139,10 @@ export function SeaTradePanel() {
     },
     {
       key:   "performance",
-      label: "Performance",
+      label: tf("performance"),
       render: () => (
         <>
-          <div className="subhead"><div className="subhead__bar" />Performance</div>
+          <div className="subhead"><div className="subhead__bar" />{tf("performance")}</div>
           <FieldItemGrid itemScope="sea-trade-panel.performance" items={perfItems} cols={1} />
         </>
       ),
@@ -150,7 +153,7 @@ export function SeaTradePanel() {
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Trade & Performance</span>
+        <span className="panel__title">{tp("tradePerf")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope="sea-trade-panel" fields={fields} />

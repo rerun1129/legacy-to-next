@@ -1,6 +1,7 @@
 import type { Dispatch, MutableRefObject, RefObject, SetStateAction } from "react";
 import type { UseFormReturn }    from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
+import { useTranslations }       from "next-intl";
 import { confirm }               from "@/components/confirm";
 import { toast }                 from "@/lib/toast-store";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
@@ -29,6 +30,9 @@ export function useHouseBlEntryHandlers(args: {
   handleSubmit: (raw: HouseBlFormValues) => Promise<void>;
   handleDelete: () => Promise<void>;
 } {
+  const t  = useTranslations("fms.houseBl.entry.msg");
+  const tc = useTranslations("common");
+
   const {
     id,
     variant,
@@ -65,7 +69,7 @@ export function useHouseBlEntryHandlers(args: {
 
   function handleChangeBlNo() {
     if (!isEdit || !id) {
-      toast.info("먼저 House B/L을 조회해주세요.");
+      toast.info(t("searchBlFirst"));
       return;
     }
     setIsChangeBlNoModalOpen(true);
@@ -73,7 +77,7 @@ export function useHouseBlEntryHandlers(args: {
 
   async function handleSubmit(raw: HouseBlFormValues) {
     const ok = await confirm({
-      title: "저장하시겠습니까?",
+      title: t("confirmSave"),
       variant: "default",
     });
     if (!ok) return;
@@ -84,9 +88,9 @@ export function useHouseBlEntryHandlers(args: {
     if (!isEdit) return;
     const ok = await confirm({
       variant: "destructive",
-      title: "삭제하시겠습니까?",
-      confirmText: "삭제",
-      description: "삭제된 데이터는 복구할 수 없습니다.",
+      title: t("confirmDelete"),
+      confirmText: tc("delete"),
+      description: t("deleteWarning"),
     });
     if (!ok) return;
     deleteMutation.mutate();

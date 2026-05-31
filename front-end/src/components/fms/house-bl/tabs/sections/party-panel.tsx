@@ -1,4 +1,7 @@
+"use client";
+
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { CodeBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
@@ -14,6 +17,7 @@ type PartyRole = "SHIPPER" | "CONSIGNEE" | "NOTIFY" | "DOC PARTNER";
 interface PartyConfig {
   key:      string;
   role:     PartyRole;
+  label:    string;   // localised display label
   required: boolean;
 }
 
@@ -36,7 +40,13 @@ const ROLE_SOURCE = {
   "DOC PARTNER": CODE_SOURCES.partner,
 } satisfies Record<PartyRole, typeof CODE_SOURCES.customer | typeof CODE_SOURCES.partner>;
 
-function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
+function PartyBlock({ cfg, isExp, toOrderLabel, sameAsCneLabel, addrPlaceholder }: {
+  cfg: PartyConfig;
+  isExp: boolean;
+  toOrderLabel: string;
+  sameAsCneLabel: string;
+  addrPlaceholder: string;
+}) {
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
   const isRequired = cfg.role === "CONSIGNEE" ? !isExp : cfg.required;
   const [codeField, nameField, addrField] = ROLE_FIELDS[cfg.role];
@@ -49,7 +59,7 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
           <CodeBox
             kind="party-cn"
             variant="panel"
-            label={cfg.role}
+            label={cfg.label}
             required={isRequired}
             codeProps={{ ...register(codeField) }}
             nameProps={{ ...register(nameField) }}
@@ -61,10 +71,10 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
           />
         </div>
         {cfg.role === "CONSIGNEE" && (
-          <button type="button" className="party-block__head-btn">To Order</button>
+          <button type="button" className="party-block__head-btn">{toOrderLabel}</button>
         )}
         {cfg.role === "NOTIFY" && (
-          <button type="button" className="party-block__head-btn">Same as Cne.</button>
+          <button type="button" className="party-block__head-btn">{sameAsCneLabel}</button>
         )}
       </div>
       <Controller
@@ -76,7 +86,7 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
             value={field.value as string ?? ""}
             onChange={field.onChange}
             onBlur={field.onBlur}
-            placeholder="Address (free text)"
+            placeholder={addrPlaceholder}
             style={{ height: 100, marginTop: 4 }}
           />
         )}
@@ -86,25 +96,40 @@ function PartyBlock({ cfg, isExp }: { cfg: PartyConfig; isExp: boolean }) {
 }
 
 export function PartyPanel({ variant, isExp = false }: Props) {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const panelScope = variant ? `party-panel.${variant.key}` : "party-panel";
+
   const PARTY_CONFIGS: PartyConfig[] = [
-    { key: "shipper",     role: "SHIPPER",     required: false },
-    { key: "consignee",   role: "CONSIGNEE",   required: !isExp },
-    { key: "notify",      role: "NOTIFY",      required: false  },
-    { key: "doc-partner", role: "DOC PARTNER", required: true   },
+    { key: "shipper",     role: "SHIPPER",     label: tf("shipper"),    required: false },
+    { key: "consignee",   role: "CONSIGNEE",   label: tf("consignee"),  required: !isExp },
+    { key: "notify",      role: "NOTIFY",      label: tf("notify"),     required: false  },
+    { key: "doc-partner", role: "DOC PARTNER", label: tf("docPartner"), required: true   },
   ];
+
+  const toOrderLabel    = tf("toOrder");
+  const sameAsCneLabel  = tf("sameAsCne");
+  const addrPlaceholder = tf("addressPlaceholder");
 
   const fields: FieldWidgetDef[] = PARTY_CONFIGS.map(cfg => ({
     key:   cfg.key,
-    label: cfg.role,
-    render: () => <PartyBlock cfg={cfg} isExp={isExp} />,
+    label: cfg.label,
+    render: () => (
+      <PartyBlock
+        cfg={cfg}
+        isExp={isExp}
+        toOrderLabel={toOrderLabel}
+        sameAsCneLabel={sameAsCneLabel}
+        addrPlaceholder={addrPlaceholder}
+      />
+    ),
   }));
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Party</span>
+        <span className="panel__title">{tp("party")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />

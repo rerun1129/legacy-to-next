@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, Minus } from "lucide-react";
 import type { HouseBlFormValues } from "../../house-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -44,6 +45,8 @@ const EMPTY_CONTAINER_ROW: ContainerRow = {
 };
 
 export function ContainerGridPanel() {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { control, register } = useFormContext<HouseBlFormValues>();
   const { options: rawContainerTypeOptions } = useEnumOptions("ContainerType");
   const containerTypeOptions = useMemo(
@@ -54,9 +57,9 @@ export function ContainerGridPanel() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
   const columns = useMemo<GridColumn<ContainerRow>[]>(() => [
-    { key: "_no",          label: "#",            width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
-    { key: "containerNo",  label: "Container No", width: 160, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.containerNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
-    { key: "containerType", label: "Type",        width: 100, render: (_, __, i) => (
+    { key: "_no",          label: "#",                  width: 36,  className: "row-num", render: (_, __, i) => i + 1 },
+    { key: "containerNo",  label: tf("containerNo"),    width: 160, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.containerNo`)}  style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }} /> },
+    { key: "containerType", label: tf("containerType"), width: 100, render: (_, __, i) => (
       <Controller
         name={`containers.${i}.containerType`}
         control={control}
@@ -65,15 +68,15 @@ export function ContainerGridPanel() {
         )}
       />
     ) },
-    { key: "sealNo1",      label: "SEAL NO. 1",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "sealNo2",      label: "SEAL NO. 2",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "sealNo3",      label: "SEAL NO. 3",   width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
-    { key: "pkgQty",       label: "Pkg",          width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
-    { key: "pkgUnit",      label: "Unit",         width: 60,  render: (_, __, i) => <PkgUnitCell index={i} /> },
-    { key: "grossWeightKg", label: "G/W",         width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
-    { key: "cbm",          label: "CBM",          width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
-    { key: "vgmKg",        label: "VGM",          width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.vgmKg`}         decimalPlaces={3} valueAsNumber={false} /> },
-  ], [register, control, containerTypeOptions]);
+    { key: "sealNo1",      label: tf("sealNo1"),        width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo1`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo2",      label: tf("sealNo2"),        width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo2`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "sealNo3",      label: tf("sealNo3"),        width: 110, render: (_, __, i) => <TextBox   variant="cell" {...register(`containers.${i}.sealNo3`)}       style={{ fontFamily: "var(--font-mono)" }} /> },
+    { key: "pkgQty",       label: tf("pkg"),            width: 70,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.pkgQty`}        decimalPlaces={0} valueAsNumber={false} /> },
+    { key: "pkgUnit",      label: tf("unit"),           width: 60,  render: (_, __, i) => <PkgUnitCell index={i} /> },
+    { key: "grossWeightKg", label: tf("gw"),            width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.grossWeightKg`} decimalPlaces={3} valueAsNumber={false} /> },
+    { key: "cbm",          label: tf("cbm"),            width: 80,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.cbm`}           decimalPlaces={3} valueAsNumber={false} /> },
+    { key: "vgmKg",        label: tf("vgm"),            width: 90,  className: "is-num", render: (_, __, i) => <NumberBox variant="cell" name={`containers.${i}.vgmKg`}         decimalPlaces={3} valueAsNumber={false} /> },
+  ], [tf, register, control, containerTypeOptions]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
@@ -110,7 +113,7 @@ export function ContainerGridPanel() {
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Container</span>
+        <span className="panel__title">{tp("container")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>
