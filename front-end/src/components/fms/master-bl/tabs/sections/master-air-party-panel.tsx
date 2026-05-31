@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import { CodeBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
@@ -75,14 +76,18 @@ function PartyBlock({ role, isImp }: { role: PartyRole; isImp: boolean }) {
   );
 }
 
+const ROLE_LABEL_KEY = { SHIPPER: "shipper", CONSIGNEE: "consignee", NOTIFY: "notify" } as const;
+
 // DOC PARTNER 제외 — 3슬롯(SHIPPER/CONSIGNEE/NOTIFY)
 export function MasterAirPartyPanel({ variant }: Props) {
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const panelScope = variant ? `master-air-party-panel.${variant.key}` : "master-air-party-panel";
   const isImp      = variant?.direction === "IMP";
 
   const fields: FieldWidgetDef[] = (["SHIPPER", "CONSIGNEE", "NOTIFY"] as const).map(role => ({
     key:    role.toLowerCase(),
-    label:  role,
+    label:  tf(ROLE_LABEL_KEY[role]),
     render: () => <PartyBlock role={role} isImp={isImp} />,
   }));
 
@@ -90,7 +95,7 @@ export function MasterAirPartyPanel({ variant }: Props) {
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Party</span>
+        <span className="panel__title">{tp("party")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />

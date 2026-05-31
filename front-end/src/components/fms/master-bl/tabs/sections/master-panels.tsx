@@ -1,6 +1,7 @@
 "use client";
 
 import { Controller, type UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { CodeBox }            from "@/components/shared/inputs/code-box";
@@ -113,10 +114,13 @@ function PartyBlockStub({ role }: { role: PartyRole }) {
 }
 
 export function MasterPartyPanel({ variant, form }: Props) {
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const isImp = variant?.direction === "IMP";
+  const ROLE_LABEL_KEY = { SHIPPER: "shipper", CONSIGNEE: "consignee", NOTIFY: "notify" } as const;
   const fields: FieldWidgetDef[] = PARTIES.map(role => ({
     key:    role.toLowerCase(),
-    label:  role,
+    label:  tf(ROLE_LABEL_KEY[role]),
     render: () => form
       ? <PartyBlockConnected role={role} form={form} isImp={isImp} />
       : <PartyBlockStub role={role} />,
@@ -126,7 +130,7 @@ export function MasterPartyPanel({ variant, form }: Props) {
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Party</span>
+        <span className="panel__title">{tp("party")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope="master-party-panel" fields={fields} />
@@ -137,11 +141,12 @@ export function MasterPartyPanel({ variant, form }: Props) {
 
 // ── Marks ──────────────────────────────────────────────────────────────────
 export function MasterMarksPanel({ form }: Props) {
+  const tp = useTranslations("fms.masterBl.entry.panels");
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Marks &amp; Numbers</span>
+        <span className="panel__title">{tp("marksNumbers")}</span>
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {form
@@ -166,12 +171,13 @@ export function MasterMarksPanel({ form }: Props) {
 
 // ── Goods Description ──────────────────────────────────────────────────────
 export function MasterGoodsDescPanel({ variant, form }: Props) {
+  const tp = useTranslations("fms.masterBl.entry.panels");
   const { options: clause1Options, placeholder: clause1Placeholder } = useEnumOptions("DescClause1");
   const { options: clause2Options, placeholder: clause2Placeholder } = useEnumOptions("DescClause2");
 
   if (!variant) return null;
   const isSea = variant.mode === "SEA";
-  const title = isSea ? "Description of Goods" : "Nature of Goods";
+  const title = isSea ? tp("goodsDescription") : tp("natureQty");
 
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -220,11 +226,12 @@ export function MasterGoodsDescPanel({ variant, form }: Props) {
 
 // ── Remark ─────────────────────────────────────────────────────────────────
 export function MasterRemarkPanel({ form }: Props) {
+  const tp = useTranslations("fms.masterBl.entry.panels");
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Remark</span>
+        <span className="panel__title">{tp("remark")}</span>
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {form

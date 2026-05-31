@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
@@ -16,7 +17,13 @@ interface Props {
 const SEA_ROWS: { cno: string; type: string; seal: string; pkg: number; unit: string; gw: string; cbm: string }[] = [];
 
 // AIR dims controlled grid
-function AirDimsGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
+function AirDimsGrid({
+  form,
+  tf,
+}: {
+  form: UseFormReturn<MasterBlFormValues>;
+  tf: ReturnType<typeof useTranslations>;
+}) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name:    "dims",
@@ -25,7 +32,7 @@ function AirDimsGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4, gap: 4 }}>
-        <button type="button" className="btn btn--sm">Load Dimension</button>
+        <button type="button" className="btn btn--sm">{tf("loadDimension")}</button>
         <button
           type="button"
           className="btn btn--sm"
@@ -38,12 +45,12 @@ function AirDimsGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
         <thead>
           <tr>
             <th className="row-num">#</th>
-            <th className="is-num">Length</th>
-            <th className="is-num">Width</th>
-            <th className="is-num">Height</th>
-            <th className="is-num">Qty</th>
-            <th className="is-num">CBM</th>
-            <th className="is-num">Vol. Wt.</th>
+            <th className="is-num">{tf("length")}</th>
+            <th className="is-num">{tf("width")}</th>
+            <th className="is-num">{tf("height")}</th>
+            <th className="is-num">{tf("qty")}</th>
+            <th className="is-num">{tf("cbm")}</th>
+            <th className="is-num">{tf("volumeWtCol")}</th>
             <th style={{ width: 24 }} />
           </tr>
         </thead>
@@ -76,15 +83,15 @@ function AirDimsGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
 // AIR dims stub (form 없을 때)
 const AIR_STUB_ROWS: { length: string; width: string; height: string; qty: string; cbm: string; volWt: string }[] = [];
 
-function AirDimsStub() {
+function AirDimsStub({ tf }: { tf: ReturnType<typeof useTranslations> }) {
   return (
     <table className="grid--list">
       <thead>
         <tr>
           <th className="row-num">#</th>
-          <th className="is-num">Length</th><th className="is-num">Width</th>
-          <th className="is-num">Height</th><th className="is-num">Qty</th>
-          <th className="is-num">CBM</th><th className="is-num">Vol. Wt.</th>
+          <th className="is-num">{tf("length")}</th><th className="is-num">{tf("width")}</th>
+          <th className="is-num">{tf("height")}</th><th className="is-num">{tf("qty")}</th>
+          <th className="is-num">{tf("cbm")}</th><th className="is-num">{tf("volumeWtCol")}</th>
         </tr>
       </thead>
       <tbody>
@@ -102,6 +109,7 @@ function AirDimsStub() {
 }
 
 export function MasterContainerDimPanel({ variant, form }: Props) {
+  const tf = useTranslations("fms.masterBl.entry.fields");
   if (!variant) return null;
   const isSea = variant.mode === "SEA";
   const ml    = getModeLabels(variant.mode);
@@ -119,9 +127,9 @@ export function MasterContainerDimPanel({ variant, form }: Props) {
             <thead>
               <tr>
                 <th className="row-num">#</th>
-                <th>Container No.</th><th>Type</th><th>Seal No.</th>
-                <th className="is-num">Pkg</th><th>Unit</th>
-                <th className="is-num">G/W</th><th className="is-num">CBM</th><th>SOC</th>
+                <th>{tf("containerNo")}</th><th>{tf("type")}</th><th>{tf("sealNo1")}</th>
+                <th className="is-num">{tf("pkg")}</th><th>{tf("unit")}</th>
+                <th className="is-num">{tf("gw")}</th><th className="is-num">{tf("cbm")}</th><th>SOC</th>
               </tr>
             </thead>
             <tbody>
@@ -136,7 +144,7 @@ export function MasterContainerDimPanel({ variant, form }: Props) {
             </tbody>
           </table>
         ) : (
-          form ? <AirDimsGrid form={form} /> : <AirDimsStub />
+          form ? <AirDimsGrid form={form} tf={tf} /> : <AirDimsStub tf={tf} />
         )}
       </div>
     </div>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { TRACE_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function CargoTrace() {
+  const t = useTranslations("fms.dashboard");
   const [query, setQuery] = useState("HBLKR24041801");
 
   return (
@@ -13,18 +15,18 @@ export function CargoTrace() {
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Cargo Trace
+          {t("panels.cargoTrace")}
         </div>
       </div>
       <div className="trace-search">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="H/M B/L Number…"
+          placeholder={t("trace.placeholder")}
         />
-        <button className="btn btn--sm btn--primary">
+        <button type="button" className="btn btn--sm btn--primary">
           <Search size={12} />
-          Trace
+          {t("trace.button")}
         </button>
       </div>
       <div className="trace-steps">

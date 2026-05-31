@@ -1,15 +1,20 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { TIMELINE_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function Timeline() {
+  const t = useTranslations("fms.dashboard");
+
   return (
     <div className="dash-panel">
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Upcoming ETD / ETA
+          {t("panels.upcomingSchedule")}
         </div>
-        <div className="dash-panel__meta">Next 7 days</div>
+        <div className="dash-panel__meta">{t("meta.next7Days")}</div>
       </div>
       <div className="timeline">
         {TIMELINE_DATA.map((day) => (

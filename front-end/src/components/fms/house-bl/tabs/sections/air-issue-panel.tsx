@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller, type FieldPath } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { TextBox, DateBox } from "@/components/shared/inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
@@ -16,7 +17,16 @@ const AIR_ISSUE_LABEL_TO_FIELD: Record<string, FieldPath<HouseBlFormValues>> = {
   "Signature":   "airDetail.signature",
 };
 
+// issue field label (English) → fields.* i18n key
+const ISSUE_LABEL_TO_KEY: Record<string, string> = {
+  "Issue Date":  "issueDate",
+  "Issue Place": "issuePlace",
+  "Signature":   "signature",
+};
+
 export function AirIssuePanel({ variant }: Props) {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, control } = useFormContext<HouseBlFormValues>();
   if (!variant) return null;
 
@@ -24,11 +34,13 @@ export function AirIssuePanel({ variant }: Props) {
 
   const issueItems: FieldItemDef[] = variant.issueFields.map(f => {
     const fieldName = AIR_ISSUE_LABEL_TO_FIELD[f];
+    const i18nKey   = ISSUE_LABEL_TO_KEY[f];
+    const label     = i18nKey ? tf(i18nKey) : f;
     return {
       key:    f.toLowerCase().replace(/[^a-z0-9]/g, "-"),
       render: () => (
         <div className="li">
-          <span className="li__label">{f}</span>
+          <span className="li__label">{label}</span>
           <div className="li__input">
             {f.includes("Date")
               ? fieldName
@@ -57,7 +69,7 @@ export function AirIssuePanel({ variant }: Props) {
   const widgetFields: FieldWidgetDef[] = [
     {
       key:   "issue",
-      label: "Issue Information",
+      label: tf("issueInformation"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.issue`}
@@ -71,7 +83,7 @@ export function AirIssuePanel({ variant }: Props) {
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Issue Information</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("issueInformation")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={widgetFields} />
       </div>

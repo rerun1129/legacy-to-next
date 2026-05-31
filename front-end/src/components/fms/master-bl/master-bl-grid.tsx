@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import { getPageTitle } from "@/lib/bl-variants";
@@ -33,6 +34,9 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const modeLabels = getModeLabels(variant.mode);
+  const tc = useTranslations("fms.masterBl.list.cols");
+  const tl = useTranslations("fms.masterBl.list");
+  const tCommon = useTranslations("common");
 
   const handleCyclePageSize = () => {
     setPageSize(cyclePageSize(pageSize));
@@ -65,7 +69,8 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const rows = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
 
-  const columns: GridColumn<MasterBlRow>[] = [
+  // 컬럼 배열은 t 참조가 바뀔 때만 재계산 — useMemo([tc])로 render loop 방지
+  const columns = useMemo<GridColumn<MasterBlRow>[]>(() => [
     {
       key: "mblNo",
       label: modeLabels.blNo,
@@ -93,13 +98,13 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
     {
       // TODO: BE 미반영 — masterRefNo 필드가 MasterBlRow에 없음
       key: "masterRefNo",
-      label: "Master Ref",
+      label: tc("masterRefNo"),
       minWidth: 130,
       render: () => <span className="cell-mono">-</span>,
     },
     {
       key: "bound",
-      label: "Bound",
+      label: tc("bound"),
       minWidth: 66,
       align: "center" as const,
       render: (_v, row) => (
@@ -110,40 +115,40 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
     },
     {
       key: "shipperCode",
-      label: "Shipper",
+      label: tc("shipperCode"),
       minWidth: 130,
       render: (_v, row) => <span className="cell-mono">{row.shipperCode}</span>,
     },
     {
       key: "consigneeCode",
-      label: "Consignee",
+      label: tc("consigneeCode"),
       minWidth: 130,
       render: (_v, row) => <span className="cell-mono">{row.consigneeCode}</span>,
     },
     {
       key: "polCode",
-      label: "POL",
+      label: tc("polCode"),
       minWidth: 70,
       align: "center" as const,
       render: (_v, row) => <span className="port__code">{row.polCode}</span>,
     },
     {
       key: "podCode",
-      label: "POD",
+      label: tc("podCode"),
       minWidth: 70,
       align: "center" as const,
       render: (_v, row) => <span className="port__code">{row.podCode}</span>,
     },
     {
       key: "etd",
-      label: "ETD",
+      label: tc("etd"),
       minWidth: 88,
       align: "center" as const,
       render: (_v, row) => <span className="cell-mono">{row.etd}</span>,
     },
     {
       key: "eta",
-      label: "ETA",
+      label: tc("eta"),
       minWidth: 88,
       align: "center" as const,
       render: (_v, row) => <span className="cell-mono">{row.eta}</span>,
@@ -151,29 +156,31 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
     {
       // TODO: BE 미반영 — operatorCode 필드가 MasterBlRow에 없음
       key: "operatorCode",
-      label: "Operator",
+      label: tc("operatorCode"),
       minWidth: 100,
       render: () => <span className="cell-mono">-</span>,
     },
     {
       // TODO: BE 미반영 — createdAt 필드가 MasterBlRow에 없음
       key: "createdAt",
-      label: "Reg. Date",
+      label: tc("createdAt"),
       minWidth: 88,
       align: "center" as const,
       render: () => <span className="cell-mono">-</span>,
     },
-  ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [tc, modeLabels.blNo]);
+  // row-level 클릭 핸들러(queryClient, clearDraft 등)는 render closure 허용 — tc/modeLabels만 의존
 
   if (error) {
     return (
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Master B/L</span>
+          <span className="panel__title">{tl("panel")}</span>
         </div>
         <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+          <span className="text-error">{tCommon("loadFailed")}</span>
         </div>
       </div>
     );
@@ -183,7 +190,7 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
     <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Master B/L</span>
+        <span className="panel__title">{tl("panel")}</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
         <ColumnVisibilityMenu<MasterBlRow> gridId="master-bl" defaultColumns={columns} />
       </div>

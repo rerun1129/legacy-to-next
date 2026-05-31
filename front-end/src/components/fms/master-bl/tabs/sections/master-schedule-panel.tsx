@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, useFieldArray, type UseFormReturn, type UseFormRegister, type Control } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, Minus } from "lucide-react";
 import { GridList } from "@/components/shared/grid-list";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
@@ -34,18 +35,19 @@ function buildAirFields(
   isExp: boolean,
   register: UseFormRegister<MasterBlFormValues>,
   control: Control<MasterBlFormValues>,
+  tf: ReturnType<typeof useTranslations>,
 ): FieldWidgetDef[] {
   // §누락1 fix: airlineCode는 airDetail.airlineCode (seaDetail.linerCode 오기 수정)
   // §누락2 fix: polCode/podCode/etd/eta 위젯 추가 — BE @NotBlank 공통 필수 필드
   const carrierItems: FieldItemDef[] = [
-    { key: "carrier",   render: () => <SchedField label={isExp ? "Airline" : "Carrier"} name="airDetail.airlineCode" req /> },
-    { key: "departure", render: () => <SchedField label="Departure" name="polCode" req /> },
+    { key: "carrier",   render: () => <SchedField label={isExp ? tf("airline") : tf("carrier")} name="airDetail.airlineCode" req /> },
+    { key: "departure", render: () => <SchedField label={tf("departure")} name="polCode" req /> },
   ];
   // §누락1 fix: issueDate/signature/issuePlace도 airDetail path로 수정 (seaDetail은 SEA 전용)
   const issueItems: FieldItemDef[] = [
-    { key: "issue-date",  render: () => <SchedField label="Issue Date"  name="airDetail.issueDate" /> },
-    { key: "signature",   render: () => <SchedField label="Signature"   name="airDetail.signature" /> },
-    { key: "issue-place", render: () => <SchedField label="Issue Place" name="airDetail.issuePlace" /> },
+    { key: "issue-date",  render: () => <SchedField label={tf("issueDate")}  name="airDetail.issueDate" /> },
+    { key: "signature",   render: () => <SchedField label={tf("signature")}   name="airDetail.signature" /> },
+    { key: "issue-place", render: () => <SchedField label={tf("issuePlace")} name="airDetail.issuePlace" /> },
   ];
   // §누락2 fix: BE @NotBlank 공통 필수 polCode/podCode/etd/eta — SEA atoms 재사용
   const portItems: FieldItemDef[] = [
@@ -59,31 +61,33 @@ function buildAirFields(
 
   return [
     {
-      key: "carrier", label: "Carrier",
+      key: "carrier", label: tf("carrier"),
       render: () => <FieldItemGrid itemScope={`${panelScope}.carrier`} items={carrierItems} />,
     },
     {
-      key: "ports", label: "POL / POD",
+      key: "ports", label: `${tf("pol")} / ${tf("pod")}`,
       render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} cols={2} shouldShowRowControls={false} />,
     },
     {
-      key: "dates", label: "ETD / ETA",
+      key: "dates", label: `${tf("etd")} / ${tf("eta")}`,
       render: () => <FieldItemGrid itemScope={`${panelScope}.dates`} items={dateItems} cols={2} shouldShowRowControls={false} />,
     },
     {
-      key: "legs", label: "Schedule Legs",
-      render: () => <AirLegsWidget register={register} control={control} />,
+      key: "legs", label: tf("scheduleLegs"),
+      render: () => <AirLegsWidget register={register} control={control} tf={tf} />,
     },
-    ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
+    ...(isExp ? [{ key: "issue", label: tf("issue"), render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
   ];
 }
 
 function AirLegsWidget({
   register,
   control,
+  tf,
 }: {
   register: UseFormRegister<MasterBlFormValues>;
   control: Control<MasterBlFormValues>;
+  tf: ReturnType<typeof useTranslations>;
 }) {
   const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
 
@@ -96,7 +100,7 @@ function AirLegsWidget({
 
   return (
     <>
-      <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
+      <div className="subhead"><div className="subhead__bar" />{tf("scheduleLegs")}</div>
       <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
           <span className="panel__rowcount">{fields.length}</span>
@@ -119,19 +123,21 @@ function AirLegsWidget({
 
 export function MasterSchedulePanel({ variant }: Props) {
   const { register, control } = useFormContext<MasterBlFormValues>();
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
 
   if (!variant) return null;
   const panelScope = `master-schedule-panel.${variant.key}`;
   const isExp      = variant.direction === "EXP";
   const fields     = variant.mode === "SEA"
-    ? buildSeaFields(panelScope, isExp)
-    : buildAirFields(panelScope, isExp, register, control);
+    ? buildSeaFields(panelScope, isExp, tf)
+    : buildAirFields(panelScope, isExp, register, control, tf);
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Schedule</span>
+        <span className="panel__title">{tp("schedule")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />

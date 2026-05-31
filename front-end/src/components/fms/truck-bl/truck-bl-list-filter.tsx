@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
@@ -11,25 +13,13 @@ import { useEnumOptions } from "@/application/enums/use-enum";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { TruckBlFilter } from "@/domain/truck-bl";
-
-// list-filter 전용 옵션 상수 — Entry 스코프 누출 금지 (ARCH2 단순 상수 테이블 예외)
-const DATE_KIND_OPTIONS = [
-  { value: 'ETD', label: 'ETD' },
-  { value: 'ETA', label: 'ETA' },
-];
-const PARTY_KIND_OPTIONS = [
-  { value: 'SHIPPER',    label: 'Shipper' },
-  { value: 'CONSIGNEE',  label: 'Consignee' },
-  { value: 'NOTIFY',     label: 'Notify' },
-];
-const PARTNER_KIND_OPTIONS = [
-  { value: 'SETTLE_PARTNER', label: 'Settle Partner' },
-  { value: 'DOC_PARTNER',    label: 'Doc Partner' },
-];
-const PORT_KIND_OPTIONS = [
-  { value: 'POL', label: 'POL' },
-  { value: 'POD', label: 'POD' },
-];
+import {
+  DATE_KIND_OPTIONS,
+  PARTY_KIND_OPTIONS,
+  PARTNER_KIND_OPTIONS,
+  PORT_KIND_OPTIONS,
+} from "./truck-bl-list-filter-options";
+import type { LabelOption } from "@/components/shared/inputs/_types";
 
 interface Props {
   form: UseFormReturn<TruckBlFilter>;
@@ -37,8 +27,33 @@ interface Props {
 
 export function TruckBlListFilter({ form }: Props) {
   useListFilterSync(form, "/fms/truck-bl/list");
+  const t = useTranslations("fms.truckBl.list.filter");
+
+  // labelKey 배열 → 해석된 LabelOption 배열 (useMemo로 t 참조 변경 시에만 재계산)
+  const dateKindOptions = useMemo<LabelOption[]>(
+    () => DATE_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const partyKindOptions = useMemo<LabelOption[]>(
+    () => PARTY_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const partnerKindOptions = useMemo<LabelOption[]>(
+    () => PARTNER_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const portKindOptions = useMemo<LabelOption[]>(
+    () => PORT_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+
   const { options: boundOptions, isLoading: boundLoading, placeholder: boundPlaceholder } = useEnumOptions("Bound");
-  const boundOptionsWithAll = [{ value: "", label: "ALL" }, ...boundOptions];
+  const allOption = useMemo(() => ({ value: "", label: t("all") }), [t]);
+  const boundOptionsWithAll = useMemo(
+    () => [allOption, ...boundOptions],
+    [allOption, boundOptions]
+  );
+
   const { register, setValue } = form;
 
   // 자동완성 훅 — 소스별 1:1
@@ -55,7 +70,7 @@ export function TruckBlListFilter({ form }: Props) {
         <div className="filter-grid">
           {/* 1. Bound */}
           <div className="lcn">
-            <span className="lcn__label">Bound</span>
+            <span className="lcn__label">{t("bound")}</span>
             <ComboBox
               variant="panel"
               options={boundOptionsWithAll}
@@ -80,7 +95,7 @@ export function TruckBlListFilter({ form }: Props) {
                     name="dateTo"
                     render={({ field: toField }) => (
                       <DateRangeBox
-                        labelOptions={DATE_KIND_OPTIONS}
+                        labelOptions={dateKindOptions}
                         labelValue={kindField.value ?? "ETD"}
                         onLabelChange={kindField.onChange}
                         required
@@ -109,7 +124,7 @@ export function TruckBlListFilter({ form }: Props) {
           {/* 3. Trucker */}
           <CodeBox
             kind="lcn"
-            label="Trucker"
+            label={t("trucker")}
             codeProps={{ ...register("truckerCode"), placeholder: "Code" }}
             nameProps={{ ...register("truckerName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -124,7 +139,7 @@ export function TruckBlListFilter({ form }: Props) {
 
           {/* 4. Truck B/L No */}
           <div className="lcn">
-            <span className="lcn__label">Truck B/L No</span>
+            <span className="lcn__label">{t("truckBlNo")}</span>
             <TextBox
               variant="panel"
               placeholder="Truck B/L No"
@@ -140,7 +155,7 @@ export function TruckBlListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PARTY_KIND_OPTIONS}
+                labelOptions={partyKindOptions}
                 labelValue={kindField.value ?? "SHIPPER"}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("partyCode"), placeholder: "Code" }}
@@ -164,7 +179,7 @@ export function TruckBlListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PORT_KIND_OPTIONS}
+                labelOptions={portKindOptions}
                 labelValue={kindField.value ?? "POL"}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("portCode"), placeholder: "Code" }}
@@ -181,14 +196,14 @@ export function TruckBlListFilter({ form }: Props) {
             )}
           />
 
-          {/* 7. Settle Partner / Doc Partner (기존 단일 DOC. Partner 박스를 토글 박스로 대체) */}
+          {/* 7. Settle Partner / Doc Partner */}
           <Controller
             control={form.control}
             name="partnerKind"
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PARTNER_KIND_OPTIONS}
+                labelOptions={partnerKindOptions}
                 labelValue={kindField.value ?? ""}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("partnerCode"), placeholder: "Code" }}
@@ -208,7 +223,7 @@ export function TruckBlListFilter({ form }: Props) {
           {/* 8. Operator */}
           <CodeBox
             kind="lcn"
-            label="Operator"
+            label={t("operator")}
             codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
             nameProps={{ ...register("operatorName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -224,7 +239,7 @@ export function TruckBlListFilter({ form }: Props) {
           {/* 9. Team */}
           <CodeBox
             kind="lcn"
-            label="Team"
+            label={t("team")}
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}

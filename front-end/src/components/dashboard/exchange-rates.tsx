@@ -1,15 +1,20 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { FX_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function ExchangeRates() {
+  const t = useTranslations("fms.dashboard");
+
   return (
     <div className="dash-panel">
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Exchange Rates
+          {t("panels.exchangeRates")}
         </div>
-        <div className="dash-panel__meta">KRW base · Daily fix</div>
+        <div className="dash-panel__meta">{t("meta.krwBaseDaily")}</div>
       </div>
       <div className="fx-list">
         {FX_DATA.map((fx) => (

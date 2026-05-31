@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox } from "@/components/shared/inputs";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { MasterBlFormValues } from "../../master-bl-schema";
@@ -12,6 +13,8 @@ import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 // Master schema: operatorCode/teamCode/settlePartnerCode (operatorName/teamName 표시 전용)
 export function MasterAirDocumentPanel() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const operator       = useCodeAutocomplete(CODE_SOURCES.user);
   const settlePartner  = useCodeAutocomplete(CODE_SOURCES.partner);
   const team           = useCodeAutocomplete(CODE_SOURCES.team);
@@ -23,7 +26,7 @@ export function MasterAirDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Operator"
+          label={tf("operator")}
           required
           codeProps={{ ...register("operatorCode") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -40,7 +43,7 @@ export function MasterAirDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Team"
+          label={tf("team")}
           required
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
@@ -58,7 +61,7 @@ export function MasterAirDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Settle Partner"
+          label={tf("settlePartner")}
           codeProps={{ ...register("settlePartnerCode") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
           onSearch={settlePartner.onSearch}
@@ -74,7 +77,7 @@ export function MasterAirDocumentPanel() {
     <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Document</span>
+        <span className="panel__title">{tp("document")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
         <FieldItemGrid itemScope="master-air-document-panel" items={DOCUMENT_ITEMS} cols={1} />

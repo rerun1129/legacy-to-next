@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import { TextBox, ComboBox, CodeBox } from "@/components/shared/inputs";
@@ -32,6 +33,8 @@ function CurrencyField() {
 // incoterms / fhd 제외 — 7 필드
 export function MasterAirTradePanel({ variant }: Props) {
   const { register, control } = useFormContext<MasterBlFormValues>();
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const { options: freightTermOptions, placeholder: freightTermPlaceholder } = useEnumOptions("FreightTerm");
 
   if (!variant) return null;
@@ -42,7 +45,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "currency",
       render: () => (
         <div className="li">
-          <span className="li__label">Currency</span>
+          <span className="li__label">{tf("currency")}</span>
           <div className="li__input">
             <CurrencyField />
           </div>
@@ -53,7 +56,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "freight-term",
       render: () => (
         <div className="li">
-          <span className="li__label">Freight Term</span>
+          <span className="li__label">{tf("freightTerm")}</span>
           <div className="li__input">
             <Controller
               name="freightTerm"
@@ -76,7 +79,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "other-term",
       render: () => (
         <div className="li">
-          <span className="li__label">Other Term</span>
+          <span className="li__label">{tf("otherTerm")}</span>
           <div className="li__input">
             <Controller
               name="airDetail.otherTerm"
@@ -99,7 +102,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "dv-carriage",
       render: () => (
         <div className="li">
-          <span className="li__label">D.V Carriage</span>
+          <span className="li__label">{tf("dvCarriage")}</span>
           <div className="li__input">
             <TextBox variant="panel" {...register("airDetail.declaredValueCarriage")} />
           </div>
@@ -110,7 +113,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "insurance",
       render: () => (
         <div className="li">
-          <span className="li__label">Insurance</span>
+          <span className="li__label">{tf("insurance")}</span>
           <div className="li__input">
             <TextBox variant="panel" {...register("airDetail.insurance")} />
           </div>
@@ -121,7 +124,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "dv-customs",
       render: () => (
         <div className="li">
-          <span className="li__label">D.V Customs</span>
+          <span className="li__label">{tf("dvCustoms")}</span>
           <div className="li__input">
             <TextBox variant="panel" {...register("airDetail.declaredValueCustoms")} />
           </div>
@@ -132,7 +135,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key: "account-info",
       render: () => (
         <div className="li">
-          <span className="li__label">Account Info</span>
+          <span className="li__label">{tf("accountInfo")}</span>
           <div className="li__input">
             <TextBox variant="panel" {...register("airDetail.accountInformation")} />
           </div>
@@ -144,7 +147,7 @@ export function MasterAirTradePanel({ variant }: Props) {
   const fields: FieldWidgetDef[] = [
     {
       key:   "trade-terms",
-      label: "Trade Terms",
+      label: tf("tradeTerms"),
       render: () => (
         <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={tradeItems} cols={1} shouldShowRowControls={false} />
       ),
@@ -153,7 +156,7 @@ export function MasterAirTradePanel({ variant }: Props) {
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Trade</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("trade")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />
       </div>

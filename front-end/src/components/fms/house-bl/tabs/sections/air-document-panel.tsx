@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox, ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
@@ -9,6 +10,8 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function AirDocumentPanel() {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
   const salesMan = useCodeAutocomplete(CODE_SOURCES.user);
@@ -23,7 +26,7 @@ export function AirDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Sales Man"
+          label={tf("salesMan")}
           codeProps={{ ...register("salesManCode") }}
           nameProps={{ ...register("salesManName") }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -40,7 +43,7 @@ export function AirDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Operator"
+          label={tf("operator")}
           required
           codeProps={{ ...register("operatorCode") }}
           nameProps={{ ...register("operatorName") }}
@@ -58,7 +61,7 @@ export function AirDocumentPanel() {
         <CodeBox
           variant="panel"
           kind="lcn"
-          label="Team"
+          label={tf("team")}
           required
           codeProps={{ ...register("teamCode") }}
           nameProps={{ ...register("teamName") }}
@@ -74,7 +77,7 @@ export function AirDocumentPanel() {
       key: "sales-class",
       render: () => (
         <div className="li">
-          <span className="li__label">Sales Class</span>
+          <span className="li__label">{tf("salesClass")}</span>
           <div className="li__input">
             <Controller
               name="salesClass"
@@ -93,7 +96,7 @@ export function AirDocumentPanel() {
     <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Document</span>
+        <span className="panel__title">{tp("document")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
         <FieldItemGrid itemScope="air-document-panel" items={DOCUMENT_ITEMS} cols={1} />

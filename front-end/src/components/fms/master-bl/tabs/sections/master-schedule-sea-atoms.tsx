@@ -3,6 +3,7 @@
 // SEA Master Schedule 패널 개별 원자 필드 컴포넌트
 // master-schedule-sea-fields.tsx에서 분리 (300줄 초과 기준, CLAUDE.md Critical)
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { TextBox }  from "@/components/shared/inputs/text-box";
 import { CodeBox }  from "@/components/shared/inputs/code-box";
 import { DateBox }  from "@/components/shared/inputs/date-box";
@@ -13,12 +14,13 @@ import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 // ── Liner / Vessel / Voyage ─────────────────────────────────────────────────
 export function LinerLcnField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const liner = useCodeAutocomplete(CODE_SOURCES.carrierSea);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="Liner"
+      label={tf("liner")}
       required
       codeProps={{ ...register("seaDetail.linerCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Liner Name" }}
@@ -33,9 +35,10 @@ export function LinerLcnField() {
 
 export function VesselField() {
   const { register } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   return (
     <div className="li">
-      <span className="li__label is-required">Vessel</span>
+      <span className="li__label is-required">{tf("vessel")}</span>
       <div className="li__input">
         <TextBox variant="panel" {...register("seaDetail.vesselName")} />
       </div>
@@ -45,9 +48,10 @@ export function VesselField() {
 
 export function VoyageField() {
   const { register } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   return (
     <div className="li">
-      <span className="li__label is-required">Voyage</span>
+      <span className="li__label is-required">{tf("voyage")}</span>
       <div className="li__input">
         <TextBox variant="panel" {...register("seaDetail.voyageNo")} />
       </div>
@@ -58,9 +62,10 @@ export function VoyageField() {
 // ── ETD / ETA ──────────────────────────────────────────────────────────────
 export function EtdField() {
   const { control } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   return (
     <div className="li">
-      <span className="li__label is-required">ETD</span>
+      <span className="li__label is-required">{tf("etd")}</span>
       <div className="li__input">
         <Controller
           control={control}
@@ -84,9 +89,10 @@ export function EtdField() {
 
 export function EtaField() {
   const { control } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   return (
     <div className="li">
-      <span className="li__label is-required">ETA</span>
+      <span className="li__label is-required">{tf("eta")}</span>
       <div className="li__input">
         <Controller
           control={control}
@@ -110,9 +116,10 @@ export function EtaField() {
 
 export function IssueDateField() {
   const { control } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   return (
     <div className="li">
-      <span className="li__label">Issue Date</span>
+      <span className="li__label">{tf("issueDate")}</span>
       <div className="li__input">
         <Controller
           control={control}
@@ -137,12 +144,13 @@ export function IssueDateField() {
 // schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
 export function PorField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const por = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="POR"
+      label={tf("por")}
       codeProps={{ ...register("seaDetail.porCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -156,12 +164,13 @@ export function PorField() {
 
 export function PolField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const pol = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="POL"
+      label={tf("pol")}
       required
       codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
@@ -176,12 +185,13 @@ export function PolField() {
 
 export function PodField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const pod = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="POD"
+      label={tf("pod")}
       required
       codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
@@ -196,12 +206,13 @@ export function PodField() {
 
 export function FinalDestField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const finalDest = useCodeAutocomplete(CODE_SOURCES.portSea);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="Final Dest."
+      label={tf("finalDest")}
       codeProps={{ ...register("seaDetail.finalDestCode"), placeholder: "UNLOC" }}
       nameProps={{ placeholder: "Port Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}

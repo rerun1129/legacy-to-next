@@ -1,13 +1,18 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { ACTIVITY_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function ActivityFeed() {
+  const t = useTranslations("fms.dashboard");
+
   return (
     <div className="dash-panel">
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Recent Activity
+          {t("panels.recentActivity")}
         </div>
       </div>
       <div className="activity">

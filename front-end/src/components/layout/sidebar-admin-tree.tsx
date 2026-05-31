@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { useLocale } from "next-intl";
 import type { SidebarMenuRow } from "@/application/access/sidebar-menu/ports";
 import { resolveIcon } from "./sidebar-icon-map";
 
@@ -50,6 +51,13 @@ export function SidebarAdminTree({
   onToggleSection,
   onNavigate,
 }: SidebarAdminTreeProps) {
+  // 훅은 조건 분기보다 먼저 호출 (Rules of Hooks)
+  const locale = useLocale();
+
+  // locale이 'en'이고 labelEn이 있으면 영어 레이블 사용, 없으면 label 폴백
+  const displayLabel = (row: SidebarMenuRow) =>
+    locale === "en" && row.labelEn ? row.labelEn : row.label;
+
   // USER 시나리오 등 접근 가능 메뉴가 없으면 모듈 헤더 자체 미렌더
   if (!isLoading && (!data || data.length === 0)) {
     return null;
@@ -98,7 +106,7 @@ export function SidebarAdminTree({
                   style={{ paddingLeft: 12 }}
                 >
                   <span className="side-item__icon"><RootIcon size={13} /></span>
-                  <span style={{ flex: 1, textAlign: "left" }}>{root.label}</span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{displayLabel(root)}</span>
                 </div>
               );
             }
@@ -107,10 +115,10 @@ export function SidebarAdminTree({
                 key={root.id}
                 className={`side-item${secActive ? " is-active" : ""}`}
                 style={{ paddingLeft: 12 }}
-                onClick={() => onNavigate(root.label, root.path!)}
+                onClick={() => onNavigate(displayLabel(root), root.path!)}
               >
                 <span className="side-item__icon"><RootIcon size={13} /></span>
-                <span style={{ flex: 1, textAlign: "left" }}>{root.label}</span>
+                <span style={{ flex: 1, textAlign: "left" }}>{displayLabel(root)}</span>
               </button>
             );
           }
@@ -124,7 +132,7 @@ export function SidebarAdminTree({
                 onClick={() => onToggleSection(root.menuCode)}
               >
                 <span className="side-item__icon"><RootIcon size={13} /></span>
-                <span style={{ flex: 1, textAlign: "left" }}>{root.label}</span>
+                <span style={{ flex: 1, textAlign: "left" }}>{displayLabel(root)}</span>
                 <ChevronRight
                   size={11}
                   style={{
@@ -152,7 +160,7 @@ export function SidebarAdminTree({
                         style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
                       >
                         <span className="side-item__icon"><LeafIcon size={11} /></span>
-                        {leaf.label}
+                        {displayLabel(leaf)}
                       </div>
                     );
                   }
@@ -162,10 +170,10 @@ export function SidebarAdminTree({
                       key={leaf.id}
                       className={`side-item${active ? " is-active" : ""}`}
                       style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
-                      onClick={() => onNavigate(`${root.label} ${leaf.label}`, leaf.path!)}
+                      onClick={() => onNavigate(`${displayLabel(root)} ${displayLabel(leaf)}`, leaf.path!)}
                     >
                       <span className="side-item__icon"><LeafIcon size={11} /></span>
-                      {leaf.label}
+                      {displayLabel(leaf)}
                     </button>
                   );
                 })}

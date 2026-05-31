@@ -27,13 +27,13 @@ export interface WidgetDef {
 }
 
 export const WIDGET_REGISTRY: WidgetDef[] = [
-  { key: "party",       label: "Party",           component: PartyPanel,         defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "schedule",    label: "Schedule",         component: SchedulePanel,      defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "trade",       label: "Trade & Perf.",    component: TradePanel,         defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
-  { key: "container",   label: "Container",        component: ContainerGridPanel, defaultPosition: { col: 0, row: 4, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
-  { key: "marks",       label: "Marks & Numbers",  component: MarksPanel,         defaultPosition: { col: 0, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
-  { key: "description", label: "Description",      component: DescriptionPanel,   defaultPosition: { col: 2, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
-  { key: "item-hs",     label: "Item / HS Code",   component: ItemHsPanel,        defaultPosition: { col: 4, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 2, minRowSpan: 2 },
+  { key: "party",       label: "Party",           labelKey: "party",        component: PartyPanel,         defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "schedule",    label: "Schedule",         labelKey: "schedule",     component: SchedulePanel,      defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "trade",       label: "Trade & Perf.",    labelKey: "tradePerf",    component: TradePanel,         defaultPosition: { col: 4, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
+  { key: "container",   label: "Container",        labelKey: "container",    component: ContainerGridPanel, defaultPosition: { col: 0, row: 4, colSpan: 6, rowSpan: 2 }, minColSpan: 3, minRowSpan: 1 },
+  { key: "marks",       label: "Marks & Numbers",  labelKey: "marksNumbers", component: MarksPanel,         defaultPosition: { col: 0, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
+  { key: "description", label: "Description",      labelKey: "description",  component: DescriptionPanel,   defaultPosition: { col: 2, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
+  { key: "item-hs",     label: "Item / HS Code",   labelKey: "itemHs",       component: ItemHsPanel,        defaultPosition: { col: 4, row: 6, colSpan: 2, rowSpan: 2 }, minColSpan: 2, minRowSpan: 2 },
 ];
 
 export const REGISTRY_MAP = Object.fromEntries(

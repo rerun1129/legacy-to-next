@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, Minus } from "lucide-react";
 import { GridList } from "@/components/shared/grid-list";
 import { CodeBox, DateBox } from "@/components/shared/inputs";
@@ -16,6 +17,8 @@ import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 interface Props { variant?: AnyVariantConfig }
 
 export function AirSchedulePanel({ variant }: Props) {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, control, setValue } = useFormContext<HouseBlFormValues>();
 
   const airline     = useCodeAutocomplete(CODE_SOURCES.carrierAir);
@@ -33,7 +36,7 @@ export function AirSchedulePanel({ variant }: Props) {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Airline"
+          label={tf("airline")}
           required
           codeProps={{ ...register("airDetail.airlineCode"), placeholder: "IATA" }}
           nameProps={{ ...register("airDetail.airlineName"), placeholder: "Airline Name" }}
@@ -51,7 +54,7 @@ export function AirSchedulePanel({ variant }: Props) {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Departure"
+          label={tf("departure")}
           required
           codeProps={{ ...register("pol"), placeholder: "UNLOC" }}
           nameProps={{ ...register("polName"), placeholder: "Port Name" }}
@@ -68,7 +71,7 @@ export function AirSchedulePanel({ variant }: Props) {
   const widgetFields: FieldWidgetDef[] = [
     {
       key:   "airline",
-      label: "Airline",
+      label: tf("airline"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.airline`}
@@ -80,7 +83,7 @@ export function AirSchedulePanel({ variant }: Props) {
     },
     {
       key:   "legs",
-      label: "Schedule Legs",
+      label: tf("scheduleLegs"),
       render: () => {
         function handleAdd() {
           append({ toCode: "", byCarrier: "", flightNo: "", onBoardDt: "", onBoardTm: "", arrivalDt: "", arrivalTm: "" });
@@ -110,7 +113,7 @@ export function AirSchedulePanel({ variant }: Props) {
     },
     {
       key:   "destination",
-      label: "Destination",
+      label: tf("destination"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.destination`}
@@ -120,7 +123,7 @@ export function AirSchedulePanel({ variant }: Props) {
               <CodeBox
                 kind="lcn"
                 variant="panel"
-                label="Destination"
+                label={tf("destination")}
                 required
                 codeProps={{ ...register("pod"), placeholder: "UNLOC" }}
                 nameProps={{ ...register("podName"), placeholder: "Port Name" }}
@@ -139,7 +142,7 @@ export function AirSchedulePanel({ variant }: Props) {
     },
     {
       key:   "dates",
-      label: "On board / Arrival",
+      label: tf("onBoardArrival"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.dates`}
@@ -148,7 +151,7 @@ export function AirSchedulePanel({ variant }: Props) {
               key: "onboard",
               render: () => (
                 <div className="li">
-                  <span className="li__label is-required">On board</span>
+                  <span className="li__label is-required">{tf("onBoard")}</span>
                   <div className="li__input">
                     <Controller
                       control={control}
@@ -173,7 +176,7 @@ export function AirSchedulePanel({ variant }: Props) {
               key: "arrival",
               render: () => (
                 <div className="li">
-                  <span className="li__label is-required">Arrival</span>
+                  <span className="li__label is-required">{tf("arrival")}</span>
                   <div className="li__input">
                     <Controller
                       control={control}
@@ -204,7 +207,7 @@ export function AirSchedulePanel({ variant }: Props) {
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Schedule</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("schedule")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={widgetFields} />
       </div>

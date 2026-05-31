@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useFormContext, useFieldArray, useWatch, Controller, type Control } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, Minus } from "lucide-react";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -53,6 +54,8 @@ export function MasterAirChargeInfoPanel() {
   const { fields, append, remove } = useFieldArray({ control, name: "airCharges" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
 
   const { options: perOptions, placeholder: perPlaceholder }             = useEnumOptions("Per");
   const { options: rateClassOptions, placeholder: rateClassPlaceholder } = useEnumOptions("RateClass");
@@ -67,25 +70,25 @@ export function MasterAirChargeInfoPanel() {
     },
     {
       key: "freightCode",
-      label: "Freight",
+      label: tf("freight"),
       width: 70,
       render: (_, __, i) => <TextBox variant="cell" {...register(`airCharges.${i}.freightCode`)} />,
     },
     {
       key: "_freightName",
-      label: "Freight Name",
+      label: tf("freightName"),
       width: 160,
       render: () => <TextBox variant="cell" readOnly value="" />,
     },
     {
       key: "currencyCode",
-      label: "Currency",
+      label: tf("currency"),
       width: 60,
       render: (_, __, i) => <CurrencyCell index={i} />,
     },
     {
       key: "per",
-      label: "Per",
+      label: tf("per"),
       width: 70,
       render: (_, __, i) => (
         <Controller
@@ -105,7 +108,7 @@ export function MasterAirChargeInfoPanel() {
     },
     {
       key: "grossWeightKg",
-      label: "Gross W/T",
+      label: tf("grossWT"),
       className: "is-num",
       width: 70,
       render: (_, __, i) => (
@@ -114,7 +117,7 @@ export function MasterAirChargeInfoPanel() {
     },
     {
       key: "rateClass",
-      label: "Rate Class",
+      label: tf("rateClass"),
       width: 60,
       render: (_, __, i) => (
         <Controller
@@ -134,7 +137,7 @@ export function MasterAirChargeInfoPanel() {
     },
     {
       key: "chargeWeightKg",
-      label: "Charge W/T",
+      label: tf("chargeWT"),
       className: "is-num",
       width: 70,
       render: (_, __, i) => (
@@ -143,7 +146,7 @@ export function MasterAirChargeInfoPanel() {
     },
     {
       key: "rate",
-      label: "Rate",
+      label: tf("rate"),
       className: "is-num",
       width: 70,
       render: (_, __, i) => (
@@ -152,12 +155,12 @@ export function MasterAirChargeInfoPanel() {
     },
     {
       key: "_total",
-      label: "Total Amount",
+      label: tf("totalAmount"),
       className: "is-num",
       width: 90,
       render: (_, __, i) => <TotalAmountCell control={control} index={i} />,
     },
-  ], [register, control, perOptions, perPlaceholder, rateClassOptions, rateClassPlaceholder]);
+  ], [register, control, perOptions, perPlaceholder, rateClassOptions, rateClassPlaceholder, tf]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
@@ -194,7 +197,7 @@ export function MasterAirChargeInfoPanel() {
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Charge Information</span>
+        <span className="panel__title">{tp("chargeInformation")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>

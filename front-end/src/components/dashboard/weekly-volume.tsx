@@ -1,9 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { WEEKLY_VOLUME_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function WeeklyVolume() {
+  const t = useTranslations("fms.dashboard");
   const maxTotal = Math.max(...WEEKLY_VOLUME_DATA.map((d) => d.total));
 
   return (
@@ -11,9 +13,9 @@ export function WeeklyVolume() {
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Weekly Volume (TEU)
+          {t("panels.weeklyVolume")}
         </div>
-        <div className="dash-panel__meta">Last 7 days</div>
+        <div className="dash-panel__meta">{t("meta.last7Days")}</div>
       </div>
       <div className="wk-chart">
         {WEEKLY_VOLUME_DATA.map((d) => {
@@ -35,9 +37,9 @@ export function WeeklyVolume() {
         })}
       </div>
       <div className="wk-legend">
-        <span><i className="fcl" />FCL</span>
-        <span><i className="lcl" />LCL</span>
-        <span><i className="bulk" />Bulk</span>
+        <span><i className="fcl" />{t("volume.legend.fcl")}</span>
+        <span><i className="lcl" />{t("volume.legend.lcl")}</span>
+        <span><i className="bulk" />{t("volume.legend.bulk")}</span>
       </div>
     </div>
   );

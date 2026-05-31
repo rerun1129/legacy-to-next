@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { CodeBox } from "@/components/shared/inputs/code-box";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { TextBox } from "@/components/shared/inputs/text-box";
@@ -11,15 +13,12 @@ import { useEnumOptions } from "@/application/enums/use-enum";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { NonBlFilter } from "@/domain/non-bl";
-
-const DATE_KIND_OPTIONS = [{ value: 'ETD', label: 'ETD' }, { value: 'ETA', label: 'ETA' }]
-const PARTY_KIND_OPTIONS = [
-  { value: 'SHIPPER', label: 'Shipper' },
-  { value: 'CONSIGNEE', label: 'Consignee' },
-  { value: 'NOTIFY', label: 'Notify' },
-  { value: 'SETTLE_PARTNER', label: 'Settle Partner' },
-]
-const PORT_KIND_OPTIONS = [{ value: 'POL', label: 'POL' }, { value: 'POD', label: 'POD' }]
+import {
+  DATE_KIND_OPTIONS,
+  PARTY_KIND_OPTIONS,
+  PORT_KIND_OPTIONS,
+} from "./non-bl-list-filter-options";
+import type { LabelOption } from "@/components/shared/inputs/_types";
 
 interface Props {
   form: UseFormReturn<NonBlFilter>;
@@ -27,8 +26,29 @@ interface Props {
 
 export function NonBlListFilter({ form }: Props) {
   useListFilterSync(form, "/fms/non-bl/list");
+  const t = useTranslations("fms.nonBl.list.filter");
+
+  // labelKey 배열 → 해석된 LabelOption 배열 (useMemo로 t 참조 변경 시에만 재계산)
+  const dateKindOptions = useMemo<LabelOption[]>(
+    () => DATE_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const partyKindOptions = useMemo<LabelOption[]>(
+    () => PARTY_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+  const portKindOptions = useMemo<LabelOption[]>(
+    () => PORT_KIND_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) })),
+    [t]
+  );
+
   const { options: boundOptions, isLoading: boundLoading, placeholder: boundPlaceholder } = useEnumOptions("Bound");
-  const boundOptionsWithAll = [{ value: "", label: "ALL" }, ...boundOptions];
+  const allOption = useMemo(() => ({ value: "", label: t("all") }), [t]);
+  const boundOptionsWithAll = useMemo(
+    () => [allOption, ...boundOptions],
+    [allOption, boundOptions]
+  );
+
   const { register, setValue } = form;
 
   // party 토글이 SETTLE_PARTNER이면 partner 소스, 그 외(Shipper/Consignee/Notify)는 customer 소스
@@ -45,7 +65,7 @@ export function NonBlListFilter({ form }: Props) {
         <div className="filter-grid">
           {/* Row 1 */}
           <div className="lcn">
-            <span className="lcn__label">Bound</span>
+            <span className="lcn__label">{t("bound")}</span>
             <Controller
               name="bound"
               control={form.control}
@@ -76,7 +96,7 @@ export function NonBlListFilter({ form }: Props) {
                     name="dateTo"
                     render={({ field: toField }) => (
                       <DateRangeBox
-                        labelOptions={DATE_KIND_OPTIONS}
+                        labelOptions={dateKindOptions}
                         labelValue={kindField.value}
                         onLabelChange={kindField.onChange}
                         required
@@ -104,7 +124,7 @@ export function NonBlListFilter({ form }: Props) {
 
           <CodeBox
             kind="lcn"
-            label="Liner"
+            label={t("liner")}
             codeProps={{ ...register("linerCode"), placeholder: "Code" }}
             nameProps={{ ...register("linerName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -118,7 +138,7 @@ export function NonBlListFilter({ form }: Props) {
           />
 
           <div className="lcn">
-            <span className="lcn__label">Non B/L No</span>
+            <span className="lcn__label">{t("nonBlNo")}</span>
             <TextBox
               variant="panel"
               placeholder="Non B/L No"
@@ -134,7 +154,7 @@ export function NonBlListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PARTY_KIND_OPTIONS}
+                labelOptions={partyKindOptions}
                 labelValue={kindField.value}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("partyCode"), placeholder: "Code" }}
@@ -157,7 +177,7 @@ export function NonBlListFilter({ form }: Props) {
             render={({ field: kindField }) => (
               <CodeBox
                 kind="lcn"
-                labelOptions={PORT_KIND_OPTIONS}
+                labelOptions={portKindOptions}
                 labelValue={kindField.value}
                 onLabelChange={kindField.onChange}
                 codeProps={{ ...register("portCode"), placeholder: "Code" }}
@@ -175,14 +195,14 @@ export function NonBlListFilter({ form }: Props) {
           />
 
           <div className="lcn">
-            <span className="lcn__label">Vessel/Voyage</span>
+            <span className="lcn__label">{t("vesselVoyage")}</span>
             <TextBox variant="panel" placeholder="Vessel" {...register("vessel")} />
             <TextBox variant="panel" placeholder="Voyage" {...register("voyage")} />
           </div>
 
           <CodeBox
             kind="lcn"
-            label="Operator"
+            label={t("operator")}
             codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
             nameProps={{ ...register("operatorName"), placeholder: "Name" }}
             onLookup={() => {}}
@@ -198,7 +218,7 @@ export function NonBlListFilter({ form }: Props) {
           {/* Row 3 */}
           <CodeBox
             kind="lcn"
-            label="Team"
+            label={t("team")}
             codeProps={{ ...register("teamCode"), placeholder: "Code" }}
             nameProps={{ ...register("teamName"), placeholder: "Name" }}
             onLookup={() => {}}

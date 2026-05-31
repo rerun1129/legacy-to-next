@@ -188,15 +188,15 @@ export const MASTER_BL_SCHEMA = z.object({
 
 export type MasterBlFormValues = z.infer<typeof MASTER_BL_SCHEMA>;
 
-// toolbar 라벨 → RHF field path 매핑
+// toolbar fieldId → RHF field path 매핑 (라벨 의존 제거 — i18n 전환)
 // Status 필드 제거 (BE 미지원, 사용자 결정 2026-05-15)
-export const TOOLBAR_TO_FIELD: Partial<Record<string, string>> = {
-  "Master Ref":    "masterRefNo",
-  "MBL No":        "mblNo",
-  "MAWB No":       "mblNo",
-  "Line Bkg. No":  "seaDetail.lineBkgNo",
-  "Load Type":     "seaDetail.loadType",
-  "Service Term":  "seaDetail.serviceTerm",
-  "B/L Type":      "seaDetail.blType",
-  "Shipment Type": "shipmentType",
+export const TOOLBAR_FIELD_TO_RHF: Partial<Record<string, string>> = {
+  masterRef:    "masterRefNo",
+  mblNo:        "mblNo",
+  mawbNo:       "mblNo",
+  lineBkgNo:    "seaDetail.lineBkgNo",
+  loadType:     "seaDetail.loadType",
+  serviceTerm:  "seaDetail.serviceTerm",
+  blType:       "seaDetail.blType",
+  shipmentType: "shipmentType",
 };

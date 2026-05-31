@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PanelDateInput } from "@/components/shared/grid-cell-inputs";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
@@ -8,10 +9,11 @@ import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-
 // ── Stub 렌더러 — form 없이 hardcoded 값으로 구조 표현 ─────
 
 export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isExp: boolean }) {
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const linerItems: FieldItemDef[] = [
     { key: "liner", render: () => (
       <div className="li">
-        <span className="li__label is-required">Liner</span>
+        <span className="li__label is-required">{tf("liner")}</span>
         <div className="li__input" style={{ gap: 4 }}>
           <input defaultValue="" style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
           <input defaultValue="" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }} />
@@ -20,7 +22,7 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "vessel", render: () => (
       <div className="li">
-        <span className="li__label is-required">Vessel</span>
+        <span className="li__label is-required">{tf("vessel")}</span>
         <div className="li__input">
           <input defaultValue="" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} />
         </div>
@@ -28,7 +30,7 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "voyage", render: () => (
       <div className="li">
-        <span className="li__label is-required">Voyage</span>
+        <span className="li__label is-required">{tf("voyage")}</span>
         <div className="li__input">
           <input defaultValue="" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} />
         </div>
@@ -36,13 +38,13 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "etd", render: () => (
       <div className="li">
-        <span className="li__label is-required">ETD</span>
+        <span className="li__label is-required">{tf("etd")}</span>
         <div className="li__input"><PanelDateInput defaultValue="" required /></div>
       </div>
     )},
     { key: "eta", render: () => (
       <div className="li">
-        <span className="li__label is-required">ETA</span>
+        <span className="li__label is-required">{tf("eta")}</span>
         <div className="li__input"><PanelDateInput defaultValue="" required /></div>
       </div>
     )},
@@ -51,7 +53,7 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
   const portItems: FieldItemDef[] = [
     { key: "pol", render: () => (
       <div className="lcn" style={{ marginBottom: 4 }}>
-        <span className="lcn__label is-required">POL</span>
+        <span className="lcn__label is-required">{tf("pol")}</span>
         <div className="lcn__code" style={{ position: "relative" }}>
           <input defaultValue="" placeholder="UNLOC"
             style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
@@ -62,7 +64,7 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "pod", render: () => (
       <div className="lcn" style={{ marginBottom: 4 }}>
-        <span className="lcn__label is-required">POD</span>
+        <span className="lcn__label is-required">{tf("pod")}</span>
         <div className="lcn__code" style={{ position: "relative" }}>
           <input defaultValue="" placeholder="UNLOC"
             style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
@@ -73,7 +75,7 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "delivery", render: () => (
       <div className="lcn" style={{ marginBottom: 4 }}>
-        <span className="lcn__label">Delivery</span>
+        <span className="lcn__label">Delivery</span>{/* Delivery: no catalog key needed — stub-only, delivery is not in master SEA schedule */}
         <div className="lcn__code" style={{ position: "relative" }}>
           <input placeholder="UNLOC"
             style={{ width: "100%", height: 24, padding: "0 20px 0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
@@ -87,13 +89,13 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
   const issueItems: FieldItemDef[] = [
     { key: "issue-date",   render: () => (
       <div className="li">
-        <span className="li__label">Issue Date</span>
+        <span className="li__label">{tf("issueDate")}</span>
         <div className="li__input"><PanelDateInput defaultValue="" /></div>
       </div>
     )},
     { key: "freight-term", render: () => (
       <div className="li">
-        <span className="li__label">Freight Term</span>
+        <span className="li__label">{tf("freightTerm")}</span>
         <div className="li__input">
           <input defaultValue="" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} />
         </div>
@@ -102,19 +104,20 @@ export function SeaScheduleStub({ panelScope, isExp }: { panelScope: string; isE
   ];
 
   const fields: FieldWidgetDef[] = [
-    { key: "liner-vessel", label: "Liner & Vessel", render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={linerItems} /> },
-    { key: "ports",        label: "Ports",          render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} shouldShowRowControls={false} /> },
-    ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
+    { key: "liner-vessel", label: tf("linerVessel"), render: () => <FieldItemGrid itemScope={`${panelScope}.liner`} items={linerItems} /> },
+    { key: "ports",        label: tf("ports"),       render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} shouldShowRowControls={false} /> },
+    ...(isExp ? [{ key: "issue", label: tf("issue"), render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
   ];
 
   return <FieldWidgetList panelScope={panelScope} fields={fields} />;
 }
 
 export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isExp: boolean }) {
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const carrierItems: FieldItemDef[] = [
     { key: "carrier", render: () => (
       <div className="li">
-        <span className="li__label is-required">{isExp ? "Airline" : "Carrier"}</span>
+        <span className="li__label is-required">{isExp ? tf("airline") : tf("carrier")}</span>
         <div className="li__input" style={{ gap: 4 }}>
           <input defaultValue=""
             style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
@@ -125,7 +128,7 @@ export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "departure", render: () => (
       <div className="li">
-        <span className="li__label is-required">Departure</span>
+        <span className="li__label is-required">{tf("departure")}</span>
         <div className="li__input" style={{ gap: 4 }}>
           <input defaultValue="" style={{ width: 70, height: 22, padding: "0 6px", fontSize: 10, fontFamily: "var(--font-mono)" }} />
           <input defaultValue="" style={{ flex: 1, height: 22, padding: "0 6px", fontSize: 10 }} />
@@ -137,13 +140,13 @@ export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isE
   const issueItems: FieldItemDef[] = [
     { key: "issue-date",  render: () => (
       <div className="li">
-        <span className="li__label">Issue Date</span>
+        <span className="li__label">{tf("issueDate")}</span>
         <div className="li__input"><PanelDateInput defaultValue="" /></div>
       </div>
     )},
     { key: "signature",   render: () => (
       <div className="li">
-        <span className="li__label">Signature</span>
+        <span className="li__label">{tf("signature")}</span>
         <div className="li__input">
           <input defaultValue="" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} />
         </div>
@@ -151,7 +154,7 @@ export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isE
     )},
     { key: "issue-place", render: () => (
       <div className="li">
-        <span className="li__label">Issue Place</span>
+        <span className="li__label">{tf("issuePlace")}</span>
         <div className="li__input">
           <input defaultValue="" style={{ width: "100%", height: 22, padding: "0 6px", fontSize: 10 }} />
         </div>
@@ -163,12 +166,12 @@ export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isE
   const STUB_LEGS: Array<{ id: number; to: string; by: string; flight: string; onBoard: string; boardTime: string; arrival: string; arrTime: string }> = [];
 
   const fields: FieldWidgetDef[] = [
-    { key: "carrier", label: "Carrier", render: () => <FieldItemGrid itemScope={`${panelScope}.carrier`} items={carrierItems} /> },
+    { key: "carrier", label: tf("carrier"), render: () => <FieldItemGrid itemScope={`${panelScope}.carrier`} items={carrierItems} /> },
     {
-      key: "legs", label: "Schedule Legs",
+      key: "legs", label: tf("scheduleLegs"),
       render: () => (
         <>
-          <div className="subhead"><div className="subhead__bar" />Schedule Legs</div>
+          <div className="subhead"><div className="subhead__bar" />{tf("scheduleLegs")}</div>
           <div style={{ overflow: "auto" }}>
             <table className="grid--list">
               <thead>
@@ -197,7 +200,7 @@ export function AirScheduleStub({ panelScope, isExp }: { panelScope: string; isE
         </>
       ),
     },
-    ...(isExp ? [{ key: "issue", label: "Issue", render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
+    ...(isExp ? [{ key: "issue", label: tf("issue"), render: () => <FieldItemGrid itemScope={`${panelScope}.issue`} items={issueItems} /> }] : []),
   ];
 
   return <FieldWidgetList panelScope={panelScope} fields={fields} />;

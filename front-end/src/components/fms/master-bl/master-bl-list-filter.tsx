@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, RotateCcw, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { ChevronUp } from "lucide-react";
 import type { MasterBlFilter } from "@/domain/master-bl";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function MasterBlListFilter({ onSearch, onReset }: Props) {
+  const t = useTranslations("fms.masterBl.list.filter");
   const [collapsed, setCollapsed] = useState(false);
   const [mblNo, setMblNo] = useState('');
   const [shipperCode, setShipperCode] = useState('');
@@ -49,7 +51,7 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
           <div className="filter-grid">
             {/* ETD Range */}
             <div className="lcn">
-              <span className="lcn__label">ETD</span>
+              <span className="lcn__label">{t("etd")}</span>
               <div className="lcn__daterange">
                 <input type="date" value={etdFrom} onChange={(e) => setEtdFrom(e.target.value)} />
                 <span className="lcn__tilde">~</span>
@@ -59,7 +61,7 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
 
             {/* MBL No */}
             <div className="lcn">
-              <span className="lcn__label">MBL No</span>
+              <span className="lcn__label">{t("mblNo")}</span>
               <input
                 className="lcn__name"
                 placeholder="MBL Number"
@@ -71,7 +73,7 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
 
             {/* Shipper */}
             <div className="lcn">
-              <span className="lcn__label">Shipper</span>
+              <span className="lcn__label">{t("shipper")}</span>
               <div className="lcn__code" style={{ position: "relative" }}>
                 <input
                   placeholder="Code"
@@ -85,7 +87,7 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
 
             {/* Consignee */}
             <div className="lcn">
-              <span className="lcn__label">Consignee</span>
+              <span className="lcn__label">{t("consignee")}</span>
               <div className="lcn__code" style={{ position: "relative" }}>
                 <input
                   placeholder="Code"
@@ -99,7 +101,7 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
 
             {/* POL */}
             <div className="lcn">
-              <span className="lcn__label">POL</span>
+              <span className="lcn__label">{t("pol")}</span>
               <div className="lcn__code" style={{ position: "relative" }}>
                 <input
                   placeholder="UNLOC"
@@ -113,7 +115,7 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
 
             {/* POD */}
             <div className="lcn">
-              <span className="lcn__label">POD</span>
+              <span className="lcn__label">{t("pod")}</span>
               <div className="lcn__code" style={{ position: "relative" }}>
                 <input
                   placeholder="UNLOC"
@@ -127,22 +129,22 @@ export function MasterBlListFilter({ onSearch, onReset }: Props) {
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8, paddingBottom: 4 }}>
-            <button className="btn btn--sm btn--ghost" onClick={handleReset}>
-              <RotateCcw size={12} />
-              Reset
+            <button type="button" className="btn btn--sm btn--ghost" onClick={handleReset}>
+              <ChevronUp size={12} />
+              {t("reset")}
             </button>
-            <button className="btn btn--sm btn--primary" onClick={handleSearch}>
-              <Search size={12} />
-              Search
+            <button type="button" className="btn btn--sm btn--primary" onClick={handleSearch}>
+              {t("search")}
             </button>
           </div>
         </div>
       )}
 
       <button
+        type="button"
         className="search-card__collapse"
         onClick={() => setCollapsed((v) => !v)}
-        title={collapsed ? "Collapse filter" : "Expand filter"}
+        title={collapsed ? t("expandFilter") : t("collapseFilter")}
       >
         <ChevronUp size={12} style={{ transform: collapsed ? "rotate(180deg)" : undefined, transition: "transform 200ms" }} />
       </button>

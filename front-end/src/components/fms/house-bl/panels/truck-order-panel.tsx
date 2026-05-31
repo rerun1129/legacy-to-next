@@ -1,6 +1,7 @@
 "use client";
 
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, X } from "lucide-react";
 import type { HouseBlFormValues } from "../house-bl-schema";
 
@@ -16,6 +17,8 @@ const INPUT_ST: React.CSSProperties = { width: "100%", height: 24, padding: "0 4
 const NUM_ST:   React.CSSProperties = { ...INPUT_ST, textAlign: "right" };
 
 export function TruckOrderPanel() {
+  const tp = useTranslations("fms.houseBl.entry.panels");
+  const tf = useTranslations("fms.houseBl.entry.fields");
   const { control, register } = useFormContext<HouseBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "truckOrders" });
 
@@ -23,7 +26,7 @@ export function TruckOrderPanel() {
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Truck Order</span>
+        <span className="panel__title">{tp("truckOrder")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button type="button" className="btn btn--sm" onClick={() => append({ ...EMPTY_ROW })}>
@@ -37,17 +40,17 @@ export function TruckOrderPanel() {
           <thead>
             <tr>
               <th style={{ width: 32 }}>#</th>
-              <th style={{ width: 110 }}>Order No</th>
-              <th style={{ width: 55 }}>Pkg Qty</th>
-              <th style={{ width: 55 }}>Unit</th>
-              <th style={{ width: 80 }}>G/W (kg)</th>
-              <th style={{ width: 70 }}>CBM</th>
-              <th style={{ width: 80 }}>Truck No</th>
-              <th style={{ width: 70 }}>Type</th>
-              <th style={{ width: 90 }}>Driver</th>
-              <th style={{ width: 100 }}>Mobile</th>
-              <th style={{ width: 110 }}>Container No</th>
-              <th style={{ width: 55 }}>Seal 1</th>
+              <th style={{ width: 110 }}>{tf("truckOrderNo")}</th>
+              <th style={{ width: 55 }}>{tf("pkgQty")}</th>
+              <th style={{ width: 55 }}>{tf("unit")}</th>
+              <th style={{ width: 80 }}>{tf("gwKg")}</th>
+              <th style={{ width: 70 }}>{tf("cbm")}</th>
+              <th style={{ width: 80 }}>{tf("truckNo")}</th>
+              <th style={{ width: 70 }}>{tf("containerType")}</th>
+              <th style={{ width: 90 }}>{tf("driver")}</th>
+              <th style={{ width: 100 }}>{tf("mobileNo")}</th>
+              <th style={{ width: 110 }}>{tf("containerNo")}</th>
+              <th style={{ width: 55 }}>{tf("seal1")}</th>
               <th style={{ width: 32 }} />
             </tr>
           </thead>
@@ -55,7 +58,7 @@ export function TruckOrderPanel() {
             {fields.length === 0 && (
               <tr>
                 <td colSpan={13} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
-                  No truck order rows. Click + to add.
+                  {tf("noTruckOrderRows")}
                 </td>
               </tr>
             )}

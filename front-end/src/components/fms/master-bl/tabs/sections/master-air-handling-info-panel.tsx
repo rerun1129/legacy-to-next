@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
@@ -10,13 +11,14 @@ import type { MasterBlFormValues } from "../../master-bl-schema";
 // Master schema: airDetail.handlingInformationText (House는 handlingInformationDesc)
 export function MasterAirHandlingInfoPanel() {
   const { control } = useFormContext<MasterBlFormValues>();
+  const tp = useTranslations("fms.masterBl.entry.panels");
   const { options, placeholder } = useEnumOptions("HandlingInfoCode");
 
   return (
     <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Handling Information</span>
+        <span className="panel__title">{tp("handlingInformation")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <Controller

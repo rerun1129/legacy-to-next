@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, Minus } from "lucide-react";
 import { GridList } from "@/components/shared/grid-list";
 import { CodeBox, DateBox } from "@/components/shared/inputs";
@@ -18,6 +19,8 @@ interface Props { variant?: AnyVariantConfig }
 export function MasterAirSchedulePanel({ variant }: Props) {
   const { register, control, setValue } = useFormContext<MasterBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: "scheduleLegs" });
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
 
   const airline     = useCodeAutocomplete(CODE_SOURCES.carrierAir);
   const departure   = useCodeAutocomplete(CODE_SOURCES.portAir);
@@ -34,7 +37,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Airline"
+          label={tf("airline")}
           required
           codeProps={{ ...register("airDetail.airlineCode"), placeholder: "IATA" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -52,7 +55,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Departure"
+          label={tf("departure")}
           required
           codeProps={{ ...register("polCode"), placeholder: "UNLOC" }}
           onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -68,7 +71,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
   const widgetFields: FieldWidgetDef[] = [
     {
       key:   "airline",
-      label: "Airline",
+      label: tf("airline"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.airline`}
@@ -80,7 +83,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
     },
     {
       key:   "legs",
-      label: "Schedule Legs",
+      label: tf("scheduleLegs"),
       render: () => {
         function handleAdd() {
           append({ toCode: "", byCarrier: "", flightNo: "", onBoardDt: "", onBoardTm: "", arrivalDt: "", arrivalTm: "" });
@@ -110,7 +113,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
     },
     {
       key:   "destination",
-      label: "Destination",
+      label: tf("destination"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.destination`}
@@ -121,7 +124,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
               <CodeBox
                 kind="lcn"
                 variant="panel"
-                label="Destination"
+                label={tf("destination")}
                 required
                 codeProps={{ ...register("podCode"), placeholder: "UNLOC" }}
                 onLookup={() => {/* TODO(lookup): 모달 미구현. 별도 작업 후속. */}}
@@ -139,7 +142,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
     },
     {
       key:   "dates",
-      label: "On board / Arrival",
+      label: tf("onBoardArrival"),
       render: () => (
         <FieldItemGrid
           itemScope={`${panelScope}.dates`}
@@ -148,7 +151,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
               key: "onboard",
               render: () => (
                 <div className="li">
-                  <span className="li__label is-required">On board</span>
+                  <span className="li__label is-required">{tf("onBoard")}</span>
                   <div className="li__input">
                     <Controller
                       control={control}
@@ -173,7 +176,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
               key: "arrival",
               render: () => (
                 <div className="li">
-                  <span className="li__label is-required">Arrival</span>
+                  <span className="li__label is-required">{tf("arrival")}</span>
                   <div className="li__input">
                     <Controller
                       control={control}
@@ -204,7 +207,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
 
   return (
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">Schedule</span></div>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("schedule")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={widgetFields} />
       </div>

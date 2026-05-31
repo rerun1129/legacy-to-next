@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { TextBox }   from "@/components/shared/inputs/text-box";
@@ -12,21 +13,25 @@ interface Props {
   form?:    UseFormReturn<MasterBlFormValues>;
 }
 
+// i18n 키로 참조 — 렌더 시 tf() 통해 번역
 const AIR_CHARGE_COLS = [
-  { key: "freightCode",    label: "Code",      width: 50 },
-  { key: "currencyCode",   label: "Currency",  width: 50 },
-  { key: "per",            label: "Per",       width: 40 },
-  { key: "freightTerm",    label: "Term",      width: 50 },
-  { key: "grossWeightKg",  label: "G/W",       width: 60, numeric: true },
-  { key: "rateClass",      label: "Class",     width: 44 },
-  { key: "chargeWeightKg", label: "Chg W/T",   width: 60, numeric: true },
-  { key: "rate",           label: "Rate",      width: 60, numeric: true },
+  { key: "freightCode",    labelKey: "freight",    width: 50 },
+  { key: "currencyCode",   labelKey: "currency",   width: 50 },
+  { key: "per",            labelKey: "per",        width: 40 },
+  { key: "freightTerm",    labelKey: "freightTerm",width: 50 },
+  { key: "grossWeightKg",  labelKey: "gw",         width: 60, numeric: true },
+  { key: "rateClass",      labelKey: "rateClass",  width: 44 },
+  { key: "chargeWeightKg", labelKey: "chargeWT",   width: 60, numeric: true },
+  { key: "rate",           labelKey: "rate",       width: 60, numeric: true },
 ] as const;
 
 type ColKey = typeof AIR_CHARGE_COLS[number]["key"];
 
 export function MasterAirChargesPanel({ variant, form }: Props) {
-  // AIR 모드에서만 표示
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
+
+  // AIR 모드에서만 표시
   if (!variant || variant.mode !== "AIR") return null;
 
   if (!form) {
@@ -34,14 +39,14 @@ export function MasterAirChargesPanel({ variant, form }: Props) {
       <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Air Charges</span>
+          <span className="panel__title">{tp("chargeInformation")}</span>
         </div>
         <div style={{ overflow: "auto", flex: 1 }}>
           <table className="grid--list">
             <thead>
               <tr>
                 <th className="row-num">#</th>
-                {AIR_CHARGE_COLS.map(c => <th key={c.key} className={"numeric" in c && c.numeric ? "is-num" : ""}>{c.label}</th>)}
+                {AIR_CHARGE_COLS.map(c => <th key={c.key} className={"numeric" in c && c.numeric ? "is-num" : ""}>{tf(c.labelKey)}</th>)}
               </tr>
             </thead>
             <tbody />
@@ -51,10 +56,18 @@ export function MasterAirChargesPanel({ variant, form }: Props) {
     );
   }
 
-  return <AirChargesGrid form={form} />;
+  return <AirChargesGrid form={form} tf={tf} tp={tp} />;
 }
 
-function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
+function AirChargesGrid({
+  form,
+  tf,
+  tp,
+}: {
+  form: UseFormReturn<MasterBlFormValues>;
+  tf: ReturnType<typeof useTranslations>;
+  tp: ReturnType<typeof useTranslations>;
+}) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name:    "airCharges",
@@ -64,7 +77,7 @@ function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Air Charges</span>
+        <span className="panel__title">{tp("chargeInformation")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <button
@@ -84,7 +97,7 @@ function AirChargesGrid({ form }: { form: UseFormReturn<MasterBlFormValues> }) {
           <thead>
             <tr>
               <th className="row-num">#</th>
-              {AIR_CHARGE_COLS.map(c => <th key={c.key} className={"numeric" in c && c.numeric ? "is-num" : ""}>{c.label}</th>)}
+              {AIR_CHARGE_COLS.map(c => <th key={c.key} className={"numeric" in c && c.numeric ? "is-num" : ""}>{tf(c.labelKey)}</th>)}
               <th style={{ width: 24 }} />
             </tr>
           </thead>

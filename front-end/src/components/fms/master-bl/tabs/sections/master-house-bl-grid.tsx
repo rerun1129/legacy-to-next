@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFormContext, useFieldArray } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Minus } from "lucide-react";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { formatDateDisplay } from "@/lib/date";
@@ -32,6 +33,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
   const clearDraft  = useBLDraftStore((s) => s.clearDraft);
   const addTab      = useTabs((s) => s.addTab);
 
+  const tf = useTranslations("fms.masterBl.entry.fields");
   if (!variant) return null;
   const ml = getModeLabels(variant.mode);
 
@@ -89,7 +91,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
           >
             <Minus size={12} />
           </button>
-          <button type="button" className="btn btn--sm">House Consol</button>
+          <button type="button" className="btn btn--sm">{tf("houseConsol")}</button>
         </div>
       </div>
       <div style={{ overflow: "auto", flex: 1 }}>
@@ -130,13 +132,13 @@ export function MasterHouseBLGrid({ variant }: Props) {
               <tr>
                 <th className="row-num">#</th>
                 <th>{ml.hblNo}</th>
-                <th>Shipper</th>
-                <th>Consignee</th>
-                <th>DOC Partner</th>
-                <th className="is-num">Package</th>
-                <th className="is-num">Gross W/T</th>
-                <th className="is-num">Charge W/T</th>
-                <th className="is-num">CBM</th>
+                <th>{tf("shipper")}</th>
+                <th>{tf("consignee")}</th>
+                <th>{tf("docPartner")}</th>
+                <th className="is-num">{tf("package")}</th>
+                <th className="is-num">{tf("grossWT")}</th>
+                <th className="is-num">{tf("chargeWT")}</th>
+                <th className="is-num">{tf("cbm")}</th>
               </tr>
             </thead>
           ) : (
@@ -144,19 +146,19 @@ export function MasterHouseBLGrid({ variant }: Props) {
               <tr>
                 <th className="row-num">#</th>
                 <th>{ml.hblNo}</th>
-                <th>Shipper</th>
-                <th>Consignee</th>
-                <th>DOC Partner</th>
-                <th className="is-num">Package</th>
-                <th>Unit</th>
-                <th className="is-num">Gross W/T</th>
-                <th className="is-num">CBM</th>
-                <th>ETD</th>
-                <th>ETA</th>
-                <th>Vessel</th>
-                <th>Voyage</th>
-                <th>POL</th>
-                <th>POD</th>
+                <th>{tf("shipper")}</th>
+                <th>{tf("consignee")}</th>
+                <th>{tf("docPartner")}</th>
+                <th className="is-num">{tf("package")}</th>
+                <th>{tf("unit")}</th>
+                <th className="is-num">{tf("grossWT")}</th>
+                <th className="is-num">{tf("cbm")}</th>
+                <th>{tf("etd")}</th>
+                <th>{tf("eta")}</th>
+                <th>{tf("vesselName")}</th>
+                <th>{tf("voyageNo")}</th>
+                <th>{tf("pol")}</th>
+                <th>{tf("pod")}</th>
               </tr>
             </thead>
           )}
@@ -164,7 +166,7 @@ export function MasterHouseBLGrid({ variant }: Props) {
             {fields.length === 0 && (
               <tr>
                 <td colSpan={isAir ? 9 : 15} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
-                  No rows.
+                  {tf("noRows")}
                 </td>
               </tr>
             )}

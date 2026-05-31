@@ -1,16 +1,20 @@
+"use client";
+
 import { useFormContext, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { LineNumberTextarea } from "@/components/shared/line-number-textarea";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
 export function NatureGoodsPanel() {
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { control } = useFormContext<HouseBlFormValues>();
 
   return (
     <div className="panel" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Nature &amp; Quantity of Goods</span>
+        <span className="panel__title">{tp("natureQty")}</span>
       </div>
       <div className="panel__body" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <Controller

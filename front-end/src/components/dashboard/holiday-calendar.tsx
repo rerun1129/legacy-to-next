@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { HOLIDAY_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
@@ -25,6 +26,7 @@ function buildCalendar(year: number, month: number) {
 }
 
 export function HolidayCalendar() {
+  const t = useTranslations("fms.dashboard");
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -41,15 +43,15 @@ export function HolidayCalendar() {
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Public Holidays
+          {t("panels.publicHolidays")}
         </div>
       </div>
       <div className="mini-cal">
         <div className="mini-cal__head">
           <span className="mini-cal__title">{monthLabel}</span>
           <div className="mini-cal__nav">
-            <button onClick={prev}>‹</button>
-            <button onClick={next}>›</button>
+            <button type="button" onClick={prev}>‹</button>
+            <button type="button" onClick={next}>›</button>
           </div>
         </div>
         <div className="mini-cal__grid">

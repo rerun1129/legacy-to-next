@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import { CodeBox } from "@/components/shared/inputs";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
@@ -8,6 +9,8 @@ import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 
 export function AirPerformancePanel() {
+  const tf = useTranslations("fms.houseBl.entry.fields");
+  const tp = useTranslations("fms.houseBl.entry.panels");
   const { register, setValue } = useFormContext<HouseBlFormValues>();
 
   const actualCustomer = useCodeAutocomplete(CODE_SOURCES.customer);
@@ -20,7 +23,7 @@ export function AirPerformancePanel() {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Actual Customer"
+          label={tf("actualCustomer")}
           required
           codeProps={{ ...register("actualCustomerCode") }}
           nameProps={{ ...register("actualCustomerName") }}
@@ -38,7 +41,7 @@ export function AirPerformancePanel() {
         <CodeBox
           kind="lcn"
           variant="panel"
-          label="Settle Partner"
+          label={tf("settlePartner")}
           codeProps={{ ...register("settlePartnerCode") }}
           nameProps={{ ...register("settlePartnerName") }}
           onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -55,7 +58,7 @@ export function AirPerformancePanel() {
     <div className="panel panel--col-flex">
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Performance</span>
+        <span className="panel__title">{tp("performance")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
         <FieldItemGrid itemScope="air-performance-panel" items={PERF_ITEMS} cols={1} />

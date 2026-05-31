@@ -2,18 +2,16 @@
 
 import { Save, Trash2, Layers, SquarePen, Search, FilePlus } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { getPageTitle } from "@/lib/bl-variants";
 import type { MasterVariantConfig } from "@/lib/bl-variants";
 import type { MasterBlFormValues } from "./master-bl-schema";
-import type { ModeLabels } from "@/lib/bl-mode-labels";
 
 interface MasterBlEntryPageHeadProps {
   variant: MasterVariantConfig;
   mutation: UseMutationResult<{ id: number } | void, Error, MasterBlFormValues>;
   deleteMutation: UseMutationResult<void, Error, void>;
   isEdit: boolean;
-  modeLabels: ModeLabels;
   onResetEntry: () => void;
   onSearchBl: () => void;
   onDelete: () => Promise<void>;
@@ -27,27 +25,38 @@ const VARIANT_TO_MENU: Record<string, string> = {
   "air-imp": "FMS_MASTER_BL_AIR_IMP_ENTRY",
 };
 
+// variant → title 카탈로그 키 (mode+direction 조합 → seaExp|seaImp|airExp|airImp)
+function variantToTitleKey(variant: MasterVariantConfig): "seaExp" | "seaImp" | "airExp" | "airImp" {
+  if (variant.mode === "SEA" && variant.direction === "EXP") return "seaExp";
+  if (variant.mode === "SEA" && variant.direction === "IMP") return "seaImp";
+  if (variant.mode === "AIR" && variant.direction === "EXP") return "airExp";
+  return "airImp";
+}
+
 // NOTE: No Print button per PRD §S-04
 export function MasterBlEntryPageHead({
   variant,
   mutation,
   deleteMutation,
   isEdit,
-  modeLabels,
   onResetEntry,
   onSearchBl,
   onDelete,
   onChangeBlNo,
 }: MasterBlEntryPageHeadProps) {
+  const tt = useTranslations("fms.masterBl.entry.title");
+  const ts = useTranslations("fms.masterBl.entry.status");
+  const tc = useTranslations("common");
+
   const menuCode = VARIANT_TO_MENU[variant.key] ?? "FMS_MASTER_BL_SEA_EXP_ENTRY";
   return (
     <div className="page-head">
       <div className="page-head__title">
         <div className="page-head__title-icon"><Layers size={14} /></div>
-        {getPageTitle(variant, "Master", "Entry")}
+        {tt(variantToTitleKey(variant))}
       </div>
       <div className="page-head__meta">
-        <span className="badge badge--draft">DRAFT</span>
+        <span className="badge badge--draft">{ts("draft")}</span>
       </div>
       <div className="page-head__actions">
         <ActionButton
@@ -68,7 +77,7 @@ export function MasterBlEntryPageHead({
           type="submit"
           disabled={mutation.isPending}
         >
-          <Save size={12} style={{ marginRight: 4 }} />{mutation.isPending ? "Saving..." : "Save"}
+          <Save size={12} style={{ marginRight: 4 }} />{mutation.isPending ? tc("saving") : tc("save")}
         </ActionButton>
         <ActionButton
           buttonCode={`BTN_${menuCode}_DELETE`}

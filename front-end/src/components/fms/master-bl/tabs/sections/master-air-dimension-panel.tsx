@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Plus, Minus } from "lucide-react";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
@@ -24,16 +25,18 @@ export function MasterAirDimensionPanel() {
   const { fields, append, remove } = useFieldArray({ control, name: "dims" });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
 
   const columns = useMemo<GridColumn<DimRow>[]>(() => [
-    { key: "_no",            label: "#",          className: "row-num", width: 50,  render: (_, __, i) => i + 1 },
-    { key: "lengthCm",       label: "Length",     className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.lengthCm`)} /> },
-    { key: "widthCm",        label: "Width",      className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.widthCm`)} /> },
-    { key: "heightCm",       label: "Height",     className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.heightCm`)} /> },
-    { key: "quantity",       label: "Qty",        className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.quantity`)} /> },
-    { key: "cbm",            label: "CBM",        className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.cbm`)} /> },
-    { key: "volumeWeightKg", label: "Volume Wt.", className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.volumeWeightKg`)} /> },
-  ], [register]);
+    { key: "_no",            label: "#",                className: "row-num", width: 50,  render: (_, __, i) => i + 1 },
+    { key: "lengthCm",       label: tf("length"),       className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.lengthCm`)} /> },
+    { key: "widthCm",        label: tf("width"),        className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.widthCm`)} /> },
+    { key: "heightCm",       label: tf("height"),       className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.heightCm`)} /> },
+    { key: "quantity",       label: tf("qty"),          className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.quantity`)} /> },
+    { key: "cbm",            label: tf("cbm"),          className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.cbm`)} /> },
+    { key: "volumeWeightKg", label: tf("volumeWtCol"),  className: "is-num",  width: 80,  render: (_, __, i) => <NumericCell {...register(`dims.${i}.volumeWeightKg`)} /> },
+  ], [register, tf]);
 
   const selectedIdx = selectedKey !== null
     ? fields.findIndex(f => f.id === selectedKey)
@@ -70,7 +73,7 @@ export function MasterAirDimensionPanel() {
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Dimension</span>
+        <span className="panel__title">{tp("dimension")}</span>
         <span className="panel__rowcount">{fields.length}</span>
         <div className="panel__actions">
           <Button variant="success" size="sm" iconOnly onClick={handleAdd}><Plus size={12} /></Button>

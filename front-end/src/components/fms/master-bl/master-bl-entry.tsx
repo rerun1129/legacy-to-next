@@ -7,7 +7,8 @@ import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { TOOLBAR_TO_FIELD } from "./master-bl-schema";
+import { useTranslations } from "next-intl";
+import { TOOLBAR_FIELD_TO_RHF } from "./master-bl-schema";
 import type { MasterBlFormValues } from "./master-bl-schema";
 import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
 import { ComboBox, TextBox } from "@/components/shared/inputs";
@@ -28,14 +29,17 @@ interface Props {
   variantKey: string;
 }
 
-const TOOLBAR_SEA = ["Master Ref", "MBL No", "Line Bkg. No", "Load Type", "Service Term", "B/L Type", "Shipment Type"] as const;
-const TOOLBAR_AIR = ["Master Ref", "MAWB No", "Shipment Type", "", "", "", ""] as const;
+const TOOLBAR_SEA = ["masterRef", "mblNo", "lineBkgNo", "loadType", "serviceTerm", "blType", "shipmentType"] as const;
+const TOOLBAR_AIR = ["masterRef", "mawbNo", "shipmentType"] as const;
 
-// ComboBox로 렌더링할 enum 라벨 목록
-const TOOLBAR_ENUM_LABELS = new Set(["Load Type", "Service Term", "B/L Type", "Shipment Type"]);
+// ComboBox로 렌더링할 enum fieldId 목록
+const TOOLBAR_ENUM_FIELDS = new Set(["loadType", "serviceTerm", "blType", "shipmentType"]);
+
+// required fieldId 목록
+const REQUIRED = new Set(["masterRef", "mblNo", "mawbNo"]);
 
 function getToolbarFields(mode: string) {
-  return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR.filter(Boolean);
+  return mode === "SEA" ? TOOLBAR_SEA : TOOLBAR_AIR;
 }
 
 export function MasterBLEntry({ variantKey }: Props) {
@@ -45,6 +49,10 @@ export function MasterBLEntry({ variantKey }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const queryClient = useQueryClient();
+
+  const tb  = useTranslations("fms.masterBl.entry.toolbar");
+  const tts = useTranslations("fms.masterBl.entry.tabs");
+  const tm  = useTranslations("fms.masterBl.entry.msg");
 
   const variant = getMasterVariant(variantKey);
   const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.masterBl(variantKey)]);
@@ -74,10 +82,10 @@ export function MasterBLEntry({ variantKey }: Props) {
   const { options: shipmentTypeOptions, placeholder: shipmentTypePh } = useEnumOptions("ShipmentType");
 
   const TOOLBAR_ENUM: Record<string, { options: typeof loadTypeOptions; placeholder: string | undefined }> = {
-    "Load Type":     { options: loadTypeOptions,     placeholder: loadTypePh },
-    "Service Term":  { options: serviceTermOptions,  placeholder: serviceTermPh },
-    "B/L Type":      { options: blTypeOptions,       placeholder: blTypePh },
-    "Shipment Type": { options: shipmentTypeOptions, placeholder: shipmentTypePh },
+    loadType:     { options: loadTypeOptions,     placeholder: loadTypePh },
+    serviceTerm:  { options: serviceTermOptions,  placeholder: serviceTermPh },
+    blType:       { options: blTypeOptions,       placeholder: blTypePh },
+    shipmentType: { options: shipmentTypeOptions, placeholder: shipmentTypePh },
   };
 
   // §6.49 ⑨ — didRestoreFromDraftRef 수신하여 form.reset 시 draft 복원 시 덮어쓰기 방지
@@ -118,12 +126,12 @@ export function MasterBLEntry({ variantKey }: Props) {
     });
 
   const tabs = [
-    { key: "main",    label: "Main"    },
-    { key: "freight", label: "Freight" },
+    { key: "main",    label: tts("main")    },
+    { key: "freight", label: tts("freight") },
   ];
 
   const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
-  const loadingMessage = deleteMutation.isPending ? "삭제 중..." : mutation.isPending ? "저장 중..." : "조회 중...";
+  const loadingMessage = deleteMutation.isPending ? tm("deleting") : mutation.isPending ? tm("saving") : tm("fetching");
 
   return (
     <FormProvider {...form}>
@@ -134,7 +142,6 @@ export function MasterBLEntry({ variantKey }: Props) {
         mutation={mutation}
         deleteMutation={deleteMutation}
         isEdit={isEdit}
-        modeLabels={modeLabels}
         onResetEntry={handleResetEntry}
         onSearchBl={handleSearchBl}
         onDelete={handleDelete}
@@ -144,14 +151,15 @@ export function MasterBLEntry({ variantKey }: Props) {
       {/* Toolbar — SEA 7 필드: TextBox(3) + ComboBox+useEnumOptions(4 enum) */}
       <div className="toolbar" style={{ gridTemplateColumns: `repeat(${variant.toolbarColumnCount}, 1fr)` }}>
         {toolbarFields.map((f) => {
-          const fieldPath = TOOLBAR_TO_FIELD[f];
-          const isRequired = ["MBL No", "MAWB No", "Master Ref"].includes(f);
+          const fieldPath = TOOLBAR_FIELD_TO_RHF[f];
+          const isRequired = REQUIRED.has(f);
+          const label = tb(f);
           return (
             <div key={f} className={`field${isRequired ? " is-required" : ""}`}>
-              <div className={`field__label${isRequired ? " is-required" : ""}`}>{f}</div>
+              <div className={`field__label${isRequired ? " is-required" : ""}`}>{label}</div>
               <div className="field__input">
                 {fieldPath ? (
-                  TOOLBAR_ENUM_LABELS.has(f) ? (
+                  TOOLBAR_ENUM_FIELDS.has(f) ? (
                     <Controller
                       name={fieldPath as keyof MasterBlFormValues}
                       control={form.control}
@@ -171,7 +179,7 @@ export function MasterBLEntry({ variantKey }: Props) {
                       control={form.control}
                       render={({ field }) => (
                         <TextBox
-                          placeholder={f}
+                          placeholder={label}
                           value={(field.value as string | undefined) ?? ""}
                           onChange={field.onChange}
                           onBlur={field.onBlur}
@@ -179,9 +187,7 @@ export function MasterBLEntry({ variantKey }: Props) {
                       )}
                     />
                   )
-                ) : (
-                  <input placeholder={f || ""} />
-                )}
+                ) : null}
               </div>
             </div>
           );

@@ -1,17 +1,20 @@
 "use client";
 
 import { useFormContext, useWatch } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import type { MasterBlFormValues } from "../../master-bl-schema";
 
 export function MasterContainerGrid() {
   const { control } = useFormContext<MasterBlFormValues>();
   const rows = useWatch({ control, name: "consoledSeaContainers" }) ?? [];
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
 
   return (
     <div className="panel" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Container</span>
+        <span className="panel__title">{tp("container")}</span>
         <span className="panel__rowcount">{rows.length}</span>
       </div>
       <div style={{ overflow: "auto", flex: 1 }}>
@@ -32,23 +35,23 @@ export function MasterContainerGrid() {
           <thead>
             <tr>
               <th className="row-num">#</th>
-              <th>Container No</th>
-              <th>Type</th>
-              <th>Seal No. 1</th>
-              <th>Seal No. 2</th>
-              <th>Seal No. 3</th>
-              <th className="is-num">Pkg</th>
-              <th>Unit</th>
-              <th className="is-num">G/W</th>
-              <th className="is-num">CBM</th>
-              <th className="is-num">VGM</th>
+              <th>{tf("containerNo")}</th>
+              <th>{tf("type")}</th>
+              <th>{tf("sealNo1")}</th>
+              <th>{tf("sealNo2")}</th>
+              <th>{tf("sealNo3")}</th>
+              <th className="is-num">{tf("pkg")}</th>
+              <th>{tf("unit")}</th>
+              <th className="is-num">{tf("gw")}</th>
+              <th className="is-num">{tf("cbm")}</th>
+              <th className="is-num">{tf("vgm")}</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
                 <td colSpan={11} style={{ textAlign: "center", padding: 8, fontSize: 11, color: "var(--ink-3)" }}>
-                  No rows.
+                  {tf("noRows")}
                 </td>
               </tr>
             )}

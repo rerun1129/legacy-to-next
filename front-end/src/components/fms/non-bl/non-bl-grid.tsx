@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { useBLDraftStore } from "@/lib/use-bl-draft-store";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
@@ -13,6 +14,7 @@ import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store"
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { fmtDate } from "@/lib/grid-formatters";
 import type { NonBlRow, NonBlFilter } from "@/domain/non-bl";
+
 interface Props {
   extraFilter: NonBlFilter | null;
   currentPage: number;
@@ -29,6 +31,9 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, on
   const clearDraft = useBLDraftStore((s) => s.clearDraft);
   const { options: boundOptions } = useEnumOptions("Bound");
   const [selected, setSelected] = useState<number | null>(null);
+  const tc = useTranslations("fms.nonBl.list.cols");
+  const tl = useTranslations("fms.nonBl.list");
+  const tCommon = useTranslations("common");
 
   const { data, isFetching, error } = useQuery({
     queryKey: ["non-bl", "list", extraFilter, currentPage, pageSize],
@@ -42,10 +47,11 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, on
   const rows = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
 
-  const columns: GridColumn<NonBlRow>[] = [
+  // 컬럼 배열은 t 참조가 바뀔 때만 재계산 — useMemo([tc])로 render loop 방지
+  const columns = useMemo<GridColumn<NonBlRow>[]>(() => [
     {
       key: "nonBlNo",
-      label: "Non B/L No",
+      label: tc("nonBlNo"),
       minWidth: 150,
       render: (v, row) => (
         <div
@@ -65,48 +71,50 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, on
     },
     {
       key: "bound",
-      label: "Bound",
+      label: tc("bound"),
       minWidth: 90,
       render: (v) => {
         const code = String(v ?? '');
         return boundOptions.find(o => o.value === code)?.label ?? code;
       },
     },
-    { key: "etd", label: "ETD", minWidth: 110, render: (v) => fmtDate(v) },
-    { key: "eta", label: "ETA", minWidth: 110, render: (v) => fmtDate(v) },
-    { key: "pol", label: "POL", minWidth: 80 },
-    { key: "pod", label: "POD", minWidth: 80 },
-    { key: "vesselName", label: "Vessel", minWidth: 130 },
-    { key: "voyNo", label: "Voyage", minWidth: 80 },
-    { key: "shipperCode", label: "Shipper", minWidth: 90 },
-    { key: "shipperName", label: "Shipper Name", minWidth: 140 },
-    { key: "consigneeCode", label: "Consignee", minWidth: 90 },
-    { key: "consigneeName", label: "Consignee Name", minWidth: 150 },
-    { key: "notifyCode", label: "Notify", minWidth: 90 },
-    { key: "notifyName", label: "Notify Name", minWidth: 140 },
-    { key: "settlePartnerCode", label: "Partner", minWidth: 90 },
-    { key: "settlePartnerName", label: "Partner Name", minWidth: 140 },
-    { key: "linerCode", label: "Liner", minWidth: 80 },
-    { key: "linerName", label: "Liner Name", minWidth: 120 },
-    { key: "actualCustomerCode", label: "Actual Customer", minWidth: 110 },
-    { key: "actualCustomerName", label: "Actual Customer Name", minWidth: 160 },
-    { key: "pkgQty", label: "Package", minWidth: 80 },
-    { key: "pkgUnit", label: "Package Unit", minWidth: 90 },
-    { key: "grossWt", label: "Gross W/T", minWidth: 100, aggregate: "sum", aggregateDecimals: 3 },
-    { key: "cbm", label: "CBM", minWidth: 90, aggregate: "sum", aggregateDecimals: 3 },
-    { key: "teamCode", label: "Team", minWidth: 90 },
-    { key: "teamName", label: "Team Name", minWidth: 140 },
-  ];
+    { key: "etd", label: tc("etd"), minWidth: 110, render: (v) => fmtDate(v) },
+    { key: "eta", label: tc("eta"), minWidth: 110, render: (v) => fmtDate(v) },
+    { key: "pol", label: tc("pol"), minWidth: 80 },
+    { key: "pod", label: tc("pod"), minWidth: 80 },
+    { key: "vesselName", label: tc("vesselName"), minWidth: 130 },
+    { key: "voyNo", label: tc("voyNo"), minWidth: 80 },
+    { key: "shipperCode", label: tc("shipperCode"), minWidth: 90 },
+    { key: "shipperName", label: tc("shipperName"), minWidth: 140 },
+    { key: "consigneeCode", label: tc("consigneeCode"), minWidth: 90 },
+    { key: "consigneeName", label: tc("consigneeName"), minWidth: 150 },
+    { key: "notifyCode", label: tc("notifyCode"), minWidth: 90 },
+    { key: "notifyName", label: tc("notifyName"), minWidth: 140 },
+    { key: "settlePartnerCode", label: tc("settlePartnerCode"), minWidth: 90 },
+    { key: "settlePartnerName", label: tc("settlePartnerName"), minWidth: 140 },
+    { key: "linerCode", label: tc("linerCode"), minWidth: 80 },
+    { key: "linerName", label: tc("linerName"), minWidth: 120 },
+    { key: "actualCustomerCode", label: tc("actualCustomerCode"), minWidth: 110 },
+    { key: "actualCustomerName", label: tc("actualCustomerName"), minWidth: 160 },
+    { key: "pkgQty", label: tc("pkgQty"), minWidth: 80 },
+    { key: "pkgUnit", label: tc("pkgUnit"), minWidth: 90 },
+    { key: "grossWt", label: tc("grossWt"), minWidth: 100, aggregate: "sum", aggregateDecimals: 3 },
+    { key: "cbm", label: tc("cbm"), minWidth: 90, aggregate: "sum", aggregateDecimals: 3 },
+    { key: "teamCode", label: tc("teamCode"), minWidth: 90 },
+    { key: "teamName", label: tc("teamName"), minWidth: 140 },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [tc, boundOptions]);
+  // row-level 클릭 핸들러는 render closure 허용 — tc/boundOptions만 의존
 
   if (error) {
     return (
       <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div className="panel__head">
           <div className="panel__title-accent" />
-          <span className="panel__title">Non B/L</span>
+          <span className="panel__title">{tl("panel")}</span>
         </div>
         <div className="list-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-          <span className="text-error">데이터를 불러오지 못했습니다.</span>
+          <span className="text-error">{tCommon("loadFailed")}</span>
         </div>
       </div>
     );
@@ -116,7 +124,7 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, on
     <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Non B/L</span>
+        <span className="panel__title">{tl("panel")}</span>
         <span className="panel__rowcount">{data?.totalElements ?? 0}</span>
         <ColumnVisibilityMenu<NonBlRow> gridId="non-bl" defaultColumns={columns} />
       </div>

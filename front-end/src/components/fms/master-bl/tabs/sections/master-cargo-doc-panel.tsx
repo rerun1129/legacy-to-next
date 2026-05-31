@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext, Controller, type UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import type { AnyVariantConfig } from "@/components/widget/widget-registry";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
@@ -34,12 +35,13 @@ function LiText({ label, name }: { label: string; name: string }) {
 // ── HS Code LCN 필드 (bare: 외부 li__label 없이 label prop만) ─────────────────
 function HsCodeLcnField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const hsCodeAc = useCodeAutocomplete(CODE_SOURCES.hsCode);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="HS Code"
+      label={tf("hsCode")}
       codeProps={{ ...register("hsCode"), placeholder: "Code" }}
       nameProps={{ ...register("hsCodeName"), placeholder: "HS Code Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -55,12 +57,13 @@ function HsCodeLcnField() {
 // schema에 name 필드 없음 → nameProps는 placeholder만 (LinerLcnField와 동일 패턴)
 function SettlePartnerLcnField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const settlePartner = useCodeAutocomplete(CODE_SOURCES.partner);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="Settle Partner"
+      label={tf("settlePartner")}
       codeProps={{ ...register("settlePartnerCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Partner Name" }}
       onLookup={() => {/* TODO(lookup): Phase C에서 구현 */}}
@@ -74,12 +77,13 @@ function SettlePartnerLcnField() {
 
 function OperatorLcnField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const operatorAc = useCodeAutocomplete(CODE_SOURCES.user);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="Operator"
+      label={tf("operator")}
       required
       codeProps={{ ...register("operatorCode"), placeholder: "Code" }}
       nameProps={{ placeholder: "Operator Name" }}
@@ -94,12 +98,13 @@ function OperatorLcnField() {
 
 function TeamLcnField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const teamAc = useCodeAutocomplete(CODE_SOURCES.team);
   return (
     <CodeBox
       kind="lcn"
       variant="panel"
-      label="Team"
+      label={tf("team")}
       required
       codeProps={{ ...register("teamCode"), placeholder: "Code" }}
       nameProps={{ ...register("teamName"), placeholder: "Team Name" }}
@@ -115,10 +120,11 @@ function TeamLcnField() {
 // ── G/W 필드 ───────────────────────────────────────────────────────────────
 function GWField() {
   const { register, control } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const { options: weightUnitOptions } = useEnumOptions("WeightUnit");
   return (
     <div className="li">
-      <span className="li__label">G/W</span>
+      <span className="li__label">{tf("grossWt")}</span>
       <div className="li__input li__input--tight">
         <NumberBox variant="panel" decimalPlaces={3} {...register("grossWeightKg")} />
         <Controller
@@ -136,10 +142,11 @@ function GWField() {
 // ── Package Qty 필드 ────────────────────────────────────────────────────────
 function PackageField() {
   const { register, setValue } = useFormContext<MasterBlFormValues>();
+  const tf = useTranslations("fms.masterBl.entry.fields");
   const pkgUnit = useCodeAutocomplete(CODE_SOURCES.packageUnit);
   return (
     <div className="li">
-      <span className="li__label">Package</span>
+      <span className="li__label">{tf("package")}</span>
       <div className="li__input li__input--tight">
         <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
         {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능) */}
@@ -161,17 +168,20 @@ function PackageField() {
 }
 
 export function MasterCargoDocPanel({ variant }: Props) {
+  const tp = useTranslations("fms.masterBl.entry.panels");
+  const tf = useTranslations("fms.masterBl.entry.fields");
+
   if (!variant) return null;
   const isSea      = variant.mode === "SEA";
   const panelScope = `master-cargo-doc.${variant.key}`;
 
   const cargoBase: FieldItemDef[] = [
-    { key: "main-item", render: () => <LiText label="Main Item" name="mainItemName" /> },
+    { key: "main-item", render: () => <LiText label={tf("mainItem")} name="mainItemName" /> },
     { key: "package",   render: () => <PackageField /> },
     { key: "gw",        render: () => <GWField /> },
     { key: "cbm",       render: () => (
       <div className="li">
-        <span className="li__label">CBM</span>
+        <span className="li__label">{tf("cbm")}</span>
         <div className="li__input"><NumberBox variant="panel" name="cbm" decimalPlaces={3} /></div>
       </div>
     )},
@@ -180,7 +190,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const cargoExtras: FieldItemDef[] = isSea
     ? [{ key: "r-ton", render: () => (
         <div className="li">
-          <span className="li__label">R/Ton</span>
+          <span className="li__label">{tf("rton")}</span>
           {/* §6.64 — schema는 seaDetail.rton path. 마이그레이션 잔존 'rTon'은 미연결 path였음 */}
           <div className="li__input"><NumberBox variant="panel" name="seaDetail.rton" decimalPlaces={3} /></div>
         </div>
@@ -188,17 +198,17 @@ export function MasterCargoDocPanel({ variant }: Props) {
     : [
         { key: "vol-wt",     render: () => (
           <div className="li">
-            <span className="li__label">Volume W/T</span>
+            <span className="li__label">{tf("volumeWt")}</span>
             <div className="li__input"><NumberBox variant="panel" name="volWeight" decimalPlaces={3} /></div>
           </div>
         )},
         { key: "charge-wt",  render: () => (
           <div className="li">
-            <span className="li__label">Charge W/T</span>
+            <span className="li__label">{tf("chargeWt")}</span>
             <div className="li__input"><NumberBox variant="panel" name="chargeWeight" decimalPlaces={3} /></div>
           </div>
         )},
-        { key: "rate-class", render: () => <LiText label="Rate Class" name="rateClass" /> },
+        { key: "rate-class", render: () => <LiText label={tf("rateClass")} name="rateClass" /> },
       ];
 
   const cargoItems = [...cargoBase, ...cargoExtras];
@@ -210,36 +220,36 @@ export function MasterCargoDocPanel({ variant }: Props) {
   ];
 
   const airDocBase: FieldItemDef[] = [
-    { key: "co-load-type", render: () => <LiText label="Co-Load Type" name="coLoadType" /> },
-    { key: "flight-type",  render: () => <LiText label="Flight Type"  name="flightType" /> },
+    { key: "co-load-type", render: () => <LiText label={tf("coLoadType")} name="coLoadType" /> },
+    { key: "flight-type",  render: () => <LiText label={tf("flightType")} name="flightType" /> },
   ];
   const airDocSec: FieldItemDef[] = variant.direction === "EXP"
-    ? [{ key: "security", render: () => <LiText label="Security Status" name="securityStatus" /> }]
+    ? [{ key: "security", render: () => <LiText label={tf("securityStatus")} name="securityStatus" /> }]
     : [];
   const airDocTail: FieldItemDef[] = [
-    { key: "settle",   render: () => <LiText label="Settle Partner" name="settlePartnerCode" /> },
-    { key: "operator", render: () => <LiText label="Operator"       name="operatorCode" /> },
-    { key: "team",     render: () => <LiText label="Team"           name="teamCode" /> },
+    { key: "settle",   render: () => <LiText label={tf("settlePartner")} name="settlePartnerCode" /> },
+    { key: "operator", render: () => <LiText label={tf("operator")}      name="operatorCode" /> },
+    { key: "team",     render: () => <LiText label={tf("team")}          name="teamCode" /> },
   ];
 
   const docItems = isSea ? seaDoc : [...airDocBase, ...airDocSec, ...airDocTail];
 
   const fields: FieldWidgetDef[] = [
     {
-      key: "cargo", label: "Cargo",
+      key: "cargo", label: tf("cargo"),
       render: () => (
         <>
-          <div className="subhead"><div className="subhead__bar" />Cargo</div>
+          <div className="subhead"><div className="subhead__bar" />{tf("cargo")}</div>
           <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} />
           <FieldItemGrid itemScope={`${panelScope}.hs`} items={[{ key: "hs-code", render: () => <HsCodeLcnField /> }]} cols={1} />
         </>
       ),
     },
     {
-      key: "document", label: "Document",
+      key: "document", label: tf("document"),
       render: () => (
         <>
-          <div className="subhead"><div className="subhead__bar" />Document</div>
+          <div className="subhead"><div className="subhead__bar" />{tf("document")}</div>
           <FieldItemGrid itemScope={`${panelScope}.document`} items={docItems} cols={1} />
         </>
       ),
@@ -250,7 +260,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
     <div className="panel master-cargo-doc-panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head">
         <div className="panel__title-accent" />
-        <span className="panel__title">Cargo &amp; Document</span>
+        <span className="panel__title">{tp("cargoDocument")}</span>
       </div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
         <FieldWidgetList panelScope={panelScope} fields={fields} />

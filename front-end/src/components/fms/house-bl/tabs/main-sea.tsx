@@ -36,13 +36,18 @@ const HOUSE_BL_SEA_BASE_REGISTRY: WidgetDef[] = [
 export const HOUSE_BL_SEA_REGISTRY = HOUSE_BL_SEA_BASE_REGISTRY;
 
 export function MainTabSea({ variant, active }: Props) {
+  // 훅은 모든 조건 분기보다 먼저 호출 (Rules of Hooks)
   const tp = useTranslations("fms.houseBl.entry.panels");
 
-  // labelKey があるエントリーのみ label を上書き。
-  // useMemo のメモ化で locale 切替時も余計な再生成を抑える。
-  // WidgetGrid の layout 保持は scope+key ベースなので registry 参照変更は無害。
+  // labelKey があるエントリーのみ label を上書き。locale 切替時も安定。
   const seaRegistry = useMemo(
     () => HOUSE_BL_SEA_BASE_REGISTRY.map(w => w.labelKey ? { ...w, label: tp(w.labelKey) } : w),
+    [tp]
+  );
+
+  // NON_BL 전용: 공통 WIDGET_REGISTRY도 동일 방식으로 지역화
+  const nonBlRegistry = useMemo(
+    () => WIDGET_REGISTRY.map(w => w.labelKey ? { ...w, label: tp(w.labelKey) } : w),
     [tp]
   );
 
@@ -61,7 +66,7 @@ export function MainTabSea({ variant, active }: Props) {
     return <WidgetGrid scope={scope} variant={variant} registry={seaRegistry} active={active} />;
   }
 
-  // NON_BL 등 나머지: 기존 공통 위젯 레지스트리 사용 (영향 회피)
+  // NON_BL 등 나머지: 지역화된 레지스트리 사용 (base label은 영어 fallback 유지)
   const scope = `house-bl-entry.main.${variant.key}`;
-  return <WidgetGrid scope={scope} variant={variant} registry={WIDGET_REGISTRY} active={active} />;
+  return <WidgetGrid scope={scope} variant={variant} registry={nonBlRegistry} active={active} />;
 }

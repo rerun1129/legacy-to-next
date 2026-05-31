@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FileText, Layers, Search, Printer, Receipt, FolderOpen } from "lucide-react";
 import { SHORTCUT_DATA } from "@/lib/mock-data";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
@@ -6,12 +9,14 @@ import { SHORTCUT_DATA } from "@/lib/mock-data";
 const icons = [FileText, Layers, Search, Printer, Receipt, FolderOpen];
 
 export function Shortcuts() {
+  const t = useTranslations("fms.dashboard");
+
   return (
     <div className="dash-panel">
       <div className="dash-panel__head">
         <div className="dash-panel__title">
           <div className="dash-panel__title-accent" />
-          Quick Access
+          {t("panels.quickAccess")}
         </div>
       </div>
       <div className="shortcut-grid">
