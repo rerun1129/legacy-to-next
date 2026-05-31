@@ -66,7 +66,6 @@ export function PlainGridList<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
-  totalAggregates,
 }: Omit<GridListProps<T>, "gridId">) {
   const { colWidths, handleResizePointerDown } = useColResize();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -287,7 +286,6 @@ export function PlainGridList<T>({
           <GridFooter<T>
             columns={resolvedColumns}
             data={data}
-            totalAggregates={totalAggregates}
             selectable={selectable}
           />
         )}

@@ -42,7 +42,6 @@ export function ManagedGridList<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
-  totalAggregates,
 }: GridListProps<T> & { gridId: string }) {
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
@@ -306,7 +305,6 @@ export function ManagedGridList<T>({
             <GridFooter<T>
               columns={visibleColumns}
               data={data}
-              totalAggregates={totalAggregates}
               selectable={selectable}
             />
           )}
