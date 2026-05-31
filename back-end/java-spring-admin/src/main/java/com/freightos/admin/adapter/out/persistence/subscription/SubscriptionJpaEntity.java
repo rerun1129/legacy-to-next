@@ -29,7 +29,7 @@ public class SubscriptionJpaEntity extends BaseJpaEntity {
     @Column(name = "subscriber_id", nullable = false, updatable = false)
     private Long subscriberId;
 
-    /** FK → admin.module.module_code (Plain String, @ManyToOne 미사용) */
+    /** module 값 (admin.attribute_value attribute_key='module'; FK 없음, Plain String, @ManyToOne 미사용) */
     @Column(name = "module_code", nullable = false, length = 40, updatable = false)
     private String moduleCode;
 
