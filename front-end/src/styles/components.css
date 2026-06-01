@@ -177,13 +177,19 @@
 .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 22px; row-gap: 6px; align-items: center; }
 /* Quick Search 사이드바 패널(~380px)용 단일 열 오버라이드 — 전역 .filter-grid 변경 금지 */
 .quick-search__grid { grid-template-columns: 1fr; column-gap: 0; row-gap: 8px; }
-.quick-search__grid .lcn { grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr); }
+.search-card .quick-search__grid .lcn { grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr); }
 .search-card .lcn { display: grid; grid-template-columns: 112px minmax(110px, 0.85fr) minmax(0, 1.35fr); gap: 6px; padding: 0; align-items: center; }
 .search-card .lcn__label { text-align: left; padding-right: 0; font-size: var(--fs-xs); color: var(--ink-3); letter-spacing: 0.01em; }
 .search-card .lcn__select { grid-column: 2 / span 2; height: 22px; padding: 0 8px; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); min-width: 0; }
 .lcn__daterange { grid-column: 2 / span 2; display: flex; align-items: center; gap: 4px; position: relative; min-width: 0; }
 .lcn__daterange > input { flex: 1 1 0; min-width: 0; height: 26px; padding: 0 8px; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); font-family: var(--font-mono); }
 .lcn__tilde { font-size: 11px; color: var(--ink-4); }
+
+/* Quick Search 패널 — B/L No 메인 검색 필드 (필터 그룹과 구분, 강조) */
+.quick-search-panel__bl-search { margin-top: 10px; padding: 12px 8px 0; border-top: 1px solid var(--border); }
+.quick-search-panel__bl-search .lcn { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 0; }
+.quick-search-panel__bl-search .lcn__label { text-align: left; padding-right: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--ink); white-space: nowrap; }
+.quick-search-panel__bl-search .lcn__code > input { width: 100%; height: 30px; font-size: 13px; padding: 0 28px 0 10px; }
 
 .panel--list { overflow: hidden; }
 .panel--list .panel__body--flush { flex: 1; min-height: 0; display: flex; }
