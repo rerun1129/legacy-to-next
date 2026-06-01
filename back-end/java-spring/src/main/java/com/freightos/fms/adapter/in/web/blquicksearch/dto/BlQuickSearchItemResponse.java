@@ -5,7 +5,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * BL 자동완성 응답 아이템.
- * label 포맷: "blNo · POL→POD · ETD" (구분자 " · ", 화살표 "→", null/공백 슬롯은 생략).
+ * label 포맷: "POL→POD · ETD - ETA" (구분자 " · ", 화살표 "→", 날짜 범위 " - ", null/공백 슬롯은 생략).
  */
 public record BlQuickSearchItemResponse(
     Long id,
@@ -37,19 +37,25 @@ public record BlQuickSearchItemResponse(
 
     private static String buildLabel(BlQuickSearchSummary s) {
         StringBuilder sb = new StringBuilder();
-        if (StringUtils.hasText(s.blNo())) {
-            sb.append(s.blNo());
-        }
         String route = buildRoute(s.polCode(), s.podCode());
         if (StringUtils.hasText(route)) {
-            if (sb.length() > 0) sb.append(" · ");
             sb.append(route);
         }
-        if (StringUtils.hasText(s.etd())) {
+        String dateRange = buildDateRange(s.etd(), s.eta());
+        if (StringUtils.hasText(dateRange)) {
             if (sb.length() > 0) sb.append(" · ");
-            sb.append(s.etd());
+            sb.append(dateRange);
         }
         return sb.toString();
+    }
+
+    private static String buildDateRange(String etd, String eta) {
+        boolean hasEtd = StringUtils.hasText(etd);
+        boolean hasEta = StringUtils.hasText(eta);
+        if (hasEtd && hasEta) return etd + " - " + eta;
+        if (hasEtd) return etd;
+        if (hasEta) return eta;
+        return "";
     }
 
     private static String buildRoute(String pol, String pod) {

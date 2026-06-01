@@ -14,5 +14,12 @@ public record BlQuickSearchSummary(
     String shipperCode,
     String polCode,
     String podCode,
-    String etd
-) {}
+    String etd,
+    String eta
+) {
+    /** 하위호환: eta 미지정(9-인자) 호출부 보존 (기존 테스트 등). 코더는 테스트를 수정하지 말 것. */
+    public BlQuickSearchSummary(Long id, String blType, String blNo, String jobDiv, String bound,
+                                String shipperCode, String polCode, String podCode, String etd) {
+        this(id, blType, blNo, jobDiv, bound, shipperCode, polCode, podCode, etd, null);
+    }
+}

@@ -39,7 +39,8 @@ public class BlQuickSearchRepositoryImpl implements BlQuickSearchRepositoryCusto
                         h.shipperCode,
                         h.polCode,
                         h.podCode,
-                        h.etd))
+                        h.etd,
+                        h.eta))
                 .from(h)
                 .where(
                         Nullables.mapOrNull(filter.jobDiv(), h.jobDiv::eq),
@@ -76,7 +77,8 @@ public class BlQuickSearchRepositoryImpl implements BlQuickSearchRepositoryCusto
                         m.shipperCode,
                         m.polCode,
                         m.podCode,
-                        m.etd))
+                        m.etd,
+                        m.eta))
                 .from(m)
                 .where(
                         Nullables.mapOrNull(masterJobDiv, m.jobDiv::eq),
