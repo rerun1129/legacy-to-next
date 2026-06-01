@@ -14,10 +14,13 @@ import {
 const linerItems:     FieldItemDef[] = [{ key: "liner",      render: () => <LinerLcnField /> }];
 const vesselItems:    FieldItemDef[] = [{ key: "vessel",     render: () => <VesselField /> },  { key: "voyage",    render: () => <VoyageField /> }];
 const dateItems:      FieldItemDef[] = [{ key: "etd",        render: () => <EtdField /> },     { key: "eta",       render: () => <EtaField /> }];
-const porItems:       FieldItemDef[] = [{ key: "por",        render: () => <PorField /> }];
-const polItems:       FieldItemDef[] = [{ key: "pol",        render: () => <PolField /> }];
-const podItems:       FieldItemDef[] = [{ key: "pod",        render: () => <PodField /> }];
-const finalDestItems: FieldItemDef[] = [{ key: "final-dest", render: () => <FinalDestField /> }];
+// POR/POL/POD/Final Dest를 cols=2 단일 위젯으로 묶어 좌우 이동·전체/분할 토글 활성화
+const portItems:      FieldItemDef[] = [
+  { key: "por",        render: () => <PorField /> },
+  { key: "pol",        render: () => <PolField /> },
+  { key: "pod",        render: () => <PodField /> },
+  { key: "final-dest", render: () => <FinalDestField /> },
+];
 const issueDateItems: FieldItemDef[] = [{ key: "issue-date", render: () => <IssueDateField /> }];
 
 // ── SEA schedule FieldWidgetDef 배열 빌더 ───────────────────────────────────
@@ -38,13 +41,10 @@ export function buildSeaFields(
   });
 
   const common: FieldWidgetDef[] = [
-    mk("liner",      l("liner",      "Liner"),             linerItems,     1),
-    mk("vessel",     l("vesselVoyage", "Vessel / Voyage"), vesselItems,    2),
-    mk("dates",      `${l("etd", "ETD")} / ${l("eta", "ETA")}`, dateItems, 2),
-    mk("por",        l("por",        "POR"),               porItems,       1),
-    mk("pol",        l("pol",        "POL"),               polItems,       1),
-    mk("pod",        l("pod",        "POD"),               podItems,       1),
-    mk("final-dest", l("finalDest",  "Final Dest."),       finalDestItems, 1),
+    mk("liner",  l("liner",      "Liner"),             linerItems,  1),
+    mk("vessel", l("vesselVoyage", "Vessel / Voyage"), vesselItems, 2),
+    mk("dates",  `${l("etd", "ETD")} / ${l("eta", "ETA")}`, dateItems, 2),
+    mk("ports",  l("ports",      "Ports"),             portItems,   2),
   ];
 
   return isExp
