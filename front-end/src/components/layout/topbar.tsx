@@ -14,10 +14,12 @@ import { useFieldLayout } from "@/lib/use-field-layout";
 import { LanguageToggle } from "./language-toggle";
 
 const SIDEBAR_W = 220;
+const QUICK_SEARCH_W = 380; // shell.css 의 .app.is-side-quicksearch 사이드바 폭과 반드시 일치
 
 interface Props {
   onToggleSidebar: () => void;
   sidebarCollapsed: boolean;
+  quickSearchOpen: boolean;
 }
 
 interface DragState {
@@ -28,7 +30,7 @@ interface DragState {
   tabWidth: number;
 }
 
-export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
+export function Topbar({ onToggleSidebar, sidebarCollapsed, quickSearchOpen }: Props) {
   const pathname = usePathname();
   const router   = useRouter();
   const { tabs, removeTab, initFromPath, reorderTabs, closeOtherTabs, closeTabsToRight, closeTabsToLeft, clearTabs } = useTabs();
@@ -212,7 +214,8 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
           style={{
             display: "flex", alignItems: "center", flexShrink: 0, overflow: "hidden",
             borderRight: "1px solid var(--border)", padding: "0 4px",
-            width: sidebarCollapsed ? 68 : SIDEBAR_W, minWidth: sidebarCollapsed ? 68 : SIDEBAR_W,
+            width: quickSearchOpen ? QUICK_SEARCH_W : sidebarCollapsed ? 68 : SIDEBAR_W,
+            minWidth: quickSearchOpen ? QUICK_SEARCH_W : sidebarCollapsed ? 68 : SIDEBAR_W,
             transition: "width 180ms ease, min-width 180ms ease",
           }}
         >

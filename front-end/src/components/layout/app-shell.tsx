@@ -14,6 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Topbar
         onToggleSidebar={() => setCollapsed((v) => !v)}
         sidebarCollapsed={collapsed}
+        quickSearchOpen={quickSearch}
       />
       <Sidebar
         quickSearchOpen={quickSearch}
