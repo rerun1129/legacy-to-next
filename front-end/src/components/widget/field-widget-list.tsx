@@ -2,7 +2,6 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useWidgetLayout }      from "@/lib/use-widget-layout";
-import { useCurrentUser }       from "@/lib/use-current-user";
 import { useFieldLayout }       from "@/lib/use-field-layout";
 import { FieldWidgetContainer } from "./field-widget-container";
 
@@ -27,10 +26,8 @@ interface Props {
 }
 
 export function FieldWidgetList({ panelScope, fields }: Props) {
-  const { editMode }      = useWidgetLayout();
-  const { currentUserId } = useCurrentUser();
-  const fullScope         = `${currentUserId}.${panelScope}`;
-  const defaultOrder      = useMemo(() => fields.map(f => f.key), [fields]);
+  const { editMode }  = useWidgetLayout();
+  const defaultOrder  = useMemo(() => fields.map(f => f.key), [fields]);
 
   const { getFieldLayout, initFieldLayout, reorderFields, hideField, showField, resetFieldLayout } =
     useFieldLayout();
@@ -39,10 +36,10 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
   useLayoutEffect(() => { initFieldLayoutRef.current = initFieldLayout; });
 
   useEffect(() => {
-    initFieldLayoutRef.current(fullScope, defaultOrder);
-  }, [fullScope, defaultOrder]);
+    initFieldLayoutRef.current(panelScope, defaultOrder);
+  }, [panelScope, defaultOrder]);
 
-  const layout = getFieldLayout(fullScope, defaultOrder);
+  const layout = getFieldLayout(panelScope, defaultOrder);
 
   const visibleDefs = layout.order
     .map(k => fields.find(f => f.key === k))
@@ -108,7 +105,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
 
     const onUp = () => {
       if (latestInsert !== origIndex && Math.abs(latestDeltaY) > 4) {
-        reorderFields(fullScope, origIndex, latestInsert);
+        reorderFields(panelScope, origIndex, latestInsert);
       }
       setDragState(null);
       window.removeEventListener("mousemove", onMove);
@@ -133,7 +130,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
               label={def.label}
               editMode={editMode}
               canHide={!def.alwaysVisible}
-              onHide={() => hideField(fullScope, def.key)}
+              onHide={() => hideField(panelScope, def.key)}
               onDragStart={ev => handleDragStart(ev, def.key)}
             >
               {def.render()}
@@ -149,7 +146,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
               type="button"
               key={def.key}
               className="field-widget-hidden-pill"
-              onClick={() => showField(fullScope, def.key)}
+              onClick={() => showField(panelScope, def.key)}
             >
               + {def.label}
             </button>
@@ -157,7 +154,7 @@ export function FieldWidgetList({ panelScope, fields }: Props) {
           <button
             type="button"
             className="field-widget-hidden-pill field-widget-hidden-pill--reset"
-            onClick={() => resetFieldLayout(fullScope, defaultOrder)}
+            onClick={() => resetFieldLayout(panelScope, defaultOrder)}
           >
             초기화
           </button>

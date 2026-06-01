@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GripHorizontal, X, Plus, Trash2 } from "lucide-react";
 import { useWidgetLayout }  from "@/lib/use-widget-layout";
-import { useCurrentUser }   from "@/lib/use-current-user";
 import { useFieldLayout }   from "@/lib/use-field-layout";
 
 export interface FieldItemDef {
@@ -40,10 +39,8 @@ const parseSlot = (k: string): [number, number] => {
 };
 
 export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControls = true }: Props) {
-  const { editMode }      = useWidgetLayout();
-  const { currentUserId } = useCurrentUser();
-  const fullScope         = `${currentUserId}.${itemScope}`;
-  const defaultOrder      = useMemo(() => items.map(i => i.key), [items]);
+  const { editMode }  = useWidgetLayout();
+  const defaultOrder  = useMemo(() => items.map(i => i.key), [items]);
 
   const {
     getFieldLayout, initFieldLayout, initItemRows,
@@ -52,14 +49,14 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
   } = useFieldLayout();
 
   useEffect(() => {
-    initFieldLayout(fullScope, defaultOrder);
-  }, [fullScope, defaultOrder, initFieldLayout]);
+    initFieldLayout(itemScope, defaultOrder);
+  }, [itemScope, defaultOrder, initFieldLayout]);
 
   useEffect(() => {
-    initItemRows(fullScope, defaultOrder, cols);
-  }, [fullScope, defaultOrder, cols, initItemRows]);
+    initItemRows(itemScope, defaultOrder, cols);
+  }, [itemScope, defaultOrder, cols, initItemRows]);
 
-  const layout    = getFieldLayout(fullScope, defaultOrder);
+  const layout    = getFieldLayout(itemScope, defaultOrder);
   const rowModes  = layout.rowModes  ?? {};
   const splitCols = layout.splitCols ?? {};
   const rowIds    = layout.rowIds    ?? [];
@@ -134,9 +131,9 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
       if (latestOver && (Math.abs(latestDX) > 4 || Math.abs(latestDY) > 4)) {
         if (isSlotKey(latestOver)) {
           const [rowIdx, slotIdx] = parseSlot(latestOver);
-          moveItemToSlot(fullScope, key, rowIdx, slotIdx);
+          moveItemToSlot(itemScope, key, rowIdx, slotIdx);
         } else {
-          swapFields(fullScope, key, latestOver);
+          swapFields(itemScope, key, latestOver);
         }
       }
       setDragState(null);
@@ -171,27 +168,29 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
 
         return (
           <div key={rowIds[rowIdx] ?? `r${rowIdx}-${keys.join('|')}`} style={{ marginBottom: 2 }}>
-            {/* 행 컨트롤 바 */}
-            {editMode && (
+            {/* 행 컨트롤 바: cols=1 && shouldShowRowControls=false 이면 표시 불필요 */}
+            {editMode && (cols > 1 || shouldShowRowControls) && (
               <div className="field-item-row-bar">
                 <div style={{ flex: 1 }} />
-                {isSingle && (
+                {isSingle && cols > 1 && (
                   <button type="button" className="field-item-row-btn" onMouseDown={e => e.stopPropagation()}
-                    onClick={() => setSplitCol(fullScope, rowIdx, (splitCol % cols) + 1)}>
+                    onClick={() => setSplitCol(itemScope, rowIdx, (splitCol % cols) + 1)}>
                     {splitCol === 1 ? "← 좌측" : splitCol === cols ? "→ 우측" : `${splitCol}번째`}
                   </button>
                 )}
-                <button type="button" className="field-item-row-btn field-item-row-btn--mode"
-                  onMouseDown={e => e.stopPropagation()}
-                  onClick={() => setRowMode(fullScope, rowIdx, mode === "full" ? "split" : "full")}>
-                  {mode === "full" ? "전체" : "분할"}
-                </button>
+                {cols > 1 && (
+                  <button type="button" className="field-item-row-btn field-item-row-btn--mode"
+                    onMouseDown={e => e.stopPropagation()}
+                    onClick={() => setRowMode(itemScope, rowIdx, mode === "full" ? "split" : "full")}>
+                    {mode === "full" ? "전체" : "분할"}
+                  </button>
+                )}
                 {shouldShowRowControls && (
                   <button
                     type="button"
                     className={`field-item-row-btn field-item-row-btn--delete${!isEmpty ? " is-disabled" : ""}`}
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => isEmpty && deleteItemRow(fullScope, rowIdx)}
+                    onClick={() => isEmpty && deleteItemRow(itemScope, rowIdx)}
                     title={isEmpty ? "행 삭제" : "아이템을 모두 이동 후 삭제 가능"}
                     disabled={!isEmpty}
                   >
@@ -236,7 +235,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
                         </div>
                         <button type="button" className="field-item-cell-close"
                           onMouseDown={e => e.stopPropagation()}
-                          onClick={() => hideField(fullScope, k)} title="숨기기">
+                          onClick={() => hideField(itemScope, k)} title="숨기기">
                           <X size={8} />
                         </button>
                       </>
@@ -252,7 +251,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
 
       {/* 행 추가 버튼 */}
       {editMode && shouldShowRowControls && (
-        <button type="button" className="field-item-add-row" onClick={() => addItemRow(fullScope)}>
+        <button type="button" className="field-item-add-row" onClick={() => addItemRow(itemScope)}>
           <Plus size={10} /> 행 추가
         </button>
       )}
@@ -262,7 +261,7 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
         <div className="field-item-hidden-bar">
           {hiddenItems.map(item => (
             <button type="button" key={item.key} className="field-widget-hidden-pill"
-              onClick={() => showField(fullScope, item.key)}>
+              onClick={() => showField(itemScope, item.key)}>
               + {item.label ?? inferLabel(item.key)}
             </button>
           ))}

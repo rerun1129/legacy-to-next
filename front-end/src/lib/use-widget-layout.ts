@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { backendLayoutStorage, setLayoutPersistPaused } from "./backend-layout-storage";
 
 export type WidgetKey = string; // 엔트리 타입별로 다른 위젯 키 사용 가능
 
@@ -45,8 +46,8 @@ export const useWidgetLayout = create<LayoutStore>()(
       editMode:  false,
       canEdit:   true,
 
-      setEditMode(on) { set({ editMode: on }); },
-      setCanEdit(on)  { set({ canEdit: on, ...(!on && { editMode: false }) }); },
+      setEditMode(on) { setLayoutPersistPaused(on); set({ editMode: on }); },
+      setCanEdit(on)  { if (!on) setLayoutPersistPaused(false); set({ canEdit: on, ...(!on && { editMode: false }) }); },
 
       // useEffect 에서만 호출 — 레이아웃이 없을 때 초기값을 스토어에 저장
       initLayout(scope, defaults) {
@@ -174,12 +175,10 @@ export const useWidgetLayout = create<LayoutStore>()(
     }),
     {
       name: "fms.widgetLayouts.v1",
-      // snapshots는 편집 중 임시 데이터이므로 localStorage에 저장하지 않음
-      partialize: (state) => ({
-        layouts:  state.layouts,
-        editMode: state.editMode,
-        canEdit:  state.canEdit,
-      }),
+      storage: createJSONStorage(() => backendLayoutStorage),
+      // snapshots는 편집 중 임시 데이터이므로 영속 대상 제외
+      // editMode/canEdit는 UI 세션 플래그이므로 서버 영속화 대상에서 제외
+      partialize: (state) => ({ layouts: state.layouts }),
     }
   )
 );

@@ -4,7 +4,8 @@
 // getFieldLayout 단일 진입점에 묶여 있어 store/getter 분리 시 정합 깨짐. 분리 보류.
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { backendLayoutStorage } from "./backend-layout-storage";
 
 export interface FieldLayout {
   order:      string[];          // 섹션 순서 (FieldWidgetList 전용)
@@ -23,6 +24,7 @@ function nextRowId() { return `r${++_rowSeq}`; }
 
 interface FieldLayoutStore {
   layouts:          Record<string, FieldLayout>;
+  snapshot:         Record<string, FieldLayout> | null;
   getFieldLayout:   (scope: string, defaults: string[]) => FieldLayout;
   initFieldLayout:  (scope: string, defaults: string[]) => void;
   initItemRows:     (scope: string, items: string[], cols?: number) => void;
@@ -36,12 +38,17 @@ interface FieldLayoutStore {
   resetFieldLayout: (scope: string, defaults: string[]) => void;
   setRowMode:       (scope: string, rowIdx: number, mode: "full" | "split") => void;
   setSplitCol:      (scope: string, rowIdx: number, col: number) => void;
+  beginEdit:        () => void;
+  commitEdit:       () => void;
+  revertEdit:       () => void;
+  resetAll:         () => void;
 }
 
 export const useFieldLayout = create<FieldLayoutStore>()(
   persist(
     (set, get) => ({
       layouts: {},
+      snapshot: null,
 
       // === Read ===
       getFieldLayout(scope, defaults) {
@@ -352,7 +359,22 @@ export const useFieldLayout = create<FieldLayoutStore>()(
           return { layouts: { ...s.layouts, [scope]: { ...base, splitCols } } };
         });
       },
+
+      // === Edit lifecycle ===
+      // StrictMode/다중 그리드 보호: 스냅샷이 이미 있으면 no-op
+      beginEdit() { if (get().snapshot) return; set({ snapshot: structuredClone(get().layouts) }); },
+      // 저장 확정: 스냅샷만 비움(변경 유지). set()이 persist를 트리거함.
+      commitEdit() { set({ snapshot: null }); },
+      // 취소: 스냅샷이 있으면 layouts 복원 후 비움
+      revertEdit() { const snap = get().snapshot; if (!snap) return; set({ layouts: snap, snapshot: null }); },
+      // 롤백: 전체 필드 레이아웃 초기화. 스냅샷은 보존(닫기 시 pre-edit로 복원되게).
+      resetAll() { set({ layouts: {} }); },
     }),
-    { name: "fms.fieldLayouts.v1" }
+    {
+      name: "fms.fieldLayouts.v1",
+      storage: createJSONStorage(() => backendLayoutStorage),
+      // snapshot은 편집 중 임시 데이터이므로 영속 대상 제외
+      partialize: (s) => ({ layouts: s.layouts }),
+    }
   )
 );

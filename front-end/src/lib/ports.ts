@@ -34,6 +34,7 @@ import { apiUserPermissionPresetPort } from '@/adapter/out/api/access/user-permi
 import { API_TEAM_PORT } from '@/adapter/out/api/team';
 import { API_SUBSCRIBER_PORT } from '@/adapter/out/api/subscriber';
 import { API_SUBSCRIPTION_PORT } from '@/adapter/out/api/subscription';
+import { API_UI_LAYOUT_PORT } from '@/adapter/out/api/ui-layout';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -70,3 +71,4 @@ export const accessUserPermissionPresetPort = apiUserPermissionPresetPort;
 export const teamPort = API_TEAM_PORT;
 export const subscriberPort = API_SUBSCRIBER_PORT;
 export const subscriptionPort = API_SUBSCRIPTION_PORT;
+export const uiLayoutPort = API_UI_LAYOUT_PORT;

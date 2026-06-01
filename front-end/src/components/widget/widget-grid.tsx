@@ -5,7 +5,8 @@ import GridLayout, { type Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
-import { useCurrentUser }  from "@/lib/use-current-user";
+import { useFieldLayout } from "@/lib/use-field-layout";
+import { setLayoutPersistPaused } from "@/lib/backend-layout-storage";
 import { WidgetContainer } from "./widget-container";
 import { WidgetPalette }   from "./widget-palette";
 import type { WidgetDef, AnyVariantConfig } from "./widget-registry";
@@ -47,17 +48,25 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  const currentUserId = useCurrentUser(s => s.currentUserId);
-  const userScope = `${currentUserId}.${scope}`;
-
   const { editMode, initLayout, getLayout, moveWidget, resizeWidget, hideWidget, showWidget, resetLayout, beginEdit, commitEdit, revertEdit } = useWidgetLayout();
+
+  // react-grid-layout v2의 layout prop은 초기값(uncontrolled)이라 마운트 후 스토어 변경이 자동 반영되지 않음.
+  // 외부에서 레이아웃을 재설정(롤백·편집 종료)할 때 key를 바꿔 GridLayout을 remount시킨다.
+  const [gridEpoch, setGridEpoch] = useState(0);
+  const wasEditRef = useRef(editMode);
+
+  // 편집 모드 종료(true→false) 시에만 epoch bump — 진입 시는 불필요한 remount/깜빡임 방지
+  useEffect(() => {
+    if (wasEditRef.current && !editMode) setGridEpoch(e => e + 1);
+    wasEditRef.current = editMode;
+  }, [editMode]);
 
   const registryMap = buildRegistryMap(registry);
   const defaults    = useMemo(
     () => registry.map(d => ({ key: d.key, ...d.defaultPosition })),
     [registry]
   );
-  const rawLayout = getLayout(userScope, defaults);
+  const rawLayout = getLayout(scope, defaults);
 
   // registry에 추가된 새 위젯 key가 저장된 레이아웃(visible+hidden 모두)에 없으면 visible에 자동 포함
   const layout = useMemo(() => {
@@ -71,25 +80,30 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
   useLayoutEffect(() => { initLayoutRef.current = initLayout; });
 
   useEffect(() => {
-    initLayoutRef.current(userScope, defaults);
-  }, [userScope, defaults]);
+    initLayoutRef.current(scope, defaults);
+  }, [scope, defaults]);
 
-  // 편집 모드 진입 시 스냅샷 저장, 종료 시 revert (저장 버튼은 commitEdit으로 스냅샷을 미리 비워 revert를 no-op으로 만듦)
+  // 편집 모드 진입 시 위젯·필드 스냅샷 저장, 종료 시 revert
+  // (저장 버튼은 commitEdit으로 스냅샷을 미리 비워 두 revert를 no-op으로 만듦)
   useEffect(() => {
     if (!editMode || !active) return;
-    beginEdit(userScope);
-    return () => { revertEdit(userScope); };
-  }, [editMode, active, userScope, beginEdit, revertEdit]);
+    beginEdit(scope);
+    useFieldLayout.getState().beginEdit();
+    return () => {
+      revertEdit(scope);
+      useFieldLayout.getState().revertEdit();
+    };
+  }, [editMode, active, scope, beginEdit, revertEdit]);
 
   const handleLayoutChange = useCallback((next: Layout) => {
     next.forEach(item => {
       const key  = item.i;
       const prev = layout.visible.find(w => w.key === key);
       if (!prev) return;
-      if (prev.col !== item.x || prev.row !== item.y) moveWidget(userScope, key, item.x, item.y);
-      if (prev.colSpan !== item.w || prev.rowSpan !== item.h) resizeWidget(userScope, key, item.w, item.h);
+      if (prev.col !== item.x || prev.row !== item.y) moveWidget(scope, key, item.x, item.y);
+      if (prev.colSpan !== item.w || prev.rowSpan !== item.h) resizeWidget(scope, key, item.w, item.h);
     });
-  }, [layout.visible, moveWidget, resizeWidget, userScope]);
+  }, [layout.visible, moveWidget, resizeWidget, scope]);
 
   const maxRow     = layout.visible.length > 0 ? Math.max(...layout.visible.map(w => w.row + w.rowSpan)) : 4;
   const overlayRows = maxRow + 2;
@@ -110,6 +124,7 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
 
       {containerWidth > 0 && (
         <GridLayout
+          key={`${scope}-${gridEpoch}`}
           layout={toRGLLayout(layout.visible, registryMap)}
           width={containerWidth}
           style={{ position: "relative", zIndex: 1 }}
@@ -124,7 +139,7 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
             const Component = def.component;
             return (
               <div key={w.key} style={{ display: "flex", flexDirection: "column" }}>
-                <WidgetContainer label={def.label} editMode={editMode} onHide={() => hideWidget(userScope, w.key)}>
+                <WidgetContainer label={def.label} editMode={editMode} onHide={() => hideWidget(scope, w.key)}>
                   <Component variant={variant} isExp={variant?.direction === "EXP"} />
                 </WidgetContainer>
               </div>
@@ -138,12 +153,18 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
           scope={scope}
           registry={registry}
           hidden={layout.hidden}
-          onShow={(key) => showWidget(userScope, key)}
-          onReset={() => resetLayout(userScope, defaults)}
+          onShow={(key) => showWidget(scope, key)}
+          onReset={() => {
+            resetLayout(scope, defaults);             // 위젯 기본값(paused → 미영속)
+            useFieldLayout.getState().resetAll();     // 필드 전체 기본값(paused → 미영속) — controlled 컴포넌트가 즉시 재렌더
+            setGridEpoch(e => e + 1);                 // 위젯 그리드(uncontrolled) remount로 기본값 반영
+          }}
           onClose={() => useWidgetLayout.getState().setEditMode(false)}
           onSave={() => {
-            commitEdit(userScope);
-            useWidgetLayout.getState().setEditMode(false);
+            commitEdit(scope);                              // 1. 위젯 스냅샷 비움(paused → 미영속)
+            setLayoutPersistPaused(false);                  // 2. 영속 재개
+            useFieldLayout.getState().commitEdit();         // 3. 필드 스냅샷 비움 + set() → 필드 영속(재개됨)
+            useWidgetLayout.getState().setEditMode(false);  // 4. 편집 종료 + set(editMode) → 위젯 영속; cleanup의 두 revert는 스냅샷 비워져 no-op
           }}
         />
       )}

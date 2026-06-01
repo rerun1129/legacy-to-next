@@ -9,6 +9,8 @@ import { useTabs, inferLabelFromPath } from "@/lib/use-tabs";
 import { useTheme } from "@/lib/use-theme";
 import { authUseCases } from "@/application/auth/use-cases";
 import { clearSession, getSession } from "@/lib/admin-session";
+import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { useFieldLayout } from "@/lib/use-field-layout";
 import { LanguageToggle } from "./language-toggle";
 
 const SIDEBAR_W = 220;
@@ -192,6 +194,10 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
     }
     clearTabs();
     clearSession();
+    // clearSession 이후 in-memory 레이아웃 초기화
+    // backendLayoutStorage.setItem 가드가 세션 없을 때 PUT을 막으므로 백엔드 데이터는 보존됨
+    useWidgetLayout.setState({ layouts: {} });
+    useFieldLayout.setState({ layouts: {} });
     router.replace("/login");
   };
 

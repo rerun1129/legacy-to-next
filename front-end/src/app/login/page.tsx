@@ -10,6 +10,8 @@ import { setSession, firstAccessibleRoute } from "@/lib/admin-session";
 import type { AdminSession } from "@/lib/admin-session";
 import { toast } from "@/lib/toast-store";
 import { useTabs } from "@/lib/use-tabs";
+import { useWidgetLayout } from "@/lib/use-widget-layout";
+import { useFieldLayout } from "@/lib/use-field-layout";
 
 interface LoginForm {
   username: string;
@@ -46,6 +48,10 @@ export default function LoginPage() {
       }
       qc.clear();
       setSession(session);
+      // 세션 저장 직후 위젯/필드 레이아웃을 백엔드에서 재하이드레이트
+      // (앱 초기 로드 시점엔 세션이 없어 getItem이 null이었으므로 실제 유저 데이터로 다시 채움)
+      void useWidgetLayout.persist.rehydrate();
+      void useFieldLayout.persist.rehydrate();
       router.replace(target);
     } catch (e) {
       if (e instanceof ApiError && e.errorCode === "SUBSCRIPTION_EXPIRED") {
