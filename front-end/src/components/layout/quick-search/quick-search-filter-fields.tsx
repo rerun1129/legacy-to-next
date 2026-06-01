@@ -60,7 +60,7 @@ export function QuickSearchFilterFields({ form }: Props) {
   return (
     <div className="search-card">
       <div className="search-card__body">
-        <div className="filter-grid">
+        <div className="filter-grid quick-search__grid">
 
           {/* 1. 업무구분 */}
           <div className="lcn">
