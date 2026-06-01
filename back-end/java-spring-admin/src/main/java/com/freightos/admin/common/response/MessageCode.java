@@ -162,7 +162,9 @@ public enum MessageCode {
     SUBSCRIPTION_NOT_FOUND("구독 내역을 찾을 수 없습니다."),
     SUBSCRIPTION_DUPLICATE_MODULE("해당 구독사에 동일한 모듈 구독이 이미 존재합니다."),
     SUBSCRIPTION_DATE_RANGE_INVALID("시작일이 종료일보다 늦을 수 없습니다."),
-    SUBSCRIPTION_SAVE_CHANGES("구독 일괄 저장이 완료되었습니다.");
+    SUBSCRIPTION_SAVE_CHANGES("구독 일괄 저장이 완료되었습니다."),
+    UI_LAYOUT_SAVED("UI 레이아웃이 저장되었습니다."),
+    UI_LAYOUT_DELETED("UI 레이아웃이 삭제되었습니다.");
 
     private final String message;
 
