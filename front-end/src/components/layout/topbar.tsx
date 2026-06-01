@@ -3,10 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, HelpCircle, Search, ChevronLeft, LogOut, Moon, Sun } from "lucide-react";
+import { ChevronLeft, LogOut, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTabs, inferLabelFromPath } from "@/lib/use-tabs";
-import { useCurrentUser, USERS } from "@/lib/use-current-user";
 import { useTheme } from "@/lib/use-theme";
 import { authUseCases } from "@/application/auth/use-cases";
 import { clearSession, getSession } from "@/lib/admin-session";
@@ -38,10 +37,6 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
   const didDragRef = useRef(false);
 
   const { dark, toggle: toggleTheme } = useTheme();
-  const { currentUserId, setCurrentUser } = useCurrentUser();
-  const currentUser = USERS.find(u => u.id === currentUserId) ?? USERS[0];
-  const [userMenuPos, setUserMenuPos] = useState<{ x: number; y: number } | null>(null);
-  const userRef = useRef<HTMLDivElement>(null);
 
   const t  = useTranslations('shell.topbar');
   const tt = useTranslations('shell.tabs');
@@ -75,13 +70,6 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
     window.addEventListener("mousedown", onMouseDown);
     return () => window.removeEventListener("mousedown", onMouseDown);
   }, [ctxMenu]);
-
-  useEffect(() => {
-    if (!userMenuPos) return;
-    function onMouseDown() { setUserMenuPos(null); }
-    window.addEventListener("mousedown", onMouseDown);
-    return () => window.removeEventListener("mousedown", onMouseDown);
-  }, [userMenuPos]);
 
   // ── Tab close ────────────────────────────────────────────
   function handleClose(e: React.MouseEvent, id: string) {
@@ -262,25 +250,10 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
         {/* ── Right icons ────────────────────────────────────── */}
         <div className="app__topbar-right" style={{ flexShrink: 0 }}>
           <div className="topbar-icons">
-            <button type="button" className="topbar-icon" title={t('search')}><Search /></button>
-            <button type="button" className="topbar-icon" title={t('notifications')}><Bell /><span className="topbar-icon__dot" /></button>
             <button type="button" className="topbar-icon" title={dark ? t('lightMode') : t('darkMode')} onClick={toggleTheme}>
               {dark ? <Sun /> : <Moon />}
             </button>
-            <button type="button" className="topbar-icon" title={t('help')}><HelpCircle /></button>
             <LanguageToggle />
-          </div>
-          <div
-            ref={userRef}
-            className="app__user"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              const rect = userRef.current?.getBoundingClientRect();
-              if (rect) setUserMenuPos({ x: rect.left, y: rect.bottom + 4 });
-            }}
-          >
-            <div className="app__user-avatar">{currentUser.initials}</div>
-            <span>{currentUser.name}</span>
           </div>
           <button type="button" className="topbar-icon" title={t('logout')} style={{ margin: 4 }} onClick={handleLogout}><LogOut /></button>
         </div>
@@ -300,28 +273,6 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed }: Props) {
         document.body
       )}
 
-      {/* ── User switcher menu ─────────────────────────────────── */}
-      {userMenuPos && createPortal(
-        <div
-          className="user-switch-menu"
-          style={{ left: userMenuPos.x, top: userMenuPos.y }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          {USERS.map(u => (
-            <button
-              key={u.id}
-              className={`user-switch-menu__item${u.id === currentUserId ? " is-active" : ""}`}
-              onClick={() => { setCurrentUser(u.id); setUserMenuPos(null); }}
-            >
-              <div className="app__user-avatar" style={{ width: 22, height: 22, fontSize: 9, flexShrink: 0 }}>
-                {u.initials}
-              </div>
-              <span>{u.name}</span>
-            </button>
-          ))}
-        </div>,
-        document.body
-      )}
     </>
   );
 }

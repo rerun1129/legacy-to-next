@@ -1694,11 +1694,8 @@
     "topbar": {
       "showSidebar": "사이드바 표시",
       "hideSidebar": "사이드바 숨기기",
-      "search": "검색 (⌘K)",
-      "notifications": "알림",
       "lightMode": "라이트 모드",
       "darkMode": "다크 모드",
-      "help": "도움말",
       "logout": "로그아웃",
       "closeOtherTabs": "다른 탭 닫기",
       "closeTabsToRight": "우측 탭 닫기",

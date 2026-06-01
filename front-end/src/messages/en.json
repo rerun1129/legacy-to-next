@@ -1694,11 +1694,8 @@
     "topbar": {
       "showSidebar": "Show sidebar",
       "hideSidebar": "Hide sidebar",
-      "search": "Search (⌘K)",
-      "notifications": "Notifications",
       "lightMode": "Light mode",
       "darkMode": "Dark mode",
-      "help": "Help",
       "logout": "Logout",
       "closeOtherTabs": "Close other tabs",
       "closeTabsToRight": "Close tabs to right",
