@@ -2,7 +2,8 @@ import { z } from "zod";
 
 // ── Dimension 그리드 행 ────────────────────────────────────
 export const TRUCK_DIM_SCHEMA = z.object({
-  id: z.number(),
+  // validation은 BE SSOT — Copy 신규 행은 id 없이 BE INSERT, 기존 행은 id로 BE merge
+  id: z.number().optional(),
   length: z.string().optional(),
   width:  z.string().optional(),
   height: z.string().optional(),

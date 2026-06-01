@@ -1,0 +1,83 @@
+import type { TruckBlDetail } from "@/domain/truck-bl";
+import { createEmptyTruckBlFormValues } from "./truck-bl-defaults";
+import type { TruckBlFormValues } from "./truck-bl-schema";
+
+/**
+ * BE detail 응답을 form 값으로 매핑.
+ * use-truck-bl-entry.ts의 useEffect inline form.reset 블록을 추출한 함수 — 동작 100% 동일.
+ * polName/podName은 CodeBox가 런타임에 채우므로 항상 "".
+ */
+export function mapTruckBlDetailToForm(detail: TruckBlDetail): TruckBlFormValues {
+  return {
+    ...createEmptyTruckBlFormValues(),
+    truckBlNo:          detail.hblNo             ?? "",
+    bound:              detail.bound              ?? "",
+    loadType:           detail.loadType           ?? "",
+    serviceTerm:        detail.serviceTerm        ?? "",
+    shipperCode:        detail.shipperCode        ?? "",
+    shipperAddr:        detail.shipperAddr        ?? "",
+    consigneeCode:      detail.consigneeCode      ?? "",
+    consigneeAddr:      detail.consigneeAddr      ?? "",
+    notifyCode:         detail.notifyCode         ?? "",
+    notifyAddr:         detail.notifyAddr         ?? "",
+    docPartnerCode:     detail.docPartnerCode     ?? "",
+    docPartnerAddress:  detail.docPartnerAddress  ?? "",
+    polCode:            detail.polCode            ?? "",
+    polName:            "",
+    podCode:            detail.podCode            ?? "",
+    podName:            "",
+    etd:                detail.etd                ?? "",
+    eta:                detail.eta                ?? "",
+    voyNo:              detail.voyageNo           ?? "",
+    vesselName:         detail.vesselName         ?? "",
+    pkgQty:             detail.pkgQty             != null ? detail.pkgQty : undefined,
+    pkgUnit:            detail.pkgUnit            ?? "",
+    weightUnit:         detail.weightUnit         ?? "",
+    grossWeightKg:      detail.grossWeightKg      != null ? detail.grossWeightKg : undefined,
+    cbm:                detail.cbm                != null ? detail.cbm : undefined,
+    chargeWeightKg:     detail.chargeWeightKg     != null ? detail.chargeWeightKg : undefined,
+    actualCustomerCode: detail.actualCustomerCode ?? "",
+    operatorCode:       detail.operatorCode       ?? "",
+    teamCode:           detail.teamCode           ?? "",
+    teamName:           detail.teamName           ?? "",
+    salesManCode:       detail.salesManCode       ?? "",
+    settlePartnerCode:  detail.settlePartnerCode  ?? "",
+    truckerCode:        detail.truckerCode        ?? "",
+    truckerPic:         detail.truckerPic         ?? "",
+    pickupDate:         detail.pickupDate         ?? "",
+    hsCode:             detail.hsCode             ?? "",
+    hsCodeName:         detail.hsCodeName         ?? "",
+    truckOrders: detail.truckOrders?.map((o) => ({
+      id:            o.id,
+      truckOrderNo:  o.truckOrderNo   ?? "",
+      pkgQty:        o.pkgQty         != null ? String(o.pkgQty)         : "",
+      pkgUnit:       o.pkgUnit        ?? "",
+      grossWeightKg: o.grossWeightKg  != null ? String(o.grossWeightKg)  : "",
+      cbm:           o.cbm            != null ? String(o.cbm)            : "",
+      truckNo:       o.truckNo        ?? "",
+      truckType:     o.truckType      ?? "",
+      driver:        o.driver         ?? "",
+      mobileNo:      o.mobileNo       ?? "",
+      containerNo:   o.containerNo    ?? "",
+      containerType: o.containerType  ?? "",
+      sealNo1:       o.sealNo1        ?? "",
+      sealNo2:       o.sealNo2        ?? "",
+      sealNo3:       o.sealNo3        ?? "",
+    })) ?? [],
+    marks:       detail.desc?.marks       ?? "",
+    description: detail.desc?.description ?? "",
+    descClause1: detail.desc?.descClause1 ?? "",
+    descClause2: detail.desc?.descClause2 ?? "",
+    remark:      detail.remark            ?? "",
+    dimensionDivisor: detail.volumeDivisor ?? "",
+    dimensions: detail.dims?.map((d, idx) => ({
+      id:     d.id ?? idx,
+      length: d.lengthCm       != null ? String(d.lengthCm)       : "",
+      width:  d.widthCm        != null ? String(d.widthCm)        : "",
+      height: d.heightCm       != null ? String(d.heightCm)       : "",
+      qty:    d.quantity       != null ? String(d.quantity)       : "",
+      cbm:    d.cbm            != null ? String(d.cbm)            : "",
+      volWt:  d.volumeWeightKg != null ? String(d.volumeWeightKg) : "",
+    })) ?? [],
+  };
+}

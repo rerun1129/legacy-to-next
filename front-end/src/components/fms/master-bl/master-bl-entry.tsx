@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
-import { useBLDraftStore } from "@/lib/use-bl-draft-store";
+import { useBLDraftStore, blDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -98,6 +97,37 @@ export function MasterBLEntry({ variantKey }: Props) {
     didRestoreFromDraftRef,
   });
 
+  // B/L Copy 재초기화 신호 구독.
+  // focus 불변(new→new)일 때 useBlDraftSync의 key 변경이 일어나지 않으므로
+  // nonce 증가를 별도 트리거로 삼아 최신 :new draft로 강제 reset한다.
+  const focusDomain = entryFocusKeys.masterBl(variantKey);
+  const nonce = useEntryFocusStore((s) => s.resetNonce[focusDomain]);
+  const prevNonceRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    // 초기 마운트(prevNonceRef가 아직 세팅되지 않은 시점)는 무시 — useBlDraftSync가 처리
+    if (prevNonceRef.current === undefined) {
+      prevNonceRef.current = nonce;
+      return;
+    }
+    // nonce가 실제로 증가했을 때만 발동
+    if (nonce === prevNonceRef.current) return;
+    prevNonceRef.current = nonce;
+
+    const draftKey = `master:${variantKey}:new`;
+    const draft = blDraftStore.getState().getDraft(draftKey);
+    if (draft !== undefined) {
+      // detail 덮어쓰기 방지 + form reset.
+      // main tab 리마운트는 key에 nonce가 포함되어 자동 처리됨.
+      didRestoreFromDraftRef.current = true;
+      detailLoadedRef.current = true;
+      form.reset(draft as MasterBlFormValues);
+    }
+  // variantKey는 컴포넌트 수명 내 불변(탭 분리 구조).
+  // form/didRestoreFromDraftRef/detailLoadedRef는 컴포넌트 수명 내 안정 참조(ref).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
+
   const { mutation, deleteMutation } = useMasterBlEntryMutations({
     id,
     variantKey,
@@ -132,6 +162,9 @@ export function MasterBLEntry({ variantKey }: Props) {
 
   const isLoading = isDetailFetching || mutation.isPending || deleteMutation.isPending;
   const loadingMessage = deleteMutation.isPending ? tm("deleting") : mutation.isPending ? tm("saving") : tm("fetching");
+
+  // nonce를 key에 포함해 Copy 신호(new→new)도 main tab 리마운트 트리거
+  const mainTabKey = `${resetVersion}:${nonce ?? 0}`;
 
   return (
     <FormProvider {...form}>
@@ -204,7 +237,7 @@ export function MasterBLEntry({ variantKey }: Props) {
       </div>
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
-      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={resetVersion} variant={variant} form={form} active={tab === "main"} /></div>
+      <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={mainTabKey} variant={variant} form={form} active={tab === "main"} /></div>
       <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
     </form>
     {isEdit && id && (

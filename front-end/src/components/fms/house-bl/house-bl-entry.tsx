@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
-import { useBLDraftStore } from "@/lib/use-bl-draft-store";
+import { useBLDraftStore, blDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider } from "react-hook-form";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import type { BLVariantConfig } from "@/lib/bl-variants";
@@ -34,10 +34,12 @@ function getToolbarFields(variant: BLVariantConfig): ReadonlyArray<string> {
   return TOOLBAR_FIELDS_NON_BL;
 }
 
-function renderMainTab(variant: BLVariantConfig, active: boolean, resetVersion: number) {
-  if (variant.mode === "SEA") return <MainTabSea key={resetVersion} variant={variant} active={active} />;
-  if (variant.mode === "AIR") return <MainTabAir key={resetVersion} variant={variant} active={active} />;
-  return <MainTabSea key={resetVersion} variant={variant} active={active} />;
+function renderMainTab(variant: BLVariantConfig, active: boolean, resetVersion: number, nonce: number | undefined) {
+  // nonce를 key에 포함해 Copy 신호(new→new)도 리마운트 트리거
+  const tabKey = `${resetVersion}:${nonce ?? 0}`;
+  if (variant.mode === "SEA") return <MainTabSea key={tabKey} variant={variant} active={active} />;
+  if (variant.mode === "AIR") return <MainTabAir key={tabKey} variant={variant} active={active} />;
+  return <MainTabSea key={tabKey} variant={variant} active={active} />;
 }
 
 interface Props {
@@ -68,6 +70,37 @@ export function HouseBLEntry({ variant }: Props) {
     form,
     didRestoreFromDraftRef,
   });
+
+  // B/L Copy 재초기화 신호 구독.
+  // focus 불변(new→new)일 때 useBlDraftSync의 key 변경이 일어나지 않으므로
+  // nonce 증가를 별도 트리거로 삼아 최신 :new draft로 강제 reset한다.
+  const focusDomain = entryFocusKeys.houseBl(variant.key);
+  const nonce = useEntryFocusStore((s) => s.resetNonce[focusDomain]);
+  const prevNonceRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    // 초기 마운트(prevNonceRef가 아직 세팅되지 않은 시점)는 무시 — useBlDraftSync가 처리
+    if (prevNonceRef.current === undefined) {
+      prevNonceRef.current = nonce;
+      return;
+    }
+    // nonce가 실제로 증가했을 때만 발동
+    if (nonce === prevNonceRef.current) return;
+    prevNonceRef.current = nonce;
+
+    const draftKey = `house:${variant.key}:new`;
+    const draft = blDraftStore.getState().getDraft(draftKey);
+    if (draft !== undefined) {
+      // detail 덮어쓰기 방지 + form reset.
+      // main tab 리마운트는 renderMainTab의 key에 nonce가 포함되어 자동 처리됨.
+      didRestoreFromDraftRef.current = true;
+      detailLoadedRef.current = true;
+      form.reset(draft as HouseBlFormValues);
+    }
+  // variant.key는 컴포넌트 수명 내 불변(탭 분리 구조).
+  // form/didRestoreFromDraftRef/detailLoadedRef는 컴포넌트 수명 내 안정 참조(ref).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
 
   const { mutation, deleteMutation } = useHouseBlEntryMutations({
     id,
@@ -143,7 +176,7 @@ export function HouseBLEntry({ variant }: Props) {
           ))}
         </div>
 
-        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion)}</div>
+        <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion, nonce)}</div>
         <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
       </form>
       </FormProvider>

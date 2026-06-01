@@ -4,10 +4,10 @@ import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
 import { useTranslations }                       from "next-intl";
 import { useBlDraftSync }                        from "@/lib/use-bl-draft-sync";
-import { useBLDraftStore }                       from "@/lib/use-bl-draft-store";
+import { useBLDraftStore, blDraftStore }         from "@/lib/use-bl-draft-store";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
 import { nonBlPort }                             from "@/lib/ports";
-import { useEntryFocusStore }                    from "@/lib/use-entry-focus-store";
+import { useEntryFocusStore, entryFocusKeys }    from "@/lib/use-entry-focus-store";
 import { toast }                                 from "@/lib/toast-store";
 import type { NonBlFormValues }                  from "./non-bl-schema";
 import { NON_BL_SCHEMA }                         from "./non-bl-schema";
@@ -23,8 +23,10 @@ export function useNonBlEntry() {
   const [resetVersion, setResetVersion] = useState(0);
   const bumpResetVersion = useCallback(() => setResetVersion(v => v + 1), []);
   const id = useEntryFocusStore((s) => s.focus.nonBl);
+  const nonce = useEntryFocusStore((s) => s.resetNonce[entryFocusKeys.nonBl]);
   const isEdit = Boolean(id);
   const detailLoadedRef = useRef<boolean>(false);
+  const prevNonceRef = useRef<number | undefined>(undefined);
 
   const clearDraft = useBLDraftStore((state) => state.clearDraft);
 
@@ -69,6 +71,32 @@ export function useNonBlEntry() {
     if (didRestoreFromDraftRef.current) return;
     methods.reset(mapNonBlDetailToFormValues(detail));
   }, [detail, methods, didRestoreFromDraftRef]);
+
+  // B/L Copy 재초기화 신호 구독.
+  // focus 불변(new→new)일 때 useBlDraftSync의 key 변경이 일어나지 않으므로
+  // nonce 증가를 별도 트리거로 삼아 최신 non::new draft로 강제 reset한다.
+  // set-state-in-effect 금지 준수 — useState setter 미사용, ref+methods.reset만 사용.
+  useEffect(() => {
+    // 초기 마운트(prevNonceRef가 아직 세팅되지 않은 시점)는 무시 — useBlDraftSync가 처리
+    if (prevNonceRef.current === undefined) {
+      prevNonceRef.current = nonce;
+      return;
+    }
+    // nonce가 실제로 증가했을 때만 발동
+    if (nonce === prevNonceRef.current) return;
+    prevNonceRef.current = nonce;
+
+    const draft = blDraftStore.getState().getDraft("non::new");
+    if (draft !== undefined) {
+      // detail 덮어쓰기 방지 + form reset.
+      // main tab 리마운트는 non-bl-entry.tsx의 key에 nonce가 포함되어 자동 처리됨.
+      didRestoreFromDraftRef.current = true;
+      detailLoadedRef.current = true;
+      methods.reset(draft as NonBlFormValues);
+    }
+  // methods/didRestoreFromDraftRef/detailLoadedRef는 컴포넌트 수명 내 안정 참조(ref).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
 
   const resetDetailLoaded = useCallback(() => {
     detailLoadedRef.current = false;
@@ -116,6 +144,7 @@ export function useNonBlEntry() {
     tab,
     setTab,
     resetVersion,
+    nonce,
     isChangeBlNoModalOpen,
     setIsChangeBlNoModalOpen,
     resetDetailLoaded,

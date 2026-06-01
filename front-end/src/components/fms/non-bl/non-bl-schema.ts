@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const CONTAINER_INFO_SCHEMA = z.object({
-  id: z.number(),
+  // validation은 BE SSOT — Copy 신규 행은 id 없이 BE INSERT, 기존 행은 id로 BE merge
+  id: z.number().optional(),
   cno: z.string().optional(),
   contType: z.string().optional(),
   sealNo1: z.string().optional(),
@@ -14,7 +15,8 @@ export const CONTAINER_INFO_SCHEMA = z.object({
 });
 
 export const DIM_SCHEMA = z.object({
-  id: z.number(),
+  // validation은 BE SSOT — Copy 신규 행은 id 없이 BE INSERT, 기존 행은 id로 BE merge
+  id: z.number().optional(),
   length: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),

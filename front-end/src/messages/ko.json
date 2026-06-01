@@ -1768,7 +1768,14 @@
       "partyKindConsignee": "Consignee",
       "partyKindNotify": "Notify",
       "partyKindSettlePartner": "Settle Partner",
-      "noAccess": "접근 권한이 없습니다."
+      "noAccess": "접근 권한이 없습니다.",
+      "copy": "복사",
+      "copyTitle": "B/L 복사",
+      "copyDesc": "새 엔트리에 복사할 패널을 선택하세요.",
+      "copySelectAll": "전체 선택",
+      "copyConfirm": "확정",
+      "copyCancel": "취소",
+      "copyUnsupported": "이 B/L 타입은 복사를 지원하지 않습니다."
     }
   }
 }

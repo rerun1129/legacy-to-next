@@ -15,7 +15,8 @@ import {
 } from "./sections/nonbl-panels";
 
 // labelKey は i18n の panels.* キーと対応; label はフォールバック用英語テキスト
-const NON_BL_REGISTRY: WidgetDef[] = [
+// copy-bl-modal.tsx에서 form 없이 패널 목록(key/label)을 읽기 위해 export
+export const NON_BL_REGISTRY: WidgetDef[] = [
   { key: "party-nonbl",          label: "Party",                 labelKey: "party",         component: NonBLPartyPanel,         defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "document-nonbl",       label: "Document",              labelKey: "document",      component: NonBLDocumentPanel,      defaultPosition: { col: 0, row: 4, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "schedule-nonbl",       label: "Schedule",              labelKey: "schedule",      component: NonBLSchedulePanel,      defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },

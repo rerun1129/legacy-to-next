@@ -35,6 +35,22 @@ const buildSeaRegistry = (form: UseFormReturn<MasterBlFormValues>): WidgetDef[] 
 // 後方互換のため旧名でも再エクスポート — 外部から直接参照される可能性あり
 export const MASTER_BL_SEA_REGISTRY = buildSeaRegistry;
 
+/**
+ * SEA Master 레지스트리 정적 패널 목록 (form 없이 key/label 참조용).
+ * copy-bl-modal 등 form context 없이 패널 카탈로그만 필요한 곳에서 사용.
+ * buildSeaRegistry는 form을 인자로 받으므로 key/label만 분리해 상수로 노출.
+ */
+export const MASTER_BL_SEA_PANEL_LIST: ReadonlyArray<{ key: string; label: string; labelKey?: string }> = [
+  { key: "house-bl-grid",    label: "House B/L List",    labelKey: "houseBLList"      },
+  { key: "party-master",     label: "Party",             labelKey: "party"            },
+  { key: "schedule-master",  label: "Schedule",          labelKey: "schedule"         },
+  { key: "cargo-doc",        label: "Cargo & Document",  labelKey: "cargoDocument"    },
+  { key: "container-master", label: "Container",         labelKey: "container"        },
+  { key: "marks-master",     label: "Marks & Numbers",   labelKey: "marksNumbers"     },
+  { key: "goods-desc",       label: "Goods Description", labelKey: "goodsDescription" },
+  { key: "remark",           label: "Remark",            labelKey: "remark"           },
+];
+
 export function MasterMainTabSea({ variant, form, active }: Props) {
   const tp = useTranslations("fms.masterBl.entry.panels");
 

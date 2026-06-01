@@ -44,7 +44,7 @@ export function TruckDimensionPanel() {
   }
 
   function handleAdd() {
-    const nextId = Math.max(0, ...fields.map(f => f.id)) + 1;
+    const nextId = Math.max(0, ...fields.map(f => f.id ?? 0)) + 1;
     append({ ...EMPTY_TRUCK_DIM_ROW, id: nextId });
     setSelectedKey(null);
   }

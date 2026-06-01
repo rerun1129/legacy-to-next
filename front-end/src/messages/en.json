@@ -1768,7 +1768,14 @@
       "partyKindConsignee": "Consignee",
       "partyKindNotify": "Notify",
       "partyKindSettlePartner": "Settle Partner",
-      "noAccess": "You do not have access permission."
+      "noAccess": "You do not have access permission.",
+      "copy": "Copy",
+      "copyTitle": "Copy B/L",
+      "copyDesc": "Select panels to copy to the new entry.",
+      "copySelectAll": "Select All",
+      "copyConfirm": "Confirm",
+      "copyCancel": "Cancel",
+      "copyUnsupported": "Copy is not supported for this B/L type."
     }
   }
 }

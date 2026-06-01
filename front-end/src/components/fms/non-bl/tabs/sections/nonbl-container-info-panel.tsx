@@ -86,7 +86,7 @@ export function NonBLContainerInfoPanel() {
   }
 
   function handleAdd() {
-    const nextId = Math.max(0, ...fields.map(f => f.id)) + 1;
+    const nextId = Math.max(0, ...fields.map(f => f.id ?? 0)) + 1;
     append({ ...EMPTY_CONTAINER_ROW, id: nextId });
     setSelectedKey(null);
   }

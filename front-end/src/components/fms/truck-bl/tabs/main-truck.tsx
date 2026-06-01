@@ -10,7 +10,8 @@ import { TruckMarksPanel }        from "./sections/truck-marks-panel";
 import { TruckDescriptionPanel }  from "./sections/truck-description-panel";
 
 // labelKey は i18n の panels.* キーと対応; label はフォールバック用英語テキスト
-const TRUCK_REGISTRY: WidgetDef[] = [
+// copy-bl-modal 등 form context 없이 패널 목록만 필요한 곳에서 사용 가능 — form 비의존 정적 배열
+export const TRUCK_REGISTRY: WidgetDef[] = [
   { key: "party-truck",        label: "Party",              labelKey: "party",            component: TruckPartyPanel,       defaultPosition: { col: 0, row: 0, colSpan: 2, rowSpan: 4 }, minColSpan: 1, minRowSpan: 2 },
   { key: "schedule-truck",     label: "Schedule",           labelKey: "schedule",         component: TruckSchedulePanel,    defaultPosition: { col: 2, row: 0, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },
   { key: "cargo-truck",        label: "Cargo",              labelKey: "cargo",            component: TruckCargoPanel,       defaultPosition: { col: 2, row: 2, colSpan: 2, rowSpan: 2 }, minColSpan: 1, minRowSpan: 1 },

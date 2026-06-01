@@ -4,14 +4,15 @@ import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
 import { useTranslations }                       from "next-intl";
 import { useBlDraftSync }                        from "@/lib/use-bl-draft-sync";
-import { useBLDraftStore }                       from "@/lib/use-bl-draft-store";
+import { useBLDraftStore, blDraftStore }         from "@/lib/use-bl-draft-store";
 import { useEnumOptions }                        from "@/application/enums/use-enum";
 import { truckBlPort }                           from "@/lib/ports";
-import { useEntryFocusStore }                    from "@/lib/use-entry-focus-store";
+import { useEntryFocusStore, entryFocusKeys }    from "@/lib/use-entry-focus-store";
 import { toast }                                 from "@/lib/toast-store";
 import type { TruckBlFormValues }                from "./truck-bl-schema";
 import { TRUCK_BL_SCHEMA }                       from "./truck-bl-schema";
 import { createEmptyTruckBlFormValues }          from "./truck-bl-defaults";
+import { mapTruckBlDetailToForm }                from "./map-truck-bl-detail";
 import { useTruckBlEntryMutations }              from "./use-truck-bl-entry-mutations";
 import { useSearchTruckBl }                      from "./use-search-truck-bl";
 
@@ -22,8 +23,10 @@ export function useTruckBlEntry() {
   const [resetVersion, setResetVersion] = useState(0);
   const bumpResetVersion = useCallback(() => setResetVersion(v => v + 1), []);
   const id = useEntryFocusStore((s) => s.focus.truckBl);
+  const nonce = useEntryFocusStore((s) => s.resetNonce[entryFocusKeys.truckBl]);
   const isEdit = Boolean(id);
   const detailLoadedRef = useRef<boolean>(false);
+  const prevNonceRef = useRef<number | undefined>(undefined);
 
   const clearDraft = useBLDraftStore((state) => state.clearDraft);
 
@@ -64,79 +67,34 @@ export function useTruckBlEntry() {
     detailLoadedRef.current = true;
     // 이번 mount에서 useBlDraftSync가 stored draft로 실제 form.reset을 호출했으면 detail로 덮어쓰지 않음
     if (didRestoreFromDraftRef.current) return;
-    form.reset({
-      ...createEmptyTruckBlFormValues(),
-      truckBlNo:          detail.hblNo             ?? "",
-      bound:              detail.bound              ?? "",
-      loadType:           detail.loadType           ?? "",
-      serviceTerm:        detail.serviceTerm        ?? "",
-      shipperCode:        detail.shipperCode        ?? "",
-      shipperAddr:        detail.shipperAddr        ?? "",
-      consigneeCode:      detail.consigneeCode      ?? "",
-      consigneeAddr:      detail.consigneeAddr      ?? "",
-      notifyCode:         detail.notifyCode         ?? "",
-      notifyAddr:         detail.notifyAddr         ?? "",
-      docPartnerCode:     detail.docPartnerCode     ?? "",
-      docPartnerAddress:  detail.docPartnerAddress  ?? "",
-      polCode:            detail.polCode            ?? "",
-      polName:            "",
-      podCode:            detail.podCode            ?? "",
-      podName:            "",
-      etd:                detail.etd                ?? "",
-      eta:                detail.eta                ?? "",
-      voyNo:              detail.voyageNo           ?? "",
-      vesselName:         detail.vesselName         ?? "",
-      pkgQty:             detail.pkgQty             != null ? detail.pkgQty : undefined,
-      pkgUnit:            detail.pkgUnit            ?? "",
-      weightUnit:         detail.weightUnit         ?? "",
-      grossWeightKg:      detail.grossWeightKg      != null ? detail.grossWeightKg : undefined,
-      cbm:                detail.cbm                != null ? detail.cbm : undefined,
-      chargeWeightKg:     detail.chargeWeightKg     != null ? detail.chargeWeightKg : undefined,
-      actualCustomerCode: detail.actualCustomerCode ?? "",
-      operatorCode:       detail.operatorCode       ?? "",
-      teamCode:           detail.teamCode           ?? "",
-      teamName:           detail.teamName           ?? "",
-      salesManCode:       detail.salesManCode       ?? "",
-      settlePartnerCode:  detail.settlePartnerCode  ?? "",
-      truckerCode:        detail.truckerCode        ?? "",
-      truckerPic:         detail.truckerPic         ?? "",
-      pickupDate:         detail.pickupDate         ?? "",
-      hsCode:             detail.hsCode             ?? "",
-      hsCodeName:         detail.hsCodeName         ?? "",
-      truckOrders: detail.truckOrders?.map((o) => ({
-        id:            o.id,
-        truckOrderNo:  o.truckOrderNo   ?? "",
-        pkgQty:        o.pkgQty         != null ? String(o.pkgQty)         : "",
-        pkgUnit:       o.pkgUnit        ?? "",
-        grossWeightKg: o.grossWeightKg  != null ? String(o.grossWeightKg)  : "",
-        cbm:           o.cbm            != null ? String(o.cbm)            : "",
-        truckNo:       o.truckNo        ?? "",
-        truckType:     o.truckType      ?? "",
-        driver:        o.driver         ?? "",
-        mobileNo:      o.mobileNo       ?? "",
-        containerNo:   o.containerNo    ?? "",
-        containerType: o.containerType  ?? "",
-        sealNo1:       o.sealNo1        ?? "",
-        sealNo2:       o.sealNo2        ?? "",
-        sealNo3:       o.sealNo3        ?? "",
-      })) ?? [],
-      marks:       detail.desc?.marks       ?? "",
-      description: detail.desc?.description ?? "",
-      descClause1: detail.desc?.descClause1 ?? "",
-      descClause2: detail.desc?.descClause2 ?? "",
-      remark:      detail.remark            ?? "",
-      dimensionDivisor: detail.volumeDivisor ?? "",
-      dimensions: detail.dims?.map((d, idx) => ({
-        id:     d.id ?? idx,
-        length: d.lengthCm       != null ? String(d.lengthCm)       : "",
-        width:  d.widthCm        != null ? String(d.widthCm)        : "",
-        height: d.heightCm       != null ? String(d.heightCm)       : "",
-        qty:    d.quantity       != null ? String(d.quantity)       : "",
-        cbm:    d.cbm            != null ? String(d.cbm)            : "",
-        volWt:  d.volumeWeightKg != null ? String(d.volumeWeightKg) : "",
-      })) ?? [],
-    });
+    form.reset(mapTruckBlDetailToForm(detail));
   }, [detail, form, didRestoreFromDraftRef]);
+
+  // B/L Copy 재초기화 신호 구독.
+  // focus 불변(new→new)일 때 useBlDraftSync의 key 변경이 일어나지 않으므로
+  // nonce 증가를 별도 트리거로 삼아 최신 truck::new draft로 강제 reset한다.
+  // set-state-in-effect 금지 준수 — useState setter 미사용, ref+form.reset만 사용.
+  useEffect(() => {
+    // 초기 마운트(prevNonceRef가 아직 세팅되지 않은 시점)는 무시 — useBlDraftSync가 처리
+    if (prevNonceRef.current === undefined) {
+      prevNonceRef.current = nonce;
+      return;
+    }
+    // nonce가 실제로 증가했을 때만 발동
+    if (nonce === prevNonceRef.current) return;
+    prevNonceRef.current = nonce;
+
+    const draft = blDraftStore.getState().getDraft("truck::new");
+    if (draft !== undefined) {
+      // detail 덮어쓰기 방지 + form reset.
+      // main tab 리마운트는 truck-bl-entry.tsx의 key에 nonce가 포함되어 자동 처리됨.
+      didRestoreFromDraftRef.current = true;
+      detailLoadedRef.current = true;
+      form.reset(draft as TruckBlFormValues);
+    }
+  // form/didRestoreFromDraftRef/detailLoadedRef는 컴포넌트 수명 내 안정 참조(ref).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
 
   const { deleteMutation, isSavePending, handleSubmit, handleDelete } = useTruckBlEntryMutations({
     id: id ?? null,
@@ -185,6 +143,7 @@ export function useTruckBlEntry() {
     tab,
     setTab,
     resetVersion,
+    nonce,
     isChangeBlNoModalOpen,
     setIsChangeBlNoModalOpen,
     resetDetailLoaded,
