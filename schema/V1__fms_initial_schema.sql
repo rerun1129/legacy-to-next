@@ -78,6 +78,8 @@ COMMENT ON COLUMN master_bl.weight_unit       IS '무게 단위 (KGS/LBS)';
 COMMENT ON COLUMN master_bl.gross_weight_kg   IS '총 중량(kg)';
 COMMENT ON COLUMN master_bl.cbm               IS '용적(CBM)';
 
+CREATE INDEX IF NOT EXISTS idx_master_bl_mbl_no ON master_bl(mbl_no);
+
 -- =============================================================================
 -- E-03 Master B/L 해상 확장
 -- =============================================================================
