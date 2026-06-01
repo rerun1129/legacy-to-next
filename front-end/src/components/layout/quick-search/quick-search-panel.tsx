@@ -22,7 +22,7 @@ export function QuickSearchPanel({ onBack }: Props) {
   const [blQuery, setBlQuery] = useState("");
 
   const form = useForm<BlQuickSearchFilters>({
-    defaultValues: { dateKind: "ETD" },
+    defaultValues: { dateKind: "ETD", partyKind: "SHIPPER" },
   });
 
   const { items, isLoading } = useBlQuickSearch(blQuery, form.watch());
@@ -37,6 +37,7 @@ export function QuickSearchPanel({ onBack }: Props) {
   function handleSelect(suggestion: CodeBoxSuggestion): void {
     const item: BlQuickSearchItem | undefined = items[suggestion.id as number];
     if (!item) return;
+    setBlQuery(item.blNo);
     openBlEntry(item, router, t("noAccess"));
   }
 
