@@ -223,8 +223,13 @@ class AirMasterBlControllerWebMvcTest {
     }
 
     @Test
-    @DisplayName("POST /api/master-bl: AIR airDetail.issueDate 누락 → 400 validation 오류")
-    void createMasterBl_airMissingIssueDate_returns400() throws Exception {
+    @DisplayName("POST /api/master-bl: AIR airDetail.issueDate 누락 → issue 필드는 optional이므로 201 성공")
+    void createMasterBl_airMissingIssueDate_optional_succeeds() throws Exception {
+        Long id = 10L;
+        CreateMasterBlCommand mockCommand = mock(CreateMasterBlCommand.class);
+        given(masterBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
+        given(masterBlUseCase.createMasterBl(any(CreateMasterBlCommand.class))).willReturn(id);
+
         mockMvc.perform(post("/api/master-bl")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -242,12 +247,20 @@ class AirMasterBlControllerWebMvcTest {
                                   }
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.id").value(10L));
+
+        then(masterBlUseCase).should().createMasterBl(any(CreateMasterBlCommand.class));
     }
 
     @Test
-    @DisplayName("POST /api/master-bl: AIR airDetail.issuePlace 누락 → 400 validation 오류")
-    void createMasterBl_airMissingIssuePlace_returns400() throws Exception {
+    @DisplayName("POST /api/master-bl: AIR airDetail.issuePlace 누락 → issue 필드는 optional이므로 201 성공")
+    void createMasterBl_airMissingIssuePlace_optional_succeeds() throws Exception {
+        Long id = 10L;
+        CreateMasterBlCommand mockCommand = mock(CreateMasterBlCommand.class);
+        given(masterBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
+        given(masterBlUseCase.createMasterBl(any(CreateMasterBlCommand.class))).willReturn(id);
+
         mockMvc.perform(post("/api/master-bl")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -265,12 +278,20 @@ class AirMasterBlControllerWebMvcTest {
                                   }
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.id").value(10L));
+
+        then(masterBlUseCase).should().createMasterBl(any(CreateMasterBlCommand.class));
     }
 
     @Test
-    @DisplayName("POST /api/master-bl: AIR airDetail.signature 누락 → 400 validation 오류")
-    void createMasterBl_airMissingSignature_returns400() throws Exception {
+    @DisplayName("POST /api/master-bl: AIR airDetail.signature 누락 → issue 필드는 optional이므로 201 성공")
+    void createMasterBl_airMissingSignature_optional_succeeds() throws Exception {
+        Long id = 10L;
+        CreateMasterBlCommand mockCommand = mock(CreateMasterBlCommand.class);
+        given(masterBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
+        given(masterBlUseCase.createMasterBl(any(CreateMasterBlCommand.class))).willReturn(id);
+
         mockMvc.perform(post("/api/master-bl")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -288,7 +309,10 @@ class AirMasterBlControllerWebMvcTest {
                                   }
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.id").value(10L));
+
+        then(masterBlUseCase).should().createMasterBl(any(CreateMasterBlCommand.class));
     }
 
     // ── GET /api/master-bl/10: NotFound → 404 ─────────────────────────
