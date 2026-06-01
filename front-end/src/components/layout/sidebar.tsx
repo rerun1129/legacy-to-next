@@ -6,13 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
-  ChevronRight, List, FilePlus, LayoutGrid,
+  ChevronRight, List, FilePlus, LayoutGrid, Search,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { getSession, hasMenuAccess } from "@/lib/admin-session";
 import { sidebarMenuPort } from "@/lib/ports";
 import { SidebarAdminTree } from "./sidebar-admin-tree";
+import { QuickSearchPanel } from "./quick-search/quick-search-panel";
 
 
 // ─── Types ──────────────────────────────────────────────────
@@ -101,8 +102,15 @@ function sectionActive(pathname: string, s: NavSection) {
   return s.children.some((c) => leafActive(pathname, c));
 }
 
+// ─── Sidebar props ──────────────────────────────────────────
+interface SidebarProps {
+  quickSearchOpen: boolean;
+  onOpenQuickSearch: () => void;
+  onCloseQuickSearch: () => void;
+}
+
 // ─── Component ──────────────────────────────────────────────
-export function Sidebar() {
+export function Sidebar({ quickSearchOpen, onOpenQuickSearch, onCloseQuickSearch }: SidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
   const addTab   = useTabs((s) => s.addTab);
@@ -155,6 +163,14 @@ export function Sidebar() {
     (s) => !s.requiredMenuCode || (mounted && hasMenuAccess(session, s.requiredMenuCode))
   );
 
+  if (quickSearchOpen) {
+    return (
+      <nav className="app__side" style={{ display: "flex", flexDirection: "column" }}>
+        <QuickSearchPanel onBack={onCloseQuickSearch} />
+      </nav>
+    );
+  }
+
   return (
     <nav className="app__side" style={{ display: "flex", flexDirection: "column" }}>
       {/* Dashboard — 최상단 */}
@@ -184,6 +200,21 @@ export function Sidebar() {
               }}
             />
           </button>
+
+          {/* Quick Search 진입 버튼 — BL 메뉴 접근 보유 시에만 표시 */}
+          {fmsModOpen && mounted && (
+            hasMenuAccess(session, "MENU_FMS_HOUSE_BL") || hasMenuAccess(session, "MENU_FMS_MASTER_BL")
+          ) && (
+            <button
+              type="button"
+              className="side-item"
+              style={{ paddingLeft: 12 }}
+              onClick={onOpenQuickSearch}
+            >
+              <span className="side-item__icon"><Search size={13} /></span>
+              <span style={{ flex: 1, textAlign: "left" }}>{t('quickSearch')}</span>
+            </button>
+          )}
 
           {fmsModOpen && fmsAccessibleSections.map((section) => {
             const secActive = sectionActive(pathname, section);

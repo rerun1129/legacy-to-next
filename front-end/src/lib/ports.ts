@@ -35,6 +35,7 @@ import { API_TEAM_PORT } from '@/adapter/out/api/team';
 import { API_SUBSCRIBER_PORT } from '@/adapter/out/api/subscriber';
 import { API_SUBSCRIPTION_PORT } from '@/adapter/out/api/subscription';
 import { API_UI_LAYOUT_PORT } from '@/adapter/out/api/ui-layout';
+import { API_BL_QUICK_SEARCH_PORT } from '@/adapter/out/api/bl-quick-search';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -72,3 +73,4 @@ export const teamPort = API_TEAM_PORT;
 export const subscriberPort = API_SUBSCRIBER_PORT;
 export const subscriptionPort = API_SUBSCRIPTION_PORT;
 export const uiLayoutPort = API_UI_LAYOUT_PORT;
+export const blQuickSearchPort = API_BL_QUICK_SEARCH_PORT;

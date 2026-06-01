@@ -1719,7 +1719,8 @@
       "entry": "Entry",
       "widgetEditMode": "Entry Widget Edit",
       "widgetEditTitle": "Toggle widget edit mode",
-      "widgetEditDisabledTitle": "Only available in Main / Freight tab"
+      "widgetEditDisabledTitle": "Only available in Main / Freight tab",
+      "quickSearch": "Quick Search"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export List",
@@ -1746,6 +1747,28 @@
     },
     "lang": {
       "toggleTitle": "Toggle language"
+    },
+    "quickSearch": {
+      "title": "Quick Search",
+      "blNo": "B/L No",
+      "back": "Back",
+      "all": "All",
+      "jobDiv": "Job Div",
+      "bound": "Bound",
+      "dateKind": "Date Kind",
+      "dateKindEtd": "ETD",
+      "dateKindEta": "ETA",
+      "team": "Team",
+      "operator": "Operator",
+      "salesMan": "Sales Man",
+      "pol": "POL",
+      "pod": "POD",
+      "party": "Party",
+      "partyKindShipper": "Shipper",
+      "partyKindConsignee": "Consignee",
+      "partyKindNotify": "Notify",
+      "partyKindSettlePartner": "Settle Partner",
+      "noAccess": "You do not have access permission."
     }
   }
 }

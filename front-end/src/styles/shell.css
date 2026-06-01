@@ -11,6 +11,8 @@
 }
 .app.is-side-collapsed { grid-template-columns: 0 1fr; }
 .app.is-side-collapsed .app__side { transform: translateX(-100%); }
+/* quicksearch 뒤에 배치해 collapsed와 동시 적용 시 quicksearch가 이김 */
+.app.is-side-quicksearch { grid-template-columns: 380px 1fr; }
 
 .app__topbar {
   grid-column: 1 / -1;

@@ -1719,7 +1719,8 @@
       "entry": "등록",
       "widgetEditMode": "Entry 위젯 편집",
       "widgetEditTitle": "위젯 편집 모드 on/off",
-      "widgetEditDisabledTitle": "Main / Freight 탭에서만 사용 가능"
+      "widgetEditDisabledTitle": "Main / Freight 탭에서만 사용 가능",
+      "quickSearch": "빠른 검색"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export 목록",
@@ -1746,6 +1747,28 @@
     },
     "lang": {
       "toggleTitle": "언어 전환"
+    },
+    "quickSearch": {
+      "title": "빠른 검색",
+      "blNo": "B/L 번호",
+      "back": "뒤로",
+      "all": "전체",
+      "jobDiv": "업무구분",
+      "bound": "수출입",
+      "dateKind": "날짜 종류",
+      "dateKindEtd": "ETD",
+      "dateKindEta": "ETA",
+      "team": "팀",
+      "operator": "담당자",
+      "salesMan": "영업사원",
+      "pol": "POL",
+      "pod": "POD",
+      "party": "화주",
+      "partyKindShipper": "Shipper",
+      "partyKindConsignee": "Consignee",
+      "partyKindNotify": "Notify",
+      "partyKindSettlePartner": "Settle Partner",
+      "noAccess": "접근 권한이 없습니다."
     }
   }
 }
