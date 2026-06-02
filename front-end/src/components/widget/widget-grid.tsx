@@ -7,6 +7,7 @@ import "react-resizable/css/styles.css";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { useFieldLayout } from "@/lib/use-field-layout";
 import { setLayoutPersistPaused } from "@/lib/backend-layout-storage";
+import { EntryScopeProvider } from "@/lib/entry-scope-context";
 import { WidgetContainer } from "./widget-container";
 import { WidgetPalette }   from "./widget-palette";
 import type { WidgetDef, AnyVariantConfig } from "./widget-registry";
@@ -109,6 +110,7 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
   const overlayRows = maxRow + 2;
 
   return (
+    <EntryScopeProvider scope={scope}>
     <div ref={containerRef} className="widget-grid-root" style={{ position: "relative" }}>
       {editMode && containerWidth > 0 && (
         <div className="widget-grid-overlay" style={{
@@ -156,7 +158,7 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
           onShow={(key) => showWidget(scope, key)}
           onReset={() => {
             resetLayout(scope, defaults);             // 위젯 기본값(paused → 미영속)
-            useFieldLayout.getState().resetAll();     // 필드 전체 기본값(paused → 미영속) — controlled 컴포넌트가 즉시 재렌더
+            useFieldLayout.getState().resetByPrefix(`${scope}::`); // 현재 화면 필드 레이아웃만 초기화(paused → 미영속)
             setGridEpoch(e => e + 1);                 // 위젯 그리드(uncontrolled) remount로 기본값 반영
           }}
           onClose={() => useWidgetLayout.getState().setEditMode(false)}
@@ -169,6 +171,7 @@ export function WidgetGrid({ scope, variant, registry, active = true }: Props) {
         />
       )}
     </div>
+    </EntryScopeProvider>
   );
 }
 

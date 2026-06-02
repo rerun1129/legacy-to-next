@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { GripHorizontal, X, Plus, Trash2 } from "lucide-react";
 import { useWidgetLayout }  from "@/lib/use-widget-layout";
 import { useFieldLayout }   from "@/lib/use-field-layout";
+import { useEntryScope }    from "@/lib/entry-scope-context";
 
 export interface FieldItemDef {
   key:       string;
@@ -40,7 +41,10 @@ const parseSlot = (k: string): [number, number] => {
   return [Number(r), Number(s)];
 };
 
-export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControls = true }: Props) {
+export function FieldItemGrid({ itemScope: rawItemScope, items, cols = 2, shouldShowRowControls = true }: Props) {
+  const entryScope = useEntryScope();
+  const itemScope  = entryScope ? `${entryScope}::${rawItemScope}` : rawItemScope;
+
   const { editMode }  = useWidgetLayout();
   const defaultOrder  = useMemo(() => items.map(i => i.key), [items]);
 

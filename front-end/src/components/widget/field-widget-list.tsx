@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useWidgetLayout }      from "@/lib/use-widget-layout";
 import { useFieldLayout }       from "@/lib/use-field-layout";
+import { useEntryScope }        from "@/lib/entry-scope-context";
 import { FieldWidgetContainer } from "./field-widget-container";
 
 export interface FieldWidgetDef {
@@ -25,7 +26,10 @@ interface Props {
   fields:     FieldWidgetDef[];
 }
 
-export function FieldWidgetList({ panelScope, fields }: Props) {
+export function FieldWidgetList({ panelScope: rawPanelScope, fields }: Props) {
+  const entryScope = useEntryScope();
+  const panelScope = entryScope ? `${entryScope}::${rawPanelScope}` : rawPanelScope;
+
   const { editMode }  = useWidgetLayout();
   const defaultOrder  = useMemo(() => fields.map(f => f.key), [fields]);
 

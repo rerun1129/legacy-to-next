@@ -56,6 +56,7 @@ interface FieldLayoutStore {
   commitEdit:       () => void;
   revertEdit:       () => void;
   resetAll:         () => void;
+  resetByPrefix:    (prefix: string) => void;
 }
 
 export const useFieldLayout = create<FieldLayoutStore>()(
@@ -381,9 +382,17 @@ export const useFieldLayout = create<FieldLayoutStore>()(
       revertEdit() { const snap = get().snapshot; if (!snap) return; set({ layouts: snap, snapshot: null }); },
       // 롤백: 전체 필드 레이아웃 초기화. 스냅샷은 보존(닫기 시 pre-edit로 복원되게).
       resetAll() { set({ layouts: {} }); },
+      // 현재 화면(scope::) 필드 레이아웃만 초기화 — prefix 이하 키만 제거.
+      resetByPrefix(prefix) {
+        set(s => ({
+          layouts: Object.fromEntries(
+            Object.entries(s.layouts).filter(([k]) => !k.startsWith(prefix))
+          ),
+        }));
+      },
     }),
     {
-      name: "fms.fieldLayouts.v1",
+      name: "fms.fieldLayouts.v2",
       storage: createJSONStorage(() => backendLayoutStorage),
       // snapshot은 편집 중 임시 데이터이므로 영속 대상 제외
       partialize: (s) => ({ layouts: s.layouts }),
