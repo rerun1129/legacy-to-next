@@ -71,6 +71,7 @@ export function SeaTradePanel() {
 
   const payableAtItem: FieldItemDef = {
     key: "payable-at",
+    fullWidth: true,
     render: () => (
       <CodeBox
         kind="lcn"
@@ -90,6 +91,7 @@ export function SeaTradePanel() {
   const perfItems: FieldItemDef[] = [
     {
       key: "customer",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -109,6 +111,7 @@ export function SeaTradePanel() {
     {
       // settlePartnerName: schema에 존재 — nameProps 연결
       key: "settle-partner",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

@@ -26,6 +26,7 @@ export function NonBLSchedulePanel() {
   const linerVesselItems: FieldItemDef[] = useMemo(() => [
     {
       key: "liner",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -116,6 +117,7 @@ export function NonBLSchedulePanel() {
   const portItems: FieldItemDef[] = useMemo(() => [
     {
       key: "pol",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -134,6 +136,7 @@ export function NonBLSchedulePanel() {
     },
     {
       key: "pod",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -152,6 +155,7 @@ export function NonBLSchedulePanel() {
     },
     {
       key: "final-dest",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"

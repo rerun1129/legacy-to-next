@@ -214,9 +214,9 @@ export function MasterCargoDocPanel({ variant }: Props) {
   const cargoItems = [...cargoBase, ...cargoExtras];
 
   const seaDoc: FieldItemDef[] = [
-    { key: "settle",   render: () => <SettlePartnerLcnField /> },
-    { key: "operator", render: () => <OperatorLcnField /> },
-    { key: "team",     render: () => <TeamLcnField /> },
+    { key: "settle",   fullWidth: true, render: () => <SettlePartnerLcnField /> },
+    { key: "operator", fullWidth: true, render: () => <OperatorLcnField /> },
+    { key: "team",     fullWidth: true, render: () => <TeamLcnField /> },
   ];
 
   const airDocBase: FieldItemDef[] = [
@@ -241,7 +241,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
         <>
           <div className="subhead"><div className="subhead__bar" />{tf("cargo")}</div>
           <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} />
-          <FieldItemGrid itemScope={`${panelScope}.hs`} items={[{ key: "hs-code", render: () => <HsCodeLcnField /> }]} cols={2} />
+          <FieldItemGrid itemScope={`${panelScope}.hs`} items={[{ key: "hs-code", fullWidth: true, render: () => <HsCodeLcnField /> }]} cols={2} />
         </>
       ),
     },

@@ -43,6 +43,7 @@ export function TruckDocumentPanel() {
     },
     {
       key: "trucker",
+      fullWidth: true,
       label: tf("trucker"),
       render: () => (
         <CodeBox

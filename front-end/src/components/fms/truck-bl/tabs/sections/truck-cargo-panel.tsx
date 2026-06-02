@@ -87,6 +87,7 @@ function TruckCargoFields() {
   const HS_CODE_ITEMS: FieldItemDef[] = [
     {
       key: "hs-code",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

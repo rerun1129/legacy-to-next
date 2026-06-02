@@ -26,7 +26,7 @@ export function SeaCargoPanel() {
           <div className="li__input li__input--tight">
             <NumberBox variant="panel" decimalPlaces={0} placeholder="0" {...register("pkgQty")} />
             {/* pkgUnit: §6.14 정책 — 자유 텍스트(비표준 단위 가능) */}
-            <div style={{ flex: "0 0 80px" }}>
+            <div style={{ flex: "0 0 60px" }}>
               <CodeBox
                 kind="code-only"
                 variant="panel"
@@ -53,7 +53,7 @@ export function SeaCargoPanel() {
               name="weightUnit"
               control={control}
               render={({ field }) => (
-                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} style={{ flex: "0 0 80px" }} />
+                <ComboBox variant="panel" options={weightUnitOptions} value={field.value} onChange={field.onChange} style={{ flex: "0 0 60px" }} />
               )}
             />
           </div>
@@ -87,6 +87,7 @@ export function SeaCargoPanel() {
   const HS_CODE_ITEMS: FieldItemDef[] = [
     {
       key: "hs-code",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

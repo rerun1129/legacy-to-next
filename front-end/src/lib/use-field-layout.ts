@@ -22,12 +22,26 @@ export interface FieldLayout {
 let _rowSeq = 0;
 function nextRowId() { return `r${++_rowSeq}`; }
 
+// fullKeys에 속한 키는 단독 행(rowMode "full"), 나머지는 n개씩 split 행으로 묶음
+const buildRowsWithFull = (ordered: string[], n: number, fullSet: Set<string>) => {
+  const rows: string[][] = [];
+  const rowModes: Record<number, "full" | "split"> = {};
+  let cur: string[] = [];
+  const flush = () => { if (cur.length) { rows.push(cur); cur = []; } };
+  for (const k of ordered) {
+    if (fullSet.has(k)) { flush(); rows.push([k]); rowModes[rows.length - 1] = "full"; }
+    else { cur.push(k); if (cur.length >= n) flush(); }
+  }
+  flush();
+  return { rows, rowModes };
+};
+
 interface FieldLayoutStore {
   layouts:          Record<string, FieldLayout>;
   snapshot:         Record<string, FieldLayout> | null;
   getFieldLayout:   (scope: string, defaults: string[]) => FieldLayout;
   initFieldLayout:  (scope: string, defaults: string[]) => void;
-  initItemRows:     (scope: string, items: string[], cols?: number) => void;
+  initItemRows:     (scope: string, items: string[], cols?: number, fullKeys?: string[]) => void;
   reorderFields:    (scope: string, fromIdx: number, toIdx: number) => void;
   swapFields:       (scope: string, key1: string, key2: string) => void;
   moveItemToSlot:   (scope: string, key: string, rowIdx: number, slotIdx: number) => void;
@@ -87,8 +101,8 @@ export const useFieldLayout = create<FieldLayoutStore>()(
         set(s => ({ layouts: { ...s.layouts, [scope]: { order: defaults, hidden: [] } } }));
       },
 
-      // FieldItemGrid 전용: cols 개씩 split 행으로 초기화
-      initItemRows(scope, items, cols = 2) {
+      // FieldItemGrid 전용: cols 개씩 split 행으로 초기화 (fullKeys는 단독 행 + rowMode "full"로 시드)
+      initItemRows(scope, items, cols = 2, fullKeys = []) {
         const layout = get().layouts[scope];
         if (layout?.itemRows) {
           // layout.cols가 명시된 경우에만 cols 변경을 감지해 재배치
@@ -101,8 +115,7 @@ export const useFieldLayout = create<FieldLayoutStore>()(
             // items에만 있는 신규 키는 뒤에 추가
             const missing = items.filter(k => !preserved.includes(k));
             const ordered = [...preserved, ...missing];
-            const rows: string[][] = [];
-            for (let i = 0; i < ordered.length; i += cols) rows.push(ordered.slice(i, i + cols));
+            const { rows, rowModes } = buildRowsWithFull(ordered, cols, new Set(fullKeys));
             const rowIds = rows.map(() => nextRowId());
             set(s => ({
               layouts: {
@@ -112,8 +125,8 @@ export const useFieldLayout = create<FieldLayoutStore>()(
                   itemRows: rows,
                   rowIds,
                   cols,
-                  // 행 인덱스 의미가 무너지므로 행 단위 모드/분할 설정 리셋
-                  rowModes:  {},
+                  // 행 인덱스 의미가 무너지므로 행 단위 모드/분할 설정 리셋 (fullKeys 시드 적용)
+                  rowModes,
                   splitCols: {},
                 },
               },
@@ -131,12 +144,11 @@ export const useFieldLayout = create<FieldLayoutStore>()(
           }
           return;
         }
-        const rows: string[][] = [];
-        for (let i = 0; i < items.length; i += cols) rows.push(items.slice(i, i + cols));
+        const { rows, rowModes } = buildRowsWithFull(items, cols, new Set(fullKeys));
         const rowIds = rows.map(() => nextRowId());
         set(s => {
           const base = s.layouts[scope] ?? { order: items, hidden: [] };
-          return { layouts: { ...s.layouts, [scope]: { ...base, itemRows: rows, rowIds, cols } } };
+          return { layouts: { ...s.layouts, [scope]: { ...base, itemRows: rows, rowIds, cols, rowModes } } };
         });
       },
 

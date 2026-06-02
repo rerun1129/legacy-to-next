@@ -88,6 +88,7 @@ function TruckSchedulePol({ polLabel }: { polLabel: string }) {
   const ITEMS: FieldItemDef[] = [
     {
       key: "pol",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -113,6 +114,7 @@ function TruckSchedulePod({ podLabel }: { podLabel: string }) {
   const ITEMS: FieldItemDef[] = [
     {
       key: "pod",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

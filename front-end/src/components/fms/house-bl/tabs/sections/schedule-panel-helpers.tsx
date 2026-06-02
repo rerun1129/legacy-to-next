@@ -96,6 +96,7 @@ export function IssueSection({ issueFields, panelScope, noOfBlOptions, noOfBlPla
     if (f === "Issue Place") {
       return {
         key: "issue-place",
+        fullWidth: true,
         render: () => (
           <CodeBox
             kind="lcn"

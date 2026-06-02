@@ -22,6 +22,7 @@ export function MasterAirDocumentPanel() {
   const DOCUMENT_ITEMS: FieldItemDef[] = [
     {
       key: "operator",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -39,6 +40,7 @@ export function MasterAirDocumentPanel() {
     },
     {
       key: "team",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -57,6 +59,7 @@ export function MasterAirDocumentPanel() {
     },
     {
       key: "settle-partner",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"

@@ -39,6 +39,7 @@ export function SeaDocumentPanel() {
     },
     {
       key: "sales-man",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -56,6 +57,7 @@ export function SeaDocumentPanel() {
     },
     {
       key: "operator",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -74,6 +76,7 @@ export function SeaDocumentPanel() {
     },
     {
       key: "team",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"

@@ -32,6 +32,7 @@ export function AirSchedulePanel({ variant }: Props) {
   const airlineItems: FieldItemDef[] = [
     {
       key: "airline",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -50,6 +51,7 @@ export function AirSchedulePanel({ variant }: Props) {
     },
     {
       key: "departure",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -118,6 +120,7 @@ export function AirSchedulePanel({ variant }: Props) {
           itemScope={`${panelScope}.destination`}
           items={[{
             key: "destination",
+            fullWidth: true,
             render: () => (
               <CodeBox
                 kind="lcn"

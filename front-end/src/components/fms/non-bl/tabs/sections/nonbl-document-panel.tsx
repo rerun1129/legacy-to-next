@@ -40,6 +40,7 @@ export function NonBLDocumentPanel() {
     },
     {
       key: "sales-man",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -57,6 +58,7 @@ export function NonBLDocumentPanel() {
     },
     {
       key: "operator",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -75,6 +77,7 @@ export function NonBLDocumentPanel() {
     },
     {
       key: "team",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"

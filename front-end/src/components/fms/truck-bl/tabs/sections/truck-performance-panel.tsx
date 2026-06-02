@@ -23,6 +23,7 @@ export function TruckPerformancePanel() {
   const PERF_ITEMS: FieldItemDef[] = [
     {
       key: "actual-customer",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -40,6 +41,7 @@ export function TruckPerformancePanel() {
     },
     {
       key: "settle-partner",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -56,6 +58,7 @@ export function TruckPerformancePanel() {
     },
     {
       key: "sales-man",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -73,6 +76,7 @@ export function TruckPerformancePanel() {
     },
     {
       key: "operator",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -90,6 +94,7 @@ export function TruckPerformancePanel() {
     },
     {
       key: "team",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

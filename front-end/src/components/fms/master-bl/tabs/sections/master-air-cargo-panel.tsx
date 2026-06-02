@@ -129,6 +129,7 @@ export function MasterAirCargoPanel({ variant }: Props) {
     },
     {
       key: "hs-code",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

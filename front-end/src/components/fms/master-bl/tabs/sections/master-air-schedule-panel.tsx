@@ -33,6 +33,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
   const airlineItems: FieldItemDef[] = [
     {
       key: "airline",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -50,6 +51,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
     },
     {
       key: "departure",
+      fullWidth: true,
       render: () => (
         // Master schema: polCode (polName 미존재 — name 없이 code only)
         <CodeBox
@@ -118,6 +120,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
           itemScope={`${panelScope}.destination`}
           items={[{
             key: "destination",
+            fullWidth: true,
             render: () => (
               // Master schema: podCode (podName 미존재 — name 없이 code only)
               <CodeBox

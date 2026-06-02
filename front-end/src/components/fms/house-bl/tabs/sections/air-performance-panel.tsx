@@ -19,6 +19,7 @@ export function AirPerformancePanel() {
   const PERF_ITEMS: FieldItemDef[] = [
     {
       key: "actual-customer",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -37,6 +38,7 @@ export function AirPerformancePanel() {
     },
     {
       key: "settle-partner",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"

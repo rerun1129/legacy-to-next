@@ -11,15 +11,15 @@ import {
 } from "./master-schedule-sea-atoms";
 
 // ── 줄 단위 items (순수 렌더 — 라벨은 atoms 컴포넌트 내부에서 자체 관리) ──────
-const linerItems:     FieldItemDef[] = [{ key: "liner",      render: () => <LinerLcnField /> }];
+const linerItems:     FieldItemDef[] = [{ key: "liner",      fullWidth: true, render: () => <LinerLcnField /> }];
 const vesselItems:    FieldItemDef[] = [{ key: "vessel",     render: () => <VesselField /> },  { key: "voyage",    render: () => <VoyageField /> }];
 const dateItems:      FieldItemDef[] = [{ key: "etd",        render: () => <EtdField /> },     { key: "eta",       render: () => <EtaField /> }];
 // POR/POL/POD/Final Dest를 cols=2 단일 위젯으로 묶어 좌우 이동·전체/분할 토글 활성화
 const portItems:      FieldItemDef[] = [
-  { key: "por",        render: () => <PorField /> },
-  { key: "pol",        render: () => <PolField /> },
-  { key: "pod",        render: () => <PodField /> },
-  { key: "final-dest", render: () => <FinalDestField /> },
+  { key: "por",        fullWidth: true, render: () => <PorField /> },
+  { key: "pol",        fullWidth: true, render: () => <PolField /> },
+  { key: "pod",        fullWidth: true, render: () => <PodField /> },
+  { key: "final-dest", fullWidth: true, render: () => <FinalDestField /> },
 ];
 const issueDateItems: FieldItemDef[] = [{ key: "issue-date", render: () => <IssueDateField /> }];
 

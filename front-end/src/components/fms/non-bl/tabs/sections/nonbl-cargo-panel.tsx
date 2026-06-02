@@ -124,6 +124,7 @@ export function NonBLCargoPanel() {
           itemScope="nonbl-cargo-panel.hs"
           items={[{
             key: "hs-code",
+            fullWidth: true,
             render: () => (
               <CodeBox
                 kind="lcn"

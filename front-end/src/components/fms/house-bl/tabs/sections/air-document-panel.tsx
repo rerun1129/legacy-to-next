@@ -22,6 +22,7 @@ export function AirDocumentPanel() {
   const DOCUMENT_ITEMS: FieldItemDef[] = [
     {
       key: "sales-man",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -39,6 +40,7 @@ export function AirDocumentPanel() {
     },
     {
       key: "operator",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"
@@ -57,6 +59,7 @@ export function AirDocumentPanel() {
     },
     {
       key: "team",
+      fullWidth: true,
       render: () => (
         <CodeBox
           variant="panel"

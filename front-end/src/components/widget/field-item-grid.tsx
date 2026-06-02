@@ -6,8 +6,10 @@ import { useWidgetLayout }  from "@/lib/use-widget-layout";
 import { useFieldLayout }   from "@/lib/use-field-layout";
 
 export interface FieldItemDef {
-  key:    string;
-  label?: string;
+  key:       string;
+  label?:    string;
+  /** 기본 배치에서 행 전체(full) 점유로 시드 */
+  fullWidth?: boolean;
   render: () => React.ReactNode;
 }
 
@@ -48,13 +50,15 @@ export function FieldItemGrid({ itemScope, items, cols = 2, shouldShowRowControl
     addItemRow, deleteItemRow, setRowMode, setSplitCol,
   } = useFieldLayout();
 
+  const fullKeys = useMemo(() => items.filter(i => i.fullWidth).map(i => i.key), [items]);
+
   useEffect(() => {
     initFieldLayout(itemScope, defaultOrder);
   }, [itemScope, defaultOrder, initFieldLayout]);
 
   useEffect(() => {
-    initItemRows(itemScope, defaultOrder, cols);
-  }, [itemScope, defaultOrder, cols, initItemRows]);
+    initItemRows(itemScope, defaultOrder, cols, fullKeys);
+  }, [itemScope, defaultOrder, cols, fullKeys, initItemRows]);
 
   const layout    = getFieldLayout(itemScope, defaultOrder);
   const rowModes  = layout.rowModes  ?? {};

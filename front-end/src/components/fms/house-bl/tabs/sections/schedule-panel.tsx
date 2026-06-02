@@ -32,6 +32,7 @@ export function SchedulePanel({ variant }: Props) {
   const PORT_ITEMS: FieldItemDef[] = [
     {
       key: "pol",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -50,6 +51,7 @@ export function SchedulePanel({ variant }: Props) {
     },
     {
       key: "pod",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -68,6 +70,7 @@ export function SchedulePanel({ variant }: Props) {
     },
     {
       key: "delivery",
+      fullWidth: true,
       render: () => (
         <CodeBox
           kind="lcn"
@@ -87,6 +90,7 @@ export function SchedulePanel({ variant }: Props) {
 
   const linerItem: FieldItemDef = {
     key: "liner",
+    fullWidth: true,
     render: () => (
       <CodeBox
         kind="lcn"
