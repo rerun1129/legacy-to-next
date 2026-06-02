@@ -238,7 +238,7 @@ export function MasterBLEntry({ variantKey }: Props) {
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={mainTabKey} variant={variant} form={form} active={tab === "main"} /></div>
-      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode === "SEA" || variant.mode === "AIR" ? variant.mode : undefined} /></div>
     </form>
     {isEdit && id && (
       <MasterChangeBlNoModal

@@ -128,10 +128,11 @@
         },
         "freight": {
           "panels": {
-            "rateHeaders":       "Rate Headers",
-            "sellingDebit":      "Selling / Debit",
-            "buyingCredit":      "Buying / Credit",
-            "accountDocuments":  "Account Documents"
+            "rateHeaders":          "Rate Headers",
+            "freightInformation":   "Freight Information",
+            "sellingDebit":         "Selling / Debit",
+            "buyingCredit":         "Buying / Credit",
+            "accountDocuments":     "Account Documents"
           },
           "headers": {
             "customers":  "CUSTOMERS",
@@ -140,12 +141,14 @@
           "customers": {
             "actualCustomer": "ACTUAL CUSTOMER",
             "liner":          "LINER",
+            "airline":        "AIRLINE",
             "settlePartner":  "SETTLE PARTNER"
           },
           "exRate": {
             "selling": "SELLING",
             "buying":  "BUYING",
-            "perf":    "PERF."
+            "perf":    "PERF.",
+            "usd":     "USD"
           },
           "cols": {
             "no":          "#",

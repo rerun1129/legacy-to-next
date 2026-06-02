@@ -177,7 +177,7 @@ export function HouseBLEntry({ variant }: Props) {
         </div>
 
         <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion, nonce)}</div>
-        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} /></div>
+        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode === "SEA" || variant.mode === "AIR" ? variant.mode : undefined} /></div>
       </form>
       </FormProvider>
 

@@ -139,5 +139,13 @@ export function createEmptyHouseBlFormValues(): HouseBlFormValues {
     itemHs: [],
     freightSelling: [],
     freightBuying: [],
+    sellRateDt: "",
+    sellRateCurrencyCode: "",
+    sellRate: "",
+    buyRateDt: "",
+    buyRateCurrencyCode: "",
+    buyRate: "",
+    usdRateDt: "",
+    usdRate: "",
   };
 }

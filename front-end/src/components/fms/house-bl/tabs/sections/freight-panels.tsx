@@ -3,11 +3,8 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
-import { Search } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { TextBox, NumberBox } from "@/components/shared/inputs";
-import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
-import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues, FreightRow } from "@/components/fms/house-bl/house-bl-schema";
 // TODO: 후속 작업 — 백엔드 미구현 (stub 유지)
 
@@ -18,77 +15,7 @@ interface AccountRow {
 }
 
 const ACCOUNT_ROWS: AccountRow[] = [];
-
-// ── Sample data ────────────────────────────────────────────
 const RATE_ROWS: FreightRow[] = [];
-
-// ── Rate header 공통 블록 ──────────────────────────────────
-interface CustomerItemProps { label: string; code: string; name: string }
-
-function CustomerItem({ label, code, name }: CustomerItemProps) {
-  return (
-    <div className="party-block__head">
-      <span style={{ fontSize: 10, minWidth: 110, flexShrink: 0 }}>{label}</span>
-      <div className="party-cn">
-        <div className="party-cn__code">
-          <TextBox variant="panel" readOnly defaultValue={code} />
-          <Search size={12} className="party-cn__icon" />
-        </div>
-        <TextBox variant="panel" readOnly defaultValue={name} />
-      </div>
-    </div>
-  );
-}
-
-interface ExRateItemProps { label: string }
-
-function ExRateItem({ label }: ExRateItemProps) {
-  return (
-    <div className="party-block__head">
-      <span style={{ fontSize: 10, minWidth: 110, flexShrink: 0, color: "var(--ink-2)" }}>{label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <TextBox variant="panel" readOnly defaultValue="" />
-        <TextBox variant="panel" readOnly defaultValue="" />
-        <TextBox variant="panel" readOnly defaultValue="" />
-      </div>
-    </div>
-  );
-}
-
-// ── Rate Headers Panel (FieldWidgetList + 3-col FieldItemGrid) ──
-export function FreightRatePanel() {
-  const tf = useTranslations("fms.houseBl.entry.freight");
-
-  // ── CUSTOMERS — 3-col FieldItemGrid ─────────────────────
-  // layout persisted by itemScope + item key (not label/array identity) — safe to define in-component
-  const customerItems: FieldItemDef[] = [
-    { key: "actual-customer", label: tf("customers.actualCustomer"), render: () => <CustomerItem label={tf("customers.actualCustomer")} code="" name="" /> },
-    { key: "liner",           label: tf("customers.liner"),          render: () => <CustomerItem label={tf("customers.liner")}          code="" name="" /> },
-    { key: "settle-partner",  label: tf("customers.settlePartner"),  render: () => <CustomerItem label={tf("customers.settlePartner")}  code="" name="" /> },
-  ];
-
-  // ── Ex. Rate Info — 3-col FieldItemGrid ─────────────────
-  // layout persisted by itemScope + item key — safe to define in-component
-  const exrateItems: FieldItemDef[] = [
-    { key: "selling-rate", label: tf("exRate.selling"), render: () => <ExRateItem label={tf("exRate.selling")} /> },
-    { key: "buying-rate",  label: tf("exRate.buying"),  render: () => <ExRateItem label={tf("exRate.buying")}  /> },
-    { key: "perf-rate",    label: tf("exRate.perf"),    render: () => <ExRateItem label={tf("exRate.perf")}    /> },
-  ];
-
-  const fields: FieldWidgetDef[] = [
-    { key: "customers",    label: tf("headers.customers"),  render: () => <FieldItemGrid itemScope="freight-rate-v2.customers"      items={customerItems} cols={2} /> },
-    { key: "ex-rate-info", label: tf("headers.exRateInfo"), render: () => <FieldItemGrid itemScope="freight-rate-v2.ex-rate-info-v2" items={exrateItems}   cols={2} /> },
-  ];
-
-  return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tf("panels.rateHeaders")}</span></div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <FieldWidgetList panelScope="freight-rate-v2" fields={fields} />
-      </div>
-    </div>
-  );
-}
 
 // ── Selling Panel ──────────────────────────────────────────
 export function FreightSellingPanel() {
@@ -170,7 +97,6 @@ export function FreightBuyingPanel() {
 export function FreightAccountPanel() {
   const tf = useTranslations("fms.houseBl.entry.freight");
 
-  // layout persisted by GridList column key (not label) — safe to define in-component
   const accountCols: GridColumn<AccountRow>[] = [
     { key: "docType",   label: tf("cols.docType")   },
     { key: "docNo",     label: tf("cols.docNo")      },

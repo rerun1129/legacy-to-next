@@ -288,6 +288,16 @@ export const HOUSE_BL_SCHEMA = z.object({
   itemHs:         z.array(ITEM_HS_SCHEMA).optional(),
   freightSelling: z.array(FREIGHT_ROW_SCHEMA).optional(),
   freightBuying:  z.array(FREIGHT_ROW_SCHEMA).optional(),
+
+  // 환율 — BE 연결은 단계 A(범위 외), FE 폼 바인딩만
+  sellRateDt:          DATE8,
+  sellRateCurrencyCode: z.string().optional(),
+  sellRate:            z.string().optional(),
+  buyRateDt:           DATE8,
+  buyRateCurrencyCode: z.string().optional(),
+  buyRate:             z.string().optional(),
+  usdRateDt:           DATE8,
+  usdRate:             z.string().optional(),
 });
 
 export type HouseBlFormValues = z.infer<typeof HOUSE_BL_SCHEMA>;

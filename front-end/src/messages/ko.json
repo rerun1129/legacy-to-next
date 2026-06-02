@@ -128,10 +128,11 @@
         },
         "freight": {
           "panels": {
-            "rateHeaders":       "운임 헤더",
-            "sellingDebit":      "Selling / Debit",
-            "buyingCredit":      "Buying / Credit",
-            "accountDocuments":  "정산 문서"
+            "rateHeaders":          "운임 헤더",
+            "freightInformation":   "운임 정보",
+            "sellingDebit":         "Selling / Debit",
+            "buyingCredit":         "Buying / Credit",
+            "accountDocuments":     "정산 문서"
           },
           "headers": {
             "customers":  "거래처",
@@ -140,12 +141,14 @@
           "customers": {
             "actualCustomer": "실화주",
             "liner":          "선사",
+            "airline":        "항공사",
             "settlePartner":  "정산 파트너"
           },
           "exRate": {
             "selling": "매출",
             "buying":  "매입",
-            "perf":    "PERF."
+            "perf":    "PERF.",
+            "usd":     "USD"
           },
           "cols": {
             "no":          "#",
