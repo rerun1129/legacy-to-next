@@ -74,8 +74,7 @@ export function MasterAirIssuePanel({ variant }: Props) {
         <FieldItemGrid
           itemScope={`${panelScope}.issue`}
           items={issueItems}
-          cols={1}
-          shouldShowRowControls={false}
+          cols={2}
         />
       ),
     },

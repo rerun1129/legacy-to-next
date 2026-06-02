@@ -111,7 +111,7 @@ export function TruckPerformancePanel() {
     <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("performance")}</span></div>
       <div className="panel__body" style={{ overflow: "auto", flex: 1 }}>
-        <FieldItemGrid itemScope="truck-performance-panel" items={PERF_ITEMS} cols={1} />
+        <FieldItemGrid itemScope="truck-performance-panel" items={PERF_ITEMS} cols={2} />
       </div>
     </div>
   );

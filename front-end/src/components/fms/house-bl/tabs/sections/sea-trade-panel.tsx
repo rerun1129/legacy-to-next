@@ -133,7 +133,7 @@ export function SeaTradePanel() {
       render: () => (
         <>
           <FieldItemGrid itemScope="sea-trade-panel.trade-terms.terms"   items={[incotermsItem, freightTermItem]} cols={2} />
-          <FieldItemGrid itemScope="sea-trade-panel.trade-terms.payable" items={[payableAtItem]}                  cols={1} />
+          <FieldItemGrid itemScope="sea-trade-panel.trade-terms.payable" items={[payableAtItem]}                  cols={2} />
         </>
       ),
     },
@@ -143,7 +143,7 @@ export function SeaTradePanel() {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />{tf("performance")}</div>
-          <FieldItemGrid itemScope="sea-trade-panel.performance" items={perfItems} cols={1} />
+          <FieldItemGrid itemScope="sea-trade-panel.performance" items={perfItems} cols={2} />
         </>
       ),
     },

@@ -112,7 +112,7 @@ export function SeaCargoPanel() {
       </div>
       <div className="panel__body panel__body--scroll">
         <FieldItemGrid itemScope="sea-cargo-panel" items={CARGO_ITEMS} />
-        <FieldItemGrid itemScope="sea-cargo-panel.hs" items={HS_CODE_ITEMS} cols={1} />
+        <FieldItemGrid itemScope="sea-cargo-panel.hs" items={HS_CODE_ITEMS} cols={2} />
       </div>
     </div>
   );

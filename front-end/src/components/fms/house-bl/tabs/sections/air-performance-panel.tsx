@@ -61,7 +61,7 @@ export function AirPerformancePanel() {
         <span className="panel__title">{tp("performance")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
-        <FieldItemGrid itemScope="air-performance-panel" items={PERF_ITEMS} cols={1} />
+        <FieldItemGrid itemScope="air-performance-panel" items={PERF_ITEMS} cols={2} />
       </div>
     </div>
   );

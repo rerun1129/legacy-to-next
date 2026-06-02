@@ -76,8 +76,8 @@ export function FreightRatePanel() {
   ];
 
   const fields: FieldWidgetDef[] = [
-    { key: "customers",    label: tf("headers.customers"),  render: () => <FieldItemGrid itemScope="freight-rate-v2.customers"      items={customerItems} cols={3} /> },
-    { key: "ex-rate-info", label: tf("headers.exRateInfo"), render: () => <FieldItemGrid itemScope="freight-rate-v2.ex-rate-info-v2" items={exrateItems}   cols={3} /> },
+    { key: "customers",    label: tf("headers.customers"),  render: () => <FieldItemGrid itemScope="freight-rate-v2.customers"      items={customerItems} cols={2} /> },
+    { key: "ex-rate-info", label: tf("headers.exRateInfo"), render: () => <FieldItemGrid itemScope="freight-rate-v2.ex-rate-info-v2" items={exrateItems}   cols={2} /> },
   ];
 
   return (

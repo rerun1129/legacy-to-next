@@ -3,6 +3,7 @@
 import { useFormContext, Controller } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { CodeBox, TextBox, DateBox } from "@/components/shared/inputs";
+import { FieldItemGrid, type FieldItemDef } from "@/components/widget/field-item-grid";
 import type { TruckBlFormValues } from "@/components/fms/truck-bl/truck-bl-schema";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
@@ -14,11 +15,12 @@ export function TruckDocumentPanel() {
 
   const { register, control, setValue } = useFormContext<TruckBlFormValues>();
   const trucker = useCodeAutocomplete(CODE_SOURCES.trucker);
-  return (
-    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("document")}</span></div>
-      <div className="panel__body" style={{ overflow: "auto", flex: 1, padding: "8px 0" }}>
-        {/* Pick-up Date */}
+
+  const docItems: FieldItemDef[] = [
+    {
+      key: "pickup-date",
+      label: tf("pickupDate"),
+      render: () => (
         <div className="li">
           <span className="li__label">{tf("pickupDate")}</span>
           <div className="li__input">
@@ -37,7 +39,12 @@ export function TruckDocumentPanel() {
             />
           </div>
         </div>
-        {/* Trucker */}
+      ),
+    },
+    {
+      key: "trucker",
+      label: tf("trucker"),
+      render: () => (
         <CodeBox
           kind="lcn"
           label={tf("trucker")}
@@ -49,13 +56,27 @@ export function TruckDocumentPanel() {
           suggestionsLoading={trucker.suggestionsLoading}
           onSelect={(it) => { setValue("truckerCode", it.code); setValue("truckerName", it.name); }}
         />
-        {/* Trucker PIC */}
+      ),
+    },
+    {
+      key: "trucker-pic",
+      label: tf("truckerPic"),
+      render: () => (
         <div className="li">
           <span className="li__label">{tf("truckerPic")}</span>
           <div className="li__input">
             <TextBox variant="panel" placeholder="Trucker PIC" {...register("truckerPic")} />
           </div>
         </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div className="panel__head"><div className="panel__title-accent" /><span className="panel__title">{tp("document")}</span></div>
+      <div className="panel__body" style={{ overflow: "auto", flex: 1, padding: "8px 0" }}>
+        <FieldItemGrid itemScope="truck-document-panel" items={docItems} cols={2} />
       </div>
     </div>
   );

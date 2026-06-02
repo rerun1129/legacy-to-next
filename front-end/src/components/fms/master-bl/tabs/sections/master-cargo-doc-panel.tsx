@@ -241,7 +241,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
         <>
           <div className="subhead"><div className="subhead__bar" />{tf("cargo")}</div>
           <FieldItemGrid itemScope={`${panelScope}.cargo`} items={cargoItems} />
-          <FieldItemGrid itemScope={`${panelScope}.hs`} items={[{ key: "hs-code", render: () => <HsCodeLcnField /> }]} cols={1} />
+          <FieldItemGrid itemScope={`${panelScope}.hs`} items={[{ key: "hs-code", render: () => <HsCodeLcnField /> }]} cols={2} />
         </>
       ),
     },
@@ -250,7 +250,7 @@ export function MasterCargoDocPanel({ variant }: Props) {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />{tf("document")}</div>
-          <FieldItemGrid itemScope={`${panelScope}.document`} items={docItems} cols={1} />
+          <FieldItemGrid itemScope={`${panelScope}.document`} items={docItems} cols={2} />
         </>
       ),
     },

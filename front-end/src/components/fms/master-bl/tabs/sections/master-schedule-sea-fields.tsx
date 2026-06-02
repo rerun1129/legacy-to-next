@@ -37,11 +37,11 @@ export function buildSeaFields(
   const mk = (key: string, label: string, items: FieldItemDef[], cols: number = 2): FieldWidgetDef => ({
     key,
     label,
-    render: () => <FieldItemGrid itemScope={`${panelScope}.${key}`} items={items} cols={cols} shouldShowRowControls={false} />,
+    render: () => <FieldItemGrid itemScope={`${panelScope}.${key}`} items={items} cols={cols} />,
   });
 
   const common: FieldWidgetDef[] = [
-    mk("liner",  l("liner",      "Liner"),             linerItems,  1),
+    mk("liner",  l("liner",      "Liner"),             linerItems,  2),
     mk("vessel", l("vesselVoyage", "Vessel / Voyage"), vesselItems, 2),
     mk("dates",  `${l("etd", "ETD")} / ${l("eta", "ETA")}`, dateItems, 2),
     mk("ports",  l("ports",      "Ports"),             portItems,   2),

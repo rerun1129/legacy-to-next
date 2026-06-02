@@ -24,7 +24,7 @@ function TruckScheduleVessel({ vesselLabel }: { vesselLabel: string }) {
       ),
     },
   ];
-  return <FieldItemGrid itemScope="truck-schedule-panel.vessel" items={ITEMS} shouldShowRowControls={false} />;
+  return <FieldItemGrid itemScope="truck-schedule-panel.vessel" items={ITEMS} />;
 }
 
 function TruckScheduleDates({ etdLabel, etaLabel }: { etdLabel: string; etaLabel: string }) {
@@ -79,7 +79,7 @@ function TruckScheduleDates({ etdLabel, etaLabel }: { etdLabel: string; etaLabel
       ),
     },
   ];
-  return <FieldItemGrid itemScope="truck-schedule-panel.dates" items={ITEMS} shouldShowRowControls={false} />;
+  return <FieldItemGrid itemScope="truck-schedule-panel.dates" items={ITEMS} />;
 }
 
 function TruckSchedulePol({ polLabel }: { polLabel: string }) {
@@ -104,7 +104,7 @@ function TruckSchedulePol({ polLabel }: { polLabel: string }) {
       ),
     },
   ];
-  return <FieldItemGrid itemScope="truck-schedule-panel.pol" items={ITEMS} cols={1} shouldShowRowControls={false} />;
+  return <FieldItemGrid itemScope="truck-schedule-panel.pol" items={ITEMS} cols={2} />;
 }
 
 function TruckSchedulePod({ podLabel }: { podLabel: string }) {
@@ -129,7 +129,7 @@ function TruckSchedulePod({ podLabel }: { podLabel: string }) {
       ),
     },
   ];
-  return <FieldItemGrid itemScope="truck-schedule-panel.pod" items={ITEMS} cols={1} shouldShowRowControls={false} />;
+  return <FieldItemGrid itemScope="truck-schedule-panel.pod" items={ITEMS} cols={2} />;
 }
 
 export function TruckSchedulePanel() {

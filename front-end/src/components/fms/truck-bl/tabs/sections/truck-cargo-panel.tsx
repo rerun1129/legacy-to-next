@@ -107,7 +107,7 @@ function TruckCargoFields() {
   return (
     <>
       <FieldItemGrid itemScope="truck-cargo-panel" items={CARGO_ITEMS} />
-      <FieldItemGrid itemScope="truck-cargo-panel.hs" items={HS_CODE_ITEMS} cols={1} />
+      <FieldItemGrid itemScope="truck-cargo-panel.hs" items={HS_CODE_ITEMS} cols={2} />
     </>
   );
 }

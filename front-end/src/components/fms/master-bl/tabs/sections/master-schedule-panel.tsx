@@ -66,11 +66,11 @@ function buildAirFields(
     },
     {
       key: "ports", label: `${tf("pol")} / ${tf("pod")}`,
-      render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} cols={2} shouldShowRowControls={false} />,
+      render: () => <FieldItemGrid itemScope={`${panelScope}.ports`} items={portItems} cols={2} />,
     },
     {
       key: "dates", label: `${tf("etd")} / ${tf("eta")}`,
-      render: () => <FieldItemGrid itemScope={`${panelScope}.dates`} items={dateItems} cols={2} shouldShowRowControls={false} />,
+      render: () => <FieldItemGrid itemScope={`${panelScope}.dates`} items={dateItems} cols={2} />,
     },
     {
       key: "legs", label: tf("scheduleLegs"),

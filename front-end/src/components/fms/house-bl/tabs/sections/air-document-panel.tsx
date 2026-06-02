@@ -99,7 +99,7 @@ export function AirDocumentPanel() {
         <span className="panel__title">{tp("document")}</span>
       </div>
       <div className="panel__body panel__body--scroll-flex2">
-        <FieldItemGrid itemScope="air-document-panel" items={DOCUMENT_ITEMS} cols={1} />
+        <FieldItemGrid itemScope="air-document-panel" items={DOCUMENT_ITEMS} cols={2} />
       </div>
     </div>
   );

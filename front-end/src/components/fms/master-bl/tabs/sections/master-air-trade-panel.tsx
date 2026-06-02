@@ -149,7 +149,7 @@ export function MasterAirTradePanel({ variant }: Props) {
       key:   "trade-terms",
       label: tf("tradeTerms"),
       render: () => (
-        <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={tradeItems} cols={1} shouldShowRowControls={false} />
+        <FieldItemGrid itemScope={`${panelScope}.trade-terms`} items={tradeItems} cols={2} />
       ),
     },
   ];

@@ -210,7 +210,7 @@ export function SchedulePanel({ variant }: Props) {
       label: tf("linerVessel"),
       render: () => (
         <>
-          <FieldItemGrid itemScope={`${panelScope}.liner.solo`}         items={[linerItem]}              cols={1} />
+          <FieldItemGrid itemScope={`${panelScope}.liner.solo`}         items={[linerItem]}              cols={2} />
           <FieldItemGrid itemScope={`${panelScope}.liner.vessel-voyage`} items={[vesselItem, voyageItem]} cols={2} />
           <FieldItemGrid itemScope={`${panelScope}.liner.etd-eta`}      items={[etdItem, etaItem]}       cols={2} />
           <FieldItemGrid itemScope={`${panelScope}.liner.onboard`}      items={[onBoardItem]}            cols={2} />
@@ -223,7 +223,7 @@ export function SchedulePanel({ variant }: Props) {
       render: () => (
         <>
           <div className="subhead"><div className="subhead__bar" />{tf("ports")}</div>
-          <FieldItemGrid itemScope={`${panelScope}.ports`} items={PORT_ITEMS} cols={1} />
+          <FieldItemGrid itemScope={`${panelScope}.ports`} items={PORT_ITEMS} cols={2} />
         </>
       ),
     },

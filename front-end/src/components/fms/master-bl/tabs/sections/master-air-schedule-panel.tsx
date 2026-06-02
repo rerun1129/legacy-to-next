@@ -76,8 +76,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
         <FieldItemGrid
           itemScope={`${panelScope}.airline`}
           items={airlineItems}
-          cols={1}
-          shouldShowRowControls={false}
+          cols={2}
         />
       ),
     },
@@ -135,8 +134,7 @@ export function MasterAirSchedulePanel({ variant }: Props) {
               />
             ),
           }]}
-          cols={1}
-          shouldShowRowControls={false}
+          cols={2}
         />
       ),
     },
@@ -199,7 +197,6 @@ export function MasterAirSchedulePanel({ variant }: Props) {
             },
           ]}
           cols={2}
-          shouldShowRowControls={false}
         />
       ),
     },

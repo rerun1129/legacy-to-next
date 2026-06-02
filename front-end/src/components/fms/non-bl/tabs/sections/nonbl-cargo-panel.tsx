@@ -139,7 +139,7 @@ export function NonBLCargoPanel() {
               />
             ),
           }]}
-          cols={1}
+          cols={2}
         />
       </div>
     </div>
