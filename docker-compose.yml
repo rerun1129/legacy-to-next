@@ -49,6 +49,22 @@ services:
       postgres:
         condition: service_healthy
 
+  bms-api:
+    build:
+      context: ./back-end/java-spring-bms
+    container_name: bms-api
+    ports:
+      - "8082:8082"
+    environment:
+      BMS_DB_URL: jdbc:postgresql://postgres:5432/fms?currentSchema=bms
+      BMS_DB_USER: fms
+      BMS_DB_PASS: fms_local
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   frontend:
     build:
       context: ./front-end
