@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: java-spring-bms
+
+  # ── Database (같은 PostgreSQL 인스턴스, bms 스키마 소유) ───────────
+  datasource:
+    url: ${BMS_DB_URL:jdbc:postgresql://localhost:5432/fms?currentSchema=bms}
+    username: ${BMS_DB_USER:fms}
+    password: ${BMS_DB_PASS:fms_local}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: BmsHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  # ── JPA (스키마는 Flyway 관리 → ddl-auto none, FMS 와 동일 정책) ──
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: bms
+        format_sql: true
+    show-sql: false
+    open-in-view: false
+
+  # ── Flyway (bms 스키마 신규 관리) ─────────────────────────────────
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: bms
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  output:
+    ansi:
+      enabled: always
+
+# ── Server (FMS 8080 · ADMIN 8081 다음) ──────────────────────────
+server:
+  port: 8082
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+
+# ── OpenAPI / Swagger ─────────────────────────────────────────────
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  default-produces-media-type: application/json
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    com.freightos: DEBUG
+
+# ── p6spy (SQL 로깅 — 로컬 프로파일에서만 활성화) ──────────────────
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
+
+# ── CORS ─────────────────────────────────────────────────────────
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001}
+
+# ── JWT (admin·fms 와 동일 secret 공유 — HS256 대칭키 검증) ────────
+jwt:
+  secret: ${JWT_SECRET:dev-secret-please-rotate-at-least-32-chars!!}
+  access-token-ttl-minutes: ${JWT_ACCESS_TTL:15}
+  refresh-token-ttl-days: ${JWT_REFRESH_TTL:14}
