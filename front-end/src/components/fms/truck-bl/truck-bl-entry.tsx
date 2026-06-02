@@ -137,7 +137,7 @@ export function TruckBLEntry() {
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       {/* nonce를 key에 포함해 Copy 신호(new→new)도 리마운트 트리거 */}
       <div style={{ display: entry.tab === "main"    ? "contents" : "none" }}><MainTruck   key={`${entry.resetVersion}:${entry.nonce ?? 0}`} active={entry.tab === "main"}    /></div>
-      <div style={{ display: entry.tab === "freight" ? "contents" : "none" }}><FreightTab key={`${entry.resetVersion}:${entry.nonce ?? 0}`} active={entry.tab === "freight"} /></div>
+      <div style={{ display: entry.tab === "freight" ? "contents" : "none" }}><FreightTab key={`${entry.resetVersion}:${entry.nonce ?? 0}`} active={entry.tab === "freight"} layoutScope="truck-bl-entry.freight" /></div>
     </form>
     {entry.isEdit && entry.id && (
       <TruckChangeBlNoModal

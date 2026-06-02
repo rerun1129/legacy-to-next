@@ -10,7 +10,7 @@ import {
   FreightAccountPanel,
 } from "./sections/freight-panels";
 
-export function FreightTab({ active, mode }: { active?: boolean; mode?: "SEA" | "AIR" }) {
+export function FreightTab({ active, mode, layoutScope }: { active?: boolean; mode?: "SEA" | "AIR"; layoutScope?: string }) {
   const tf = useTranslations("fms.houseBl.entry.freight");
 
   const registry: WidgetDef[] = [
@@ -50,5 +50,5 @@ export function FreightTab({ active, mode }: { active?: boolean; mode?: "SEA" | 
     },
   ];
 
-  return <WidgetGrid scope="freight-tab" variant={undefined} registry={registry} active={active} />;
+  return <WidgetGrid scope={layoutScope ?? "freight-tab"} variant={undefined} registry={registry} active={active} />;
 }
