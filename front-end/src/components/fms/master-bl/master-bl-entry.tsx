@@ -14,6 +14,7 @@ import { ComboBox, TextBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { getMasterVariant } from "@/lib/bl-variants";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useEntryTabStore } from "@/lib/use-entry-tab-store";
 import { getModeLabels } from "@/lib/bl-mode-labels";
 import { useMasterBlEntryMutations } from "./use-master-bl-entry-mutations";
 import { useMasterBlEntryDetailSync } from "./use-master-bl-entry-detail-sync";
@@ -42,7 +43,6 @@ function getToolbarFields(mode: string) {
 }
 
 export function MasterBLEntry({ variantKey }: Props) {
-  const [tab, setTab] = useState("main");
   const [resetVersion, setResetVersion] = useState(0);
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -58,10 +58,13 @@ export function MasterBLEntry({ variantKey }: Props) {
   const isEdit = Boolean(id);
   const modeLabels = getModeLabels(variant.mode);
   const toolbarFields = getToolbarFields(variant.mode);
+  const focusDomain = entryFocusKeys.masterBl(variantKey);
+  // 탭 상태 — 라우트 전환 후 재진입 시 마지막 탭 유지 (EntryDomain별 싱글톤 store)
+  const tab = useEntryTabStore((s) => s.tabs[focusDomain] ?? "main");
 
   function handleTabChange(key: string) {
     setCanEdit(key === "main" || key === "freight");
-    setTab(key);
+    useEntryTabStore.getState().setTab(focusDomain, key);
   }
 
   const clearDraft = useBLDraftStore(state => state.clearDraft);
@@ -100,7 +103,6 @@ export function MasterBLEntry({ variantKey }: Props) {
   // B/L Copy 재초기화 신호 구독.
   // focus 불변(new→new)일 때 useBlDraftSync의 key 변경이 일어나지 않으므로
   // nonce 증가를 별도 트리거로 삼아 최신 :new draft로 강제 reset한다.
-  const focusDomain = entryFocusKeys.masterBl(variantKey);
   const nonce = useEntryFocusStore((s) => s.resetNonce[focusDomain]);
   const prevNonceRef = useRef<number | undefined>(undefined);
 

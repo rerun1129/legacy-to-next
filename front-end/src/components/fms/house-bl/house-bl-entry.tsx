@@ -21,6 +21,7 @@ import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { HouseChangeBlNoModal } from "./house-change-bl-no-modal";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
+import { useEntryTabStore } from "@/lib/use-entry-tab-store";
 import { ScreenGuard } from "@/components/shared/screen-guard";
 import { useHouseBlEntryDetailSync } from "./use-house-bl-entry-detail-sync";
 import { useHouseBlEntryMutations } from "./use-house-bl-entry-mutations";
@@ -48,7 +49,6 @@ interface Props {
 
 export function HouseBLEntry({ variant }: Props) {
   const tt = useTranslations("fms.houseBl.entry.tabs");
-  const [tab, setTab] = useState("main");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
@@ -76,6 +76,8 @@ export function HouseBLEntry({ variant }: Props) {
   // nonce 증가를 별도 트리거로 삼아 최신 :new draft로 강제 reset한다.
   const focusDomain = entryFocusKeys.houseBl(variant.key);
   const nonce = useEntryFocusStore((s) => s.resetNonce[focusDomain]);
+  // 탭 상태 — 라우트 전환 후 재진입 시 마지막 탭 유지 (EntryDomain별 싱글톤 store)
+  const tab = useEntryTabStore((s) => s.tabs[focusDomain] ?? "main");
   const prevNonceRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -131,7 +133,7 @@ export function HouseBLEntry({ variant }: Props) {
 
   function handleTabChange(key: string) {
     setCanEdit(key === "main" || key === "freight");
-    setTab(key);
+    useEntryTabStore.getState().setTab(focusDomain, key);
   }
 
   const tabs = [

@@ -8,6 +8,7 @@ import { useBLDraftStore, blDraftStore }         from "@/lib/use-bl-draft-store"
 import { useEnumOptions }                        from "@/application/enums/use-enum";
 import { nonBlPort }                             from "@/lib/ports";
 import { useEntryFocusStore, entryFocusKeys }    from "@/lib/use-entry-focus-store";
+import { useEntryTabStore }                      from "@/lib/use-entry-tab-store";
 import { toast }                                 from "@/lib/toast-store";
 import type { NonBlFormValues }                  from "./non-bl-schema";
 import { NON_BL_SCHEMA }                         from "./non-bl-schema";
@@ -18,8 +19,12 @@ import { useNonBlEntryMutations }                from "./use-non-bl-entry-mutati
 
 export function useNonBlEntry() {
   const t = useTranslations("fms.nonBl.entry.msg");
-  const [tab, setTab] = useState("main");
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
+  // 탭 상태 — 라우트 전환 후 재진입 시 마지막 탭 유지 (EntryDomain별 싱글톤 store)
+  const tab = useEntryTabStore((s) => s.tabs[entryFocusKeys.nonBl] ?? "main");
+  const setTab = useCallback((key: string) => {
+    useEntryTabStore.getState().setTab(entryFocusKeys.nonBl, key);
+  }, []);
   const [resetVersion, setResetVersion] = useState(0);
   const bumpResetVersion = useCallback(() => setResetVersion(v => v + 1), []);
   const id = useEntryFocusStore((s) => s.focus.nonBl);
