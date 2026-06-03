@@ -34,6 +34,13 @@ public class ExchangeRatePersistenceAdapter implements ExchangeRatePort {
     }
 
     @Override
+    public Optional<ExchangeRate> findActiveByDateCurrency(String fromCurrencyCode, String toCurrencyCode, String exchangeDate) {
+        return exchangeRateRepository
+                .findByFromCurrencyCodeAndToCurrencyCodeAndExchangeDateAndDeletedAtIsNull(fromCurrencyCode, toCurrencyCode, exchangeDate)
+                .map(jpaToDomainMapper::toDomain);
+    }
+
+    @Override
     public Long save(ExchangeRate exchangeRate) {
         ExchangeRateJpaEntity entity = domainToJpaMapper.toNewJpa(exchangeRate);
         exchangeRateRepository.save(entity);

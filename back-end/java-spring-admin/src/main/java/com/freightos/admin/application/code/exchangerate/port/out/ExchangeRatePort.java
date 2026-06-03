@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface ExchangeRatePort {
     PagedResult<ExchangeRateSummary> searchSummaries(SearchExchangeRateCommand command);
     Optional<ExchangeRate> findById(Long id);
+    Optional<ExchangeRate> findActiveByDateCurrency(String fromCurrencyCode, String toCurrencyCode, String exchangeDate);
     Long save(ExchangeRate exchangeRate);
     void update(Long id, ExchangeRate patchData);
     void softDelete(Long id);

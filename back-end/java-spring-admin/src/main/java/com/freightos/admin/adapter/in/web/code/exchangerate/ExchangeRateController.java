@@ -3,11 +3,13 @@ package com.freightos.admin.adapter.in.web.code.exchangerate;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.CreateExchangeRateRequest;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.ExchangeRateDetailResponse;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.ExchangeRateSummaryResponse;
+import com.freightos.admin.adapter.in.web.code.exchangerate.dto.ExchangeRateValueResponse;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.SaveExchangeRateChangesRequest;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.SearchExchangeRateRequest;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.UpdateExchangeRateRequest;
 import com.freightos.admin.application.code.exchangerate.port.in.ExchangeRateUseCase;
 import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateSummary;
+import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateValue;
 import com.freightos.admin.common.request.BulkDeleteRequest;
 import com.freightos.admin.common.response.ApiResponse;
 import com.freightos.admin.common.response.AutocompleteItem;
@@ -109,5 +111,16 @@ public class ExchangeRateController {
             @RequestParam String q,
             @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit) {
         return ResponseEntity.ok(ApiResponse.of(exchangeRateUseCase.autocompleteExchangeRates(q, limit)));
+    }
+
+    @GetMapping("/rates")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<ExchangeRateValueResponse>>> getRates(
+            @RequestParam String exchangeDate,
+            @RequestParam String fromCurrencyCode,
+            @RequestParam String toCurrencyCode) {
+        List<ExchangeRateValue> values = exchangeRateUseCase.findRates(fromCurrencyCode, toCurrencyCode, exchangeDate);
+        List<ExchangeRateValueResponse> response = values.stream().map(exchangeRateAssembler::toValueResponse).toList();
+        return ResponseEntity.ok(ApiResponse.of(response));
     }
 }

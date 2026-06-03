@@ -5,6 +5,7 @@ import com.freightos.admin.application.code.exchangerate.command.SaveExchangeRat
 import com.freightos.admin.application.code.exchangerate.command.SearchExchangeRateCommand;
 import com.freightos.admin.application.code.exchangerate.command.UpdateExchangeRateCommand;
 import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateSummary;
+import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateValue;
 import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.response.SaveChangesResult;
@@ -21,4 +22,5 @@ public interface ExchangeRateUseCase {
     void deleteExchangeRates(List<Long> ids);
     SaveChangesResult saveExchangeRateChanges(SaveExchangeRateChangesCommand command);
     List<AutocompleteItem> autocompleteExchangeRates(String query, int limit);
+    List<ExchangeRateValue> findRates(String fromCurrencyCode, String toCurrencyCode, String exchangeDate);
 }

@@ -7,17 +7,21 @@ import com.freightos.admin.application.code.exchangerate.command.UpdateExchangeR
 import com.freightos.admin.application.code.exchangerate.port.in.ExchangeRateUseCase;
 import com.freightos.admin.application.code.exchangerate.port.out.ExchangeRatePort;
 import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateSummary;
+import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateValue;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.AutocompleteItem;
 import com.freightos.admin.common.response.MessageCode;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.common.response.SaveChangesResult;
 import com.freightos.admin.domain.code.exchangerate.entity.ExchangeRate;
+import com.freightos.admin.domain.code.exchangerate.entity.ExchangeRateKind;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -102,5 +106,28 @@ public class ExchangeRateService implements ExchangeRateUseCase {
     @Override
     public List<AutocompleteItem> autocompleteExchangeRates(String query, int limit) {
         return exchangeRatePort.autocomplete(query, limit);
+    }
+
+    @Override
+    public List<ExchangeRateValue> findRates(String fromCurrencyCode, String toCurrencyCode, String exchangeDate) {
+        return exchangeRatePort.findActiveByDateCurrency(fromCurrencyCode, toCurrencyCode, exchangeDate)
+                .map(this::toValueList)
+                .orElse(List.of());
+    }
+
+    private List<ExchangeRateValue> toValueList(ExchangeRate domain) {
+        List<ExchangeRateValue> result = new ArrayList<>();
+        addIfPresent(result, ExchangeRateKind.STANDARD, domain.getStandardExchangeRate());
+        addIfPresent(result, ExchangeRateKind.WIRE_SEND, domain.getWireSendExchangeRate());
+        addIfPresent(result, ExchangeRateKind.WIRE_RECEIVE, domain.getWireReceiveExchangeRate());
+        addIfPresent(result, ExchangeRateKind.CASH_SELL, domain.getCashSellExchangeRate());
+        addIfPresent(result, ExchangeRateKind.CASH_BUY, domain.getCashBuyExchangeRate());
+        return result;
+    }
+
+    private void addIfPresent(List<ExchangeRateValue> list, ExchangeRateKind kind, BigDecimal rate) {
+        if (rate != null) {
+            list.add(new ExchangeRateValue(kind, rate));
+        }
     }
 }

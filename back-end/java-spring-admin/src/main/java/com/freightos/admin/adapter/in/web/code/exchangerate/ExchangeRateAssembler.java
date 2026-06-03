@@ -3,6 +3,7 @@ package com.freightos.admin.adapter.in.web.code.exchangerate;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.CreateExchangeRateRequest;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.ExchangeRateDetailResponse;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.ExchangeRateSummaryResponse;
+import com.freightos.admin.adapter.in.web.code.exchangerate.dto.ExchangeRateValueResponse;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.SaveExchangeRateChangesRequest;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.SearchExchangeRateRequest;
 import com.freightos.admin.adapter.in.web.code.exchangerate.dto.UpdateExchangeRateRequest;
@@ -11,6 +12,7 @@ import com.freightos.admin.application.code.exchangerate.command.SaveExchangeRat
 import com.freightos.admin.application.code.exchangerate.command.SearchExchangeRateCommand;
 import com.freightos.admin.application.code.exchangerate.command.UpdateExchangeRateCommand;
 import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateSummary;
+import com.freightos.admin.application.code.exchangerate.projection.ExchangeRateValue;
 import com.freightos.admin.common.response.PagedResult;
 import com.freightos.admin.domain.code.exchangerate.entity.ExchangeRate;
 import org.springframework.stereotype.Component;
@@ -59,6 +61,10 @@ public class ExchangeRateAssembler {
 
     public PagedResult<ExchangeRateSummaryResponse> toSummaryPage(PagedResult<ExchangeRateSummary> src) {
         return src.map(this::toSummaryResponse);
+    }
+
+    public ExchangeRateValueResponse toValueResponse(ExchangeRateValue value) {
+        return new ExchangeRateValueResponse(value.kind().name(), value.rate());
     }
 
     public SaveExchangeRateChangesCommand toSaveChangesCommand(SaveExchangeRateChangesRequest req) {
