@@ -1,6 +1,6 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
-import com.freightos.fms.application.freight.FreightView;
+import com.freightos.fms.adapter.in.web.freight.dto.FreightResponse;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 
@@ -57,7 +57,7 @@ public record NonBlDetailResponse(
         List<DimView> dims,
 
         // Freight 탭 헤더+라인 (없으면 null)
-        FreightView freight
+        FreightResponse freight
 ) {
 
     public record ContainerView(
@@ -128,7 +128,7 @@ public record NonBlDetailResponse(
                 result.remark(),
                 toContainerViews(result.containers()),
                 toDimViews(result.dims()),
-                view.freight()
+                view.freight() != null ? FreightResponse.from(view.freight()) : null
         );
     }
 
@@ -146,4 +146,5 @@ public record NonBlDetailResponse(
                 d.id(), d.lengthCm(), d.widthCm(), d.heightCm(),
                 d.quantity(), d.cbm(), d.volumeWeightKg())).toList();
     }
+
 }
