@@ -33,7 +33,7 @@ const codeStyle: React.CSSProperties = {
   fontFamily: "var(--font-mono, monospace)",
   fontWeight: 600,
   flexShrink: 0,
-  color: "var(--ink-strong, #111)",
+  color: "var(--ink, #111)",
 };
 
 const nameStyle: React.CSSProperties = {

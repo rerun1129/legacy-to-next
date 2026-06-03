@@ -148,7 +148,14 @@
             "selling": "매출",
             "buying":  "매입",
             "perf":    "PERF.",
-            "usd":     "USD"
+            "usd":     "USD",
+            "kinds": {
+              "STANDARD":     "매매기준율",
+              "WIRE_SEND":    "송금 보낼 때",
+              "WIRE_RECEIVE": "송금 받을 때",
+              "CASH_SELL":    "현찰 매도",
+              "CASH_BUY":     "현찰 매입"
+            }
           },
           "cols": {
             "no":          "#",

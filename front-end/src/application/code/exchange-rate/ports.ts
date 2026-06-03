@@ -2,6 +2,7 @@ import type {
   ExchangeRateRow,
   ExchangeRateDetail,
   ExchangeRateFilter,
+  ExchangeRateValue,
   CreateExchangeRateRequestDto,
   UpdateExchangeRateRequestDto,
   SaveExchangeRateChangesRequestDto,
@@ -26,4 +27,5 @@ export interface ExchangeRatePort {
   deleteMany(ids: number[]): Promise<void>;
   saveChanges(req: SaveExchangeRateChangesRequestDto): Promise<SaveChangesResultDto>;
   autocomplete(q: string, limit?: number): Promise<CodeBoxSuggestion[]>;
+  findRatesByDateCurrency(exchangeDate: string, fromCurrencyCode: string, toCurrencyCode: string): Promise<ExchangeRateValue[]>;
 }

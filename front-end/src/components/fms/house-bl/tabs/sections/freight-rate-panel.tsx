@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useFormContext, useWatch, Controller, type Path } from "react-hook-form";
-import { TextBox, NumberBox, CodeBox, DateBox } from "@/components/shared/inputs";
+import { TextBox, CodeBox, DateBox } from "@/components/shared/inputs";
+import { ExchangeRateNumberBox } from "./exchange-rate-number-box";
 import { FieldWidgetList, type FieldWidgetDef } from "@/components/widget/field-widget-list";
 import { FieldItemGrid,   type FieldItemDef }   from "@/components/widget/field-item-grid";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
@@ -82,13 +83,7 @@ function SellingBuyingExRate({ label, dateName, curName, rateName }: SellingBuyi
           />
         </div>
         <div style={{ width: 140, flexShrink: 0 }}>
-          <NumberBox
-            variant="panel"
-            name={rateName}
-            valueAsNumber={false}
-            decimalPlaces={2}
-            style={{ width: "100%" }}
-          />
+          <ExchangeRateNumberBox rateName={rateName} dateName={dateName} currencyName={curName} decimalPlaces={4} />
         </div>
       </div>
     </div>
@@ -124,13 +119,7 @@ function UsdExRate({ label, dateName, rateName }: UsdExRateProps) {
           />
         </div>
         <div style={{ width: 140, flexShrink: 0 }}>
-          <NumberBox
-            variant="panel"
-            name={rateName}
-            valueAsNumber={false}
-            decimalPlaces={2}
-            style={{ width: "100%" }}
-          />
+          <ExchangeRateNumberBox rateName={rateName} dateName={dateName} fixedCurrency="USD" decimalPlaces={4} />
         </div>
       </div>
     </div>

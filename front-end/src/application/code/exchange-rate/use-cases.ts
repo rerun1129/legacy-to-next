@@ -10,4 +10,6 @@ export const exchangeRateUseCases = {
   deleteMany: (ids: number[]) => exchangeRatePort.deleteMany(ids),
   saveChanges: (req: SaveExchangeRateChangesRequestDto) => exchangeRatePort.saveChanges(req),
   autocomplete: (q: string, limit?: number) => exchangeRatePort.autocomplete(q, limit),
+  findRatesByDateCurrency: (exchangeDate: string, fromCurrencyCode: string, toCurrencyCode: string) =>
+    exchangeRatePort.findRatesByDateCurrency(exchangeDate, fromCurrencyCode, toCurrencyCode),
 };

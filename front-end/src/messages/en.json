@@ -148,7 +148,14 @@
             "selling": "SELLING",
             "buying":  "BUYING",
             "perf":    "PERF.",
-            "usd":     "USD"
+            "usd":     "USD",
+            "kinds": {
+              "STANDARD":     "Standard",
+              "WIRE_SEND":    "Wire Send",
+              "WIRE_RECEIVE": "Wire Receive",
+              "CASH_SELL":    "Cash Sell",
+              "CASH_BUY":     "Cash Buy"
+            }
           },
           "cols": {
             "no":          "#",

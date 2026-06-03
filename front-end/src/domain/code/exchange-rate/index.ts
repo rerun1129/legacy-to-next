@@ -1,5 +1,10 @@
 export type ExchangeRateScope = "ALL" | "ACTIVE" | "INACTIVE" | "DELETED";
 
+export interface ExchangeRateValue {
+  kind: string;
+  rate: number;
+}
+
 export interface ExchangeRateRow {
   id: number;
   fromCurrencyCode: string;

@@ -4,6 +4,7 @@ import type {
   ExchangeRateRow,
   ExchangeRateDetail,
   ExchangeRateFilter,
+  ExchangeRateValue,
   ExchangeRateScope,
   CreateExchangeRateRequestDto,
   UpdateExchangeRateRequestDto,
@@ -15,6 +16,9 @@ import { adminFetchJson } from "../admin-fetch";
 import { ResponseParseError } from "../errors";
 
 const BASE = "/api/admin/code/exchange-rate";
+
+/** 환율 자동완성의 기준 통화. BE 계약 고정값이므로 상수로 분리. */
+export const BASE_CURRENCY = "KRW";
 
 const EXCHANGE_RATE_ROW_SCHEMA = z.object({
   id: z.number(),
@@ -157,6 +161,14 @@ export const API_EXCHANGE_RATE_PORT: ExchangeRatePort = {
     const json = await adminFetchJson(`${BASE}/autocomplete?${params}`);
     const parsed = apiResponse(z.array(AUTOCOMPLETE_ITEM_SCHEMA)).safeParse(json);
     if (!parsed.success) throw new ResponseParseError(`Invalid exchange-rate autocomplete response: ${parsed.error.message}`);
+    return parsed.data.data;
+  },
+
+  async findRatesByDateCurrency(exchangeDate: string, fromCurrencyCode: string, toCurrencyCode: string): Promise<ExchangeRateValue[]> {
+    const params = new URLSearchParams({ exchangeDate, fromCurrencyCode, toCurrencyCode });
+    const json = await adminFetchJson(`${BASE}/rates?${params}`);
+    const parsed = apiResponse(z.array(z.object({ kind: z.string(), rate: z.number() }))).safeParse(json);
+    if (!parsed.success) throw new ResponseParseError(`Invalid exchange-rate rates response: ${parsed.error.message}`);
     return parsed.data.data;
   },
 };
