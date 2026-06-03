@@ -264,6 +264,13 @@ public record UpdateHouseBlRequest(
             String currency,
             String customerCode,
             String taxType,
-            String performanceDt
+            String performanceDt,
+            String exchangeRate,
+            String settleAmount,
+            String localAmount,
+            String usdExchangeRate,
+            String usdAmount,
+            String localTaxAmount,
+            String financialDocType
     ) {}
 }

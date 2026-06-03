@@ -2,11 +2,9 @@ package com.freightos.fms.adapter.out.persistence.freight;
 
 import com.freightos.fms.application.freight.command.FreightInputCommand;
 import com.freightos.fms.application.freight.command.FreightLineCommand;
-import com.freightos.fms.domain.freight.FreightCalculator;
 import com.freightos.fms.domain.freight.FinancialDocTypePolicy;
-import com.freightos.fms.domain.freight.FreightLine;
+import com.freightos.fms.domain.freight.enums.FinancialDocType;
 import com.freightos.fms.domain.freight.enums.FreightType;
-import com.freightos.fms.domain.freight.enums.TaxType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,7 +13,8 @@ import java.util.Map;
 
 /**
  * Domain Command → JPA 엔티티 변환 매퍼.
- * 계산값(FreightCalculator) + 정책(FinancialDocTypePolicy) 적용 후 엔티티로 변환한다.
+ * FE가 실시간 계산한 값을 그대로 저장한다(BE 재계산 없음).
+ * financialDocType은 FE 전달값 검증 후 사용, 미전달 시 FinancialDocTypePolicy 폴백.
  */
 @Component
 public class FreightDomainToJpaMapper {
@@ -40,8 +39,8 @@ public class FreightDomainToJpaMapper {
 
     /**
      * 라인 커맨드 목록 → FreightLineJpaEntity 목록 변환.
-     * customerTypes: customer_code → customer_type(PARTNER 여부 판정용).
-     * 계산값과 FinancialDocType을 이 메서드에서 결정한다.
+     * customerTypes: customer_code → customer_type(PARTNER 여부 판정 — financialDocType 폴백용).
+     * FE 계산값을 그대로 저장하며, financialDocType만 검증·폴백 처리한다.
      */
     public List<FreightLineJpaEntity> buildLineEntities(
         List<FreightLineCommand> lineCmds,
@@ -65,24 +64,18 @@ public class FreightDomainToJpaMapper {
             entity.setTaxType(cmd.taxType());
             entity.setPerformanceDt(cmd.performanceDt());
 
-            // 계산값 적용 (도메인 순수 함수 위임)
-            FreightLine line = toFreightLine(cmd);
-            FreightCalculator.applyCalculations(line, header.sellRate(), header.buyRate(), header.usdRate());
+            // FE 계산값 그대로 저장 (BE 재계산 없음)
+            entity.setExchangeRate(cmd.exchangeRate());
+            entity.setSettleAmount(cmd.settleAmount());
+            entity.setLocalAmount(cmd.localAmount());
+            entity.setUsdExchangeRate(cmd.usdExchangeRate());
+            entity.setUsdAmount(cmd.usdAmount());
+            entity.setLocalTaxAmount(cmd.localTaxAmount());
+            // settleTaxAmount: 미사용 — null 저장
+            entity.setSettleTaxAmount(null);
 
-            entity.setExchangeRate(line.getExchangeRate());
-            entity.setSettleAmount(line.getSettleAmount());
-            entity.setLocalAmount(line.getLocalAmount());
-            entity.setUsdExchangeRate(line.getUsdExchangeRate());
-            entity.setUsdAmount(line.getUsdAmount());
-            entity.setSettleTaxAmount(line.getSettleTaxAmount());
-            entity.setLocalTaxAmount(line.getLocalTaxAmount());
-
-            // FinancialDocType 정책 적용 (라인 customer_code 기준)
-            String customerType = customerTypes.get(cmd.customerCode());
-            FreightType freightType = FreightType.fromName(cmd.freightType());
-            if (freightType != null) {
-                entity.setFinancialDocType(FinancialDocTypePolicy.resolve(freightType, customerType).name());
-            }
+            // financialDocType: FE 전달값 검증 → 없으면 정책 폴백
+            entity.setFinancialDocType(resolveFinancialDocType(cmd, customerTypes));
 
             // 단계B 필드: null 저장
             entity.setTaxNo(null);
@@ -96,12 +89,44 @@ public class FreightDomainToJpaMapper {
         return result;
     }
 
-    private FreightLine toFreightLine(FreightLineCommand cmd) {
-        FreightLine line = new FreightLine();
-        line.setFreightType(FreightType.fromName(cmd.freightType()));
-        line.setUnitQuantity(cmd.unitQuantity());
-        line.setUnitPrice(cmd.unitPrice());
-        line.setTaxType(TaxType.fromName(cmd.taxType()));
-        return line;
+    /**
+     * financialDocType 결정.
+     * cmd.financialDocType()이 non-blank이면 FreightType 제약 검증 후 사용.
+     * blank/null이면 FinancialDocTypePolicy 폴백.
+     *
+     * 검증 규칙(§6.16):
+     *   SELLING → {INVOICE, DEBIT},  BUYING → {PAYMENT, CREDIT}
+     */
+    private String resolveFinancialDocType(FreightLineCommand cmd, Map<String, String> customerTypes) {
+        FreightType freightType = FreightType.fromName(cmd.freightType());
+
+        if (cmd.financialDocType() != null && !cmd.financialDocType().isBlank()) {
+            FinancialDocType docType = FinancialDocType.fromName(cmd.financialDocType());
+            validateFinancialDocTypeConstraint(freightType, docType, cmd.financialDocType());
+            return docType.name();
+        }
+
+        // 폴백: FinancialDocTypePolicy (freightType이 인식 불가면 null 저장)
+        if (freightType == null) return null;
+        String customerType = customerTypes.get(cmd.customerCode());
+        return FinancialDocTypePolicy.resolve(freightType, customerType).name();
+    }
+
+    /**
+     * SELLING이면 INVOICE·DEBIT만, BUYING이면 PAYMENT·CREDIT만 허용.
+     * freightType이 null이면 검증 생략(upstream 밸리데이션에서 이미 처리).
+     */
+    private static void validateFinancialDocTypeConstraint(
+            FreightType freightType, FinancialDocType docType, String rawDocType) {
+        if (freightType == null) return;
+        boolean valid = switch (freightType) {
+            case SELLING -> docType == FinancialDocType.INVOICE || docType == FinancialDocType.DEBIT;
+            case BUYING  -> docType == FinancialDocType.PAYMENT || docType == FinancialDocType.CREDIT;
+        };
+        if (!valid) {
+            throw new IllegalArgumentException(
+                    "financialDocType '" + rawDocType + "'은(는) freightType '" + freightType.name() + "'에 허용되지 않습니다. "
+                    + "SELLING: INVOICE·DEBIT, BUYING: PAYMENT·CREDIT");
+        }
     }
 }

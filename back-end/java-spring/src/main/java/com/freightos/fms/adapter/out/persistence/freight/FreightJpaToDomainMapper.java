@@ -61,7 +61,9 @@ public class FreightJpaToDomainMapper {
             line.getTaxDt(),
             line.getSlipNo(),
             line.getSlipDt(),
-            line.getFinancialDocumentId()
+            line.getFinancialDocumentId(),
+            // TODO(단계E): financial_document_id → document_no 조인 — FinancialDocumentJpaEntity 도입 후 연결
+            null
         );
     }
 }

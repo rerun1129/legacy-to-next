@@ -374,7 +374,11 @@ public class HouseBlAssembler {
         return reqs.stream().map(r -> new CreateHouseBlCommand.FreightLineCommand(
                 r.freightCode(), r.per(),
                 parseBigDecimal(r.qty()), parseBigDecimal(r.price()),
-                r.currency(), r.customerCode(), r.taxType(), r.performanceDt()
+                r.currency(), r.customerCode(), r.taxType(), r.performanceDt(),
+                parseBigDecimal(r.exchangeRate()), parseBigDecimal(r.settleAmount()),
+                parseBigDecimal(r.localAmount()), parseBigDecimal(r.usdExchangeRate()),
+                parseBigDecimal(r.usdAmount()), parseBigDecimal(r.localTaxAmount()),
+                r.financialDocType()
         )).toList();
     }
 
@@ -384,7 +388,11 @@ public class HouseBlAssembler {
         return reqs.stream().map(r -> new UpdateHouseBlCommand.FreightLineCommand(
                 r.freightCode(), r.per(),
                 parseBigDecimal(r.qty()), parseBigDecimal(r.price()),
-                r.currency(), r.customerCode(), r.taxType(), r.performanceDt()
+                r.currency(), r.customerCode(), r.taxType(), r.performanceDt(),
+                parseBigDecimal(r.exchangeRate()), parseBigDecimal(r.settleAmount()),
+                parseBigDecimal(r.localAmount()), parseBigDecimal(r.usdExchangeRate()),
+                parseBigDecimal(r.usdAmount()), parseBigDecimal(r.localTaxAmount()),
+                r.financialDocType()
         )).toList();
     }
 

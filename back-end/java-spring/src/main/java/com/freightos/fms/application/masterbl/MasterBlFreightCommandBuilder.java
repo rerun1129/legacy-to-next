@@ -33,15 +33,7 @@ public class MasterBlFreightCommandBuilder {
         String linerCode = resolveLinerCode(cmd.jobDiv(),
                 cmd.seaDetail() != null ? cmd.seaDetail().linerCode() : null,
                 cmd.airDetail() != null ? cmd.airDetail().airlineCode() : null);
-        List<FreightLineCommand> lines = buildLines(freightCmd.selling(), freightCmd.buying(),
-                CreateMasterBlCommand.FreightLineCommand::freightCode,
-                CreateMasterBlCommand.FreightLineCommand::per,
-                CreateMasterBlCommand.FreightLineCommand::unitQuantity,
-                CreateMasterBlCommand.FreightLineCommand::unitPrice,
-                CreateMasterBlCommand.FreightLineCommand::currency,
-                CreateMasterBlCommand.FreightLineCommand::customerCode,
-                CreateMasterBlCommand.FreightLineCommand::taxType,
-                CreateMasterBlCommand.FreightLineCommand::performanceDt);
+        List<FreightLineCommand> lines = buildLinesFromCreate(freightCmd.selling(), freightCmd.buying());
         return new FreightInputCommand(
                 cmd.shipperCode(), linerCode, cmd.settlePartnerCode(),
                 freightCmd.sellRateDt(), freightCmd.sellRateCurrencyCode(), freightCmd.sellRate(),
@@ -60,15 +52,7 @@ public class MasterBlFreightCommandBuilder {
         String linerCode = resolveLinerCode(cmd.jobDiv(),
                 cmd.seaDetail() != null ? cmd.seaDetail().linerCode() : null,
                 cmd.airDetail() != null ? cmd.airDetail().airlineCode() : null);
-        List<FreightLineCommand> lines = buildLines(freightCmd.selling(), freightCmd.buying(),
-                UpdateMasterBlCommand.FreightLineCommand::freightCode,
-                UpdateMasterBlCommand.FreightLineCommand::per,
-                UpdateMasterBlCommand.FreightLineCommand::unitQuantity,
-                UpdateMasterBlCommand.FreightLineCommand::unitPrice,
-                UpdateMasterBlCommand.FreightLineCommand::currency,
-                UpdateMasterBlCommand.FreightLineCommand::customerCode,
-                UpdateMasterBlCommand.FreightLineCommand::taxType,
-                UpdateMasterBlCommand.FreightLineCommand::performanceDt);
+        List<FreightLineCommand> lines = buildLinesFromUpdate(freightCmd.selling(), freightCmd.buying());
         return new FreightInputCommand(
                 cmd.shipperCode(), linerCode, cmd.settlePartnerCode(),
                 freightCmd.sellRateDt(), freightCmd.sellRateCurrencyCode(), freightCmd.sellRate(),
@@ -89,37 +73,55 @@ public class MasterBlFreightCommandBuilder {
         };
     }
 
-    /**
-     * selling/buying 목록을 FreightLineCommand 리스트로 병합.
-     * Function 참조로 추상화하여 Create/Update 양쪽에 재사용.
-     */
-    private <T> List<FreightLineCommand> buildLines(
-            List<T> selling, List<T> buying,
-            java.util.function.Function<T, String> freightCodeFn,
-            java.util.function.Function<T, String> perFn,
-            java.util.function.Function<T, java.math.BigDecimal> qtyFn,
-            java.util.function.Function<T, java.math.BigDecimal> priceFn,
-            java.util.function.Function<T, String> currencyFn,
-            java.util.function.Function<T, String> customerCodeFn,
-            java.util.function.Function<T, String> taxTypeFn,
-            java.util.function.Function<T, String> performanceDtFn) {
+    private static List<FreightLineCommand> buildLinesFromCreate(
+            List<CreateMasterBlCommand.FreightLineCommand> selling,
+            List<CreateMasterBlCommand.FreightLineCommand> buying) {
         List<FreightLineCommand> lines = new ArrayList<>();
         if (selling != null) {
-            for (T item : selling) {
+            for (CreateMasterBlCommand.FreightLineCommand item : selling) {
                 lines.add(new FreightLineCommand(SELLING,
-                        freightCodeFn.apply(item), perFn.apply(item),
-                        qtyFn.apply(item), priceFn.apply(item),
-                        currencyFn.apply(item), customerCodeFn.apply(item),
-                        taxTypeFn.apply(item), performanceDtFn.apply(item)));
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
             }
         }
         if (buying != null) {
-            for (T item : buying) {
+            for (CreateMasterBlCommand.FreightLineCommand item : buying) {
                 lines.add(new FreightLineCommand(BUYING,
-                        freightCodeFn.apply(item), perFn.apply(item),
-                        qtyFn.apply(item), priceFn.apply(item),
-                        currencyFn.apply(item), customerCodeFn.apply(item),
-                        taxTypeFn.apply(item), performanceDtFn.apply(item)));
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
+            }
+        }
+        return lines;
+    }
+
+    private static List<FreightLineCommand> buildLinesFromUpdate(
+            List<UpdateMasterBlCommand.FreightLineCommand> selling,
+            List<UpdateMasterBlCommand.FreightLineCommand> buying) {
+        List<FreightLineCommand> lines = new ArrayList<>();
+        if (selling != null) {
+            for (UpdateMasterBlCommand.FreightLineCommand item : selling) {
+                lines.add(new FreightLineCommand(SELLING,
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
+            }
+        }
+        if (buying != null) {
+            for (UpdateMasterBlCommand.FreightLineCommand item : buying) {
+                lines.add(new FreightLineCommand(BUYING,
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
             }
         }
         return lines;

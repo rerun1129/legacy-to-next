@@ -266,7 +266,7 @@ public record CreateHouseBlCommand(
             List<FreightLineCommand> buying
     ) {}
 
-    /** Freight 라인 1행 커맨드. */
+    /** Freight 라인 1행 커맨드. FE 실시간 계산값 포함. */
     public record FreightLineCommand(
             String freightCode,
             String per,
@@ -275,6 +275,22 @@ public record CreateHouseBlCommand(
             String currency,
             String customerCode,
             String taxType,
-            String performanceDt
-    ) {}
+            String performanceDt,
+            BigDecimal exchangeRate,
+            BigDecimal settleAmount,
+            BigDecimal localAmount,
+            BigDecimal usdExchangeRate,
+            BigDecimal usdAmount,
+            BigDecimal localTaxAmount,
+            /** 금융 서류 종류 (name() 문자열). null/blank면 FinancialDocTypePolicy 폴백. */
+            String financialDocType
+    ) {
+
+        /** 하위호환 생성자 — 계산값 미포함. 계산값은 null로 초기화. */
+        public FreightLineCommand(String freightCode, String per, BigDecimal unitQuantity, BigDecimal unitPrice,
+                String currency, String customerCode, String taxType, String performanceDt) {
+            this(freightCode, per, unitQuantity, unitPrice, currency, customerCode, taxType, performanceDt,
+                    null, null, null, null, null, null, null);
+        }
+    }
 }

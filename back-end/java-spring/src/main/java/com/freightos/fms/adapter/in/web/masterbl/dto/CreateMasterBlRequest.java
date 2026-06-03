@@ -102,7 +102,14 @@ public record CreateMasterBlRequest(
             String currency,
             String customerCode,
             String taxType,
-            String performanceDt
+            String performanceDt,
+            String exchangeRate,
+            String settleAmount,
+            String localAmount,
+            String usdExchangeRate,
+            String usdAmount,
+            String localTaxAmount,
+            String financialDocType
     ) {}
 
     /** SEA 모드 확장 필드. */

@@ -31,15 +31,7 @@ public class HouseBlFreightCommandBuilder {
                 cmd.seaDetail() != null ? cmd.seaDetail().linerCode() : null,
                 cmd.airDetail() != null ? cmd.airDetail().airlineCode() : null,
                 cmd.linerCode());
-        List<FreightLineCommand> lines = buildLines(freightCmd.selling(), freightCmd.buying(),
-                CreateHouseBlCommand.FreightLineCommand::freightCode,
-                CreateHouseBlCommand.FreightLineCommand::per,
-                CreateHouseBlCommand.FreightLineCommand::unitQuantity,
-                CreateHouseBlCommand.FreightLineCommand::unitPrice,
-                CreateHouseBlCommand.FreightLineCommand::currency,
-                CreateHouseBlCommand.FreightLineCommand::customerCode,
-                CreateHouseBlCommand.FreightLineCommand::taxType,
-                CreateHouseBlCommand.FreightLineCommand::performanceDt);
+        List<FreightLineCommand> lines = buildLinesFromCreate(freightCmd.selling(), freightCmd.buying());
         return new FreightInputCommand(
                 cmd.actualCustomerCode(), linerCode, cmd.settlePartnerCode(),
                 freightCmd.sellRateDt(), freightCmd.sellRateCurrencyCode(), freightCmd.sellRate(),
@@ -59,15 +51,7 @@ public class HouseBlFreightCommandBuilder {
                 cmd.seaDetail() != null ? cmd.seaDetail().linerCode() : null,
                 cmd.airDetail() != null ? cmd.airDetail().airlineCode() : null,
                 cmd.linerCode());
-        List<FreightLineCommand> lines = buildLines(freightCmd.selling(), freightCmd.buying(),
-                UpdateHouseBlCommand.FreightLineCommand::freightCode,
-                UpdateHouseBlCommand.FreightLineCommand::per,
-                UpdateHouseBlCommand.FreightLineCommand::unitQuantity,
-                UpdateHouseBlCommand.FreightLineCommand::unitPrice,
-                UpdateHouseBlCommand.FreightLineCommand::currency,
-                UpdateHouseBlCommand.FreightLineCommand::customerCode,
-                UpdateHouseBlCommand.FreightLineCommand::taxType,
-                UpdateHouseBlCommand.FreightLineCommand::performanceDt);
+        List<FreightLineCommand> lines = buildLinesFromUpdate(freightCmd.selling(), freightCmd.buying());
         return new FreightInputCommand(
                 cmd.actualCustomerCode(), linerCode, cmd.settlePartnerCode(),
                 freightCmd.sellRateDt(), freightCmd.sellRateCurrencyCode(), freightCmd.sellRate(),
@@ -87,37 +71,55 @@ public class HouseBlFreightCommandBuilder {
         };
     }
 
-    /**
-     * selling/buying 목록을 FreightLineCommand 리스트로 병합.
-     * Function 참조로 추상화하여 Create/Update 양쪽에 재사용.
-     */
-    private <T> List<FreightLineCommand> buildLines(
-            List<T> selling, List<T> buying,
-            java.util.function.Function<T, String> freightCodeFn,
-            java.util.function.Function<T, String> perFn,
-            java.util.function.Function<T, java.math.BigDecimal> qtyFn,
-            java.util.function.Function<T, java.math.BigDecimal> priceFn,
-            java.util.function.Function<T, String> currencyFn,
-            java.util.function.Function<T, String> customerCodeFn,
-            java.util.function.Function<T, String> taxTypeFn,
-            java.util.function.Function<T, String> performanceDtFn) {
+    private static List<FreightLineCommand> buildLinesFromCreate(
+            List<CreateHouseBlCommand.FreightLineCommand> selling,
+            List<CreateHouseBlCommand.FreightLineCommand> buying) {
         List<FreightLineCommand> lines = new ArrayList<>();
         if (selling != null) {
-            for (T item : selling) {
+            for (CreateHouseBlCommand.FreightLineCommand item : selling) {
                 lines.add(new FreightLineCommand(SELLING,
-                        freightCodeFn.apply(item), perFn.apply(item),
-                        qtyFn.apply(item), priceFn.apply(item),
-                        currencyFn.apply(item), customerCodeFn.apply(item),
-                        taxTypeFn.apply(item), performanceDtFn.apply(item)));
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
             }
         }
         if (buying != null) {
-            for (T item : buying) {
+            for (CreateHouseBlCommand.FreightLineCommand item : buying) {
                 lines.add(new FreightLineCommand(BUYING,
-                        freightCodeFn.apply(item), perFn.apply(item),
-                        qtyFn.apply(item), priceFn.apply(item),
-                        currencyFn.apply(item), customerCodeFn.apply(item),
-                        taxTypeFn.apply(item), performanceDtFn.apply(item)));
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
+            }
+        }
+        return lines;
+    }
+
+    private static List<FreightLineCommand> buildLinesFromUpdate(
+            List<UpdateHouseBlCommand.FreightLineCommand> selling,
+            List<UpdateHouseBlCommand.FreightLineCommand> buying) {
+        List<FreightLineCommand> lines = new ArrayList<>();
+        if (selling != null) {
+            for (UpdateHouseBlCommand.FreightLineCommand item : selling) {
+                lines.add(new FreightLineCommand(SELLING,
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
+            }
+        }
+        if (buying != null) {
+            for (UpdateHouseBlCommand.FreightLineCommand item : buying) {
+                lines.add(new FreightLineCommand(BUYING,
+                        item.freightCode(), item.per(), item.unitQuantity(), item.unitPrice(),
+                        item.currency(), item.customerCode(), item.taxType(), item.performanceDt(),
+                        item.exchangeRate(), item.settleAmount(), item.localAmount(),
+                        item.usdExchangeRate(), item.usdAmount(), item.localTaxAmount(),
+                        item.financialDocType()));
             }
         }
         return lines;

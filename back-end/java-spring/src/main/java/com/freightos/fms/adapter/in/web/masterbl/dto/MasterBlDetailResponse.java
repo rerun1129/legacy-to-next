@@ -163,7 +163,9 @@ public record MasterBlDetailResponse(
             BigDecimal localAmount,
             BigDecimal settleTaxAmount,
             BigDecimal localTaxAmount,
-            BigDecimal usdAmount
+            BigDecimal usdExchangeRate,
+            BigDecimal usdAmount,
+            String financialDocumentNo
     ) {
         public static FreightLineResponse from(FreightLineView l) {
             return new FreightLineResponse(
@@ -182,7 +184,9 @@ public record MasterBlDetailResponse(
                     l.localAmount(),
                     l.settleTaxAmount(),
                     l.localTaxAmount(),
-                    l.usdAmount()
+                    l.usdExchangeRate(),
+                    l.usdAmount(),
+                    l.financialDocumentNo()
             );
         }
     }
