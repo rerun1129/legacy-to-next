@@ -2,6 +2,8 @@ package com.freightos.fms.application.enums;
 
 import com.freightos.fms.domain.common.enums.*;
 import com.freightos.fms.application.enums.projection.EnumOption;
+import com.freightos.fms.domain.freight.enums.FinancialDocType;
+import com.freightos.fms.domain.freight.enums.TaxType;
 import com.freightos.fms.domain.housebl.enums.*;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
 import org.springframework.context.annotation.Bean;
@@ -84,6 +86,11 @@ public class EnumRegistryFactory {
                 e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         register(map, "masterbl.MasterBlJobDiv", MasterBlJobDiv.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
+        // freight enums — FE Freight 탭 소비
+        register(map, "TaxType", TaxType.values(),
+                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
+        register(map, "FinancialDocType", FinancialDocType.values(),
+                e -> new EnumOption(e.name(), e.name(), null));
         return EnumRegistry.of(map);
     }
 

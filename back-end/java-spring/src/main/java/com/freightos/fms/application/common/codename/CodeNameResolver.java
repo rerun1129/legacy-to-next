@@ -41,4 +41,12 @@ public class CodeNameResolver {
     public Map<String, String> findTeamNames(Collection<String> codes) {
         return codeNamePort.findTeamNames(codes);
     }
+
+    /**
+     * customer_code → customer_type 일괄 조회.
+     * BMS 운임 라인 §6.16 FinancialDocType 자동 산정용.
+     */
+    public Map<String, String> findCustomerTypes(Collection<String> codes) {
+        return codeNamePort.findCustomerTypes(codes);
+    }
 }

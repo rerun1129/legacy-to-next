@@ -172,4 +172,31 @@ public class CodeNameQueryRepository {
                 row -> row.get(t.name) != null ? row.get(t.name) : ""
             ));
     }
+
+    /**
+     * customer_code → customer_type 일괄 조회.
+     * BMS 운임 라인 §6.16 FinancialDocType 자동 산정용.
+     * fetchCustomerNames와 동일 DataSource·QEntity를 사용하며 select 컬럼만 다르다.
+     */
+    Map<String, String> fetchCustomerTypes(Collection<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        QCustomerRefJpaEntity c = QCustomerRefJpaEntity.customerRefJpaEntity;
+        BooleanExpression inCodes = c.customerCode.in(codes);
+        BooleanExpression notDeleted = c.deletedAt.isNull();
+
+        List<Tuple> rows = queryFactory
+            .select(c.customerCode, c.customerType)
+            .from(c)
+            .where(inCodes, notDeleted)
+            .fetch();
+
+        return rows.stream()
+            .filter(t -> t.get(c.customerCode) != null)
+            .collect(Collectors.toMap(
+                t -> t.get(c.customerCode),
+                t -> t.get(c.customerType) != null ? t.get(c.customerType) : ""
+            ));
+    }
 }

@@ -32,6 +32,9 @@ public class CustomerRefJpaEntity {
     @Column(name = "customer_code", nullable = false, length = 40)
     private String customerCode;
 
+    @Column(name = "customer_type", length = 30)
+    private String customerType;
+
     @Column(name = "name", length = 200)
     private String name;
 
