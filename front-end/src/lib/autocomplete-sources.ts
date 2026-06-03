@@ -8,6 +8,7 @@ import { hsCodeUseCases } from "@/application/code/hs-code/use-cases";
 import { currencyUseCases } from "@/application/code/currency/use-cases";
 import { teamUseCases } from "@/application/team/use-cases";
 import { subscriberUseCases } from "@/application/subscriber/use-cases";
+import { freightUseCases } from "@/application/code/freight/use-cases";
 
 export const CODE_SOURCES = {
   customer:    { key: "ac-customer",         fetch: (q: string) => customerUseCases.autocomplete(q, undefined, "CUSTOMER") },
@@ -25,4 +26,5 @@ export const CODE_SOURCES = {
   currency:    { key: "ac-code-currency",    fetch: (q: string) => currencyUseCases.autocomplete(q) },
   team:        { key: "ac-team",             fetch: (q: string) => teamUseCases.autocomplete(q) },
   subscriber:  { key: "ac-subscriber",       fetch: (q: string) => subscriberUseCases.autocomplete(q) },
+  freight:     { key: "ac-code-freight",     fetch: (q: string) => freightUseCases.autocomplete(q) },
 } satisfies Record<string, AutocompleteSource>;

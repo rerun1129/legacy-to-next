@@ -9,9 +9,20 @@ import {
   FreightBuyingPanel,
   FreightAccountPanel,
 } from "./sections/freight-panels";
+import type { Mode } from "@/lib/bl-variants";
 
-export function FreightTab({ active, mode, layoutScope }: { active?: boolean; mode?: "SEA" | "AIR"; layoutScope?: string }) {
+interface FreightTabProps {
+  active?: boolean;
+  /** BLVariantConfig.mode — SEA/AIR/TRUCK/NON_BL 4종. Per scope 필터에 사용. */
+  mode?: Mode;
+  layoutScope?: string;
+}
+
+export function FreightTab({ active, mode, layoutScope }: FreightTabProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
+
+  // FreightRatePanel은 SEA/AIR 구분만 필요 — TRUCK/NON_BL은 undefined 처리
+  const ratePanelMode = mode === "SEA" || mode === "AIR" ? mode : undefined;
 
   const registry: WidgetDef[] = [
     {
@@ -19,7 +30,7 @@ export function FreightTab({ active, mode, layoutScope }: { active?: boolean; mo
       label: tf("panels.freightInformation"),
       // WidgetProps를 수신해야 ComponentType<WidgetProps>와 타입 일치 — 인자는 타입 목적으로만 선언
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      component: (_props: WidgetProps) => <FreightRatePanel mode={mode} />,
+      component: (_props: WidgetProps) => <FreightRatePanel mode={ratePanelMode} />,
       defaultPosition: { col: 0, row: 0, colSpan: 6, rowSpan: 1 },
       minColSpan: 2,
       minRowSpan: 1,
@@ -27,7 +38,8 @@ export function FreightTab({ active, mode, layoutScope }: { active?: boolean; mo
     {
       key: "selling",
       label: tf("panels.sellingDebit"),
-      component: FreightSellingPanel,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      component: (_props: WidgetProps) => <FreightSellingPanel mode={mode} />,
       defaultPosition: { col: 0, row: 1, colSpan: 6, rowSpan: 2 },
       minColSpan: 2,
       minRowSpan: 2,
@@ -35,7 +47,8 @@ export function FreightTab({ active, mode, layoutScope }: { active?: boolean; mo
     {
       key: "buying",
       label: tf("panels.buyingCredit"),
-      component: FreightBuyingPanel,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      component: (_props: WidgetProps) => <FreightBuyingPanel mode={mode} />,
       defaultPosition: { col: 0, row: 3, colSpan: 6, rowSpan: 2 },
       minColSpan: 2,
       minRowSpan: 2,

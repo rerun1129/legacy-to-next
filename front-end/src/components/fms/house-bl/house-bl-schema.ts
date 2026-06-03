@@ -100,16 +100,22 @@ const ITEM_HS_SCHEMA = z.object({
 
 // Freight Selling/Buying 공통 행
 export const FREIGHT_ROW_SCHEMA = z.object({
-  id:     z.number(),
-  code:   z.string().optional(),
-  desc:   z.string().optional(),
-  qty:    z.string().optional(),
-  unit:   z.string().optional(),
-  sell:   z.string().optional(),
-  buy:    z.string().optional(),
-  amount: z.string().optional(),
-  cur:    z.string().optional(),
-  remark: z.string().optional(),
+  id:               z.number().optional(),     // 신규행 id 없음 (zodResolver 배열항목 id는 optional)
+  freightCode:      z.string().optional(),
+  freightName:      z.string().optional(),     // code→name 표시용(readOnly)
+  per:              z.string().optional(),     // Per code 또는 컨테이너타입 enum name
+  qty:              z.string().optional(),     // unit_quantity (per 선택 시 스냅샷)
+  price:            z.string().optional(),     // unit_price
+  currency:         z.string().optional(),
+  customerCode:     z.string().optional(),
+  customerName:     z.string().optional(),     // readOnly 표시
+  taxType:          z.string().optional(),
+  performanceDt:    DATE8,                     // 실적일자
+  settleAmount:     z.string().optional(),     // 계산필드 — A2 BE 산정, A1 readOnly 빈칸
+  localAmount:      z.string().optional(),     // 계산필드
+  usdAmount:        z.string().optional(),     // 계산필드
+  financialDocType: z.string().optional(),     // 계산필드(서류종류)
+  remark:           z.string().optional(),
 });
 
 export type FreightRow = z.infer<typeof FREIGHT_ROW_SCHEMA>;

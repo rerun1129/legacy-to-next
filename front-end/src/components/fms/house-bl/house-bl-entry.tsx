@@ -179,7 +179,7 @@ export function HouseBLEntry({ variant }: Props) {
         </div>
 
         <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion, nonce)}</div>
-        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode === "SEA" || variant.mode === "AIR" ? variant.mode : undefined} layoutScope={`house-bl-entry.freight.${variant.key}`} /></div>
+        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode} layoutScope={`house-bl-entry.freight.${variant.key}`} /></div>
       </form>
       </FormProvider>
 
