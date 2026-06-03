@@ -80,6 +80,7 @@ export function QtyCell({ prefix, index }: CalcCellProps) {
   return (
     <NumberBox
       variant="cell"
+      required
       name={`${prefix}.${index}.qty`}
       valueAsNumber={false}
       onChange={() => {
@@ -95,6 +96,7 @@ export function PriceCell({ prefix, index }: CalcCellProps) {
   return (
     <NumberBox
       variant="cell"
+      required
       name={`${prefix}.${index}.price`}
       valueAsNumber={false}
       decimalPlaces={2}
@@ -173,6 +175,7 @@ export function UsdExchangeRateCell({ prefix, index }: CalcCellProps) {
       variant="cell"
       name={`${prefix}.${index}.usdExchangeRate`}
       valueAsNumber={false}
+      decimalPlaces={2}
       onChange={() => {
         const row = readCalcRow(getValues, prefix, index);
         applyCalcResult(setValue, prefix, index, recalcFromUsdExchangeRate(row));

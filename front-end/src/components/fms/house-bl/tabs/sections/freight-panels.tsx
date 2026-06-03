@@ -38,7 +38,6 @@ const EMPTY_FREIGHT_ROW: FreightRow = {
   taxNo:               "",
   slipNo:              "",
   financialDocumentNo: "",
-  remark:              "",
 };
 
 // ── 공통 패널 컴포넌트 ────────────────────────────────────────
@@ -151,12 +150,30 @@ function FreightPanel({ prefix, panelTitle, mode }: FreightPanelProps) {
         : (formValues.buyRate ?? "");
     const usdExchangeRate = formValues.usdRate ?? "";
 
+    // 헤더 당사자 → 신규 행 Customer 자동 바인딩
+    let customerCode = "";
+    let customerName = "";
+    if (prefix === "freightSelling") {
+      customerCode = formValues.actualCustomerCode ?? "";
+      customerName = formValues.actualCustomerName ?? "";
+    } else {
+      if (mode === "AIR") {
+        customerCode = formValues.airDetail?.airlineCode ?? "";
+        customerName = formValues.airDetail?.airlineName ?? "";
+      } else {
+        customerCode = formValues.seaDetail?.linerCode ?? "";
+        customerName = formValues.linerName ?? "";
+      }
+    }
+
     // settle/local/usd/vat는 qty·price 없으므로 빈칸으로 시작
     append({
       ...EMPTY_FREIGHT_ROW,
       currency,
       exchangeRate,
       usdExchangeRate,
+      customerCode,
+      customerName,
     });
     setSelectedKey(null);
   }

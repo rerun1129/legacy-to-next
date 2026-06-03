@@ -92,6 +92,7 @@ export function FreightCodeCell({ prefix, index }: FreightCodeCellProps) {
     <CodeBox
       kind="code-only"
       variant="cell"
+      required
       codeProps={{ ...register(`${prefix}.${index}.freightCode`) }}
       onLookup={() => {}}
       onSearch={freight.onSearch}
@@ -115,13 +116,21 @@ interface CurrencyCellProps {
 }
 
 export function CurrencyCell({ prefix, index, onCurrencySelect }: CurrencyCellProps) {
-  const { register, setValue } = useFormContext<HouseBlFormValues>();
+  const { register, setValue, getValues } = useFormContext<HouseBlFormValues>();
   const currency = useCodeAutocomplete(CODE_SOURCES.currency);
   return (
     <CodeBox
       kind="code-only"
       variant="cell"
-      codeProps={{ ...register(`${prefix}.${index}.currency`) }}
+      required
+      codeProps={{
+        ...register(`${prefix}.${index}.currency`, {
+          onBlur: () => {
+            const cur = getValues(`${prefix}.${index}.currency`);
+            if (cur) onCurrencySelect?.(index, cur);
+          },
+        }),
+      }}
       onLookup={() => {}}
       onSearch={currency.onSearch}
       suggestions={currency.suggestions}
@@ -148,6 +157,7 @@ export function CustomerCell({ prefix, index }: CustomerCellProps) {
     <CodeBox
       kind="code-only"
       variant="cell"
+      required
       codeProps={{ ...register(`${prefix}.${index}.customerCode`) }}
       onLookup={() => {}}
       onSearch={customer.onSearch}
@@ -194,6 +204,7 @@ export function PerCell({ prefix, index, perOptions, onPerChange, resolveLabel }
         return (
           <ComboBox
             variant="cell"
+            required
             options={displayOptions}
             value={currentValue}
             onChange={(e) => {
@@ -225,6 +236,7 @@ export function TaxTypeCell({ prefix, index }: TaxTypeCellProps) {
       render={({ field }) => (
         <ComboBox
           variant="cell"
+          required
           options={options}
           value={field.value ?? ""}
           onChange={(e) => {
@@ -256,6 +268,7 @@ export function PerformanceDtCell({ prefix, index }: PerformanceDtCellProps) {
       render={({ field }) => (
         <DateBox
           variant="cell"
+          required
           name={field.name}
           value={(field.value as string) ?? ""}
           onChange={field.onChange}

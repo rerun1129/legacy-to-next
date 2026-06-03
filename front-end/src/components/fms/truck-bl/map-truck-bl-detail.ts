@@ -8,14 +8,14 @@ function mapFreightLine(l: TruckBlFreightLineView): FreightRow {
   return {
     id:                  l.id,
     freightCode:         l.freightCode  ?? "",
-    freightName:         "",
+    freightName:         l.freightName  ?? "",
     per:                 l.per          ?? "",
     qty:                 l.qty          != null ? String(l.qty)             : "",
     price:               l.price        != null ? String(l.price)           : "",
     currency:            l.currency     ?? "",
     exchangeRate:        l.exchangeRate != null ? String(l.exchangeRate)    : "",
     customerCode:        l.customerCode ?? "",
-    customerName:        "",
+    customerName:        l.customerName ?? "",
     taxType:             l.taxType      ?? "",
     performanceDt:       l.performanceDt ?? "",
     settleAmount:        l.settleAmount  != null ? String(l.settleAmount)  : "",
@@ -27,7 +27,6 @@ function mapFreightLine(l: TruckBlFreightLineView): FreightRow {
     taxNo:               l.taxNo              ?? "",
     slipNo:              l.slipNo             ?? "",
     financialDocumentNo: l.financialDocumentNo ?? "",
-    remark:              "",
   };
 }
 

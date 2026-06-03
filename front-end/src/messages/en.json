@@ -189,7 +189,8 @@
             "taxNo":                 "Tax No",
             "slipNo":                "Slip No",
             "financialDocumentNo":   "Doc No",
-            "exchangeRate":          "Ex. Rate"
+            "exchangeRate":          "Ex. Rate",
+            "total":                 "Total"
           },
           "per": {
             "SHP":  "Ship",

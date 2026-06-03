@@ -189,7 +189,8 @@
             "taxNo":                 "세금계산서번호",
             "slipNo":                "전표번호",
             "financialDocumentNo":   "서류번호",
-            "exchangeRate":          "환율"
+            "exchangeRate":          "환율",
+            "total":                 "합계"
           },
           "per": {
             "SHP":  "Ship",

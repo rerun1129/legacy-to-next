@@ -200,11 +200,13 @@ export interface HouseBlDetail extends HouseBlRow {
 export interface FreightLineView {
   id?: number;
   freightCode?: string;
+  freightName?: string;
   per?: string;
   qty?: number;
   price?: number;
   currency?: string;
   customerCode?: string;
+  customerName?: string;
   taxType?: string;
   performanceDt?: string;
   // 계산값 (저장 후 BE 산정)

@@ -131,11 +131,13 @@ export interface NonBlDetail {
 export interface NonBlFreightLineView {
   id?: number;
   freightCode?: string;
+  freightName?: string;
   per?: string;
   qty?: number;
   price?: number;
   currency?: string;
   customerCode?: string;
+  customerName?: string;
   taxType?: string;
   performanceDt?: string;
   financialDocType?: string;
