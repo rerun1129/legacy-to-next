@@ -17,6 +17,7 @@ import com.freightos.fms.common.response.MessageCode;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -291,8 +292,12 @@ public class NonBlAssembler {
         }
         List<CreateHouseBlCommand.FreightLineCommand> selling = toCreateFreightLineCommands(req.freightSelling());
         List<CreateHouseBlCommand.FreightLineCommand> buying  = toCreateFreightLineCommands(req.freightBuying());
-        validateCreateFreightLines(selling, "Selling");
-        validateCreateFreightLines(buying, "Buying");
+        List<String> freightErrors = new ArrayList<>();
+        validateCreateFreightLines(selling, "Selling", freightErrors);
+        validateCreateFreightLines(buying, "Buying", freightErrors);
+        if (!freightErrors.isEmpty()) {
+            throw FmsException.badRequest("FREIGHT_LINE_INVALID", String.join("\n", freightErrors));
+        }
         return new CreateHouseBlCommand.FreightCommand(
                 req.sellRateDt(), req.sellRateCurrencyCode(), parseBigDecimal(req.sellRate()),
                 req.buyRateDt(), req.buyRateCurrencyCode(), parseBigDecimal(req.buyRate()),
@@ -311,8 +316,12 @@ public class NonBlAssembler {
         }
         List<UpdateHouseBlCommand.FreightLineCommand> selling = toUpdateFreightLineCommands(req.freightSelling());
         List<UpdateHouseBlCommand.FreightLineCommand> buying  = toUpdateFreightLineCommands(req.freightBuying());
-        validateUpdateFreightLines(selling, "Selling");
-        validateUpdateFreightLines(buying, "Buying");
+        List<String> freightErrors = new ArrayList<>();
+        validateUpdateFreightLines(selling, "Selling", freightErrors);
+        validateUpdateFreightLines(buying, "Buying", freightErrors);
+        if (!freightErrors.isEmpty()) {
+            throw FmsException.badRequest("FREIGHT_LINE_INVALID", String.join("\n", freightErrors));
+        }
         return new UpdateHouseBlCommand.FreightCommand(
                 req.sellRateDt(), req.sellRateCurrencyCode(), parseBigDecimal(req.sellRate()),
                 req.buyRateDt(), req.buyRateCurrencyCode(), parseBigDecimal(req.buyRate()),
@@ -349,39 +358,44 @@ public class NonBlAssembler {
         )).toList();
     }
 
-    private void validateCreateFreightLines(List<CreateHouseBlCommand.FreightLineCommand> lines, String gridLabel) {
+    private void validateCreateFreightLines(List<CreateHouseBlCommand.FreightLineCommand> lines, String gridLabel,
+                                             List<String> errors) {
         if (lines == null) return;
         for (int i = 0; i < lines.size(); i++) {
             CreateHouseBlCommand.FreightLineCommand l = lines.get(i);
-            validateFreightLine(gridLabel, i + 1, l.freightCode(), l.per(), l.currency(), l.customerCode(),
+            String err = validateFreightLine(gridLabel, i + 1, l.freightCode(), l.per(), l.currency(), l.customerCode(),
                     l.taxType(), l.performanceDt(), l.unitQuantity(), l.unitPrice());
+            if (err != null) errors.add(err);
         }
     }
 
-    private void validateUpdateFreightLines(List<UpdateHouseBlCommand.FreightLineCommand> lines, String gridLabel) {
+    private void validateUpdateFreightLines(List<UpdateHouseBlCommand.FreightLineCommand> lines, String gridLabel,
+                                             List<String> errors) {
         if (lines == null) return;
         for (int i = 0; i < lines.size(); i++) {
             UpdateHouseBlCommand.FreightLineCommand l = lines.get(i);
-            validateFreightLine(gridLabel, i + 1, l.freightCode(), l.per(), l.currency(), l.customerCode(),
+            String err = validateFreightLine(gridLabel, i + 1, l.freightCode(), l.per(), l.currency(), l.customerCode(),
                     l.taxType(), l.performanceDt(), l.unitQuantity(), l.unitPrice());
+            if (err != null) errors.add(err);
         }
     }
 
-    /** 라인 필수 필드 + qty/price > 0 검증 (BE SSOT). gridLabel·rowNo를 에러 메시지에 prepend한다. */
-    private static void validateFreightLine(String gridLabel, int rowNo, String freightCode, String per,
-                                             String currency, String customerCode, String taxType,
-                                             String performanceDt, BigDecimal qty, BigDecimal price) {
+    /** 라인 필수 필드 + qty/price > 0 검증 (BE SSOT). 위반 메시지를 반환하고 위반 없으면 null을 반환한다. */
+    private static String validateFreightLine(String gridLabel, int rowNo, String freightCode, String per,
+                                              String currency, String customerCode, String taxType,
+                                              String performanceDt, BigDecimal qty, BigDecimal price) {
         String prefix = gridLabel + " " + rowNo + "행: ";
         if (isBlank(freightCode) || isBlank(per) || isBlank(currency)
                 || isBlank(customerCode) || isBlank(taxType) || isBlank(performanceDt)) {
-            throw FmsException.badRequest("FREIGHT_LINE_REQUIRED", prefix + MessageCode.FREIGHT_LINE_REQUIRED.message());
+            return prefix + MessageCode.FREIGHT_LINE_REQUIRED.message();
         }
         if (qty == null || qty.compareTo(BigDecimal.ZERO) <= 0) {
-            throw FmsException.badRequest("FREIGHT_LINE_QTY_INVALID", prefix + MessageCode.FREIGHT_LINE_QTY_INVALID.message());
+            return prefix + MessageCode.FREIGHT_LINE_QTY_INVALID.message();
         }
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-            throw FmsException.badRequest("FREIGHT_LINE_PRICE_INVALID", prefix + MessageCode.FREIGHT_LINE_PRICE_INVALID.message());
+            return prefix + MessageCode.FREIGHT_LINE_PRICE_INVALID.message();
         }
+        return null;
     }
 
     private static BigDecimal parseBigDecimal(String value) {
