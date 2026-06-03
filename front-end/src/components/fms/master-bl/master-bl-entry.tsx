@@ -171,7 +171,12 @@ export function MasterBLEntry({ variantKey }: Props) {
   return (
     <FormProvider {...form}>
     <ScreenGuard visible={isLoading} message={loadingMessage} />
-    <form ref={formRef} onSubmit={form.handleSubmit(handleSave)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+    <form ref={formRef} noValidate onSubmit={form.handleSubmit(handleSave)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }} onKeyDown={(e) => {
+        // textarea 줄바꿈은 보존, 그 외 Enter는 implicit form submission 차단
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+          e.preventDefault();
+        }
+      }}>
       <MasterBlEntryPageHead
         variant={variant}
         mutation={mutation}

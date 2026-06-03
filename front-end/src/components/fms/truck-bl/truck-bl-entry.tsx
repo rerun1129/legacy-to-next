@@ -33,6 +33,7 @@ export function TruckBLEntry() {
     <FormProvider {...entry.form}>
     <ScreenGuard visible={entry.isLoading} message={loadingMessage} />
     <form
+      noValidate
       onSubmit={entry.form.handleSubmit(entry.handleSubmit)}
       onKeyDown={(e) => {
         // textarea 줄바꿈은 보존, 그 외 Enter는 implicit form submission 차단
