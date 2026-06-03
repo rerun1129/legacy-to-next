@@ -43,6 +43,14 @@ public class CodeNameResolver {
     }
 
     /**
+     * freight_code → name 일괄 조회.
+     * admin.freight deleted_at IS NULL 활성 항목만 포함.
+     */
+    public Map<String, String> findFreightNames(Collection<String> codes) {
+        return codeNamePort.findFreightNames(codes);
+    }
+
+    /**
      * customer_code → customer_type 일괄 조회.
      * BMS 운임 라인 §6.16 FinancialDocType 자동 산정용.
      */

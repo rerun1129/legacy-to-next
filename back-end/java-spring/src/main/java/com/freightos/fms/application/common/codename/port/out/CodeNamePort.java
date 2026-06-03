@@ -34,6 +34,13 @@ public interface CodeNamePort {
     Map<String, String> findTeamNames(Collection<String> codes);
 
     /**
+     * freight_code → name 일괄 조회.
+     * admin.freight deleted_at IS NULL 활성 항목만 포함.
+     * 미존재·삭제 코드는 맵에 포함되지 않음(예외 아님). 빈 입력은 빈 맵.
+     */
+    Map<String, String> findFreightNames(Collection<String> codes);
+
+    /**
      * customer_code → customer_type 일괄 조회.
      * BMS 운임 라인 §6.16 FinancialDocType 자동 산정용.
      * deleted_at IS NULL 활성 고객만 포함. 미존재·삭제 코드는 맵에 포함되지 않음(예외 아님).

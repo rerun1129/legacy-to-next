@@ -3,6 +3,7 @@ package com.freightos.fms.adapter.out.persistence.codename;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QAdminUserRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QCarrierRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QCustomerRefJpaEntity;
+import com.freightos.fms.adapter.out.persistence.codename.entity.QFreightRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QHsCodeRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QPortRefJpaEntity;
 import com.freightos.fms.adapter.out.persistence.codename.entity.QTeamRefJpaEntity;
@@ -170,6 +171,32 @@ public class CodeNameQueryRepository {
             .collect(Collectors.toMap(
                 row -> row.get(t.teamCode),
                 row -> row.get(t.name) != null ? row.get(t.name) : ""
+            ));
+    }
+
+    /**
+     * freight_code → name 일괄 조회.
+     * admin.freight deleted_at IS NULL 활성 항목만 포함.
+     */
+    Map<String, String> fetchFreightNames(Collection<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        QFreightRefJpaEntity f = QFreightRefJpaEntity.freightRefJpaEntity;
+        BooleanExpression inCodes = f.freightCode.in(codes);
+        BooleanExpression notDeleted = f.deletedAt.isNull();
+
+        List<Tuple> rows = queryFactory
+            .select(f.freightCode, f.name)
+            .from(f)
+            .where(inCodes, notDeleted)
+            .fetch();
+
+        return rows.stream()
+            .filter(t -> t.get(f.freightCode) != null)
+            .collect(Collectors.toMap(
+                t -> t.get(f.freightCode),
+                t -> t.get(f.name) != null ? t.get(f.name) : ""
             ));
     }
 

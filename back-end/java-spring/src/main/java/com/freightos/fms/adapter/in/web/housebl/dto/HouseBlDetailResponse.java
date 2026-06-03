@@ -203,11 +203,13 @@ public record HouseBlDetailResponse(
     public record FreightLineResponse(
             Long id,
             String freightCode,
+            String freightName,
             String per,
             BigDecimal qty,
             BigDecimal price,
             String currency,
             String customerCode,
+            String customerName,
             String taxType,
             String performanceDt,
             // 계산값
@@ -225,11 +227,13 @@ public record HouseBlDetailResponse(
             return new FreightLineResponse(
                     l.freightLineId(),
                     l.freightCode(),
+                    l.freightName(),
                     l.per(),
                     l.unitQuantity(),
                     l.unitPrice(),
                     l.currency(),
                     l.customerCode(),
+                    l.customerName(),
                     l.taxType(),
                     l.performanceDt(),
                     l.financialDocType(),

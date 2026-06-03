@@ -5,6 +5,7 @@ import com.freightos.fms.application.freight.FreightView;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * JPA 엔티티 → FreightView(application VO) 변환 매퍼.
@@ -13,9 +14,12 @@ import java.util.List;
 @Component
 public class FreightJpaToDomainMapper {
 
-    public FreightView toFreightView(FreightHeaderJpaEntity header) {
+    public FreightView toFreightView(
+            FreightHeaderJpaEntity header,
+            Map<String, String> customerNames,
+            Map<String, String> freightNames) {
         List<FreightLineView> lineViews = header.getLines().stream()
-            .map(this::toLineView)
+            .map(line -> toLineView(line, customerNames, freightNames))
             .toList();
 
         return new FreightView(
@@ -37,16 +41,21 @@ public class FreightJpaToDomainMapper {
         );
     }
 
-    private FreightLineView toLineView(FreightLineJpaEntity line) {
+    private FreightLineView toLineView(
+            FreightLineJpaEntity line,
+            Map<String, String> customerNames,
+            Map<String, String> freightNames) {
+        String customerCode = line.getCustomerCode();
+        String freightCode = line.getFreightCode();
         return new FreightLineView(
             line.getFreightLineId(),
             line.getFreightType(),
-            line.getFreightCode(),
+            freightCode,
             line.getPer(),
             line.getUnitQuantity(),
             line.getUnitPrice(),
             line.getCurrency(),
-            line.getCustomerCode(),
+            customerCode,
             line.getTaxType(),
             line.getPerformanceDt(),
             line.getFinancialDocType(),
@@ -63,7 +72,9 @@ public class FreightJpaToDomainMapper {
             line.getSlipDt(),
             line.getFinancialDocumentId(),
             // TODO(단계E): financial_document_id → document_no 조인 — FinancialDocumentJpaEntity 도입 후 연결
-            null
+            null,
+            customerCode != null ? customerNames.getOrDefault(customerCode, "") : "",
+            freightCode != null ? freightNames.getOrDefault(freightCode, "") : ""
         );
     }
 }

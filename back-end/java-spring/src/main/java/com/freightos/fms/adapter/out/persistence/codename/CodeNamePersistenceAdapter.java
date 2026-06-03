@@ -49,6 +49,11 @@ public class CodeNamePersistenceAdapter implements CodeNamePort {
     }
 
     @Override
+    public Map<String, String> findFreightNames(Collection<String> codes) {
+        return queryRepository.fetchFreightNames(codes);
+    }
+
+    @Override
     public Map<String, String> findCustomerTypes(Collection<String> codes) {
         return queryRepository.fetchCustomerTypes(codes);
     }

@@ -71,7 +71,23 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
     public Optional<FreightView> findFreightByBl(FreightBlType blType, String blId) {
         return headerRepository
             .findByBlTypeAndBlId(blType.name(), blId)
-            .map(jpaToDomainMapper::toFreightView);
+            .map(header -> {
+                Set<String> customerCodes = header.getLines().stream()
+                    .map(FreightLineJpaEntity::getCustomerCode)
+                    .filter(c -> c != null && !c.isBlank())
+                    .collect(Collectors.toSet());
+                Set<String> freightCodes = header.getLines().stream()
+                    .map(FreightLineJpaEntity::getFreightCode)
+                    .filter(c -> c != null && !c.isBlank())
+                    .collect(Collectors.toSet());
+                Map<String, String> customerNames = customerCodes.isEmpty()
+                    ? Collections.emptyMap()
+                    : codeNameResolver.findCustomerNames(customerCodes);
+                Map<String, String> freightNames = freightCodes.isEmpty()
+                    ? Collections.emptyMap()
+                    : codeNameResolver.findFreightNames(freightCodes);
+                return jpaToDomainMapper.toFreightView(header, customerNames, freightNames);
+            });
     }
 
     @Override
