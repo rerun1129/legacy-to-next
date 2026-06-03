@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch, type Path } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { type GridColumn } from "@/components/shared/grid-list";
 import { TextBox } from "@/components/shared/inputs";
@@ -62,7 +62,7 @@ export function buildFreightColumns({
       key: "freightName",
       label: tf("cols.freightName"),
       width: 130,
-      render: (_, row) => <TextBox variant="cell" readOnly value={row.freightName ?? ""} />,
+      render: (_, __, i) => <WatchReadOnlyCell prefix={prefix} index={i} field="freightName" />,
     },
     {
       key: "per",
@@ -117,7 +117,7 @@ export function buildFreightColumns({
       key: "customerName",
       label: tf("cols.customerName"),
       width: 120,
-      render: (_, row) => <TextBox variant="cell" readOnly value={row.customerName ?? ""} />,
+      render: (_, __, i) => <WatchReadOnlyCell prefix={prefix} index={i} field="customerName" />,
     },
     {
       key: "taxType",
@@ -164,7 +164,7 @@ export function buildFreightColumns({
       label: tf("cols.usdAmount"),
       className: "is-num",
       width: 80,
-      render: (_, row) => <ReadOnlyCell value={row.usdAmount} />,
+      render: (_, __, i) => <WatchReadOnlyCell prefix={prefix} index={i} field="usdAmount" decimals={2} />,
     },
     {
       key: "financialDocType",
@@ -204,4 +204,32 @@ export function buildFreightColumns({
 function FreightRemarkCell({ prefix, index }: { prefix: FieldPrefix; index: number }) {
   const { register } = useFormContext<HouseBlFormValues>();
   return <TextBox variant="cell" {...register(`${prefix}.${index}.remark`)} />;
+}
+
+// ── setValue로 갱신되는 readOnly 셀 — useWatch로 직접 구독 ────
+// RHF useFieldArray fields[]는 setValue로 갱신되지 않으므로
+// freightName/customerName/usdAmount 는 control 구독으로 실시간 반영.
+
+function WatchReadOnlyCell({
+  prefix,
+  index,
+  field,
+  decimals,
+}: {
+  prefix: FieldPrefix;
+  index: number;
+  field: "freightName" | "customerName" | "usdAmount";
+  decimals?: number;
+}) {
+  const { control } = useFormContext<HouseBlFormValues>();
+  const value = useWatch({
+    control,
+    name: `${prefix}.${index}.${field}` as Path<HouseBlFormValues>,
+  });
+  let display = "";
+  if (value != null && value !== "") {
+    const n = Number(value);
+    display = decimals != null && !Number.isNaN(n) ? n.toFixed(decimals) : String(value);
+  }
+  return <TextBox variant="cell" readOnly value={display} />;
 }

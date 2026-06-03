@@ -97,6 +97,7 @@ export function PriceCell({ prefix, index }: CalcCellProps) {
       variant="cell"
       name={`${prefix}.${index}.price`}
       valueAsNumber={false}
+      decimalPlaces={2}
       onChange={() => {
         const row = readCalcRow(getValues, prefix, index);
         applyCalcResult(setValue, prefix, index, recalcFromQtyPrice(row));
@@ -112,6 +113,7 @@ export function ExchangeRateCell({ prefix, index }: CalcCellProps) {
       variant="cell"
       name={`${prefix}.${index}.exchangeRate`}
       valueAsNumber={false}
+      decimalPlaces={2}
       onChange={() => {
         const row = readCalcRow(getValues, prefix, index);
         applyCalcResult(setValue, prefix, index, recalcFromExchangeRate(row));
@@ -127,6 +129,7 @@ export function SettleAmountCell({ prefix, index }: CalcCellProps) {
       variant="cell"
       name={`${prefix}.${index}.settleAmount`}
       valueAsNumber={false}
+      decimalPlaces={2}
       onChange={() => {
         const row = readCalcRow(getValues, prefix, index);
         applyCalcResult(setValue, prefix, index, recalcFromSettle(row));
@@ -142,6 +145,7 @@ export function LocalAmountCell({ prefix, index }: CalcCellProps) {
       variant="cell"
       name={`${prefix}.${index}.localAmount`}
       valueAsNumber={false}
+      decimalPlaces={2}
       onChange={() => {
         const row = readCalcRow(getValues, prefix, index);
         applyCalcResult(setValue, prefix, index, recalcFromLocal(row));
@@ -157,6 +161,7 @@ export function VatCell({ prefix, index }: CalcCellProps) {
       variant="cell"
       name={`${prefix}.${index}.vat`}
       valueAsNumber={false}
+      decimalPlaces={2}
     />
   );
 }
