@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.truckbl.dto;
 
+import com.freightos.fms.application.freight.FreightView;
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailResult;
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailView;
 
@@ -69,7 +70,10 @@ public record TruckBlDetailResponse(
 
         // Dimension 그리드
         String volumeDivisor,
-        List<DimView> dims
+        List<DimView> dims,
+
+        // Freight 탭 헤더+라인 (없으면 null)
+        FreightView freight
 ) {
     public record DimView(
             Long id,
@@ -168,7 +172,8 @@ public record TruckBlDetailResponse(
                 result.volumeDivisor(),
                 result.dims() == null ? null : result.dims().stream()
                         .map(d -> new DimView(d.id(), d.lengthCm(), d.widthCm(), d.heightCm(), d.quantity(), d.cbm(), d.volumeWeightKg()))
-                        .toList()
+                        .toList(),
+                view.freight()
         );
     }
 }

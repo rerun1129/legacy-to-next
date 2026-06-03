@@ -1,10 +1,14 @@
 package com.freightos.fms.application.housebl;
 
+import com.freightos.common.exception.FmsException;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.common.codename.CodeNameResolver;
+import com.freightos.fms.application.freight.FreightView;
+import com.freightos.fms.application.freight.command.FreightInputCommand;
+import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.SearchHouseBlCommand;
@@ -15,6 +19,7 @@ import com.freightos.fms.application.housebl.projection.SeaDetailProjection;
 import com.freightos.fms.application.housebl.port.out.AirBlPersistencePort;
 import com.freightos.fms.application.seahbl.port.out.SeaHblPersistencePort;
 import com.freightos.fms.domain.common.vo.BlNumber;
+import com.freightos.fms.domain.freight.enums.FreightBlType;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
@@ -25,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +47,8 @@ public class HouseBlService implements HouseBlUseCase {
     private final SeaHblPersistencePort seaHblPersistencePort;
     private final AirBlPersistencePort airBlPersistencePort;
     private final CodeNameResolver codeNameResolver;
+    private final FreightInputPort freightInputPort;
+    private final HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
 
     @Override
     public PagedResult<HouseBlSummary> searchHouseBls(SearchHouseBlCommand cmd, PageRequest pageRequest) {
@@ -60,6 +68,8 @@ public class HouseBlService implements HouseBlUseCase {
         Map<String, String> carrierNames = resolveCarrierNames(base);
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
         Map<String, String> teamNames = resolveTeamNames(base);
+        Optional<FreightView> freightView = freightInputPort.findFreightByBl(
+                FreightBlType.HOUSE, String.valueOf(base.id()));
         return new HouseBlDetailView(
                 base,
                 nameOrEmpty(customerNames, base.shipperCode()),
@@ -77,7 +87,8 @@ public class HouseBlService implements HouseBlUseCase {
                 seaPortName(portNames, base, SeaPortField.PAYABLE_AT),
                 seaPortName(portNames, base, SeaPortField.DELIVERY),
                 seaLinerName(carrierNames, base),
-                nameOrEmpty(hsCodeNames, base.hsCode())
+                nameOrEmpty(hsCodeNames, base.hsCode()),
+                freightView.orElse(null)
         );
     }
 
@@ -182,7 +193,12 @@ public class HouseBlService implements HouseBlUseCase {
     public Long createHouseBl(CreateHouseBlCommand command) {
         HouseBl entity = houseBlFactory.toEntity(command);
         log.debug("Creating HouseBl: {}", entity.getHblNo());
-        return houseBlPort.saveHouseBl(entity).getId();
+        Long houseBlId = houseBlPort.saveHouseBl(entity).getId();
+        if (command.freight() != null) {
+            FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromCreate(command, command.freight());
+            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(houseBlId), freightCmd);
+        }
+        return houseBlId;
     }
 
     @Override
@@ -191,18 +207,30 @@ public class HouseBlService implements HouseBlUseCase {
         HouseBl existing = findEntityById(id);
         houseBlFactory.applyToEntity(command, existing);
         houseBlPort.saveHouseBl(existing);
+        if (command.freight() != null) {
+            FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
+            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+        }
     }
 
     @Override
     @Transactional
     public void updateSeaHbl(Long id, UpdateHouseBlCommand command) {
         seaHblPersistencePort.update(id, command);
+        if (command.freight() != null) {
+            FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
+            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+        }
     }
 
     @Override
     @Transactional
     public void updateAirHbl(Long id, UpdateHouseBlCommand command) {
         airBlPersistencePort.update(id, command);
+        if (command.freight() != null) {
+            FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
+            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+        }
     }
 
     @Override
@@ -210,6 +238,12 @@ public class HouseBlService implements HouseBlUseCase {
     public void deleteHouseBlById(Long id) {
         JobDiv jobDiv = houseBlPort.findJobDivById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
+        String blIdStr = String.valueOf(id);
+        if (freightInputPort.existsFreightLines(FreightBlType.HOUSE, blIdStr)) {
+            // 운임 라인 존재 시 삭제 차단 — 데이터 정합성 보호
+            throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
+        }
+        freightInputPort.deleteFreight(FreightBlType.HOUSE, blIdStr);
         houseBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted HouseBl id={}", id);
     }

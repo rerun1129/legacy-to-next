@@ -54,5 +54,19 @@ public record CreateNonBlRequest(
         List<CreateHouseBlRequest.ContainerRequest> containers,
         List<CreateHouseBlRequest.ScheduleLegRequest> scheduleLegs,
         List<CreateHouseBlRequest.TruckOrderRequest> truckOrders,
-        List<CreateHouseBlRequest.AirChargeRequest> airCharges
+        List<CreateHouseBlRequest.AirChargeRequest> airCharges,
+
+        // Freight 탭 — 환율 헤더 (HouseBl과 동일 필드명)
+        String sellRateDt,
+        String sellRateCurrencyCode,
+        String sellRate,
+        String buyRateDt,
+        String buyRateCurrencyCode,
+        String buyRate,
+        String usdRateDt,
+        String usdRate,
+
+        // Freight 탭 — 매출/매입 라인
+        List<CreateHouseBlRequest.FreightLineRequest> freightSelling,
+        List<CreateHouseBlRequest.FreightLineRequest> freightBuying
 ) {}

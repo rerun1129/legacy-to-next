@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.nonbl.dto;
 
+import com.freightos.fms.application.freight.FreightView;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailResult;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 
@@ -53,7 +54,10 @@ public record NonBlDetailResponse(
         LocalDateTime updatedAt,
         String remark,
         List<ContainerView> containers,
-        List<DimView> dims
+        List<DimView> dims,
+
+        // Freight 탭 헤더+라인 (없으면 null)
+        FreightView freight
 ) {
 
     public record ContainerView(
@@ -123,7 +127,8 @@ public record NonBlDetailResponse(
                 result.updatedAt(),
                 result.remark(),
                 toContainerViews(result.containers()),
-                toDimViews(result.dims())
+                toDimViews(result.dims()),
+                view.freight()
         );
     }
 

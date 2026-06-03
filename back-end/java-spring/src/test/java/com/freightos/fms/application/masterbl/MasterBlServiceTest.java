@@ -2,6 +2,7 @@ package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.common.codename.CodeNameResolver;
+import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.masterbl.command.SearchMasterBlCommand;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailResult;
 import com.freightos.fms.application.masterbl.projection.MasterBlDetailView;
@@ -54,6 +55,12 @@ class MasterBlServiceTest {
     @Mock
     private CodeNameResolver codeNameResolver;
 
+    @Mock
+    private FreightInputPort freightInputPort;
+
+    @Mock
+    private MasterBlFreightCommandBuilder masterBlFreightCommandBuilder;
+
     @InjectMocks
     private MasterBlService masterBlService;
 
@@ -69,6 +76,7 @@ class MasterBlServiceTest {
         given(houseBlPort.findConsoledSeaContainersByMasterBlId(id)).willReturn(List.of());
         given(masterBlFactory.toDetailResult(mockEntity, List.of(), List.of())).willReturn(mockBase);
         given(codeNameResolver.findHsCodeNames(any())).willReturn(Map.of("8471.30", "컴퓨터"));
+        given(freightInputPort.findFreightByBl(any(), any())).willReturn(Optional.empty());
 
         MasterBlDetailView view = masterBlService.findMasterBlById(id);
 
@@ -93,6 +101,7 @@ class MasterBlServiceTest {
     void delete_existingId_callsPortDelete() {
         Long id = 1L;
         given(masterBlPort.findJobDivById(id)).willReturn(Optional.of(MasterBlJobDiv.SEA));
+        given(freightInputPort.existsFreightLines(any(), any())).willReturn(false);
 
         masterBlService.deleteMasterBlById(id);
 
@@ -112,6 +121,7 @@ class MasterBlServiceTest {
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
         given(houseBlPort.findConsoledSeaSummariesByMasterBlId(id)).willReturn(List.of(s1));
         given(masterBlFactory.toDetailResult(any(), any(), any())).willReturn(mock(MasterBlDetailResult.class));
+        given(freightInputPort.findFreightByBl(any(), any())).willReturn(Optional.empty());
 
         masterBlService.findMasterBlById(id);
 
@@ -128,6 +138,7 @@ class MasterBlServiceTest {
         given(masterBlPort.findMasterBlById(id)).willReturn(Optional.of(master));
         given(houseBlPort.findConsoledAirSummariesByMasterBlId(id)).willReturn(List.of(a1));
         given(masterBlFactory.toDetailResult(any(), any(), any())).willReturn(mock(MasterBlDetailResult.class));
+        given(freightInputPort.findFreightByBl(any(), any())).willReturn(Optional.empty());
 
         masterBlService.findMasterBlById(id);
 

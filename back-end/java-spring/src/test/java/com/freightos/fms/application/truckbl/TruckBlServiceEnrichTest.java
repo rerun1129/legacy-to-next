@@ -1,12 +1,15 @@
 package com.freightos.fms.application.truckbl;
 
 import com.freightos.fms.application.common.codename.CodeNameResolver;
+import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.HouseBlFactory;
+import com.freightos.fms.application.housebl.HouseBlFreightCommandBuilder;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.truckbl.port.out.TruckBlPersistencePort;
 import com.freightos.fms.application.truckbl.port.out.TruckBlSearchPort;
 import com.freightos.fms.application.truckbl.projection.TruckBlDetailView;
 import com.freightos.fms.domain.common.enums.Bound;
+import com.freightos.fms.domain.freight.enums.FreightBlType;
 import com.freightos.fms.domain.housebl.entity.HouseBlTruck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +23,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 /**
@@ -35,6 +40,8 @@ class TruckBlServiceEnrichTest {
     @Mock private TruckBlSearchPort truckBlSearchPort;
     @Mock private CodeNameResolver codeNameResolver;
     @Mock private HouseBlFactory houseBlFactory;
+    @Mock private FreightInputPort freightInputPort;
+    @Mock private HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
 
     private TruckBlService truckBlService;
 
@@ -42,7 +49,8 @@ class TruckBlServiceEnrichTest {
     void setUp() {
         TruckBlFactory truckBlFactory = new TruckBlFactory(houseBlFactory);
         truckBlService = new TruckBlService(
-                houseBlPort, truckBlFactory, truckBlPersistencePort, truckBlSearchPort, codeNameResolver);
+                houseBlPort, truckBlFactory, truckBlPersistencePort, truckBlSearchPort, codeNameResolver,
+                freightInputPort, houseBlFreightCommandBuilder);
     }
 
     @Test
@@ -53,11 +61,13 @@ class TruckBlServiceEnrichTest {
         given(houseBlPort.findHouseBlById(1L)).willReturn(Optional.of(truck));
         given(codeNameResolver.findHsCodeNames(anyCollection()))
                 .willReturn(Map.of("8471.30", "자동 데이터 처리 기계"));
+        given(freightInputPort.findFreightByBl(eq(FreightBlType.HOUSE), any())).willReturn(Optional.empty());
 
         TruckBlDetailView view = truckBlService.findTruckBlById(1L);
 
         assertThat(view.base().hsCode()).isEqualTo("8471.30");
         assertThat(view.hsCodeName()).isEqualTo("자동 데이터 처리 기계");
+        assertThat(view.freight()).isNull();
     }
 
     @Test
@@ -67,6 +77,7 @@ class TruckBlServiceEnrichTest {
         // hsCode 미설정 → null
         given(houseBlPort.findHouseBlById(2L)).willReturn(Optional.of(truck));
         given(codeNameResolver.findHsCodeNames(Set.of())).willReturn(Map.of());
+        given(freightInputPort.findFreightByBl(eq(FreightBlType.HOUSE), any())).willReturn(Optional.empty());
 
         TruckBlDetailView view = truckBlService.findTruckBlById(2L);
 
@@ -81,6 +92,7 @@ class TruckBlServiceEnrichTest {
         truck.updateTradeInfo(null, null, null, "9999.99");
         given(houseBlPort.findHouseBlById(3L)).willReturn(Optional.of(truck));
         given(codeNameResolver.findHsCodeNames(anyCollection())).willReturn(Map.of());
+        given(freightInputPort.findFreightByBl(eq(FreightBlType.HOUSE), any())).willReturn(Optional.empty());
 
         TruckBlDetailView view = truckBlService.findTruckBlById(3L);
 

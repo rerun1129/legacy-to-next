@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.truckbl.dto;
 
+import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -62,7 +63,21 @@ public record CreateTruckBlRequest(
         List<TruckOrderRequest> truckOrders,
 
         // Dimension 그리드 (CREATE — id 없음)
-        List<DimRequest> dims
+        List<DimRequest> dims,
+
+        // Freight 탭 — 환율 헤더 (HouseBl과 동일 필드명)
+        String sellRateDt,
+        String sellRateCurrencyCode,
+        String sellRate,
+        String buyRateDt,
+        String buyRateCurrencyCode,
+        String buyRate,
+        String usdRateDt,
+        String usdRate,
+
+        // Freight 탭 — 매출/매입 라인
+        List<CreateHouseBlRequest.FreightLineRequest> freightSelling,
+        List<CreateHouseBlRequest.FreightLineRequest> freightBuying
 ) {
 
     /** Marks/Description 패널 1건. */

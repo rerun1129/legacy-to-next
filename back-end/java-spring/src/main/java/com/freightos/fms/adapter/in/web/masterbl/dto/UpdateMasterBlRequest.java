@@ -48,8 +48,60 @@ public record UpdateMasterBlRequest(
         DescRequest desc,
         List<DimRequest> dims,
         List<ScheduleLegRequest> scheduleLegs,
-        List<AirChargeRequest> airCharges
+        List<AirChargeRequest> airCharges,
+
+        // Freight 탭 — 환율 헤더 (FE와 동일 필드명)
+        String sellRateDt,
+        String sellRateCurrencyCode,
+        String sellRate,
+        String buyRateDt,
+        String buyRateCurrencyCode,
+        String buyRate,
+        String usdRateDt,
+        String usdRate,
+
+        // Freight 탭 — 매출/매입 라인
+        List<FreightLineRequest> freightSelling,
+        List<FreightLineRequest> freightBuying
 ) {
+
+    /**
+     * Freight 필드 없는 편의 생성자 — 기존 테스트 호환성 유지용.
+     * freight 필드는 모두 null로 초기화된다.
+     */
+    public UpdateMasterBlRequest(
+            String jobDiv, String bound, String freightTerm,
+            String shipperCode, String shipperAddress, String consigneeCode, String consigneeAddress,
+            String notifyCode, String notifyAddress, String polCode, String podCode, String etd, String eta,
+            Integer pkgQty, String pkgUnit, String weightUnit, BigDecimal grossWeightKg, BigDecimal cbm,
+            String hsCode, String mainItemName, String settlePartnerCode, String operatorCode, String teamCode,
+            String shipmentType, String remark,
+            SeaDetailRequest seaDetail, AirDetailRequest airDetail,
+            DescRequest desc, List<DimRequest> dims, List<ScheduleLegRequest> scheduleLegs,
+            List<AirChargeRequest> airCharges) {
+        this(jobDiv, bound, freightTerm,
+                shipperCode, shipperAddress, consigneeCode, consigneeAddress,
+                notifyCode, notifyAddress, polCode, podCode, etd, eta,
+                pkgQty, pkgUnit, weightUnit, grossWeightKg, cbm,
+                hsCode, mainItemName, settlePartnerCode, operatorCode, teamCode,
+                shipmentType, remark,
+                seaDetail, airDetail,
+                desc, dims, scheduleLegs, airCharges,
+                null, null, null, null, null, null, null, null, null, null);
+    }
+
+    /** Freight 매출/매입 라인 1행. FE FREIGHT_ROW_SCHEMA와 필드명 동일. */
+    public record FreightLineRequest(
+            Long id,
+            String freightCode,
+            String per,
+            String qty,
+            String price,
+            String currency,
+            String customerCode,
+            String taxType,
+            String performanceDt
+    ) {}
 
     /** SEA 모드 확장 필드. */
     public record SeaDetailRequest(

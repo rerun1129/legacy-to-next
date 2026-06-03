@@ -1,5 +1,7 @@
 package com.freightos.fms.adapter.in.web.masterbl.dto;
 
+import com.freightos.fms.application.freight.FreightLineView;
+import com.freightos.fms.application.freight.FreightView;
 import com.freightos.fms.application.masterbl.projection.AirChargeProjection;
 import com.freightos.fms.application.masterbl.projection.AirDetailProjection;
 import com.freightos.fms.application.masterbl.projection.ConsoledHouseBlSummaryView;
@@ -56,7 +58,10 @@ public record MasterBlDetailResponse(
         AirDetailResponse airDetail,
         List<DimView> dims,
         List<ScheduleLegView> scheduleLegs,
-        List<AirChargeView> airCharges
+        List<AirChargeView> airCharges,
+
+        // Freight 탭 응답 (없으면 null)
+        FreightResponse freight
 ) {
     public static MasterBlDetailResponse from(MasterBlDetailView view) {
         MasterBlDetailResult result = view.base();
@@ -102,8 +107,84 @@ public record MasterBlDetailResponse(
                 airDetailProjection != null ? AirDetailResponse.from(airDetailProjection) : null,
                 result.dims() == null ? List.of() : result.dims().stream().map(DimView::from).toList(),
                 result.scheduleLegs() == null ? List.of() : result.scheduleLegs().stream().map(ScheduleLegView::from).toList(),
-                result.airCharges() == null ? List.of() : result.airCharges().stream().map(AirChargeView::from).toList()
+                result.airCharges() == null ? List.of() : result.airCharges().stream().map(AirChargeView::from).toList(),
+                view.freight() != null ? FreightResponse.from(view.freight()) : null
         );
+    }
+
+    /** Freight 탭 응답 DTO. */
+    public record FreightResponse(
+            // 환율 헤더
+            String sellRateDt,
+            String sellRateCurrencyCode,
+            BigDecimal sellRate,
+            String buyRateDt,
+            String buyRateCurrencyCode,
+            BigDecimal buyRate,
+            String usdRateDt,
+            BigDecimal usdRate,
+            // 라인
+            List<FreightLineResponse> selling,
+            List<FreightLineResponse> buying
+    ) {
+        public static FreightResponse from(FreightView v) {
+            List<FreightLineResponse> selling = v.lines().stream()
+                    .filter(l -> "SELLING".equals(l.freightType()))
+                    .map(FreightLineResponse::from)
+                    .toList();
+            List<FreightLineResponse> buying = v.lines().stream()
+                    .filter(l -> "BUYING".equals(l.freightType()))
+                    .map(FreightLineResponse::from)
+                    .toList();
+            return new FreightResponse(
+                    v.sellRateDt(), v.sellRateCurrencyCode(), v.sellRate(),
+                    v.buyRateDt(), v.buyRateCurrencyCode(), v.buyRate(),
+                    v.usdRateDt(), v.usdRate(),
+                    selling, buying
+            );
+        }
+    }
+
+    /** Freight 라인 1행 응답 DTO. */
+    public record FreightLineResponse(
+            Long id,
+            String freightCode,
+            String per,
+            BigDecimal qty,
+            BigDecimal price,
+            String currency,
+            String customerCode,
+            String taxType,
+            String performanceDt,
+            // 계산값
+            String financialDocType,
+            BigDecimal exchangeRate,
+            BigDecimal settleAmount,
+            BigDecimal localAmount,
+            BigDecimal settleTaxAmount,
+            BigDecimal localTaxAmount,
+            BigDecimal usdAmount
+    ) {
+        public static FreightLineResponse from(FreightLineView l) {
+            return new FreightLineResponse(
+                    l.freightLineId(),
+                    l.freightCode(),
+                    l.per(),
+                    l.unitQuantity(),
+                    l.unitPrice(),
+                    l.currency(),
+                    l.customerCode(),
+                    l.taxType(),
+                    l.performanceDt(),
+                    l.financialDocType(),
+                    l.exchangeRate(),
+                    l.settleAmount(),
+                    l.localAmount(),
+                    l.settleTaxAmount(),
+                    l.localTaxAmount(),
+                    l.usdAmount()
+            );
+        }
     }
 
     /**

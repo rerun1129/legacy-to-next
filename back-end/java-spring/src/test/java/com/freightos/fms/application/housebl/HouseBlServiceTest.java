@@ -15,6 +15,7 @@ import com.freightos.fms.domain.housebl.HouseBlFilter;
 import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +50,12 @@ class HouseBlServiceTest {
     @Mock
     private CodeNameResolver codeNameResolver;
 
+    @Mock
+    private FreightInputPort freightInputPort;
+
+    @Mock
+    private HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
+
     @InjectMocks
     private HouseBlService houseBlService;
 
@@ -71,6 +78,8 @@ class HouseBlServiceTest {
         given(mockBase.deliveryCode()).willReturn(null);
         given(mockBase.seaDetail()).willReturn(null);
         given(mockBase.hsCode()).willReturn("8471.30");
+        given(mockBase.teamCode()).willReturn(null);
+        given(mockBase.id()).willReturn(id);
         given(houseBlPort.findHouseBlById(id)).willReturn(Optional.of(mockEntity));
         given(houseBlFactory.toDetailResult(mockEntity)).willReturn(mockBase);
         given(codeNameResolver.findCustomerNames(any())).willReturn(Map.of("SHIP01", "ShipperCo"));
@@ -78,6 +87,8 @@ class HouseBlServiceTest {
         given(codeNameResolver.findUserNames(any())).willReturn(Map.of("john.doe", "John Doe"));
         given(codeNameResolver.findCarrierNames(any())).willReturn(Map.of());
         given(codeNameResolver.findHsCodeNames(any())).willReturn(Map.of("8471.30", "휴대용 자동자료처리기계"));
+        given(codeNameResolver.findTeamNames(any())).willReturn(Map.of());
+        given(freightInputPort.findFreightByBl(any(), any())).willReturn(Optional.empty());
 
         HouseBlDetailView result = houseBlService.findHouseBlById(id);
 
@@ -107,6 +118,7 @@ class HouseBlServiceTest {
     void deleteHouseBlById_existingId_callsPortDelete() {
         Long id = 1L;
         given(houseBlPort.findJobDivById(id)).willReturn(Optional.of(JobDiv.SEA));
+        given(freightInputPort.existsFreightLines(any(), any())).willReturn(false);
 
         houseBlService.deleteHouseBlById(id);
 

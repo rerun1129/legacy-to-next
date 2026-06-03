@@ -46,8 +46,35 @@ public record CreateMasterBlCommand(
         DescCommand desc,
         List<DimCommand> dims,
         List<ScheduleLegCommand> scheduleLegs,
-        List<AirChargeCommand> airCharges
+        List<AirChargeCommand> airCharges,
+
+        // Freight 탭 커맨드 (null이면 freight 미포함 저장)
+        FreightCommand freight
 ) {
+
+    /**
+     * freight 미지정 편의 생성자 — freight=null로 위임.
+     * 기존 Assembler의 positional 호출을 보존한다.
+     */
+    public CreateMasterBlCommand(
+            String jobDiv, String bound, String mblNo, String masterRefNo, String freightTerm,
+            String shipperCode, String shipperAddress, String consigneeCode, String consigneeAddress,
+            String notifyCode, String notifyAddress, String polCode, String podCode, String etd, String eta,
+            Integer pkgQty, String pkgUnit, String weightUnit, BigDecimal grossWeightKg, BigDecimal cbm,
+            String hsCode, String mainItemName, String settlePartnerCode, String operatorCode, String teamCode,
+            String shipmentType, String remark,
+            SeaDetailCommand seaDetail, AirDetailCommand airDetail,
+            DescCommand desc, List<DimCommand> dims, List<ScheduleLegCommand> scheduleLegs,
+            List<AirChargeCommand> airCharges) {
+        this(jobDiv, bound, mblNo, masterRefNo, freightTerm,
+                shipperCode, shipperAddress, consigneeCode, consigneeAddress,
+                notifyCode, notifyAddress, polCode, podCode, etd, eta,
+                pkgQty, pkgUnit, weightUnit, grossWeightKg, cbm,
+                hsCode, mainItemName, settlePartnerCode, operatorCode, teamCode,
+                shipmentType, remark,
+                seaDetail, airDetail,
+                desc, dims, scheduleLegs, airCharges, null);
+    }
 
     public record SeaDetailCommand(
             String loadType,
@@ -122,5 +149,31 @@ public record CreateMasterBlCommand(
             String rateClass,
             BigDecimal chargeWeightKg,
             BigDecimal rate
+    ) {}
+
+    /** Freight 탭 헤더+라인 커맨드. null이면 freight 저장 생략. */
+    public record FreightCommand(
+            String sellRateDt,
+            String sellRateCurrencyCode,
+            BigDecimal sellRate,
+            String buyRateDt,
+            String buyRateCurrencyCode,
+            BigDecimal buyRate,
+            String usdRateDt,
+            BigDecimal usdRate,
+            List<FreightLineCommand> selling,
+            List<FreightLineCommand> buying
+    ) {}
+
+    /** Freight 라인 1행 커맨드. */
+    public record FreightLineCommand(
+            String freightCode,
+            String per,
+            BigDecimal unitQuantity,
+            BigDecimal unitPrice,
+            String currency,
+            String customerCode,
+            String taxType,
+            String performanceDt
     ) {}
 }

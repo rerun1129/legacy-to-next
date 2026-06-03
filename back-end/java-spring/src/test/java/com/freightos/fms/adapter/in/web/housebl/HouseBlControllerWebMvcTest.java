@@ -186,7 +186,7 @@ class HouseBlControllerWebMvcTest {
     void createHouseBl_happyPath_returns201WithLocation() throws Exception {
         Long id = 1L;
         CreateHouseBlCommand mockCommand = mock(CreateHouseBlCommand.class);
-        given(houseBlAssembler.toCreateCommand(any())).willReturn(mockCommand);
+        given(houseBlAssembler.toCreateCommand(any(), any())).willReturn(mockCommand);
         given(houseBlUseCase.createHouseBl(any(CreateHouseBlCommand.class))).willReturn(id);
 
         mockMvc.perform(post("/api/house-bl")
@@ -225,7 +225,7 @@ class HouseBlControllerWebMvcTest {
     void updateHouseBl_happyPath_returns200() throws Exception {
         Long id = 1L;
         UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
-        given(houseBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
+        given(houseBlAssembler.toUpdateCommand(any(), any())).willReturn(mockCommand);
         willDoNothing().given(houseBlUseCase).updateHouseBl(eq(id), eq(mockCommand));
 
         mockMvc.perform(put("/api/house-bl/{id}", id)
@@ -242,7 +242,7 @@ class HouseBlControllerWebMvcTest {
     void updateHouseBl_whenNotFound_returns404() throws Exception {
         Long id = 999L;
         UpdateHouseBlCommand mockCommand = mock(UpdateHouseBlCommand.class);
-        given(houseBlAssembler.toUpdateCommand(any())).willReturn(mockCommand);
+        given(houseBlAssembler.toUpdateCommand(any(), any())).willReturn(mockCommand);
         willThrow(new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND))
                 .given(houseBlUseCase).updateHouseBl(eq(id), eq(mockCommand));
 

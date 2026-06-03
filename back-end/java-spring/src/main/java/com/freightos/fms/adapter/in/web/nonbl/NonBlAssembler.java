@@ -1,5 +1,6 @@
 package com.freightos.fms.adapter.in.web.nonbl;
 
+import com.freightos.common.exception.FmsException;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.adapter.in.web.housebl.dto.CreateHouseBlRequest;
 import com.freightos.fms.adapter.in.web.nonbl.dto.CreateNonBlRequest;
@@ -12,8 +13,11 @@ import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
 import com.freightos.fms.application.nonbl.projection.NonBlDetailView;
 import com.freightos.fms.application.nonbl.projection.NonBlListItem;
+import com.freightos.fms.common.response.MessageCode;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,6 +52,7 @@ public class NonBlAssembler {
     }
 
     public CreateHouseBlCommand toCreateCommand(CreateNonBlRequest req) {
+        CreateHouseBlCommand.FreightCommand freight = toCreateFreightCommand(req);
         return new CreateHouseBlCommand(
                 "NON_BL",
                 req.bound(),
@@ -104,11 +109,13 @@ public class NonBlAssembler {
                 toScheduleLegCommands(req.scheduleLegs()),
                 toTruckOrderCommands(req.truckOrders()),
                 toAirChargeCommands(req.airCharges()),
-                null // truckDetail — NON_BL 전용 아님
+                null, // truckDetail — NON_BL 전용 아님
+                freight
         );
     }
 
     public UpdateHouseBlCommand toUpdateCommand(UpdateNonBlRequest req) {
+        UpdateHouseBlCommand.FreightCommand freight = toUpdateFreightCommand(req);
         return new UpdateHouseBlCommand(
                 "NON_BL",
                 req.bound(),
@@ -164,7 +171,8 @@ public class NonBlAssembler {
                 toScheduleLegCommandsU(req.scheduleLegs()),
                 toTruckOrderCommandsU(req.truckOrders()),
                 toAirChargeCommandsU(req.airCharges()),
-                null // truckDetail — NON_BL 전용 아님
+                null, // truckDetail — NON_BL 전용 아님
+                freight
         );
     }
 
@@ -268,5 +276,113 @@ public class NonBlAssembler {
         return reqs.stream().map(r -> new UpdateHouseBlCommand.AirChargeCommand(
                 null, r.freightCode(), r.currencyCode(), r.per(), r.freightTerm(),
                 r.grossWeightKg(), r.rateClass(), r.chargeWeightKg(), r.rate())).toList();
+    }
+
+    // ── Freight 변환 (HouseBlAssembler와 동일 규칙) ───────────────────────
+
+    /**
+     * CreateNonBlRequest의 freight 필드 → CreateHouseBlCommand.FreightCommand 변환.
+     * freight 관련 필드가 모두 null이면 null 반환 (freight 미포함 저장).
+     */
+    CreateHouseBlCommand.FreightCommand toCreateFreightCommand(CreateNonBlRequest req) {
+        if (req.freightSelling() == null && req.freightBuying() == null
+                && req.sellRateDt() == null && req.buyRateDt() == null && req.usdRateDt() == null) {
+            return null;
+        }
+        List<CreateHouseBlCommand.FreightLineCommand> selling = toCreateFreightLineCommands(req.freightSelling());
+        List<CreateHouseBlCommand.FreightLineCommand> buying  = toCreateFreightLineCommands(req.freightBuying());
+        validateFreightLines(selling);
+        validateFreightLines(buying);
+        return new CreateHouseBlCommand.FreightCommand(
+                req.sellRateDt(), req.sellRateCurrencyCode(), parseBigDecimal(req.sellRate()),
+                req.buyRateDt(), req.buyRateCurrencyCode(), parseBigDecimal(req.buyRate()),
+                req.usdRateDt(), parseBigDecimal(req.usdRate()),
+                selling, buying
+        );
+    }
+
+    /**
+     * UpdateNonBlRequest의 freight 필드 → UpdateHouseBlCommand.FreightCommand 변환.
+     */
+    UpdateHouseBlCommand.FreightCommand toUpdateFreightCommand(UpdateNonBlRequest req) {
+        if (req.freightSelling() == null && req.freightBuying() == null
+                && req.sellRateDt() == null && req.buyRateDt() == null && req.usdRateDt() == null) {
+            return null;
+        }
+        List<UpdateHouseBlCommand.FreightLineCommand> selling = toUpdateFreightLineCommands(req.freightSelling());
+        List<UpdateHouseBlCommand.FreightLineCommand> buying  = toUpdateFreightLineCommands(req.freightBuying());
+        validateUpdateFreightLines(selling);
+        validateUpdateFreightLines(buying);
+        return new UpdateHouseBlCommand.FreightCommand(
+                req.sellRateDt(), req.sellRateCurrencyCode(), parseBigDecimal(req.sellRate()),
+                req.buyRateDt(), req.buyRateCurrencyCode(), parseBigDecimal(req.buyRate()),
+                req.usdRateDt(), parseBigDecimal(req.usdRate()),
+                selling, buying
+        );
+    }
+
+    private List<CreateHouseBlCommand.FreightLineCommand> toCreateFreightLineCommands(
+            List<CreateHouseBlRequest.FreightLineRequest> reqs) {
+        if (reqs == null) return Collections.emptyList();
+        return reqs.stream().map(r -> new CreateHouseBlCommand.FreightLineCommand(
+                r.freightCode(), r.per(),
+                parseBigDecimal(r.qty()), parseBigDecimal(r.price()),
+                r.currency(), r.customerCode(), r.taxType(), r.performanceDt()
+        )).toList();
+    }
+
+    private List<UpdateHouseBlCommand.FreightLineCommand> toUpdateFreightLineCommands(
+            List<CreateHouseBlRequest.FreightLineRequest> reqs) {
+        if (reqs == null) return Collections.emptyList();
+        return reqs.stream().map(r -> new UpdateHouseBlCommand.FreightLineCommand(
+                r.freightCode(), r.per(),
+                parseBigDecimal(r.qty()), parseBigDecimal(r.price()),
+                r.currency(), r.customerCode(), r.taxType(), r.performanceDt()
+        )).toList();
+    }
+
+    private void validateFreightLines(List<CreateHouseBlCommand.FreightLineCommand> lines) {
+        if (lines == null) return;
+        for (CreateHouseBlCommand.FreightLineCommand l : lines) {
+            validateFreightLine(l.freightCode(), l.per(), l.currency(), l.customerCode(),
+                    l.taxType(), l.performanceDt(), l.unitQuantity(), l.unitPrice());
+        }
+    }
+
+    private void validateUpdateFreightLines(List<UpdateHouseBlCommand.FreightLineCommand> lines) {
+        if (lines == null) return;
+        for (UpdateHouseBlCommand.FreightLineCommand l : lines) {
+            validateFreightLine(l.freightCode(), l.per(), l.currency(), l.customerCode(),
+                    l.taxType(), l.performanceDt(), l.unitQuantity(), l.unitPrice());
+        }
+    }
+
+    /** 라인 필수 필드 + qty/price > 0 검증 (BE SSOT). */
+    private static void validateFreightLine(String freightCode, String per, String currency,
+                                             String customerCode, String taxType, String performanceDt,
+                                             BigDecimal qty, BigDecimal price) {
+        if (isBlank(freightCode) || isBlank(per) || isBlank(currency)
+                || isBlank(customerCode) || isBlank(taxType) || isBlank(performanceDt)) {
+            throw FmsException.badRequest("FREIGHT_LINE_REQUIRED", MessageCode.FREIGHT_LINE_REQUIRED.message());
+        }
+        if (qty == null || qty.compareTo(BigDecimal.ZERO) <= 0) {
+            throw FmsException.badRequest("FREIGHT_LINE_QTY_INVALID", MessageCode.FREIGHT_LINE_QTY_INVALID.message());
+        }
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw FmsException.badRequest("FREIGHT_LINE_PRICE_INVALID", MessageCode.FREIGHT_LINE_PRICE_INVALID.message());
+        }
+    }
+
+    private static BigDecimal parseBigDecimal(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return new BigDecimal(value.trim());
+        } catch (NumberFormatException e) {
+            throw FmsException.badRequest("FREIGHT_NUMBER_FORMAT", "운임 수치 필드 형식이 잘못되었습니다: " + value);
+        }
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.isBlank();
     }
 }

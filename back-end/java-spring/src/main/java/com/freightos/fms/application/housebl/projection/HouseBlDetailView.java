@@ -1,5 +1,7 @@
 package com.freightos.fms.application.housebl.projection;
 
+import com.freightos.fms.application.freight.FreightView;
+
 /**
  * House B/L 단건 조회 응답 전용 뷰 타입.
  * HouseBlDetailResult(코드만) + code→name name 필드를 합친 Service 출력 경계 타입.
@@ -36,5 +38,8 @@ public record HouseBlDetailView(
         String linerName,
 
         // hs_code → name (findHsCodeNames)
-        String hsCodeName
+        String hsCodeName,
+
+        // Freight 헤더+라인 (없으면 null)
+        FreightView freight
 ) {}

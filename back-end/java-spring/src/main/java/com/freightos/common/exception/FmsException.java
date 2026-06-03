@@ -22,4 +22,8 @@ public class FmsException extends RuntimeException {
     public static FmsException conflict(String errorCode, String message) {
         return new FmsException(HttpStatus.CONFLICT, errorCode, message);
     }
+
+    public static FmsException badRequest(String errorCode, String message) {
+        return new FmsException(HttpStatus.BAD_REQUEST, errorCode, message);
+    }
 }

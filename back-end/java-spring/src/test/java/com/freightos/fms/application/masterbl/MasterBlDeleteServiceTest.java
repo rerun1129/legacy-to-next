@@ -1,6 +1,7 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
 import com.freightos.fms.application.masterbl.port.out.SeaMasterPersistencePort;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.inOrder;
@@ -32,6 +34,8 @@ class MasterBlDeleteServiceTest {
     @Mock private SeaMasterPersistencePort seaMasterPersistencePort;
     @Mock private HouseBlPort houseBlPort;
     @Mock private MasterBlFactory masterBlFactory;
+    @Mock private FreightInputPort freightInputPort;
+    @Mock private MasterBlFreightCommandBuilder masterBlFreightCommandBuilder;
 
     @InjectMocks
     private MasterBlService masterBlService;
@@ -41,11 +45,13 @@ class MasterBlDeleteServiceTest {
     void deleteMasterBlById_nullifyCalledBeforeDelete() {
         Long id = 10L;
         given(masterBlPort.findJobDivById(id)).willReturn(Optional.of(MasterBlJobDiv.SEA));
+        given(freightInputPort.existsFreightLines(any(), any())).willReturn(false);
         given(houseBlPort.nullifyMasterRefByMasterBlId(id)).willReturn(3);
 
         masterBlService.deleteMasterBlById(id);
 
-        InOrder order = inOrder(houseBlPort, masterBlPort);
+        InOrder order = inOrder(freightInputPort, houseBlPort, masterBlPort);
+        order.verify(freightInputPort).existsFreightLines(any(), any());
         order.verify(houseBlPort).nullifyMasterRefByMasterBlId(id);
         order.verify(masterBlPort).deleteByIdAndJobDiv(id, MasterBlJobDiv.SEA);
     }
@@ -55,6 +61,7 @@ class MasterBlDeleteServiceTest {
     void deleteMasterBlById_noLinkedHouseBl_stillDeletes() {
         Long id = 20L;
         given(masterBlPort.findJobDivById(id)).willReturn(Optional.of(MasterBlJobDiv.AIR));
+        given(freightInputPort.existsFreightLines(any(), any())).willReturn(false);
         given(houseBlPort.nullifyMasterRefByMasterBlId(id)).willReturn(0);
 
         masterBlService.deleteMasterBlById(id);

@@ -16,6 +16,7 @@ import com.freightos.fms.common.response.MessageCode;
 import com.freightos.common.model.PageRequest;
 import com.freightos.common.model.PagedResult;
 import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
+import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
@@ -81,7 +82,8 @@ public class HouseBlController {
             Set<ConstraintViolation<CreateHouseBlRequest>> violations = validator.validate(request, group);
             if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         }
-        Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toCreateCommand(request));
+        CreateHouseBlCommand.FreightCommand freightCmd = houseBlAssembler.toCreateFreightCommand(request);
+        Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toCreateCommand(request, freightCmd));
         URI location = uriBuilder.path("/api/house-bl/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location)
                 .body(ApiResponse.of(Map.of("id", id), MessageCode.HOUSE_BL_CREATED.message()));
@@ -98,7 +100,8 @@ public class HouseBlController {
     public ResponseEntity<ApiResponse<Void>> updateHouseBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateHouseBlRequest req) {
-        UpdateHouseBlCommand cmd = houseBlAssembler.toUpdateCommand(req);
+        UpdateHouseBlCommand.FreightCommand freightCmd = houseBlAssembler.toUpdateFreightCommand(req);
+        UpdateHouseBlCommand cmd = houseBlAssembler.toUpdateCommand(req, freightCmd);
         // Sea jobDiv는 §6.35 전용 Port+Adapter
         if (Objects.equals("SEA", req.jobDiv())) {
             houseBlUseCase.updateSeaHbl(id, cmd);

@@ -73,8 +73,61 @@ public record CreateHouseBlRequest(
         List<ContainerRequest> containers,
         List<ScheduleLegRequest> scheduleLegs,
         List<TruckOrderRequest> truckOrders,
-        List<AirChargeRequest> airCharges
+        List<AirChargeRequest> airCharges,
+
+        // Freight 탭 — 환율 헤더 (FE와 동일 필드명)
+        String sellRateDt,
+        String sellRateCurrencyCode,
+        String sellRate,
+        String buyRateDt,
+        String buyRateCurrencyCode,
+        String buyRate,
+        String usdRateDt,
+        String usdRate,
+
+        // Freight 탭 — 매출/매입 라인
+        List<FreightLineRequest> freightSelling,
+        List<FreightLineRequest> freightBuying
 ) {
+
+    /**
+     * Freight 필드 없는 54-인자 편의 생성자 — 기존 테스트 호환성 유지용.
+     * freight 필드는 모두 null로 초기화된다.
+     */
+    public CreateHouseBlRequest(
+            String jobDiv, String bound, String hblNo, String shipmentType, String freightTerm,
+            String shipperCode, String shipperAddress, String consigneeCode, String consigneeAddress,
+            String notifyCode, String notifyAddress, String docPartnerCode, String docPartnerAddress,
+            String settlePartnerCode, String polCode, String podCode, String etd, String eta,
+            Integer pkgQty, String pkgUnit, String weightUnit,
+            BigDecimal grossWeightKg, BigDecimal cbm,
+            String actualCustomerCode, String operatorCode, String teamCode, String salesManCode,
+            Long masterBlId, String incoterms, String salesClass, String mainItemName, String hsCode,
+            String mblNo, String masterRefNo,
+            String workDivision, String originalBlRef,
+            String linerCode, String linerName, String vesselName, String voyageNo,
+            String finalDestCode, String finalDestName, String finalEta,
+            BigDecimal volumeWeightKg, BigDecimal rton, String remark,
+            SeaDetailRequest seaDetail, AirDetailRequest airDetail,
+            DescRequest desc, List<DimRequest> dims, List<ContainerRequest> containers,
+            List<ScheduleLegRequest> scheduleLegs, List<TruckOrderRequest> truckOrders,
+            List<AirChargeRequest> airCharges) {
+        this(jobDiv, bound, hblNo, shipmentType, freightTerm,
+                shipperCode, shipperAddress, consigneeCode, consigneeAddress,
+                notifyCode, notifyAddress, docPartnerCode, docPartnerAddress,
+                settlePartnerCode, polCode, podCode, etd, eta,
+                pkgQty, pkgUnit, weightUnit, grossWeightKg, cbm,
+                actualCustomerCode, operatorCode, teamCode, salesManCode,
+                masterBlId, incoterms, salesClass, mainItemName, hsCode,
+                mblNo, masterRefNo,
+                workDivision, originalBlRef,
+                linerCode, linerName, vesselName, voyageNo,
+                finalDestCode, finalDestName, finalEta,
+                volumeWeightKg, rton, remark,
+                seaDetail, airDetail,
+                desc, dims, containers, scheduleLegs, truckOrders, airCharges,
+                null, null, null, null, null, null, null, null, null, null);
+    }
 
     /** SEA 모드 확장 필드. */
     public record SeaDetailRequest(
@@ -202,5 +255,18 @@ public record CreateHouseBlRequest(
             String rateClass,
             @DecimalMin("0") BigDecimal chargeWeightKg,
             @DecimalMin("0") BigDecimal rate
+    ) {}
+
+    /** Freight 매출/매입 라인 1행. FE FREIGHT_ROW_SCHEMA와 필드명 동일. */
+    public record FreightLineRequest(
+            Long id,
+            String freightCode,
+            String per,
+            String qty,
+            String price,
+            String currency,
+            String customerCode,
+            String taxType,
+            String performanceDt
     ) {}
 }

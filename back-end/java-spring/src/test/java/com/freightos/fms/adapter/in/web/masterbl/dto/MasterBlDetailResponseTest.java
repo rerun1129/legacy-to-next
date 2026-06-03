@@ -17,11 +17,11 @@ class MasterBlDetailResponseTest {
     // ── record 구조 검증 ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 40개이고, consolidatedHouseBls 위치 정합")
-    void recordComponents_haveExactlyThirtyFiveFields() {
+    @DisplayName("MasterBlDetailResponse: record 컴포넌트가 정확히 41개이고, consolidatedHouseBls 위치 정합")
+    void recordComponents_haveExactlyFortyOneFields() {
         var components = MasterBlDetailResponse.class.getRecordComponents();
 
-        assertThat(components).hasSize(40);
+        assertThat(components).hasSize(41);
         assertThat(components[19].getName()).isEqualTo("teamName");
         assertThat(components[31].getName()).isEqualTo("consolidatedHouseBls");
         assertThat(components[31].getType()).isEqualTo(List.class);

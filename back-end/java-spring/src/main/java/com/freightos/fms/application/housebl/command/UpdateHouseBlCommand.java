@@ -73,8 +73,50 @@ public record UpdateHouseBlCommand(
         List<AirChargeCommand> airCharges,
 
         // Truck 전용 퍼포먼스 패널 필드 (non-TRUCK 모드는 null 전달)
-        TruckDetailCommand truckDetail
+        TruckDetailCommand truckDetail,
+
+        // Freight 탭 커맨드 (null이면 freight 미포함 저장)
+        FreightCommand freight
 ) {
+
+    /**
+     * freight 미지정 편의 생성자 — freight=null로 위임.
+     * NonBl/TruckBl Assembler처럼 freight 인자 없이 호출하는 형제 도메인의 positional 호출을 보존.
+     */
+    public UpdateHouseBlCommand(
+            String jobDiv, String bound, String shipmentType, String freightTerm,
+            String shipperCode, String shipperAddress, String consigneeCode, String consigneeAddress,
+            String notifyCode, String notifyAddress, String docPartnerCode, String docPartnerAddress,
+            String settlePartnerCode, String polCode, String podCode, String etd, String eta,
+            Integer pkgQty, String pkgUnit, String weightUnit, BigDecimal grossWeightKg, BigDecimal cbm,
+            String actualCustomerCode, String operatorCode, String teamCode, String salesManCode,
+            Long masterBlId, String incoterms, String salesClass, String mainItemName, String hsCode,
+            String mblNo, String masterRefNo,
+            String workDivision, String originalBlRef, String volumeDivisor,
+            String linerCode, String linerName, String vesselName, String voyageNo,
+            String finalDestCode, String finalDestName, String finalEta,
+            BigDecimal volumeWeightKg, BigDecimal rton, String remark,
+            SeaDetailCommand seaDetail, AirDetailCommand airDetail,
+            DescCommand desc, List<DimCommand> dims, List<ContainerCommand> containers,
+            List<ScheduleLegCommand> scheduleLegs, List<TruckOrderCommand> truckOrders,
+            List<AirChargeCommand> airCharges,
+            TruckDetailCommand truckDetail) {
+        this(jobDiv, bound, shipmentType, freightTerm,
+                shipperCode, shipperAddress, consigneeCode, consigneeAddress,
+                notifyCode, notifyAddress, docPartnerCode, docPartnerAddress,
+                settlePartnerCode, polCode, podCode, etd, eta,
+                pkgQty, pkgUnit, weightUnit, grossWeightKg, cbm,
+                actualCustomerCode, operatorCode, teamCode, salesManCode,
+                masterBlId, incoterms, salesClass, mainItemName, hsCode,
+                mblNo, masterRefNo,
+                workDivision, originalBlRef, volumeDivisor,
+                linerCode, linerName, vesselName, voyageNo,
+                finalDestCode, finalDestName, finalEta,
+                volumeWeightKg, rton, remark,
+                seaDetail, airDetail,
+                desc, dims, containers, scheduleLegs, truckOrders, airCharges,
+                truckDetail, null);
+    }
 
     public record SeaDetailCommand(
             String loadType,
@@ -213,5 +255,31 @@ public record UpdateHouseBlCommand(
             String loadType,
             String serviceTerm,
             String voyageNo
+    ) {}
+
+    /** Freight 탭 헤더+라인 커맨드. null이면 freight 저장 생략. */
+    public record FreightCommand(
+            String sellRateDt,
+            String sellRateCurrencyCode,
+            BigDecimal sellRate,
+            String buyRateDt,
+            String buyRateCurrencyCode,
+            BigDecimal buyRate,
+            String usdRateDt,
+            BigDecimal usdRate,
+            List<FreightLineCommand> selling,
+            List<FreightLineCommand> buying
+    ) {}
+
+    /** Freight 라인 1행 커맨드. */
+    public record FreightLineCommand(
+            String freightCode,
+            String per,
+            BigDecimal unitQuantity,
+            BigDecimal unitPrice,
+            String currency,
+            String customerCode,
+            String taxType,
+            String performanceDt
     ) {}
 }

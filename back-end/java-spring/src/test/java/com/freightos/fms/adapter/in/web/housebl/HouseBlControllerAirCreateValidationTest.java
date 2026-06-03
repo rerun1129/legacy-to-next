@@ -92,7 +92,7 @@ class HouseBlControllerAirCreateValidationTest {
     @DisplayName("POST /api/house-bl: AIR EXP — 12개 필수 모두 채움 → 201 + Location 헤더")
     void createHouseBl_air_exp_happyPath_returns201() throws Exception {
         Long id = 1L;
-        given(houseBlAssembler.toCreateCommand(any())).willReturn(mockCommand());
+        given(houseBlAssembler.toCreateCommand(any(), any())).willReturn(mockCommand());
         given(houseBlUseCase.createHouseBl(any(CreateHouseBlCommand.class))).willReturn(id);
 
         mockMvc.perform(post("/api/house-bl")
@@ -120,7 +120,7 @@ class HouseBlControllerAirCreateValidationTest {
     @DisplayName("POST /api/house-bl: AIR IMP — 13개 필수(consigneeCode 포함) 모두 채움 → 201 + Location 헤더")
     void createHouseBl_air_imp_happyPath_returns201() throws Exception {
         Long id = 2L;
-        given(houseBlAssembler.toCreateCommand(any())).willReturn(mockCommand());
+        given(houseBlAssembler.toCreateCommand(any(), any())).willReturn(mockCommand());
         given(houseBlUseCase.createHouseBl(any(CreateHouseBlCommand.class))).willReturn(id);
 
         mockMvc.perform(post("/api/house-bl")
@@ -139,7 +139,7 @@ class HouseBlControllerAirCreateValidationTest {
     @DisplayName("POST /api/house-bl: AIR EXP — fhd(비필수) 누락이어도 검증 통과 → 201")
     void createHouseBl_air_exp_missing_fhd_returns201() throws Exception {
         Long id = 3L;
-        given(houseBlAssembler.toCreateCommand(any())).willReturn(mockCommand());
+        given(houseBlAssembler.toCreateCommand(any(), any())).willReturn(mockCommand());
         given(houseBlUseCase.createHouseBl(any(CreateHouseBlCommand.class))).willReturn(id);
 
         // fhd 없이 airDetail 구성 (airlineCode만 포함)
