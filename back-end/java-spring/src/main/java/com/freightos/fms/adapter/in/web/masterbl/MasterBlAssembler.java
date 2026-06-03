@@ -196,8 +196,8 @@ public class MasterBlAssembler {
         }
         List<CreateMasterBlCommand.FreightLineCommand> selling = toCreateFreightLineCommands(req.freightSelling());
         List<CreateMasterBlCommand.FreightLineCommand> buying = toCreateFreightLineCommands(req.freightBuying());
-        validateFreightLines(selling);
-        validateFreightLines(buying);
+        validateCreateFreightLines(selling, "Selling");
+        validateCreateFreightLines(buying, "Buying");
         return new CreateMasterBlCommand.FreightCommand(
                 req.sellRateDt(), req.sellRateCurrencyCode(), parseBigDecimal(req.sellRate()),
                 req.buyRateDt(), req.buyRateCurrencyCode(), parseBigDecimal(req.buyRate()),
@@ -216,8 +216,8 @@ public class MasterBlAssembler {
         }
         List<UpdateMasterBlCommand.FreightLineCommand> selling = toUpdateFreightLineCommands(req.freightSelling());
         List<UpdateMasterBlCommand.FreightLineCommand> buying = toUpdateFreightLineCommands(req.freightBuying());
-        validateUpdateFreightLines(selling);
-        validateUpdateFreightLines(buying);
+        validateUpdateFreightLines(selling, "Selling");
+        validateUpdateFreightLines(buying, "Buying");
         return new UpdateMasterBlCommand.FreightCommand(
                 req.sellRateDt(), req.sellRateCurrencyCode(), parseBigDecimal(req.sellRate()),
                 req.buyRateDt(), req.buyRateCurrencyCode(), parseBigDecimal(req.buyRate()),
@@ -254,35 +254,38 @@ public class MasterBlAssembler {
         )).toList();
     }
 
-    private void validateFreightLines(List<CreateMasterBlCommand.FreightLineCommand> lines) {
+    private void validateCreateFreightLines(List<CreateMasterBlCommand.FreightLineCommand> lines, String gridLabel) {
         if (lines == null) return;
-        for (CreateMasterBlCommand.FreightLineCommand l : lines) {
-            validateFreightLine(l.freightCode(), l.per(), l.currency(), l.customerCode(),
+        for (int i = 0; i < lines.size(); i++) {
+            CreateMasterBlCommand.FreightLineCommand l = lines.get(i);
+            validateFreightLine(gridLabel, i + 1, l.freightCode(), l.per(), l.currency(), l.customerCode(),
                     l.taxType(), l.performanceDt(), l.unitQuantity(), l.unitPrice());
         }
     }
 
-    private void validateUpdateFreightLines(List<UpdateMasterBlCommand.FreightLineCommand> lines) {
+    private void validateUpdateFreightLines(List<UpdateMasterBlCommand.FreightLineCommand> lines, String gridLabel) {
         if (lines == null) return;
-        for (UpdateMasterBlCommand.FreightLineCommand l : lines) {
-            validateFreightLine(l.freightCode(), l.per(), l.currency(), l.customerCode(),
+        for (int i = 0; i < lines.size(); i++) {
+            UpdateMasterBlCommand.FreightLineCommand l = lines.get(i);
+            validateFreightLine(gridLabel, i + 1, l.freightCode(), l.per(), l.currency(), l.customerCode(),
                     l.taxType(), l.performanceDt(), l.unitQuantity(), l.unitPrice());
         }
     }
 
-    /** 라인 필수 필드 + qty/price > 0 검증 (BE SSOT). */
-    private static void validateFreightLine(String freightCode, String per, String currency,
-                                             String customerCode, String taxType, String performanceDt,
-                                             BigDecimal qty, BigDecimal price) {
+    /** 라인 필수 필드 + qty/price > 0 검증 (BE SSOT). gridLabel·rowNo를 에러 메시지에 prepend한다. */
+    private static void validateFreightLine(String gridLabel, int rowNo, String freightCode, String per,
+                                             String currency, String customerCode, String taxType,
+                                             String performanceDt, BigDecimal qty, BigDecimal price) {
+        String prefix = gridLabel + " " + rowNo + "행: ";
         if (isBlank(freightCode) || isBlank(per) || isBlank(currency)
                 || isBlank(customerCode) || isBlank(taxType) || isBlank(performanceDt)) {
-            throw FmsException.badRequest("FREIGHT_LINE_REQUIRED", MessageCode.FREIGHT_LINE_REQUIRED.message());
+            throw FmsException.badRequest("FREIGHT_LINE_REQUIRED", prefix + MessageCode.FREIGHT_LINE_REQUIRED.message());
         }
         if (qty == null || qty.compareTo(BigDecimal.ZERO) <= 0) {
-            throw FmsException.badRequest("FREIGHT_LINE_QTY_INVALID", MessageCode.FREIGHT_LINE_QTY_INVALID.message());
+            throw FmsException.badRequest("FREIGHT_LINE_QTY_INVALID", prefix + MessageCode.FREIGHT_LINE_QTY_INVALID.message());
         }
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-            throw FmsException.badRequest("FREIGHT_LINE_PRICE_INVALID", MessageCode.FREIGHT_LINE_PRICE_INVALID.message());
+            throw FmsException.badRequest("FREIGHT_LINE_PRICE_INVALID", prefix + MessageCode.FREIGHT_LINE_PRICE_INVALID.message());
         }
     }
 
