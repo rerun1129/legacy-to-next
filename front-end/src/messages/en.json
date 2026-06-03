@@ -68,7 +68,8 @@
           "hawbNo": "HAWB No",
           "mawbNo": "MAWB No",
           "truckBlNo": "Truck B/L No",
-          "nonBlNo": "Non B/L No"
+          "nonBlNo": "Non B/L No",
+          "goToMaster": "Open consolidated Master B/L"
         },
         "title": {
           "seaExp": "Sea Export House B/L Entry",

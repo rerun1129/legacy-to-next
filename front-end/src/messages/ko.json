@@ -68,7 +68,8 @@
           "hawbNo": "HAWB No",
           "mawbNo": "MAWB No",
           "truckBlNo": "Truck B/L No",
-          "nonBlNo": "Non B/L No"
+          "nonBlNo": "Non B/L No",
+          "goToMaster": "콘솔 마스터 B/L 열기"
         },
         "title": {
           "seaExp": "해상 수출 House B/L 등록",

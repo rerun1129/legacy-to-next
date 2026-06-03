@@ -18,7 +18,8 @@ interface EntryTarget {
   menuCode: string;
 }
 
-function resolveTarget(item: BlQuickSearchItem): EntryTarget | null {
+// resolveTarget은 id/blType/jobDiv/bound만 사용하므로 파라미터 타입을 최소화
+function resolveTarget(item: Pick<BlQuickSearchItem, "id" | "blType" | "jobDiv" | "bound">): EntryTarget | null {
   const bound = item.bound === "EXP" ? "exp" : "imp";
 
   if (item.blType === "HOUSE") {
@@ -76,6 +77,18 @@ function resolveTarget(item: BlQuickSearchItem): EntryTarget | null {
   return null;
 }
 
+// target 결정 후 권한 체크 → focus 설정 → 탭 추가 → 라우팅 수행
+function navigateToTarget(target: EntryTarget, id: number, router: RouterLike, noAccessMessage: string): void {
+  const session = getSession();
+  if (!hasMenuAccess(session, target.menuCode)) {
+    toast.error(noAccessMessage);
+    return;
+  }
+  useEntryFocusStore.getState().setFocus(target.focusDomain, id);
+  useTabs.getState().addTab(target.href, target.href);
+  router.push(target.href);
+}
+
 /**
  * B/L Quick Search 결과 선택 시 해당 Entry 화면으로 이동.
  * 권한 없으면 toast.error(noAccessMessage) 안내 후 중단.
@@ -87,14 +100,23 @@ export function openBlEntry(item: BlQuickSearchItem, router: RouterLike, noAcces
     toast.error(`Unsupported B/L type: blType=${item.blType}, jobDiv=${item.jobDiv}`);
     return;
   }
+  navigateToTarget(target, item.id, router, noAccessMessage);
+}
 
-  const session = getSession();
-  if (!hasMenuAccess(session, target.menuCode)) {
-    toast.error(noAccessMessage);
+/**
+ * House B/L이 콘솔된 Master B/L Entry 화면으로 이동.
+ * masterBlId · jobDiv · bound를 직접 전달받으므로 QuickSearch item 불필요.
+ * 권한 없으면 toast.error(noAccessMessage) 안내 후 중단.
+ */
+export function openMasterBlEntry(
+  p: { masterBlId: number; jobDiv: string; bound: string },
+  router: RouterLike,
+  noAccessMessage: string,
+): void {
+  const target = resolveTarget({ id: p.masterBlId, blType: "MASTER", jobDiv: p.jobDiv, bound: p.bound });
+  if (!target) {
+    toast.error(`Unsupported master jobDiv: ${p.jobDiv}`);
     return;
   }
-
-  useEntryFocusStore.getState().setFocus(target.focusDomain, item.id);
-  useTabs.getState().addTab(target.href, target.href);
-  router.push(target.href);
+  navigateToTarget(target, p.masterBlId, router, noAccessMessage);
 }

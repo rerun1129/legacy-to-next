@@ -1,19 +1,21 @@
 "use client";
 
-import { Save, Printer, Trash2, FileText, SquarePen, Search, FilePlus } from "lucide-react";
-import { Controller } from "react-hook-form";
+import { Save, Printer, Trash2, FileText, SquarePen, Search, FilePlus, ExternalLink } from "lucide-react";
+import { Controller, useWatch } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { ComboBox } from "@/components/shared/inputs";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import type { BLVariantConfig } from "@/lib/bl-variants";
+import { openMasterBlEntry } from "@/lib/open-bl-entry";
 import type { HouseBlFormValues } from "./house-bl-schema";
 import {
   TOOLBAR_FIELD_TO_RHF,
   REQUIRED_TOOLBAR_FIELDS,
 } from "./house-bl-schema";
-import { useTranslations } from "next-intl";
 
 // variant별 기본값(RHF 바인딩 없는 placeholder-only 필드용) — fieldId 키로 관리
 const DEFAULTS_SEA: Record<string, string> = {
@@ -80,6 +82,7 @@ export function HouseBlEntryPageHead({
   onChangeBlNo,
   onOpenSwitchBl,
 }: HouseBlEntryPageHeadProps) {
+  const router = useRouter();
   const isExp = variant.direction === "EXP";
   const defaults = getToolbarDefaults(variant);
   const menuCode = VARIANT_TO_MENU[variant.key] ?? "FMS_HOUSE_BL_SEA_EXP_ENTRY";
@@ -88,6 +91,10 @@ export function HouseBlEntryPageHead({
   const tt = useTranslations("fms.houseBl.entry.title");
   const ts = useTranslations("fms.houseBl.entry.status");
   const tc = useTranslations("common");
+  const tq = useTranslations("shell.quickSearch");
+
+  // masterBlId만 구독 — form.watch() 전체 구독 시 형제 입력 focus 유실 회피
+  const masterBlId = useWatch({ control: form.control, name: "masterBlId" });
 
   const { options: loadTypeOptions,     placeholder: loadTypePh }     = useEnumOptions("LoadType");
   const { options: serviceTermOptions,  placeholder: serviceTermPh }  = useEnumOptions("ServiceTerm");
@@ -196,6 +203,24 @@ export function HouseBlEntryPageHead({
                         {...(form.register as (n: string) => object)(fieldName)}
                         placeholder={label}
                       />
+                    )}
+                    {fieldName === "mbl" && String(masterBlId ?? "").trim() !== "" && (
+                      <button
+                        type="button"
+                        className="btn--icon-sm"
+                        title={tb("goToMaster")}
+                        aria-label={tb("goToMaster")}
+                        onClick={() => {
+                          if (!variant.direction) return;
+                          openMasterBlEntry(
+                            { masterBlId: Number(masterBlId), jobDiv: variant.mode, bound: variant.direction },
+                            router,
+                            tq("noAccess"),
+                          );
+                        }}
+                      >
+                        <ExternalLink size={12} />
+                      </button>
                     )}
                     {(form.formState.errors as Record<string, unknown>)[fieldName] && (
                       <span className="field__error">
