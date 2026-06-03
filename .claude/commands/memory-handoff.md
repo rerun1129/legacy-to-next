@@ -48,8 +48,12 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
   ```
 - 원본 내용은 가공 없이 그대로 옮긴다. 구분자 `===== MEMORY FILE:` / `===== END =====`는 메모리 본문에 등장하지 않는 유니크 마커라 충돌하지 않는다.
 
-## 4. 마커 갱신
+## 4. 프로젝트 루트로 복사
+- 생성한 `handoff_<yyyyMMdd>.md`를 **프로젝트 루트(현재 작업 디렉토리)** 에도 그대로 사본으로 둔다 — 다른 PC로 옮기기 쉽게(별도 요청 없이 기본 수행).
+- **Bash `cp`로 바이트 복사**(재인코딩 방지): `cp "$MEM/handoff_<yyyyMMdd>.md" "./handoff_<yyyyMMdd>.md"`. PowerShell 리다이렉트/`Set-Content`/`Out-File`로 만들지 말 것(CP949 깨짐, [[reference_memory_migration]]).
+
+## 5. 마커 갱신
 - `MEM/.last-handoff`에 현재 시각 ISO를 Write로 기록한다(이 파일의 mtime이 다음 추출의 기준이 됨).
 
 ## 종료
-생성한 `handoff_<yyyyMMdd>.md` 경로, 포함 파일 목록(건수), 대상 PC 적용 절차를 요약 보고.
+생성한 `handoff_<yyyyMMdd>.md`의 **MEM 경로 + 프로젝트 루트 사본 경로**, 포함 파일 목록(건수), 대상 PC 적용 절차를 요약 보고.
