@@ -143,6 +143,8 @@ export interface MasterBlDetail extends MasterBlRow {
   dims?: Dim[];
   scheduleLegs?: ScheduleLeg[];
   airCharges?: AirCharge[];
+  // §BE-sync — Freight 탭 응답
+  freight?: MasterBlFreightView | null;
 }
 
 // §BE-sync — ConsoledSeaContainerView (BE consoledSeaContainers 전체 필드 정합)
@@ -183,6 +185,39 @@ export interface ConsolidatedHouseBlSummary {
   polCode: string | null;
   podCode: string | null;
   chargeWeightKg?: number | null;
+}
+
+// §BE-sync — FreightLineResponse (계산값 포함)
+export interface MasterBlFreightLineView {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: number;
+  price?: number;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
+  financialDocType?: string;
+  exchangeRate?: number;
+  settleAmount?: number;
+  localAmount?: number;
+  settleTaxAmount?: number;
+  localTaxAmount?: number;
+  usdAmount?: number;
+}
+
+export interface MasterBlFreightView {
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: number;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: number;
+  usdRateDt?: string;
+  usdRate?: number;
+  selling: MasterBlFreightLineView[];
+  buying: MasterBlFreightLineView[];
 }
 
 export interface MasterBlFilter {
@@ -314,6 +349,29 @@ export interface CreateMasterBlRequest {
   dims?: DimRequest[];
   scheduleLegs?: ScheduleLegRequest[];
   airCharges?: AirChargeRequest[];
+  // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: string;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: string;
+  usdRateDt?: string;
+  usdRate?: string;
+  freightSelling?: MasterBlFreightLineRequest[];
+  freightBuying?: MasterBlFreightLineRequest[];
+}
+
+export interface MasterBlFreightLineRequest {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: string;
+  price?: string;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
 }
 
 export type UpdateMasterBlRequest = Partial<CreateMasterBlRequest>;

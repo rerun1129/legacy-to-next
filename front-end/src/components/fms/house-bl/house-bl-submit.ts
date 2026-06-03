@@ -1,6 +1,6 @@
 import type { BLVariantConfig } from '@/lib/bl-variants';
-import type { CreateHouseBlRequest, UpdateHouseBlRequest, AirDetailRequest } from '@/domain/house-bl';
-import type { HouseBlFormValues } from './house-bl-schema';
+import type { CreateHouseBlRequest, UpdateHouseBlRequest, AirDetailRequest, FreightLineRequest } from '@/domain/house-bl';
+import type { HouseBlFormValues, FreightRow } from './house-bl-schema';
 
 /** 문자열 → number 변환. 빈 문자열이면 undefined 반환. */
 function toNum(v: string | undefined): number | undefined {
@@ -12,6 +12,22 @@ function toNum(v: string | undefined): number | undefined {
 /** 빈 문자열 → undefined 정규화 */
 function toStr(v: string | undefined): string | undefined {
   return v?.trim() || undefined;
+}
+
+/** FreightRow 배열 → FreightLineRequest 배열 변환 */
+function buildFreightLines(rows: FreightRow[] | undefined): FreightLineRequest[] | undefined {
+  if (!rows || rows.length === 0) return undefined;
+  return rows.map((r) => ({
+    id:            r.id,
+    freightCode:   toStr(r.freightCode),
+    per:           toStr(r.per),
+    qty:           toStr(r.qty),
+    price:         toStr(r.price),
+    currency:      toStr(r.currency),
+    customerCode:  toStr(r.customerCode),
+    taxType:       toStr(r.taxType),
+    performanceDt: toStr(r.performanceDt),
+  }));
 }
 
 /** form 값을 CreateHouseBlRequest로 매핑한다. */
@@ -60,6 +76,17 @@ export function buildHouseBlRequest(
     masterRefNo:      toStr(values.masterRefNo),
     remark:           toStr(values.remark),
     desc:             values.desc,
+    // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+    sellRateDt:          toStr(values.sellRateDt),
+    sellRateCurrencyCode: toStr(values.sellRateCurrencyCode),
+    sellRate:            toStr(values.sellRate),
+    buyRateDt:           toStr(values.buyRateDt),
+    buyRateCurrencyCode: toStr(values.buyRateCurrencyCode),
+    buyRate:             toStr(values.buyRate),
+    usdRateDt:           toStr(values.usdRateDt),
+    usdRate:             toStr(values.usdRate),
+    freightSelling: buildFreightLines(values.freightSelling),
+    freightBuying:  buildFreightLines(values.freightBuying),
   };
 
   // SEA 전용 확장 필드

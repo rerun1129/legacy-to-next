@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { FREIGHT_ROW_SCHEMA } from "@/components/fms/house-bl/house-bl-schema";
+
+const DATE8 = z.string().regex(/^\d{8}$/).or(z.literal('')).optional();
 
 export const CONTAINER_INFO_SCHEMA = z.object({
   // validation은 BE SSOT — Copy 신규 행은 id 없이 BE INSERT, 기존 행은 id로 BE merge
@@ -88,8 +91,16 @@ export const NON_BL_SCHEMA = z.object({
   remark: z.string().optional(),
 
   // Freight (FreightTab 공유용)
-  freightSelling: z.array(z.any()).optional(),
-  freightBuying:  z.array(z.any()).optional(),
+  freightSelling: z.array(FREIGHT_ROW_SCHEMA).optional(),
+  freightBuying:  z.array(FREIGHT_ROW_SCHEMA).optional(),
+  sellRateDt:           DATE8,
+  sellRateCurrencyCode: z.string().optional(),
+  sellRate:             z.string().optional(),
+  buyRateDt:            DATE8,
+  buyRateCurrencyCode:  z.string().optional(),
+  buyRate:              z.string().optional(),
+  usdRateDt:            DATE8,
+  usdRate:              z.string().optional(),
 
   // Container & Dimension grids
   containers: z.array(CONTAINER_INFO_SCHEMA).optional(),

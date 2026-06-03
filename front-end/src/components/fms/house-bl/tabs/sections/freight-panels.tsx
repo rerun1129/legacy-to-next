@@ -18,7 +18,6 @@ import {
   TaxTypeCell,
   PerformanceDtCell,
   ReadOnlyCell,
-  TAX_TYPE_OPTIONS,
   type FieldPrefix,
 } from "./freight-cells";
 
@@ -134,7 +133,7 @@ function buildFreightColumns({
       label: tf("cols.taxType"),
       width: 80,
       render: (_, __, i) => (
-        <TaxTypeCell prefix={prefix} index={i} options={TAX_TYPE_OPTIONS} />
+        <TaxTypeCell prefix={prefix} index={i} />
       ),
     },
     {
@@ -148,27 +147,27 @@ function buildFreightColumns({
       label: tf("cols.settleAmount"),
       className: "is-num",
       width: 90,
-      render: () => <ReadOnlyCell />, // A2 BE 산정
+      render: (_, row) => <ReadOnlyCell value={row.settleAmount} />,
     },
     {
       key: "localAmount",
       label: tf("cols.localAmount"),
       className: "is-num",
       width: 90,
-      render: () => <ReadOnlyCell />, // A2 BE 산정
+      render: (_, row) => <ReadOnlyCell value={row.localAmount} />,
     },
     {
       key: "usdAmount",
       label: tf("cols.usdAmount"),
       className: "is-num",
       width: 80,
-      render: () => <ReadOnlyCell />, // A2 BE 산정
+      render: (_, row) => <ReadOnlyCell value={row.usdAmount} />,
     },
     {
       key: "financialDocType",
       label: tf("cols.financialDocType"),
       width: 80,
-      render: () => <ReadOnlyCell />, // A2 BE 산정
+      render: (_, row) => <ReadOnlyCell value={row.financialDocType} />,
     },
     {
       key: "remark",

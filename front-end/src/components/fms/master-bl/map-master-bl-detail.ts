@@ -1,6 +1,29 @@
-import type { MasterBlDetail } from "@/domain/master-bl";
+import type { MasterBlDetail, MasterBlFreightLineView } from "@/domain/master-bl";
 import { createEmptyMasterBlFormValues } from "./master-bl-defaults";
 import type { MasterBlFormValues } from "./master-bl-schema";
+import type { FreightRow } from "@/components/fms/house-bl/house-bl-schema";
+
+/** MasterBlFreightLineView → FreightRow 변환 */
+function mapFreightLine(l: MasterBlFreightLineView): FreightRow {
+  return {
+    id:               l.id,
+    freightCode:      l.freightCode  ?? "",
+    freightName:      "",
+    per:              l.per          ?? "",
+    qty:              l.qty          != null ? String(l.qty)           : "",
+    price:            l.price        != null ? String(l.price)         : "",
+    currency:         l.currency     ?? "",
+    customerCode:     l.customerCode ?? "",
+    customerName:     "",
+    taxType:          l.taxType      ?? "",
+    performanceDt:    l.performanceDt ?? "",
+    settleAmount:     l.settleAmount  != null ? String(l.settleAmount)  : "",
+    localAmount:      l.localAmount   != null ? String(l.localAmount)   : "",
+    usdAmount:        l.usdAmount     != null ? String(l.usdAmount)     : "",
+    financialDocType: l.financialDocType ?? "",
+    remark:           "",
+  };
+}
 
 /**
  * BE detail 응답을 form 값으로 매핑. 본 함수 시그니처 변경 시 form schema와 동시 정합 필수(§6.49 ⑧).
@@ -146,6 +169,17 @@ export function mapMasterBlDetailToForm(detail: MasterBlDetail): MasterBlFormVal
       polCode:        hbl.polCode,
       podCode:        hbl.podCode,
     })),
+    // §A2 — Freight 탭: 환율 헤더 + 매출/매입 라인 + 계산값 바인딩
+    sellRateDt:          detail.freight?.sellRateDt           ?? "",
+    sellRateCurrencyCode: detail.freight?.sellRateCurrencyCode ?? "",
+    sellRate:            detail.freight?.sellRate  != null ? String(detail.freight.sellRate)  : "",
+    buyRateDt:           detail.freight?.buyRateDt            ?? "",
+    buyRateCurrencyCode: detail.freight?.buyRateCurrencyCode   ?? "",
+    buyRate:             detail.freight?.buyRate   != null ? String(detail.freight.buyRate)   : "",
+    usdRateDt:           detail.freight?.usdRateDt            ?? "",
+    usdRate:             detail.freight?.usdRate   != null ? String(detail.freight.usdRate)   : "",
+    freightSelling: detail.freight?.selling?.map(mapFreightLine) ?? [],
+    freightBuying:  detail.freight?.buying?.map(mapFreightLine)  ?? [],
     // §BE-sync — consoledSeaContainers (ConsoledSeaContainerView 전체 필드 매핑, 표시 전용)
     consoledSeaContainers: (detail.consoledSeaContainers ?? []).map((c) => ({
       houseBlId:     c.houseBlId,

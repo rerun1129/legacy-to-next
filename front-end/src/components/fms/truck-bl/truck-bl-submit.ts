@@ -5,8 +5,10 @@ import type {
   TruckOrderUpdateRequest,
   TruckDescRequest,
   TruckBlDimRequest,
+  TruckBlFreightLineRequest,
 } from '@/domain/truck-bl';
 import type { TruckBlFormValues } from './truck-bl-schema';
+import type { FreightRow } from '@/components/fms/house-bl/house-bl-schema';
 
 /** 빈 문자열·null → undefined 정규화 */
 function toStr(v: string | undefined): string | undefined {
@@ -21,6 +23,22 @@ function toNum(v: string | number | undefined): number | undefined {
   if (trimmed === '') return undefined;
   const n = Number(trimmed);
   return Number.isNaN(n) ? undefined : n;
+}
+
+/** FreightRow 배열 → TruckBlFreightLineRequest 배열 변환 */
+function buildFreightLines(rows: FreightRow[] | undefined): TruckBlFreightLineRequest[] | undefined {
+  if (!rows || rows.length === 0) return undefined;
+  return rows.map((r) => ({
+    id:            r.id,
+    freightCode:   toStr(r.freightCode),
+    per:           toStr(r.per),
+    qty:           toStr(r.qty),
+    price:         toStr(r.price),
+    currency:      toStr(r.currency),
+    customerCode:  toStr(r.customerCode),
+    taxType:       toStr(r.taxType),
+    performanceDt: toStr(r.performanceDt),
+  }));
 }
 
 function buildDescRequest(form: TruckBlFormValues): TruckDescRequest | undefined {
@@ -139,6 +157,17 @@ export function buildTruckBlCreateRequest(form: TruckBlFormValues): CreateTruckB
     desc:               buildDescRequest(form),
     truckOrders:        buildTruckOrderCreateRows(form),
     dims:               buildTruckDimCreateRows(form),
+    // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+    sellRateDt:          toStr(form.sellRateDt),
+    sellRateCurrencyCode: toStr(form.sellRateCurrencyCode),
+    sellRate:            toStr(form.sellRate),
+    buyRateDt:           toStr(form.buyRateDt),
+    buyRateCurrencyCode: toStr(form.buyRateCurrencyCode),
+    buyRate:             toStr(form.buyRate),
+    usdRateDt:           toStr(form.usdRateDt),
+    usdRate:             toStr(form.usdRate),
+    freightSelling: buildFreightLines(form.freightSelling as FreightRow[] | undefined),
+    freightBuying:  buildFreightLines(form.freightBuying as FreightRow[] | undefined),
   };
 }
 

@@ -1,6 +1,29 @@
-import type { TruckBlDetail } from "@/domain/truck-bl";
+import type { TruckBlDetail, TruckBlFreightLineView } from "@/domain/truck-bl";
 import { createEmptyTruckBlFormValues } from "./truck-bl-defaults";
 import type { TruckBlFormValues } from "./truck-bl-schema";
+import type { FreightRow } from "@/components/fms/house-bl/house-bl-schema";
+
+/** TruckBlFreightLineView → FreightRow 변환 */
+function mapFreightLine(l: TruckBlFreightLineView): FreightRow {
+  return {
+    id:               l.id,
+    freightCode:      l.freightCode  ?? "",
+    freightName:      "",
+    per:              l.per          ?? "",
+    qty:              l.qty          != null ? String(l.qty)           : "",
+    price:            l.price        != null ? String(l.price)         : "",
+    currency:         l.currency     ?? "",
+    customerCode:     l.customerCode ?? "",
+    customerName:     "",
+    taxType:          l.taxType      ?? "",
+    performanceDt:    l.performanceDt ?? "",
+    settleAmount:     l.settleAmount  != null ? String(l.settleAmount)  : "",
+    localAmount:      l.localAmount   != null ? String(l.localAmount)   : "",
+    usdAmount:        l.usdAmount     != null ? String(l.usdAmount)     : "",
+    financialDocType: l.financialDocType ?? "",
+    remark:           "",
+  };
+}
 
 /**
  * BE detail 응답을 form 값으로 매핑.
@@ -79,5 +102,16 @@ export function mapTruckBlDetailToForm(detail: TruckBlDetail): TruckBlFormValues
       cbm:    d.cbm            != null ? String(d.cbm)            : "",
       volWt:  d.volumeWeightKg != null ? String(d.volumeWeightKg) : "",
     })) ?? [],
+    // §A2 — Freight 탭: 환율 헤더 + 매출/매입 라인 + 계산값 바인딩
+    sellRateDt:          detail.freight?.sellRateDt           ?? "",
+    sellRateCurrencyCode: detail.freight?.sellRateCurrencyCode ?? "",
+    sellRate:            detail.freight?.sellRate  != null ? String(detail.freight.sellRate)  : "",
+    buyRateDt:           detail.freight?.buyRateDt            ?? "",
+    buyRateCurrencyCode: detail.freight?.buyRateCurrencyCode   ?? "",
+    buyRate:             detail.freight?.buyRate   != null ? String(detail.freight.buyRate)   : "",
+    usdRateDt:           detail.freight?.usdRateDt            ?? "",
+    usdRate:             detail.freight?.usdRate   != null ? String(detail.freight.usdRate)   : "",
+    freightSelling: detail.freight?.selling?.map(mapFreightLine) ?? [],
+    freightBuying:  detail.freight?.buying?.map(mapFreightLine)  ?? [],
   };
 }

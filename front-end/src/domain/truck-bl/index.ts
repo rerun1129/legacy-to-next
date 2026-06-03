@@ -123,6 +123,41 @@ export interface TruckBlDetail {
   truckOrders?: TruckOrderDetail[];
   desc?: DescDetail;
   dims?: TruckBlDimView[];
+  // §BE-sync — Freight 탭 응답
+  freight?: TruckBlFreightView | null;
+}
+
+// ── Freight 타입
+export interface TruckBlFreightLineView {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: number;
+  price?: number;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
+  financialDocType?: string;
+  exchangeRate?: number;
+  settleAmount?: number;
+  localAmount?: number;
+  settleTaxAmount?: number;
+  localTaxAmount?: number;
+  usdAmount?: number;
+}
+
+export interface TruckBlFreightView {
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: number;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: number;
+  usdRateDt?: string;
+  usdRate?: number;
+  selling: TruckBlFreightLineView[];
+  buying: TruckBlFreightLineView[];
 }
 
 // ── Truck Order 자식 Request 타입 ─────────────────────────────
@@ -200,6 +235,29 @@ export interface CreateTruckBlRequest {
   desc?: TruckDescRequest;
   truckOrders?: TruckOrderCreateRequest[];
   dims?: TruckBlDimRequest[];
+  // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: string;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: string;
+  usdRateDt?: string;
+  usdRate?: string;
+  freightSelling?: TruckBlFreightLineRequest[];
+  freightBuying?: TruckBlFreightLineRequest[];
+}
+
+export interface TruckBlFreightLineRequest {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: string;
+  price?: string;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
 }
 
 /** Update 요청은 hblNo를 제외한 나머지 필드 (B/L No 변경은 PUT /{id}/hbl-no 전용) */

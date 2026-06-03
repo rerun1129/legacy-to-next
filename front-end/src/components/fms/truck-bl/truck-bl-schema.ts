@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { FREIGHT_ROW_SCHEMA } from "@/components/fms/house-bl/house-bl-schema";
+
+const DATE8 = z.string().regex(/^\d{8}$/).or(z.literal('')).optional();
 
 // ── Dimension 그리드 행 ────────────────────────────────────
 export const TRUCK_DIM_SCHEMA = z.object({
@@ -101,8 +104,16 @@ export const TRUCK_BL_SCHEMA = z.object({
   remark:       z.string().optional(),
 
   // Freight (FreightTab 공유용)
-  freightSelling: z.array(z.any()).optional(),
-  freightBuying:  z.array(z.any()).optional(),
+  freightSelling: z.array(FREIGHT_ROW_SCHEMA).optional(),
+  freightBuying:  z.array(FREIGHT_ROW_SCHEMA).optional(),
+  sellRateDt:           DATE8,
+  sellRateCurrencyCode: z.string().optional(),
+  sellRate:             z.string().optional(),
+  buyRateDt:            DATE8,
+  buyRateCurrencyCode:  z.string().optional(),
+  buyRate:              z.string().optional(),
+  usdRateDt:            DATE8,
+  usdRate:              z.string().optional(),
 
   // Dimension 단위 (form schema로 승격)
   dimensionDivisor: z.string().optional(),

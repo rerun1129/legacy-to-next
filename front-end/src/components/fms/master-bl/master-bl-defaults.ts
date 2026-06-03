@@ -85,5 +85,16 @@ export function createEmptyMasterBlFormValues(): MasterBlFormValues {
     airCharges: [],
     houseBls: [],
     consoledSeaContainers: [],
+    // §Freight 탭
+    freightSelling: [],
+    freightBuying:  [],
+    sellRateDt:           "",
+    sellRateCurrencyCode: "",
+    sellRate:             "",
+    buyRateDt:            "",
+    buyRateCurrencyCode:  "",
+    buyRate:              "",
+    usdRateDt:            "",
+    usdRate:              "",
   };
 }

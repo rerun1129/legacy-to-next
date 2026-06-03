@@ -9,6 +9,7 @@ import { useFormContext, Controller } from "react-hook-form";
 import type { HouseBlFormValues } from "@/components/fms/house-bl/house-bl-schema";
 import { TextBox, ComboBox, CodeBox, DateBox } from "@/components/shared/inputs";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import type { ComboBoxOption } from "@/components/shared/inputs/_types";
 
@@ -141,21 +142,15 @@ export function PerCell({ prefix, index, perOptions, onPerChange, resolveLabel }
 
 // ── TaxType 셀 ───────────────────────────────────────────────
 
-// TODO(A2): BE TaxType enum 신설 후 useEnumOptions("TaxType")로 전환
-export const TAX_TYPE_OPTIONS: ComboBoxOption[] = [
-  { value: "TAXABLE",    label: "TAXABLE" },
-  { value: "ZERO_RATED", label: "ZERO_RATED" },
-  { value: "EXEMPT",     label: "EXEMPT" },
-];
-
 interface TaxTypeCellProps {
   prefix: FieldPrefix;
   index: number;
-  options: ComboBoxOption[];
 }
 
-export function TaxTypeCell({ prefix, index, options }: TaxTypeCellProps) {
+export function TaxTypeCell({ prefix, index }: TaxTypeCellProps) {
   const { control } = useFormContext<HouseBlFormValues>();
+  // §A2: BE TaxType enum 등록 완료 — useEnumOptions로 전환 (labelKo 미설정 시 영문 label 표시)
+  const { options } = useEnumOptions("TaxType");
   return (
     <Controller
       name={`${prefix}.${index}.taxType`}
@@ -200,7 +195,11 @@ export function PerformanceDtCell({ prefix, index }: PerformanceDtCellProps) {
 
 // ── ReadOnly 계산필드 셀 ──────────────────────────────────────
 
-export function ReadOnlyCell() {
-  // A2 BE 산정 — A1에서는 빈칸 readOnly
-  return <TextBox variant="cell" readOnly value="" />;
+interface ReadOnlyCellProps {
+  /** §A2 BE 산정값 — 저장 전 신규 행은 undefined/빈 문자열, 저장 후 BE 계산값 표시 */
+  value?: string | number | null;
+}
+
+export function ReadOnlyCell({ value }: ReadOnlyCellProps) {
+  return <TextBox variant="cell" readOnly value={value != null ? String(value) : ""} />;
 }

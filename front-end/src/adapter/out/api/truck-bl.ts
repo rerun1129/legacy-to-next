@@ -110,6 +110,39 @@ const TRUCK_BL_DIM_SCHEMA = z.object({
   volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
 });
 
+// §BE-sync — FreightLineResponse / FreightResponse
+const TRUCK_BL_FREIGHT_LINE_SCHEMA = z.object({
+  id:               z.number().nullable().optional().transform((v) => v ?? undefined),
+  freightCode:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  per:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  qty:              z.number().nullable().optional().transform((v) => v ?? undefined),
+  price:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  currency:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  customerCode:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  taxType:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  performanceDt:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  financialDocType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  exchangeRate:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleAmount:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  localAmount:      z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleTaxAmount:  z.number().nullable().optional().transform((v) => v ?? undefined),
+  localTaxAmount:   z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdAmount:        z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const TRUCK_BL_FREIGHT_RESPONSE_SCHEMA = z.object({
+  sellRateDt:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRate:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  buyRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  usdRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  selling: z.array(TRUCK_BL_FREIGHT_LINE_SCHEMA).default([]),
+  buying:  z.array(TRUCK_BL_FREIGHT_LINE_SCHEMA).default([]),
+});
+
 const TRUCK_BL_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -163,6 +196,8 @@ const TRUCK_BL_DETAIL_SCHEMA = z.object({
   truckOrders: z.array(TRUCK_ORDER_DETAIL_SCHEMA).nullable().optional().transform((v) => v ?? undefined),
   desc: DESC_DETAIL_SCHEMA,
   dims: z.array(TRUCK_BL_DIM_SCHEMA).default([]),
+  // §BE-sync — Freight 탭 응답 (없으면 null)
+  freight: TRUCK_BL_FREIGHT_RESPONSE_SCHEMA.nullable().optional(),
 });
 
 export const API_TRUCK_BL_PORT: TruckBlPort = {

@@ -192,6 +192,43 @@ export interface HouseBlDetail extends HouseBlRow {
   settlePartnerCode?: string;
   hsCode?: string;
   hsCodeName?: string;
+  // §BE-sync — FreightResponse (Freight 탭 응답, 없으면 null)
+  freight?: FreightDetailView | null;
+}
+
+// §BE-sync — FreightLineResponse (BE 계산값 포함 라인 응답)
+export interface FreightLineView {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: number;
+  price?: number;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
+  // 계산값 (저장 후 BE 산정)
+  financialDocType?: string;
+  exchangeRate?: number;
+  settleAmount?: number;
+  localAmount?: number;
+  settleTaxAmount?: number;
+  localTaxAmount?: number;
+  usdAmount?: number;
+}
+
+// §BE-sync — FreightResponse (환율 헤더 + selling/buying 라인)
+export interface FreightDetailView {
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: number;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: number;
+  usdRateDt?: string;
+  usdRate?: number;
+  selling: FreightLineView[];
+  buying: FreightLineView[];
 }
 
 export interface HouseBlFilter {

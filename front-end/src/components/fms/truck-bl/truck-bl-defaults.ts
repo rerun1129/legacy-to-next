@@ -51,6 +51,14 @@ export function createEmptyTruckBlFormValues(): TruckBlFormValues {
     // Freight
     freightSelling: [],
     freightBuying:  [],
+    sellRateDt:           "",
+    sellRateCurrencyCode: "",
+    sellRate:             "",
+    buyRateDt:            "",
+    buyRateCurrencyCode:  "",
+    buyRate:              "",
+    usdRateDt:            "",
+    usdRate:              "",
 
     // Dimension
     dimensionDivisor: "CM6000",

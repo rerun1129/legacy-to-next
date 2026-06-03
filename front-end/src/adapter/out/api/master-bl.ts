@@ -149,6 +149,39 @@ const AIR_CHARGE_API_SCHEMA = z.object({
   rate:           z.number().nullable().optional().transform((v) => v ?? undefined),
 });
 
+// §BE-sync — FreightLineResponse / FreightResponse (selling/buying 라인 키)
+const MASTER_BL_FREIGHT_LINE_SCHEMA = z.object({
+  id:               z.number().nullable().optional().transform((v) => v ?? undefined),
+  freightCode:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  per:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  qty:              z.number().nullable().optional().transform((v) => v ?? undefined),
+  price:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  currency:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  customerCode:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  taxType:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  performanceDt:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  financialDocType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  exchangeRate:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleAmount:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  localAmount:      z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleTaxAmount:  z.number().nullable().optional().transform((v) => v ?? undefined),
+  localTaxAmount:   z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdAmount:        z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const MASTER_BL_FREIGHT_RESPONSE_SCHEMA = z.object({
+  sellRateDt:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRate:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  buyRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  usdRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  selling: z.array(MASTER_BL_FREIGHT_LINE_SCHEMA).default([]),
+  buying:  z.array(MASTER_BL_FREIGHT_LINE_SCHEMA).default([]),
+});
+
 const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   shipmentType: z.string().nullable(),
   // §6.49 ⑰ — freightTerm enum literal → string nullable 완화
@@ -184,6 +217,8 @@ const MASTER_BL_DETAIL_SCHEMA = MASTER_BL_ROW_SCHEMA.extend({
   dims:         z.array(DIM_API_SCHEMA).optional().default([]),
   scheduleLegs: z.array(SCHEDULE_LEG_API_SCHEMA).optional().default([]),
   airCharges:   z.array(AIR_CHARGE_API_SCHEMA).optional().default([]),
+  // §BE-sync — Freight 탭 응답 (없으면 null)
+  freight: MASTER_BL_FREIGHT_RESPONSE_SCHEMA.nullable().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

@@ -88,6 +88,39 @@ const NON_BL_DIM_SCHEMA = z.object({
   volumeWeightKg: z.number().nullable().optional().transform((v) => v ?? undefined),
 });
 
+// §BE-sync — FreightLineResponse / FreightResponse (selling/buying 라인 키)
+const NON_BL_FREIGHT_LINE_SCHEMA = z.object({
+  id:               z.number().nullable().optional().transform((v) => v ?? undefined),
+  freightCode:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  per:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  qty:              z.number().nullable().optional().transform((v) => v ?? undefined),
+  price:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  currency:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  customerCode:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  taxType:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  performanceDt:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  financialDocType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  exchangeRate:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleAmount:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  localAmount:      z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleTaxAmount:  z.number().nullable().optional().transform((v) => v ?? undefined),
+  localTaxAmount:   z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdAmount:        z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+const NON_BL_FREIGHT_RESPONSE_SCHEMA = z.object({
+  sellRateDt:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRate:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  buyRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  usdRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  selling: z.array(NON_BL_FREIGHT_LINE_SCHEMA).default([]),
+  buying:  z.array(NON_BL_FREIGHT_LINE_SCHEMA).default([]),
+});
+
 const NON_BL_DETAIL_SCHEMA = z.object({
   id: z.number(),
   hblNo: z.string().nullable().optional().transform((v) => v ?? undefined),
@@ -132,6 +165,8 @@ const NON_BL_DETAIL_SCHEMA = z.object({
   remark: z.string().nullable().optional().transform((v) => v ?? undefined),
   containers: z.array(NON_BL_CONTAINER_SCHEMA).default([]),
   dims: z.array(NON_BL_DIM_SCHEMA).default([]),
+  // §BE-sync — Freight 탭 응답 (없으면 null)
+  freight: NON_BL_FREIGHT_RESPONSE_SCHEMA.nullable().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
@@ -146,7 +181,7 @@ const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>
 const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
-/** FE CreateNonBlRequest → BE CreateHouseBlRequest 형식 변환. */
+/** FE CreateNonBlRequest → BE CreateNonBlRequest 형식 변환. */
 function toBeRequest(req: CreateNonBlRequest) {
   return {
     hblNo: req.hblNo,
@@ -186,6 +221,17 @@ function toBeRequest(req: CreateNonBlRequest) {
     containers: req.containers,
     dims: req.dims,
     remark: req.remark,
+    // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+    sellRateDt: req.sellRateDt,
+    sellRateCurrencyCode: req.sellRateCurrencyCode,
+    sellRate: req.sellRate,
+    buyRateDt: req.buyRateDt,
+    buyRateCurrencyCode: req.buyRateCurrencyCode,
+    buyRate: req.buyRate,
+    usdRateDt: req.usdRateDt,
+    usdRate: req.usdRate,
+    freightSelling: req.freightSelling,
+    freightBuying: req.freightBuying,
   };
 }
 

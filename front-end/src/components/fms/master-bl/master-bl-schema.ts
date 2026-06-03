@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FREIGHT_ROW_SCHEMA } from "@/components/fms/house-bl/house-bl-schema";
 
 const DATE8 = z.string().regex(/^\d{8}$/).optional().or(z.literal(""));
 
@@ -184,6 +185,17 @@ export const MASTER_BL_SCHEMA = z.object({
   airCharges:   z.array(AIR_CHARGE_SCHEMA).optional(),
   houseBls:              z.array(HOUSE_BL_REF_SCHEMA).optional(),
   consoledSeaContainers: z.array(CONSOLED_SEA_CONTAINER_SCHEMA).default([]),
+  // §Freight 탭 — 환율 헤더 + 매출/매입 라인 (FreightTab 공유)
+  freightSelling: z.array(FREIGHT_ROW_SCHEMA).optional(),
+  freightBuying:  z.array(FREIGHT_ROW_SCHEMA).optional(),
+  sellRateDt:           DATE8,
+  sellRateCurrencyCode: z.string().optional(),
+  sellRate:             z.string().optional(),
+  buyRateDt:            DATE8,
+  buyRateCurrencyCode:  z.string().optional(),
+  buyRate:              z.string().optional(),
+  usdRateDt:            DATE8,
+  usdRate:              z.string().optional(),
 });
 
 export type MasterBlFormValues = z.infer<typeof MASTER_BL_SCHEMA>;

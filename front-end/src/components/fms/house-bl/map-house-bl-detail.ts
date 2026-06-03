@@ -1,6 +1,29 @@
-import type { HouseBlDetail, HouseBlAirScheduleLegView, HouseBlAirChargeView, HouseBlAirDimView } from "@/domain/house-bl";
+import type { HouseBlDetail, HouseBlAirScheduleLegView, HouseBlAirChargeView, HouseBlAirDimView, FreightLineView } from "@/domain/house-bl";
 import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
-import type { HouseBlFormValues } from "./house-bl-schema";
+import type { HouseBlFormValues, FreightRow } from "./house-bl-schema";
+
+/** FreightLineView(BE 응답) → FreightRow(form 값) 변환. 계산값도 string으로 보존. */
+function mapFreightLine(l: FreightLineView): FreightRow {
+  return {
+    id:               l.id,
+    freightCode:      l.freightCode  ?? "",
+    freightName:      "",
+    per:              l.per          ?? "",
+    qty:              l.qty          != null ? String(l.qty)           : "",
+    price:            l.price        != null ? String(l.price)         : "",
+    currency:         l.currency     ?? "",
+    customerCode:     l.customerCode ?? "",
+    customerName:     "",
+    taxType:          l.taxType      ?? "",
+    performanceDt:    l.performanceDt ?? "",
+    // §A2 — BE 계산값 바인딩 (저장 전 신규 행은 undefined → 빈 문자열)
+    settleAmount:     l.settleAmount  != null ? String(l.settleAmount)  : "",
+    localAmount:      l.localAmount   != null ? String(l.localAmount)   : "",
+    usdAmount:        l.usdAmount     != null ? String(l.usdAmount)     : "",
+    financialDocType: l.financialDocType ?? "",
+    remark:           "",
+  };
+}
 
 /** BE detail 응답을 form 값으로 매핑. 본 함수 시그니처 변경 시 form schema와 동시 정합 필수(§6.49 ⑧). */
 export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues {
@@ -181,5 +204,16 @@ export function mapHouseBlDetailToForm(detail: HouseBlDetail): HouseBlFormValues
       cbm:            d.cbm            != null ? String(d.cbm)            : "",
       volumeWeightKg: d.volumeWeightKg != null ? String(d.volumeWeightKg) : "",
     })) ?? [],
+    // §A2 — Freight 탭: 환율 헤더 + 매출/매입 라인 + 계산값 바인딩
+    sellRateDt:          detail.freight?.sellRateDt          ?? "",
+    sellRateCurrencyCode: detail.freight?.sellRateCurrencyCode ?? "",
+    sellRate:            detail.freight?.sellRate  != null ? String(detail.freight.sellRate)  : "",
+    buyRateDt:           detail.freight?.buyRateDt           ?? "",
+    buyRateCurrencyCode: detail.freight?.buyRateCurrencyCode  ?? "",
+    buyRate:             detail.freight?.buyRate   != null ? String(detail.freight.buyRate)   : "",
+    usdRateDt:           detail.freight?.usdRateDt           ?? "",
+    usdRate:             detail.freight?.usdRate   != null ? String(detail.freight.usdRate)   : "",
+    freightSelling: detail.freight?.selling?.map(mapFreightLine) ?? [],
+    freightBuying:  detail.freight?.buying?.map(mapFreightLine)  ?? [],
   };
 }

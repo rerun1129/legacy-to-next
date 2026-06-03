@@ -149,6 +149,40 @@ const AIR_DETAIL_SCHEMA = z.object({
   desc:         AIR_DESC_VIEW_SCHEMA.optional(),
 });
 
+// §BE-sync — FreightLineResponse (계산값 포함, BigDecimal → number)
+const FREIGHT_LINE_RESPONSE_SCHEMA = z.object({
+  id:               z.number().nullable().optional().transform((v) => v ?? undefined),
+  freightCode:      z.string().nullable().optional().transform((v) => v ?? undefined),
+  per:              z.string().nullable().optional().transform((v) => v ?? undefined),
+  qty:              z.number().nullable().optional().transform((v) => v ?? undefined),
+  price:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  currency:         z.string().nullable().optional().transform((v) => v ?? undefined),
+  customerCode:     z.string().nullable().optional().transform((v) => v ?? undefined),
+  taxType:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  performanceDt:    z.string().nullable().optional().transform((v) => v ?? undefined),
+  financialDocType: z.string().nullable().optional().transform((v) => v ?? undefined),
+  exchangeRate:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleAmount:     z.number().nullable().optional().transform((v) => v ?? undefined),
+  localAmount:      z.number().nullable().optional().transform((v) => v ?? undefined),
+  settleTaxAmount:  z.number().nullable().optional().transform((v) => v ?? undefined),
+  localTaxAmount:   z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdAmount:        z.number().nullable().optional().transform((v) => v ?? undefined),
+});
+
+// §BE-sync — FreightResponse (응답의 라인 키는 selling/buying)
+const FREIGHT_RESPONSE_SCHEMA = z.object({
+  sellRateDt:          z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  sellRate:            z.number().nullable().optional().transform((v) => v ?? undefined),
+  buyRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRateCurrencyCode: z.string().nullable().optional().transform((v) => v ?? undefined),
+  buyRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  usdRateDt:           z.string().nullable().optional().transform((v) => v ?? undefined),
+  usdRate:             z.number().nullable().optional().transform((v) => v ?? undefined),
+  selling: z.array(FREIGHT_LINE_RESPONSE_SCHEMA).default([]),
+  buying:  z.array(FREIGHT_LINE_RESPONSE_SCHEMA).default([]),
+});
+
 const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   shipmentType: z.enum(['HOUSE', 'DIRECT']).nullable(),
   blType: z.string().nullable(),
@@ -203,6 +237,8 @@ const HOUSE_BL_DETAIL_SCHEMA = HOUSE_BL_ROW_SCHEMA.extend({
   hsCodeName: z.string().nullable().optional().transform((v) => v ?? undefined),
   seaDetail:  SEA_DETAIL_SCHEMA.nullable().optional(),
   airDetail: AIR_DETAIL_SCHEMA.nullable().optional(),
+  // §BE-sync — Freight 탭 응답 (없으면 null)
+  freight: FREIGHT_RESPONSE_SCHEMA.nullable().optional(),
 });
 
 const pagedResult = <T extends z.ZodTypeAny>(schema: T) =>

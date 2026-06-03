@@ -130,6 +130,21 @@ export interface AirDetailRequest {
   cargoType?: string;
 }
 
+// ── Freight request types ──────────────────────────────────
+
+export interface FreightLineRequest {
+  // §BE — id 있으면 merge-by-id, 없으면 신규 INSERT
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: string;
+  price?: string;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
+}
+
 // ── Create / Update request ────────────────────────────────
 
 export interface CreateHouseBlRequest {
@@ -176,6 +191,17 @@ export interface CreateHouseBlRequest {
   scheduleLegs?: ScheduleLegRequest[];
   truckOrders?: TruckOrderRequest[];
   airCharges?: AirChargeRequest[];
+  // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: string;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: string;
+  usdRateDt?: string;
+  usdRate?: string;
+  freightSelling?: FreightLineRequest[];
+  freightBuying?: FreightLineRequest[];
 }
 
 export type UpdateHouseBlRequest = Partial<CreateHouseBlRequest>;

@@ -123,6 +123,41 @@ export interface NonBlDetail {
   remark?: string;
   containers: NonBlContainerView[];
   dims: NonBlDimView[];
+  // §BE-sync — Freight 탭 응답
+  freight?: NonBlFreightView | null;
+}
+
+// ── Freight 타입 (house-bl FreightDetailView 재활용 불가 — 별도 import 금지)
+export interface NonBlFreightLineView {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: number;
+  price?: number;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
+  financialDocType?: string;
+  exchangeRate?: number;
+  settleAmount?: number;
+  localAmount?: number;
+  settleTaxAmount?: number;
+  localTaxAmount?: number;
+  usdAmount?: number;
+}
+
+export interface NonBlFreightView {
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: number;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: number;
+  usdRateDt?: string;
+  usdRate?: number;
+  selling: NonBlFreightLineView[];
+  buying: NonBlFreightLineView[];
 }
 
 // ── 자식 Request 타입 ─────────────────────────────────────────
@@ -190,6 +225,29 @@ export interface CreateNonBlRequest {
   remark?: string;
   containers?: NonBlContainerRequest[];
   dims?: NonBlDimRequest[];
+  // §Freight 탭 — 환율 헤더 + 매출/매입 라인
+  sellRateDt?: string;
+  sellRateCurrencyCode?: string;
+  sellRate?: string;
+  buyRateDt?: string;
+  buyRateCurrencyCode?: string;
+  buyRate?: string;
+  usdRateDt?: string;
+  usdRate?: string;
+  freightSelling?: NonBlFreightLineRequest[];
+  freightBuying?: NonBlFreightLineRequest[];
+}
+
+export interface NonBlFreightLineRequest {
+  id?: number;
+  freightCode?: string;
+  per?: string;
+  qty?: string;
+  price?: string;
+  currency?: string;
+  customerCode?: string;
+  taxType?: string;
+  performanceDt?: string;
 }
 
 export type UpdateNonBlRequest = Partial<CreateNonBlRequest>;
