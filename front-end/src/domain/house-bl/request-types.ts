@@ -143,6 +143,14 @@ export interface FreightLineRequest {
   customerCode?: string;
   taxType?: string;
   performanceDt?: string;
+  // 계산값 — FE 산정 후 BE에 그대로 전달 (BE는 재계산 없이 저장)
+  exchangeRate?: string;
+  usdExchangeRate?: string;
+  settleAmount?: string;
+  localAmount?: string;
+  localTaxAmount?: string;   // FE vat → BE localTaxAmount
+  usdAmount?: string;
+  financialDocType?: string;
 }
 
 // ── Create / Update request ────────────────────────────────

@@ -200,11 +200,15 @@ export interface MasterBlFreightLineView {
   performanceDt?: string;
   financialDocType?: string;
   exchangeRate?: number;
+  usdExchangeRate?: number;
   settleAmount?: number;
   localAmount?: number;
   settleTaxAmount?: number;
   localTaxAmount?: number;
   usdAmount?: number;
+  taxNo?: string;
+  slipNo?: string;
+  financialDocumentNo?: string;
 }
 
 export interface MasterBlFreightView {
@@ -372,6 +376,13 @@ export interface MasterBlFreightLineRequest {
   customerCode?: string;
   taxType?: string;
   performanceDt?: string;
+  exchangeRate?: string;
+  usdExchangeRate?: string;
+  settleAmount?: string;
+  localAmount?: string;
+  localTaxAmount?: string;
+  usdAmount?: string;
+  financialDocType?: string;
 }
 
 export type UpdateMasterBlRequest = Partial<CreateMasterBlRequest>;

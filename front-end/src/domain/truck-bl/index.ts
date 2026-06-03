@@ -140,11 +140,15 @@ export interface TruckBlFreightLineView {
   performanceDt?: string;
   financialDocType?: string;
   exchangeRate?: number;
+  usdExchangeRate?: number;
   settleAmount?: number;
   localAmount?: number;
   settleTaxAmount?: number;
   localTaxAmount?: number;
   usdAmount?: number;
+  taxNo?: string;
+  slipNo?: string;
+  financialDocumentNo?: string;
 }
 
 export interface TruckBlFreightView {
@@ -258,6 +262,13 @@ export interface TruckBlFreightLineRequest {
   customerCode?: string;
   taxType?: string;
   performanceDt?: string;
+  exchangeRate?: string;
+  usdExchangeRate?: string;
+  settleAmount?: string;
+  localAmount?: string;
+  localTaxAmount?: string;
+  usdAmount?: string;
+  financialDocType?: string;
 }
 
 /** Update 요청은 hblNo를 제외한 나머지 필드 (B/L No 변경은 PUT /{id}/hbl-no 전용) */

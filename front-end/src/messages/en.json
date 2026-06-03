@@ -180,10 +180,16 @@
             "customerName":     "Customer Name",
             "taxType":          "Tax Type",
             "performanceDt":    "Perf. Date",
-            "settleAmount":     "Settle Amt",
-            "localAmount":      "Local Amt",
-            "usdAmount":        "USD Amt",
-            "financialDocType": "Doc Type"
+            "settleAmount":          "Settle Amt",
+            "localAmount":           "Local Amt",
+            "vat":                   "VAT",
+            "usdExchangeRate":       "USD Rate",
+            "usdAmount":             "USD Amt",
+            "financialDocType":      "Doc Type",
+            "taxNo":                 "Tax No",
+            "slipNo":                "Slip No",
+            "financialDocumentNo":   "Doc No",
+            "exchangeRate":          "Ex. Rate"
           },
           "per": {
             "SHP":  "Ship",

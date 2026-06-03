@@ -210,11 +210,16 @@ export interface FreightLineView {
   // 계산값 (저장 후 BE 산정)
   financialDocType?: string;
   exchangeRate?: number;
+  usdExchangeRate?: number;
   settleAmount?: number;
   localAmount?: number;
   settleTaxAmount?: number;
   localTaxAmount?: number;
   usdAmount?: number;
+  // BE 발행 후 채워지는 서류 번호 필드 (readOnly)
+  taxNo?: string;
+  slipNo?: string;
+  financialDocumentNo?: string;
 }
 
 // §BE-sync — FreightResponse (환율 헤더 + selling/buying 라인)

@@ -107,14 +107,20 @@ export const FREIGHT_ROW_SCHEMA = z.object({
   qty:              z.string().optional(),     // unit_quantity (per 선택 시 스냅샷)
   price:            z.string().optional(),     // unit_price
   currency:         z.string().optional(),
+  exchangeRate:     z.string().optional(),     // 환율 (FE 계산 체인 입력)
   customerCode:     z.string().optional(),
   customerName:     z.string().optional(),     // readOnly 표시
   taxType:          z.string().optional(),
   performanceDt:    DATE8,                     // 실적일자
-  settleAmount:     z.string().optional(),     // 계산필드 — A2 BE 산정, A1 readOnly 빈칸
-  localAmount:      z.string().optional(),     // 계산필드
-  usdAmount:        z.string().optional(),     // 계산필드
-  financialDocType: z.string().optional(),     // 계산필드(서류종류)
+  settleAmount:     z.string().optional(),     // 정산금액 (FE 계산 체인 출력, 사용자 미세조정 가능)
+  localAmount:      z.string().optional(),     // 현지금액 (FE 계산 체인 출력, 사용자 미세조정 가능)
+  vat:              z.string().optional(),     // 부가세 (FE 계산 체인 출력, BE는 localTaxAmount로 저장)
+  usdExchangeRate:  z.string().optional(),     // USD 환율 (FE 계산 체인 입력)
+  usdAmount:        z.string().optional(),     // USD금액 (항상 자동 계산, readOnly)
+  financialDocType: z.string().optional(),     // 서류종류 (ComboBox 입력)
+  taxNo:            z.string().optional(),     // 세금계산서 번호 (readOnly, BE 산정)
+  slipNo:           z.string().optional(),     // 전표 번호 (readOnly, BE 산정)
+  financialDocumentNo: z.string().optional(), // 서류 번호 (readOnly, BE 산정)
   remark:           z.string().optional(),
 });
 

@@ -180,10 +180,16 @@
             "customerName":     "거래처명",
             "taxType":          "세금 구분",
             "performanceDt":    "실적일자",
-            "settleAmount":     "정산금액",
-            "localAmount":      "현지금액",
-            "usdAmount":        "USD금액",
-            "financialDocType": "서류종류"
+            "settleAmount":          "정산금액",
+            "localAmount":           "현지금액",
+            "vat":                   "부가세",
+            "usdExchangeRate":       "USD환율",
+            "usdAmount":             "USD금액",
+            "financialDocType":      "서류종류",
+            "taxNo":                 "세금계산서번호",
+            "slipNo":                "전표번호",
+            "financialDocumentNo":   "서류번호",
+            "exchangeRate":          "환율"
           },
           "per": {
             "SHP":  "Ship",

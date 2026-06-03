@@ -21,15 +21,22 @@ function toStr(v: string | undefined | null): string | undefined {
 function buildFreightLines(rows: FreightRow[] | undefined): MasterBlFreightLineRequest[] | undefined {
   if (!rows || rows.length === 0) return undefined;
   return rows.map((r) => ({
-    id:            r.id,
-    freightCode:   toStr(r.freightCode),
-    per:           toStr(r.per),
-    qty:           toStr(r.qty),
-    price:         toStr(r.price),
-    currency:      toStr(r.currency),
-    customerCode:  toStr(r.customerCode),
-    taxType:       toStr(r.taxType),
-    performanceDt: toStr(r.performanceDt),
+    id:               r.id,
+    freightCode:      toStr(r.freightCode),
+    per:              toStr(r.per),
+    qty:              toStr(r.qty),
+    price:            toStr(r.price),
+    currency:         toStr(r.currency),
+    customerCode:     toStr(r.customerCode),
+    taxType:          toStr(r.taxType),
+    performanceDt:    toStr(r.performanceDt),
+    exchangeRate:     toStr(r.exchangeRate),
+    usdExchangeRate:  toStr(r.usdExchangeRate),
+    settleAmount:     toStr(r.settleAmount),
+    localAmount:      toStr(r.localAmount),
+    localTaxAmount:   toStr(r.vat),
+    usdAmount:        toStr(r.usdAmount),
+    financialDocType: toStr(r.financialDocType),
   }));
 }
 

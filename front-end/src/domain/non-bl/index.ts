@@ -140,11 +140,15 @@ export interface NonBlFreightLineView {
   performanceDt?: string;
   financialDocType?: string;
   exchangeRate?: number;
+  usdExchangeRate?: number;
   settleAmount?: number;
   localAmount?: number;
   settleTaxAmount?: number;
   localTaxAmount?: number;
   usdAmount?: number;
+  taxNo?: string;
+  slipNo?: string;
+  financialDocumentNo?: string;
 }
 
 export interface NonBlFreightView {
@@ -248,6 +252,13 @@ export interface NonBlFreightLineRequest {
   customerCode?: string;
   taxType?: string;
   performanceDt?: string;
+  exchangeRate?: string;
+  usdExchangeRate?: string;
+  settleAmount?: string;
+  localAmount?: string;
+  localTaxAmount?: string;
+  usdAmount?: string;
+  financialDocType?: string;
 }
 
 export type UpdateNonBlRequest = Partial<CreateNonBlRequest>;
