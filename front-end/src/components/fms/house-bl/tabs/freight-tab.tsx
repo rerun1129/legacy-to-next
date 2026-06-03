@@ -7,8 +7,8 @@ import { FreightRatePanel } from "./sections/freight-rate-panel";
 import {
   FreightSellingPanel,
   FreightBuyingPanel,
-  FreightAccountPanel,
 } from "./sections/freight-panels";
+import { FreightAccountPanel } from "./sections/freight-account-panel";
 import type { Mode } from "@/lib/bl-variants";
 
 interface FreightTabProps {
