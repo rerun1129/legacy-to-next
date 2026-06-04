@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import { useFormContext, useFieldArray, useFormState, useWatch } from "react-hook-form";
 import { Plus, Minus } from "lucide-react";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import type { HouseBlFormValues, FreightRow } from "@/components/fms/house-bl/house-bl-schema";
@@ -57,6 +57,8 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
   const tf = useTranslations("fms.houseBl.entry.freight");
   const ti = useTranslations("fms.houseBl.entry.freight.issue");
   const { control, getValues, setValue } = useFormContext<HouseBlFormValues>();
+  // dirtyFields 구독 — 핸들러에서 stale 없이 최신값을 읽기 위해 useFormState 사용
+  const { dirtyFields } = useFormState({ control });
   const { fields, append, remove } = useFieldArray({ control, name: prefix });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
@@ -218,53 +220,65 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
   }
 
   // ── 발행 버튼 onClick 검증 ────────────────────────────────────
-  // GridList per-row disable 미지원 → 선택된 행 중 발행불가 행(미저장/이미발행)을 제외하고 검증
   function handleIssueClick() {
+    // 1. 선택 0개 → 차단
     if (issueSelectedKeys.size === 0) {
       toast.error(ti("selectRequired"));
+      return;
+    }
+
+    // 2. dirty 검사 — 선택된 행 중 하나라도 변경(미저장)되면 전체 차단
+    // dirtyFields[prefix]?.[index]가 존재하고 키가 있으면 해당 행은 dirty
+    // 신규 추가행도 defaultValues에 없으므로 RHF가 dirty로 간주 → 동일 게이트에서 차단
+    const prefixDirtyFields = (dirtyFields as Record<string, Record<number, object> | undefined>)[prefix];
+    const hasDirtySelected = Array.from(issueSelectedKeys).some((key) => {
+      const idx = fields.findIndex((f) => (f as unknown as { id: string }).id === key);
+      if (idx === -1) return false;
+      const rowDirty = prefixDirtyFields?.[idx];
+      return rowDirty !== undefined && Object.keys(rowDirty).length > 0;
+    });
+    if (hasDirtySelected) {
+      toast.error(ti("dirtyRowsSaveFirst"));
       return;
     }
 
     const formValues = getValues();
     const rows = (formValues[prefix] ?? []) as FreightRow[];
 
-    // 선택된 행 수집 — RHF fields[].id(UUID)로 매칭
-    const selectedRows: FreightRow[] = [];
+    // 3. 선택된 행에서 발행 완료(financialDocumentNo 보유) 행 제외 → 후보 수집
+    const candidateRows: FreightRow[] = [];
     for (let i = 0; i < fields.length; i++) {
       const fieldId = (fields[i] as unknown as { id: string }).id;
       if (!issueSelectedKeys.has(fieldId)) continue;
 
       const row = rows[i];
       if (!row) continue;
-
-      // freightLineId 없는 행(미저장) 또는 이미 발행된 행은 제외
-      if (!row.freightLineId) continue;
       if (row.financialDocumentNo) continue;
 
-      selectedRows.push(row);
+      candidateRows.push(row);
     }
 
-    if (selectedRows.length === 0) {
+    if (candidateRows.length === 0) {
       toast.error(ti("selectRequired"));
       return;
     }
 
-    // customerCode distinct 검증
-    const customerCodes = new Set(selectedRows.map((r) => r.customerCode ?? ""));
+    // 4. customerCode distinct 검증
+    const customerCodes = new Set(candidateRows.map((r) => r.customerCode ?? ""));
     if (customerCodes.size > 1) {
       toast.error(ti("customerMixed"));
       return;
     }
 
-    // financialDocType distinct 검증
-    const docTypes = new Set(selectedRows.map((r) => r.financialDocType ?? ""));
+    // 5. financialDocType distinct 검증
+    const docTypes = new Set(candidateRows.map((r) => r.financialDocType ?? ""));
     if (docTypes.size > 1) {
       toast.error(ti("docTypeMixed"));
       return;
     }
 
-    // 검증 통과 — 스냅샷 고정 후 모달 오픈
-    const snapshot: SelectedFreightLine[] = selectedRows.map((r) => ({
+    // 6. 검증 통과 — 스냅샷 고정 후 모달 오픈
+    const snapshot: SelectedFreightLine[] = candidateRows.map((r) => ({
       freightLineId:    r.freightLineId!,
       customerCode:     r.customerCode ?? "",
       customerName:     r.customerName ?? "",
