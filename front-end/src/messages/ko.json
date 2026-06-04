@@ -238,6 +238,10 @@
             "totalAmount":    "합계",
             "selectAll":      "전체 선택",
             "issueBtn":       "발행",
+            "multiDocBlocked": "다른 서류의 발행 운임은 함께 편집할 수 없습니다.",
+            "amendSuccess":   "서류가 수정되었습니다.",
+            "removeLine":     "라인 제거",
+            "amendDesc":      "편집할 라인을 확인하고 추가/제거 후 확정하세요.",
             "lineCols": {
               "customer":     "거래처",
               "freightCode":  "운임 코드",

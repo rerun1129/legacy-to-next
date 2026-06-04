@@ -123,6 +123,8 @@ export const FREIGHT_ROW_SCHEMA = z.object({
   taxNo:            z.string().optional(),     // 세금계산서 번호 (readOnly, BE 산정)
   slipNo:           z.string().optional(),     // 전표 번호 (readOnly, BE 산정)
   financialDocumentNo: z.string().optional(), // 서류 번호 (readOnly, BE 산정)
+  // amend 진입을 위한 서류 PK — 발행 전 행은 undefined, 발행 후 BE에서 채워짐
+  financialDocumentId: z.number().optional(),
 });
 
 export type FreightRow = z.infer<typeof FREIGHT_ROW_SCHEMA>;

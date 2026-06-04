@@ -151,6 +151,8 @@ export interface NonBlFreightLineView {
   taxNo?: string;
   slipNo?: string;
   financialDocumentNo?: string;
+  // BE amend 진입을 위한 서류 PK — 발행 전은 null/undefined
+  financialDocumentId?: number;
 }
 
 export interface NonBlFreightView {

@@ -65,11 +65,30 @@ export interface IssueDocumentResult {
   documentNo: string;
 }
 
+/** BE: AmendDocumentRequest — 서류 편집(amend) 요청 입력 */
+export interface AmendDocumentInput {
+  documentId: number;
+  blType: string;
+  blId: string;
+  freightType: string;
+  /** 최종 라인 상태(선언적) — 서버가 현재 상태와 diff하여 link/unlink 처리 */
+  finalLineIds: number[];
+}
+
+/** BE: AmendDocumentResponse — 서류 편집 응답. deleted=true이면 모든 라인 제거로 서류 자동 삭제됨 */
+export interface AmendDocumentResult {
+  financialDocumentId: number | null;
+  documentNo: string;
+  deleted: boolean;
+}
+
 // === 포트 인터페이스 ===
 
 export interface FinancialDocumentPort {
   /** POST /api/bms/financial-documents/issue */
   issueDocument(req: IssueDocumentInput): Promise<IssueDocumentResult>;
+  /** PATCH /api/bms/financial-documents/{id} */
+  amendDocument(req: AmendDocumentInput): Promise<AmendDocumentResult>;
   /** DELETE /api/bms/financial-documents/{id} */
   deleteDocument(id: number): Promise<void>;
   /** GET /api/bms/financial-documents?blType=&blId= */

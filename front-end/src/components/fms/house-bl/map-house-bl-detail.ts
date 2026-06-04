@@ -28,6 +28,7 @@ function mapFreightLine(l: FreightLineView): FreightRow {
     taxNo:               l.taxNo              ?? "",
     slipNo:              l.slipNo             ?? "",
     financialDocumentNo: l.financialDocumentNo ?? "",
+    financialDocumentId: l.financialDocumentId,
   };
 }
 

@@ -222,6 +222,8 @@ export interface FreightLineView {
   taxNo?: string;
   slipNo?: string;
   financialDocumentNo?: string;
+  // BE amend 진입을 위한 서류 PK (financialDocumentId) — 발행 전은 null/undefined
+  financialDocumentId?: number;
 }
 
 // §BE-sync — FreightResponse (환율 헤더 + selling/buying 라인)

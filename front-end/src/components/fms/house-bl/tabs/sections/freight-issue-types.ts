@@ -21,6 +21,10 @@ export interface SelectedFreightLine {
   qty:              number | null;
   price:            number | null;
   taxType:          string;
+  // amend 모드 전용 — 발행 행 식별 및 서류 번호 표시
+  financialDocumentId:  number | null;
+  financialDocumentNo:  string;
+  freightType:          "SELLING" | "BUYING";
 }
 
 export interface FreightIssueModalProps {

@@ -1,6 +1,6 @@
 import type { QueryOptions } from "@tanstack/react-query";
 import { financialDocumentPort } from "@/lib/ports";
-import type { IssueDocumentInput } from "./ports";
+import type { IssueDocumentInput, AmendDocumentInput } from "./ports";
 
 // === 쿼리키 팩토리 ===
 
@@ -36,6 +36,7 @@ export function issuableLinesQueryOptions(
 
 export const financialDocumentUseCases = {
   issueDocument: (req: IssueDocumentInput) => financialDocumentPort.issueDocument(req),
+  amendDocument: (req: AmendDocumentInput) => financialDocumentPort.amendDocument(req),
   deleteDocument: (id: number) => financialDocumentPort.deleteDocument(id),
   listByBl: (blType: string, blId: string) => financialDocumentPort.listByBl(blType, blId),
   findIssuableLines: (blType: string, blId: string, freightType: string) =>

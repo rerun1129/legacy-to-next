@@ -1,18 +1,19 @@
 "use client";
 
 /**
- * 서류 발행 모달.
- * - 발행 대상 라인은 상위 그리드에서 선택 후 스냅샷으로 전달받음(selectedLines).
+ * 서류 발행/편집(amend) 모달.
+ * - issue 모드: 미발행 운임 선택 → 새 financial_document INSERT + 라인 link.
+ * - amend 모드: 발행된 서류의 라인 편집 → finalLineIds 선언적 PATCH, 모든 라인 제거 시 서류 자동 삭제.
  * - customerCode / financialDocType 검증은 발행 버튼 onClick(freight-panels)에서 선행.
- * - 성공 시 모달 잔류(PRD §3). onClose 시 listByBl invalidate 보장.
  * - 에러 토스트는 전역 MutationCache onError SSOT에 위임(직접 catch 금지).
  */
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { Minus } from "lucide-react";
 import { ModalShell } from "@/components/shared/modal-shell";
-import { GridList } from "@/components/shared/grid-list";
+import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { Button } from "@/components/shared/button";
 import { toast } from "@/lib/toast-store";
 import {
@@ -20,7 +21,7 @@ import {
   financialDocumentUseCases,
 } from "@/application/bms/financial-document/use-cases";
 import { useEnumOptions } from "@/application/enums/use-enum";
-import { type FreightIssueModalProps } from "./freight-issue-types";
+import { type FreightIssueModalProps, type SelectedFreightLine } from "./freight-issue-types";
 import { buildFreightLineColumns } from "./freight-issue-columns";
 import { useFreightIssueHeader, FreightIssueHeader } from "./freight-issue-header";
 import { FreightIssueSummary } from "./freight-issue-summary";
@@ -42,52 +43,128 @@ function FreightIssueModalInner({
   const ti = useTranslations("fms.houseBl.entry.freight.issue");
   const queryClient = useQueryClient();
 
+  // 모달 내 편집 가능한 라인 목록 — 행 제거 시 실시간 반영
+  // ModalShell isOpen=false → return null(unmount)이므로 재오픈마다 초기값으로 재설정됨
+  const [lines, setLines] = useState<SelectedFreightLine[]>(selectedLines);
+
+  // amend 모드 판정 — 발행된 행(financialDocumentId 있음)이 하나라도 있으면 amend
+  const amendDocId = useMemo(
+    () => lines.find((l) => l.financialDocumentId != null)?.financialDocumentId ?? null,
+    [lines],
+  );
+  const isAmend = amendDocId != null;
+
+  // amend 시 서류 번호 표시 (발행 행의 financialDocumentNo 기준)
+  const displayDocumentNo = useMemo(
+    () => lines.find((l) => l.financialDocumentNo)?.financialDocumentNo ?? "",
+    [lines],
+  );
+
   const header = useFreightIssueHeader();
 
   const { options: taxTypeOptions } = useEnumOptions("TaxType");
-  // value→label 역방향 조회 맵 (코드→표시명)
   const taxTypeLabelMap = useMemo(
     () => new Map(taxTypeOptions.map((o) => [o.value, o.label])),
     [taxTypeOptions],
   );
 
-  const lineColumns = useMemo(
+  // 행 제거 버튼 컬럼 — amend/issue 모두 허용(최종셋에서 빠지면 BE diff가 unlink 처리)
+  // setLines는 React setState 안정 레퍼런스. ti(removeLine) 키 변경 시에만 재생성.
+  const removeColumn = useMemo<GridColumn<SelectedFreightLine>>(
+    () => ({
+      key: "_remove",
+      label: "",
+      width: 36,
+      align: "center",
+      render: (_, row) => (
+        <button
+          type="button"
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 2,
+            color: "var(--color-danger, #ef4444)",
+          }}
+          title={ti("removeLine")}
+          onClick={() =>
+            setLines((prev) => prev.filter((l) => l.freightLineId !== row.freightLineId))
+          }
+        >
+          <Minus size={14} />
+        </button>
+      ),
+    }),
+    [ti, setLines],
+  );
+
+  const baseLineColumns = useMemo(
     () => buildFreightLineColumns(tf, taxTypeLabelMap),
     [tf, taxTypeLabelMap],
   );
 
+  // 행 제거 컬럼을 앞에 배치
+  const lineColumns = useMemo(
+    () => [removeColumn, ...baseLineColumns],
+    [removeColumn, baseLineColumns],
+  );
+
   const blIdStr = String(blId);
 
-  // ── 발행 Mutation ──────────────────────────────────────────
+  // ── 발행 Mutation (issue 모드) ─────────────────────────────
   const issueMutation = useMutation({
     mutationFn: () =>
       financialDocumentUseCases.issueDocument({
         blType,
         blId: blIdStr,
         freightType,
-        lineIds: selectedLines.map((l) => l.freightLineId),
+        lineIds: lines.map((l) => l.freightLineId),
         documentDt: header.documentDt,
         performanceDt: header.performanceDt,
         teamCode: header.teamCode || null,
         operator: header.operatorForSubmit,
       }),
     onSuccess: (result) => {
-      // 성공 토스트 명시(전역 onError는 에러만) — 발행된 document_no 포함
       toast.success(`${ti("success")} (${result.documentNo})`);
-      // ① listByBl invalidate (Account Documents 갱신)
       queryClient.invalidateQueries({
         queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
       });
-      // ② 상위 그리드 체크박스 선택 해제 + entry detail 재조회 트리거(onIssueSuccess 경로로 전파)
-      // B/L detail invalidate는 entry의 onFreightMutated → handleIssueSuccess → 여기로 이관.
-      // useFieldArray fields는 setValue로 갱신 불가하므로 detailLoadedRef 풀기+invalidate 패턴 필수.
       onIssueSuccess();
-      // 모달은 닫지 않음(PRD: 잔류). 발행 완료 후 버튼 비활성(isPending/isSuccess 판정).
+      // 모달은 닫지 않음(PRD: 잔류)
     },
-    // 에러는 전역 MutationCache onError SSOT에 위임 — 여기서 catch 금지
+    // 에러는 전역 MutationCache onError SSOT에 위임
   });
 
-  // 모달 닫기 — listByBl invalidate 재보장(Account Documents 최신)
+  // ── 편집 Mutation (amend 모드) ─────────────────────────────
+  const amendMutation = useMutation({
+    mutationFn: () =>
+      financialDocumentUseCases.amendDocument({
+        documentId: amendDocId!,
+        blType,
+        blId: blIdStr,
+        freightType,
+        finalLineIds: lines.map((l) => l.freightLineId),
+      }),
+    onSuccess: (result) => {
+      if (result.deleted) {
+        toast.success(ti("deleteSuccess"));
+      } else {
+        toast.success(ti("amendSuccess"));
+      }
+      queryClient.invalidateQueries({
+        queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
+      });
+      // detail 재조회(form.reset 경로) + 그리드 선택 해제
+      onIssueSuccess();
+      handleClose();
+    },
+    // 에러는 전역 MutationCache onError SSOT에 위임
+  });
+
+  // 모달 닫기 — listByBl invalidate 재보장
   function handleClose() {
     queryClient.invalidateQueries({
       queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
@@ -95,8 +172,9 @@ function FreightIssueModalInner({
     onClose();
   }
 
-  // 발행 버튼: 발행 성공 후 재발행 방지(isSuccess 시 비활성)
+  // 발행 버튼: 발행/편집 성공 후 재실행 방지
   const canIssue = !issueMutation.isPending && !issueMutation.isSuccess;
+  const canAmend = !amendMutation.isPending && !amendMutation.isSuccess;
 
   return (
     <div
@@ -109,20 +187,32 @@ function FreightIssueModalInner({
         }
       }}
     >
-      {/* ── 헤더 입력 섹션 ─────────────────────────────────── */}
-      <FreightIssueHeader header={header} ti={ti} />
+      {/* ── 헤더 섹션 ─────────────────────────────────────────── */}
+      {isAmend ? (
+        // amend 모드: 헤더 표시 전용 (서류번호만 표시, 나머지는 편집 불가)
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0,1fr))", gap: 8, marginBottom: 12 }}>
+          <div className="field">
+            <div className="field__label">{ti("documentNo")}</div>
+            <div className="field__input">
+              <input className="input" readOnly value={displayDocumentNo} />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <FreightIssueHeader header={header} ti={ti} />
+      )}
 
       {/* ── 선택 요약(고객/DocType/합계) ─────────────────────── */}
-      <FreightIssueSummary selectedLines={selectedLines} ti={ti} tf={tf} />
+      <FreightIssueSummary selectedLines={lines} ti={ti} tf={tf} />
 
-      {/* ── 선택 라인 읽기전용 목록 ──────────────────────────── */}
+      {/* ── 선택 라인 목록 (행 제거 버튼 포함) ─────────────────── */}
       <div style={{ marginBottom: 4, fontSize: 12, color: "var(--color-text-secondary, #6b7280)" }}>
-        {ti("desc")} ({selectedLines.length}건)
+        {isAmend ? ti("amendDesc", { defaultValue: ti("desc") }) : ti("desc")} ({lines.length}건)
       </div>
       <div style={{ flex: 1, minHeight: 270 }}>
         <GridList
           columns={lineColumns}
-          data={selectedLines}
+          data={lines}
           rowKey={(r) => r.freightLineId}
           emptyMessage="—"
         />
@@ -130,14 +220,25 @@ function FreightIssueModalInner({
 
       {/* ── 액션 버튼 ────────────────────────────────────────── */}
       <div className="modal__actions">
-        <Button
-          variant="transaction"
-          onClick={() => issueMutation.mutate()}
-          disabled={!canIssue}
-          loading={issueMutation.isPending}
-        >
-          {ti("confirm")}
-        </Button>
+        {isAmend ? (
+          <Button
+            variant="transaction"
+            onClick={() => amendMutation.mutate()}
+            disabled={!canAmend}
+            loading={amendMutation.isPending}
+          >
+            {ti("confirm")}
+          </Button>
+        ) : (
+          <Button
+            variant="transaction"
+            onClick={() => issueMutation.mutate()}
+            disabled={!canIssue}
+            loading={issueMutation.isPending}
+          >
+            {ti("confirm")}
+          </Button>
+        )}
         <Button variant="normal" onClick={handleClose}>
           {ti("cancel")}
         </Button>

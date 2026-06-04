@@ -1,6 +1,13 @@
 import { z } from "zod";
 import type { FinancialDocumentPort } from "@/application/bms/financial-document/ports";
-import type { FinancialDocument, IssuableLine, IssueDocumentInput, IssueDocumentResult } from "@/application/bms/financial-document/ports";
+import type {
+  FinancialDocument,
+  IssuableLine,
+  IssueDocumentInput,
+  IssueDocumentResult,
+  AmendDocumentInput,
+  AmendDocumentResult,
+} from "@/application/bms/financial-document/ports";
 import { bmsFetchJson } from "../bms-fetch";
 import { ResponseParseError } from "../errors";
 
@@ -55,7 +62,31 @@ const ISSUE_DOCUMENT_RESPONSE_SCHEMA = z.object({
   documentNo: z.string(),
 }) satisfies z.ZodType<IssueDocumentResult>;
 
+// BE: AmendDocumentResponse
+const AMEND_DOCUMENT_RESPONSE_SCHEMA = z.object({
+  financialDocumentId: z.number().nullable(),
+  documentNo: z.string(),
+  deleted: z.boolean(),
+}) satisfies z.ZodType<AmendDocumentResult>;
+
 export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
+  async amendDocument(req: AmendDocumentInput): Promise<AmendDocumentResult> {
+    const json = await bmsFetchJson(`${BASE}/${req.documentId}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        blType: req.blType,
+        blId: req.blId,
+        freightType: req.freightType,
+        finalLineIds: req.finalLineIds,
+      }),
+    });
+    const parsed = apiResponse(AMEND_DOCUMENT_RESPONSE_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid amend-document response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
+  },
+
   async issueDocument(req: IssueDocumentInput): Promise<IssueDocumentResult> {
     const json = await bmsFetchJson(BASE + "/issue", {
       method: "POST",

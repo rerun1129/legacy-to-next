@@ -238,6 +238,10 @@
             "totalAmount":    "Total",
             "selectAll":      "Select All",
             "issueBtn":       "Issue",
+            "multiDocBlocked": "Cannot edit lines from different documents together.",
+            "amendSuccess":   "Document updated.",
+            "removeLine":     "Remove line",
+            "amendDesc":      "Review lines, add or remove as needed, then confirm.",
             "lineCols": {
               "customer":     "Customer",
               "freightCode":  "Freight Code",

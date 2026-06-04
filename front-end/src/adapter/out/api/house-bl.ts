@@ -173,6 +173,8 @@ const FREIGHT_LINE_RESPONSE_SCHEMA = z.object({
   taxNo:               z.string().nullable().optional().transform((v) => v ?? undefined),
   slipNo:              z.string().nullable().optional().transform((v) => v ?? undefined),
   financialDocumentNo: z.string().nullable().optional().transform((v) => v ?? undefined),
+  // §BE-sync — FreightLineResponse.financialDocumentId (amend 진입용, 발행 전 null)
+  financialDocumentId: z.number().nullable().optional().transform((v) => v ?? undefined),
 });
 
 // §BE-sync — FreightResponse (응답의 라인 키는 selling/buying)
