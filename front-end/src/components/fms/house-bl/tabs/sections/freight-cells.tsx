@@ -310,10 +310,19 @@ export function FinancialDocTypeCell({ prefix, index }: FinancialDocTypeCellProp
 interface ReadOnlyCellProps {
   /** §A2 BE 산정값 — 저장 전 신규 행은 undefined/빈 문자열, 저장 후 BE 계산값 표시 */
   value?: string | number | null;
+  /** 편집 셀(ComboBox/CodeBox) 가운데정렬과 시각적 일치를 위해 td textAlign 상속에 추가로 style 직접 적용 */
+  align?: "left" | "center" | "right";
 }
 
-export function ReadOnlyCell({ value }: ReadOnlyCellProps) {
-  return <TextBox variant="cell" readOnly value={value != null ? String(value) : ""} />;
+export function ReadOnlyCell({ value, align }: ReadOnlyCellProps) {
+  return (
+    <TextBox
+      variant="cell"
+      readOnly
+      value={value != null ? String(value) : ""}
+      style={align ? { textAlign: align } : undefined}
+    />
+  );
 }
 
 // ── FreightLineId hidden input ────────────────────────────────

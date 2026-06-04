@@ -16,6 +16,7 @@ import {
   FinancialDocTypeCell,
   ReadOnlyCell,
   FreightLineIdCell,
+  getFinancialDocOptions,
   type FieldPrefix,
 } from "./freight-cells";
 import {
@@ -36,6 +37,7 @@ export interface BuildColumnsArgs {
   perOptions: ReturnType<typeof getPerOptions>;
   onPerChange: (index: number, value: string) => void;
   onCurrencySelect: (index: number, currencyCode: string) => void;
+  taxTypeLabelMap: Map<string, string>;
 }
 
 // 발행 라인 판정 헬퍼 — financialDocumentNo 있는 행은 immutable(§6.17)
@@ -49,6 +51,7 @@ export function buildFreightColumns({
   perOptions,
   onPerChange,
   onCurrencySelect,
+  taxTypeLabelMap,
 }: BuildColumnsArgs): GridColumn<FreightRow>[] {
   return [
     {
@@ -70,7 +73,7 @@ export function buildFreightColumns({
       width: 100,
       isRequired: true,
       render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.customerCode} /> : <CustomerCell prefix={prefix} index={i} />,
+        isIssued(row) ? <ReadOnlyCell value={row.customerCode} align="center" /> : <CustomerCell prefix={prefix} index={i} />,
     },
     {
       key: "customerName",
@@ -82,8 +85,15 @@ export function buildFreightColumns({
       key: "financialDocType",
       label: tf("cols.financialDocType"),
       width: 90,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.financialDocType} /> : <FinancialDocTypeCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const docLabel = row.financialDocType
+            ? (getFinancialDocOptions(prefix).find((o) => o.value === row.financialDocType)?.label ?? row.financialDocType)
+            : "";
+          return <ReadOnlyCell value={docLabel} align="center" />;
+        }
+        return <FinancialDocTypeCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "freightCode",
@@ -91,7 +101,7 @@ export function buildFreightColumns({
       width: 80,
       isRequired: true,
       render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.freightCode} /> : <FreightCodeCell prefix={prefix} index={i} />,
+        isIssued(row) ? <ReadOnlyCell value={row.freightCode} align="center" /> : <FreightCodeCell prefix={prefix} index={i} />,
     },
     {
       key: "freightName",
@@ -106,7 +116,7 @@ export function buildFreightColumns({
       isRequired: true,
       render: (_, row, i) =>
         isIssued(row)
-          ? <ReadOnlyCell value={row.currency} />
+          ? <ReadOnlyCell value={row.currency} align="center" />
           : <CurrencyCell prefix={prefix} index={i} onCurrencySelect={onCurrencySelect} />,
     },
     {
@@ -114,8 +124,13 @@ export function buildFreightColumns({
       label: tf("cols.exchangeRate"),
       className: "is-num",
       width: 90,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.exchangeRate} /> : <ExchangeRateCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const v = row.exchangeRate;
+          return <ReadOnlyCell value={v != null && v !== "" ? Number(v).toFixed(2) : ""} />;
+        }
+        return <ExchangeRateCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "per",
@@ -124,7 +139,7 @@ export function buildFreightColumns({
       isRequired: true,
       render: (_, row, i) =>
         isIssued(row)
-          ? <ReadOnlyCell value={row.per} />
+          ? <ReadOnlyCell value={row.per ? resolvePerLabel(row.per) : ""} align="center" />
           : (
             <PerCell
               prefix={prefix}
@@ -150,24 +165,39 @@ export function buildFreightColumns({
       className: "is-num",
       width: 100,
       isRequired: true,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.price} /> : <PriceCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const v = row.price;
+          return <ReadOnlyCell value={v != null && v !== "" ? Number(v).toFixed(2) : ""} />;
+        }
+        return <PriceCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "settleAmount",
       label: tf("cols.settleAmount"),
       className: "is-num",
       width: 100,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.settleAmount} /> : <SettleAmountCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const v = row.settleAmount;
+          return <ReadOnlyCell value={v != null && v !== "" ? Number(v).toFixed(2) : ""} />;
+        }
+        return <SettleAmountCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "localAmount",
       label: tf("cols.localAmount"),
       className: "is-num",
       width: 100,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.localAmount} /> : <LocalAmountCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const v = row.localAmount;
+          return <ReadOnlyCell value={v != null && v !== "" ? Number(v).toFixed(2) : ""} />;
+        }
+        return <LocalAmountCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "taxType",
@@ -175,15 +205,22 @@ export function buildFreightColumns({
       width: 100,
       isRequired: true,
       render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.taxType} /> : <TaxTypeCell prefix={prefix} index={i} />,
+        isIssued(row)
+          ? <ReadOnlyCell value={row.taxType ? (taxTypeLabelMap.get(row.taxType) ?? row.taxType) : ""} align="center" />
+          : <TaxTypeCell prefix={prefix} index={i} />,
     },
     {
       key: "vat",
       label: tf("cols.vat"),
       className: "is-num",
       width: 100,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.vat} /> : <VatCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const v = row.vat;
+          return <ReadOnlyCell value={v != null && v !== "" ? Number(v).toFixed(2) : ""} />;
+        }
+        return <VatCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "total",
@@ -205,8 +242,13 @@ export function buildFreightColumns({
       label: tf("cols.usdExchangeRate"),
       className: "is-num",
       width: 90,
-      render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.usdExchangeRate} /> : <UsdExchangeRateCell prefix={prefix} index={i} />,
+      render: (_, row, i) => {
+        if (isIssued(row)) {
+          const v = row.usdExchangeRate;
+          return <ReadOnlyCell value={v != null && v !== "" ? Number(v).toFixed(2) : ""} />;
+        }
+        return <UsdExchangeRateCell prefix={prefix} index={i} />;
+      },
     },
     {
       key: "usdAmount",

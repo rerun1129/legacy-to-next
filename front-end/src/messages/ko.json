@@ -250,7 +250,10 @@
               "status":       "상태"
             },
             "deleteConfirm":  "선택한 서류를 삭제하시겠습니까?",
-            "deleteSuccess":  "서류가 삭제되었습니다."
+            "deleteSuccess":  "서류가 삭제되었습니다.",
+            "deleteConfirmTitle": "서류 삭제",
+            "deleteConfirmDesc":  "선택한 {count}건의 서류를 삭제하시겠습니까? 연결된 운임 라인의 발행이 해제됩니다.",
+            "deleteConfirmBtn":   "삭제"
           },
           "documentType": {
             "INVOICE": "Invoice",

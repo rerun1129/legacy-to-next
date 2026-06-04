@@ -9,6 +9,7 @@ import type { HouseBlFormValues, FreightRow } from "@/components/fms/house-bl/ho
 import { Button } from "@/components/shared/button";
 import type { Mode } from "@/lib/bl-variants";
 import { getPerOptions, computeQtySnapshot } from "@/components/fms/house-bl/freight-per";
+import { useEnumOptions } from "@/application/enums/use-enum";
 import { type FieldPrefix } from "./freight-cells";
 import { buildFreightColumns } from "./freight-columns";
 import { recalcFromExchangeRate } from "@/components/fms/house-bl/freight-calc";
@@ -50,10 +51,10 @@ interface FreightPanelProps {
   mode?: Mode;
   blType?: string;
   blId?: string | number | null;
-  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
+  onFreightMutated?: () => void;
 }
 
-function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "house-bl" }: FreightPanelProps) {
+function FreightPanel({ prefix, panelTitle, mode, blType, blId, onFreightMutated }: FreightPanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   const ti = useTranslations("fms.houseBl.entry.freight.issue");
   const { control, getValues, setValue } = useFormContext<HouseBlFormValues>();
@@ -77,6 +78,13 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
   const perOptions = useMemo(
     () => getPerOptions(mode ?? "NON_BL", containers),
     [mode, containers],
+  );
+
+  // 발행 행 TaxType 코드 → 표시명 변환 맵 (freight-issue-columns.tsx 기준 패턴)
+  const { options: taxTypeOptions } = useEnumOptions("TaxType");
+  const taxTypeLabelMap = useMemo(
+    () => new Map(taxTypeOptions.map((o) => [o.value, o.label])),
+    [taxTypeOptions],
   );
 
   // per 선택 시 qty 스냅샷 1회 setValue — watch 아닌 getValues 사용(형제 focus 보호)
@@ -138,8 +146,9 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
         perOptions,
         onPerChange: handlePerChange,
         onCurrencySelect: handleCurrencySelect,
+        taxTypeLabelMap,
       }),
-    [prefix, tf, perOptions, handlePerChange, handleCurrencySelect],
+    [prefix, tf, perOptions, handlePerChange, handleCurrencySelect, taxTypeLabelMap],
   );
 
   const selectedIdx =
@@ -301,9 +310,10 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
     setIsIssueModalOpen(true);
   }
 
-  // 발행 성공 후 모달에서 호출 — 그리드 선택 해제
+  // 발행 성공 후 모달에서 호출 — 그리드 선택 해제 + entry detail 재조회 트리거
   function handleIssueSuccess() {
     setIssueSelectedKeys(new Set());
+    onFreightMutated?.();
   }
 
   // 미저장(blId 없음) 또는 발행 버튼 비활성 조건
@@ -376,7 +386,6 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
           blType={resolvedBlType}
           blId={blId!}
           freightType={freightType}
-          blDomainKey={blDomainKey}
           selectedLines={modalSelectedLines}
           onIssueSuccess={handleIssueSuccess}
         />
@@ -391,10 +400,10 @@ interface FreightSidePanelProps {
   mode?: Mode;
   blType?: string;
   blId?: string | number | null;
-  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
+  onFreightMutated?: () => void;
 }
 
-export function FreightSellingPanel({ mode, blType, blId, blDomainKey }: FreightSidePanelProps) {
+export function FreightSellingPanel({ mode, blType, blId, onFreightMutated }: FreightSidePanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   return (
     <FreightPanel
@@ -403,12 +412,12 @@ export function FreightSellingPanel({ mode, blType, blId, blDomainKey }: Freight
       mode={mode}
       blType={blType}
       blId={blId}
-      blDomainKey={blDomainKey}
+      onFreightMutated={onFreightMutated}
     />
   );
 }
 
-export function FreightBuyingPanel({ mode, blType, blId, blDomainKey }: FreightSidePanelProps) {
+export function FreightBuyingPanel({ mode, blType, blId, onFreightMutated }: FreightSidePanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   return (
     <FreightPanel
@@ -417,7 +426,7 @@ export function FreightBuyingPanel({ mode, blType, blId, blDomainKey }: FreightS
       mode={mode}
       blType={blType}
       blId={blId}
-      blDomainKey={blDomainKey}
+      onFreightMutated={onFreightMutated}
     />
   );
 }

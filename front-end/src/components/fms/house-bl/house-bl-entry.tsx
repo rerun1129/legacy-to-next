@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore, blDraftStore } from "@/lib/use-bl-draft-store";
@@ -27,6 +27,7 @@ import { useHouseBlEntryDetailSync } from "./use-house-bl-entry-detail-sync";
 import { useHouseBlEntryMutations } from "./use-house-bl-entry-mutations";
 import { useHouseBlEntryHandlers } from "./use-house-bl-entry-handlers";
 import { HouseBlEntryPageHead } from "./house-bl-entry-page-head";
+import { useQueryClient } from "@tanstack/react-query";
 
 function getToolbarFields(variant: BLVariantConfig): ReadonlyArray<string> {
   if (variant.mode === "SEA")   return TOOLBAR_FIELDS_SEA;
@@ -54,6 +55,7 @@ export function HouseBLEntry({ variant }: Props) {
   const [resetVersion, setResetVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
+  const queryClient = useQueryClient();
   const id = useEntryFocusStore((s) => s.focus[entryFocusKeys.houseBl(variant.key)]);
   const isEdit = Boolean(id);
   const clearDraft = useBLDraftStore((state) => state.clearDraft);
@@ -103,6 +105,15 @@ export function HouseBLEntry({ variant }: Props) {
   // form/didRestoreFromDraftRef/detailLoadedRef는 컴포넌트 수명 내 안정 참조(ref).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
+
+  // 발행/서류삭제 성공 시 entry detail을 강제 재조회하는 콜백.
+  // detailLoadedRef.current=false → invalidate 순서로 실행하면 refetch 후 reset useEffect 가드가 열림.
+  const handleFreightMutated = useCallback(() => {
+    detailLoadedRef.current = false;
+    if (id != null) {
+      queryClient.invalidateQueries({ queryKey: ["house-bl", "detail", id] });
+    }
+  }, [queryClient, id, detailLoadedRef]);
 
   const { mutation, deleteMutation } = useHouseBlEntryMutations({
     id,
@@ -184,7 +195,7 @@ export function HouseBLEntry({ variant }: Props) {
         </div>
 
         <div style={{ display: tab === "main"    ? "contents" : "none" }}>{renderMainTab(variant, tab === "main", resetVersion, nonce)}</div>
-        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode} layoutScope={`house-bl-entry.freight.${variant.key}`} blType="HOUSE" blId={id ?? null} blDomainKey="house-bl" /></div>
+        <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode} layoutScope={`house-bl-entry.freight.${variant.key}`} blType="HOUSE" blId={id ?? null} onFreightMutated={handleFreightMutated} /></div>
       </form>
       </FormProvider>
 

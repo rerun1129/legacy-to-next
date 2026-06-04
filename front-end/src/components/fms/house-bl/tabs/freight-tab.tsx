@@ -20,11 +20,15 @@ interface FreightTabProps {
   blType?: "HOUSE" | "MASTER";
   /** 현재 저장된 B/L id. 신규 미저장이면 null/undefined. */
   blId?: string | number | null;
-  /** B/L detail 쿼리 캐시 도메인 키. invalidate 대상 결정에 사용. */
-  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
+  /**
+   * 발행(issue) 또는 서류 삭제(account-docs) 성공 후 엔트리가 수신하는 콜백.
+   * entry에서 detailLoadedRef.current=false + detail invalidate를 수행해
+   * freight 그리드(useFieldArray)가 최신 BE 응답으로 리셋되도록 보장한다.
+   */
+  onFreightMutated?: () => void;
 }
 
-export function FreightTab({ active, mode, layoutScope, blType, blId, blDomainKey }: FreightTabProps) {
+export function FreightTab({ active, mode, layoutScope, blType, blId, onFreightMutated }: FreightTabProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
 
   // FreightRatePanel은 SEA/AIR 구분만 필요 — TRUCK/NON_BL은 undefined 처리
@@ -46,7 +50,7 @@ export function FreightTab({ active, mode, layoutScope, blType, blId, blDomainKe
       label: tf("panels.sellingDebit"),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       component: (_props: WidgetProps) => (
-        <FreightSellingPanel mode={mode} blType={blType} blId={blId} blDomainKey={blDomainKey} />
+        <FreightSellingPanel mode={mode} blType={blType} blId={blId} onFreightMutated={onFreightMutated} />
       ),
       defaultPosition: { col: 0, row: 1, colSpan: 6, rowSpan: 2 },
       minColSpan: 2,
@@ -57,7 +61,7 @@ export function FreightTab({ active, mode, layoutScope, blType, blId, blDomainKe
       label: tf("panels.buyingCredit"),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       component: (_props: WidgetProps) => (
-        <FreightBuyingPanel mode={mode} blType={blType} blId={blId} blDomainKey={blDomainKey} />
+        <FreightBuyingPanel mode={mode} blType={blType} blId={blId} onFreightMutated={onFreightMutated} />
       ),
       defaultPosition: { col: 0, row: 3, colSpan: 6, rowSpan: 2 },
       minColSpan: 2,
@@ -68,7 +72,7 @@ export function FreightTab({ active, mode, layoutScope, blType, blId, blDomainKe
       label: tf("panels.accountDocuments"),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       component: (_props: WidgetProps) => (
-        <FreightAccountPanel blType={blType} blId={blId} blDomainKey={blDomainKey} />
+        <FreightAccountPanel blType={blType} blId={blId} onFreightMutated={onFreightMutated} />
       ),
       defaultPosition: { col: 0, row: 5, colSpan: 6, rowSpan: 2 },
       minColSpan: 3,

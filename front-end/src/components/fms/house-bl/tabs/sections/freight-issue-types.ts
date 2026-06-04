@@ -33,6 +33,4 @@ export interface FreightIssueModalProps {
   selectedLines: SelectedFreightLine[];
   /** 발행 성공 후 상위 그리드 체크박스 선택 해제 콜백 */
   onIssueSuccess: () => void;
-  /** B/L detail 쿼리 캐시 도메인 키. 기본값 "house-bl". */
-  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
 }

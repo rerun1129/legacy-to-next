@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
+import { confirm } from "@/components/confirm";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { Button } from "@/components/shared/button";
 import { toast } from "@/lib/toast-store";
@@ -51,10 +52,10 @@ function resolveDocStatus(code: string): string {
 interface FreightAccountPanelProps {
   blType?: "HOUSE" | "MASTER";
   blId?: string | number | null;
-  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
+  onFreightMutated?: () => void;
 }
 
-export function FreightAccountPanel({ blType, blId, blDomainKey = "house-bl" }: FreightAccountPanelProps) {
+export function FreightAccountPanel({ blType, blId, onFreightMutated }: FreightAccountPanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   const ti = useTranslations("fms.houseBl.entry.freight.issue");
   const queryClient = useQueryClient();
@@ -85,19 +86,25 @@ export function FreightAccountPanel({ blType, blId, blDomainKey = "house-bl" }: 
       queryClient.invalidateQueries({
         queryKey: financialDocumentKeys.listByBl(resolvedBlType, blIdStr),
       });
-      // B/L detail invalidate(라인 해제 · readOnly 해제)
-      const numId = Number(blId);
-      if (!isNaN(numId)) {
-        queryClient.invalidateQueries({ queryKey: [blDomainKey, "detail", numId] });
-      }
+      // B/L detail invalidate는 entry의 onFreightMutated 콜백으로 이관.
+      // useFieldArray fields는 setValue로 갱신 불가하므로 detailLoadedRef 풀기+invalidate 패턴 필수.
+      onFreightMutated?.();
       setSelectedKeys(new Set());
     },
     // 에러는 전역 MutationCache onError SSOT에 위임
   });
 
-  function handleDelete() {
+  async function handleDelete() {
     const ids = [...selectedKeys].map(Number).filter((n) => !isNaN(n));
     if (ids.length === 0) return;
+    const ok = await confirm({
+      title: ti("deleteConfirmTitle"),
+      description: ti("deleteConfirmDesc", { count: ids.length }),
+      variant: "destructive",
+      confirmText: ti("deleteConfirmBtn"),
+      cancelText: ti("cancel"),
+    });
+    if (!ok) return;
     deleteMutation.mutate(ids);
   }
 

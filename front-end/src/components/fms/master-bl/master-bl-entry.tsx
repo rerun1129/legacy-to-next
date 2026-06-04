@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useBlDraftSync } from "@/lib/use-bl-draft-sync";
 import { useBLDraftStore, blDraftStore } from "@/lib/use-bl-draft-store";
 import { useForm, FormProvider, Controller } from "react-hook-form";
@@ -130,6 +130,15 @@ export function MasterBLEntry({ variantKey }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
+  // 발행/서류삭제 성공 시 entry detail을 강제 재조회하는 콜백.
+  // detailLoadedRef.current=false → invalidate 순서로 실행하면 refetch 후 reset useEffect 가드가 열림.
+  const handleFreightMutated = useCallback(() => {
+    detailLoadedRef.current = false;
+    if (id != null) {
+      queryClient.invalidateQueries({ queryKey: ["master-bl", "detail", id] });
+    }
+  }, [queryClient, id, detailLoadedRef]);
+
   const { mutation, deleteMutation } = useMasterBlEntryMutations({
     id,
     variantKey,
@@ -245,7 +254,7 @@ export function MasterBLEntry({ variantKey }: Props) {
 
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       <div style={{ display: tab === "main"    ? "contents" : "none" }}><MasterMainTab key={mainTabKey} variant={variant} form={form} active={tab === "main"} /></div>
-      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode === "SEA" || variant.mode === "AIR" ? variant.mode : undefined} layoutScope={`master-bl-entry.freight.${variant.key}`} blType="MASTER" blId={id ?? null} blDomainKey="master-bl" /></div>
+      <div style={{ display: tab === "freight" ? "contents" : "none" }}><FreightTab key={resetVersion} active={tab === "freight"} mode={variant.mode === "SEA" || variant.mode === "AIR" ? variant.mode : undefined} layoutScope={`master-bl-entry.freight.${variant.key}`} blType="MASTER" blId={id ?? null} onFreightMutated={handleFreightMutated} /></div>
     </form>
     {isEdit && id && (
       <MasterChangeBlNoModal

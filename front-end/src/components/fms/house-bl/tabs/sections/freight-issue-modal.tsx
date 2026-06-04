@@ -21,7 +21,6 @@ import {
 } from "@/application/bms/financial-document/use-cases";
 import { useEnumOptions } from "@/application/enums/use-enum";
 import { type FreightIssueModalProps } from "./freight-issue-types";
-import { invalidateBlDetail } from "./freight-issue-utils";
 import { buildFreightLineColumns } from "./freight-issue-columns";
 import { useFreightIssueHeader, FreightIssueHeader } from "./freight-issue-header";
 import { FreightIssueSummary } from "./freight-issue-summary";
@@ -38,7 +37,6 @@ function FreightIssueModalInner({
   freightType,
   selectedLines,
   onIssueSuccess,
-  blDomainKey = "house-bl",
 }: Omit<FreightIssueModalProps, "isOpen">) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   const ti = useTranslations("fms.houseBl.entry.freight.issue");
@@ -80,9 +78,9 @@ function FreightIssueModalInner({
       queryClient.invalidateQueries({
         queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
       });
-      // ② B/L detail invalidate (freight 그리드 reload → financialDocumentNo 채워짐)
-      invalidateBlDetail(queryClient, blDomainKey, blId);
-      // ③ 상위 그리드 체크박스 선택 해제
+      // ② 상위 그리드 체크박스 선택 해제 + entry detail 재조회 트리거(onIssueSuccess 경로로 전파)
+      // B/L detail invalidate는 entry의 onFreightMutated → handleIssueSuccess → 여기로 이관.
+      // useFieldArray fields는 setValue로 갱신 불가하므로 detailLoadedRef 풀기+invalidate 패턴 필수.
       onIssueSuccess();
       // 모달은 닫지 않음(PRD: 잔류). 발행 완료 후 버튼 비활성(isPending/isSuccess 판정).
     },
@@ -103,6 +101,7 @@ function FreightIssueModalInner({
   return (
     <div
       className="modal__body"
+      style={{ padding: "12px 20px 16px" }}
       onKeyDown={(e) => {
         // Enter 차단 (textarea 제외) — 부모 엔트리 폼으로 버블링돼 저장 제출되는 것을 막음
         if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
@@ -120,7 +119,7 @@ function FreightIssueModalInner({
       <div style={{ marginBottom: 4, fontSize: 12, color: "var(--color-text-secondary, #6b7280)" }}>
         {ti("desc")} ({selectedLines.length}건)
       </div>
-      <div style={{ flex: 1, minHeight: 120 }}>
+      <div style={{ flex: 1, minHeight: 270 }}>
         <GridList
           columns={lineColumns}
           data={selectedLines}
@@ -157,7 +156,6 @@ export function FreightIssueModal({
   freightType,
   selectedLines,
   onIssueSuccess,
-  blDomainKey,
 }: FreightIssueModalProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   const panelLabel =
@@ -168,6 +166,8 @@ export function FreightIssueModal({
       isOpen={isOpen}
       title={panelLabel}
       size="lg"
+      portal
+      style={{ maxWidth: 1400 }}
     >
       <FreightIssueModalInner
         onClose={onClose}
@@ -176,7 +176,6 @@ export function FreightIssueModal({
         freightType={freightType}
         selectedLines={selectedLines}
         onIssueSuccess={onIssueSuccess}
-        blDomainKey={blDomainKey}
       />
     </ModalShell>
   );

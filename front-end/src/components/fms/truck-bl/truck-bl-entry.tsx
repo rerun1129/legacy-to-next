@@ -1,7 +1,9 @@
 "use client";
 
+import { useCallback }               from "react";
 import { useTranslations }               from "next-intl";
 import { FormProvider, Controller }       from "react-hook-form";
+import { useQueryClient }                from "@tanstack/react-query";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { MainTruck }     from "./tabs/main-truck";
 import { TextBox, ComboBox }              from "@/components/shared/inputs";
@@ -16,7 +18,17 @@ export function TruckBLEntry() {
   const tts = useTranslations("fms.truckBl.entry.tabs");
   const tm  = useTranslations("fms.truckBl.entry.msg");
 
+  const queryClient = useQueryClient();
   const entry = useTruckBlEntry();
+
+  // 발행/서류삭제 성공 시 entry detail을 강제 재조회하는 콜백.
+  // detailLoadedRef는 훅 내부 소유 — 직접 변경 대신 훅이 제공하는 콜백을 경유해 변경함(React Compiler 준수).
+  const handleFreightMutated = useCallback(() => {
+    entry.resetDetailLoaded();
+    if (entry.id != null) {
+      queryClient.invalidateQueries({ queryKey: ["truck-bl", "detail", entry.id] });
+    }
+  }, [entry, queryClient]);
 
   const loadingMessage = entry.deleteMutation.isPending
     ? tm("deleting")
@@ -138,7 +150,7 @@ export function TruckBLEntry() {
       {/* Tab content — 항상 마운트, 비활성 탭은 hidden으로 숨겨 폼 상태 보존 */}
       {/* nonce를 key에 포함해 Copy 신호(new→new)도 리마운트 트리거 */}
       <div style={{ display: entry.tab === "main"    ? "contents" : "none" }}><MainTruck   key={`${entry.resetVersion}:${entry.nonce ?? 0}`} active={entry.tab === "main"}    /></div>
-      <div style={{ display: entry.tab === "freight" ? "contents" : "none" }}><FreightTab key={`${entry.resetVersion}:${entry.nonce ?? 0}`} active={entry.tab === "freight"} layoutScope="truck-bl-entry.freight" blType="HOUSE" blId={entry.id ?? null} blDomainKey="truck-bl" /></div>
+      <div style={{ display: entry.tab === "freight" ? "contents" : "none" }}><FreightTab key={`${entry.resetVersion}:${entry.nonce ?? 0}`} active={entry.tab === "freight"} layoutScope="truck-bl-entry.freight" blType="HOUSE" blId={entry.id ?? null} onFreightMutated={handleFreightMutated} /></div>
     </form>
     {entry.isEdit && entry.id && (
       <TruckChangeBlNoModal
