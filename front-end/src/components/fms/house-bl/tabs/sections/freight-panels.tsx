@@ -12,7 +12,8 @@ import { getPerOptions, computeQtySnapshot } from "@/components/fms/house-bl/fre
 import { type FieldPrefix } from "./freight-cells";
 import { buildFreightColumns } from "./freight-columns";
 import { recalcFromExchangeRate } from "@/components/fms/house-bl/freight-calc";
-import { FreightIssueModal } from "./freight-issue-modal";
+import { FreightIssueModal, type SelectedFreightLine } from "./freight-issue-modal";
+import { toast } from "@/lib/toast-store";
 
 export type { FieldPrefix };
 
@@ -60,6 +61,11 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
+
+  // 그리드 행 체크박스 선택 — 발행 게이트 전용 (단일 선택과 독립)
+  const [issueSelectedKeys, setIssueSelectedKeys] = useState<Set<string | number>>(new Set());
+  // 모달에 전달할 스냅샷 — 모달 오픈 시 고정, 이후 그리드 선택 변경과 독립
+  const [modalSelectedLines, setModalSelectedLines] = useState<SelectedFreightLine[]>([]);
 
   // containers는 per 옵션 동적 치환에 필요 — useWatch로 리렌더 최소화
   // rawContainers를 useMemo로 안정화해 ?? [] 인라인 폴백의 매 렌더 새 배열 참조 방지
@@ -211,6 +217,74 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
     focusedRowKeyRef.current = null;
   }
 
+  // ── 발행 버튼 onClick 검증 ────────────────────────────────────
+  // GridList per-row disable 미지원 → 선택된 행 중 발행불가 행(미저장/이미발행)을 제외하고 검증
+  function handleIssueClick() {
+    if (issueSelectedKeys.size === 0) {
+      toast.error(ti("selectRequired"));
+      return;
+    }
+
+    const formValues = getValues();
+    const rows = (formValues[prefix] ?? []) as FreightRow[];
+
+    // 선택된 행 수집 — RHF fields[].id(UUID)로 매칭
+    const selectedRows: FreightRow[] = [];
+    for (let i = 0; i < fields.length; i++) {
+      const fieldId = (fields[i] as unknown as { id: string }).id;
+      if (!issueSelectedKeys.has(fieldId)) continue;
+
+      const row = rows[i];
+      if (!row) continue;
+
+      // freightLineId 없는 행(미저장) 또는 이미 발행된 행은 제외
+      if (!row.freightLineId) continue;
+      if (row.financialDocumentNo) continue;
+
+      selectedRows.push(row);
+    }
+
+    if (selectedRows.length === 0) {
+      toast.error(ti("selectRequired"));
+      return;
+    }
+
+    // customerCode distinct 검증
+    const customerCodes = new Set(selectedRows.map((r) => r.customerCode ?? ""));
+    if (customerCodes.size > 1) {
+      toast.error(ti("customerMixed"));
+      return;
+    }
+
+    // financialDocType distinct 검증
+    const docTypes = new Set(selectedRows.map((r) => r.financialDocType ?? ""));
+    if (docTypes.size > 1) {
+      toast.error(ti("docTypeMixed"));
+      return;
+    }
+
+    // 검증 통과 — 스냅샷 고정 후 모달 오픈
+    const snapshot: SelectedFreightLine[] = selectedRows.map((r) => ({
+      freightLineId:    r.freightLineId!,
+      customerCode:     r.customerCode ?? "",
+      customerName:     r.customerName ?? "",
+      financialDocType: r.financialDocType ?? "",
+      currency:         r.currency ?? "",
+      settleAmount:     r.settleAmount ? Number(r.settleAmount) : null,
+      localAmount:      r.localAmount  ? Number(r.localAmount)  : null,
+      vat:              r.vat          ? Number(r.vat)          : null,
+      usdAmount:        r.usdAmount    ? Number(r.usdAmount)    : null,
+      performanceDt:    r.performanceDt ?? "",
+    }));
+    setModalSelectedLines(snapshot);
+    setIsIssueModalOpen(true);
+  }
+
+  // 발행 성공 후 모달에서 호출 — 그리드 선택 해제
+  function handleIssueSuccess() {
+    setIssueSelectedKeys(new Set());
+  }
+
   // 미저장(blId 없음) 또는 발행 버튼 비활성 조건
   const hasBlId = Boolean(blId);
   // freightType 결정
@@ -252,7 +326,7 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
               variant="transaction"
               size="sm"
               disabled={!hasBlId}
-              onClick={() => setIsIssueModalOpen(true)}
+              onClick={handleIssueClick}
             >
               {ti("issueBtn")}
             </Button>
@@ -268,6 +342,9 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
           }
           onClearRow={() => setSelectedKey(null)}
           style={{ flex: 1, minHeight: 0 }}
+          selectable
+          selectedKeys={issueSelectedKeys}
+          onSelectionChange={setIssueSelectedKeys}
         />
       </div>
       {/* 발행 모달 — FreightPanel 외부에 mount하여 DOM 깊이 문제 방지 */}
@@ -279,6 +356,8 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
           blId={blId!}
           freightType={freightType}
           blDomainKey={blDomainKey}
+          selectedLines={modalSelectedLines}
+          onIssueSuccess={handleIssueSuccess}
         />
       )}
     </>

@@ -315,3 +315,22 @@ interface ReadOnlyCellProps {
 export function ReadOnlyCell({ value }: ReadOnlyCellProps) {
   return <TextBox variant="cell" readOnly value={value != null ? String(value) : ""} />;
 }
+
+// ── FreightLineId hidden input ────────────────────────────────
+// RHF useFieldArray가 id를 UUID로 덮으므로 freightLineId를 hidden input으로 등록해 필드값 유지
+// (feedback_entityid_rhf_fieldarray 패턴)
+
+interface FreightLineIdCellProps {
+  prefix: FieldPrefix;
+  index: number;
+}
+
+export function FreightLineIdCell({ prefix, index }: FreightLineIdCellProps) {
+  const { register } = useFormContext<HouseBlFormValues>();
+  return (
+    <input
+      type="hidden"
+      {...register(`${prefix}.${index}.freightLineId`, { valueAsNumber: true })}
+    />
+  );
+}

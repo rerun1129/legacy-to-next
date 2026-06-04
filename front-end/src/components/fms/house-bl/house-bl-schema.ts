@@ -101,6 +101,8 @@ const ITEM_HS_SCHEMA = z.object({
 // Freight Selling/Buying 공통 행
 export const FREIGHT_ROW_SCHEMA = z.object({
   id:               z.number().optional(),     // 신규행 id 없음 (zodResolver 배열항목 id는 optional)
+  // RHF useFieldArray가 id를 UUID로 덮으므로 freight_line_id는 별도 필드로 보존 (feedback_entityid_rhf_fieldarray 패턴)
+  freightLineId:    z.number().optional(),
   freightCode:      z.string().optional(),
   freightName:      z.string().optional(),     // code→name 표시용(readOnly)
   per:              z.string().optional(),     // Per code 또는 컨테이너타입 enum name

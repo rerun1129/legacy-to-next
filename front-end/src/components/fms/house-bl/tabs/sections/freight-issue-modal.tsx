@@ -2,11 +2,9 @@
 
 /**
  * 서류 발행 모달.
- * - 오픈 시 BE에서 issuableLines를 조회(폼 스냅샷 아님).
- * - 미발행 라인: 체크박스 선택 가능.
- * - 발행 라인: 목록 표시만(선택 불가).
- * - 단일 고객 프리체크(§6.14): 혼재 시 발행 버튼 비활성.
- * - 성공 시 모달 잔류(PRD). onClose 시에도 listByBl invalidate.
+ * - 발행 대상 라인은 상위 그리드에서 선택 후 스냅샷으로 전달받음(selectedLines).
+ * - customerCode / financialDocType 검증은 발행 버튼 onClick(freight-panels)에서 선행.
+ * - 성공 시 모달 잔류(PRD §3). onClose 시 listByBl invalidate 보장.
  * - 에러 토스트는 전역 MutationCache onError SSOT에 위임(직접 catch 금지).
  */
 
@@ -24,7 +22,6 @@ import {
   financialDocumentKeys,
   financialDocumentUseCases,
 } from "@/application/bms/financial-document/use-cases";
-import type { IssuableLine } from "@/application/bms/financial-document/ports";
 
 // ── 오늘 날짜 yyyyMMdd ─────────────────────────────────────────
 function todayYyyyMmDd(): string {
@@ -35,17 +32,34 @@ function todayYyyyMmDd(): string {
   return `${y}${m}${day}`;
 }
 
-// ── DocumentType/Status FE 매핑 (BE 컴포넌트 의존 금지) ────────
+// ── DocumentType FE 매핑 (BE 컴포넌트 의존 금지) ──────────────
 
 const DOCUMENT_TYPE_MAP: Record<string, string> = {
   INVOICE: "Invoice",
   PAYMENT: "Payment",
-  DEBIT: "Debit",
-  CREDIT: "Credit",
+  DEBIT:   "Debit",
+  CREDIT:  "Credit",
 };
 
 function resolveDocType(code: string): string {
   return DOCUMENT_TYPE_MAP[code] ?? code;
+}
+
+// ── 선택 행 스냅샷 타입 ────────────────────────────────────────
+// 상위 그리드에서 체크 후 발행 버튼 onClick 시 고정되는 스냅샷.
+// 이후 그리드 선택 변경과 독립적으로 모달이 동작하도록 분리.
+
+export interface SelectedFreightLine {
+  freightLineId:    number;
+  customerCode:     string;
+  customerName:     string;
+  financialDocType: string;
+  currency:         string;
+  settleAmount:     number | null;
+  localAmount:      number | null;
+  vat:              number | null;
+  usdAmount:        number | null;
+  performanceDt:    string;
 }
 
 // ── Props ──────────────────────────────────────────────────────
@@ -56,6 +70,10 @@ export interface FreightIssueModalProps {
   blType: string;
   blId: string | number;
   freightType: "SELLING" | "BUYING";
+  /** 상위 그리드에서 체크 후 전달되는 발행 대상 스냅샷 */
+  selectedLines: SelectedFreightLine[];
+  /** 발행 성공 후 상위 그리드 체크박스 선택 해제 콜백 */
+  onIssueSuccess: () => void;
   /** B/L detail 쿼리 캐시 도메인 키. 기본값 "house-bl". */
   blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
 }
@@ -67,6 +85,8 @@ function FreightIssueModalInner({
   blType,
   blId,
   freightType,
+  selectedLines,
+  onIssueSuccess,
   blDomainKey = "house-bl",
 }: Omit<FreightIssueModalProps, "isOpen">) {
   const tf = useTranslations("fms.houseBl.entry.freight");
@@ -94,60 +114,27 @@ function FreightIssueModalInner({
   // operator는 빈 문자열로 초기화 — 표시·제출 시 meData.username 폴백(setState-in-effect 회피)
   const [operator, setOperator] = useState<string>("");
 
-  // ── 선택 상태 ──────────────────────────────────────────────
-  const [selectedKeys, setSelectedKeys] = useState<Set<string | number>>(new Set());
-
-  // ── 발행 가능 라인 조회 ────────────────────────────────────
-  const { data: lines, isLoading } = useQuery<IssuableLine[]>({
-    queryKey: financialDocumentKeys.issuableLines(blType, blIdStr, freightType),
-    queryFn: () => financialDocumentUseCases.findIssuableLines(blType, blIdStr, freightType),
-  });
-  const safeLines = useMemo(() => lines ?? [], [lines]);
-
-  // 미발행 라인 / 발행 라인 분리
-  const issuableLines = useMemo(
-    () => safeLines.filter((l) => l.documentNo == null),
-    [safeLines]
+  // ── 선택 라인 합계 ─────────────────────────────────────────
+  const totalSettle = useMemo(
+    () => selectedLines.reduce((sum, l) => sum + (l.settleAmount ?? 0), 0),
+    [selectedLines],
   );
-  const issuedLines = useMemo(
-    () => safeLines.filter((l) => l.documentNo != null),
-    [safeLines]
+  const totalLocal = useMemo(
+    () => selectedLines.reduce((sum, l) => sum + (l.localAmount ?? 0), 0),
+    [selectedLines],
+  );
+  const totalVat = useMemo(
+    () => selectedLines.reduce((sum, l) => sum + (l.vat ?? 0), 0),
+    [selectedLines],
+  );
+  const totalUsd = useMemo(
+    () => selectedLines.reduce((sum, l) => sum + (l.usdAmount ?? 0), 0),
+    [selectedLines],
   );
 
-  // 선택된 라인 객체
-  const selectedLines = useMemo(
-    () => issuableLines.filter((l) => selectedKeys.has(l.freightLineId)),
-    [issuableLines, selectedKeys]
-  );
-
-  // ── 선택 라인 자동 계산 ────────────────────────────────────
-  // 단일 고객 체크(§6.14): 선택 라인의 customerCode가 2종 이상이면 혼재
-  const selectedCustomerCodes = useMemo(
-    () => new Set(selectedLines.map((l) => l.customerCode)),
-    [selectedLines]
-  );
-  const isCustomerMixed = selectedCustomerCodes.size > 1;
-  const singleCustomer =
-    selectedCustomerCodes.size === 1
-      ? [...selectedCustomerCodes][0]
-      : "";
-
-  const totalSettle = selectedLines.reduce(
-    (sum, l) => sum + (l.settleAmount ?? 0),
-    0
-  );
-  const totalLocal = selectedLines.reduce(
-    (sum, l) => sum + (l.localAmount ?? 0),
-    0
-  );
-  const totalVat = selectedLines.reduce(
-    (sum, l) => sum + (l.settleTaxAmount ?? 0),
-    0
-  );
-  const totalUsd = selectedLines.reduce(
-    (sum, l) => sum + (l.usdAmount ?? 0),
-    0
-  );
+  // 단일 customer/docType 요약 (선행 검증 통과 전제, 방어적 표시용)
+  const singleCustomer = selectedLines.length > 0 ? selectedLines[0].customerCode : "";
+  const singleDocType  = selectedLines.length > 0 ? resolveDocType(selectedLines[0].financialDocType) : "";
 
   // ── 발행 Mutation ──────────────────────────────────────────
   const issueMutation = useMutation({
@@ -163,30 +150,23 @@ function FreightIssueModalInner({
         // 사용자가 직접 입력하지 않은 경우 me.username 폴백(PRD §3)
         operator: operator || meData?.username || null,
       }),
-    onSuccess: () => {
-      // 성공 토스트 명시(전역 onError는 에러만)
-      toast.success(ti("success"));
-      // ① issuableLines invalidate(모달 갱신 — 발행 라인 documentNo 채워짐)
-      queryClient.invalidateQueries({
-        queryKey: financialDocumentKeys.issuableLines(blType, blIdStr, freightType),
-      });
-      // ② Account Documents invalidate
+    onSuccess: (result) => {
+      // 성공 토스트 명시(전역 onError는 에러만) — 발행된 document_no 포함
+      toast.success(`${ti("success")} (${result.documentNo})`);
+      // ① listByBl invalidate (Account Documents 갱신)
       queryClient.invalidateQueries({
         queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
       });
-      // ③ B/L detail invalidate(freight 그리드 reload → financialDocumentNo 채워짐)
+      // ② B/L detail invalidate (freight 그리드 reload → financialDocumentNo 채워짐)
       invalidateBlDetail(queryClient, blDomainKey, blId);
-      // 모달은 닫지 않음(PRD: 잔류). 선택만 초기화.
-      setSelectedKeys(new Set());
+      // ③ 상위 그리드 체크박스 선택 해제
+      onIssueSuccess();
+      // 모달은 닫지 않음(PRD: 잔류). 발행 완료 후 버튼 비활성(isPending/isSuccess 판정).
     },
     // 에러는 전역 MutationCache onError SSOT에 위임 — 여기서 catch 금지
   });
 
-  // ── 발행 버튼 활성 조건 ────────────────────────────────────
-  const canIssue =
-    selectedKeys.size > 0 && !isCustomerMixed && !issueMutation.isPending;
-
-  // ── 모달 닫기 — listByBl invalidate 보장 ──────────────────
+  // 모달 닫기 — listByBl invalidate 재보장(Account Documents 최신)
   function handleClose() {
     queryClient.invalidateQueries({
       queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
@@ -194,18 +174,13 @@ function FreightIssueModalInner({
     onClose();
   }
 
-  // ── 그리드 컬럼 ───────────────────────────────────────────
-  const lineColumns: GridColumn<IssuableLine>[] = [
+  // ── 선택 라인 읽기전용 그리드 컬럼 ───────────────────────────
+  const lineColumns: GridColumn<SelectedFreightLine>[] = [
     {
       key: "customerCode",
       label: ti("lineCols.customer"),
       width: 90,
       render: (_, row) => `${row.customerCode} ${row.customerName}`,
-    },
-    {
-      key: "freightCode",
-      label: ti("lineCols.freightCode"),
-      width: 80,
     },
     {
       key: "financialDocType",
@@ -233,11 +208,11 @@ function FreightIssueModalInner({
       render: (_, row) => row.localAmount?.toFixed(2) ?? "",
     },
     {
-      key: "settleTaxAmount",
+      key: "vat",
       label: ti("lineCols.vat"),
       className: "is-num",
       width: 80,
-      render: (_, row) => row.settleTaxAmount?.toFixed(2) ?? "",
+      render: (_, row) => row.vat?.toFixed(2) ?? "",
     },
     {
       key: "usdAmount",
@@ -247,12 +222,14 @@ function FreightIssueModalInner({
       render: (_, row) => row.usdAmount?.toFixed(2) ?? "",
     },
     {
-      key: "documentNo",
-      label: ti("lineCols.docNo"),
-      width: 110,
-      render: (_, row) => row.documentNo ?? "",
+      key: "performanceDt",
+      label: ti("performanceDt"),
+      width: 90,
     },
   ];
+
+  // 발행 버튼: 발행 성공 후 재발행 방지(isSuccess 시 비활성)
+  const canIssue = !issueMutation.isPending && !issueMutation.isSuccess;
 
   return (
     <form
@@ -311,12 +288,18 @@ function FreightIssueModalInner({
         </div>
       </div>
 
-      {/* ── 선택 요약(고객/합계) ──────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
+      {/* ── 선택 요약(고객/DocType/합계) ─────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
         <div className="field">
           <div className="field__label">{ti("customer")}</div>
           <div className="field__input">
             <input className="input" readOnly value={singleCustomer} />
+          </div>
+        </div>
+        <div className="field">
+          <div className="field__label">{tf("cols.financialDocType")}</div>
+          <div className="field__input">
+            <input className="input" readOnly value={singleDocType} />
           </div>
         </div>
         <div className="field">
@@ -345,47 +328,20 @@ function FreightIssueModalInner({
         </div>
       </div>
 
-      {/* ── 고객 혼재 안내 ────────────────────────────────── */}
-      {isCustomerMixed && (
-        <div style={{ color: "var(--color-danger, #dc2626)", fontSize: 12, marginBottom: 6 }}>
-          {ti("customerMixed")}
-        </div>
-      )}
-
-      {/* ── 미발행 라인 그리드 ────────────────────────────── */}
+      {/* ── 선택 라인 읽기전용 목록 ──────────────────────────── */}
       <div style={{ marginBottom: 4, fontSize: 12, color: "var(--color-text-secondary, #6b7280)" }}>
-        {ti("desc")}
+        {ti("desc")} ({selectedLines.length}건)
       </div>
-      <div style={{ flex: 1, minHeight: 160 }}>
-        <GridList<IssuableLine>
+      <div style={{ flex: 1, minHeight: 120 }}>
+        <GridList<SelectedFreightLine>
           columns={lineColumns}
-          data={issuableLines}
+          data={selectedLines}
           rowKey={(r) => r.freightLineId}
-          selectable
-          selectedKeys={selectedKeys}
-          onSelectionChange={setSelectedKeys}
-          isLoading={isLoading}
           emptyMessage="—"
         />
       </div>
 
-      {/* ── 이미 발행된 라인 표시(있을 때만) ──────────────── */}
-      {issuedLines.length > 0 && (
-        <>
-          <div style={{ marginTop: 8, marginBottom: 4, fontSize: 12, color: "var(--color-text-secondary, #6b7280)" }}>
-            {tf("cols.financialDocumentNo")} — {issuedLines.length}건 발행됨
-          </div>
-          <div style={{ minHeight: 60 }}>
-            <GridList<IssuableLine>
-              columns={lineColumns}
-              data={issuedLines}
-              rowKey={(r) => r.freightLineId}
-            />
-          </div>
-        </>
-      )}
-
-      {/* ── 액션 버튼 ────────────────────────────────────── */}
+      {/* ── 액션 버튼 ────────────────────────────────────────── */}
       <div className="modal__actions">
         <Button
           variant="transaction"
@@ -422,6 +378,8 @@ export function FreightIssueModal({
   blType,
   blId,
   freightType,
+  selectedLines,
+  onIssueSuccess,
   blDomainKey,
 }: FreightIssueModalProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
@@ -439,6 +397,8 @@ export function FreightIssueModal({
         blType={blType}
         blId={blId}
         freightType={freightType}
+        selectedLines={selectedLines}
+        onIssueSuccess={onIssueSuccess}
         blDomainKey={blDomainKey}
       />
     </ModalShell>

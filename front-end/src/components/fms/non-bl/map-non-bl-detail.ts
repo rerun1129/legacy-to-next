@@ -7,6 +7,8 @@ import type { FreightRow } from "@/components/fms/house-bl/house-bl-schema";
 function mapFreightLine(l: NonBlFreightLineView): FreightRow {
   return {
     id:                  l.id,
+    // RHF useFieldArray가 id를 UUID로 덮으므로 freight_line_id를 별도 필드에 보존
+    freightLineId:       l.id,
     freightCode:         l.freightCode  ?? "",
     freightName:         l.freightName  ?? "",
     per:                 l.per          ?? "",

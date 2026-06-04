@@ -225,6 +225,8 @@
             "cancel":         "Close",
             "success":        "Document issued successfully.",
             "customerMixed":  "Selected lines have different customers. Please select lines with the same customer.",
+            "docTypeMixed":   "Selected lines have different document types. Please select lines with the same document type.",
+            "selectRequired": "Please select lines from the grid before issuing.",
             "documentDt":     "Issue Date",
             "performanceDt":  "Perf. Date",
             "team":           "Team",

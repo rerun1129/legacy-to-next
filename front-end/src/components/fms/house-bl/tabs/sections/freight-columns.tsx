@@ -15,6 +15,7 @@ import {
   PerformanceDtCell,
   FinancialDocTypeCell,
   ReadOnlyCell,
+  FreightLineIdCell,
   type FieldPrefix,
 } from "./freight-cells";
 import {
@@ -55,7 +56,13 @@ export function buildFreightColumns({
       label: tf("cols.no"),
       className: "row-num",
       width: 36,
-      render: (_, __, i) => i + 1,
+      // FreightLineIdCell: hidden input으로 freightLineId를 RHF에 등록 (useFieldArray UUID 덮어쓰기 방지)
+      render: (_, __, i) => (
+        <>
+          {i + 1}
+          <FreightLineIdCell prefix={prefix} index={i} />
+        </>
+      ),
     },
     {
       key: "customerCode",
