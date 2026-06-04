@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm }                                from "react-hook-form";
-import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
 import { useTranslations }                       from "next-intl";
 import { useBlDraftSync }                        from "@/lib/use-bl-draft-sync";
@@ -11,7 +10,6 @@ import { useEntryFocusStore, entryFocusKeys }    from "@/lib/use-entry-focus-sto
 import { useEntryTabStore }                      from "@/lib/use-entry-tab-store";
 import { toast }                                 from "@/lib/toast-store";
 import type { NonBlFormValues }                  from "./non-bl-schema";
-import { NON_BL_SCHEMA }                         from "./non-bl-schema";
 import { createEmptyNonBlFormValues }            from "./non-bl-defaults";
 import { mapNonBlDetailToFormValues }            from "./map-non-bl-detail";
 import { useSearchNonBl }                        from "./use-search-non-bl";
@@ -36,7 +34,6 @@ export function useNonBlEntry() {
   const clearDraft = useBLDraftStore((state) => state.clearDraft);
 
   const methods = useForm<NonBlFormValues>({
-    resolver: zodResolver(NON_BL_SCHEMA),
     defaultValues: createEmptyNonBlFormValues(),
   });
 

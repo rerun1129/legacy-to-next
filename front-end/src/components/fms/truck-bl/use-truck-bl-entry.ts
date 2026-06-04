@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm }                                from "react-hook-form";
-import { zodResolver }                           from "@hookform/resolvers/zod";
 import { useQuery }                              from "@tanstack/react-query";
 import { useTranslations }                       from "next-intl";
 import { useBlDraftSync }                        from "@/lib/use-bl-draft-sync";
@@ -11,7 +10,6 @@ import { useEntryFocusStore, entryFocusKeys }    from "@/lib/use-entry-focus-sto
 import { useEntryTabStore }                      from "@/lib/use-entry-tab-store";
 import { toast }                                 from "@/lib/toast-store";
 import type { TruckBlFormValues }                from "./truck-bl-schema";
-import { TRUCK_BL_SCHEMA }                       from "./truck-bl-schema";
 import { createEmptyTruckBlFormValues }          from "./truck-bl-defaults";
 import { mapTruckBlDetailToForm }                from "./map-truck-bl-detail";
 import { useTruckBlEntryMutations }              from "./use-truck-bl-entry-mutations";
@@ -36,7 +34,6 @@ export function useTruckBlEntry() {
   const clearDraft = useBLDraftStore((state) => state.clearDraft);
 
   const form = useForm<TruckBlFormValues>({
-    resolver: zodResolver(TRUCK_BL_SCHEMA),
     defaultValues: createEmptyTruckBlFormValues(),
   });
 
