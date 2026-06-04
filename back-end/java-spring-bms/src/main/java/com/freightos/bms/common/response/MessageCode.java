@@ -16,7 +16,11 @@ public enum MessageCode {
     FINANCIAL_DOCUMENT_CREATED("금융 서류가 생성되었습니다."),
     FINANCIAL_DOCUMENT_UPDATED("수정되었습니다."),
     FINANCIAL_DOCUMENT_DELETED("삭제되었습니다."),
-    FINANCIAL_DOCUMENT_NOT_FOUND("금융 서류를 찾을 수 없습니다.");
+    FINANCIAL_DOCUMENT_NOT_FOUND("금융 서류를 찾을 수 없습니다."),
+    FINANCIAL_DOCUMENT_LINE_EMPTY("발행 대상 운임 라인이 없습니다."),
+    FINANCIAL_DOCUMENT_LINE_ALREADY_ISSUED("이미 서류가 발행된 라인이 포함되어 있습니다."),
+    FINANCIAL_DOCUMENT_MIXED_CUSTOMER("선택된 라인의 고객사가 서로 다릅니다. 동일 고객사 라인만 한 서류로 발행할 수 있습니다."),
+    FINANCIAL_DOCUMENT_MIXED_TYPE("선택된 라인의 서류 종류가 서로 다릅니다. 동일 종류 라인만 한 서류로 발행할 수 있습니다.");
 
     private final String message;
 
