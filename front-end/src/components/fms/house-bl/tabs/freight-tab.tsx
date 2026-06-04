@@ -16,9 +16,15 @@ interface FreightTabProps {
   /** BLVariantConfig.mode — SEA/AIR/TRUCK/NON_BL 4종. Per scope 필터에 사용. */
   mode?: Mode;
   layoutScope?: string;
+  /** 발행/Account Documents 배선용 blType. house/non/truck → 'HOUSE', master → 'MASTER'. */
+  blType?: "HOUSE" | "MASTER";
+  /** 현재 저장된 B/L id. 신규 미저장이면 null/undefined. */
+  blId?: string | number | null;
+  /** B/L detail 쿼리 캐시 도메인 키. invalidate 대상 결정에 사용. */
+  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
 }
 
-export function FreightTab({ active, mode, layoutScope }: FreightTabProps) {
+export function FreightTab({ active, mode, layoutScope, blType, blId, blDomainKey }: FreightTabProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
 
   // FreightRatePanel은 SEA/AIR 구분만 필요 — TRUCK/NON_BL은 undefined 처리
@@ -39,7 +45,9 @@ export function FreightTab({ active, mode, layoutScope }: FreightTabProps) {
       key: "selling",
       label: tf("panels.sellingDebit"),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      component: (_props: WidgetProps) => <FreightSellingPanel mode={mode} />,
+      component: (_props: WidgetProps) => (
+        <FreightSellingPanel mode={mode} blType={blType} blId={blId} blDomainKey={blDomainKey} />
+      ),
       defaultPosition: { col: 0, row: 1, colSpan: 6, rowSpan: 2 },
       minColSpan: 2,
       minRowSpan: 2,
@@ -48,7 +56,9 @@ export function FreightTab({ active, mode, layoutScope }: FreightTabProps) {
       key: "buying",
       label: tf("panels.buyingCredit"),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      component: (_props: WidgetProps) => <FreightBuyingPanel mode={mode} />,
+      component: (_props: WidgetProps) => (
+        <FreightBuyingPanel mode={mode} blType={blType} blId={blId} blDomainKey={blDomainKey} />
+      ),
       defaultPosition: { col: 0, row: 3, colSpan: 6, rowSpan: 2 },
       minColSpan: 2,
       minRowSpan: 2,
@@ -56,7 +66,10 @@ export function FreightTab({ active, mode, layoutScope }: FreightTabProps) {
     {
       key: "account-docs",
       label: tf("panels.accountDocuments"),
-      component: FreightAccountPanel,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      component: (_props: WidgetProps) => (
+        <FreightAccountPanel blType={blType} blId={blId} blDomainKey={blDomainKey} />
+      ),
       defaultPosition: { col: 0, row: 5, colSpan: 6, rowSpan: 2 },
       minColSpan: 3,
       minRowSpan: 1,

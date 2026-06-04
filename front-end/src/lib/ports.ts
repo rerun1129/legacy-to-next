@@ -1,4 +1,5 @@
 import { API_AUTH_PORT } from '@/adapter/out/api/auth';
+import { API_FINANCIAL_DOCUMENT_PORT } from '@/adapter/out/api/bms/financial-document';
 import { API_AIR_HOUSE_PORT } from '@/adapter/out/api/air-house';
 import { API_SEA_HOUSE_PORT } from '@/adapter/out/api/sea-house';
 import { API_AIR_MASTER_PORT } from '@/adapter/out/api/air-master';
@@ -74,3 +75,4 @@ export const subscriberPort = API_SUBSCRIBER_PORT;
 export const subscriptionPort = API_SUBSCRIPTION_PORT;
 export const uiLayoutPort = API_UI_LAYOUT_PORT;
 export const blQuickSearchPort = API_BL_QUICK_SEARCH_PORT;
+export const financialDocumentPort = API_FINANCIAL_DOCUMENT_PORT;

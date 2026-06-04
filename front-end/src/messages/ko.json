@@ -217,6 +217,48 @@
             "TAXABLE":    "과세",
             "ZERO_RATED": "영세",
             "EXEMPT":     "면세"
+          },
+          "issue": {
+            "title":          "서류 발행",
+            "desc":           "발행할 라인을 선택하고 정보를 입력하세요.",
+            "confirm":        "발행",
+            "cancel":         "닫기",
+            "success":        "서류가 발행되었습니다.",
+            "customerMixed":  "선택된 라인의 거래처가 다릅니다. 같은 거래처 라인만 선택해 주세요.",
+            "documentDt":     "발행일",
+            "performanceDt":  "실적일자",
+            "team":           "팀",
+            "operator":       "담당자",
+            "customer":       "거래처",
+            "totalAmount":    "합계",
+            "selectAll":      "전체 선택",
+            "issueBtn":       "발행",
+            "lineCols": {
+              "customer":     "거래처",
+              "freightCode":  "운임 코드",
+              "currency":     "통화",
+              "settleAmount": "정산금액",
+              "localAmount":  "현지금액",
+              "vat":          "부가세",
+              "usdAmount":    "USD금액",
+              "docNo":        "서류번호",
+              "status":       "상태"
+            },
+            "deleteConfirm":  "선택한 서류를 삭제하시겠습니까?",
+            "deleteSuccess":  "서류가 삭제되었습니다."
+          },
+          "documentType": {
+            "INVOICE": "Invoice",
+            "PAYMENT": "Payment",
+            "DEBIT":   "Debit",
+            "CREDIT":  "Credit"
+          },
+          "documentStatus": {
+            "CREATED": "생성됨",
+            "GROUPED": "그룹됨",
+            "TAX":     "세금계산서",
+            "SLIP":    "전표",
+            "CLEAR":   "정산완료"
           }
         },
         "fields": {

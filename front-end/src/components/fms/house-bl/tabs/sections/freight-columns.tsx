@@ -37,6 +37,11 @@ export interface BuildColumnsArgs {
   onCurrencySelect: (index: number, currencyCode: string) => void;
 }
 
+// 발행 라인 판정 헬퍼 — financialDocumentNo 있는 행은 immutable(§6.17)
+function isIssued(row: FreightRow): boolean {
+  return Boolean(row.financialDocumentNo);
+}
+
 export function buildFreightColumns({
   prefix,
   tf,
@@ -57,7 +62,8 @@ export function buildFreightColumns({
       label: tf("cols.customer"),
       width: 100,
       isRequired: true,
-      render: (_, __, i) => <CustomerCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.customerCode} /> : <CustomerCell prefix={prefix} index={i} />,
     },
     {
       key: "customerName",
@@ -69,14 +75,16 @@ export function buildFreightColumns({
       key: "financialDocType",
       label: tf("cols.financialDocType"),
       width: 90,
-      render: (_, __, i) => <FinancialDocTypeCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.financialDocType} /> : <FinancialDocTypeCell prefix={prefix} index={i} />,
     },
     {
       key: "freightCode",
       label: tf("cols.freightCode"),
       width: 80,
       isRequired: true,
-      render: (_, __, i) => <FreightCodeCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.freightCode} /> : <FreightCodeCell prefix={prefix} index={i} />,
     },
     {
       key: "freightName",
@@ -89,31 +97,36 @@ export function buildFreightColumns({
       label: tf("cols.currency"),
       width: 60,
       isRequired: true,
-      render: (_, __, i) => (
-        <CurrencyCell prefix={prefix} index={i} onCurrencySelect={onCurrencySelect} />
-      ),
+      render: (_, row, i) =>
+        isIssued(row)
+          ? <ReadOnlyCell value={row.currency} />
+          : <CurrencyCell prefix={prefix} index={i} onCurrencySelect={onCurrencySelect} />,
     },
     {
       key: "exchangeRate",
       label: tf("cols.exchangeRate"),
       className: "is-num",
       width: 90,
-      render: (_, __, i) => <ExchangeRateCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.exchangeRate} /> : <ExchangeRateCell prefix={prefix} index={i} />,
     },
     {
       key: "per",
       label: tf("cols.per"),
       width: 80,
       isRequired: true,
-      render: (_, __, i) => (
-        <PerCell
-          prefix={prefix}
-          index={i}
-          perOptions={perOptions}
-          onPerChange={onPerChange}
-          resolveLabel={(code) => resolvePerLabel(code)}
-        />
-      ),
+      render: (_, row, i) =>
+        isIssued(row)
+          ? <ReadOnlyCell value={row.per} />
+          : (
+            <PerCell
+              prefix={prefix}
+              index={i}
+              perOptions={perOptions}
+              onPerChange={onPerChange}
+              resolveLabel={(code) => resolvePerLabel(code)}
+            />
+          ),
     },
     {
       key: "qty",
@@ -121,7 +134,8 @@ export function buildFreightColumns({
       className: "is-num",
       width: 80,
       isRequired: true,
-      render: (_, __, i) => <QtyCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.qty} /> : <QtyCell prefix={prefix} index={i} />,
     },
     {
       key: "price",
@@ -129,35 +143,40 @@ export function buildFreightColumns({
       className: "is-num",
       width: 100,
       isRequired: true,
-      render: (_, __, i) => <PriceCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.price} /> : <PriceCell prefix={prefix} index={i} />,
     },
     {
       key: "settleAmount",
       label: tf("cols.settleAmount"),
       className: "is-num",
       width: 100,
-      render: (_, __, i) => <SettleAmountCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.settleAmount} /> : <SettleAmountCell prefix={prefix} index={i} />,
     },
     {
       key: "localAmount",
       label: tf("cols.localAmount"),
       className: "is-num",
       width: 100,
-      render: (_, __, i) => <LocalAmountCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.localAmount} /> : <LocalAmountCell prefix={prefix} index={i} />,
     },
     {
       key: "taxType",
       label: tf("cols.taxType"),
       width: 100,
       isRequired: true,
-      render: (_, __, i) => <TaxTypeCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.taxType} /> : <TaxTypeCell prefix={prefix} index={i} />,
     },
     {
       key: "vat",
       label: tf("cols.vat"),
       className: "is-num",
       width: 100,
-      render: (_, __, i) => <VatCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.vat} /> : <VatCell prefix={prefix} index={i} />,
     },
     {
       key: "total",
@@ -171,14 +190,16 @@ export function buildFreightColumns({
       label: tf("cols.performanceDt"),
       width: 100,
       isRequired: true,
-      render: (_, __, i) => <PerformanceDtCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.performanceDt} /> : <PerformanceDtCell prefix={prefix} index={i} />,
     },
     {
       key: "usdExchangeRate",
       label: tf("cols.usdExchangeRate"),
       className: "is-num",
       width: 90,
-      render: (_, __, i) => <UsdExchangeRateCell prefix={prefix} index={i} />,
+      render: (_, row, i) =>
+        isIssued(row) ? <ReadOnlyCell value={row.usdExchangeRate} /> : <UsdExchangeRateCell prefix={prefix} index={i} />,
     },
     {
       key: "usdAmount",

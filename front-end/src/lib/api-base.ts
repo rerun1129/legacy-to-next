@@ -6,3 +6,7 @@ export const FMS_API_URL =
 export const ADMIN_API_URL =
   process.env.NEXT_PUBLIC_ADMIN_API_URL ??
   "http://localhost:8081";
+
+export const BMS_API_URL =
+  process.env.NEXT_PUBLIC_BMS_API_URL ??
+  "http://localhost:8082";

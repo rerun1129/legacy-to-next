@@ -217,6 +217,48 @@
             "TAXABLE":    "Taxable",
             "ZERO_RATED": "Zero-rated",
             "EXEMPT":     "Exempt"
+          },
+          "issue": {
+            "title":          "Issue Document",
+            "desc":           "Select lines to issue and fill in the details.",
+            "confirm":        "Issue",
+            "cancel":         "Close",
+            "success":        "Document issued successfully.",
+            "customerMixed":  "Selected lines have different customers. Please select lines with the same customer.",
+            "documentDt":     "Issue Date",
+            "performanceDt":  "Perf. Date",
+            "team":           "Team",
+            "operator":       "Operator",
+            "customer":       "Customer",
+            "totalAmount":    "Total",
+            "selectAll":      "Select All",
+            "issueBtn":       "Issue",
+            "lineCols": {
+              "customer":     "Customer",
+              "freightCode":  "Freight Code",
+              "currency":     "Currency",
+              "settleAmount": "Settle Amt",
+              "localAmount":  "Local Amt",
+              "vat":          "VAT",
+              "usdAmount":    "USD Amt",
+              "docNo":        "Doc No",
+              "status":       "Status"
+            },
+            "deleteConfirm":  "Delete selected documents?",
+            "deleteSuccess":  "Document(s) deleted."
+          },
+          "documentType": {
+            "INVOICE": "Invoice",
+            "PAYMENT": "Payment",
+            "DEBIT":   "Debit",
+            "CREDIT":  "Credit"
+          },
+          "documentStatus": {
+            "CREATED": "Created",
+            "GROUPED": "Grouped",
+            "TAX":     "Tax Invoice",
+            "SLIP":    "Slip",
+            "CLEAR":   "Cleared"
           }
         },
         "fields": {

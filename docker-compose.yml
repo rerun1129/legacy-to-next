@@ -72,6 +72,7 @@ services:
         NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
         NEXT_PUBLIC_FMS_API_URL: http://localhost:8080
         NEXT_PUBLIC_ADMIN_API_URL: http://localhost:8081
+        NEXT_PUBLIC_BMS_API_URL: http://localhost:8082
         NEXT_PUBLIC_USE_MOCK: "false"
     container_name: fms-frontend
     ports:
@@ -79,6 +80,7 @@ services:
     depends_on:
       - fms-api
       - admin-api
+      - bms-api
 
 volumes:
   postgres_data:

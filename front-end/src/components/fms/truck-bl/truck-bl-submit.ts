@@ -25,10 +25,14 @@ function toNum(v: string | number | undefined): number | undefined {
   return Number.isNaN(n) ? undefined : n;
 }
 
-/** FreightRow 배열 → TruckBlFreightLineRequest 배열 변환 */
+/** FreightRow 배열 → TruckBlFreightLineRequest 배열 변환.
+ * 발행 라인(financialDocumentNo 있는 행)은 BE 영속 상태 보존 — 저장 커맨드에서 제외.
+ */
 function buildFreightLines(rows: FreightRow[] | undefined): TruckBlFreightLineRequest[] | undefined {
   if (!rows || rows.length === 0) return undefined;
-  return rows.map((r) => ({
+  const unissued = rows.filter((r) => !r.financialDocumentNo);
+  if (unissued.length === 0) return undefined;
+  return unissued.map((r) => ({
     id:               r.id,
     freightCode:      toStr(r.freightCode),
     per:              toStr(r.per),

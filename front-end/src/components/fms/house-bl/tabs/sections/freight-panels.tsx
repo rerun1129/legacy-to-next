@@ -12,6 +12,7 @@ import { getPerOptions, computeQtySnapshot } from "@/components/fms/house-bl/fre
 import { type FieldPrefix } from "./freight-cells";
 import { buildFreightColumns } from "./freight-columns";
 import { recalcFromExchangeRate } from "@/components/fms/house-bl/freight-calc";
+import { FreightIssueModal } from "./freight-issue-modal";
 
 export type { FieldPrefix };
 
@@ -46,14 +47,19 @@ interface FreightPanelProps {
   prefix: FieldPrefix;
   panelTitle: string;
   mode?: Mode;
+  blType?: string;
+  blId?: string | number | null;
+  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
 }
 
-function FreightPanel({ prefix, panelTitle, mode }: FreightPanelProps) {
+function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "house-bl" }: FreightPanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
+  const ti = useTranslations("fms.houseBl.entry.freight.issue");
   const { control, getValues, setValue } = useFormContext<HouseBlFormValues>();
   const { fields, append, remove } = useFieldArray({ control, name: prefix });
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const focusedRowKeyRef = useRef<string | null>(null);
+  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
   // containers는 per 옵션 동적 치환에 필요 — useWatch로 리렌더 최소화
   // rawContainers를 useMemo로 안정화해 ?? [] 인라인 폴백의 매 렌더 새 배열 참조 방지
@@ -178,6 +184,13 @@ function FreightPanel({ prefix, panelTitle, mode }: FreightPanelProps) {
     setSelectedKey(null);
   }
 
+  // 발행 라인 판정: RHF fieldArray fields[]는 setValue로 갱신 안 됨 →
+  // financialDocumentNo는 detail-load/reset으로만 채워지므로 fields[].financialDocumentNo 직접 참조 OK
+  function isIssuedRow(idx: number): boolean {
+    const row = fields[idx] as unknown as FreightRow;
+    return Boolean(row?.financialDocumentNo);
+  }
+
   function handleRemove() {
     if (fields.length === 0) return;
     const focused = focusedRowKeyRef.current;
@@ -191,48 +204,84 @@ function FreightPanel({ prefix, panelTitle, mode }: FreightPanelProps) {
       targetIdx = selectedIdx;
     }
     if (targetIdx === -1) targetIdx = fields.length - 1;
+    // 발행 라인은 삭제 불가(§6.17 immutable)
+    if (targetIdx !== -1 && isIssuedRow(targetIdx)) return;
     remove(targetIdx);
     setSelectedKey(null);
     focusedRowKeyRef.current = null;
   }
 
+  // 미저장(blId 없음) 또는 발행 버튼 비활성 조건
+  const hasBlId = Boolean(blId);
+  // freightType 결정
+  const freightType: "SELLING" | "BUYING" =
+    prefix === "freightSelling" ? "SELLING" : "BUYING";
+  // blType 기본값(undefined 보호)
+  const resolvedBlType = blType ?? "HOUSE";
+
+  // Minus 버튼: 선택/포커스 행이 발행 라인이면 비활성
+  const selectedRowIsIssued =
+    selectedIdx !== -1 ? isIssuedRow(selectedIdx) : false;
+
   return (
-    <div
-      className="panel"
-      style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
-    >
-      <div className="panel__head">
-        <div className="panel__title-accent" />
-        <span className="panel__title">{panelTitle}</span>
-        <span className="panel__rowcount">{fields.length}</span>
-        <div className="panel__actions">
-          <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
-            <Plus size={12} />
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            iconOnly
-            onMouseDown={captureFocusedRow}
-            onClick={handleRemove}
-            disabled={fields.length === 0}
-          >
-            <Minus size={12} />
-          </Button>
+    <>
+      <div
+        className="panel"
+        style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
+      >
+        <div className="panel__head">
+          <div className="panel__title-accent" />
+          <span className="panel__title">{panelTitle}</span>
+          <span className="panel__rowcount">{fields.length}</span>
+          <div className="panel__actions">
+            <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
+              <Plus size={12} />
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              iconOnly
+              onMouseDown={captureFocusedRow}
+              onClick={handleRemove}
+              disabled={fields.length === 0 || selectedRowIsIssued}
+            >
+              <Minus size={12} />
+            </Button>
+            {/* 발행 버튼 — 미저장 B/L이면 disabled */}
+            <Button
+              variant="transaction"
+              size="sm"
+              disabled={!hasBlId}
+              onClick={() => setIsIssueModalOpen(true)}
+            >
+              {ti("issueBtn")}
+            </Button>
+          </div>
         </div>
+        <GridList
+          columns={columns}
+          data={fields as unknown as FreightRow[]}
+          rowKey={(r) => String((r as unknown as { id: string }).id)}
+          onRowClick={(r) => setSelectedKey((r as unknown as { id: string }).id)}
+          rowClassName={(r) =>
+            (r as unknown as { id: string }).id === selectedKey ? "is-selected" : undefined
+          }
+          onClearRow={() => setSelectedKey(null)}
+          style={{ flex: 1, minHeight: 0 }}
+        />
       </div>
-      <GridList
-        columns={columns}
-        data={fields as unknown as FreightRow[]}
-        rowKey={(r) => String((r as unknown as { id: string }).id)}
-        onRowClick={(r) => setSelectedKey((r as unknown as { id: string }).id)}
-        rowClassName={(r) =>
-          (r as unknown as { id: string }).id === selectedKey ? "is-selected" : undefined
-        }
-        onClearRow={() => setSelectedKey(null)}
-        style={{ flex: 1, minHeight: 0 }}
-      />
-    </div>
+      {/* 발행 모달 — FreightPanel 외부에 mount하여 DOM 깊이 문제 방지 */}
+      {hasBlId && (
+        <FreightIssueModal
+          isOpen={isIssueModalOpen}
+          onClose={() => setIsIssueModalOpen(false)}
+          blType={resolvedBlType}
+          blId={blId!}
+          freightType={freightType}
+          blDomainKey={blDomainKey}
+        />
+      )}
+    </>
   );
 }
 
@@ -240,26 +289,35 @@ function FreightPanel({ prefix, panelTitle, mode }: FreightPanelProps) {
 
 interface FreightSidePanelProps {
   mode?: Mode;
+  blType?: string;
+  blId?: string | number | null;
+  blDomainKey?: "house-bl" | "master-bl" | "truck-bl" | "non-bl";
 }
 
-export function FreightSellingPanel({ mode }: FreightSidePanelProps) {
+export function FreightSellingPanel({ mode, blType, blId, blDomainKey }: FreightSidePanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   return (
     <FreightPanel
       prefix="freightSelling"
       panelTitle={tf("panels.sellingDebit")}
       mode={mode}
+      blType={blType}
+      blId={blId}
+      blDomainKey={blDomainKey}
     />
   );
 }
 
-export function FreightBuyingPanel({ mode }: FreightSidePanelProps) {
+export function FreightBuyingPanel({ mode, blType, blId, blDomainKey }: FreightSidePanelProps) {
   const tf = useTranslations("fms.houseBl.entry.freight");
   return (
     <FreightPanel
       prefix="freightBuying"
       panelTitle={tf("panels.buyingCredit")}
       mode={mode}
+      blType={blType}
+      blId={blId}
+      blDomainKey={blDomainKey}
     />
   );
 }
