@@ -47,17 +47,18 @@ function FreightIssueModalInner({
   // ModalShell isOpen=false → return null(unmount)이므로 재오픈마다 초기값으로 재설정됨
   const [lines, setLines] = useState<SelectedFreightLine[]>(selectedLines);
 
-  // amend 모드 판정 — 발행된 행(financialDocumentId 있음)이 하나라도 있으면 amend
-  const amendDocId = useMemo(
-    () => lines.find((l) => l.financialDocumentId != null)?.financialDocumentId ?? null,
-    [lines],
+  // amend 모드 판정 — 진입 시점 selectedLines 기준 1회 고정.
+  // lines(가변) 기반으로 두면 행을 전부 제거했을 때 isAmend=false로 뒤집혀
+  // amendMutation 대신 issueMutation이 호출되고 BE validateLines가 빈 lineIds를 거부하는 버그 발생.
+  // ModalShell이 isOpen=false 시 unmount하므로 재오픈마다 selectedLines로 재초기화됨.
+  const [amendDocId] = useState<number | null>(
+    () => selectedLines.find((l) => l.financialDocumentId != null)?.financialDocumentId ?? null,
   );
   const isAmend = amendDocId != null;
 
-  // amend 시 서류 번호 표시 (발행 행의 financialDocumentNo 기준)
-  const displayDocumentNo = useMemo(
-    () => lines.find((l) => l.financialDocumentNo)?.financialDocumentNo ?? "",
-    [lines],
+  // amend 시 서류 번호 표시 — 행을 전부 지워도 헤더 표시 유지를 위해 진입 시점 고정
+  const [displayDocumentNo] = useState(
+    () => selectedLines.find((l) => l.financialDocumentNo)?.financialDocumentNo ?? "",
   );
 
   const header = useFreightIssueHeader();
@@ -233,7 +234,7 @@ function FreightIssueModalInner({
           <Button
             variant="transaction"
             onClick={() => issueMutation.mutate()}
-            disabled={!canIssue}
+            disabled={!canIssue || lines.length === 0}
             loading={issueMutation.isPending}
           >
             {ti("confirm")}
