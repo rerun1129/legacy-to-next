@@ -90,7 +90,8 @@ export const ComboBox = forwardRef<HTMLInputElement, ComboBoxProps>(
         target: { value: opt.value, name: name ?? "" },
       } as React.ChangeEvent<HTMLInputElement>);
       closeList();
-      visibleRef.current?.blur();
+      // blur 제거: 선택 후 input에 포커스를 유지해야 Tab이 다음 포커스 요소로 이동한다.
+      // 이전에 blur()를 호출하면 포커스가 사라져 Tab이 document 처음(사이드바 접기)으로 튀는 버그 발생.
     };
 
     // Reposition on scroll / resize while open
