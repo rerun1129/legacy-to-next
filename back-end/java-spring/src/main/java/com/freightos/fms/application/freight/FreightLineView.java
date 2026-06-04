@@ -36,8 +36,7 @@ public record FreightLineView(
     String slipDt,
     Long financialDocumentId,
 
-    // ── 단계E 진입 시 채워질 표시값 (financial_document_id 조인) ─────────────────
-    // TODO(단계E): financial_document_id → document_no 조인 — FinancialDocumentJpaEntity 도입 후 연결
+    // ── 발행 서류 표시값 (financial_document_id 조인) ─────────────────────────
     String financialDocumentNo,
 
     // ── admin 마스터 조인 표시값 ──────────────────────────────────────────────

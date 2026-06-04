@@ -28,6 +28,7 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
     private final FreightDomainToJpaMapper domainToJpaMapper;
     private final FreightJpaToDomainMapper jpaToDomainMapper;
     private final CodeNameResolver codeNameResolver;
+    private final FinancialDocumentRefRepository financialDocumentRefRepository;
 
     @Override
     @Transactional
@@ -56,14 +57,15 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
             ? Collections.emptyMap()
             : codeNameResolver.findCustomerTypes(customerCodes);
 
-        // 라인 전량 재구성 (orphanRemoval로 기존 라인 자동 DELETE)
+        // 미발행 라인만 교체 — 발행 라인(financial_document_id != null)은 보존.
+        // FE는 발행 라인을 write payload에서 제외하므로 cmd.lines()는 미발행 재구성분만 담긴다.
         List<FreightLineJpaEntity> newLines = domainToJpaMapper.buildLineEntities(
             cmd.lines() != null ? cmd.lines() : Collections.emptyList(),
             cmd,
             customerTypes,
             savedHeader
         );
-        savedHeader.syncLines(newLines);
+        savedHeader.syncUnissuedLines(newLines);
     }
 
     @Override
@@ -80,13 +82,22 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
                     .map(FreightLineJpaEntity::getFreightCode)
                     .filter(c -> c != null && !c.isBlank())
                     .collect(Collectors.toSet());
+                Set<Long> documentIds = header.getLines().stream()
+                    .map(FreightLineJpaEntity::getFinancialDocumentId)
+                    .filter(id -> id != null)
+                    .collect(Collectors.toSet());
+
                 Map<String, String> customerNames = customerCodes.isEmpty()
                     ? Collections.emptyMap()
                     : codeNameResolver.findCustomerNames(customerCodes);
                 Map<String, String> freightNames = freightCodes.isEmpty()
                     ? Collections.emptyMap()
                     : codeNameResolver.findFreightNames(freightCodes);
-                return jpaToDomainMapper.toFreightView(header, customerNames, freightNames);
+                Map<Long, String> documentNoMap = documentIds.isEmpty()
+                    ? Collections.emptyMap()
+                    : buildDocumentNoMap(documentIds);
+
+                return jpaToDomainMapper.toFreightView(header, customerNames, freightNames, documentNoMap);
             });
     }
 
@@ -113,5 +124,17 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
             .map(line -> line.customerCode())
             .filter(code -> code != null && !code.isBlank())
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * financial_document_id 집합 → id:document_no 맵 조회.
+     * 빈 입력 시 호출하지 말 것(호출 전 isEmpty 체크 필수).
+     */
+    private Map<Long, String> buildDocumentNoMap(Set<Long> documentIds) {
+        return financialDocumentRefRepository.findByFinancialDocumentIdIn(documentIds).stream()
+            .collect(Collectors.toMap(
+                FinancialDocumentRefJpaEntity::getFinancialDocumentId,
+                FinancialDocumentRefJpaEntity::getDocumentNo
+            ));
     }
 }

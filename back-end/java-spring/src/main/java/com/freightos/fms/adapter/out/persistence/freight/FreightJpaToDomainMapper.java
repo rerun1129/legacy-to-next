@@ -14,12 +14,16 @@ import java.util.Map;
 @Component
 public class FreightJpaToDomainMapper {
 
+    /**
+     * @param documentNoMap financial_document_id → document_no (빈 맵 허용)
+     */
     public FreightView toFreightView(
             FreightHeaderJpaEntity header,
             Map<String, String> customerNames,
-            Map<String, String> freightNames) {
+            Map<String, String> freightNames,
+            Map<Long, String> documentNoMap) {
         List<FreightLineView> lineViews = header.getLines().stream()
-            .map(line -> toLineView(line, customerNames, freightNames))
+            .map(line -> toLineView(line, customerNames, freightNames, documentNoMap))
             .toList();
 
         return new FreightView(
@@ -44,9 +48,12 @@ public class FreightJpaToDomainMapper {
     private FreightLineView toLineView(
             FreightLineJpaEntity line,
             Map<String, String> customerNames,
-            Map<String, String> freightNames) {
+            Map<String, String> freightNames,
+            Map<Long, String> documentNoMap) {
         String customerCode = line.getCustomerCode();
         String freightCode = line.getFreightCode();
+        Long docId = line.getFinancialDocumentId();
+        String documentNo = docId != null ? documentNoMap.getOrDefault(docId, null) : null;
         return new FreightLineView(
             line.getFreightLineId(),
             line.getFreightType(),
@@ -70,9 +77,8 @@ public class FreightJpaToDomainMapper {
             line.getTaxDt(),
             line.getSlipNo(),
             line.getSlipDt(),
-            line.getFinancialDocumentId(),
-            // TODO(단계E): financial_document_id → document_no 조인 — FinancialDocumentJpaEntity 도입 후 연결
-            null,
+            docId,
+            documentNo,
             customerCode != null ? customerNames.getOrDefault(customerCode, "") : "",
             freightCode != null ? freightNames.getOrDefault(freightCode, "") : ""
         );

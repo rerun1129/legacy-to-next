@@ -104,4 +104,15 @@ public class FreightHeaderJpaEntity extends BaseJpaEntity {
         this.lines.clear();
         this.lines.addAll(newLines);
     }
+
+    /**
+     * 미발행 라인만 교체한다.
+     * financial_document_id != null 인 발행 라인은 컬렉션에 그대로 유지하여
+     * orphanRemoval DELETE 위험을 차단한다. 미발행 라인만 제거 후 newLines를 추가한다.
+     * newLines는 미발행 재구성분(command 기반)이어야 한다.
+     */
+    public void syncUnissuedLines(List<FreightLineJpaEntity> newLines) {
+        this.lines.removeIf(line -> line.getFinancialDocumentId() == null);
+        this.lines.addAll(newLines);
+    }
 }
