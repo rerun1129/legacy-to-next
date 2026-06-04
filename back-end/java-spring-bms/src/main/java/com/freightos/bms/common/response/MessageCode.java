@@ -20,7 +20,8 @@ public enum MessageCode {
     FINANCIAL_DOCUMENT_LINE_EMPTY("발행 대상 운임 라인이 없습니다."),
     FINANCIAL_DOCUMENT_LINE_ALREADY_ISSUED("이미 서류가 발행된 라인이 포함되어 있습니다."),
     FINANCIAL_DOCUMENT_MIXED_CUSTOMER("선택된 라인의 고객사가 서로 다릅니다. 동일 고객사 라인만 한 서류로 발행할 수 있습니다."),
-    FINANCIAL_DOCUMENT_MIXED_TYPE("선택된 라인의 서류 종류가 서로 다릅니다. 동일 종류 라인만 한 서류로 발행할 수 있습니다.");
+    FINANCIAL_DOCUMENT_MIXED_TYPE("선택된 라인의 서류 종류가 서로 다릅니다. 동일 종류 라인만 한 서류로 발행할 수 있습니다."),
+    FINANCIAL_DOCUMENT_LINE_OTHER_DOCUMENT("다른 서류에 이미 연결된 라인은 편집 대상에 포함할 수 없습니다.");
 
     private final String message;
 

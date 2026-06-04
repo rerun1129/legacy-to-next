@@ -1,14 +1,21 @@
 package com.freightos.bms.adapter.in.web.financialdocument;
 
+import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentRequest;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssuableLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentResponse;
+import com.freightos.bms.application.financialdocument.AmendResult;
 import com.freightos.bms.application.financialdocument.FinancialDocumentView;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.application.financialdocument.IssueResult;
+import com.freightos.bms.application.financialdocument.command.AmendDocumentCommand;
 import com.freightos.bms.application.financialdocument.command.IssueDocumentCommand;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * FinancialDocument Adapter(in) 어셈블러.
@@ -31,8 +38,17 @@ public class FinancialDocumentAssembler {
         );
     }
 
+    public AmendDocumentCommand toCommand(Long id, AmendDocumentRequest req) {
+        List<Long> finalLineIds = req.finalLineIds() != null ? req.finalLineIds() : Collections.emptyList();
+        return new AmendDocumentCommand(id, req.blType(), req.blId(), req.freightType(), finalLineIds);
+    }
+
     public IssueDocumentResponse toResponse(IssueResult result) {
         return new IssueDocumentResponse(result.financialDocumentId(), result.documentNo());
+    }
+
+    public AmendDocumentResponse toResponse(AmendResult result) {
+        return new AmendDocumentResponse(result.financialDocumentId(), result.documentNo(), result.deleted());
     }
 
     public FinancialDocumentResponse toResponse(FinancialDocumentView view) {

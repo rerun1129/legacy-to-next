@@ -4,6 +4,7 @@ import com.freightos.bms.application.financialdocument.FinancialDocumentView;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.domain.financialdocument.FinancialDocument;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,4 +44,35 @@ public interface FinancialDocumentPort {
 
     /** B/L의 운임 라인 목록 조회(발행 여부 포함 — documentNo는 JOIN으로 채워짐, customerName 미포함). */
     List<IssuableLineView> findIssuableLines(Long headerId, String freightType);
+
+    /**
+     * 서류 요약 정보 로드. 서류가 없으면 빈 Optional.
+     * amend 진입 시 서류 존재 확인 및 customer/docType/performanceDt 획득에 사용.
+     */
+    Optional<DocumentSummary> loadDocumentSummary(Long documentId);
+
+    /**
+     * 서류에 연결된 라인 ID 목록 조회.
+     * amend 시 현재 상태와 finalLineIds의 diff 계산에 사용.
+     */
+    List<Long> findLineIdsByDocument(Long documentId);
+
+    /**
+     * 지정된 라인들의 financial_document_id를 null로 해제한다(개별 행 해제).
+     * performance_dt는 유지한다.
+     */
+    void unlinkLines(List<Long> lineIds);
+
+    /**
+     * 서류의 합계 5종을 갱신한다(amend 후 재계산 반영).
+     * JPA dirty-checking으로 UPDATE — 트랜잭션 내 호출 필수.
+     */
+    void updateDocumentTotals(
+            Long documentId,
+            BigDecimal settleTotal,
+            BigDecimal localTotal,
+            BigDecimal settleVat,
+            BigDecimal localVat,
+            BigDecimal usdTotal
+    );
 }

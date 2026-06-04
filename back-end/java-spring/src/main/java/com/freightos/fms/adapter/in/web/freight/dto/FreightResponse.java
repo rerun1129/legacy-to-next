@@ -60,7 +60,9 @@ public record FreightResponse(
             BigDecimal localTaxAmount,
             BigDecimal usdExchangeRate,
             BigDecimal usdAmount,
-            String financialDocumentNo
+            String financialDocumentNo,
+            // BMS amend 편집 진입용 — 발행 서류 PK
+            Long financialDocumentId
     ) {
         public static FreightLineResponse from(FreightLineView l) {
             return new FreightLineResponse(
@@ -83,7 +85,8 @@ public record FreightResponse(
                     l.localTaxAmount(),
                     l.usdExchangeRate(),
                     l.usdAmount(),
-                    l.financialDocumentNo()
+                    l.financialDocumentNo(),
+                    l.financialDocumentId()
             );
         }
     }

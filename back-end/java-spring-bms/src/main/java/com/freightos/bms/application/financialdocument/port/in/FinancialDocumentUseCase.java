@@ -1,8 +1,10 @@
 package com.freightos.bms.application.financialdocument.port.in;
 
+import com.freightos.bms.application.financialdocument.AmendResult;
 import com.freightos.bms.application.financialdocument.FinancialDocumentView;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.application.financialdocument.IssueResult;
+import com.freightos.bms.application.financialdocument.command.AmendDocumentCommand;
 import com.freightos.bms.application.financialdocument.command.IssueDocumentCommand;
 
 import java.util.List;
@@ -24,6 +26,13 @@ public interface FinancialDocumentUseCase {
      * performance_dt는 원복하지 않는다(유지).
      */
     void deleteDocument(Long financialDocumentId);
+
+    /**
+     * 금융 서류 편집(amend).
+     * finalLineIds가 비면 서류를 삭제하고 deleted=true를 반환한다.
+     * 라인이 있으면 link/unlink diff 적용 후 합계를 재계산한다.
+     */
+    AmendResult amendDocument(AmendDocumentCommand cmd);
 
     /** B/L에 속한 금융 서류 목록 조회. */
     List<FinancialDocumentView> findDocumentsByBl(String blType, String blId);

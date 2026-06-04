@@ -1,5 +1,7 @@
 package com.freightos.bms.adapter.in.web.financialdocument;
 
+import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentRequest;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssuableLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentRequest;
@@ -11,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +46,21 @@ public class FinancialDocumentController {
             financialDocumentUseCase.issueDocument(assembler.toCommand(request))
         );
         return ApiResponse.of(response, MessageCode.FINANCIAL_DOCUMENT_CREATED.message());
+    }
+
+    /**
+     * 금융 서류 편집(amend).
+     * PATCH /api/bms/financial-documents/{id}
+     * finalLineIds 빈 리스트 = 서류 자동 삭제.
+     */
+    @PatchMapping("/{id}")
+    public ApiResponse<AmendDocumentResponse> amendDocument(
+            @PathVariable Long id,
+            @RequestBody @Valid AmendDocumentRequest request) {
+        AmendDocumentResponse response = assembler.toResponse(
+            financialDocumentUseCase.amendDocument(assembler.toCommand(id, request))
+        );
+        return ApiResponse.of(response, MessageCode.FINANCIAL_DOCUMENT_UPDATED.message());
     }
 
     /**

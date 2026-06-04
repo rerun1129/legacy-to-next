@@ -1,8 +1,10 @@
 package com.freightos.bms.application.financialdocument;
 
+import com.freightos.bms.application.financialdocument.command.AmendDocumentCommand;
 import com.freightos.bms.application.financialdocument.command.IssueDocumentCommand;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentUseCase;
 import com.freightos.bms.application.financialdocument.port.out.DocumentNumberGenerator;
+import com.freightos.bms.application.financialdocument.port.out.DocumentSummary;
 import com.freightos.bms.application.financialdocument.port.out.FinancialDocumentPort;
 import com.freightos.bms.application.financialdocument.port.out.FreightLineSnapshot;
 import com.freightos.bms.application.port.out.CodeNameResolver;
@@ -16,10 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -88,6 +93,57 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
     }
 
     @Override
+    public AmendResult amendDocument(AmendDocumentCommand cmd) {
+        // ① 서류 존재 확인 — 없으면 CONFLICT(NOT_FOUND)
+        DocumentSummary summary = financialDocumentPort.loadDocumentSummary(cmd.financialDocumentId())
+            .orElseThrow(() -> FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_NOT_FOUND.name(),
+                MessageCode.FINANCIAL_DOCUMENT_NOT_FOUND.message()
+            ));
+
+        // ② finalLineIds 비면 서류 전체 삭제(기존 deleteDocument 재사용)
+        List<Long> finalLineIds = cmd.finalLineIds() != null ? cmd.finalLineIds() : Collections.emptyList();
+        if (finalLineIds.isEmpty()) {
+            deleteDocument(cmd.financialDocumentId());
+            return new AmendResult(cmd.financialDocumentId(), summary.documentNo(), true);
+        }
+
+        // ③ 최종 라인 스냅샷 로드 → 검증
+        List<FreightLineSnapshot> finalLines = financialDocumentPort.loadLinesByIds(finalLineIds);
+        validateAmend(cmd, finalLines, summary);
+
+        // ④ 현재 연결 라인 vs 최종 diff 계산
+        List<Long> currentLineIds = financialDocumentPort.findLineIdsByDocument(cmd.financialDocumentId());
+        Set<Long> finalSet = new HashSet<>(finalLineIds);
+        Set<Long> currentSet = new HashSet<>(currentLineIds);
+
+        List<Long> toRemove = currentSet.stream().filter(id -> !finalSet.contains(id)).toList();
+        List<Long> toAdd = new ArrayList<>(finalLineIds);
+        toAdd.removeAll(currentSet);
+
+        // ⑤ 라인 link/unlink
+        if (!toRemove.isEmpty()) {
+            financialDocumentPort.unlinkLines(toRemove);
+        }
+        if (!toAdd.isEmpty()) {
+            // 추가 라인에 서류의 기존 실적일 전파
+            financialDocumentPort.linkLines(toAdd, cmd.financialDocumentId(), summary.performanceDt());
+        }
+
+        // ⑥ 합계 재계산 → UPDATE
+        BigDecimal settleTotal = sumOrZero(finalLines, FreightLineSnapshot::settleAmount);
+        BigDecimal localTotal = sumOrZero(finalLines, FreightLineSnapshot::localAmount);
+        BigDecimal settleVat = sumOrZero(finalLines, FreightLineSnapshot::settleTaxAmount);
+        BigDecimal localVat = sumOrZero(finalLines, FreightLineSnapshot::localTaxAmount);
+        BigDecimal usdTotal = sumOrZero(finalLines, FreightLineSnapshot::usdAmount);
+        financialDocumentPort.updateDocumentTotals(
+            cmd.financialDocumentId(), settleTotal, localTotal, settleVat, localVat, usdTotal
+        );
+
+        return new AmendResult(cmd.financialDocumentId(), summary.documentNo(), false);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<FinancialDocumentView> findDocumentsByBl(String blType, String blId) {
         List<FinancialDocumentView> rawViews = financialDocumentPort.findDocumentsByBl(blType, blId);
@@ -127,6 +183,77 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
     }
 
     // ── 내부 검증 ──────────────────────────────────────────────────────────────
+
+    /**
+     * amend 전용 검증. validateLines와 독립 — "이미 발행 거부" 미적용(amend는 발행 라인 포함이 정상).
+     * 단일 customer·docType / 동일 freightHeader / freightType 일치 +
+     * 서류와의 customer·docType 일치 + 타 서류 소속 라인 차단.
+     */
+    private void validateAmend(AmendDocumentCommand cmd, List<FreightLineSnapshot> finalLines, DocumentSummary summary) {
+        // 단일 customer_code 검증
+        long distinctCustomerCount = finalLines.stream().map(FreightLineSnapshot::customerCode).distinct().count();
+        if (distinctCustomerCount > 1) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_CUSTOMER.name(),
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_CUSTOMER.message()
+            );
+        }
+
+        // 단일 financial_doc_type 검증
+        long distinctDocTypeCount = finalLines.stream().map(FreightLineSnapshot::financialDocType).distinct().count();
+        if (distinctDocTypeCount > 1) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_TYPE.name(),
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_TYPE.message()
+            );
+        }
+
+        // 동일 freight_header_id 검증
+        long distinctHeaderCount = finalLines.stream().map(FreightLineSnapshot::freightHeaderId).distinct().count();
+        if (distinctHeaderCount > 1) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_LINE_EMPTY.name(),
+                "선택된 라인이 서로 다른 B/L에 속합니다."
+            );
+        }
+
+        // 모든 라인 freightType == cmd.freightType()
+        boolean hasWrongFreightType = finalLines.stream().anyMatch(l -> !cmd.freightType().equals(l.freightType()));
+        if (hasWrongFreightType) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_TYPE.name(),
+                "선택된 라인의 freightType이 요청과 일치하지 않습니다."
+            );
+        }
+
+        // 추가/최종 라인 customer·docType이 서류와 일치
+        String lineCustomerCode = finalLines.get(0).customerCode();
+        if (!summary.customerCode().equals(lineCustomerCode)) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_CUSTOMER.name(),
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_CUSTOMER.message()
+            );
+        }
+
+        String lineDocType = finalLines.get(0).financialDocType();
+        if (!summary.financialDocType().equals(lineDocType)) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_TYPE.name(),
+                MessageCode.FINANCIAL_DOCUMENT_MIXED_TYPE.message()
+            );
+        }
+
+        // 각 라인 financialDocumentId는 null 또는 == cmd.financialDocumentId()만 허용(타 서류 소속 차단)
+        boolean hasOtherDocument = finalLines.stream().anyMatch(l ->
+            l.financialDocumentId() != null && !l.financialDocumentId().equals(cmd.financialDocumentId())
+        );
+        if (hasOtherDocument) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_LINE_OTHER_DOCUMENT.name(),
+                MessageCode.FINANCIAL_DOCUMENT_LINE_OTHER_DOCUMENT.message()
+            );
+        }
+    }
 
     private void validateLines(IssueDocumentCommand cmd, List<FreightLineSnapshot> lines) {
         // ② 검증: lineIds 비어있지 않음
@@ -202,8 +329,7 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
 
     // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-    private BigDecimal sumOrZero(List<FreightLineSnapshot> lines,
-                                  java.util.function.Function<FreightLineSnapshot, BigDecimal> extractor) {
+    private BigDecimal sumOrZero(List<FreightLineSnapshot> lines, Function<FreightLineSnapshot, BigDecimal> extractor) {
         return lines.stream()
             .map(extractor)
             .map(v -> v != null ? v : BigDecimal.ZERO)

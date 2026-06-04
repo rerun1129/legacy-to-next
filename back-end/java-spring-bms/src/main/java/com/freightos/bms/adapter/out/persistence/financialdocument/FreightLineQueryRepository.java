@@ -2,6 +2,7 @@ package com.freightos.bms.adapter.out.persistence.financialdocument;
 
 import com.freightos.bms.application.financialdocument.FinancialDocumentView;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
+import com.freightos.bms.application.financialdocument.port.out.DocumentSummary;
 import com.freightos.bms.application.financialdocument.port.out.FreightLineSnapshot;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 금융 서류 발행 관련 QueryDSL 조회 레포지토리.
@@ -177,6 +179,60 @@ public class FreightLineQueryRepository {
             .setNull(line.financialDocumentId)
             .where(line.financialDocumentId.eq(documentId))
             .execute();
+    }
+
+    /**
+     * 서류에 연결된 라인 ID 목록을 반환한다.
+     * amend 시 현재 상태와 finalLineIds의 diff 계산에 사용.
+     */
+    List<Long> findLineIdsByDocument(Long documentId) {
+        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
+        return queryFactory
+            .select(line.freightLineId)
+            .from(line)
+            .where(line.financialDocumentId.eq(documentId))
+            .fetch();
+    }
+
+    /**
+     * 지정된 라인들의 financial_document_id를 null로 해제한다(개별 행 선택 해제).
+     * performance_dt는 유지한다.
+     */
+    void bulkUnlinkLinesByIds(List<Long> lineIds) {
+        if (lineIds == null || lineIds.isEmpty()) return;
+        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
+        queryFactory
+            .update(line)
+            .setNull(line.financialDocumentId)
+            .where(line.freightLineId.in(lineIds))
+            .execute();
+    }
+
+    /**
+     * 서류 요약 정보를 조회한다.
+     * financial_document JOIN freight_line 1행으로 customer_code·financial_doc_type 대표값 획득.
+     * 서류=단일 customer/docType 전제이므로 LIMIT 1 대표값으로 충분.
+     */
+    Optional<DocumentSummary> loadDocumentSummary(Long documentId) {
+        QFinancialDocumentJpaEntity doc = QFinancialDocumentJpaEntity.financialDocumentJpaEntity;
+        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
+
+        Tuple row = queryFactory
+            .select(doc.financialDocumentId, doc.documentNo, doc.performanceDt, line.customerCode, line.financialDocType)
+            .from(doc)
+            .join(line).on(line.financialDocumentId.eq(doc.financialDocumentId))
+            .where(doc.financialDocumentId.eq(documentId))
+            .limit(1)
+            .fetchOne();
+
+        if (row == null) return Optional.empty();
+        return Optional.of(new DocumentSummary(
+            row.get(doc.financialDocumentId),
+            row.get(doc.documentNo),
+            row.get(line.customerCode),
+            row.get(line.financialDocType),
+            row.get(doc.performanceDt)
+        ));
     }
 
     // ── 헬퍼 ──────────────────────────────────────────────────────────────────
