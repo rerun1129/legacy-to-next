@@ -15,33 +15,10 @@ import { buildFreightColumns } from "./freight-columns";
 import { recalcFromExchangeRate } from "@/components/fms/house-bl/freight-calc";
 import { FreightIssueModal, type SelectedFreightLine } from "./freight-issue-modal";
 import { toast } from "@/lib/toast-store";
+import { buildNewFreightRow } from "./freight-row-factory";
+import { evaluateIssueSelection } from "./freight-issue-gate";
 
 export type { FieldPrefix };
-
-// ── 상수 ──────────────────────────────────────────────────────
-
-const EMPTY_FREIGHT_ROW: FreightRow = {
-  freightCode:         "",
-  freightName:         "",
-  per:                 "",
-  qty:                 "",
-  price:               "",
-  currency:            "",
-  exchangeRate:        "",
-  customerCode:        "",
-  customerName:        "",
-  taxType:             "",
-  performanceDt:       "",
-  settleAmount:        "",
-  localAmount:         "",
-  vat:                 "",
-  usdExchangeRate:     "",
-  usdAmount:           "",
-  financialDocType:    "",
-  taxNo:               "",
-  slipNo:              "",
-  financialDocumentNo: "",
-};
 
 // ── 공통 패널 컴포넌트 ────────────────────────────────────────
 
@@ -161,43 +138,8 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, onFreightMutated
   }
 
   function handleAdd() {
-    // 헤더 환율 → 신규 행에 기본 바인딩 후 계산 체인 실행
-    const formValues = getValues();
-    const currency =
-      prefix === "freightSelling"
-        ? (formValues.sellRateCurrencyCode ?? "")
-        : (formValues.buyRateCurrencyCode ?? "");
-    const exchangeRate =
-      prefix === "freightSelling"
-        ? (formValues.sellRate ?? "")
-        : (formValues.buyRate ?? "");
-    const usdExchangeRate = formValues.usdRate ?? "";
-
-    // 헤더 당사자 → 신규 행 Customer 자동 바인딩
-    let customerCode = "";
-    let customerName = "";
-    if (prefix === "freightSelling") {
-      customerCode = formValues.actualCustomerCode ?? "";
-      customerName = formValues.actualCustomerName ?? "";
-    } else {
-      if (mode === "AIR") {
-        customerCode = formValues.airDetail?.airlineCode ?? "";
-        customerName = formValues.airDetail?.airlineName ?? "";
-      } else {
-        customerCode = formValues.seaDetail?.linerCode ?? "";
-        customerName = formValues.linerName ?? "";
-      }
-    }
-
-    // settle/local/usd/vat는 qty·price 없으므로 빈칸으로 시작
-    append({
-      ...EMPTY_FREIGHT_ROW,
-      currency,
-      exchangeRate,
-      usdExchangeRate,
-      customerCode,
-      customerName,
-    });
+    const row = buildNewFreightRow(getValues(), prefix, mode);
+    append(row);
     setSelectedKey(null);
   }
 
@@ -228,177 +170,18 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, onFreightMutated
     focusedRowKeyRef.current = null;
   }
 
-  // ── 발행 버튼 onClick 검증 ────────────────────────────────────
+  // ── 발행 버튼 onClick — 게이트 평가 후 토스트/모달 처리 ────────
   function handleIssueClick() {
-    // 1. 선택 0개 → 차단
-    if (issueSelectedKeys.size === 0) {
-      toast.error(ti("selectRequired"));
-      return;
-    }
-
     const formValues = getValues();
-    const rows = (formValues[prefix] ?? []) as FreightRow[];
-
-    // 2. 선택된 행 인덱스 및 row 수집 (발행/미발행 모두 포함)
-    const selectedRows: FreightRow[] = [];
-    const selectedIndices: number[] = [];
-    for (let i = 0; i < fields.length; i++) {
-      const fieldId = (fields[i] as unknown as { id: string }).id;
-      if (!issueSelectedKeys.has(fieldId)) continue;
-      const row = rows[i];
-      if (!row) continue;
-      selectedRows.push(row);
-      selectedIndices.push(i);
-    }
-
-    // 3. dirty 검사 — 선택된 행 중 하나라도 변경(미저장)되면 전체 차단
-    const prefixDirtyFields = (dirtyFields as Record<string, Record<number, object> | undefined>)[prefix];
-    const hasDirtySelected = selectedIndices.some((idx) => {
-      const rowDirty = prefixDirtyFields?.[idx];
-      return rowDirty !== undefined && Object.keys(rowDirty).length > 0;
-    });
-    if (hasDirtySelected) {
-      toast.error(ti("dirtyRowsSaveFirst"));
-      return;
-    }
-
-    // 4. 선택된 행에서 발행 행(financialDocumentId 있는 행)의 서류 ID 수집
-    const issuedDocIds = new Set(
-      selectedRows
-        .map((r) => r.financialDocumentId)
-        .filter((id): id is number => id != null),
-    );
-
-    // 5. 서로 다른 서류의 발행 행이 섞이면 차단
-    if (issuedDocIds.size > 1) {
-      toast.error(ti("multiDocBlocked"));
-      return;
-    }
-
-    // ── amend 모드 (발행 행 ≥1, 단일 서류) ──────────────────────
-    if (issuedDocIds.size === 1) {
-      const targetDocId = [...issuedDocIds][0];
-
-      // 해당 서류의 기준 customer/docType (발행 행 첫 번째 기준)
-      const baseIssuedRow = selectedRows.find((r) => r.financialDocumentId === targetDocId)!;
-      const baseCustomer = baseIssuedRow.customerCode ?? "";
-      const baseDocType  = baseIssuedRow.financialDocType ?? "";
-
-      // 패널 전체 rows에서 같은 서류에 연결된 행 전부 수집 (체크 여부 무관)
-      const allPanelRows = (formValues[prefix] ?? []) as FreightRow[];
-      const sameDocRows = allPanelRows.filter((r) => r.financialDocumentId === targetDocId);
-
-      // 체크된 미발행 행 (추가 라인)
-      const newUnissuedRows = selectedRows.filter((r) => r.financialDocumentId == null);
-
-      // 추가 라인 customer/docType 불일치 선차단
-      for (const r of newUnissuedRows) {
-        if ((r.customerCode ?? "") !== baseCustomer) {
-          toast.error(ti("customerMixed"));
-          return;
-        }
-        if ((r.financialDocType ?? "") !== baseDocType) {
-          toast.error(ti("docTypeMixed"));
-          return;
-        }
-      }
-
-      // dirty 검사: 추가 미발행 행도 포함(이미 selectedIndices에 포함)
-      // sameDocRows는 체크 안 해도 포함되므로 별도 dirty 체크
-      const allPanelDirtyCheck = sameDocRows
-        .map((r) => allPanelRows.findIndex((ar) => ar === r))
-        .some((idx) => {
-          if (idx === -1) return false;
-          const rowDirty = prefixDirtyFields?.[idx];
-          return rowDirty !== undefined && Object.keys(rowDirty).length > 0;
-        });
-      if (allPanelDirtyCheck) {
-        toast.error(ti("dirtyRowsSaveFirst"));
-        return;
-      }
-
-      // 최종 라인 셋 — sameDocRows + 체크된 미발행 행 합집합 (freightLineId 기준 중복 제거)
-      const seenIds = new Set<number>();
-      const finalRows: FreightRow[] = [];
-      for (const r of [...sameDocRows, ...newUnissuedRows]) {
-        const lid = r.freightLineId;
-        if (lid == null || seenIds.has(lid)) continue;
-        seenIds.add(lid);
-        finalRows.push(r);
-      }
-
-      const snapshot: SelectedFreightLine[] = finalRows.map((r) => ({
-        freightLineId:       r.freightLineId!,
-        customerCode:        r.customerCode        ?? "",
-        customerName:        r.customerName        ?? "",
-        financialDocType:    r.financialDocType     ?? "",
-        currency:            r.currency            ?? "",
-        settleAmount:        r.settleAmount        ? Number(r.settleAmount)  : null,
-        localAmount:         r.localAmount         ? Number(r.localAmount)   : null,
-        vat:                 r.vat                 ? Number(r.vat)           : null,
-        usdAmount:           r.usdAmount           ? Number(r.usdAmount)     : null,
-        performanceDt:       r.performanceDt       ?? "",
-        freightCode:         r.freightCode         ?? "",
-        freightName:         r.freightName         ?? "",
-        exchangeRate:        r.exchangeRate        ? Number(r.exchangeRate)  : null,
-        per:                 r.per                 ?? "",
-        qty:                 r.qty                 ? Number(r.qty)           : null,
-        price:               r.price               ? Number(r.price)         : null,
-        taxType:             r.taxType             ?? "",
-        financialDocumentId: r.financialDocumentId ?? null,
-        financialDocumentNo: r.financialDocumentNo ?? "",
-        freightType,
-      }));
-      setModalSelectedLines(snapshot);
-      setIsIssueModalOpen(true);
-      return;
-    }
-
-    // ── issue 모드 (발행 행 0개) — 기존 로직 유지 ────────────────
-    const candidateRows = selectedRows.filter((r) => !r.financialDocumentNo);
-
-    if (candidateRows.length === 0) {
-      toast.error(ti("selectRequired"));
-      return;
-    }
-
-    // customerCode distinct 검증
-    const customerCodes = new Set(candidateRows.map((r) => r.customerCode ?? ""));
-    if (customerCodes.size > 1) {
-      toast.error(ti("customerMixed"));
-      return;
-    }
-
-    // financialDocType distinct 검증
-    const docTypes = new Set(candidateRows.map((r) => r.financialDocType ?? ""));
-    if (docTypes.size > 1) {
-      toast.error(ti("docTypeMixed"));
-      return;
-    }
-
-    const snapshot: SelectedFreightLine[] = candidateRows.map((r) => ({
-      freightLineId:       r.freightLineId!,
-      customerCode:        r.customerCode        ?? "",
-      customerName:        r.customerName        ?? "",
-      financialDocType:    r.financialDocType     ?? "",
-      currency:            r.currency            ?? "",
-      settleAmount:        r.settleAmount        ? Number(r.settleAmount)  : null,
-      localAmount:         r.localAmount         ? Number(r.localAmount)   : null,
-      vat:                 r.vat                 ? Number(r.vat)           : null,
-      usdAmount:           r.usdAmount           ? Number(r.usdAmount)     : null,
-      performanceDt:       r.performanceDt       ?? "",
-      freightCode:         r.freightCode         ?? "",
-      freightName:         r.freightName         ?? "",
-      exchangeRate:        r.exchangeRate        ? Number(r.exchangeRate)  : null,
-      per:                 r.per                 ?? "",
-      qty:                 r.qty                 ? Number(r.qty)           : null,
-      price:               r.price               ? Number(r.price)         : null,
-      taxType:             r.taxType             ?? "",
-      financialDocumentId: null,
-      financialDocumentNo: "",
+    const result = evaluateIssueSelection({
+      rows: (formValues[prefix] ?? []) as FreightRow[],
+      fieldIds: fields.map((f) => (f as unknown as { id: string }).id),
+      issueSelectedKeys,
+      prefixDirtyFields: (dirtyFields as Record<string, Record<number, object> | undefined>)[prefix],
       freightType,
-    }));
-    setModalSelectedLines(snapshot);
+    });
+    if (result.kind === "error") { toast.error(ti(result.messageKey)); return; }
+    setModalSelectedLines(result.lines);
     setIsIssueModalOpen(true);
   }
 
