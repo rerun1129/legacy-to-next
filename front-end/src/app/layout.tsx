@@ -20,7 +20,16 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   return (
-    <html lang={locale} className={`h-full ${inter.variable}`}>
+    <html lang={locale} className={`h-full ${inter.variable}`} suppressHydrationWarning>
+      {/* blocking inline script: hydration 전에 실행되어 FOUC 없이 다크모드를 적용한다.
+          서버 렌더 시 <html>에 data-theme가 없으므로 suppressHydrationWarning 으로 경고를 억제한다. */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="h-full">
         <NextIntlClientProvider>
           <QueryProvider>{children}</QueryProvider>

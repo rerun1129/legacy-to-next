@@ -10,9 +10,9 @@ export function useTheme() {
 
   const [dark, setDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    const isDark = localStorage.getItem("theme") === "dark";
-    if (isDark) document.documentElement.setAttribute("data-theme", "dark");
-    return isDark;
+    // 초기 data-theme 적용은 layout.tsx 의 blocking inline script 담당.
+    // 여기서는 순수 읽기만 수행한다.
+    return localStorage.getItem("theme") === "dark";
   });
 
   function toggle() {
