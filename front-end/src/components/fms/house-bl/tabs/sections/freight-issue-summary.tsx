@@ -30,15 +30,22 @@ export function FreightIssueSummary({ selectedLines, ti, tf }: FreightIssueSumma
   );
 
   // 단일 customer/docType 요약 (선행 검증 통과 전제, 방어적 표시용)
-  const singleCustomer = selectedLines.length > 0 ? selectedLines[0].customerCode : "";
-  const singleDocType  = selectedLines.length > 0 ? resolveDocType(selectedLines[0].financialDocType) : "";
+  const singleCustomer     = selectedLines.length > 0 ? selectedLines[0].customerCode : "";
+  const singleCustomerName = selectedLines.length > 0 ? selectedLines[0].customerName : "";
+  const singleDocType      = selectedLines.length > 0 ? resolveDocType(selectedLines[0].financialDocType) : "";
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 240px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)", gap: 8, marginBottom: 8 }}>
       <div className="field">
         <div className="field__label">{ti("customer")}</div>
         <div className="field__input">
           <input className="input" readOnly value={singleCustomer} />
+        </div>
+      </div>
+      <div className="field">
+        <div className="field__label">{tf("cols.customerName")}</div>
+        <div className="field__input">
+          <input className="input" readOnly value={singleCustomerName} />
         </div>
       </div>
       <div className="field">
