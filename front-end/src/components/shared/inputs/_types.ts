@@ -43,6 +43,11 @@ export interface CodeBoxProps extends BoxBaseProps {
   onSearch?: (query: string) => void;
   onSelect?: (item: CodeBoxSuggestion) => void;
   suggestionsLoading?: boolean;
+  /**
+   * 기본 true. false 이면 invalid blur 시 비우지 않음 —
+   * 호출측이 onBlur에서 직전 유효값 복원을 책임진다.
+   */
+  clearInvalidOnBlur?: boolean;
 }
 
 export interface ComboBoxProps extends BoxBaseProps,

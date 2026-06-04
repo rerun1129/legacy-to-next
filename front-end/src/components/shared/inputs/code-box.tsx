@@ -54,6 +54,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       onSearch,
       onSelect,
       suggestionsLoading,
+      clearInvalidOnBlur = true,
     },
     ref
   ) {
@@ -125,7 +126,8 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       handleSelectItem,
       isOpen,
       handleExpand,
-      handleShrink
+      handleShrink,
+      clearInvalidOnBlur
     );
 
     if (kind === "code-only") {

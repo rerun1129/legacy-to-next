@@ -228,6 +228,8 @@
             "docTypeMixed":   "선택된 라인의 서류 유형이 다릅니다. 같은 서류 유형만 선택해 주세요.",
             "selectRequired": "발행할 라인을 그리드에서 먼저 선택해 주세요.",
             "dirtyRowsSaveFirst": "변경된 운임 행이 있습니다. B/L 저장 후 다시 발행하세요.",
+            "documentNo":             "서류 번호",
+            "documentNoPlaceholder":  "발행 시 자동 생성",
             "documentDt":     "발행일",
             "performanceDt":  "실적일자",
             "team":           "팀",

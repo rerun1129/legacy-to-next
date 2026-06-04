@@ -289,6 +289,13 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, blDomainKey = "h
       vat:              r.vat          ? Number(r.vat)          : null,
       usdAmount:        r.usdAmount    ? Number(r.usdAmount)    : null,
       performanceDt:    r.performanceDt ?? "",
+      freightCode:      r.freightCode ?? "",
+      freightName:      r.freightName ?? "",
+      exchangeRate:     r.exchangeRate ? Number(r.exchangeRate) : null,
+      per:              r.per ?? "",
+      qty:              r.qty ? Number(r.qty) : null,
+      price:            r.price ? Number(r.price) : null,
+      taxType:          r.taxType ?? "",
     }));
     setModalSelectedLines(snapshot);
     setIsIssueModalOpen(true);

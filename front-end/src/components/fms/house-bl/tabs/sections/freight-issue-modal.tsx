@@ -8,20 +8,24 @@
  * - 에러 토스트는 전역 MutationCache onError SSOT에 위임(직접 catch 금지).
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { ModalShell } from "@/components/shared/modal-shell";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { Button } from "@/components/shared/button";
-import { DateBox } from "@/components/shared/inputs";
+import { DateBox, CodeBox } from "@/components/shared/inputs";
 import { toast } from "@/lib/toast-store";
 import { getSession } from "@/lib/admin-session";
+import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
+import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import { authUseCases } from "@/application/auth/use-cases";
 import {
   financialDocumentKeys,
   financialDocumentUseCases,
 } from "@/application/bms/financial-document/use-cases";
+import { useEnumOptions } from "@/application/enums/use-enum";
+import { resolvePerLabel } from "@/components/fms/house-bl/freight-per";
 
 // ── 오늘 날짜 yyyyMMdd ─────────────────────────────────────────
 function todayYyyyMmDd(): string {
@@ -60,6 +64,14 @@ export interface SelectedFreightLine {
   vat:              number | null;
   usdAmount:        number | null;
   performanceDt:    string;
+  // 외부 Freight 탭 그리드와 동일 컬럼 구성을 위한 추가 필드
+  freightCode:      string;
+  freightName:      string;
+  exchangeRate:     number | null;
+  per:              string;
+  qty:              number | null;
+  price:            number | null;
+  taxType:          string;
 }
 
 // ── Props ──────────────────────────────────────────────────────
@@ -93,6 +105,13 @@ function FreightIssueModalInner({
   const ti = useTranslations("fms.houseBl.entry.freight.issue");
   const queryClient = useQueryClient();
 
+  const { options: taxTypeOptions } = useEnumOptions("TaxType");
+  // value→label 역방향 조회 맵 (코드→표시명)
+  const taxTypeLabelMap = useMemo(
+    () => new Map(taxTypeOptions.map((o) => [o.value, o.label])),
+    [taxTypeOptions],
+  );
+
   // 로그인 세션에서 팀 기본값
   const session = getSession();
   const defaultTeam = session?.attributes?.["team"]?.[0] ?? "";
@@ -113,6 +132,16 @@ function FreightIssueModalInner({
   const [teamCode, setTeamCode] = useState<string>(defaultTeam);
   // operator는 빈 문자열로 초기화 — 표시·제출 시 meData.username 폴백(setState-in-effect 회피)
   const [operator, setOperator] = useState<string>("");
+
+  // ── Team / Operator 자동완성 ───────────────────────────────
+  const teamAc = useCodeAutocomplete(CODE_SOURCES.team);
+  const operatorAc = useCodeAutocomplete(CODE_SOURCES.user);
+
+  // 직전 유효값 ref — invalid blur 시 선택 전 입력을 버리고 복원
+  // team 초기 유효값: 세션에서 받은 defaultTeam
+  const teamValidRef = useRef<string>(defaultTeam);
+  // operator 초기 유효값: me 비동기 응답 전이므로 빈 문자열, blur 시 me.username 폴백
+  const operatorValidRef = useRef<string>("");
 
   // ── 선택 라인 합계 ─────────────────────────────────────────
   const totalSettle = useMemo(
@@ -175,56 +204,97 @@ function FreightIssueModalInner({
   }
 
   // ── 선택 라인 읽기전용 그리드 컬럼 ───────────────────────────
+  // 외부 Freight 탭(Selling/Buying) 그리드와 동일한 컬럼 구성·너비로 표시
   const lineColumns: GridColumn<SelectedFreightLine>[] = [
     {
-      key: "customerCode",
-      label: ti("lineCols.customer"),
-      width: 90,
-      render: (_, row) => `${row.customerCode} ${row.customerName}`,
+      key: "freightCode",
+      label: tf("cols.freightCode"),
+      width: 80,
+      align: "center",
     },
     {
-      key: "financialDocType",
-      label: tf("cols.financialDocType"),
-      width: 80,
-      render: (_, row) => resolveDocType(row.financialDocType),
+      key: "freightName",
+      label: tf("cols.freightName"),
+      width: 260,
     },
     {
       key: "currency",
-      label: ti("lineCols.currency"),
+      label: tf("cols.currency"),
       width: 60,
+      align: "center",
+    },
+    {
+      key: "exchangeRate",
+      label: tf("cols.exchangeRate"),
+      className: "is-num",
+      width: 90,
+      render: (_, row) => row.exchangeRate != null ? row.exchangeRate.toFixed(2) : "",
+    },
+    {
+      key: "per",
+      label: tf("cols.per"),
+      width: 80,
+      align: "center",
+      render: (_, row) => row.per ? resolvePerLabel(row.per) : "",
+    },
+    {
+      key: "qty",
+      label: tf("cols.qty"),
+      className: "is-num",
+      width: 80,
+      render: (_, row) => row.qty != null ? String(row.qty) : "",
+    },
+    {
+      key: "price",
+      label: tf("cols.price"),
+      className: "is-num",
+      width: 100,
+      render: (_, row) => row.price != null ? row.price.toFixed(2) : "",
     },
     {
       key: "settleAmount",
-      label: ti("lineCols.settleAmount"),
+      label: tf("cols.settleAmount"),
       className: "is-num",
-      width: 90,
-      render: (_, row) => row.settleAmount?.toFixed(2) ?? "",
+      width: 100,
+      render: (_, row) => row.settleAmount != null ? row.settleAmount.toFixed(2) : "",
     },
     {
       key: "localAmount",
-      label: ti("lineCols.localAmount"),
+      label: tf("cols.localAmount"),
       className: "is-num",
-      width: 90,
-      render: (_, row) => row.localAmount?.toFixed(2) ?? "",
-    },
-    {
-      key: "vat",
-      label: ti("lineCols.vat"),
-      className: "is-num",
-      width: 80,
-      render: (_, row) => row.vat?.toFixed(2) ?? "",
+      width: 100,
+      render: (_, row) => row.localAmount != null ? row.localAmount.toFixed(2) : "",
     },
     {
       key: "usdAmount",
-      label: ti("lineCols.usdAmount"),
+      label: tf("cols.usdAmount"),
       className: "is-num",
-      width: 80,
-      render: (_, row) => row.usdAmount?.toFixed(2) ?? "",
+      width: 100,
+      render: (_, row) => row.usdAmount != null ? row.usdAmount.toFixed(2) : "",
     },
     {
-      key: "performanceDt",
-      label: ti("performanceDt"),
-      width: 90,
+      key: "taxType",
+      label: tf("cols.taxType"),
+      width: 100,
+      align: "center",
+      render: (_, row) => row.taxType ? (taxTypeLabelMap.get(row.taxType) ?? row.taxType) : "",
+    },
+    {
+      key: "vat",
+      label: tf("cols.vat"),
+      className: "is-num",
+      width: 100,
+      render: (_, row) => row.vat != null ? row.vat.toFixed(2) : "",
+    },
+    {
+      key: "_total",
+      label: tf("cols.total"),
+      className: "is-num",
+      width: 100,
+      render: (_, row) => {
+        if (row.localAmount == null && row.vat == null) return "";
+        return ((row.localAmount ?? 0) + (row.vat ?? 0)).toFixed(2);
+      },
     },
   ];
 
@@ -242,7 +312,13 @@ function FreightIssueModalInner({
       }}
     >
       {/* ── 헤더 입력 섹션 ─────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginBottom: 12 }}>
+        <div className="field">
+          <div className="field__label">{ti("documentNo")}</div>
+          <div className="field__input">
+            <input className="input" readOnly value="" placeholder={ti("documentNoPlaceholder")} />
+          </div>
+        </div>
         <div className="field">
           <div className="field__label">{ti("documentDt")}</div>
           <div className="field__input">
@@ -266,22 +342,46 @@ function FreightIssueModalInner({
         <div className="field">
           <div className="field__label">{ti("team")}</div>
           <div className="field__input">
-            <input
-              className="input"
-              value={teamCode}
-              onChange={(e) => setTeamCode(e.target.value)}
-              placeholder={ti("team")}
+            <CodeBox
+              kind="code-only"
+              clearInvalidOnBlur={false}
+              codeProps={{
+                value: teamCode,
+                onChange: (e) => setTeamCode(e.target.value),
+                // 미선택 blur 시 직전 유효값으로 복원(자유 입력 차단)
+                onBlur: () => setTeamCode(teamValidRef.current),
+                placeholder: ti("team"),
+              }}
+              onSearch={teamAc.onSearch}
+              suggestions={teamAc.suggestions}
+              suggestionsLoading={teamAc.suggestionsLoading}
+              onSelect={(it) => {
+                setTeamCode(it.code);
+                teamValidRef.current = it.code;
+              }}
             />
           </div>
         </div>
         <div className="field">
           <div className="field__label">{ti("operator")}</div>
           <div className="field__input">
-            <input
-              className="input"
-              value={operator || (meData?.username ?? "")}
-              onChange={(e) => setOperator(e.target.value)}
-              placeholder={ti("operator")}
+            <CodeBox
+              kind="code-only"
+              clearInvalidOnBlur={false}
+              codeProps={{
+                value: operator || (meData?.username ?? ""),
+                onChange: (e) => setOperator(e.target.value),
+                // 미선택 blur 시 직전 유효값으로 복원, me.username 폴백(세션 초기값 보장)
+                onBlur: () => setOperator(operatorValidRef.current || meData?.username || ""),
+                placeholder: ti("operator"),
+              }}
+              onSearch={operatorAc.onSearch}
+              suggestions={operatorAc.suggestions}
+              suggestionsLoading={operatorAc.suggestionsLoading}
+              onSelect={(it) => {
+                setOperator(it.code);
+                operatorValidRef.current = it.code;
+              }}
             />
           </div>
         </div>

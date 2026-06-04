@@ -18,7 +18,8 @@ export function useCodeInputHandlers(
   onSelect: ((item: CodeBoxSuggestion) => void) | undefined,
   isOpen: boolean,
   onExpand: () => void,
-  onShrink: () => void
+  onShrink: () => void,
+  clearInvalidOnBlur: boolean
 ) {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -83,6 +84,8 @@ export function useCodeInputHandlers(
     (e: React.FocusEvent<HTMLInputElement>) => {
       codeProps.onBlur?.(e);
       setIsOpen(false);
+      // clearInvalidOnBlur=false 이면 비우기를 skip — 호출측이 직전 유효값 복원을 책임
+      if (!clearInvalidOnBlur) return;
       if (!onSearch || readOnly || disabled) return;
       const value = e.target.value.trim();
       if (value === "") return;
@@ -93,7 +96,7 @@ export function useCodeInputHandlers(
         e.target.dispatchEvent(new Event("input", { bubbles: true }));
       }
     },
-    [codeProps, setIsOpen, onSearch, readOnly, disabled, suggestions]
+    [codeProps, setIsOpen, clearInvalidOnBlur, onSearch, readOnly, disabled, suggestions]
   );
 
   return { handleChange, handleKeyDown, handleBlur };
