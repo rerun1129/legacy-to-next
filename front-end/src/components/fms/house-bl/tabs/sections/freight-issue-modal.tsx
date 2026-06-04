@@ -232,11 +232,10 @@ function FreightIssueModalInner({
   const canIssue = !issueMutation.isPending && !issueMutation.isSuccess;
 
   return (
-    <form
-      noValidate
+    <div
       className="modal__body"
       onKeyDown={(e) => {
-        // Enter 차단 (textarea 제외) — 폼 의도치 않은 제출 방지
+        // Enter 차단 (textarea 제외) — 부모 엔트리 폼으로 버블링돼 저장 제출되는 것을 막음
         if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
           e.preventDefault();
         }
@@ -355,7 +354,7 @@ function FreightIssueModalInner({
           {ti("cancel")}
         </Button>
       </div>
-    </form>
+    </div>
   );
 }
 
