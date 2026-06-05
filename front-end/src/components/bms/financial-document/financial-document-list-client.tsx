@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { RotateCcw, Search } from "lucide-react";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
+import { listFilterStore } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
 import { FinancialDocumentListFilter } from "./financial-document-list-filter";
 import { FinancialDocumentMasterGrid } from "./financial-document-master-grid";
@@ -13,11 +13,6 @@ import type { FinancialDocumentListConfig } from "./financial-document-list-conf
 import type { FinancialDocumentFilter } from "./use-financial-document-list-filter-model";
 import { DEFAULT_FILTER } from "./use-financial-document-list-filter-model";
 import type { SearchFinancialDocumentInput, FinancialDocumentSearchRow } from "@/application/bms/financial-document/ports";
-
-interface SearchState extends SavedSearchState {
-  submittedFilter: SearchFinancialDocumentInput | null;
-  selectedId: number | null;
-}
 
 interface Props {
   config: FinancialDocumentListConfig;
@@ -32,11 +27,8 @@ export function FinancialDocumentListClient({ config }: Props) {
 
   const form = useForm<FinancialDocumentFilter>({ defaultValues: DEFAULT_FILTER });
 
-  // 영속화된 검색 상태 복원 (listFilterStore)
-  const [submittedFilter, setSubmittedFilter] = useState<SearchFinancialDocumentInput | null>(() => {
-    const s = listFilterStore.getState().getSearch(scope) as SearchState | undefined;
-    return s?.submittedFilter ?? null;
-  });
+  // 진입 시 자동조회 방지 — submittedFilter는 항상 null로 시작, Search 버튼 클릭 시에만 조회
+  const [submittedFilter, setSubmittedFilter] = useState<SearchFinancialDocumentInput | null>(null);
   const [currentPage, setCurrentPage] = useState(() => {
     const s = listFilterStore.getState().getSearch(scope);
     return s?.currentPage ?? 1;

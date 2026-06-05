@@ -30,12 +30,26 @@ export interface FinancialDocumentFilter {
   operatorName: string;
 }
 
+function getDefaultMonthRange() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const lastDate = new Date(y, m + 1, 0).getDate();
+  return {
+    from: `${y}${pad(m + 1)}01`,
+    to: `${y}${pad(m + 1)}${pad(lastDate)}`,
+  };
+}
+
+const { from, to } = getDefaultMonthRange();
+
 export const DEFAULT_FILTER: FinancialDocumentFilter = {
   jobDiv: "",
   bound: "",
   dateKind: "DOCUMENT_DT",
-  dateFrom: "",
-  dateTo: "",
+  dateFrom: from,
+  dateTo: to,
   documentStatus: "",
   customerCode: "",
   customerName: "",
