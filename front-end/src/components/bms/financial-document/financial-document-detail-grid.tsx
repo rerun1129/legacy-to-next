@@ -32,11 +32,11 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
   const rows = data ?? [];
 
   const columns = useMemo<GridColumn<FreightLineDetail>[]>(() => [
-    { key: "customerCode",  label: t("customerCode"),  minWidth: 80 },
+    { key: "customerCode",  label: t("customerCode"),  minWidth: 80,  align: "center" },
     { key: "customerName",  label: t("customerName"),  minWidth: 110 },
-    { key: "freightCode",   label: t("freightCode"),   minWidth: 80 },
+    { key: "freightCode",   label: t("freightCode"),   minWidth: 80,  align: "center" },
     { key: "freightName",   label: t("freightName"),   minWidth: 110 },
-    { key: "currency",      label: t("currency"),      minWidth: 60 },
+    { key: "currency",      label: t("currency"),      minWidth: 60,  align: "center" },
     {
       key: "exchangeRate",
       label: t("exchangeRate"),
@@ -44,7 +44,7 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
       align: "right",
       render: (v) => fmtNumber(v, 4),
     },
-    { key: "per",           label: t("per"),           minWidth: 50 },
+    { key: "per",           label: t("per"),           minWidth: 50,  align: "center" },
     {
       key: "unitQuantity",
       label: t("unitQuantity"),
@@ -77,6 +77,7 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
       key: "taxType",
       label: t("taxType"),
       minWidth: 70,
+      align: "center",
       render: (v) => fmtEnum(v, taxTypeOptions),
     },
     {

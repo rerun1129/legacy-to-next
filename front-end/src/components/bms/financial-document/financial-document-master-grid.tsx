@@ -71,11 +71,12 @@ export function FinancialDocumentMasterGrid({
       key: "documentStatus",
       label: t("status"),
       minWidth: 80,
+      align: "center",
       render: (v) => fmtEnum(v, statusOptions),
     },
     { key: "documentNo",        label: t("documentNo"),   minWidth: 140 },
     { key: "groupFinancialNo",  label: t("groupNo"),      minWidth: 120 },
-    { key: "customerCode",      label: t("customerCode"), minWidth: 80 },
+    { key: "customerCode",      label: t("customerCode"), minWidth: 80,  align: "center" },
     { key: "customerName",      label: t("customerName"), minWidth: 120 },
     {
       key: "documentDt",
@@ -95,12 +96,14 @@ export function FinancialDocumentMasterGrid({
       key: "jobDiv",
       label: t("jobDiv"),
       minWidth: 70,
+      align: "center",
       render: (v) => fmtEnum(v, jobDivOptions),
     },
     {
       key: "bound",
       label: t("bound"),
       minWidth: 60,
+      align: "center",
       render: (v) => fmtEnum(v, boundOptions),
     },
     { key: "blNo",         label: t("blNo"),         minWidth: 140 },
@@ -156,7 +159,7 @@ export function FinancialDocumentMasterGrid({
             columns={columns}
             data={rows}
             rowKey={(row) => row.financialDocumentId}
-            onRowClick={(row) => onSelectRow(row.financialDocumentId === selectedId ? null : row)}
+            onRowClick={(row) => onSelectRow(row)}
             rowClassName={(row) =>
               row.financialDocumentId === selectedId ? "grid-row--selected" : undefined
             }
