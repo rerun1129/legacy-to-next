@@ -14,7 +14,7 @@ import java.util.List;
 public class FreightHeader {
 
     private FreightBlType blType;
-    private String blId;
+    private Long blId;
 
     // ── 당사자 3종 ─────────────────────────────────────────────────────────────
     private String actualCustomerCode;
@@ -42,7 +42,7 @@ public class FreightHeader {
     // ── Getters ────────────────────────────────────────────────────────────────
 
     public FreightBlType getBlType() { return blType; }
-    public String getBlId() { return blId; }
+    public Long getBlId() { return blId; }
     public String getActualCustomerCode() { return actualCustomerCode; }
     public String getLinerCode() { return linerCode; }
     public String getSettlePartnerCode() { return settlePartnerCode; }
@@ -59,7 +59,7 @@ public class FreightHeader {
     // ── Setters ────────────────────────────────────────────────────────────────
 
     public void setBlType(FreightBlType v) { this.blType = v; }
-    public void setBlId(String v) { this.blId = v; }
+    public void setBlId(Long v) { this.blId = v; }
     public void setActualCustomerCode(String v) { this.actualCustomerCode = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
     public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }

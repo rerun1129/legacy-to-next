@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public interface FreightHeaderJpaRepository extends JpaRepository<FreightHeaderJpaEntity, Long> {
 
-    Optional<FreightHeaderJpaEntity> findByBlTypeAndBlId(String blType, String blId);
+    Optional<FreightHeaderJpaEntity> findByBlTypeAndBlId(String blType, Long blId);
 
-    boolean existsByBlTypeAndBlId(String blType, String blId);
+    boolean existsByBlTypeAndBlId(String blType, Long blId);
 }

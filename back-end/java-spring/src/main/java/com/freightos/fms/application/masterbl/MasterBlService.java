@@ -73,7 +73,7 @@ public class MasterBlService implements MasterBlUseCase {
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
         Map<String, String> teamNames = resolveTeamNames(base);
         Optional<FreightView> freightView = freightInputPort.findFreightByBl(
-                FreightBlType.MASTER, String.valueOf(base.id()));
+                FreightBlType.MASTER, base.id());
         return new MasterBlDetailView(
                 base,
                 nameOrEmpty(hsCodeNames, base.hsCode()),
@@ -118,7 +118,7 @@ public class MasterBlService implements MasterBlUseCase {
         Long id = masterBlPort.createMasterBl(masterBlFactory.toEntity(command));
         if (command.freight() != null) {
             FreightInputCommand freightCmd = masterBlFreightCommandBuilder.buildFromCreate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.MASTER, String.valueOf(id), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.MASTER, id, freightCmd);
         }
         log.info("Created MasterBl id={}", id);
         return id;
@@ -141,7 +141,7 @@ public class MasterBlService implements MasterBlUseCase {
         }
         if (command.freight() != null) {
             FreightInputCommand freightCmd = masterBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.MASTER, String.valueOf(id), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.MASTER, id, freightCmd);
         }
         log.info("Updated MasterBl id={}", id);
     }
@@ -164,12 +164,11 @@ public class MasterBlService implements MasterBlUseCase {
     public void deleteMasterBlById(Long id) {
         MasterBlJobDiv jobDiv = masterBlPort.findJobDivById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.MASTER_BL_NOT_FOUND));
-        String blIdStr = String.valueOf(id);
-        if (freightInputPort.existsFreightLines(FreightBlType.MASTER, blIdStr)) {
+        if (freightInputPort.existsFreightLines(FreightBlType.MASTER, id)) {
             // 운임 라인 존재 시 삭제 차단 — 데이터 정합성 보호
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
-        freightInputPort.deleteFreight(FreightBlType.MASTER, blIdStr);
+        freightInputPort.deleteFreight(FreightBlType.MASTER, id);
         int unlinked = houseBlPort.nullifyMasterRefByMasterBlId(id);
         masterBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted MasterBl id={} (unlinked {} house_bl rows)", id, unlinked);

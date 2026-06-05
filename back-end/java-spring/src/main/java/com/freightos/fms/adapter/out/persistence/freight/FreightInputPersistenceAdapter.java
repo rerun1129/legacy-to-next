@@ -32,7 +32,7 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
 
     @Override
     @Transactional
-    public void saveFreight(FreightBlType blType, String blId, FreightInputCommand cmd) {
+    public void saveFreight(FreightBlType blType, Long blId, FreightInputCommand cmd) {
         String blTypeName = blType.name();
 
         // 헤더 upsert: bl_type+bl_id로 조회 후 없으면 신규 생성
@@ -70,7 +70,7 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<FreightView> findFreightByBl(FreightBlType blType, String blId) {
+    public Optional<FreightView> findFreightByBl(FreightBlType blType, Long blId) {
         return headerRepository
             .findByBlTypeAndBlId(blType.name(), blId)
             .map(header -> {
@@ -103,7 +103,7 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean existsFreightLines(FreightBlType blType, String blId) {
+    public boolean existsFreightLines(FreightBlType blType, Long blId) {
         return headerRepository
             .findByBlTypeAndBlId(blType.name(), blId)
             .map(header -> !header.getLines().isEmpty())
@@ -112,7 +112,7 @@ public class FreightInputPersistenceAdapter implements FreightInputPort {
 
     @Override
     @Transactional
-    public void deleteFreight(FreightBlType blType, String blId) {
+    public void deleteFreight(FreightBlType blType, Long blId) {
         headerRepository.findByBlTypeAndBlId(blType.name(), blId)
             .ifPresent(headerRepository::delete);
         // orphanRemoval이 라인을 자동 삭제한다.

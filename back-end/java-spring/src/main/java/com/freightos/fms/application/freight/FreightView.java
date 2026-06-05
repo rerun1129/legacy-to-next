@@ -11,7 +11,7 @@ public record FreightView(
     // ── 헤더 식별 ──────────────────────────────────────────────────────────────
     Long freightHeaderId,
     String blType,
-    String blId,
+    Long blId,
 
     // ── 당사자 3종 ─────────────────────────────────────────────────────────────
     String actualCustomerCode,

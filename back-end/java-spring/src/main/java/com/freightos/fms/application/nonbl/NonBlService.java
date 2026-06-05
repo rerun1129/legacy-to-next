@@ -107,7 +107,7 @@ public class NonBlService implements NonBlUseCase {
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
         Map<String, String> teamNames = resolveTeamNames(base);
         Optional<FreightView> freightView = freightInputPort.findFreightByBl(
-                FreightBlType.HOUSE, String.valueOf(base.id()));
+                FreightBlType.HOUSE, base.id());
         return new NonBlDetailView(
                 base,
                 nameOrEmpty(hsCodeNames, base.hsCode()),
@@ -155,19 +155,18 @@ public class NonBlService implements NonBlUseCase {
         nonBlPersistencePort.update(id, command);
         if (command.freight() != null) {
             FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.HOUSE, id, freightCmd);
         }
     }
 
     @Override
     @Transactional
     public void deleteNonBlById(Long id) {
-        String blIdStr = String.valueOf(id);
-        if (freightInputPort.existsFreightLines(FreightBlType.HOUSE, blIdStr)) {
+        if (freightInputPort.existsFreightLines(FreightBlType.HOUSE, id)) {
             // 운임 라인 존재 시 삭제 차단 — 데이터 정합성 보호
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
-        freightInputPort.deleteFreight(FreightBlType.HOUSE, blIdStr);
+        freightInputPort.deleteFreight(FreightBlType.HOUSE, id);
         // NON_BL은 jobDiv가 고정이므로 projection 없이 직접 호출 (SELECT 0회 추가)
         houseBlPort.deleteByIdAndJobDiv(id, JobDiv.NON_BL);
         log.info("Deleted NonBl id={}", id);

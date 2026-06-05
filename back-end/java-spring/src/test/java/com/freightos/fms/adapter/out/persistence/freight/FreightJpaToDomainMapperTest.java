@@ -90,7 +90,7 @@ class FreightJpaToDomainMapperTest {
     private FreightHeaderJpaEntity buildMinimalHeader() {
         FreightHeaderJpaEntity header = new FreightHeaderJpaEntity();
         header.setBlType("HOUSE");
-        header.setBlId("BL-001");
+        header.setBlId(1L);
         return header;
     }
 

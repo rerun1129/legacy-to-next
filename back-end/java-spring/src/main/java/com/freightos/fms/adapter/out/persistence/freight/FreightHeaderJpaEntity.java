@@ -35,8 +35,8 @@ public class FreightHeaderJpaEntity extends BaseJpaEntity {
     @Column(name = "bl_type", nullable = false, length = 10)
     private String blType;
 
-    @Column(name = "bl_id", nullable = false, length = 50)
-    private String blId;
+    @Column(name = "bl_id", nullable = false)
+    private Long blId;
 
     // ── 당사자 3종 ─────────────────────────────────────────────────────────────
     @Column(name = "actual_customer_code", length = 40)
@@ -83,7 +83,7 @@ public class FreightHeaderJpaEntity extends BaseJpaEntity {
     // ── Setters ────────────────────────────────────────────────────────────────
 
     public void setBlType(String v) { this.blType = v; }
-    public void setBlId(String v) { this.blId = v; }
+    public void setBlId(Long v) { this.blId = v; }
     public void setActualCustomerCode(String v) { this.actualCustomerCode = v; }
     public void setLinerCode(String v) { this.linerCode = v; }
     public void setSettlePartnerCode(String v) { this.settlePartnerCode = v; }

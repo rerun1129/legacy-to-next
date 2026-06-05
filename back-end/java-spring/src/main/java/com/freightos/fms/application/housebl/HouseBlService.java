@@ -69,7 +69,7 @@ public class HouseBlService implements HouseBlUseCase {
         Map<String, String> hsCodeNames = resolveHsCodeNames(base);
         Map<String, String> teamNames = resolveTeamNames(base);
         Optional<FreightView> freightView = freightInputPort.findFreightByBl(
-                FreightBlType.HOUSE, String.valueOf(base.id()));
+                FreightBlType.HOUSE, base.id());
         return new HouseBlDetailView(
                 base,
                 nameOrEmpty(customerNames, base.shipperCode()),
@@ -196,7 +196,7 @@ public class HouseBlService implements HouseBlUseCase {
         Long houseBlId = houseBlPort.saveHouseBl(entity).getId();
         if (command.freight() != null) {
             FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromCreate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(houseBlId), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.HOUSE, houseBlId, freightCmd);
         }
         return houseBlId;
     }
@@ -209,7 +209,7 @@ public class HouseBlService implements HouseBlUseCase {
         houseBlPort.saveHouseBl(existing);
         if (command.freight() != null) {
             FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.HOUSE, id, freightCmd);
         }
     }
 
@@ -219,7 +219,7 @@ public class HouseBlService implements HouseBlUseCase {
         seaHblPersistencePort.update(id, command);
         if (command.freight() != null) {
             FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.HOUSE, id, freightCmd);
         }
     }
 
@@ -229,7 +229,7 @@ public class HouseBlService implements HouseBlUseCase {
         airBlPersistencePort.update(id, command);
         if (command.freight() != null) {
             FreightInputCommand freightCmd = houseBlFreightCommandBuilder.buildFromUpdate(command, command.freight());
-            freightInputPort.saveFreight(FreightBlType.HOUSE, String.valueOf(id), freightCmd);
+            freightInputPort.saveFreight(FreightBlType.HOUSE, id, freightCmd);
         }
     }
 
@@ -238,12 +238,11 @@ public class HouseBlService implements HouseBlUseCase {
     public void deleteHouseBlById(Long id) {
         JobDiv jobDiv = houseBlPort.findJobDivById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageCode.HOUSE_BL_NOT_FOUND));
-        String blIdStr = String.valueOf(id);
-        if (freightInputPort.existsFreightLines(FreightBlType.HOUSE, blIdStr)) {
+        if (freightInputPort.existsFreightLines(FreightBlType.HOUSE, id)) {
             // 운임 라인 존재 시 삭제 차단 — 데이터 정합성 보호
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
-        freightInputPort.deleteFreight(FreightBlType.HOUSE, blIdStr);
+        freightInputPort.deleteFreight(FreightBlType.HOUSE, id);
         houseBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted HouseBl id={}", id);
     }
