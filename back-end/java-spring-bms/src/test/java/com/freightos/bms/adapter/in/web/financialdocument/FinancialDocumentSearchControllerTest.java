@@ -70,7 +70,7 @@ class FinancialDocumentSearchControllerTest {
             "CUST001", "고객명",
             BigDecimal.valueOf(1000), BigDecimal.valueOf(1100000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.valueOf(800),
             "20240601", "SEA", "해상팀", "admin_user", "홍길동", null,
-            "HOUSE", "123", "SEA", "EXP", "HBL-0001", "20240601", "20240610"
+            "HOUSE", 123L, "SEA", "EXP", "HBL-0001", "20240601", "20240610"
         );
         Page<FinancialDocumentSearchView> page = new PageImpl<>(List.of(view), PageRequest.of(0, 20), 1);
 

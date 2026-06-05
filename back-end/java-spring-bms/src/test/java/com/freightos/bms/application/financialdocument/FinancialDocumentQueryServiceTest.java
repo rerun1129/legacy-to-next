@@ -53,7 +53,7 @@ class FinancialDocumentQueryServiceTest {
             "CUST001", "",
             BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
             "20240601", "SEA", "", "operator1", "", null,
-            "HOUSE", "10", "SEA", "EXP", "HBL-001", "20240601", "20240610"
+            "HOUSE", 10L, "SEA", "EXP", "HBL-001", "20240601", "20240610"
         );
         Page<FinancialDocumentSearchView> rawPage = new PageImpl<>(List.of(rawView), PageRequest.of(0, 20), 1);
 

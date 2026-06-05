@@ -34,7 +34,7 @@ public interface CodeNameResolver {
     /**
      * blType·blId → B/L 파생 정보(jobDiv·bound·blNo·etd·eta) 일괄 조회.
      * blType이 HOUSE이면 fms.house_bl, MASTER이면 fms.master_bl 에서 조회.
-     * 반환 맵 키 = bl_id 문자열.
+     * 반환 맵 키 = bl_id (Long).
      */
-    Map<String, BlDerived> findBlDerived(String blType, Collection<String> blIds);
+    Map<Long, BlDerived> findBlDerived(String blType, Collection<Long> blIds);
 }

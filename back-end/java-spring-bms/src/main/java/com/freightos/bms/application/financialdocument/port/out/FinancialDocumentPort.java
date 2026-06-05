@@ -37,10 +37,10 @@ public interface FinancialDocumentPort {
     void deleteDocument(Long documentId);
 
     /** blType+blId로 freight_header_id 조회. 헤더 없으면 empty. */
-    Optional<Long> findHeaderId(String blType, String blId);
+    Optional<Long> findHeaderId(String blType, Long blId);
 
     /** B/L에 속한 금융 서류 목록 조회(customerName 미포함 — Service에서 resolve). */
-    List<FinancialDocumentView> findDocumentsByBl(String blType, String blId);
+    List<FinancialDocumentView> findDocumentsByBl(String blType, Long blId);
 
     /** B/L의 운임 라인 목록 조회(발행 여부 포함 — documentNo는 JOIN으로 채워짐, customerName 미포함). */
     List<IssuableLineView> findIssuableLines(Long headerId, String freightType);

@@ -10,5 +10,5 @@ import java.util.Optional;
  */
 public interface FreightHeaderRefRepository extends JpaRepository<FreightHeaderRefJpaEntity, Long> {
 
-    Optional<FreightHeaderRefJpaEntity> findByBlTypeAndBlId(String blType, String blId);
+    Optional<FreightHeaderRefJpaEntity> findByBlTypeAndBlId(String blType, Long blId);
 }

@@ -88,7 +88,7 @@ public class FinancialDocumentController {
     @GetMapping
     public ApiResponse<List<FinancialDocumentResponse>> findDocumentsByBl(
             @RequestParam String blType,
-            @RequestParam String blId) {
+            @RequestParam Long blId) {
         List<FinancialDocumentResponse> responses = financialDocumentUseCase
             .findDocumentsByBl(blType, blId)
             .stream()
@@ -104,7 +104,7 @@ public class FinancialDocumentController {
     @GetMapping("/issuable-lines")
     public ApiResponse<List<IssuableLineResponse>> findIssuableLines(
             @RequestParam String blType,
-            @RequestParam String blId,
+            @RequestParam Long blId,
             @RequestParam String freightType) {
         List<IssuableLineResponse> responses = financialDocumentUseCase
             .findIssuableLines(blType, blId, freightType)

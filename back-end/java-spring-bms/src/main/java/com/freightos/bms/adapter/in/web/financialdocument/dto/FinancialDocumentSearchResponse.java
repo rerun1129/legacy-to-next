@@ -25,7 +25,7 @@ public record FinancialDocumentSearchResponse(
         String operatorName,
         String groupFinancialNo,
         String blType,
-        String blId,
+        Long blId,
         String jobDiv,
         String bound,
         String blNo,

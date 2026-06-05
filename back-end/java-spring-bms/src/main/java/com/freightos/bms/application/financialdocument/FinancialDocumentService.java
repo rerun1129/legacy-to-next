@@ -158,7 +158,7 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FinancialDocumentView> findDocumentsByBl(String blType, String blId) {
+    public List<FinancialDocumentView> findDocumentsByBl(String blType, Long blId) {
         List<FinancialDocumentView> rawViews = financialDocumentPort.findDocumentsByBl(blType, blId);
         if (rawViews.isEmpty()) return rawViews;
 
@@ -174,7 +174,7 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<IssuableLineView> findIssuableLines(String blType, String blId, String freightType) {
+    public List<IssuableLineView> findIssuableLines(String blType, Long blId, String freightType) {
         return financialDocumentPort.findHeaderId(blType, blId)
             .map(headerId -> {
                 List<IssuableLineView> rawLines = financialDocumentPort.findIssuableLines(headerId, freightType);

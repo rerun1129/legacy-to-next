@@ -63,11 +63,11 @@ public class FinancialDocumentSearchQueryRepository {
             .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
             .leftJoin(houseBl).on(
                 header.blType.eq("HOUSE")
-                    .and(header.blId.eq(houseBl.houseBlId.stringValue()))
+                    .and(header.blId.eq(houseBl.houseBlId))
             )
             .leftJoin(masterBl).on(
                 header.blType.eq("MASTER")
-                    .and(header.blId.eq(masterBl.masterBlId.stringValue()))
+                    .and(header.blId.eq(masterBl.masterBlId))
             )
             .where(whereConditions)
             .fetchOne();
@@ -109,11 +109,11 @@ public class FinancialDocumentSearchQueryRepository {
             .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
             .leftJoin(houseBl).on(
                 header.blType.eq("HOUSE")
-                    .and(header.blId.eq(houseBl.houseBlId.stringValue()))
+                    .and(header.blId.eq(houseBl.houseBlId))
             )
             .leftJoin(masterBl).on(
                 header.blType.eq("MASTER")
-                    .and(header.blId.eq(masterBl.masterBlId.stringValue()))
+                    .and(header.blId.eq(masterBl.masterBlId))
             )
             .where(whereConditions)
             .orderBy(doc.documentNo.desc())

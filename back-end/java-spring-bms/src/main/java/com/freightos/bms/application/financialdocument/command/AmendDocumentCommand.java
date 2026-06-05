@@ -10,7 +10,7 @@ import java.util.List;
 public record AmendDocumentCommand(
         Long financialDocumentId,
         String blType,
-        String blId,
+        Long blId,
         String freightType,
         List<Long> finalLineIds,
         String documentDt,

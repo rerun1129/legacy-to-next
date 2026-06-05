@@ -103,7 +103,7 @@ public class FreightLineQueryRepository {
      * freight_header → freight_line → financial_document JOIN. DISTINCT 서류 기준.
      * customerName은 Service에서 resolve.
      */
-    List<FinancialDocumentView> findDocumentsByBl(String blType, String blId) {
+    List<FinancialDocumentView> findDocumentsByBl(String blType, Long blId) {
         QFreightHeaderRefJpaEntity header = QFreightHeaderRefJpaEntity.freightHeaderRefJpaEntity;
         QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
         QFinancialDocumentJpaEntity doc = QFinancialDocumentJpaEntity.financialDocumentJpaEntity;

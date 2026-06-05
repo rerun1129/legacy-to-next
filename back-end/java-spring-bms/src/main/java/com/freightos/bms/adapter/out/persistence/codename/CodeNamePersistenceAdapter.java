@@ -40,7 +40,7 @@ public class CodeNamePersistenceAdapter implements CodeNameResolver {
     }
 
     @Override
-    public Map<String, BlDerived> findBlDerived(String blType, Collection<String> blIds) {
+    public Map<Long, BlDerived> findBlDerived(String blType, Collection<Long> blIds) {
         if ("HOUSE".equals(blType)) {
             return queryRepository.fetchHouseBlDerived(blIds);
         }

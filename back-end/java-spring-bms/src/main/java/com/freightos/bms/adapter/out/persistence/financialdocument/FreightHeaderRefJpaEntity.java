@@ -30,6 +30,6 @@ public class FreightHeaderRefJpaEntity {
     @Column(name = "bl_type", nullable = false, length = 10)
     private String blType;
 
-    @Column(name = "bl_id", nullable = false, length = 50)
-    private String blId;
+    @Column(name = "bl_id", nullable = false)
+    private Long blId;
 }

@@ -1,6 +1,7 @@
 package com.freightos.bms.adapter.in.web.financialdocument.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public record AmendDocumentRequest(
         @NotBlank String blType,
-        @NotBlank String blId,
+        @NotNull Long blId,
         @NotBlank String freightType,
         List<Long> finalLineIds,
         String documentDt,

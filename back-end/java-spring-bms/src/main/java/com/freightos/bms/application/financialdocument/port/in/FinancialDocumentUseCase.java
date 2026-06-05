@@ -40,10 +40,10 @@ public interface FinancialDocumentUseCase {
     AmendResult amendDocument(AmendDocumentCommand cmd);
 
     /** B/L에 속한 금융 서류 목록 조회. */
-    List<FinancialDocumentView> findDocumentsByBl(String blType, String blId);
+    List<FinancialDocumentView> findDocumentsByBl(String blType, Long blId);
 
     /** B/L의 발행 가능 운임 라인 목록 조회(미발행+이미발행 혼재, 발행 여부 표시). */
-    List<IssuableLineView> findIssuableLines(String blType, String blId, String freightType);
+    List<IssuableLineView> findIssuableLines(String blType, Long blId, String freightType);
 
     /**
      * 금융 서류 전역 검색.

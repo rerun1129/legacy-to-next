@@ -28,7 +28,7 @@ public record FinancialDocumentSearchView(
         String groupFinancialNo,
         // B/L 파생 (FMS cross-schema)
         String blType,
-        String blId,
+        Long blId,
         String jobDiv,
         String bound,
         String blNo,

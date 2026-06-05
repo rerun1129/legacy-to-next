@@ -120,9 +120,9 @@ public class CodeNameQueryRepository {
 
     /**
      * HOUSE B/L ID 목록 → 파생 정보(jobDiv·bound·hblNo·etd·eta).
-     * bl_id는 VARCHAR, house_bl_id는 BIGINT이므로 stringValue() 비교.
+     * bl_id·house_bl_id 모두 BIGINT이므로 직접 비교.
      */
-    Map<String, BlDerived> fetchHouseBlDerived(Collection<String> blIds) {
+    Map<Long, BlDerived> fetchHouseBlDerived(Collection<Long> blIds) {
         if (blIds == null || blIds.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -131,13 +131,13 @@ public class CodeNameQueryRepository {
         List<Tuple> rows = queryFactory
             .select(h.houseBlId, h.jobDiv, h.bound, h.hblNo, h.etd, h.eta)
             .from(h)
-            .where(h.houseBlId.stringValue().in(blIds))
+            .where(h.houseBlId.in(blIds))
             .fetch();
 
         return rows.stream()
             .filter(row -> row.get(h.houseBlId) != null)
             .collect(Collectors.toMap(
-                row -> String.valueOf(row.get(h.houseBlId)),
+                row -> row.get(h.houseBlId),
                 row -> new BlDerived(
                     row.get(h.jobDiv),
                     row.get(h.bound),
@@ -150,9 +150,9 @@ public class CodeNameQueryRepository {
 
     /**
      * MASTER B/L ID 목록 → 파생 정보(jobDiv·bound·mblNo·etd·eta).
-     * bl_id는 VARCHAR, master_bl_id는 BIGINT이므로 stringValue() 비교.
+     * bl_id·master_bl_id 모두 BIGINT이므로 직접 비교.
      */
-    Map<String, BlDerived> fetchMasterBlDerived(Collection<String> blIds) {
+    Map<Long, BlDerived> fetchMasterBlDerived(Collection<Long> blIds) {
         if (blIds == null || blIds.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -161,13 +161,13 @@ public class CodeNameQueryRepository {
         List<Tuple> rows = queryFactory
             .select(m.masterBlId, m.jobDiv, m.bound, m.mblNo, m.etd, m.eta)
             .from(m)
-            .where(m.masterBlId.stringValue().in(blIds))
+            .where(m.masterBlId.in(blIds))
             .fetch();
 
         return rows.stream()
             .filter(row -> row.get(m.masterBlId) != null)
             .collect(Collectors.toMap(
-                row -> String.valueOf(row.get(m.masterBlId)),
+                row -> row.get(m.masterBlId),
                 row -> new BlDerived(
                     row.get(m.jobDiv),
                     row.get(m.bound),

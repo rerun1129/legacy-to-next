@@ -7,7 +7,7 @@ import java.util.List;
  */
 public record IssueDocumentCommand(
         String blType,
-        String blId,
+        Long blId,
         String freightType,
         List<Long> lineIds,
         String documentDt,

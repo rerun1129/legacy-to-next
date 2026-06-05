@@ -11,7 +11,7 @@ import java.util.List;
  */
 public record IssueDocumentRequest(
         @NotBlank String blType,
-        @NotBlank String blId,
+        @NotNull Long blId,
         @NotBlank String freightType,
         @NotEmpty List<Long> lineIds,
         @NotBlank String documentDt,

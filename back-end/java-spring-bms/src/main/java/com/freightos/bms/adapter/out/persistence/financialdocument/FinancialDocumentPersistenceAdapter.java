@@ -59,14 +59,14 @@ public class FinancialDocumentPersistenceAdapter implements FinancialDocumentPor
     }
 
     @Override
-    public Optional<Long> findHeaderId(String blType, String blId) {
+    public Optional<Long> findHeaderId(String blType, Long blId) {
         return headerRefRepository
             .findByBlTypeAndBlId(blType, blId)
             .map(FreightHeaderRefJpaEntity::getFreightHeaderId);
     }
 
     @Override
-    public List<FinancialDocumentView> findDocumentsByBl(String blType, String blId) {
+    public List<FinancialDocumentView> findDocumentsByBl(String blType, Long blId) {
         return lineQueryRepository.findDocumentsByBl(blType, blId);
     }
 
