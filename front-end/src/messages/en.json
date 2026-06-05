@@ -262,7 +262,8 @@
             "deleteSuccess":  "Document(s) deleted.",
             "deleteConfirmTitle": "Delete Documents",
             "deleteConfirmDesc":  "Delete {count} selected document(s)? The linked freight lines will be un-issued.",
-            "deleteConfirmBtn":   "Delete"
+            "deleteConfirmBtn":   "Delete",
+            "deleteDocBtn":       "Delete Document"
           },
           "documentType": {
             "INVOICE": "Invoice",

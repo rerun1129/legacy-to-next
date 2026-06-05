@@ -18,6 +18,7 @@ import { ModalShell } from "@/components/shared/modal-shell";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { Button } from "@/components/shared/button";
 import { toast } from "@/lib/toast-store";
+import { confirm } from "@/components/confirm";
 import {
   financialDocumentKeys,
   financialDocumentUseCases,
@@ -157,6 +158,20 @@ function FreightIssueModalInner({
     // 에러는 전역 MutationCache onError SSOT에 위임
   });
 
+  // ── 서류 삭제 Mutation (amend 모드) ────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: () => financialDocumentUseCases.deleteDocument(amendDocId!),
+    onSuccess: () => {
+      toast.success(ti("deleteSuccess"));
+      queryClient.invalidateQueries({
+        queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
+      });
+      onIssueSuccess();
+      handleClose();
+    },
+    // 에러는 전역 MutationCache onError SSOT에 위임
+  });
+
   // ── 편집 Mutation (amend 모드) ─────────────────────────────
   const amendMutation = useMutation({
     mutationFn: () =>
@@ -194,6 +209,19 @@ function FreightIssueModalInner({
       queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
     });
     onClose();
+  }
+
+  // 서류 삭제 핸들러 — amend 모드 전용
+  async function handleDeleteDocument() {
+    const ok = await confirm({
+      title: ti("deleteConfirmTitle"),
+      description: ti("deleteConfirmDesc", { count: 1 }),
+      variant: "destructive",
+      confirmText: ti("deleteConfirmBtn"),
+      cancelText: ti("cancel"),
+    });
+    if (!ok) return;
+    deleteMutation.mutate();
   }
 
   // 발행 버튼: 발행/편집 성공 후 재실행 방지
@@ -248,6 +276,17 @@ function FreightIssueModalInner({
 
       {/* ── 액션 버튼 ────────────────────────────────────────── */}
       <div className="modal__actions">
+        {isAmend && (
+          <Button
+            variant="danger"
+            style={{ marginRight: "auto" }}
+            onClick={handleDeleteDocument}
+            disabled={deleteMutation.isPending}
+            loading={deleteMutation.isPending}
+          >
+            {ti("deleteDocBtn")}
+          </Button>
+        )}
         {isAmend ? (
           <Button
             variant="transaction"
