@@ -88,6 +88,96 @@ export interface AmendDocumentResult {
   deleted: boolean;
 }
 
+/** BE: SearchFinancialDocumentRequest — 전역 검색 요청 입력 */
+export interface SearchFinancialDocumentInput {
+  documentTypes: string[];
+  documentStatus?: string | null;
+  customerCode?: string | null;
+  documentNoLike?: string | null;
+  teamCode?: string | null;
+  operator?: string | null;
+  documentDtFrom?: string | null;
+  documentDtTo?: string | null;
+  performanceDtFrom?: string | null;
+  performanceDtTo?: string | null;
+  etdFrom?: string | null;
+  etdTo?: string | null;
+  etaFrom?: string | null;
+  etaTo?: string | null;
+  jobDiv?: string | null;
+  bound?: string | null;
+  page?: number;
+  size?: number;
+}
+
+/** BE: FinancialDocumentSearchResponse — 전역 검색 결과 단건 */
+export interface FinancialDocumentSearchRow {
+  financialDocumentId: number;
+  documentNo: string;
+  documentType: string;
+  documentDt: string;
+  documentStatus: string;
+  customerCode: string;
+  customerName: string;
+  settleTotalAmount: number | null;
+  localTotalAmount: number | null;
+  settleTotalVat: number | null;
+  localTotalVat: number | null;
+  usdTotalAmount: number | null;
+  performanceDt: string;
+  teamCode: string | null;
+  teamName: string | null;
+  operator: string | null;
+  operatorName: string | null;
+  groupFinancialNo: string | null;
+  blType: string | null;
+  blId: string | null;
+  jobDiv: string | null;
+  bound: string | null;
+  blNo: string | null;
+  etd: string | null;
+  eta: string | null;
+}
+
+/** BE: FinancialDocumentPageResponse — 전역 검색 페이지 응답 */
+export interface FinancialDocumentPage {
+  content: FinancialDocumentSearchRow[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}
+
+/** BE: FreightLineDetailResponse — 운임 라인 디테일 단건 */
+export interface FreightLineDetail {
+  freightLineId: number;
+  freightHeaderId: number;
+  freightType: string;
+  financialDocType: string;
+  freightCode: string;
+  freightName: string;
+  unitQuantity: number | null;
+  unitPrice: number | null;
+  per: string | null;
+  currency: string;
+  exchangeRate: number | null;
+  settleAmount: number | null;
+  localAmount: number | null;
+  settleTaxAmount: number | null;
+  localTaxAmount: number | null;
+  usdExchangeRate: number | null;
+  usdAmount: number | null;
+  customerCode: string;
+  customerName: string;
+  taxType: string | null;
+  taxNo: string | null;
+  taxDt: string | null;
+  slipNo: string | null;
+  slipDt: string | null;
+  performanceDt: string;
+  financialDocumentId: number;
+}
+
 // === 포트 인터페이스 ===
 
 export interface FinancialDocumentPort {
@@ -101,4 +191,8 @@ export interface FinancialDocumentPort {
   listByBl(blType: string, blId: string): Promise<FinancialDocument[]>;
   /** GET /api/bms/financial-documents/issuable-lines?blType=&blId=&freightType= */
   findIssuableLines(blType: string, blId: string, freightType: string): Promise<IssuableLine[]>;
+  /** POST /api/bms/financial-documents/search */
+  search(filter: SearchFinancialDocumentInput, page: number, size: number): Promise<FinancialDocumentPage>;
+  /** GET /api/bms/financial-documents/{id}/lines */
+  findLines(documentId: number): Promise<FreightLineDetail[]>;
 }

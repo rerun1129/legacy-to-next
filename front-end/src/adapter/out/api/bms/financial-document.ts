@@ -7,6 +7,9 @@ import type {
   IssueDocumentResult,
   AmendDocumentInput,
   AmendDocumentResult,
+  SearchFinancialDocumentInput,
+  FinancialDocumentPage,
+  FreightLineDetail,
 } from "@/application/bms/financial-document/ports";
 import { bmsFetchJson } from "../bms-fetch";
 import { ResponseParseError } from "../errors";
@@ -69,6 +72,75 @@ const AMEND_DOCUMENT_RESPONSE_SCHEMA = z.object({
   documentNo: z.string(),
   deleted: z.boolean(),
 }) satisfies z.ZodType<AmendDocumentResult>;
+
+// BE: FinancialDocumentSearchResponse — 전역 검색 결과 단건
+// BigDecimal 금액 필드는 null 가능, 파생 B/L 필드도 null 가능
+const FINANCIAL_DOCUMENT_SEARCH_ROW_SCHEMA = z.object({
+  financialDocumentId: z.number(),
+  documentNo: z.string(),
+  documentType: z.string(),
+  documentDt: z.string(),
+  documentStatus: z.string(),
+  customerCode: z.string(),
+  customerName: z.string(),
+  settleTotalAmount: z.number().nullable(),
+  localTotalAmount: z.number().nullable(),
+  settleTotalVat: z.number().nullable(),
+  localTotalVat: z.number().nullable(),
+  usdTotalAmount: z.number().nullable(),
+  performanceDt: z.string(),
+  teamCode: z.string().nullable(),
+  teamName: z.string().nullable(),
+  operator: z.string().nullable(),
+  operatorName: z.string().nullable(),
+  groupFinancialNo: z.string().nullable(),
+  blType: z.string().nullable(),
+  blId: z.string().nullable(),
+  jobDiv: z.string().nullable(),
+  bound: z.string().nullable(),
+  blNo: z.string().nullable(),
+  etd: z.string().nullable(),
+  eta: z.string().nullable(),
+}) satisfies z.ZodType<FinancialDocumentPage["content"][number]>;
+
+// BE: FinancialDocumentPageResponse — 페이지 응답 래퍼
+const FINANCIAL_DOCUMENT_PAGE_SCHEMA = z.object({
+  content: z.array(FINANCIAL_DOCUMENT_SEARCH_ROW_SCHEMA),
+  totalElements: z.number(),
+  totalPages: z.number(),
+  page: z.number(),
+  size: z.number(),
+}) satisfies z.ZodType<FinancialDocumentPage>;
+
+// BE: FreightLineDetailResponse — 운임 라인 디테일
+const FREIGHT_LINE_DETAIL_SCHEMA = z.object({
+  freightLineId: z.number(),
+  freightHeaderId: z.number(),
+  freightType: z.string(),
+  financialDocType: z.string(),
+  freightCode: z.string(),
+  freightName: z.string(),
+  unitQuantity: z.number().nullable(),
+  unitPrice: z.number().nullable(),
+  per: z.string().nullable(),
+  currency: z.string(),
+  exchangeRate: z.number().nullable(),
+  settleAmount: z.number().nullable(),
+  localAmount: z.number().nullable(),
+  settleTaxAmount: z.number().nullable(),
+  localTaxAmount: z.number().nullable(),
+  usdExchangeRate: z.number().nullable(),
+  usdAmount: z.number().nullable(),
+  customerCode: z.string(),
+  customerName: z.string(),
+  taxType: z.string().nullable(),
+  taxNo: z.string().nullable(),
+  taxDt: z.string().nullable(),
+  slipNo: z.string().nullable(),
+  slipDt: z.string().nullable(),
+  performanceDt: z.string(),
+  financialDocumentId: z.number(),
+}) satisfies z.ZodType<FreightLineDetail>;
 
 export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
   async amendDocument(req: AmendDocumentInput): Promise<AmendDocumentResult> {
@@ -133,6 +205,46 @@ export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
     const parsed = apiResponse(z.array(ISSUABLE_LINE_SCHEMA)).safeParse(json);
     if (!parsed.success) {
       throw new ResponseParseError(`Invalid issuable-lines response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
+  },
+
+  async search(filter: SearchFinancialDocumentInput, page: number, size: number): Promise<FinancialDocumentPage> {
+    const json = await bmsFetchJson(`${BASE}/search`, {
+      method: "POST",
+      body: JSON.stringify({
+        documentTypes: filter.documentTypes,
+        documentStatus: filter.documentStatus ?? null,
+        customerCode: filter.customerCode ?? null,
+        documentNoLike: filter.documentNoLike ?? null,
+        teamCode: filter.teamCode ?? null,
+        operator: filter.operator ?? null,
+        documentDtFrom: filter.documentDtFrom ?? null,
+        documentDtTo: filter.documentDtTo ?? null,
+        performanceDtFrom: filter.performanceDtFrom ?? null,
+        performanceDtTo: filter.performanceDtTo ?? null,
+        etdFrom: filter.etdFrom ?? null,
+        etdTo: filter.etdTo ?? null,
+        etaFrom: filter.etaFrom ?? null,
+        etaTo: filter.etaTo ?? null,
+        jobDiv: filter.jobDiv ?? null,
+        bound: filter.bound ?? null,
+        page,
+        size,
+      }),
+    });
+    const parsed = apiResponse(FINANCIAL_DOCUMENT_PAGE_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid financial-document search response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
+  },
+
+  async findLines(documentId: number): Promise<FreightLineDetail[]> {
+    const json = await bmsFetchJson(`${BASE}/${documentId}/lines`);
+    const parsed = apiResponse(z.array(FREIGHT_LINE_DETAIL_SCHEMA)).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid freight-line-detail response: ${parsed.error.message}`);
     }
     return parsed.data.data;
   },

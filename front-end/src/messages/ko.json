@@ -1835,7 +1835,11 @@
       "widgetEditMode": "Entry 위젯 편집",
       "widgetEditTitle": "위젯 편집 모드 on/off",
       "widgetEditDisabledTitle": "Main / Freight 탭에서만 사용 가능",
-      "quickSearch": "빠른 검색"
+      "quickSearch": "빠른 검색",
+      "financialDoc": "금융 서류",
+      "invoice": "인보이스",
+      "payment": "페이먼트",
+      "dcNote": "D/C Note"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export 목록",
@@ -1891,6 +1895,85 @@
       "copyConfirm": "확정",
       "copyCancel": "취소",
       "copyUnsupported": "이 B/L 타입은 복사를 지원하지 않습니다."
+    }
+  },
+  "bms": {
+    "list": {
+      "title": {
+        "invoice": "Invoice 조회",
+        "payment": "Payment 조회",
+        "dcNote": "D/C Note 조회"
+      },
+      "filter": {
+        "all": "전체",
+        "jobDiv": "업무구분",
+        "bound": "수출입",
+        "dateKind": "일자종류",
+        "dateKindDocumentDt": "서류일자",
+        "dateKindPerformanceDt": "실적일자",
+        "dateKindEtd": "ETD",
+        "dateKindEta": "ETA",
+        "documentStatus": "서류상태",
+        "statusCreated": "생성됨",
+        "statusGrouped": "그룹됨",
+        "statusTax": "세금계산서",
+        "statusSlip": "전표",
+        "statusClear": "정산완료",
+        "customer": "거래처",
+        "customerPlaceholder": "거래처 코드",
+        "documentNoLike": "서류번호",
+        "team": "팀",
+        "teamPlaceholder": "팀 코드",
+        "operator": "담당자",
+        "operatorPlaceholder": "담당자 코드"
+      },
+      "masterCols": {
+        "panelTitle": "금융 서류",
+        "status": "상태",
+        "documentNo": "서류번호",
+        "groupNo": "그룹번호",
+        "customerCode": "거래처코드",
+        "customerName": "거래처명",
+        "documentDt": "서류일자",
+        "performanceDt": "실적일자",
+        "jobDiv": "업무구분",
+        "bound": "수출입",
+        "blNo": "House B/L No",
+        "teamName": "팀",
+        "operatorName": "담당자",
+        "etd": "ETD",
+        "eta": "ETA",
+        "usdAmount": "USD금액",
+        "localAmount": "현지금액",
+        "localVat": "현지부가세"
+      },
+      "detailCols": {
+        "panelTitle": "운임 라인",
+        "customerCode": "거래처코드",
+        "customerName": "거래처명",
+        "freightCode": "운임코드",
+        "freightName": "운임명",
+        "currency": "통화",
+        "exchangeRate": "환율",
+        "per": "Per",
+        "unitQuantity": "수량",
+        "unitPrice": "단가",
+        "settleAmount": "발행금액",
+        "localAmount": "로컬금액",
+        "taxType": "세금구분",
+        "localTaxAmount": "세액",
+        "totalAmount": "총금액",
+        "slipNo": "전표번호",
+        "taxNo": "Tax번호",
+        "performanceDt": "실적일자",
+        "noLines": "운임 라인이 없습니다."
+      },
+      "common": {
+        "search": "검색",
+        "reset": "초기화",
+        "selectDocument": "서류를 선택하면 운임 라인이 표시됩니다.",
+        "noData": "데이터가 없습니다."
+      }
     }
   }
 }

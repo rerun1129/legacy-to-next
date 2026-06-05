@@ -1835,7 +1835,11 @@
       "widgetEditMode": "Entry Widget Edit",
       "widgetEditTitle": "Toggle widget edit mode",
       "widgetEditDisabledTitle": "Only available in Main / Freight tab",
-      "quickSearch": "Quick Search"
+      "quickSearch": "Quick Search",
+      "financialDoc": "Financial Document",
+      "invoice": "Invoice",
+      "payment": "Payment",
+      "dcNote": "D/C Note"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export List",
@@ -1891,6 +1895,85 @@
       "copyConfirm": "Confirm",
       "copyCancel": "Cancel",
       "copyUnsupported": "Copy is not supported for this B/L type."
+    }
+  },
+  "bms": {
+    "list": {
+      "title": {
+        "invoice": "Invoice List",
+        "payment": "Payment List",
+        "dcNote": "D/C Note List"
+      },
+      "filter": {
+        "all": "All",
+        "jobDiv": "Job Div",
+        "bound": "Bound",
+        "dateKind": "Date Kind",
+        "dateKindDocumentDt": "Document Date",
+        "dateKindPerformanceDt": "Performance Date",
+        "dateKindEtd": "ETD",
+        "dateKindEta": "ETA",
+        "documentStatus": "Status",
+        "statusCreated": "Created",
+        "statusGrouped": "Grouped",
+        "statusTax": "Tax Invoice",
+        "statusSlip": "Slip",
+        "statusClear": "Cleared",
+        "customer": "Customer",
+        "customerPlaceholder": "Customer Code",
+        "documentNoLike": "Document No",
+        "team": "Team",
+        "teamPlaceholder": "Team Code",
+        "operator": "Operator",
+        "operatorPlaceholder": "Operator Code"
+      },
+      "masterCols": {
+        "panelTitle": "Financial Documents",
+        "status": "Status",
+        "documentNo": "Document No",
+        "groupNo": "Group No",
+        "customerCode": "Cust. Code",
+        "customerName": "Customer",
+        "documentDt": "Doc. Date",
+        "performanceDt": "Perf. Date",
+        "jobDiv": "Job Div",
+        "bound": "Bound",
+        "blNo": "House B/L No",
+        "teamName": "Team",
+        "operatorName": "Operator",
+        "etd": "ETD",
+        "eta": "ETA",
+        "usdAmount": "USD Amt",
+        "localAmount": "Local Amt",
+        "localVat": "Local VAT"
+      },
+      "detailCols": {
+        "panelTitle": "Freight Lines",
+        "customerCode": "Cust. Code",
+        "customerName": "Customer",
+        "freightCode": "Freight Code",
+        "freightName": "Freight Name",
+        "currency": "Curr.",
+        "exchangeRate": "Exch. Rate",
+        "per": "Per",
+        "unitQuantity": "Qty",
+        "unitPrice": "Unit Price",
+        "settleAmount": "Settle Amt",
+        "localAmount": "Local Amt",
+        "taxType": "Tax Type",
+        "localTaxAmount": "Tax Amt",
+        "totalAmount": "Total",
+        "slipNo": "Slip No",
+        "taxNo": "Tax No",
+        "performanceDt": "Perf. Date",
+        "noLines": "No freight lines."
+      },
+      "common": {
+        "search": "Search",
+        "reset": "Reset",
+        "selectDocument": "Select a document to view freight lines.",
+        "noData": "No data available."
+      }
     }
   }
 }

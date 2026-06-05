@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid, Search,
+  Receipt,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -87,6 +88,21 @@ const FMS_NAV_MODULE: NavModule = {
   ],
 };
 
+// ─── BMS Nav data (정적) ────────────────────────────────────
+const BMS_NAV_MODULE: NavModule = {
+  module: "BMS", defaultOpen: false,
+  sections: [
+    {
+      sectionKey: "financialDoc", icon: Receipt, defaultOpen: true, requiredMenuCode: "MENU_BMS_FINANCIAL",
+      children: [
+        { labelKey: "invoice",  href: "/bms/invoice/list",  icon: List, requiredMenuCode: "MENU_BMS_INVOICE"  },
+        { labelKey: "payment",  href: "/bms/payment/list",  icon: List, requiredMenuCode: "MENU_BMS_PAYMENT"  },
+        { labelKey: "dcNote",   href: "/bms/dc-note/list",  icon: List, requiredMenuCode: "MENU_BMS_DC_NOTE"  },
+      ],
+    },
+  ],
+};
+
 // ─── useSyncExternalStore helpers for hydration mount gate ──
 // SSR snapshot → false, CSR snapshot → true. setState 없이 hydration guard 구현.
 const subscribeNoop = () => () => {};
@@ -124,12 +140,18 @@ export function Sidebar({ quickSearchOpen, onOpenQuickSearch, onCloseQuickSearch
     [FMS_NAV_MODULE.module]:
       FMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s)) ||
       (FMS_NAV_MODULE.defaultOpen ?? false),
+    [BMS_NAV_MODULE.module]:
+      BMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s)) ||
+      (BMS_NAV_MODULE.defaultOpen ?? false),
     Admin: false,
   }));
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     FMS_NAV_MODULE.sections.forEach((s) => {
+      init[s.sectionKey] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
+    });
+    BMS_NAV_MODULE.sections.forEach((s) => {
       init[s.sectionKey] = sectionActive(pathname, s) || (s.defaultOpen ?? false);
     });
     return init;
@@ -160,6 +182,12 @@ export function Sidebar({ quickSearchOpen, onOpenQuickSearch, onCloseQuickSearch
   const fmsModActive = FMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s));
   const fmsModOpen   = openModules[FMS_NAV_MODULE.module];
   const fmsAccessibleSections = FMS_NAV_MODULE.sections.filter(
+    (s) => !s.requiredMenuCode || (mounted && hasMenuAccess(session, s.requiredMenuCode))
+  );
+
+  const bmsModActive = BMS_NAV_MODULE.sections.some((s) => sectionActive(pathname, s));
+  const bmsModOpen   = openModules[BMS_NAV_MODULE.module];
+  const bmsAccessibleSections = BMS_NAV_MODULE.sections.filter(
     (s) => !s.requiredMenuCode || (mounted && hasMenuAccess(session, s.requiredMenuCode))
   );
 
@@ -243,6 +271,72 @@ export function Sidebar({ quickSearchOpen, onOpenQuickSearch, onCloseQuickSearch
 
                 {secOpen && section.children
                   // mounted 전에는 session=null로 취급해 SSR 결과와 일치시킴
+                  .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
+                  .map((leaf) => {
+                  const active = leafActive(pathname, leaf);
+                  return (
+                    <button
+                      key={leaf.href}
+                      className={`side-item${active ? " is-active" : ""}`}
+                      style={{ paddingLeft: 32, fontSize: "var(--fs-xs)" }}
+                      onClick={() => navigate(leaf.href)}
+                    >
+                      <span className="side-item__icon"><leaf.icon size={11} /></span>
+                      {t(leaf.labelKey)}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* BMS 모듈 — 정적, 접근 가능한 섹션이 1개 이상일 때만 렌더 */}
+      {bmsAccessibleSections.length > 0 && (
+        <div className="side-group">
+          <button
+            className={`side-group__label side-group__label--toggle${bmsModActive ? " is-active" : ""}`}
+            onClick={() => toggleModule(BMS_NAV_MODULE.module)}
+          >
+            <span style={{ flex: 1 }}>{BMS_NAV_MODULE.module}</span>
+            <ChevronRight
+              size={11}
+              style={{
+                flexShrink: 0,
+                color: bmsModActive ? "var(--accent)" : "var(--ink-4)",
+                transform: bmsModOpen ? "rotate(90deg)" : undefined,
+                transition: "transform 160ms ease",
+              }}
+            />
+          </button>
+
+          {bmsModOpen && bmsAccessibleSections.map((section) => {
+            const secActive = sectionActive(pathname, section);
+            const secOpen   = openSections[section.sectionKey];
+
+            return (
+              <div key={section.sectionKey}>
+                <button
+                  className={`side-item${secActive ? " is-active" : ""}`}
+                  style={{ paddingLeft: 12 }}
+                  onClick={() => toggleSection(section.sectionKey)}
+                >
+                  <span className="side-item__icon"><section.icon size={13} /></span>
+                  <span style={{ flex: 1, textAlign: "left" }}>{t(section.sectionKey)}</span>
+                  <ChevronRight
+                    size={11}
+                    style={{
+                      flexShrink: 0,
+                      color: secActive ? "var(--accent)" : "var(--ink-4)",
+                      transform: secOpen ? "rotate(90deg)" : undefined,
+                      transition: "transform 160ms ease",
+                      marginRight: 4,
+                    }}
+                  />
+                </button>
+
+                {secOpen && section.children
                   .filter((leaf) => !leaf.requiredMenuCode || (mounted && hasMenuAccess(session, leaf.requiredMenuCode)))
                   .map((leaf) => {
                   const active = leafActive(pathname, leaf);
