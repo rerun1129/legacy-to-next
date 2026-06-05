@@ -2,15 +2,23 @@ package com.freightos.bms.adapter.in.web.financialdocument;
 
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentPageResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineDetailResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssuableLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.SearchFinancialDocumentRequest;
+import com.freightos.bms.application.financialdocument.FinancialDocumentSearchView;
+import com.freightos.bms.application.financialdocument.FreightLineDetailView;
+import com.freightos.bms.application.financialdocument.SearchFinancialDocumentCriteria;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentUseCase;
 import com.freightos.bms.common.response.MessageCode;
 import com.freightos.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -102,6 +110,37 @@ public class FinancialDocumentController {
             .findIssuableLines(blType, blId, freightType)
             .stream()
             .map(assembler::toResponse)
+            .toList();
+        return ApiResponse.of(responses);
+    }
+
+    /**
+     * 금융 서류 전역 검색.
+     * POST /api/bms/financial-documents/search
+     * documentTypes IN 필수(최소 1개). 나머지 조건은 선택.
+     */
+    @PostMapping("/search")
+    public ApiResponse<FinancialDocumentPageResponse> searchDocuments(
+            @RequestBody @Valid SearchFinancialDocumentRequest request) {
+        int pageNo = request.page() != null ? request.page() : 0;
+        int pageSize = request.size() != null ? request.size() : 20;
+        SearchFinancialDocumentCriteria criteria = assembler.toCriteria(request);
+        Page<FinancialDocumentSearchView> page = financialDocumentUseCase.searchDocuments(
+            criteria, PageRequest.of(pageNo, pageSize)
+        );
+        return ApiResponse.of(assembler.toPageResponse(page));
+    }
+
+    /**
+     * 특정 금융 서류의 운임 라인 디테일 목록 조회.
+     * GET /api/bms/financial-documents/{id}/lines
+     */
+    @GetMapping("/{id}/lines")
+    public ApiResponse<List<FreightLineDetailResponse>> findDocumentLines(@PathVariable Long id) {
+        List<FreightLineDetailResponse> responses = financialDocumentUseCase
+            .findDocumentLines(id)
+            .stream()
+            .map(assembler::toDetailResponse)
             .toList();
         return ApiResponse.of(responses);
     }

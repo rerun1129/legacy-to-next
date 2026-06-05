@@ -1,16 +1,21 @@
 package com.freightos.bms.application.financialdocument.port.in;
 
 import com.freightos.bms.application.financialdocument.AmendResult;
+import com.freightos.bms.application.financialdocument.FinancialDocumentSearchView;
 import com.freightos.bms.application.financialdocument.FinancialDocumentView;
+import com.freightos.bms.application.financialdocument.FreightLineDetailView;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.application.financialdocument.IssueResult;
+import com.freightos.bms.application.financialdocument.SearchFinancialDocumentCriteria;
 import com.freightos.bms.application.financialdocument.command.AmendDocumentCommand;
 import com.freightos.bms.application.financialdocument.command.IssueDocumentCommand;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 /**
- * 금융 서류 인바운드 포트. 발행·삭제·조회 유스케이스를 정의한다.
+ * 금융 서류 인바운드 포트. 발행·삭제·조회·전역검색 유스케이스를 정의한다.
  */
 public interface FinancialDocumentUseCase {
 
@@ -39,4 +44,16 @@ public interface FinancialDocumentUseCase {
 
     /** B/L의 발행 가능 운임 라인 목록 조회(미발행+이미발행 혼재, 발행 여부 표시). */
     List<IssuableLineView> findIssuableLines(String blType, String blId, String freightType);
+
+    /**
+     * 금융 서류 전역 검색.
+     * documentTypes IN 필수. 나머지 조건은 null/blank 시 무시.
+     */
+    Page<FinancialDocumentSearchView> searchDocuments(
+            SearchFinancialDocumentCriteria criteria, Pageable pageable);
+
+    /**
+     * 특정 금융 서류의 운임 라인 디테일 목록 조회.
+     */
+    List<FreightLineDetailView> findDocumentLines(Long financialDocumentId);
 }

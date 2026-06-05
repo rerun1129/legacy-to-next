@@ -2,16 +2,24 @@ package com.freightos.bms.adapter.in.web.financialdocument;
 
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentPageResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentSearchResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineDetailResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssuableLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.SearchFinancialDocumentRequest;
 import com.freightos.bms.application.financialdocument.AmendResult;
+import com.freightos.bms.application.financialdocument.FinancialDocumentSearchView;
 import com.freightos.bms.application.financialdocument.FinancialDocumentView;
+import com.freightos.bms.application.financialdocument.FreightLineDetailView;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.application.financialdocument.IssueResult;
+import com.freightos.bms.application.financialdocument.SearchFinancialDocumentCriteria;
 import com.freightos.bms.application.financialdocument.command.AmendDocumentCommand;
 import com.freightos.bms.application.financialdocument.command.IssueDocumentCommand;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -92,6 +100,101 @@ public class FinancialDocumentAssembler {
             view.performanceDt(),
             view.financialDocumentId(),
             view.documentNo()
+        );
+    }
+
+    public SearchFinancialDocumentCriteria toCriteria(SearchFinancialDocumentRequest req) {
+        return new SearchFinancialDocumentCriteria(
+            req.documentTypes(),
+            req.documentStatus(),
+            req.customerCode(),
+            req.documentNoLike(),
+            req.teamCode(),
+            req.operator(),
+            req.documentDtFrom(),
+            req.documentDtTo(),
+            req.performanceDtFrom(),
+            req.performanceDtTo(),
+            req.etdFrom(),
+            req.etdTo(),
+            req.etaFrom(),
+            req.etaTo(),
+            req.jobDiv(),
+            req.bound()
+        );
+    }
+
+    public FinancialDocumentPageResponse toPageResponse(Page<FinancialDocumentSearchView> page) {
+        List<FinancialDocumentSearchResponse> content = page.getContent().stream()
+            .map(this::toSearchResponse)
+            .toList();
+        return new FinancialDocumentPageResponse(
+            content,
+            page.getTotalElements(),
+            page.getTotalPages(),
+            page.getNumber(),
+            page.getSize()
+        );
+    }
+
+    public FinancialDocumentSearchResponse toSearchResponse(FinancialDocumentSearchView view) {
+        return new FinancialDocumentSearchResponse(
+            view.financialDocumentId(),
+            view.documentNo(),
+            view.documentType(),
+            view.documentDt(),
+            view.documentStatus(),
+            view.customerCode(),
+            view.customerName(),
+            view.settleTotalAmount(),
+            view.localTotalAmount(),
+            view.settleTotalVat(),
+            view.localTotalVat(),
+            view.usdTotalAmount(),
+            view.performanceDt(),
+            view.teamCode(),
+            view.teamName(),
+            view.operator(),
+            view.operatorName(),
+            view.groupFinancialNo(),
+            view.blType(),
+            view.blId(),
+            view.jobDiv(),
+            view.bound(),
+            view.blNo(),
+            view.etd(),
+            view.eta()
+        );
+    }
+
+    public FreightLineDetailResponse toDetailResponse(FreightLineDetailView view) {
+        return new FreightLineDetailResponse(
+            view.freightLineId(),
+            view.freightHeaderId(),
+            view.freightType(),
+            view.financialDocType(),
+            view.freightCode(),
+            view.freightName(),
+            view.unitQuantity(),
+            view.unitPrice(),
+            view.per(),
+            view.currency(),
+            view.exchangeRate(),
+            view.settleAmount(),
+            view.localAmount(),
+            view.settleTaxAmount(),
+            view.localTaxAmount(),
+            view.usdExchangeRate(),
+            view.usdAmount(),
+            view.customerCode(),
+            view.customerName(),
+            view.taxType(),
+            view.taxNo(),
+            view.taxDt(),
+            view.slipNo(),
+            view.slipDt(),
+            view.performanceDt(),
+            view.financialDocumentId()
         );
     }
 }

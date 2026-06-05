@@ -42,8 +42,20 @@ public class BmsFreightLineJpaEntity extends BaseJpaEntity {
     @Column(name = "freight_code", length = 40)
     private String freightCode;
 
+    @Column(name = "unit_quantity", columnDefinition = "NUMERIC(18,2)")
+    private BigDecimal unitQuantity;
+
+    @Column(name = "unit_price", columnDefinition = "NUMERIC(18,2)")
+    private BigDecimal unitPrice;
+
+    @Column(name = "per", length = 40)
+    private String per;
+
     @Column(name = "currency", length = 10)
     private String currency;
+
+    @Column(name = "exchange_rate", columnDefinition = "NUMERIC(18,6)")
+    private BigDecimal exchangeRate;
 
     @Column(name = "settle_amount", columnDefinition = "NUMERIC(18,2)")
     private BigDecimal settleAmount;
@@ -57,11 +69,29 @@ public class BmsFreightLineJpaEntity extends BaseJpaEntity {
     @Column(name = "local_tax_amount", columnDefinition = "NUMERIC(18,2)")
     private BigDecimal localTaxAmount;
 
+    @Column(name = "usd_exchange_rate", columnDefinition = "NUMERIC(18,6)")
+    private BigDecimal usdExchangeRate;
+
     @Column(name = "usd_amount", columnDefinition = "NUMERIC(18,2)")
     private BigDecimal usdAmount;
 
     @Column(name = "customer_code", length = 40)
     private String customerCode;
+
+    @Column(name = "tax_type", length = 12)
+    private String taxType;
+
+    @Column(name = "tax_no", length = 50)
+    private String taxNo;
+
+    @Column(name = "tax_dt", length = 8)
+    private String taxDt;
+
+    @Column(name = "slip_no", length = 50)
+    private String slipNo;
+
+    @Column(name = "slip_dt", length = 8)
+    private String slipDt;
 
     // ── 서류 연결 시 갱신되는 mutable 필드 ────────────────────────────────────
 

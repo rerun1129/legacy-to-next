@@ -14,6 +14,8 @@ import com.freightos.bms.domain.financialdocument.enums.DocumentType;
 import com.freightos.bms.common.response.MessageCode;
 import com.freightos.common.exception.FmsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,7 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
     private final FinancialDocumentPort financialDocumentPort;
     private final DocumentNumberGenerator documentNumberGenerator;
     private final CodeNameResolver codeNameResolver;
+    private final FinancialDocumentQueryService queryService;
 
     @Override
     public IssueResult issueDocument(IssueDocumentCommand cmd) {
@@ -373,5 +376,20 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
             v.currency(), v.settleAmount(), v.localAmount(), v.settleTaxAmount(), v.localTaxAmount(), v.usdAmount(),
             v.performanceDt(), v.financialDocumentId(), v.documentNo()
         );
+    }
+
+    // ── 전역 검색 위임 ──────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FinancialDocumentSearchView> searchDocuments(
+            SearchFinancialDocumentCriteria criteria, Pageable pageable) {
+        return queryService.search(criteria, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FreightLineDetailView> findDocumentLines(Long financialDocumentId) {
+        return queryService.findDocumentLines(financialDocumentId);
     }
 }
