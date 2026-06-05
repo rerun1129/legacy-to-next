@@ -5,6 +5,7 @@ import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.application.financialdocument.port.out.DocumentSummary;
 import com.freightos.bms.application.financialdocument.port.out.FinancialDocumentPort;
 import com.freightos.bms.application.financialdocument.port.out.FreightLineSnapshot;
+import com.freightos.bms.application.financialdocument.port.out.GroupDocumentSnapshot;
 import com.freightos.bms.domain.financialdocument.FinancialDocument;
 import com.freightos.common.exception.FmsException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class FinancialDocumentPersistenceAdapter implements FinancialDocumentPor
     private final FreightLineQueryRepository lineQueryRepository;
     private final FreightHeaderRefRepository headerRefRepository;
     private final FinancialDocumentDomainToJpaMapper domainToJpaMapper;
+    private final FinancialDocumentGroupQueryRepository groupQueryRepository;
 
     @Override
     public List<FreightLineSnapshot> loadLinesByIds(List<Long> lineIds) {
@@ -123,5 +125,25 @@ public class FinancialDocumentPersistenceAdapter implements FinancialDocumentPor
         entity.setTeamCode(teamCode);
         entity.setOperator(operator);
         // dirty-checking으로 트랜잭션 커밋 시 UPDATE 자동 발행
+    }
+
+    @Override
+    public List<GroupDocumentSnapshot> loadGroupSnapshots(List<Long> ids) {
+        return groupQueryRepository.loadGroupSnapshots(ids);
+    }
+
+    @Override
+    public void bulkAssignGroupNo(List<Long> ids, String groupNo) {
+        groupQueryRepository.bulkAssignGroupNo(ids, groupNo);
+    }
+
+    @Override
+    public void bulkClearGroupNo(List<Long> ids) {
+        groupQueryRepository.bulkClearGroupNo(ids);
+    }
+
+    @Override
+    public void bulkUpdateDocumentStatus(List<Long> ids, String status) {
+        groupQueryRepository.bulkUpdateDocumentStatus(ids, status);
     }
 }

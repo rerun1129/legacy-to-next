@@ -5,6 +5,7 @@ import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineDetailR
 import com.freightos.bms.adapter.in.web.financialdocument.dto.SearchFinancialDocumentRequest;
 import com.freightos.bms.application.financialdocument.FinancialDocumentSearchView;
 import com.freightos.bms.application.financialdocument.FreightLineDetailView;
+import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentGroupUseCase;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentUseCase;
 import com.freightos.common.security.JwtAuthenticationFilter;
 import com.freightos.common.security.JwtTokenProvider;
@@ -50,6 +51,9 @@ class FinancialDocumentSearchControllerTest {
 
     @MockitoBean
     private FinancialDocumentUseCase financialDocumentUseCase;
+
+    @MockitoBean
+    private FinancialDocumentGroupUseCase financialDocumentGroupUseCase;
 
     @MockitoBean
     private FinancialDocumentAssembler assembler;

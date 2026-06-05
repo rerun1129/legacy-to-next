@@ -2,6 +2,8 @@ package com.freightos.bms.adapter.in.web.financialdocument;
 
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.ApplyGroupingRequest;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.ApplyGroupingResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentPageResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentSearchResponse;
@@ -14,10 +16,12 @@ import com.freightos.bms.application.financialdocument.AmendResult;
 import com.freightos.bms.application.financialdocument.FinancialDocumentSearchView;
 import com.freightos.bms.application.financialdocument.FinancialDocumentView;
 import com.freightos.bms.application.financialdocument.FreightLineDetailView;
+import com.freightos.bms.application.financialdocument.GroupResult;
 import com.freightos.bms.application.financialdocument.IssuableLineView;
 import com.freightos.bms.application.financialdocument.IssueResult;
 import com.freightos.bms.application.financialdocument.SearchFinancialDocumentCriteria;
 import com.freightos.bms.application.financialdocument.command.AmendDocumentCommand;
+import com.freightos.bms.application.financialdocument.command.ApplyGroupingCommand;
 import com.freightos.bms.application.financialdocument.command.IssueDocumentCommand;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -120,7 +124,21 @@ public class FinancialDocumentAssembler {
             req.etaFrom(),
             req.etaTo(),
             req.jobDiv(),
-            req.bound()
+            req.bound(),
+            req.groupFinancialNo(),
+            req.grouped()
+        );
+    }
+
+    public ApplyGroupingCommand toCommand(ApplyGroupingRequest req) {
+        return new ApplyGroupingCommand(req.groupedDocumentIds(), req.scopeDocumentIds());
+    }
+
+    public ApplyGroupingResponse toResponse(GroupResult result) {
+        return new ApplyGroupingResponse(
+            result.groupFinancialNo(),
+            result.groupedDocumentIds(),
+            result.ungroupedDocumentIds()
         );
     }
 

@@ -90,6 +90,18 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
 
     @Override
     public void deleteDocument(Long financialDocumentId) {
+        // 서류 존재·상태 확인 — CREATED가 아니면 그룹 해제 전 삭제 차단(BE SSOT).
+        DocumentSummary summary = financialDocumentPort.loadDocumentSummary(financialDocumentId)
+            .orElseThrow(() -> FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_NOT_FOUND.name(),
+                MessageCode.FINANCIAL_DOCUMENT_NOT_FOUND.message()
+            ));
+        if (!"CREATED".equals(summary.documentStatus())) {
+            throw FmsException.conflict(
+                MessageCode.FINANCIAL_DOCUMENT_DELETE_NOT_CREATED.name(),
+                MessageCode.FINANCIAL_DOCUMENT_DELETE_NOT_CREATED.message()
+            );
+        }
         // 라인 연결 해제 후 서류 삭제. performance_dt는 유지(원복 없음).
         financialDocumentPort.unlinkLinesByDocument(financialDocumentId);
         financialDocumentPort.deleteDocument(financialDocumentId);

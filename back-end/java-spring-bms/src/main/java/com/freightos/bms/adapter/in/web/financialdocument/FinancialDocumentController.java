@@ -2,6 +2,8 @@ package com.freightos.bms.adapter.in.web.financialdocument;
 
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.AmendDocumentResponse;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.ApplyGroupingRequest;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.ApplyGroupingResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentPageResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FinancialDocumentResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineDetailResponse;
@@ -12,6 +14,7 @@ import com.freightos.bms.adapter.in.web.financialdocument.dto.SearchFinancialDoc
 import com.freightos.bms.application.financialdocument.FinancialDocumentSearchView;
 import com.freightos.bms.application.financialdocument.FreightLineDetailView;
 import com.freightos.bms.application.financialdocument.SearchFinancialDocumentCriteria;
+import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentGroupUseCase;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentUseCase;
 import com.freightos.bms.common.response.MessageCode;
 import com.freightos.common.response.ApiResponse;
@@ -41,6 +44,7 @@ import java.util.List;
 public class FinancialDocumentController {
 
     private final FinancialDocumentUseCase financialDocumentUseCase;
+    private final FinancialDocumentGroupUseCase financialDocumentGroupUseCase;
     private final FinancialDocumentAssembler assembler;
 
     /**
@@ -143,5 +147,19 @@ public class FinancialDocumentController {
             .map(assembler::toDetailResponse)
             .toList();
         return ApiResponse.of(responses);
+    }
+
+    /**
+     * 금융 서류 그룹 부여/해제.
+     * POST /api/bms/financial-documents/group
+     * groupedDocumentIds: 최종 그룹 포함 서류(모달 우측). scopeDocumentIds: 모달 전체 대상.
+     */
+    @PostMapping("/group")
+    public ApiResponse<ApplyGroupingResponse> applyGrouping(
+            @RequestBody @Valid ApplyGroupingRequest request) {
+        ApplyGroupingResponse response = assembler.toResponse(
+            financialDocumentGroupUseCase.applyGrouping(assembler.toCommand(request))
+        );
+        return ApiResponse.of(response, MessageCode.FINANCIAL_DOCUMENT_GROUPED.message());
     }
 }

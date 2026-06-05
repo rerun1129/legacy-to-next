@@ -223,7 +223,9 @@ public class FinancialDocumentSearchQueryRepository {
             dateFrom(coalesce(houseBl.eta, masterBl.eta), c.etaFrom()),
             dateTo(coalesce(houseBl.eta, masterBl.eta), c.etaTo()),
             eqString(coalesce(houseBl.jobDiv, masterBl.jobDiv), c.jobDiv()),
-            eqString(coalesce(houseBl.bound, masterBl.bound), c.bound())
+            eqString(coalesce(houseBl.bound, masterBl.bound), c.bound()),
+            likeGroupNo(doc.groupFinancialNo, c.groupFinancialNo()),
+            groupedFilter(doc.groupFinancialNo, c.grouped())
         };
     }
 
@@ -239,6 +241,22 @@ public class FinancialDocumentSearchQueryRepository {
 
     private BooleanExpression likeDocumentNo(StringPath path, String value) {
         return (value == null || value.isBlank()) ? null : path.containsIgnoreCase(value);
+    }
+
+    private BooleanExpression likeGroupNo(StringPath path, String value) {
+        return (value == null || value.isBlank()) ? null : path.containsIgnoreCase(value);
+    }
+
+    /**
+     * grouped 필터. "Y" → groupFinancialNo IS NOT NULL, "N" → IS NULL, 그 외 → 무시.
+     */
+    private BooleanExpression groupedFilter(StringPath path, String grouped) {
+        if (grouped == null || grouped.isBlank()) return null;
+        return switch (grouped.toUpperCase()) {
+            case "Y" -> path.isNotNull();
+            case "N" -> path.isNull();
+            default -> null;
+        };
     }
 
     private BooleanExpression dateFrom(StringPath path, String value) {

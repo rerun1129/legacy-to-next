@@ -87,4 +87,29 @@ public interface FinancialDocumentPort {
      * JPA dirty-checking으로 UPDATE — 트랜잭션 내 호출 필수.
      */
     void updateDocumentHeader(Long documentId, String documentDt, String performanceDt, String teamCode, String operator);
+
+    /**
+     * 그룹 부여/해제 처리용 서류 스냅샷 목록 로드.
+     * 검증·상태 승급/강등 판단에 필요한 최소 필드를 한 번에 로드한다.
+     */
+    List<GroupDocumentSnapshot> loadGroupSnapshots(List<Long> ids);
+
+    /**
+     * 지정 서류들에 그룹 번호를 일괄 부여한다.
+     * QueryDSL 벌크 UPDATE — 영속 컨텍스트 bypass.
+     */
+    void bulkAssignGroupNo(List<Long> ids, String groupNo);
+
+    /**
+     * 지정 서류들의 그룹 번호를 null로 일괄 해제한다.
+     * QueryDSL 벌크 UPDATE — 영속 컨텍스트 bypass.
+     */
+    void bulkClearGroupNo(List<Long> ids);
+
+    /**
+     * 지정 서류들의 document_status를 일괄 갱신한다.
+     * 그룹 부여 시 GROUPED 승급, 해제 시 CREATED 강등에 사용.
+     * QueryDSL 벌크 UPDATE — 영속 컨텍스트 bypass.
+     */
+    void bulkUpdateDocumentStatus(List<Long> ids, String status);
 }

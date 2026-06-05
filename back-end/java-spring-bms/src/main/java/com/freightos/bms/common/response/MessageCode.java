@@ -21,7 +21,11 @@ public enum MessageCode {
     FINANCIAL_DOCUMENT_LINE_ALREADY_ISSUED("이미 서류가 발행된 라인이 포함되어 있습니다."),
     FINANCIAL_DOCUMENT_MIXED_CUSTOMER("선택된 라인의 고객사가 서로 다릅니다. 동일 고객사 라인만 한 서류로 발행할 수 있습니다."),
     FINANCIAL_DOCUMENT_MIXED_TYPE("선택된 라인의 서류 종류가 서로 다릅니다. 동일 종류 라인만 한 서류로 발행할 수 있습니다."),
-    FINANCIAL_DOCUMENT_LINE_OTHER_DOCUMENT("다른 서류에 이미 연결된 라인은 편집 대상에 포함할 수 없습니다.");
+    FINANCIAL_DOCUMENT_LINE_OTHER_DOCUMENT("다른 서류에 이미 연결된 라인은 편집 대상에 포함할 수 없습니다."),
+    FINANCIAL_DOCUMENT_GROUPED("그룹 번호가 부여되었습니다."),
+    FINANCIAL_DOCUMENT_GROUP_MIXED_CATEGORY("INVOICE·PAYMENT·D/C Note는 서로 다른 그룹 카테고리이므로 함께 그룹화할 수 없습니다."),
+    FINANCIAL_DOCUMENT_GROUP_MULTIPLE_EXISTING("선택된 서류들이 이미 서로 다른 그룹에 속해 있습니다. 기존 그룹 중 하나를 선택해 합류하거나 개별 해제 후 다시 시도하세요."),
+    FINANCIAL_DOCUMENT_DELETE_NOT_CREATED("그룹·세금·전표 단계의 서류는 삭제할 수 없습니다. 먼저 그룹을 해제하여 생성(CREATED) 상태로 되돌린 뒤 삭제하세요.");
 
     private final String message;
 
