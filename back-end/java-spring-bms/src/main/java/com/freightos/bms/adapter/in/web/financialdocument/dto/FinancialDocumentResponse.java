@@ -20,5 +20,6 @@ public record FinancialDocumentResponse(
         BigDecimal usdTotalAmount,
         String performanceDt,
         String teamCode,
-        String operator
+        String operator,
+        String groupFinancialNo
 ) {}

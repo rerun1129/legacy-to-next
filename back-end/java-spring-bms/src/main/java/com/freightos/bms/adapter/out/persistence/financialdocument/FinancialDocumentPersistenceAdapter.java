@@ -108,4 +108,15 @@ public class FinancialDocumentPersistenceAdapter implements FinancialDocumentPor
         entity.setUsdTotalAmount(usdTotal);
         // dirty-checking으로 트랜잭션 커밋 시 UPDATE 자동 발행
     }
+
+    @Override
+    public void updateDocumentHeader(Long documentId, String documentDt, String performanceDt, String teamCode, String operator) {
+        FinancialDocumentJpaEntity entity = documentRepository.findById(documentId)
+            .orElseThrow(() -> FmsException.conflict("FINANCIAL_DOCUMENT_NOT_FOUND", "서류 ID를 찾을 수 없습니다: " + documentId));
+        entity.setDocumentDt(documentDt);
+        entity.setPerformanceDt(performanceDt);
+        entity.setTeamCode(teamCode);
+        entity.setOperator(operator);
+        // dirty-checking으로 트랜잭션 커밋 시 UPDATE 자동 발행
+    }
 }

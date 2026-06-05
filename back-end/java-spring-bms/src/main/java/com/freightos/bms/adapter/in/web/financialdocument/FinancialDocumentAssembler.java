@@ -40,7 +40,10 @@ public class FinancialDocumentAssembler {
 
     public AmendDocumentCommand toCommand(Long id, AmendDocumentRequest req) {
         List<Long> finalLineIds = req.finalLineIds() != null ? req.finalLineIds() : Collections.emptyList();
-        return new AmendDocumentCommand(id, req.blType(), req.blId(), req.freightType(), finalLineIds);
+        return new AmendDocumentCommand(
+            id, req.blType(), req.blId(), req.freightType(), finalLineIds,
+            req.documentDt(), req.performanceDt(), req.teamCode(), req.operator()
+        );
     }
 
     public IssueDocumentResponse toResponse(IssueResult result) {
@@ -67,7 +70,8 @@ public class FinancialDocumentAssembler {
             view.usdTotalAmount(),
             view.performanceDt(),
             view.teamCode(),
-            view.operator()
+            view.operator(),
+            view.groupFinancialNo()
         );
     }
 

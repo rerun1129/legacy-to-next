@@ -75,4 +75,10 @@ public interface FinancialDocumentPort {
             BigDecimal localVat,
             BigDecimal usdTotal
     );
+
+    /**
+     * CREATED 상태 서류의 헤더 4필드를 갱신한다.
+     * JPA dirty-checking으로 UPDATE — 트랜잭션 내 호출 필수.
+     */
+    void updateDocumentHeader(Long documentId, String documentDt, String performanceDt, String teamCode, String operator);
 }

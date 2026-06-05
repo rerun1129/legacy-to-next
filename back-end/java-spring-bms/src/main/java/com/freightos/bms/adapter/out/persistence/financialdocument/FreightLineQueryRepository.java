@@ -127,7 +127,8 @@ public class FreightLineQueryRepository {
                 doc.usdTotalAmount,
                 doc.performanceDt,
                 doc.teamCode,
-                doc.operator
+                doc.operator,
+                doc.groupFinancialNo
             )
             .from(header)
             .join(line).on(line.freightHeaderId.eq(header.freightHeaderId))
@@ -150,7 +151,8 @@ public class FreightLineQueryRepository {
             nvl(t.get(doc.usdTotalAmount)),
             t.get(doc.performanceDt),
             t.get(doc.teamCode),
-            t.get(doc.operator)
+            t.get(doc.operator),
+            t.get(doc.groupFinancialNo)
         )).toList();
     }
 
@@ -218,7 +220,7 @@ public class FreightLineQueryRepository {
         QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
 
         Tuple row = queryFactory
-            .select(doc.financialDocumentId, doc.documentNo, doc.performanceDt, line.customerCode, line.financialDocType)
+            .select(doc.financialDocumentId, doc.documentNo, doc.performanceDt, doc.documentStatus, line.customerCode, line.financialDocType)
             .from(doc)
             .join(line).on(line.financialDocumentId.eq(doc.financialDocumentId))
             .where(doc.financialDocumentId.eq(documentId))
@@ -231,7 +233,8 @@ public class FreightLineQueryRepository {
             row.get(doc.documentNo),
             row.get(line.customerCode),
             row.get(line.financialDocType),
-            row.get(doc.performanceDt)
+            row.get(doc.performanceDt),
+            row.get(doc.documentStatus)
         ));
     }
 

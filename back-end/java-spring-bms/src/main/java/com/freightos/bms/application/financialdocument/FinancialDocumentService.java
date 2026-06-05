@@ -140,6 +140,14 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
             cmd.financialDocumentId(), settleTotal, localTotal, settleVat, localVat, usdTotal
         );
 
+        // CREATED 상태 서류에 한해 헤더 4필드 갱신(비CREATED는 무시 — FE도 readonly로 전송 차단)
+        if ("CREATED".equals(summary.documentStatus()) && cmd.documentDt() != null) {
+            financialDocumentPort.updateDocumentHeader(
+                cmd.financialDocumentId(),
+                cmd.documentDt(), cmd.performanceDt(), cmd.teamCode(), cmd.operator()
+            );
+        }
+
         return new AmendResult(cmd.financialDocumentId(), summary.documentNo(), false);
     }
 
@@ -350,7 +358,7 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
             v.financialDocumentId(), v.documentNo(), v.documentType(), v.documentDt(), v.status(),
             v.customerCode(), name,
             v.settleTotalAmount(), v.localTotalAmount(), v.settleTotalVat(), v.localTotalVat(), v.usdTotalAmount(),
-            v.performanceDt(), v.teamCode(), v.operator()
+            v.performanceDt(), v.teamCode(), v.operator(), v.groupFinancialNo()
         );
     }
 
