@@ -44,6 +44,10 @@ class HouseBlControllerAirCreateValidationTest {
     @MockitoBean
     private HouseBlAssembler houseBlAssembler;
 
+    @MockitoBean
+    @SuppressWarnings("unused")
+    private HouseBlFreightAssembler houseBlFreightAssembler;
+
     // @EnableJpaAuditing이 FmsApplication에 선언되어 WebMvcTest 슬라이스에서도 JpaMetamodelMappingContext를 요구함
     @MockitoBean
     @SuppressWarnings("unused")

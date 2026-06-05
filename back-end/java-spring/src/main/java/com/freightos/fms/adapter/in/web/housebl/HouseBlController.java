@@ -49,6 +49,7 @@ public class HouseBlController {
 
     private final HouseBlUseCase houseBlUseCase;
     private final HouseBlAssembler houseBlAssembler;
+    private final HouseBlFreightAssembler houseBlFreightAssembler;
     private final Validator validator;
 
     @Operation(summary = "House B/L 검색 (POST body)")
@@ -82,7 +83,7 @@ public class HouseBlController {
             Set<ConstraintViolation<CreateHouseBlRequest>> violations = validator.validate(request, group);
             if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
         }
-        CreateHouseBlCommand.FreightCommand freightCmd = houseBlAssembler.toCreateFreightCommand(request);
+        CreateHouseBlCommand.FreightCommand freightCmd = houseBlFreightAssembler.toCreateFreightCommand(request);
         Long id = houseBlUseCase.createHouseBl(houseBlAssembler.toCreateCommand(request, freightCmd));
         URI location = uriBuilder.path("/api/house-bl/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location)
@@ -100,7 +101,7 @@ public class HouseBlController {
     public ResponseEntity<ApiResponse<Void>> updateHouseBl(
             @PathVariable Long id,
             @Valid @RequestBody UpdateHouseBlRequest req) {
-        UpdateHouseBlCommand.FreightCommand freightCmd = houseBlAssembler.toUpdateFreightCommand(req);
+        UpdateHouseBlCommand.FreightCommand freightCmd = houseBlFreightAssembler.toUpdateFreightCommand(req);
         UpdateHouseBlCommand cmd = houseBlAssembler.toUpdateCommand(req, freightCmd);
         // Sea jobDiv는 §6.35 전용 Port+Adapter
         if (Objects.equals("SEA", req.jobDiv())) {
