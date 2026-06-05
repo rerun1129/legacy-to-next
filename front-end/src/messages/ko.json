@@ -191,7 +191,12 @@
             "slipNo":                "전표번호",
             "financialDocumentNo":   "서류번호",
             "exchangeRate":          "환율",
-            "total":                 "합계"
+            "total":                 "합계",
+            "team":                  "팀",
+            "settleTotalAmt":        "정산 합계",
+            "localTotalAmt":         "로컬 합계",
+            "taxTotalAmt":           "세액 합계",
+            "groupDocNo":            "그룹 서류번호"
           },
           "per": {
             "SHP":  "Ship",

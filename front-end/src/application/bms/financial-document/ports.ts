@@ -23,6 +23,7 @@ export interface FinancialDocument {
   performanceDt: string;
   teamCode: string | null;
   operator: string | null;
+  groupFinancialNo: string | null;
 }
 
 /** BE: IssuableLineResponse — 발행 가능 운임 라인 (미발행이면 financialDocumentId·documentNo null) */
@@ -73,6 +74,11 @@ export interface AmendDocumentInput {
   freightType: string;
   /** 최종 라인 상태(선언적) — 서버가 현재 상태와 diff하여 link/unlink 처리 */
   finalLineIds: number[];
+  /** 헤더 편집 4필드 — status=CREATED일 때만 BE가 UPDATE, 비CREATED는 무시 */
+  documentDt?: string | null;
+  performanceDt?: string | null;
+  teamCode?: string | null;
+  operator?: string | null;
 }
 
 /** BE: AmendDocumentResponse — 서류 편집 응답. deleted=true이면 모든 라인 제거로 서류 자동 삭제됨 */

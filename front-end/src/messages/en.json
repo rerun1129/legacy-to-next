@@ -191,7 +191,12 @@
             "slipNo":                "Slip No",
             "financialDocumentNo":   "Doc No",
             "exchangeRate":          "Ex. Rate",
-            "total":                 "Total"
+            "total":                 "Total",
+            "team":                  "Team",
+            "settleTotalAmt":        "Settle Total Amt",
+            "localTotalAmt":         "Local Total Amt",
+            "taxTotalAmt":           "Tax Total Amt",
+            "groupDocNo":            "Group Doc No"
           },
           "per": {
             "SHP":  "Ship",

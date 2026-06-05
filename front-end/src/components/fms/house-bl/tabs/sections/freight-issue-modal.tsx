@@ -4,11 +4,13 @@
  * 서류 발행/편집(amend) 모달.
  * - issue 모드: 미발행 운임 선택 → 새 financial_document INSERT + 라인 link.
  * - amend 모드: 발행된 서류의 라인 편집 → finalLineIds 선언적 PATCH, 모든 라인 제거 시 서류 자동 삭제.
+ * - editableHeader(amend+CREATED): listByBl 캐시 self-resolve → 진입점 무관 동일 동작.
  * - customerCode / financialDocType 검증은 발행 버튼 onClick(freight-panels)에서 선행.
  * - 에러 토스트는 전역 MutationCache onError SSOT에 위임(직접 catch 금지).
  */
 
 import { useState, useMemo } from "react";
+import type { FinancialDocument } from "@/application/bms/financial-document/ports";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Minus } from "lucide-react";
@@ -61,7 +63,25 @@ function FreightIssueModalInner({
     () => selectedLines.find((l) => l.financialDocumentNo)?.financialDocumentNo ?? "",
   );
 
-  const header = useFreightIssueHeader();
+  const blIdStr = String(blId);
+  // amend 시 listByBl 캐시에서 해당 서류를 찾아 status·헤더값 self-resolve
+  // → 진입점(운임그리드/Account Documents) 무관하게 동일 동작.
+  const amendDoc = isAmend
+    ? queryClient
+        .getQueryData<FinancialDocument[]>(financialDocumentKeys.listByBl(blType, blIdStr))
+        ?.find((d) => d.financialDocumentId === amendDocId)
+    : undefined;
+  const editableHeader = isAmend && amendDoc?.status === "CREATED";
+  const resolvedInitialHeader = amendDoc
+    ? {
+        documentDt: amendDoc.documentDt,
+        performanceDt: amendDoc.performanceDt,
+        teamCode: amendDoc.teamCode ?? "",
+        operator: amendDoc.operator ?? "",
+      }
+    : undefined;
+
+  const header = useFreightIssueHeader(editableHeader ? resolvedInitialHeader : undefined);
 
   const { options: taxTypeOptions } = useEnumOptions("TaxType");
   const taxTypeLabelMap = useMemo(
@@ -113,8 +133,6 @@ function FreightIssueModalInner({
     [removeColumn, baseLineColumns],
   );
 
-  const blIdStr = String(blId);
-
   // ── 발행 Mutation (issue 모드) ─────────────────────────────
   const issueMutation = useMutation({
     mutationFn: () =>
@@ -148,6 +166,11 @@ function FreightIssueModalInner({
         blId: blIdStr,
         freightType,
         finalLineIds: lines.map((l) => l.freightLineId),
+        // editableHeader=true(CREATED)일 때만 헤더 4필드 전달, 비CREATED는 null로 BE 무시
+        documentDt: editableHeader ? header.documentDt : null,
+        performanceDt: editableHeader ? header.performanceDt : null,
+        teamCode: editableHeader ? (header.teamCode || null) : null,
+        operator: editableHeader ? header.operatorForSubmit : null,
       }),
     onSuccess: (result) => {
       if (result.deleted) {
@@ -189,8 +212,8 @@ function FreightIssueModalInner({
       }}
     >
       {/* ── 헤더 섹션 ─────────────────────────────────────────── */}
-      {isAmend ? (
-        // amend 모드: 헤더 표시 전용 (서류번호만 표시, 나머지는 편집 불가)
+      {isAmend && !editableHeader ? (
+        // amend 모드, 비CREATED: 헤더 표시 전용 (서류번호만 표시)
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0,1fr))", gap: 8, marginBottom: 12 }}>
           <div className="field">
             <div className="field__label">{ti("documentNo")}</div>
@@ -199,7 +222,11 @@ function FreightIssueModalInner({
             </div>
           </div>
         </div>
+      ) : isAmend && editableHeader ? (
+        // amend 모드, CREATED: 헤더 4필드 편집 가능 + 실서류번호 표시
+        <FreightIssueHeader header={header} ti={ti} documentNo={displayDocumentNo} />
       ) : (
+        // issue 모드: 기존 헤더 (documentNo 빈칸 placeholder)
         <FreightIssueHeader header={header} ti={ti} />
       )}
 

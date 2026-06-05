@@ -34,6 +34,7 @@ const FINANCIAL_DOCUMENT_SCHEMA = z.object({
   performanceDt: z.string(),
   teamCode: z.string().nullable(),
   operator: z.string().nullable(),
+  groupFinancialNo: z.string().nullable(),
 }) satisfies z.ZodType<FinancialDocument>;
 
 // BE: IssuableLineResponse
@@ -78,6 +79,10 @@ export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
         blId: req.blId,
         freightType: req.freightType,
         finalLineIds: req.finalLineIds,
+        documentDt: req.documentDt ?? null,
+        performanceDt: req.performanceDt ?? null,
+        teamCode: req.teamCode ?? null,
+        operator: req.operator ?? null,
       }),
     });
     const parsed = apiResponse(AMEND_DOCUMENT_RESPONSE_SCHEMA).safeParse(json);

@@ -34,7 +34,14 @@ export interface FreightIssueHeaderState {
   operatorNameValue: string;
 }
 
-export function useFreightIssueHeader(): FreightIssueHeaderState {
+interface InitialHeaderSeed {
+  documentDt?: string;
+  performanceDt?: string;
+  teamCode?: string;
+  operator?: string;
+}
+
+export function useFreightIssueHeader(initial?: InitialHeaderSeed): FreightIssueHeaderState {
   // 로그인 세션에서 팀 기본값
   const session = getSession();
   const defaultTeam = session?.attributes?.["team"]?.[0] ?? "";
@@ -43,6 +50,10 @@ export function useFreightIssueHeader(): FreightIssueHeaderState {
   const qc = useQueryClient();
   const initialUsername = qc.getQueryData<MeInfo>(["auth", "me"])?.username ?? "";
 
+  // seed: initial이 전달되면 우선, 없으면 기본값(issue 모드 동작 동일)
+  const seedTeam = initial?.teamCode ?? defaultTeam;
+  const seedUser = initial?.operator ?? initialUsername;
+
   // me 쿼리 유지 — 캐시 워밍 + operatorNameQuery enabled 소스
   const { data: meData } = useQuery({
     queryKey: ["auth", "me"],
@@ -50,44 +61,49 @@ export function useFreightIssueHeader(): FreightIssueHeaderState {
     staleTime: 5 * 60 * 1000,
   });
 
-  const [documentDt, setDocumentDt] = useState<string>(todayYyyyMmDd);
-  const [performanceDt, setPerformanceDt] = useState<string>(todayYyyyMmDd);
-  const [teamCode, setTeamCode] = useState<string>(defaultTeam);
-  const [operator, setOperator] = useState<string>(initialUsername);
+  const [documentDt, setDocumentDt] = useState<string>(
+    initial?.documentDt || todayYyyyMmDd,
+  );
+  const [performanceDt, setPerformanceDt] = useState<string>(
+    initial?.performanceDt || todayYyyyMmDd,
+  );
+  const [teamCode, setTeamCode] = useState<string>(seedTeam);
+  const [operator, setOperator] = useState<string>(seedUser);
   const [teamName, setTeamName] = useState<string>("");
   const [operatorName, setOperatorName] = useState<string>("");
 
   const teamAc = useCodeAutocomplete(CODE_SOURCES.team);
   const operatorAc = useCodeAutocomplete(CODE_SOURCES.user);
 
-  // 초기 팀명 조회 — defaultTeam 코드로 autocomplete 결과에서 name 추출
+  // 초기 팀명 조회 — seedTeam 코드로 autocomplete 결과에서 name 추출
   const teamNameQuery = useQuery({
-    queryKey: ["team-name-resolve", defaultTeam],
+    queryKey: ["team-name-resolve", seedTeam],
     queryFn: () =>
       CODE_SOURCES.team
-        .fetch(defaultTeam)
-        .then((r) => r.find((x) => x.code === defaultTeam)?.name ?? ""),
-    enabled: !!defaultTeam,
+        .fetch(seedTeam)
+        .then((r) => r.find((x) => x.code === seedTeam)?.name ?? ""),
+    enabled: !!seedTeam,
     staleTime: 5 * 60 * 1000,
   });
 
-  const username = meData?.username;
-  // 초기 담당자명 조회 — me.username 코드로 autocomplete 결과에서 name 추출
+  // seedUser가 있으면 seedUser 기준, 없으면 me.username 기준
+  const resolvedUserForQuery = seedUser || meData?.username;
+  // 초기 담당자명 조회 — seedUser 코드로 autocomplete 결과에서 name 추출
   const operatorNameQuery = useQuery({
-    queryKey: ["user-name-resolve", username],
+    queryKey: ["user-name-resolve", resolvedUserForQuery],
     queryFn: () =>
       CODE_SOURCES.user
-        .fetch(username!)
-        .then((r) => r.find((x) => x.code === username)?.name ?? ""),
-    enabled: !!username,
+        .fetch(resolvedUserForQuery!)
+        .then((r) => r.find((x) => x.code === resolvedUserForQuery)?.name ?? ""),
+    enabled: !!resolvedUserForQuery,
     staleTime: 5 * 60 * 1000,
   });
 
   // 초기 코드 그대로일 때만 초기조회 이름 보조 표시 — 사용자가 코드를 바꾸거나 비우면 name도 빈칸
-  const teamNameValue = teamName || (teamCode === defaultTeam ? (teamNameQuery.data ?? "") : "");
+  const teamNameValue = teamName || (teamCode === seedTeam ? (teamNameQuery.data ?? "") : "");
   const operatorNameValue =
     operatorName ||
-    (initialUsername !== "" && operator === initialUsername
+    (seedUser !== "" && operator === seedUser
       ? (operatorNameQuery.data ?? "")
       : "");
 
@@ -114,9 +130,11 @@ export function useFreightIssueHeader(): FreightIssueHeaderState {
 interface FreightIssueHeaderProps {
   header: FreightIssueHeaderState;
   ti: ReturnType<typeof useTranslations>;
+  /** 전달되면 서류번호 필드를 해당 값으로 표시 (amend 편집 모드에서 실서류번호 표시) */
+  documentNo?: string;
 }
 
-export function FreightIssueHeader({ header, ti }: FreightIssueHeaderProps) {
+export function FreightIssueHeader({ header, ti, documentNo }: FreightIssueHeaderProps) {
   const {
     documentDt, setDocumentDt,
     performanceDt, setPerformanceDt,
@@ -132,7 +150,12 @@ export function FreightIssueHeader({ header, ti }: FreightIssueHeaderProps) {
       <div className="field">
         <div className="field__label">{ti("documentNo")}</div>
         <div className="field__input">
-          <input className="input" readOnly value="" placeholder={ti("documentNoPlaceholder")} />
+          <input
+            className="input"
+            readOnly
+            value={documentNo ?? ""}
+            placeholder={documentNo == null ? ti("documentNoPlaceholder") : undefined}
+          />
         </div>
       </div>
       <div className="field">
