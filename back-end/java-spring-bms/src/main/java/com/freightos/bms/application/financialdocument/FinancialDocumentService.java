@@ -146,6 +146,8 @@ public class FinancialDocumentService implements FinancialDocumentUseCase {
                 cmd.financialDocumentId(),
                 cmd.documentDt(), cmd.performanceDt(), cmd.teamCode(), cmd.operator()
             );
+            // performanceDt 변경을 최종 연결 라인 전체에 재전파(§6.15: 문서→라인 전파값)
+            financialDocumentPort.bulkUpdateLinePerformanceDt(finalLineIds, cmd.performanceDt());
         }
 
         return new AmendResult(cmd.financialDocumentId(), summary.documentNo(), false);

@@ -211,6 +211,20 @@ public class FreightLineQueryRepository {
     }
 
     /**
+     * 최종 연결 라인들의 performance_dt만 일괄 갱신한다.
+     * amend 시 CREATED 서류의 performanceDt 변경을 기존 연결 라인에 재전파할 때 사용(§6.15).
+     */
+    void bulkUpdateLinePerformanceDt(List<Long> lineIds, String performanceDt) {
+        if (lineIds == null || lineIds.isEmpty()) return;
+        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
+        queryFactory
+            .update(line)
+            .set(line.performanceDt, performanceDt)
+            .where(line.freightLineId.in(lineIds))
+            .execute();
+    }
+
+    /**
      * 서류 요약 정보를 조회한다.
      * financial_document JOIN freight_line 1행으로 customer_code·financial_doc_type 대표값 획득.
      * 서류=단일 customer/docType 전제이므로 LIMIT 1 대표값으로 충분.

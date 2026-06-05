@@ -110,6 +110,11 @@ public class FinancialDocumentPersistenceAdapter implements FinancialDocumentPor
     }
 
     @Override
+    public void bulkUpdateLinePerformanceDt(List<Long> lineIds, String performanceDt) {
+        lineQueryRepository.bulkUpdateLinePerformanceDt(lineIds, performanceDt);
+    }
+
+    @Override
     public void updateDocumentHeader(Long documentId, String documentDt, String performanceDt, String teamCode, String operator) {
         FinancialDocumentJpaEntity entity = documentRepository.findById(documentId)
             .orElseThrow(() -> FmsException.conflict("FINANCIAL_DOCUMENT_NOT_FOUND", "서류 ID를 찾을 수 없습니다: " + documentId));

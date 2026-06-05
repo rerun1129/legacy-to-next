@@ -64,6 +64,12 @@ public interface FinancialDocumentPort {
     void unlinkLines(List<Long> lineIds);
 
     /**
+     * 최종 연결 라인들의 performance_dt만 일괄 갱신한다.
+     * amend 시 CREATED 서류의 performanceDt 변경을 기존 연결 라인에 재전파할 때 사용(§6.15).
+     */
+    void bulkUpdateLinePerformanceDt(List<Long> lineIds, String performanceDt);
+
+    /**
      * 서류의 합계 5종을 갱신한다(amend 후 재계산 반영).
      * JPA dirty-checking으로 UPDATE — 트랜잭션 내 호출 필수.
      */
