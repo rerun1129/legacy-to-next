@@ -22,25 +22,79 @@ interface Props {
  * BS-01 Invoice / BS-02 Payment / BS-03 D/C Note 공용 Shell.
  * config 주입으로 3화면 공유, 검색은 Search 명시 트리거만(자동조회 없음).
  */
+type DocumentListInject = { documentNoLike?: string };
+
+function buildDocFilter(documentTypes: string[], docNo: string): SearchFinancialDocumentInput {
+  return {
+    documentTypes,
+    documentStatus: null,
+    customerCode: null,
+    documentNoLike: docNo,
+    teamCode: null,
+    operator: null,
+    documentDtFrom: null,
+    documentDtTo: null,
+    performanceDtFrom: null,
+    performanceDtTo: null,
+    etdFrom: null,
+    etdTo: null,
+    etaFrom: null,
+    etaTo: null,
+    jobDiv: null,
+    bound: null,
+  };
+}
+
 export function FinancialDocumentListClient({ config }: Props) {
   const scope = config.routeKey;
 
   const form = useForm<FinancialDocumentFilter>({ defaultValues: DEFAULT_FILTER });
 
-  // 진입 시 자동조회 방지 — submittedFilter는 항상 null로 시작, Search 버튼 클릭 시에만 조회
-  const [submittedFilter, setSubmittedFilter] = useState<SearchFinancialDocumentInput | null>(null);
+  // 마운트 시 inject 1회 캡처 (cross-route 진입)
+  const [initialInject] = useState<DocumentListInject | undefined>(
+    () => listFilterStore.getState().getInject(scope) as DocumentListInject | undefined,
+  );
+
+  const [submittedFilter, setSubmittedFilter] = useState<SearchFinancialDocumentInput | null>(
+    () => (initialInject?.documentNoLike ? buildDocFilter(config.documentTypes, initialInject.documentNoLike) : null),
+  );
   const [currentPage, setCurrentPage] = useState(() => {
-    const s = listFilterStore.getState().getSearch(scope);
-    return s?.currentPage ?? 1;
+    if (initialInject?.documentNoLike) return 1; // inject 진입 시 page 1
+    return listFilterStore.getState().getSearch(scope)?.currentPage ?? 1;
   });
-  const [pageSize, setPageSize] = useState(() => {
-    const s = listFilterStore.getState().getSearch(scope);
-    return s?.pageSize ?? DEFAULT_PAGE_SIZE;
-  });
-  const [selectedRow, setSelectedRow] = useState<FinancialDocumentSearchRow | null>(() => {
-    // 선택 행은 세션 내 영속하지 않음(디테일은 서류 선택 시에만 의미 있음)
-    return null;
-  });
+  const [pageSize, setPageSize] = useState(() => listFilterStore.getState().getSearch(scope)?.pageSize ?? DEFAULT_PAGE_SIZE);
+  const [selectedRow, setSelectedRow] = useState<FinancialDocumentSearchRow | null>(null);
+
+  // inject 처리: cross-route는 init에서 완료, same-route는 subscribe 콜백으로 반영
+  useEffect(() => {
+    // (a) 마운트 시 캡처한 초기 inject 정리 — submittedFilter는 init에 이미 반영됨.
+    //     form 동기화 + 슬롯 clear만 수행 (둘 다 React setState 아님)
+    if (initialInject?.documentNoLike) {
+      form.setValue("documentNoLike", initialInject.documentNoLike);
+      form.setValue("dateFrom", "");
+      form.setValue("dateTo", "");
+      listFilterStore.getState().clearInject(scope);
+    }
+    // (b) same-route 재진입: 머무는 동안 도착하는 새 inject 반영
+    //     콜백 내 setState는 deferred 이벤트라 react-hooks/set-state-in-effect 위반 아님
+    const unsub = listFilterStore.subscribe((state, prevState) => {
+      // injects[scope]가 바뀐 경우에만 반응 — form.setValue→setFilter / setState→setSearch 등
+      // injects 무관 store 변경으로 인한 재진입(무한루프) 차단
+      if (state.injects[scope] === prevState.injects[scope]) return;
+      const inj = state.injects[scope] as DocumentListInject | undefined;
+      if (!inj?.documentNoLike) return;
+      const docNo = inj.documentNoLike;
+      setSubmittedFilter(buildDocFilter(config.documentTypes, docNo));
+      setCurrentPage(1);
+      setSelectedRow(null);
+      form.setValue("documentNoLike", docNo);
+      form.setValue("dateFrom", "");
+      form.setValue("dateTo", "");
+      // clear 후 재호출돼도 위 guard로 루프 없음
+      listFilterStore.getState().clearInject(scope);
+    });
+    return unsub;
+  }, [initialInject, scope, config.documentTypes, form]);
 
   // 영속화 저장
   useEffect(() => {

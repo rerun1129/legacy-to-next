@@ -311,6 +311,19 @@ export function Sidebar({ quickSearchOpen, onOpenQuickSearch, onCloseQuickSearch
             />
           </button>
 
+          {/* Quick Search 진입 버튼 — BMS 금융서류 접근 보유 시에만 표시 */}
+          {bmsModOpen && mounted && hasMenuAccess(session, "MENU_BMS_FINANCIAL") && (
+            <button
+              type="button"
+              className="side-item"
+              style={{ paddingLeft: 12 }}
+              onClick={onOpenQuickSearch}
+            >
+              <span className="side-item__icon"><Search size={13} /></span>
+              <span style={{ flex: 1, textAlign: "left" }}>{t('quickSearch')}</span>
+            </button>
+          )}
+
           {bmsModOpen && bmsAccessibleSections.map((section) => {
             const secActive = sectionActive(pathname, section);
             const secOpen   = openSections[section.sectionKey];

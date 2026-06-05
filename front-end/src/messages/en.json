@@ -1888,6 +1888,7 @@
       "partyKindNotify": "Notify",
       "partyKindSettlePartner": "Settle Partner",
       "noAccess": "You do not have access permission.",
+      "documentNo": "Document No",
       "copy": "Copy",
       "copyTitle": "Copy B/L",
       "copyDesc": "Select panels to copy to the new entry.",

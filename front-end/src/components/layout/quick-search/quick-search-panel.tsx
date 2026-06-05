@@ -10,6 +10,10 @@ import type { BlQuickSearchFilters, BlQuickSearchItem } from "@/domain/bl-quick-
 import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { useBlQuickSearch } from "@/lib/use-bl-quick-search";
 import { openBlEntry } from "@/lib/open-bl-entry";
+import { useBmsDocQuickSearch } from "@/lib/use-bms-doc-quick-search";
+import { openBmsDocumentList } from "@/lib/open-bms-document-list";
+import { getSession, hasMenuAccess } from "@/lib/admin-session";
+import type { FinancialDocumentSearchRow } from "@/application/bms/financial-document/ports";
 import { CopyBlModal } from "@/components/fms/bl-copy/copy-bl-modal";
 import { QuickSearchFilterFields } from "./quick-search-filter-fields";
 
@@ -23,6 +27,12 @@ export function QuickSearchPanel({ onBack }: Props) {
   const [blQuery, setBlQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<BlQuickSearchItem | null>(null);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [docQuery, setDocQuery] = useState("");
+
+  // getSession()은 순수 동기 읽기 — useState lazy initializer로 렌더 안정화
+  const [session] = useState(() => getSession());
+  const canBl = hasMenuAccess(session, "MENU_FMS_HOUSE_BL") || hasMenuAccess(session, "MENU_FMS_MASTER_BL");
+  const canDoc = hasMenuAccess(session, "MENU_BMS_FINANCIAL");
 
   const form = useForm<BlQuickSearchFilters>({
     defaultValues: { dateKind: "ETD", partyKind: "SHIPPER" },
@@ -53,6 +63,21 @@ export function QuickSearchPanel({ onBack }: Props) {
     setIsCopyModalOpen(false);
   }, []);
 
+  // BMS Document 검색 — docItems 인덱스를 id에 매핑하여 선택 시 역참조
+  const { items: docItems, isLoading: docLoading } = useBmsDocQuickSearch(docQuery, form.watch());
+  const docSuggestions: CodeBoxSuggestion[] = docItems.map((r, i) => ({
+    code: r.documentNo,
+    name: r.customerName,
+    id: i,
+  }));
+
+  function handleDocSelect(s: CodeBoxSuggestion): void {
+    const row: FinancialDocumentSearchRow | undefined = docItems[s.id as number];
+    if (!row) return;
+    setDocQuery(row.documentNo);
+    openBmsDocumentList(row, router, t("noAccess"));
+  }
+
   return (
     <div className="quick-search-panel">
       {/* 헤더 */}
@@ -72,36 +97,38 @@ export function QuickSearchPanel({ onBack }: Props) {
       <QuickSearchFilterFields form={form} />
 
       {/* B/L 번호 검색 + Copy 버튼 슬롯 */}
-      <div className="quick-search-panel__bl-search">
-        <div className="quick-search-panel__bl-row">
-          <div className="quick-search-panel__bl-input">
-            <CodeBox
-              kind="code-only"
-              label={t("blNo")}
-              codeProps={{
-                placeholder: "B/L No",
-                value: blQuery,
-                onChange: (e) => setBlQuery(e.target.value),
-              }}
-              onSearch={setBlQuery}
-              suggestions={suggestions}
-              suggestionsLoading={isLoading}
-              onSelect={handleSelect}
-            />
+      {canBl && (
+        <div className="quick-search-panel__bl-search">
+          <div className="quick-search-panel__bl-row">
+            <div className="quick-search-panel__bl-input">
+              <CodeBox
+                kind="code-only"
+                label={t("blNo")}
+                codeProps={{
+                  placeholder: "B/L No",
+                  value: blQuery,
+                  onChange: (e) => setBlQuery(e.target.value),
+                }}
+                onSearch={setBlQuery}
+                suggestions={suggestions}
+                suggestionsLoading={isLoading}
+                onSelect={handleSelect}
+              />
+            </div>
+            {selectedItem != null && (
+              <button
+                type="button"
+                className="quick-search-panel__copy-btn"
+                onClick={handleCopyClick}
+                aria-label={t("copy")}
+                title={t("copy")}
+              >
+                <Copy size={14} />
+              </button>
+            )}
           </div>
-          {selectedItem != null && (
-            <button
-              type="button"
-              className="quick-search-panel__copy-btn"
-              onClick={handleCopyClick}
-              aria-label={t("copy")}
-              title={t("copy")}
-            >
-              <Copy size={14} />
-            </button>
-          )}
         </div>
-      </div>
+      )}
 
       {/* B/L Copy 모달 */}
       {selectedItem != null && isCopyModalOpen && (
@@ -110,6 +137,29 @@ export function QuickSearchPanel({ onBack }: Props) {
           isOpen={isCopyModalOpen}
           onClose={handleCopyModalClose}
         />
+      )}
+
+      {/* Document No 검색 — BMS 금융서류 접근 보유 시에만 표시 */}
+      {canDoc && (
+        <div className="quick-search-panel__bl-search">
+          <div className="quick-search-panel__bl-row">
+            <div className="quick-search-panel__bl-input">
+              <CodeBox
+                kind="code-only"
+                label={t("documentNo")}
+                codeProps={{
+                  placeholder: "Document No",
+                  value: docQuery,
+                  onChange: (e) => setDocQuery(e.target.value),
+                }}
+                onSearch={setDocQuery}
+                suggestions={docSuggestions}
+                suggestionsLoading={docLoading}
+                onSelect={handleDocSelect}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
