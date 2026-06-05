@@ -33,9 +33,9 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
 
   const columns = useMemo<GridColumn<FreightLineDetail>[]>(() => [
     { key: "customerCode",  label: t("customerCode"),  minWidth: 80,  align: "center" },
-    { key: "customerName",  label: t("customerName"),  minWidth: 110 },
+    { key: "customerName",  label: t("customerName"),  minWidth: 240 },
     { key: "freightCode",   label: t("freightCode"),   minWidth: 80,  align: "center" },
-    { key: "freightName",   label: t("freightName"),   minWidth: 110 },
+    { key: "freightName",   label: t("freightName"),   minWidth: 240 },
     { key: "currency",      label: t("currency"),      minWidth: 60,  align: "center" },
     {
       key: "exchangeRate",
@@ -55,21 +55,21 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
     {
       key: "unitPrice",
       label: t("unitPrice"),
-      minWidth: 80,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
     {
       key: "settleAmount",
       label: t("settleAmount"),
-      minWidth: 90,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
     {
       key: "localAmount",
       label: t("localAmount"),
-      minWidth: 90,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
@@ -83,7 +83,7 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
     {
       key: "localTaxAmount",
       label: t("localTaxAmount"),
-      minWidth: 80,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
@@ -91,7 +91,7 @@ export function FinancialDocumentDetailGrid({ selectedDocumentId }: Props) {
       // 총금액 = localAmount + localTaxAmount (계산 표시)
       key: "totalAmount" as keyof FreightLineDetail,
       label: t("totalAmount"),
-      minWidth: 90,
+      minWidth: 120,
       align: "right",
       render: (_v, row) => {
         const local = Number(row.localAmount ?? 0);

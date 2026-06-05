@@ -77,7 +77,7 @@ export function FinancialDocumentMasterGrid({
     { key: "documentNo",        label: t("documentNo"),   minWidth: 140 },
     { key: "groupFinancialNo",  label: t("groupNo"),      minWidth: 120 },
     { key: "customerCode",      label: t("customerCode"), minWidth: 80,  align: "center" },
-    { key: "customerName",      label: t("customerName"), minWidth: 120 },
+    { key: "customerName",      label: t("customerName"), minWidth: 240 },
     {
       key: "documentDt",
       label: t("documentDt"),
@@ -126,21 +126,21 @@ export function FinancialDocumentMasterGrid({
     {
       key: "usdTotalAmount",
       label: t("usdAmount"),
-      minWidth: 90,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
     {
       key: "localTotalAmount",
       label: t("localAmount"),
-      minWidth: 90,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
     {
       key: "settleTotalVat",
       label: t("localVat"),
-      minWidth: 90,
+      minWidth: 120,
       align: "right",
       render: (v) => fmtNumber(v, 2),
     },
