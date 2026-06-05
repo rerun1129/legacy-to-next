@@ -25,6 +25,8 @@ public class AdminUserSeeder implements ApplicationRunner {
     private static final String ADMIN_RAW_PASSWORD = "admin1234";
     private static final String FMS_USERNAME = "fms";
     private static final String FMS_RAW_PASSWORD = "fms12345";
+    private static final String BMS_USERNAME = "bms";
+    private static final String BMS_RAW_PASSWORD = "bms12345";
 
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
@@ -68,6 +70,21 @@ public class AdminUserSeeder implements ApplicationRunner {
             fmsEntity.setSubscriberId(selfSubscriberId);
             userRepository.save(fmsEntity);
             log.info("AdminUserSeeder: seeded '{}' user", FMS_USERNAME);
+        }
+        if (userRepository.findByUsernameAndDeletedAtIsNull(BMS_USERNAME).isEmpty()) {
+            Long salesTeamId = teamRepository.findByTeamCode("SALES")
+                    .map(t -> t.getId())
+                    .orElse(null);
+            UserJpaEntity bmsEntity = new UserJpaEntity();
+            bmsEntity.setUsername(BMS_USERNAME);
+            bmsEntity.setEmail(null);
+            bmsEntity.setPasswordHash(passwordEncoder.encode(BMS_RAW_PASSWORD));
+            bmsEntity.setActive(true);
+            bmsEntity.setAttributes("{\"role\":[\"USER\"],\"module\":[\"BMS\"]}");
+            bmsEntity.setTeamId(salesTeamId);
+            bmsEntity.setSubscriberId(selfSubscriberId);
+            userRepository.save(bmsEntity);
+            log.info("AdminUserSeeder: seeded '{}' user", BMS_USERNAME);
         }
     }
 }
