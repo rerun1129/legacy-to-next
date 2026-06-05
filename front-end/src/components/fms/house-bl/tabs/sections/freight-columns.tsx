@@ -6,6 +6,7 @@ import { type GridColumn } from "@/components/shared/grid-list";
 import { TextBox } from "@/components/shared/inputs";
 import type { HouseBlFormValues, FreightRow } from "@/components/fms/house-bl/house-bl-schema";
 import { getPerOptions, resolvePerLabel } from "@/components/fms/house-bl/freight-per";
+import { formatDateDisplay } from "@/lib/date";
 import {
   FreightCodeCell,
   CurrencyCell,
@@ -235,7 +236,7 @@ export function buildFreightColumns({
       width: 100,
       isRequired: true,
       render: (_, row, i) =>
-        isIssued(row) ? <ReadOnlyCell value={row.performanceDt} /> : <PerformanceDtCell prefix={prefix} index={i} />,
+        isIssued(row) ? <ReadOnlyCell value={formatDateDisplay(row.performanceDt)} align="center" /> : <PerformanceDtCell prefix={prefix} index={i} />,
     },
     {
       key: "usdExchangeRate",
