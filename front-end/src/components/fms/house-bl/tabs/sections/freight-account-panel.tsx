@@ -66,7 +66,7 @@ interface AmendModalState {
 
 interface FreightAccountPanelProps {
   blType?: "HOUSE" | "MASTER";
-  blId?: string | number | null;
+  blId?: number | null;
   onFreightMutated?: () => void;
 }
 
@@ -78,14 +78,14 @@ export function FreightAccountPanel({ blType, blId, onFreightMutated }: FreightA
   const [selectedKeys, setSelectedKeys] = useState<Set<string | number>>(new Set());
   const [amendModal, setAmendModal] = useState<AmendModalState | null>(null);
 
-  const hasBlId = Boolean(blId);
-  const blIdStr = String(blId ?? "");
+  const hasBlId = blId != null;
   const resolvedBlType = blType ?? "HOUSE";
 
   // ── 서류 목록 조회 ─────────────────────────────────────────
   const { data, isLoading } = useQuery<FinancialDocument[]>({
-    queryKey: financialDocumentKeys.listByBl(resolvedBlType, blIdStr),
-    queryFn: () => financialDocumentUseCases.listByBl(resolvedBlType, blIdStr),
+    // blId가 null이면 enabled:false로 쿼리 비활성 — 더미 키는 실행되지 않음
+    queryKey: financialDocumentKeys.listByBl(resolvedBlType, blId ?? 0),
+    queryFn: () => financialDocumentUseCases.listByBl(resolvedBlType, blId!),
     enabled: hasBlId,
   });
   const docs = data ?? [];
@@ -101,7 +101,7 @@ export function FreightAccountPanel({ blType, blId, onFreightMutated }: FreightA
       toast.success(ti("deleteSuccess"));
       // listByBl invalidate(패널 갱신)
       queryClient.invalidateQueries({
-        queryKey: financialDocumentKeys.listByBl(resolvedBlType, blIdStr),
+        queryKey: financialDocumentKeys.listByBl(resolvedBlType, blId ?? 0),
       });
       // B/L detail invalidate는 entry의 onFreightMutated 콜백으로 이관.
       // useFieldArray fields는 setValue로 갱신 불가하므로 detailLoadedRef 풀기+invalidate 패턴 필수.
@@ -216,7 +216,7 @@ export function FreightAccountPanel({ blType, blId, onFreightMutated }: FreightA
           isOpen={amendModal.open}
           onClose={() => setAmendModal(null)}
           blType={resolvedBlType}
-          blId={blIdStr}
+          blId={blId!}
           freightType={amendModal.freightType}
           selectedLines={amendModal.lines}
           onIssueSuccess={() => {

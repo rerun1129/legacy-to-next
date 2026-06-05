@@ -27,7 +27,7 @@ interface FreightPanelProps {
   panelTitle: string;
   mode?: Mode;
   blType?: string;
-  blId?: string | number | null;
+  blId?: number | null;
   onFreightMutated?: () => void;
 }
 
@@ -274,7 +274,7 @@ function FreightPanel({ prefix, panelTitle, mode, blType, blId, onFreightMutated
 interface FreightSidePanelProps {
   mode?: Mode;
   blType?: string;
-  blId?: string | number | null;
+  blId?: number | null;
   onFreightMutated?: () => void;
 }
 

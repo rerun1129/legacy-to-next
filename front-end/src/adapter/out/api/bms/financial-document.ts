@@ -95,7 +95,7 @@ const FINANCIAL_DOCUMENT_SEARCH_ROW_SCHEMA = z.object({
   operatorName: z.string().nullable(),
   groupFinancialNo: z.string().nullable(),
   blType: z.string().nullable(),
-  blId: z.string().nullable(),
+  blId: z.number().nullable(),
   jobDiv: z.string().nullable(),
   bound: z.string().nullable(),
   blNo: z.string().nullable(),
@@ -189,8 +189,8 @@ export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
     await bmsFetchJson(`${BASE}/${id}`, { method: "DELETE" });
   },
 
-  async listByBl(blType: string, blId: string): Promise<FinancialDocument[]> {
-    const params = new URLSearchParams({ blType, blId });
+  async listByBl(blType: string, blId: number): Promise<FinancialDocument[]> {
+    const params = new URLSearchParams({ blType, blId: String(blId) });
     const json = await bmsFetchJson(`${BASE}?${params}`);
     const parsed = apiResponse(z.array(FINANCIAL_DOCUMENT_SCHEMA)).safeParse(json);
     if (!parsed.success) {
@@ -199,8 +199,8 @@ export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
     return parsed.data.data;
   },
 
-  async findIssuableLines(blType: string, blId: string, freightType: string): Promise<IssuableLine[]> {
-    const params = new URLSearchParams({ blType, blId, freightType });
+  async findIssuableLines(blType: string, blId: number, freightType: string): Promise<IssuableLine[]> {
+    const params = new URLSearchParams({ blType, blId: String(blId), freightType });
     const json = await bmsFetchJson(`${BASE}/issuable-lines?${params}`);
     const parsed = apiResponse(z.array(ISSUABLE_LINE_SCHEMA)).safeParse(json);
     if (!parsed.success) {

@@ -6,9 +6,9 @@ import type { IssueDocumentInput, AmendDocumentInput, SearchFinancialDocumentInp
 
 export const financialDocumentKeys = {
   all: ["bms", "financial-documents"] as const,
-  listByBl: (blType: string, blId: string) =>
+  listByBl: (blType: string, blId: number) =>
     [...financialDocumentKeys.all, "list", blType, blId] as const,
-  issuableLines: (blType: string, blId: string, freightType: string) =>
+  issuableLines: (blType: string, blId: number, freightType: string) =>
     [...financialDocumentKeys.all, "issuable-lines", blType, blId, freightType] as const,
   search: (filter: SearchFinancialDocumentInput, page: number, size: number) =>
     [...financialDocumentKeys.all, "search", filter, page, size] as const,
@@ -18,7 +18,7 @@ export const financialDocumentKeys = {
 
 // === Query Options ===
 
-export function listByBlQueryOptions(blType: string, blId: string) {
+export function listByBlQueryOptions(blType: string, blId: number) {
   return queryOptions({
     queryKey: financialDocumentKeys.listByBl(blType, blId),
     queryFn: () => financialDocumentPort.listByBl(blType, blId),
@@ -27,7 +27,7 @@ export function listByBlQueryOptions(blType: string, blId: string) {
 
 export function issuableLinesQueryOptions(
   blType: string,
-  blId: string,
+  blId: number,
   freightType: string
 ) {
   return queryOptions({
@@ -69,8 +69,8 @@ export const financialDocumentUseCases = {
   issueDocument: (req: IssueDocumentInput) => financialDocumentPort.issueDocument(req),
   amendDocument: (req: AmendDocumentInput) => financialDocumentPort.amendDocument(req),
   deleteDocument: (id: number) => financialDocumentPort.deleteDocument(id),
-  listByBl: (blType: string, blId: string) => financialDocumentPort.listByBl(blType, blId),
-  findIssuableLines: (blType: string, blId: string, freightType: string) =>
+  listByBl: (blType: string, blId: number) => financialDocumentPort.listByBl(blType, blId),
+  findIssuableLines: (blType: string, blId: number, freightType: string) =>
     financialDocumentPort.findIssuableLines(blType, blId, freightType),
   search: (filter: SearchFinancialDocumentInput, page: number, size: number) =>
     financialDocumentPort.search(filter, page, size),

@@ -19,7 +19,7 @@ interface FreightTabProps {
   /** 발행/Account Documents 배선용 blType. house/non/truck → 'HOUSE', master → 'MASTER'. */
   blType?: "HOUSE" | "MASTER";
   /** 현재 저장된 B/L id. 신규 미저장이면 null/undefined. */
-  blId?: string | number | null;
+  blId?: number | null;
   /**
    * 발행(issue) 또는 서류 삭제(account-docs) 성공 후 엔트리가 수신하는 콜백.
    * entry에서 detailLoadedRef.current=false + detail invalidate를 수행해

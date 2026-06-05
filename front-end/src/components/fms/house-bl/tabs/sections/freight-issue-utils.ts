@@ -25,9 +25,7 @@ export function resolveDocType(code: string): string {
 export function invalidateBlDetail(
   queryClient: ReturnType<typeof useQueryClient>,
   domainKey: string,
-  blId: string | number,
+  blId: number,
 ) {
-  const numId = Number(blId);
-  if (isNaN(numId)) return;
-  queryClient.invalidateQueries({ queryKey: [domainKey, "detail", numId] });
+  queryClient.invalidateQueries({ queryKey: [domainKey, "detail", blId] });
 }

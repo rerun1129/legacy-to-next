@@ -50,7 +50,7 @@ export interface IssuableLine {
 /** BE: IssueDocumentRequest — 서류 발행 요청 입력 */
 export interface IssueDocumentInput {
   blType: string;
-  blId: string;
+  blId: number;
   freightType: string;
   /** BE: List<Long> lineIds */
   lineIds: number[];
@@ -70,7 +70,7 @@ export interface IssueDocumentResult {
 export interface AmendDocumentInput {
   documentId: number;
   blType: string;
-  blId: string;
+  blId: number;
   freightType: string;
   /** 최종 라인 상태(선언적) — 서버가 현재 상태와 diff하여 link/unlink 처리 */
   finalLineIds: number[];
@@ -131,7 +131,7 @@ export interface FinancialDocumentSearchRow {
   operatorName: string | null;
   groupFinancialNo: string | null;
   blType: string | null;
-  blId: string | null;
+  blId: number | null;
   jobDiv: string | null;
   bound: string | null;
   blNo: string | null;
@@ -188,9 +188,9 @@ export interface FinancialDocumentPort {
   /** DELETE /api/bms/financial-documents/{id} */
   deleteDocument(id: number): Promise<void>;
   /** GET /api/bms/financial-documents?blType=&blId= */
-  listByBl(blType: string, blId: string): Promise<FinancialDocument[]>;
+  listByBl(blType: string, blId: number): Promise<FinancialDocument[]>;
   /** GET /api/bms/financial-documents/issuable-lines?blType=&blId=&freightType= */
-  findIssuableLines(blType: string, blId: string, freightType: string): Promise<IssuableLine[]>;
+  findIssuableLines(blType: string, blId: number, freightType: string): Promise<IssuableLine[]>;
   /** POST /api/bms/financial-documents/search */
   search(filter: SearchFinancialDocumentInput, page: number, size: number): Promise<FinancialDocumentPage>;
   /** GET /api/bms/financial-documents/{id}/lines */

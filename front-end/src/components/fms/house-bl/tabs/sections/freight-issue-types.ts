@@ -31,7 +31,7 @@ export interface FreightIssueModalProps {
   isOpen: boolean;
   onClose: () => void;
   blType: string;
-  blId: string | number;
+  blId: number;
   freightType: "SELLING" | "BUYING";
   /** 상위 그리드에서 체크 후 전달되는 발행 대상 스냅샷 */
   selectedLines: SelectedFreightLine[];

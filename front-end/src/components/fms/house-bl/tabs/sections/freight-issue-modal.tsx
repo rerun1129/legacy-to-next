@@ -64,12 +64,11 @@ function FreightIssueModalInner({
     () => selectedLines.find((l) => l.financialDocumentNo)?.financialDocumentNo ?? "",
   );
 
-  const blIdStr = String(blId);
   // amend 시 listByBl 캐시에서 해당 서류를 찾아 status·헤더값 self-resolve
   // → 진입점(운임그리드/Account Documents) 무관하게 동일 동작.
   const amendDoc = isAmend
     ? queryClient
-        .getQueryData<FinancialDocument[]>(financialDocumentKeys.listByBl(blType, blIdStr))
+        .getQueryData<FinancialDocument[]>(financialDocumentKeys.listByBl(blType, blId))
         ?.find((d) => d.financialDocumentId === amendDocId)
     : undefined;
   const editableHeader = isAmend && amendDoc?.status === "CREATED";
@@ -139,7 +138,7 @@ function FreightIssueModalInner({
     mutationFn: () =>
       financialDocumentUseCases.issueDocument({
         blType,
-        blId: blIdStr,
+        blId,
         freightType,
         lineIds: lines.map((l) => l.freightLineId),
         documentDt: header.documentDt,
@@ -150,7 +149,7 @@ function FreightIssueModalInner({
     onSuccess: (result) => {
       toast.success(`${ti("success")} (${result.documentNo})`);
       queryClient.invalidateQueries({
-        queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
+        queryKey: financialDocumentKeys.listByBl(blType, blId),
       });
       onIssueSuccess();
       // 모달은 닫지 않음(PRD: 잔류)
@@ -164,7 +163,7 @@ function FreightIssueModalInner({
     onSuccess: () => {
       toast.success(ti("deleteSuccess"));
       queryClient.invalidateQueries({
-        queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
+        queryKey: financialDocumentKeys.listByBl(blType, blId),
       });
       onIssueSuccess();
       handleClose();
@@ -178,7 +177,7 @@ function FreightIssueModalInner({
       financialDocumentUseCases.amendDocument({
         documentId: amendDocId!,
         blType,
-        blId: blIdStr,
+        blId,
         freightType,
         finalLineIds: lines.map((l) => l.freightLineId),
         // editableHeader=true(CREATED)일 때만 헤더 4필드 전달, 비CREATED는 null로 BE 무시
@@ -194,7 +193,7 @@ function FreightIssueModalInner({
         toast.success(ti("amendSuccess"));
       }
       queryClient.invalidateQueries({
-        queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
+        queryKey: financialDocumentKeys.listByBl(blType, blId),
       });
       // detail 재조회(form.reset 경로) + 그리드 선택 해제
       onIssueSuccess();
@@ -206,7 +205,7 @@ function FreightIssueModalInner({
   // 모달 닫기 — listByBl invalidate 재보장
   function handleClose() {
     queryClient.invalidateQueries({
-      queryKey: financialDocumentKeys.listByBl(blType, blIdStr),
+      queryKey: financialDocumentKeys.listByBl(blType, blId),
     });
     onClose();
   }
