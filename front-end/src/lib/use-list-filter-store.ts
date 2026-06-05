@@ -20,6 +20,8 @@ interface ListFilterState {
   setInject: (scope: string, value: unknown) => void;
   getInject: (scope: string) => unknown | undefined;
   clearInject: (scope: string) => void;
+  // 세션 경계(로그아웃/로그인)에서 전체 초기화 — 같은 세션 내 메뉴 이동 시에는 호출하지 않음
+  clearAll: () => void;
 }
 
 // persist 없음 — 새로고침 시 자동 초기화, 메뉴 이동 후 복귀 시 유지
@@ -68,6 +70,10 @@ const useListFilterStore = create<ListFilterState>((set, get) => ({
       delete nextInjects[scope];
       return { injects: nextInjects };
     });
+  },
+
+  clearAll() {
+    set({ filters: {}, searches: {}, injects: {} });
   },
 }));
 

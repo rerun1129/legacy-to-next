@@ -178,6 +178,19 @@ export interface FreightLineDetail {
   financialDocumentId: number;
 }
 
+/** BE: GroupDocumentsRequest — 그룹화 요청 입력 */
+export interface GroupDocumentsInput {
+  groupedDocumentIds: number[];
+  scopeDocumentIds: number[];
+}
+
+/** BE: GroupDocumentsResponse — 그룹화 응답 */
+export interface GroupDocumentsResult {
+  groupFinancialNo: string | null;
+  groupedDocumentIds: number[];
+  ungroupedDocumentIds: number[];
+}
+
 // === 포트 인터페이스 ===
 
 export interface FinancialDocumentPort {
@@ -195,4 +208,6 @@ export interface FinancialDocumentPort {
   search(filter: SearchFinancialDocumentInput, page: number, size: number): Promise<FinancialDocumentPage>;
   /** GET /api/bms/financial-documents/{id}/lines */
   findLines(documentId: number): Promise<FreightLineDetail[]>;
+  /** POST /api/bms/financial-documents/group */
+  groupDocuments(req: GroupDocumentsInput): Promise<GroupDocumentsResult>;
 }

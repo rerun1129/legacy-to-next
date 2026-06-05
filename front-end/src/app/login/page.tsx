@@ -12,6 +12,10 @@ import { toast } from "@/lib/toast-store";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { useFieldLayout } from "@/lib/use-field-layout";
+import { listFilterStore } from "@/lib/use-list-filter-store";
+import { useEntryTabStore } from "@/lib/use-entry-tab-store";
+import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
+import { blDraftStore } from "@/lib/use-bl-draft-store";
 
 interface LoginForm {
   username: string;
@@ -47,6 +51,10 @@ export default function LoginPage() {
         return;
       }
       qc.clear();
+      listFilterStore.getState().clearAll();
+      useEntryTabStore.setState({ tabs: {} });
+      useEntryFocusStore.setState({ focus: {}, resetNonce: {} });
+      blDraftStore.setState({ drafts: {} });
       setSession(session);
       // 세션 저장 직후 위젯/필드 레이아웃을 백엔드에서 재하이드레이트
       // (앱 초기 로드 시점엔 세션이 없어 getItem이 null이었으므로 실제 유저 데이터로 다시 채움)

@@ -1974,6 +1974,19 @@
         "reset": "초기화",
         "selectDocument": "서류를 선택하면 운임 라인이 표시됩니다.",
         "noData": "데이터가 없습니다."
+      },
+      "group": {
+        "button": "그룹",
+        "title": "금융서류 그룹화",
+        "leftTitle": "미그룹",
+        "rightTitle": "그룹 대상",
+        "assign": "부여 →",
+        "release": "← 해제",
+        "confirm": "확정",
+        "cancel": "취소",
+        "selectRequired": "그룹화할 서류를 먼저 선택하세요.",
+        "customerMixed": "거래처가 서로 다른 서류는 같은 그룹으로 묶을 수 없습니다.",
+        "success": "그룹화가 완료되었습니다."
       }
     }
   }

@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { financialDocumentPort } from "@/lib/ports";
-import type { IssueDocumentInput, AmendDocumentInput, SearchFinancialDocumentInput } from "./ports";
+import type { IssueDocumentInput, AmendDocumentInput, SearchFinancialDocumentInput, GroupDocumentsInput } from "./ports";
 
 // === 쿼리키 팩토리 ===
 
@@ -75,4 +75,5 @@ export const financialDocumentUseCases = {
   search: (filter: SearchFinancialDocumentInput, page: number, size: number) =>
     financialDocumentPort.search(filter, page, size),
   findLines: (documentId: number) => financialDocumentPort.findLines(documentId),
+  groupDocuments: (req: GroupDocumentsInput) => financialDocumentPort.groupDocuments(req),
 };

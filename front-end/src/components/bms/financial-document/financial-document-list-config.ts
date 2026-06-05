@@ -14,6 +14,8 @@ export interface FinancialDocumentListConfig {
   searchButtonCode: string;
   /** Reset ActionButton 코드 */
   resetButtonCode: string;
+  /** Group ActionButton 코드 */
+  groupButtonCode: string;
   /** listFilterStore scope key용 라우트 경로 */
   routeKey: string;
 }
@@ -24,6 +26,7 @@ export const INVOICE_LIST_CONFIG: FinancialDocumentListConfig = {
   menuCode: "MENU_BMS_INVOICE",
   searchButtonCode: "BTN_BMS_INVOICE_SEARCH",
   resetButtonCode: "BTN_BMS_INVOICE_RESET",
+  groupButtonCode: "BTN_BMS_INVOICE_GROUP",
   routeKey: "/bms/invoice/list",
 };
 
@@ -33,6 +36,7 @@ export const PAYMENT_LIST_CONFIG: FinancialDocumentListConfig = {
   menuCode: "MENU_BMS_PAYMENT",
   searchButtonCode: "BTN_BMS_PAYMENT_SEARCH",
   resetButtonCode: "BTN_BMS_PAYMENT_RESET",
+  groupButtonCode: "BTN_BMS_PAYMENT_GROUP",
   routeKey: "/bms/payment/list",
 };
 
@@ -43,5 +47,6 @@ export const DC_NOTE_LIST_CONFIG: FinancialDocumentListConfig = {
   menuCode: "MENU_BMS_DC_NOTE",
   searchButtonCode: "BTN_BMS_DC_NOTE_SEARCH",
   resetButtonCode: "BTN_BMS_DC_NOTE_RESET",
+  groupButtonCode: "BTN_BMS_DC_NOTE_GROUP",
   routeKey: "/bms/dc-note/list",
 };

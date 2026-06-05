@@ -1974,6 +1974,19 @@
         "reset": "Reset",
         "selectDocument": "Select a document to view freight lines.",
         "noData": "No data available."
+      },
+      "group": {
+        "button": "Group",
+        "title": "Group Financial Documents",
+        "leftTitle": "Ungrouped",
+        "rightTitle": "Group Target",
+        "assign": "Assign →",
+        "release": "← Release",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "selectRequired": "Please select documents to group first.",
+        "customerMixed": "Documents with different customers cannot be grouped together.",
+        "success": "Grouping completed successfully."
       }
     }
   }

@@ -11,6 +11,10 @@ import { authUseCases } from "@/application/auth/use-cases";
 import { clearSession, getSession } from "@/lib/admin-session";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
 import { useFieldLayout } from "@/lib/use-field-layout";
+import { listFilterStore } from "@/lib/use-list-filter-store";
+import { useEntryTabStore } from "@/lib/use-entry-tab-store";
+import { useEntryFocusStore } from "@/lib/use-entry-focus-store";
+import { blDraftStore } from "@/lib/use-bl-draft-store";
 import { LanguageToggle } from "./language-toggle";
 
 const SIDEBAR_W = 220;
@@ -196,10 +200,14 @@ export function Topbar({ onToggleSidebar, sidebarCollapsed, quickSearchOpen }: P
     }
     clearTabs();
     clearSession();
-    // clearSession 이후 in-memory 레이아웃 초기화
+    // clearSession 이후 in-memory 상태 일괄 초기화
     // backendLayoutStorage.setItem 가드가 세션 없을 때 PUT을 막으므로 백엔드 데이터는 보존됨
     useWidgetLayout.setState({ layouts: {} });
     useFieldLayout.setState({ layouts: {} });
+    listFilterStore.getState().clearAll();
+    useEntryTabStore.setState({ tabs: {} });
+    useEntryFocusStore.setState({ focus: {}, resetNonce: {} });
+    blDraftStore.setState({ drafts: {} });
     router.replace("/login");
   };
 

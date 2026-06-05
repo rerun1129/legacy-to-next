@@ -3,16 +3,21 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { RotateCcw, Search } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@/components/admin/access/action-button";
+import { useTranslations } from "next-intl";
 import { listFilterStore } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
+import { toast } from "@/lib/toast-store";
 import { FinancialDocumentListFilter } from "./financial-document-list-filter";
 import { FinancialDocumentMasterGrid } from "./financial-document-master-grid";
 import { FinancialDocumentDetailGrid } from "./financial-document-detail-grid";
+import { FinancialDocumentGroupModal } from "./group/financial-document-group-modal";
 import type { FinancialDocumentListConfig } from "./financial-document-list-config";
 import type { FinancialDocumentFilter } from "./use-financial-document-list-filter-model";
 import { DEFAULT_FILTER } from "./use-financial-document-list-filter-model";
 import type { SearchFinancialDocumentInput, FinancialDocumentSearchRow } from "@/application/bms/financial-document/ports";
+import { financialDocumentKeys } from "@/application/bms/financial-document/use-cases";
 
 interface Props {
   config: FinancialDocumentListConfig;
@@ -47,6 +52,8 @@ function buildDocFilter(documentTypes: string[], docNo: string): SearchFinancial
 
 export function FinancialDocumentListClient({ config }: Props) {
   const scope = config.routeKey;
+  const tg = useTranslations("bms.list.group");
+  const queryClient = useQueryClient();
 
   const form = useForm<FinancialDocumentFilter>({ defaultValues: DEFAULT_FILTER });
 
@@ -55,15 +62,23 @@ export function FinancialDocumentListClient({ config }: Props) {
     () => listFilterStore.getState().getInject(scope) as DocumentListInject | undefined,
   );
 
-  const [submittedFilter, setSubmittedFilter] = useState<SearchFinancialDocumentInput | null>(
-    () => (initialInject?.documentNoLike ? buildDocFilter(config.documentTypes, initialInject.documentNoLike) : null),
-  );
+  const [submittedFilter, setSubmittedFilter] = useState<SearchFinancialDocumentInput | null>(() => {
+    if (initialInject?.documentNoLike) {
+      return buildDocFilter(config.documentTypes, initialInject.documentNoLike);
+    }
+    // SPA 재진입 시 직전 submittedFilter 복원 — 최초 진입/새로고침은 store가 비어 null 유지
+    const saved = listFilterStore.getState().getSearch(scope);
+    return (saved?.submittedFilter as SearchFinancialDocumentInput | null | undefined) ?? null;
+  });
   const [currentPage, setCurrentPage] = useState(() => {
     if (initialInject?.documentNoLike) return 1; // inject 진입 시 page 1
     return listFilterStore.getState().getSearch(scope)?.currentPage ?? 1;
   });
   const [pageSize, setPageSize] = useState(() => listFilterStore.getState().getSearch(scope)?.pageSize ?? DEFAULT_PAGE_SIZE);
   const [selectedRow, setSelectedRow] = useState<FinancialDocumentSearchRow | null>(null);
+  const [groupSelectedKeys, setGroupSelectedKeys] = useState<Set<number>>(new Set());
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [groupSnapshot, setGroupSnapshot] = useState<FinancialDocumentSearchRow[]>([]);
 
   // inject 처리: cross-route는 init에서 완료, same-route는 subscribe 콜백으로 반영
   useEffect(() => {
@@ -87,6 +102,7 @@ export function FinancialDocumentListClient({ config }: Props) {
       setSubmittedFilter(buildDocFilter(config.documentTypes, docNo));
       setCurrentPage(1);
       setSelectedRow(null);
+      setGroupSelectedKeys(new Set());
       form.setValue("documentNoLike", docNo);
       form.setValue("dateFrom", "");
       form.setValue("dateTo", "");
@@ -116,6 +132,7 @@ export function FinancialDocumentListClient({ config }: Props) {
     setSubmittedFilter(null);
     setSelectedRow(null);
     setCurrentPage(1);
+    setGroupSelectedKeys(new Set());
   }
 
   function handleSearch() {
@@ -146,12 +163,46 @@ export function FinancialDocumentListClient({ config }: Props) {
       setSubmittedFilter(filter);
       setSelectedRow(null);
       setCurrentPage(1);
+      setGroupSelectedKeys(new Set());
     })();
+  }
+
+  function handleGroupButtonClick() {
+    if (groupSelectedKeys.size === 0) {
+      toast.error(tg("selectRequired"));
+      return;
+    }
+    // submittedFilter가 null이면 캐시 조회 불가 — 방어 return
+    if (submittedFilter === null) return;
+
+    // 클릭 시점에 캐시를 직접 읽어 최신 행 확보 (useMemo deps 불일치로 빈 배열이 되는 결함 방지)
+    const cached = queryClient.getQueryData<{ content: FinancialDocumentSearchRow[] }>(
+      financialDocumentKeys.search(submittedFilter, currentPage - 1, pageSize),
+    );
+    const allRows = cached?.content ?? [];
+    const snapshot = allRows.filter((r) => groupSelectedKeys.has(r.financialDocumentId));
+
+    if (snapshot.length === 0) return;
+
+    // 동일 고객 정책: customerCode가 2종 이상이면 차단
+    const customerCodes = new Set(snapshot.map((r) => r.customerCode));
+    if (customerCodes.size > 1) {
+      toast.error(tg("customerMixed"));
+      return;
+    }
+
+    setGroupSnapshot(snapshot);
+    setIsGroupModalOpen(true);
+  }
+
+  function handleGroupSuccess() {
+    setGroupSelectedKeys(new Set());
+    setIsGroupModalOpen(false);
   }
 
   return (
     <>
-      {/* 상단 툴바: Reset / Search */}
+      {/* 상단 툴바: Reset / Group / Search */}
       <div className="page-head__actions">
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
           <ActionButton
@@ -160,6 +211,13 @@ export function FinancialDocumentListClient({ config }: Props) {
             onClick={handleReset}
             icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
           />
+          <ActionButton
+            buttonCode={config.groupButtonCode}
+            className="btn btn--normal btn--sm"
+            onClick={handleGroupButtonClick}
+          >
+            {tg("button")}
+          </ActionButton>
           <ActionButton
             buttonCode={config.searchButtonCode}
             className="btn btn--search btn--sm"
@@ -193,6 +251,9 @@ export function FinancialDocumentListClient({ config }: Props) {
             onCyclePageSize={handleCyclePageSize}
             selectedId={selectedRow?.financialDocumentId ?? null}
             onSelectRow={setSelectedRow}
+            selectable
+            selectedKeys={groupSelectedKeys}
+            onSelectionChange={setGroupSelectedKeys}
           />
         </div>
         <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
@@ -201,6 +262,17 @@ export function FinancialDocumentListClient({ config }: Props) {
           />
         </div>
       </div>
+
+      {/* 그룹화 모달 */}
+      <FinancialDocumentGroupModal
+        isOpen={isGroupModalOpen}
+        onClose={() => setIsGroupModalOpen(false)}
+        rows={groupSnapshot}
+        searchFilter={submittedFilter}
+        page={currentPage}
+        pageSize={pageSize}
+        onGroupSuccess={handleGroupSuccess}
+      />
     </>
   );
 }

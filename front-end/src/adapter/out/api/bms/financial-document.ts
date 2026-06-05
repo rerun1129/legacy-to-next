@@ -10,6 +10,8 @@ import type {
   SearchFinancialDocumentInput,
   FinancialDocumentPage,
   FreightLineDetail,
+  GroupDocumentsInput,
+  GroupDocumentsResult,
 } from "@/application/bms/financial-document/ports";
 import { bmsFetchJson } from "../bms-fetch";
 import { ResponseParseError } from "../errors";
@@ -111,6 +113,13 @@ const FINANCIAL_DOCUMENT_PAGE_SCHEMA = z.object({
   page: z.number(),
   size: z.number(),
 }) satisfies z.ZodType<FinancialDocumentPage>;
+
+// BE: GroupDocumentsResponse — 그룹화 응답
+const GROUP_DOCUMENTS_RESPONSE_SCHEMA = z.object({
+  groupFinancialNo: z.string().nullable(),
+  groupedDocumentIds: z.array(z.number()),
+  ungroupedDocumentIds: z.array(z.number()),
+}) satisfies z.ZodType<GroupDocumentsResult>;
 
 // BE: FreightLineDetailResponse — 운임 라인 디테일
 const FREIGHT_LINE_DETAIL_SCHEMA = z.object({
@@ -245,6 +254,18 @@ export const API_FINANCIAL_DOCUMENT_PORT: FinancialDocumentPort = {
     const parsed = apiResponse(z.array(FREIGHT_LINE_DETAIL_SCHEMA)).safeParse(json);
     if (!parsed.success) {
       throw new ResponseParseError(`Invalid freight-line-detail response: ${parsed.error.message}`);
+    }
+    return parsed.data.data;
+  },
+
+  async groupDocuments(req: GroupDocumentsInput): Promise<GroupDocumentsResult> {
+    const json = await bmsFetchJson(`${BASE}/group`, {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+    const parsed = apiResponse(GROUP_DOCUMENTS_RESPONSE_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(`Invalid group-documents response: ${parsed.error.message}`);
     }
     return parsed.data.data;
   },

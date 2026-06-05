@@ -20,6 +20,12 @@ interface Props {
   onCyclePageSize: () => void;
   selectedId: number | null;
   onSelectRow: (row: FinancialDocumentSearchRow | null) => void;
+  /** 체크박스 다중선택 활성화 여부 */
+  selectable?: boolean;
+  /** 선택된 row key Set (number) */
+  selectedKeys?: ReadonlySet<number>;
+  /** 선택 변경 콜백 */
+  onSelectionChange?: (next: Set<number>) => void;
 }
 
 export function FinancialDocumentMasterGrid({
@@ -30,6 +36,9 @@ export function FinancialDocumentMasterGrid({
   onCyclePageSize,
   selectedId,
   onSelectRow,
+  selectable,
+  selectedKeys,
+  onSelectionChange,
 }: Props) {
   const t = useTranslations("bms.list.masterCols");
   const tBmsCommon = useTranslations("bms.list.common");
@@ -165,6 +174,9 @@ export function FinancialDocumentMasterGrid({
             }
             isLoading={isFetching}
             emptyMessage={tBmsCommon("noData")}
+            selectable={selectable}
+            selectedKeys={selectedKeys}
+            onSelectionChange={onSelectionChange as ((next: Set<string | number>) => void) | undefined}
           />
         </div>
         <Pagination
