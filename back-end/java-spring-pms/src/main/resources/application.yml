@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: java-spring-pms
+
+  # ── Database (fms DB 읽기 전용 접속 — bms·fms 스키마 교차 접근) ────
+  datasource:
+    url: ${PMS_DB_URL:jdbc:postgresql://localhost:5432/fms}
+    username: ${PMS_DB_USER:fms}
+    password: ${PMS_DB_PASS:fms_local}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: PmsHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  # ── JPA (스키마는 소유하지 않음 — ddl-auto none, default_schema 없음) ──
+  # entities는 @Table(schema="...") 로 스키마를 명시 선언한다.
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+    open-in-view: false
+
+  output:
+    ansi:
+      enabled: always
+
+# ── Server (FMS 8080 · ADMIN 8081 · BMS 8082 다음) ───────────────
+server:
+  port: 8083
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+
+# ── OpenAPI / Swagger ─────────────────────────────────────────────
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  default-produces-media-type: application/json
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    com.freightos: DEBUG
+
+# ── p6spy (SQL 로깅 — 로컬 프로파일에서만 활성화) ──────────────────
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
+
+# ── CORS ─────────────────────────────────────────────────────────
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001}
+
+# ── JWT (admin·fms·bms 와 동일 secret 공유 — HS256 대칭키 검증) ────
+jwt:
+  secret: ${JWT_SECRET:dev-secret-please-rotate-at-least-32-chars!!}
+  access-token-ttl-minutes: ${JWT_ACCESS_TTL:15}
+  refresh-token-ttl-days: ${JWT_REFRESH_TTL:14}
