@@ -1,13 +1,17 @@
 package com.freightos.bms.adapter.in.web.financialdocument;
 
+import com.freightos.bms.adapter.in.web.financialdocument.dto.CancelFreightLineRequest;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.CancelFreightLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineIssuePageResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineIssueRowResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueFreightLineRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueFreightLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.SearchFreightLineRequest;
+import com.freightos.bms.application.financialdocument.CancelFreightLineResult;
 import com.freightos.bms.application.financialdocument.FreightLineIssueRowView;
 import com.freightos.bms.application.financialdocument.IssueFreightLineResult;
 import com.freightos.bms.application.financialdocument.SearchFreightLineCriteria;
+import com.freightos.bms.application.financialdocument.command.CancelFreightLineCommand;
 import com.freightos.bms.application.financialdocument.command.IssueFreightLineCommand;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -104,5 +108,16 @@ public class FreightLineIssueAssembler {
             result.affectedDocumentIds(),
             statuses
         );
+    }
+
+    public CancelFreightLineCommand toCancelCommand(CancelFreightLineRequest req, String issueType) {
+        return new CancelFreightLineCommand(issueType, req.lineIds());
+    }
+
+    public CancelFreightLineResponse toCancelResponse(CancelFreightLineResult result) {
+        // Map<Long, String> → Map<String, String> (JSON 직렬화 호환)
+        Map<String, String> statuses = new HashMap<>();
+        result.statusByDocumentId().forEach((k, v) -> statuses.put(String.valueOf(k), v));
+        return new CancelFreightLineResponse(result.affectedDocumentIds(), statuses);
     }
 }

@@ -45,4 +45,16 @@ public interface FreightLineIssuePort {
      * Tuple projection — 1차캐시 staleness 회피.
      */
     List<DocumentLineFlag> loadDocumentTaxSlipFlags(List<Long> documentIds);
+
+    /**
+     * 지정 라인들의 tax_no·tax_dt를 NULL로 일괄 클리어한다.
+     * QueryDSL 벌크 UPDATE — 영속 컨텍스트 bypass, .execute() 즉시 반영.
+     */
+    void bulkClearLineTax(List<Long> lineIds);
+
+    /**
+     * 지정 라인들의 slip_no·slip_dt를 NULL로 일괄 클리어한다.
+     * QueryDSL 벌크 UPDATE — 영속 컨텍스트 bypass, .execute() 즉시 반영.
+     */
+    void bulkClearLineSlip(List<Long> lineIds);
 }

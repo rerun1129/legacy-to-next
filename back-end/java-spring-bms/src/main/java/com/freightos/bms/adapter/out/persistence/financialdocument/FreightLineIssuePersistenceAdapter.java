@@ -48,4 +48,14 @@ public class FreightLineIssuePersistenceAdapter implements FreightLineIssuePort 
     public List<DocumentLineFlag> loadDocumentTaxSlipFlags(List<Long> documentIds) {
         return issueQueryRepository.loadDocumentTaxSlipFlags(documentIds);
     }
+
+    @Override
+    public void bulkClearLineTax(List<Long> lineIds) {
+        issueQueryRepository.bulkClearLineTax(lineIds);
+    }
+
+    @Override
+    public void bulkClearLineSlip(List<Long> lineIds) {
+        issueQueryRepository.bulkClearLineSlip(lineIds);
+    }
 }

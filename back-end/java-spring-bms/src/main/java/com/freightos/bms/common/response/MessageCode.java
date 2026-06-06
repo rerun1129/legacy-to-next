@@ -32,7 +32,14 @@ public enum MessageCode {
     FREIGHT_LINE_TAX_ALREADY_ISSUED("이미 세금계산서가 발급된 운임 행이 포함되어 있습니다."),
     FREIGHT_LINE_SLIP_ALREADY_ISSUED("이미 전표가 발급된 운임 행이 포함되어 있습니다."),
     FREIGHT_LINE_TAX_ISSUED("세금계산서가 발급되었습니다."),
-    FREIGHT_LINE_SLIP_ISSUED("전표가 발급되었습니다.");
+    FREIGHT_LINE_SLIP_ISSUED("전표가 발급되었습니다."),
+
+    // 단계 E 발급 취소 전용 MessageCode
+    FREIGHT_LINE_TAX_NOT_ISSUED("취소할 세금계산서가 발급되지 않은 운임 행이 포함되어 있습니다."),
+    FREIGHT_LINE_SLIP_NOT_ISSUED("취소할 전표가 발급되지 않은 운임 행이 포함되어 있습니다."),
+    FREIGHT_LINE_TAX_CANCELLED("세금계산서 발급이 취소되었습니다."),
+    FREIGHT_LINE_SLIP_CANCELLED("전표 발급이 취소되었습니다."),
+    FREIGHT_LINE_CANCEL_NOT_ALLOWED("정산 완료된 서류는 발급을 취소할 수 없습니다.");
 
     private final String message;
 

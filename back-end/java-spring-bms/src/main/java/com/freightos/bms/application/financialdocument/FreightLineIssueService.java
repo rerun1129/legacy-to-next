@@ -1,5 +1,6 @@
 package com.freightos.bms.application.financialdocument;
 
+import com.freightos.bms.application.financialdocument.command.CancelFreightLineCommand;
 import com.freightos.bms.application.financialdocument.command.IssueFreightLineCommand;
 import com.freightos.bms.application.financialdocument.port.in.FreightLineIssueUseCase;
 import com.freightos.bms.application.financialdocument.port.out.DocumentLineFlag;
@@ -42,6 +43,7 @@ public class FreightLineIssueService implements FreightLineIssueUseCase {
     private final FinancialDocumentPort financialDocumentPort;
     private final IssueNumberGenerator issueNumberGenerator;
     private final CodeNameResolver codeNameResolver;
+    private final FreightLineCancelService freightLineCancelService;
 
     @Override
     @Transactional(readOnly = true)
@@ -245,6 +247,11 @@ public class FreightLineIssueService implements FreightLineIssueUseCase {
             }
         }
         return Collections.unmodifiableMap(result);
+    }
+
+    @Override
+    public CancelFreightLineResult cancel(CancelFreightLineCommand cmd) {
+        return freightLineCancelService.cancel(cmd);
     }
 
     // ── 헬퍼 ──────────────────────────────────────────────────────────────────

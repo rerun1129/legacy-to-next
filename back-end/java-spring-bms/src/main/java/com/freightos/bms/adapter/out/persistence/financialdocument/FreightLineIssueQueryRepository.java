@@ -140,7 +140,8 @@ public class FreightLineIssueQueryRepository {
      * 서류별 tax_no/slip_no 존재 여부 집계. Tuple projection(S6).
      * hasTax = 서류에 연결된 라인 중 tax_no IS NOT NULL인 행 ≥ 1.
      * hasSlip = 서류에 연결된 라인 중 slip_no IS NOT NULL인 행 ≥ 1.
-     * 서류 상태는 financial_document에서 직접 조회.
+     * 서류 상태·groupFinancialNo는 financial_document에서 직접 조회.
+     * groupFinancialNo: 취소 시 상태 재파생(GROUPED vs CREATED) 판단에 사용.
      */
     public List<DocumentLineFlag> loadDocumentTaxSlipFlags(List<Long> documentIds) {
         if (documentIds == null || documentIds.isEmpty()) return Collections.emptyList();
@@ -161,12 +162,13 @@ public class FreightLineIssueQueryRepository {
                 line.financialDocumentId,
                 hasTaxExpr,
                 hasSlipExpr,
-                doc.documentStatus
+                doc.documentStatus,
+                doc.groupFinancialNo
             )
             .from(line)
             .join(doc).on(doc.financialDocumentId.eq(line.financialDocumentId))
             .where(line.financialDocumentId.in(documentIds))
-            .groupBy(line.financialDocumentId, doc.documentStatus)
+            .groupBy(line.financialDocumentId, doc.documentStatus, doc.groupFinancialNo)
             .fetch();
 
         return rows.stream()
@@ -174,7 +176,8 @@ public class FreightLineIssueQueryRepository {
                 t.get(line.financialDocumentId),
                 Integer.valueOf(1).equals(t.get(hasTaxExpr)),
                 Integer.valueOf(1).equals(t.get(hasSlipExpr)),
-                t.get(doc.documentStatus)
+                t.get(doc.documentStatus),
+                t.get(doc.groupFinancialNo)
             ))
             .toList();
     }
@@ -207,6 +210,36 @@ public class FreightLineIssueQueryRepository {
             .update(line)
             .set(line.slipNo, slipNo)
             .set(line.slipDt, slipDt)
+            .where(line.freightLineId.in(lineIds))
+            .execute();
+    }
+
+    /**
+     * 지정 라인들의 tax_no·tax_dt를 NULL로 일괄 클리어한다.
+     * .execute() 즉시 반영 — 이후 loadDocumentTaxSlipFlags DB 재조회 보장(S6).
+     */
+    public void bulkClearLineTax(List<Long> lineIds) {
+        if (lineIds == null || lineIds.isEmpty()) return;
+        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
+        queryFactory
+            .update(line)
+            .setNull(line.taxNo)
+            .setNull(line.taxDt)
+            .where(line.freightLineId.in(lineIds))
+            .execute();
+    }
+
+    /**
+     * 지정 라인들의 slip_no·slip_dt를 NULL로 일괄 클리어한다.
+     * .execute() 즉시 반영 — 이후 loadDocumentTaxSlipFlags DB 재조회 보장(S6).
+     */
+    public void bulkClearLineSlip(List<Long> lineIds) {
+        if (lineIds == null || lineIds.isEmpty()) return;
+        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
+        queryFactory
+            .update(line)
+            .setNull(line.slipNo)
+            .setNull(line.slipDt)
             .where(line.freightLineId.in(lineIds))
             .execute();
     }

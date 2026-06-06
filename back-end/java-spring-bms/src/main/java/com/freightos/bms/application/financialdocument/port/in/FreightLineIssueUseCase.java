@@ -1,15 +1,17 @@
 package com.freightos.bms.application.financialdocument.port.in;
 
+import com.freightos.bms.application.financialdocument.CancelFreightLineResult;
 import com.freightos.bms.application.financialdocument.FreightLineIssueRowView;
 import com.freightos.bms.application.financialdocument.IssueFreightLineResult;
 import com.freightos.bms.application.financialdocument.SearchFreightLineCriteria;
+import com.freightos.bms.application.financialdocument.command.CancelFreightLineCommand;
 import com.freightos.bms.application.financialdocument.command.IssueFreightLineCommand;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
  * 운임 행 발급 인바운드 포트.
- * 세금계산서(TAX) / 전표(SLIP) 발급 공통 유스케이스.
+ * 세금계산서(TAX) / 전표(SLIP) 발급·취소 공통 유스케이스.
  */
 public interface FreightLineIssueUseCase {
 
@@ -23,4 +25,10 @@ public interface FreightLineIssueUseCase {
      * 채번 → 라인 기록 → 서류 상태 승급.
      */
     IssueFreightLineResult issue(IssueFreightLineCommand cmd);
+
+    /**
+     * 발급 취소 (세금계산서 또는 전표). cmd.issueType으로 분기.
+     * 라인 클리어(NULL) → 서류 상태 강등.
+     */
+    CancelFreightLineResult cancel(CancelFreightLineCommand cmd);
 }

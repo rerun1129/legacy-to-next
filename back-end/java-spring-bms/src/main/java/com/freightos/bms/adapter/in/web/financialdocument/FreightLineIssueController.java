@@ -1,5 +1,7 @@
 package com.freightos.bms.adapter.in.web.financialdocument;
 
+import com.freightos.bms.adapter.in.web.financialdocument.dto.CancelFreightLineRequest;
+import com.freightos.bms.adapter.in.web.financialdocument.dto.CancelFreightLineResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.FreightLineIssuePageResponse;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueFreightLineRequest;
 import com.freightos.bms.adapter.in.web.financialdocument.dto.IssueFreightLineResponse;
@@ -66,6 +68,32 @@ public class FreightLineIssueController {
         return ApiResponse.of(
             assembler.toResponse(freightLineIssueUseCase.issue(assembler.toCommand(request, "SLIP"))),
             MessageCode.FREIGHT_LINE_SLIP_ISSUED.message()
+        );
+    }
+
+    /**
+     * 세금계산서 발급 취소.
+     * POST /api/bms/freight-line-issues/tax/cancel
+     */
+    @PostMapping("/tax/cancel")
+    public ApiResponse<CancelFreightLineResponse> cancelTax(
+            @RequestBody @Valid CancelFreightLineRequest request) {
+        return ApiResponse.of(
+            assembler.toCancelResponse(freightLineIssueUseCase.cancel(assembler.toCancelCommand(request, "TAX"))),
+            MessageCode.FREIGHT_LINE_TAX_CANCELLED.message()
+        );
+    }
+
+    /**
+     * 전표 발급 취소.
+     * POST /api/bms/freight-line-issues/slip/cancel
+     */
+    @PostMapping("/slip/cancel")
+    public ApiResponse<CancelFreightLineResponse> cancelSlip(
+            @RequestBody @Valid CancelFreightLineRequest request) {
+        return ApiResponse.of(
+            assembler.toCancelResponse(freightLineIssueUseCase.cancel(assembler.toCancelCommand(request, "SLIP"))),
+            MessageCode.FREIGHT_LINE_SLIP_CANCELLED.message()
         );
     }
 }
