@@ -1839,7 +1839,10 @@
       "financialDoc": "Financial Document",
       "invoice": "Invoice",
       "payment": "Payment",
-      "dcNote": "D/C Note"
+      "dcNote": "D/C Note",
+      "bmsIssue": "Issue",
+      "taxInvoiceIssue": "Tax Invoice",
+      "slipIssue": "Slip"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export List",
@@ -1862,7 +1865,12 @@
       "/fms/truck-bl/entry": "Truck B/L Entry",
       "/fms/non-bl/list": "Non B/L List",
       "/fms/non-bl/entry": "Non B/L Entry",
-      "/admin/code/list": "Code Master Common Code"
+      "/admin/code/list": "Code Master Common Code",
+      "/bms/invoice/list": "Invoice List",
+      "/bms/payment/list": "Payment List",
+      "/bms/dc-note/list": "D/C Note List",
+      "/bms/tax-invoice/issue": "Tax Invoice Issue",
+      "/bms/slip/issue": "Slip Issue"
     },
     "lang": {
       "toggleTitle": "Toggle language"
@@ -1987,6 +1995,71 @@
         "selectRequired": "Please select documents to group first.",
         "customerMixed": "Documents with different customers cannot be grouped together.",
         "success": "Grouping completed successfully."
+      }
+    },
+    "issue": {
+      "title": {
+        "taxInvoice": "Tax Invoice Issue",
+        "slip": "Slip Issue"
+      },
+      "filter": {
+        "all": "All",
+        "customer": "Customer",
+        "customerPlaceholder": "Customer Code",
+        "jobDiv": "Job Div",
+        "bound": "Bound",
+        "performanceDt": "Performance Date",
+        "issuedStatus": "Issue Status",
+        "issuedStatusUnissued": "Unissued",
+        "issuedStatusIssued": "Issued"
+      },
+      "cols": {
+        "documentStatus": "Doc. Status",
+        "documentNo": "Document No",
+        "customerCode": "Cust. Code",
+        "customerName": "Customer",
+        "jobDiv": "Job Div",
+        "bound": "Bound",
+        "blNo": "House B/L No",
+        "etd": "ETD",
+        "freightCode": "Freight Code",
+        "financialDocType": "Doc. Type",
+        "currency": "Curr.",
+        "settleAmount": "Settle Amt",
+        "settleTaxAmount": "Tax Amt",
+        "usdAmount": "USD Amt",
+        "performanceDt": "Perf. Date",
+        "taxNo": "Tax Invoice No",
+        "taxDt": "Tax Invoice Date",
+        "slipNo": "Slip No",
+        "slipDt": "Slip Date"
+      },
+      "common": {
+        "panelTitle": "Freight Lines",
+        "noData": "No data available."
+      },
+      "button": {
+        "reset": "Reset",
+        "search": "Search",
+        "issue": "Issue"
+      },
+      "modal": {
+        "title": "Confirm Issue",
+        "customer": "Customer",
+        "docType": "Doc. Type",
+        "lineCount": "Selected Lines",
+        "lineUnit": "",
+        "issueDt": "Issue Date",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "issueDtRequired": "Please enter the issue date (YYYYMMDD).",
+        "successToast": "Issued successfully — {issueNo}"
+      },
+      "gate": {
+        "selectRequired": "Please select freight lines to issue first.",
+        "customerMixed": "Lines with different customers cannot be issued together.",
+        "docTypeMixed": "Lines with different document types cannot be issued together.",
+        "alreadyIssued": "Some selected lines have already been issued."
       }
     }
   }

@@ -92,9 +92,12 @@ export function firstAccessibleRoute(session: AdminSession): string | null {
     ["MENU_FMS_TRUCK_BL", "/fms/truck-bl/list"],
     ["MENU_FMS_NON_BL", "/fms/non-bl/list"],
     // BMS routes
-    ["MENU_BMS_INVOICE", "/bms/invoice/list"],
-    ["MENU_BMS_PAYMENT", "/bms/payment/list"],
-    ["MENU_BMS_DC_NOTE", "/bms/dc-note/list"],
+    ["MENU_BMS_INVOICE",      "/bms/invoice/list"],
+    ["MENU_BMS_PAYMENT",      "/bms/payment/list"],
+    ["MENU_BMS_DC_NOTE",      "/bms/dc-note/list"],
+    // BMS 발급 routes (V65 BMS_TAX_INVOICE / BMS_SLIP → MENU_ prefix)
+    ["MENU_BMS_TAX_INVOICE",  "/bms/tax-invoice/issue"],
+    ["MENU_BMS_SLIP",         "/bms/slip/issue"],
   ];
   for (const [code, route] of order) {
     if (hasMenuAccess(session, code)) return route;

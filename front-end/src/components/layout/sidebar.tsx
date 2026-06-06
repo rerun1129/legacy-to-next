@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import {
   LayoutDashboard, FileText, Layers, Truck, Package,
   ChevronRight, List, FilePlus, LayoutGrid, Search,
-  Receipt,
+  Receipt, Stamp, FileSpreadsheet,
 } from "lucide-react";
 import { useTabs } from "@/lib/use-tabs";
 import { useWidgetLayout } from "@/lib/use-widget-layout";
@@ -98,6 +98,14 @@ const BMS_NAV_MODULE: NavModule = {
         { labelKey: "invoice",  href: "/bms/invoice/list",  icon: List, requiredMenuCode: "MENU_BMS_INVOICE"  },
         { labelKey: "payment",  href: "/bms/payment/list",  icon: List, requiredMenuCode: "MENU_BMS_PAYMENT"  },
         { labelKey: "dcNote",   href: "/bms/dc-note/list",  icon: List, requiredMenuCode: "MENU_BMS_DC_NOTE"  },
+      ],
+    },
+    {
+      // BMS_ISSUE parent — DB menu_code: BMS_ISSUE → FE: MENU_BMS_ISSUE
+      sectionKey: "bmsIssue", icon: Stamp, defaultOpen: false, requiredMenuCode: "MENU_BMS_ISSUE",
+      children: [
+        { labelKey: "taxInvoiceIssue", href: "/bms/tax-invoice/issue", icon: FileSpreadsheet, requiredMenuCode: "MENU_BMS_TAX_INVOICE" },
+        { labelKey: "slipIssue",       href: "/bms/slip/issue",        icon: Stamp,           requiredMenuCode: "MENU_BMS_SLIP"        },
       ],
     },
   ],

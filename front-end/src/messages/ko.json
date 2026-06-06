@@ -1839,7 +1839,10 @@
       "financialDoc": "금융 서류",
       "invoice": "인보이스",
       "payment": "페이먼트",
-      "dcNote": "D/C Note"
+      "dcNote": "D/C Note",
+      "bmsIssue": "발급",
+      "taxInvoiceIssue": "세금계산서",
+      "slipIssue": "전표"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export 목록",
@@ -1862,7 +1865,12 @@
       "/fms/truck-bl/entry": "Truck B/L 등록",
       "/fms/non-bl/list": "Non B/L 목록",
       "/fms/non-bl/entry": "Non B/L 등록",
-      "/admin/code/list": "공통 코드 마스터"
+      "/admin/code/list": "공통 코드 마스터",
+      "/bms/invoice/list": "Invoice 조회",
+      "/bms/payment/list": "Payment 조회",
+      "/bms/dc-note/list": "D/C Note 조회",
+      "/bms/tax-invoice/issue": "세금계산서 발급",
+      "/bms/slip/issue": "전표 발급"
     },
     "lang": {
       "toggleTitle": "언어 전환"
@@ -1987,6 +1995,71 @@
         "selectRequired": "그룹화할 서류를 먼저 선택하세요.",
         "customerMixed": "거래처가 서로 다른 서류는 같은 그룹으로 묶을 수 없습니다.",
         "success": "그룹화가 완료되었습니다."
+      }
+    },
+    "issue": {
+      "title": {
+        "taxInvoice": "세금계산서 발급",
+        "slip": "전표 발급"
+      },
+      "filter": {
+        "all": "전체",
+        "customer": "거래처",
+        "customerPlaceholder": "거래처 코드",
+        "jobDiv": "업무구분",
+        "bound": "수출입",
+        "performanceDt": "실적일자",
+        "issuedStatus": "발급상태",
+        "issuedStatusUnissued": "미발급",
+        "issuedStatusIssued": "발급완료"
+      },
+      "cols": {
+        "documentStatus": "서류상태",
+        "documentNo": "서류번호",
+        "customerCode": "거래처코드",
+        "customerName": "거래처명",
+        "jobDiv": "업무구분",
+        "bound": "수출입",
+        "blNo": "House B/L No",
+        "etd": "ETD",
+        "freightCode": "운임코드",
+        "financialDocType": "서류타입",
+        "currency": "통화",
+        "settleAmount": "발행금액",
+        "settleTaxAmount": "세액",
+        "usdAmount": "USD금액",
+        "performanceDt": "실적일자",
+        "taxNo": "세금계산서번호",
+        "taxDt": "세금계산서일자",
+        "slipNo": "전표번호",
+        "slipDt": "전표일자"
+      },
+      "common": {
+        "panelTitle": "운임 행",
+        "noData": "데이터가 없습니다."
+      },
+      "button": {
+        "reset": "초기화",
+        "search": "검색",
+        "issue": "발급"
+      },
+      "modal": {
+        "title": "발급 확정",
+        "customer": "거래처",
+        "docType": "서류타입",
+        "lineCount": "선택 행",
+        "lineUnit": "건",
+        "issueDt": "발급일자",
+        "confirm": "확정",
+        "cancel": "취소",
+        "issueDtRequired": "발급일자를 입력하세요 (YYYYMMDD).",
+        "successToast": "발급 완료 — {issueNo}"
+      },
+      "gate": {
+        "selectRequired": "발급할 운임 행을 먼저 선택하세요.",
+        "customerMixed": "거래처가 서로 다른 행은 함께 발급할 수 없습니다.",
+        "docTypeMixed": "서류 타입이 서로 다른 행은 함께 발급할 수 없습니다.",
+        "alreadyIssued": "이미 발급된 행이 포함되어 있습니다."
       }
     }
   }
