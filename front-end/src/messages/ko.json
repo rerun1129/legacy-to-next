@@ -1842,7 +1842,8 @@
       "dcNote": "D/C Note",
       "bmsIssue": "발급",
       "taxInvoiceIssue": "세금계산서",
-      "slipIssue": "전표"
+      "slipIssue": "전표",
+      "performance": "실적 조회"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export 목록",
@@ -1870,7 +1871,8 @@
       "/bms/payment/list": "Payment 조회",
       "/bms/dc-note/list": "D/C Note 조회",
       "/bms/tax-invoice/issue": "세금계산서 발급",
-      "/bms/slip/issue": "전표 발급"
+      "/bms/slip/issue": "전표 발급",
+      "/pms/performance": "실적 조회"
     },
     "lang": {
       "toggleTitle": "언어 전환"
@@ -2070,6 +2072,34 @@
         "confirm": "취소 확정",
         "close": "닫기",
         "successToast": "발급이 취소되었습니다."
+      }
+    }
+  },
+  "pms": {
+    "performance": {
+      "title": "실적 조회",
+      "filter": {
+        "all": "전체",
+        "jobDiv": "업무구분",
+        "bound": "수출입",
+        "hblNo": "House B/L No",
+        "mblNo": "Master B/L No",
+        "actualCustomer": "Actual Customer",
+        "settlePartner": "Settle Partner",
+        "carrier": "Carrier",
+        "port": "항만",
+        "salesMan": "영업사원",
+        "team": "팀",
+        "teamPlaceholder": "팀 코드",
+        "operator": "담당자",
+        "codePlaceholder": "코드",
+        "documentType": "서류 종류",
+        "documentStatus": "서류 상태",
+        "documentNoLike": "서류번호",
+        "groupFinancialNo": "그룹번호",
+        "grouped": "그룹화 여부",
+        "issued": "서류 발행 여부",
+        "basisLabel": "집계 기준"
       }
     }
   }

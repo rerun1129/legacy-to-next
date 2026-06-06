@@ -98,6 +98,8 @@ export function firstAccessibleRoute(session: AdminSession): string | null {
     // BMS 발급 routes (V65 BMS_TAX_INVOICE / BMS_SLIP → MENU_ prefix)
     ["MENU_BMS_TAX_INVOICE",  "/bms/tax-invoice/issue"],
     ["MENU_BMS_SLIP",         "/bms/slip/issue"],
+    // PMS routes
+    ["MENU_PMS_PERFORMANCE",  "/pms/performance"],
   ];
   for (const [code, route] of order) {
     if (hasMenuAccess(session, code)) return route;

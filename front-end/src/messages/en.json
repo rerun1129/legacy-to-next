@@ -1842,7 +1842,8 @@
       "dcNote": "D/C Note",
       "bmsIssue": "Issue",
       "taxInvoiceIssue": "Tax Invoice",
-      "slipIssue": "Slip"
+      "slipIssue": "Slip",
+      "performance": "Performance"
     },
     "tabs": {
       "/fms/house-bl/sea-exp/list": "House B/L Sea Export List",
@@ -1870,7 +1871,8 @@
       "/bms/payment/list": "Payment List",
       "/bms/dc-note/list": "D/C Note List",
       "/bms/tax-invoice/issue": "Tax Invoice Issue",
-      "/bms/slip/issue": "Slip Issue"
+      "/bms/slip/issue": "Slip Issue",
+      "/pms/performance": "Performance"
     },
     "lang": {
       "toggleTitle": "Toggle language"
@@ -2070,6 +2072,34 @@
         "confirm": "Confirm",
         "close": "Close",
         "successToast": "Issue cancelled."
+      }
+    }
+  },
+  "pms": {
+    "performance": {
+      "title": "Performance",
+      "filter": {
+        "all": "All",
+        "jobDiv": "Job Div",
+        "bound": "Bound",
+        "hblNo": "House B/L No",
+        "mblNo": "Master B/L No",
+        "actualCustomer": "Actual Customer",
+        "settlePartner": "Settle Partner",
+        "carrier": "Carrier",
+        "port": "Port",
+        "salesMan": "Sales Man",
+        "team": "Team",
+        "teamPlaceholder": "Team Code",
+        "operator": "Operator",
+        "codePlaceholder": "Code",
+        "documentType": "Doc. Type",
+        "documentStatus": "Doc. Status",
+        "documentNoLike": "Document No",
+        "groupFinancialNo": "Group No",
+        "grouped": "Grouped",
+        "issued": "Document Issued",
+        "basisLabel": "Aggregation Basis"
       }
     }
   }
