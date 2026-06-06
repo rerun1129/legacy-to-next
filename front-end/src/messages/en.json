@@ -2041,7 +2041,8 @@
       "button": {
         "reset": "Reset",
         "search": "Search",
-        "issue": "Issue"
+        "issue": "Issue",
+        "cancel": "Cancel Issue"
       },
       "modal": {
         "title": "Confirm Issue",
@@ -2059,7 +2060,16 @@
         "selectRequired": "Please select freight lines to issue first.",
         "customerMixed": "Lines with different customers cannot be issued together.",
         "docTypeMixed": "Lines with different document types cannot be issued together.",
-        "alreadyIssued": "Some selected lines have already been issued."
+        "alreadyIssued": "Some selected lines have already been issued.",
+        "notIssued": "Selection contains rows that are not issued."
+      },
+      "cancelModal": {
+        "title": "Cancel Issue",
+        "summaryTax": "Cancel issue for {lineCount} selected tax invoice line(s).",
+        "summarySlip": "Cancel issue for {lineCount} selected slip line(s).",
+        "confirm": "Confirm",
+        "close": "Close",
+        "successToast": "Issue cancelled."
       }
     }
   }

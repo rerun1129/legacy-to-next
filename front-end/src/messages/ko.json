@@ -2041,7 +2041,8 @@
       "button": {
         "reset": "초기화",
         "search": "검색",
-        "issue": "발급"
+        "issue": "발급",
+        "cancel": "발급취소"
       },
       "modal": {
         "title": "발급 확정",
@@ -2059,7 +2060,16 @@
         "selectRequired": "발급할 운임 행을 먼저 선택하세요.",
         "customerMixed": "거래처가 서로 다른 행은 함께 발급할 수 없습니다.",
         "docTypeMixed": "서류 타입이 서로 다른 행은 함께 발급할 수 없습니다.",
-        "alreadyIssued": "이미 발급된 행이 포함되어 있습니다."
+        "alreadyIssued": "이미 발급된 행이 포함되어 있습니다.",
+        "notIssued": "발급되지 않은 운임 행이 포함되어 있습니다."
+      },
+      "cancelModal": {
+        "title": "발급취소",
+        "summaryTax": "선택 {lineCount}건의 세금계산서 발급을 취소합니다.",
+        "summarySlip": "선택 {lineCount}건의 전표 발급을 취소합니다.",
+        "confirm": "취소 확정",
+        "close": "닫기",
+        "successToast": "발급이 취소되었습니다."
       }
     }
   }

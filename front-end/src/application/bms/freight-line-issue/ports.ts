@@ -81,6 +81,17 @@ export interface IssueFreightLineResult {
   statuses: Record<string, string>;
 }
 
+/** BE: CancelFreightLineRequest — 발급취소 요청 입력 */
+export interface CancelFreightLineInput {
+  lineIds: number[];
+}
+
+/** BE: CancelFreightLineResponse — 발급취소 응답 */
+export interface CancelFreightLineResult {
+  affectedDocumentIds: number[];
+  statuses: Record<string, string>;
+}
+
 // === 포트 인터페이스 ===
 
 export interface FreightLineIssuePort {
@@ -90,4 +101,8 @@ export interface FreightLineIssuePort {
   issueTax(req: IssueFreightLineInput): Promise<IssueFreightLineResult>;
   /** POST /api/bms/freight-line-issues/slip */
   issueSlip(req: IssueFreightLineInput): Promise<IssueFreightLineResult>;
+  /** POST /api/bms/freight-line-issues/tax/cancel */
+  cancelTax(req: CancelFreightLineInput): Promise<CancelFreightLineResult>;
+  /** POST /api/bms/freight-line-issues/slip/cancel */
+  cancelSlip(req: CancelFreightLineInput): Promise<CancelFreightLineResult>;
 }

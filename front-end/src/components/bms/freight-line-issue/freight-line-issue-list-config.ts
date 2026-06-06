@@ -16,6 +16,8 @@ export interface FreightLineIssueListConfig {
   resetButtonCode: string;
   /** Issue ActionButton 코드 (BTN_ prefix 포함) */
   issueButtonCode: string;
+  /** Cancel ActionButton 코드 (BTN_ prefix 포함) */
+  cancelButtonCode: string;
   /** listFilterStore scope key용 라우트 경로 */
   routeKey: string;
 }
@@ -26,6 +28,7 @@ export const TAX_INVOICE_ISSUE_CONFIG: FreightLineIssueListConfig = {
   searchButtonCode: "BTN_BMS_TAX_INVOICE_SEARCH",
   resetButtonCode: "BTN_BMS_TAX_INVOICE_RESET",
   issueButtonCode: "BTN_BMS_TAX_INVOICE_ISSUE",
+  cancelButtonCode: "BTN_BMS_TAX_INVOICE_CANCEL",
   routeKey: "/bms/tax-invoice/issue",
 };
 
@@ -35,5 +38,6 @@ export const SLIP_ISSUE_CONFIG: FreightLineIssueListConfig = {
   searchButtonCode: "BTN_BMS_SLIP_SEARCH",
   resetButtonCode: "BTN_BMS_SLIP_RESET",
   issueButtonCode: "BTN_BMS_SLIP_ISSUE",
+  cancelButtonCode: "BTN_BMS_SLIP_CANCEL",
   routeKey: "/bms/slip/issue",
 };

@@ -1,5 +1,5 @@
 import { freightLineIssuePort } from "@/lib/ports";
-import type { SearchFreightLineInput, IssueFreightLineInput } from "./ports";
+import type { SearchFreightLineInput, IssueFreightLineInput, CancelFreightLineInput } from "./ports";
 
 // === 쿼리키 팩토리 ===
 
@@ -16,4 +16,6 @@ export const freightLineIssueUseCases = {
     freightLineIssuePort.search(filter, page, size),
   issueTax: (req: IssueFreightLineInput) => freightLineIssuePort.issueTax(req),
   issueSlip: (req: IssueFreightLineInput) => freightLineIssuePort.issueSlip(req),
+  cancelTax: (req: CancelFreightLineInput) => freightLineIssuePort.cancelTax(req),
+  cancelSlip: (req: CancelFreightLineInput) => freightLineIssuePort.cancelSlip(req),
 };

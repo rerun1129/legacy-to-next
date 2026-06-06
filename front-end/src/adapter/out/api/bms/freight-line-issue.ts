@@ -5,6 +5,8 @@ import type {
   SearchFreightLineInput,
   IssueFreightLineInput,
   IssueFreightLineResult,
+  CancelFreightLineInput,
+  CancelFreightLineResult,
 } from "@/application/bms/freight-line-issue/ports";
 import { bmsFetchJson } from "../bms-fetch";
 import { ResponseParseError } from "../errors";
@@ -62,6 +64,12 @@ const ISSUE_FREIGHT_LINE_RESPONSE_SCHEMA = z.object({
   affectedDocumentIds: z.array(z.number()),
   statuses: z.record(z.string(), z.string()),
 }) satisfies z.ZodType<IssueFreightLineResult>;
+
+// BE: CancelFreightLineResponse — 발급취소 응답
+const CANCEL_FREIGHT_LINE_RESPONSE_SCHEMA = z.object({
+  affectedDocumentIds: z.array(z.number()),
+  statuses: z.record(z.string(), z.string()),
+}) satisfies z.ZodType<CancelFreightLineResult>;
 
 export const API_FREIGHT_LINE_ISSUE_PORT: FreightLineIssuePort = {
   async search(
@@ -121,6 +129,34 @@ export const API_FREIGHT_LINE_ISSUE_PORT: FreightLineIssuePort = {
     if (!parsed.success) {
       throw new ResponseParseError(
         `Invalid issue-slip response: ${parsed.error.message}`,
+      );
+    }
+    return parsed.data.data;
+  },
+
+  async cancelTax(req: CancelFreightLineInput): Promise<CancelFreightLineResult> {
+    const json = await bmsFetchJson(`${BASE}/tax/cancel`, {
+      method: "POST",
+      body: JSON.stringify({ lineIds: req.lineIds }),
+    });
+    const parsed = apiResponse(CANCEL_FREIGHT_LINE_RESPONSE_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(
+        `Invalid cancel-tax response: ${parsed.error.message}`,
+      );
+    }
+    return parsed.data.data;
+  },
+
+  async cancelSlip(req: CancelFreightLineInput): Promise<CancelFreightLineResult> {
+    const json = await bmsFetchJson(`${BASE}/slip/cancel`, {
+      method: "POST",
+      body: JSON.stringify({ lineIds: req.lineIds }),
+    });
+    const parsed = apiResponse(CANCEL_FREIGHT_LINE_RESPONSE_SCHEMA).safeParse(json);
+    if (!parsed.success) {
+      throw new ResponseParseError(
+        `Invalid cancel-slip response: ${parsed.error.message}`,
       );
     }
     return parsed.data.data;

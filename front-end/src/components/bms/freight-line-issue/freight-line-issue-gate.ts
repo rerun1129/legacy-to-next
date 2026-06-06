@@ -44,3 +44,29 @@ export function evaluateIssueGate(
 
   return { kind: "ok", lineIds: rows.map((r) => r.freightLineId) };
 }
+
+/**
+ * 발급취소 버튼 클릭 시 선택 행 검증.
+ * - 선택 0개: 차단
+ * - 미발급 행 포함 시 차단 (발급번호가 없으면 취소 불가)
+ * - 고객/종류 혼재 검사 없음 (취소는 복수 고객/종류 허용)
+ */
+export function evaluateCancelGate(
+  rows: FreightLineIssueRow[],
+  issueType: IssueType,
+): IssueGateResult {
+  if (rows.length === 0) {
+    return { kind: "error", messageKey: "selectRequired" };
+  }
+
+  // 발급번호가 없는(미발급) 행은 취소 불가
+  const hasNotIssued = issueType === "TAX"
+    ? rows.some((r) => r.taxNo === null)
+    : rows.some((r) => r.slipNo === null);
+
+  if (hasNotIssued) {
+    return { kind: "error", messageKey: "notIssued" };
+  }
+
+  return { kind: "ok", lineIds: rows.map((r) => r.freightLineId) };
+}

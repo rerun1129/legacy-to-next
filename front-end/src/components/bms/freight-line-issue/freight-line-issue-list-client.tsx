@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { RotateCcw, Search, Stamp } from "lucide-react";
+import { RotateCcw, Search, Stamp, Ban } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { useTranslations } from "next-intl";
@@ -12,10 +12,11 @@ import { toast } from "@/lib/toast-store";
 import { FreightLineIssueListFilter } from "./freight-line-issue-list-filter";
 import { FreightLineIssueGrid } from "./freight-line-issue-grid";
 import { FreightLineIssueModal } from "./freight-line-issue-modal";
+import { FreightLineIssueCancelModal } from "./freight-line-issue-cancel-modal";
 import type { FreightLineIssueListConfig } from "./freight-line-issue-list-config";
 import type { FreightLineIssueFilter } from "./use-freight-line-issue-filter-model";
 import { DEFAULT_ISSUE_FILTER } from "./use-freight-line-issue-filter-model";
-import { evaluateIssueGate } from "./freight-line-issue-gate";
+import { evaluateIssueGate, evaluateCancelGate } from "./freight-line-issue-gate";
 import { freightLineIssueKeys } from "@/application/bms/freight-line-issue/use-cases";
 import type { SearchFreightLineInput, FreightLineIssueRow } from "@/application/bms/freight-line-issue/ports";
 
@@ -48,6 +49,8 @@ export function FreightLineIssueListClient({ config }: Props) {
   const [selectedKeys, setSelectedKeys] = useState<Set<number>>(new Set());
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [issueSnapshot, setIssueSnapshot] = useState<FreightLineIssueRow[]>([]);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelSnapshot, setCancelSnapshot] = useState<FreightLineIssueRow[]>([]);
 
   // 영속화 저장 — submittedFilter/page/pageSize 변경 시마다 동기화
   useEffect(() => {
@@ -113,6 +116,31 @@ export function FreightLineIssueListClient({ config }: Props) {
     setIsIssueModalOpen(false);
   }
 
+  function handleCancelButtonClick() {
+    if (submittedFilter === null) return;
+
+    // 클릭 시점에 캐시를 직접 읽어 최신 행 확보 (stale useMemo 방지)
+    const cached = queryClient.getQueryData<{ content: FreightLineIssueRow[] }>(
+      freightLineIssueKeys.search(submittedFilter, currentPage - 1, pageSize),
+    );
+    const allRows = cached?.content ?? [];
+    const snapshot = allRows.filter((r) => selectedKeys.has(r.freightLineId));
+
+    const gate = evaluateCancelGate(snapshot, config.issueType);
+    if (gate.kind === "error") {
+      toast.error(t(`gate.${gate.messageKey}`));
+      return;
+    }
+
+    setCancelSnapshot(snapshot);
+    setIsCancelModalOpen(true);
+  }
+
+  function handleCancelSuccess() {
+    setSelectedKeys(new Set());
+    setIsCancelModalOpen(false);
+  }
+
   return (
     <>
       {/* 상단 툴바: Reset / Search / Issue */}
@@ -131,6 +159,14 @@ export function FreightLineIssueListClient({ config }: Props) {
             icon={<Stamp size={12} style={{ marginRight: 4 }} />}
           >
             {t("button.issue")}
+          </ActionButton>
+          <ActionButton
+            buttonCode={config.cancelButtonCode}
+            className="btn btn--normal btn--sm"
+            onClick={handleCancelButtonClick}
+            icon={<Ban size={12} style={{ marginRight: 4 }} />}
+          >
+            {t("button.cancel")}
           </ActionButton>
           <ActionButton
             buttonCode={config.searchButtonCode}
@@ -174,6 +210,15 @@ export function FreightLineIssueListClient({ config }: Props) {
         issueType={config.issueType}
         rows={issueSnapshot}
         onIssueSuccess={handleIssueSuccess}
+      />
+
+      {/* 발급취소 모달 */}
+      <FreightLineIssueCancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        issueType={config.issueType}
+        rows={cancelSnapshot}
+        onCancelSuccess={handleCancelSuccess}
       />
     </>
   );
