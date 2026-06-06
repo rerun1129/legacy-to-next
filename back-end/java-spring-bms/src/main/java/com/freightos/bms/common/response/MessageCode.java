@@ -25,7 +25,14 @@ public enum MessageCode {
     FINANCIAL_DOCUMENT_GROUPED("그룹 번호가 부여되었습니다."),
     FINANCIAL_DOCUMENT_GROUP_MIXED_CATEGORY("INVOICE·PAYMENT·D/C Note는 서로 다른 그룹 카테고리이므로 함께 그룹화할 수 없습니다."),
     FINANCIAL_DOCUMENT_GROUP_MULTIPLE_EXISTING("선택된 서류들이 이미 서로 다른 그룹에 속해 있습니다. 기존 그룹 중 하나를 선택해 합류하거나 개별 해제 후 다시 시도하세요."),
-    FINANCIAL_DOCUMENT_DELETE_NOT_CREATED("그룹·세금·전표 단계의 서류는 삭제할 수 없습니다. 먼저 그룹을 해제하여 생성(CREATED) 상태로 되돌린 뒤 삭제하세요.");
+    FINANCIAL_DOCUMENT_DELETE_NOT_CREATED("그룹·세금·전표 단계의 서류는 삭제할 수 없습니다. 먼저 그룹을 해제하여 생성(CREATED) 상태로 되돌린 뒤 삭제하세요."),
+
+    // 단계 E 발급 전용 MessageCode (S3 신규 3종 + 발급 성공)
+    FREIGHT_LINE_NOT_ISSUED_YET("서류가 발행되지 않은 운임 행이 포함되어 있습니다. 서류 발행 후 발급하세요."),
+    FREIGHT_LINE_TAX_ALREADY_ISSUED("이미 세금계산서가 발급된 운임 행이 포함되어 있습니다."),
+    FREIGHT_LINE_SLIP_ALREADY_ISSUED("이미 전표가 발급된 운임 행이 포함되어 있습니다."),
+    FREIGHT_LINE_TAX_ISSUED("세금계산서가 발급되었습니다."),
+    FREIGHT_LINE_SLIP_ISSUED("전표가 발급되었습니다.");
 
     private final String message;
 
