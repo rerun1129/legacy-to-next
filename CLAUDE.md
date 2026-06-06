@@ -19,6 +19,9 @@
 * back-end/java-spring-bms/gradlew.bat -p back-end/java-spring-bms build
 * back-end/java-spring-bms/gradlew.bat -p back-end/java-spring-bms bootRun
 * back-end/java-spring-bms/gradlew.bat -p back-end/java-spring-bms test
+* back-end/java-spring-pms/gradlew.bat -p back-end/java-spring-pms build
+* back-end/java-spring-pms/gradlew.bat -p back-end/java-spring-pms bootRun
+* back-end/java-spring-pms/gradlew.bat -p back-end/java-spring-pms test
 
 
 
