@@ -860,3 +860,15 @@ CREATE TABLE IF NOT EXISTS switch_bl_description (
 COMMENT ON COLUMN switch_bl_description.switch_bl_id     IS 'Switch B/L 참조 FK (1:1 UNIQUE)';
 COMMENT ON COLUMN switch_bl_description.marks            IS 'Marks and Numbers';
 COMMENT ON COLUMN switch_bl_description.nature_quantity  IS 'Nature & Quantity of Goods';
+
+-- =============================================================================
+-- PMS 실적 집계 조회 성능 인덱스 (B/L 일자 필터 — ETD/ETA)
+--   PMS(java-spring-pms)의 cross-schema 집계는 house_bl/master_bl 의 etd/eta 로
+--   B/L 집합을 좁힌다. 해당 컬럼 인덱스로 freight_line 풀스캔/늦은 필터를 회피.
+--   idempotent. ⚠️ 기존(데이터 적재된) DB 에는 본 init 파일이 재실행되지 않으므로
+--   동일 DDL 을 수동 1회 적용해야 한다.
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS ix_house_bl_etd  ON fms.house_bl  (etd);
+CREATE INDEX IF NOT EXISTS ix_house_bl_eta  ON fms.house_bl  (eta);
+CREATE INDEX IF NOT EXISTS ix_master_bl_etd ON fms.master_bl (etd);
+CREATE INDEX IF NOT EXISTS ix_master_bl_eta ON fms.master_bl (eta);
