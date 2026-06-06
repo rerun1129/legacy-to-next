@@ -2,8 +2,6 @@ package com.freightos.pms.application.pms;
 
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.port.in.PmsPerformanceUseCase;
-import com.freightos.pms.application.pms.port.out.PmsCargoQueryPort;
-import com.freightos.pms.application.pms.port.out.PmsCodeNameResolver;
 import com.freightos.pms.application.pms.port.out.PmsPerformanceQueryPort;
 import com.freightos.pms.application.pms.projection.PmsCargoRow;
 import com.freightos.pms.application.pms.projection.PmsPerformanceRowView;
@@ -16,19 +14,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * PMS 실적 집계 조회 서비스.
- * 1. basis 분기 → 원시 B/L 페이지 조회
- * 2. House B/L ID 목록으로 cargo 일괄 조회 (fan-out 없음)
- * 3. 코드 → 이름 일괄 resolve (N+1 방지)
- * 4. cargo 수치·profit 파생 후 PmsPerformanceRowView 조립
+ *
+ * 단일 쿼리 구조 (page CTE + identity/cargo/name LEFT JOIN):
+ *   - identity (HOUSE: hblNo/mblNo/jobDiv 등, MASTER: mblNo/jobDiv 등)
+ *   - cargo 수치 (pkgQty/cbm/grossWeightKg + 확장 테이블)
+ *   - 이름 (accName/spcName/lcName/teamName/salesManName)
+ * 이 모든 정보가 한 쿼리에서 반환되므로 Phase-2 keyed lookup과 Phase-4 code→name 해소가 불필요하다.
+ *
+ * 서비스는 PmsCargoNumerics(순수 계산)와 36컬럼 RowView 조립만 담당한다.
  */
 @Component
 @Transactional(readOnly = true)
@@ -36,8 +33,6 @@ import java.util.stream.Collectors;
 public class PmsPerformanceQueryService implements PmsPerformanceUseCase {
 
     private final PmsPerformanceQueryPort queryPort;
-    private final PmsCargoQueryPort cargoQueryPort;
-    private final PmsCodeNameResolver codeNameResolver;
 
     @Override
     public Page<PmsPerformanceRowView> search(SearchPmsPerformanceCommand command, Pageable pageable) {
@@ -46,34 +41,14 @@ public class PmsPerformanceQueryService implements PmsPerformanceUseCase {
             return Page.empty(pageable);
         }
 
-        List<PmsRawBlRow> rows = rawPage.getContent();
-
-        // House B/L ID 수집 (MASTER 행은 null)
-        List<Long> houseBlIds = rows.stream()
-            .map(PmsRawBlRow::houseBlId)
-            .filter(id -> id != null)
-            .distinct()
-            .toList();
-
-        Map<Long, PmsCargoRow> cargoByHouseBlId = houseBlIds.isEmpty()
-            ? Collections.emptyMap()
-            : cargoQueryPort.findCargoByHouseBlIds(houseBlIds).stream()
-                .collect(Collectors.toMap(PmsCargoRow::houseBlId, Function.identity()));
-
-        // 코드 일괄 수집 후 이름 resolve
-        Map<String, String> customerNames = resolveCustomerNames(rows);
-        Map<String, String> carrierNames = resolveCarrierNames(rows);
-        Map<String, String> teamNames = resolveTeamNames(rows);
-        Map<String, String> operatorNames = resolveOperatorNames(rows);
-
-        List<PmsPerformanceRowView> content = rows.stream()
-            .map(row -> toRowView(row, cargoByHouseBlId, customerNames, carrierNames, teamNames, operatorNames))
+        List<PmsPerformanceRowView> content = rawPage.getContent().stream()
+            .map(this::toRowView)
             .toList();
 
         return new PageImpl<>(content, pageable, rawPage.getTotalElements());
     }
 
-    // ── 집계 기준 분기 ──────────────────────────────────────────────────────────
+    // ── basis 분기 ────────────────────────────────────────────────────────────
 
     private Page<PmsRawBlRow> fetchRawPage(SearchPmsPerformanceCommand command, Pageable pageable) {
         return switch (command.effectiveBasis()) {
@@ -82,57 +57,17 @@ public class PmsPerformanceQueryService implements PmsPerformanceUseCase {
         };
     }
 
-    // ── 이름 resolve ─────────────────────────────────────────────────────────────
+    // ── RowView 조립 ──────────────────────────────────────────────────────────
 
-    private Map<String, String> resolveCustomerNames(List<PmsRawBlRow> rows) {
-        Set<String> codes = rows.stream()
-            .flatMap(r -> java.util.stream.Stream.of(r.actualCustomerCode(), r.settlePartnerCode()))
-            .filter(s -> s != null && !s.isBlank())
-            .collect(Collectors.toSet());
-        return codes.isEmpty() ? Collections.emptyMap() : codeNameResolver.findCustomerNames(codes);
-    }
-
-    private Map<String, String> resolveCarrierNames(List<PmsRawBlRow> rows) {
-        Set<String> codes = extractNonBlank(rows, PmsRawBlRow::linerCode);
-        return codes.isEmpty() ? Collections.emptyMap() : codeNameResolver.findCarrierNames(codes);
-    }
-
-    private Map<String, String> resolveTeamNames(List<PmsRawBlRow> rows) {
-        Set<String> codes = extractNonBlank(rows, PmsRawBlRow::teamCode);
-        return codes.isEmpty() ? Collections.emptyMap() : codeNameResolver.findTeamNames(codes);
-    }
-
-    private Map<String, String> resolveOperatorNames(List<PmsRawBlRow> rows) {
-        Set<String> codes = extractNonBlank(rows, PmsRawBlRow::operator);
-        return codes.isEmpty() ? Collections.emptyMap() : codeNameResolver.findOperatorNames(codes);
-    }
-
-    private Set<String> extractNonBlank(List<PmsRawBlRow> rows, Function<PmsRawBlRow, String> extractor) {
-        return rows.stream()
-            .map(extractor)
-            .filter(s -> s != null && !s.isBlank())
-            .collect(Collectors.toSet());
-    }
-
-    // ── RowView 조립 ─────────────────────────────────────────────────────────────
-
-    private PmsPerformanceRowView toRowView(
-            PmsRawBlRow row,
-            Map<Long, PmsCargoRow> cargoByHouseBlId,
-            Map<String, String> customerNames,
-            Map<String, String> carrierNames,
-            Map<String, String> teamNames,
-            Map<String, String> operatorNames) {
-
-        PmsCargoRow cargo = row.houseBlId() != null ? cargoByHouseBlId.get(row.houseBlId()) : null;
+    /**
+     * 단일 쿼리에서 반환된 PmsRawBlRow → 36컬럼 PmsPerformanceRowView.
+     * cargo 수치 파생은 PmsCargoNumerics(순수 계산)에 위임.
+     * 이름은 쿼리 결과에서 직접 읽음 (code→name 추가 조회 없음).
+     */
+    private PmsPerformanceRowView toRowView(PmsRawBlRow row) {
+        // 단일 쿼리에서 반환된 cargo 필드로 PmsCargoRow를 재구성하여 PmsCargoNumerics 재사용
+        PmsCargoRow cargo = row.houseBlId() != null ? buildCargoRow(row) : null;
         String jobDiv = row.jobDiv();
-
-        String loadType = PmsCargoNumerics.deriveLoadType(jobDiv, cargo);
-        BigDecimal rton = PmsCargoNumerics.deriveRton(jobDiv, cargo);
-        BigDecimal chargeWeightKg = PmsCargoNumerics.deriveChargeWeightKg(jobDiv, cargo);
-        BigDecimal cbm = cargo != null ? cargo.cbm() : null;
-        BigDecimal grossWeightKg = cargo != null ? cargo.grossWeightKg() : null;
-        Integer pkgQty = cargo != null ? cargo.pkgQty() : null;
 
         BigDecimal localProfit = PmsCargoNumerics.deriveProfit(
             row.invoiceLocalAmt(), row.debitLocalAmt(), row.paymentLocalAmt(), row.creditLocalAmt());
@@ -142,15 +77,20 @@ public class PmsPerformanceQueryService implements PmsPerformanceUseCase {
         return new PmsPerformanceRowView(
             row.blType(), row.blId(),
             row.houseBlNo(), row.masterBlNo(),
-            row.teamCode(), name(teamNames, row.teamCode()),
+            row.teamCode(), blank(row.teamName()),
             jobDiv, row.bound(), row.etd(), row.eta(), row.performanceDt(),
-            row.actualCustomerCode(), name(customerNames, row.actualCustomerCode()),
-            row.settlePartnerCode(), name(customerNames, row.settlePartnerCode()),
-            row.linerCode(), name(carrierNames, row.linerCode()),
+            row.actualCustomerCode(), blank(row.accName()),
+            row.settlePartnerCode(), blank(row.spcName()),
+            row.linerCode(), blank(row.lcName()),
             row.polCode(), row.podCode(),
-            row.salesManCode(), name(operatorNames, row.salesManCode()),
+            row.salesManCode(), blank(row.salesManName()),
             row.incoterms(),
-            loadType, pkgQty, rton, cbm, chargeWeightKg, grossWeightKg,
+            PmsCargoNumerics.deriveLoadType(jobDiv, cargo),
+            cargo != null ? cargo.pkgQty() : null,
+            PmsCargoNumerics.deriveRton(jobDiv, cargo),
+            cargo != null ? cargo.cbm() : null,
+            PmsCargoNumerics.deriveChargeWeightKg(jobDiv, cargo),
+            cargo != null ? cargo.grossWeightKg() : null,
             nvl(row.invoiceLocalAmt()), nvl(row.debitLocalAmt()),
             nvl(row.paymentLocalAmt()), nvl(row.creditLocalAmt()), localProfit,
             nvl(row.invoiceUsdAmt()), nvl(row.debitUsdAmt()),
@@ -159,9 +99,28 @@ public class PmsPerformanceQueryService implements PmsPerformanceUseCase {
         );
     }
 
-    private String name(Map<String, String> map, String code) {
-        if (code == null || code.isBlank()) return "";
-        return map.getOrDefault(code, "");
+    /**
+     * 단일 쿼리 결과 행에서 PmsCargoRow를 재구성한다 (HOUSE 행 전용).
+     * PmsCargoNumerics가 PmsCargoRow 타입을 요구하므로 얇은 래퍼로 변환.
+     */
+    private PmsCargoRow buildCargoRow(PmsRawBlRow row) {
+        return new PmsCargoRow(
+            row.houseBlId(),
+            row.pkgQty(),
+            row.cbm(),
+            row.grossWeightKg(),
+            row.seaLoadType(),
+            row.airChargeWeightKg(),
+            row.truckChargeWeightKg(),
+            row.truckLoadType(),
+            row.nonBlRton()
+        );
+    }
+
+    // ── 헬퍼 ──────────────────────────────────────────────────────────────────
+
+    private String blank(String s) {
+        return s != null ? s : "";
     }
 
     private BigDecimal nvl(BigDecimal v) {

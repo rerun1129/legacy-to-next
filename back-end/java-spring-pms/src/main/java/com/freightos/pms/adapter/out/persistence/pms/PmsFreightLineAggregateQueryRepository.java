@@ -1,194 +1,166 @@
 package com.freightos.pms.adapter.out.persistence.pms;
 
-import com.freightos.pms.adapter.out.persistence.entity.QPmsFreightHeaderRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsFreightLineRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsHouseBlRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsMasterBlRefJpaEntity;
-import com.freightos.pms.application.pms.AggregationBasis;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.projection.PmsRawBlRow;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * freight_line 기반 B/L 집계 쿼리 레포지토리.
- * FREIGHT_INPUT / TAX_ISSUED / SLIP_ISSUED basis 공통.
- * GROUP BY (freight_header.bl_type, freight_header.bl_id).
- * 집계가 아닌 identity 컬럼은 Postgres GROUP BY 기능 의존 금지 → min/max 래핑.
+ * freight_line 기반 B/L 집계 쿼리 레포지토리 (native SQL, single-query).
+ *
+ * 단일 쿼리 구조:
+ *   WITH page AS ( <inner aggregate + count(*) OVER() + OFFSET/LIMIT> )
+ *   SELECT <page cols> + <identity cols> + <cargo cols> + <name cols>
+ *   FROM page
+ *   LEFT JOIN fms.house_bl … fms.master_bl … admin.*
+ *   ORDER BY p.perf DESC
+ *
+ * page CTE의 ≤pageSize 행에만 JOIN이 적용 — 전체 결과 집합 스캔 없음.
+ * Phase-2 keyed lookup (cargoRepo/masterRepo/codeNameResolver) 완전 제거.
+ *
+ * ETD/ETA 필터 활성 시: B/L-driven FROM (fms.house_bl / fms.master_bl 인덱스 우선).
+ * 실적일자·BMS 전용 필터만 활성 시: BMS-only FROM (FMS JOIN 완전 생략).
+ * house-only 필터 활성 시 UNION ALL master 브랜치 생략.
  */
 @Repository
 @RequiredArgsConstructor
 public class PmsFreightLineAggregateQueryRepository {
 
-    private final JPAQueryFactory queryFactory;
-    private final PmsPerformanceWhereBuilder whereBuilder;
+    private final NamedParameterJdbcTemplate jdbc;
+    private final PmsFreightLineSqlBuilder sqlBuilder;
+    private final PmsFmsJoinDecider fmsJoinDecider;
+
+    // ── 내부 집계 SELECT 고정 컬럼 (page CTE 내부) ────────────────────────────
+
+    private static final String INNER_SELECT = """
+        SELECT
+          h.bl_type,
+          h.bl_id,
+          max(l.performance_dt)                                                 AS perf,
+          min(h.actual_customer_code)                                           AS acc,
+          min(h.settle_partner_code)                                            AS spc,
+          min(h.liner_code)                                                     AS lc,
+          sum(CASE WHEN l.financial_doc_type = 'INVOICE' THEN l.local_amount ELSE 0 END) AS inv_l,
+          sum(CASE WHEN l.financial_doc_type = 'DEBIT'   THEN l.local_amount ELSE 0 END) AS deb_l,
+          sum(CASE WHEN l.financial_doc_type = 'PAYMENT' THEN l.local_amount ELSE 0 END) AS pay_l,
+          sum(CASE WHEN l.financial_doc_type = 'CREDIT'  THEN l.local_amount ELSE 0 END) AS crd_l,
+          sum(CASE WHEN l.financial_doc_type = 'INVOICE' THEN l.usd_amount   ELSE 0 END) AS inv_u,
+          sum(CASE WHEN l.financial_doc_type = 'DEBIT'   THEN l.usd_amount   ELSE 0 END) AS deb_u,
+          sum(CASE WHEN l.financial_doc_type = 'PAYMENT' THEN l.usd_amount   ELSE 0 END) AS pay_u,
+          sum(CASE WHEN l.financial_doc_type = 'CREDIT'  THEN l.usd_amount   ELSE 0 END) AS crd_u,
+          count(*) OVER()                                                       AS total_count
+        """;
+
+    private static final String INNER_GROUP_ORDER = """
+        GROUP BY h.bl_type, h.bl_id
+        ORDER BY max(l.performance_dt) DESC
+        OFFSET :off LIMIT :lim
+        """;
+
+    // ── 단일 쿼리 실행 ────────────────────────────────────────────────────────
 
     public Page<PmsRawBlRow> search(SearchPmsPerformanceCommand command, Pageable pageable) {
-        QPmsFreightLineRefJpaEntity line = QPmsFreightLineRefJpaEntity.pmsFreightLineRefJpaEntity;
-        QPmsFreightHeaderRefJpaEntity header = QPmsFreightHeaderRefJpaEntity.pmsFreightHeaderRefJpaEntity;
-        QPmsHouseBlRefJpaEntity houseBl = QPmsHouseBlRefJpaEntity.pmsHouseBlRefJpaEntity;
-        QPmsMasterBlRefJpaEntity masterBl = QPmsMasterBlRefJpaEntity.pmsMasterBlRefJpaEntity;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("off", pageable.getOffset());
+        params.addValue("lim", pageable.getPageSize());
 
-        BooleanExpression[] where = buildWhere(command, line, header, houseBl, masterBl);
+        boolean fmsJoin = fmsJoinDecider.fmsJoinNeeded(command);
+        boolean houseOnly = fmsJoin && sqlBuilder.houseOnlyActive(command);
 
-        // total count — count(distinct (bl_type, bl_id)) 복합 키 DISTINCT
-        NumberExpression<Long> countExpr = Expressions.numberTemplate(Long.class,
-            "count(distinct ({0},{1}))", header.blType, header.blId);
+        String from = fmsJoin
+            ? sqlBuilder.blDrivenFrom(command, params, houseOnly)
+            : sqlBuilder.bmsOnlyFrom();
 
-        Long countResult = queryFactory
-            .select(countExpr)
-            .from(line)
-            .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
-            .leftJoin(houseBl).on(header.blType.eq("HOUSE").and(header.blId.eq(houseBl.houseBlId)))
-            .leftJoin(masterBl).on(header.blType.eq("MASTER").and(header.blId.eq(masterBl.masterBlId)))
-            .where(where)
-            .fetchOne();
-        long total = countResult != null ? countResult : 0L;
+        List<String> outerWhere = sqlBuilder.buildOuterWhere(command, params);
+        String innerAggregate = buildInnerAggregate(from, outerWhere);
+        String sql = sqlBuilder.wrapWithPageCteAndJoins(innerAggregate);
 
-        if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
+        long[] totalHolder = {0L};
+        List<PmsRawBlRow> rows = new ArrayList<>();
+        jdbc.query(sql, params, rs -> {
+            if (rows.isEmpty()) {
+                totalHolder[0] = rs.getLong("total_count");
+            }
+            rows.add(mapRow(rs));
+        });
 
-        // ── 집계 표현식 (SUM by doc_type, min/max for identity) ─────────────────
-        NumberExpression<BigDecimal> invoiceLocal = sumWhenDocType(line, "INVOICE", false);
-        NumberExpression<BigDecimal> debitLocal = sumWhenDocType(line, "DEBIT", false);
-        NumberExpression<BigDecimal> paymentLocal = sumWhenDocType(line, "PAYMENT", false);
-        NumberExpression<BigDecimal> creditLocal = sumWhenDocType(line, "CREDIT", false);
-        NumberExpression<BigDecimal> invoiceUsd = sumWhenDocType(line, "INVOICE", true);
-        NumberExpression<BigDecimal> debitUsd = sumWhenDocType(line, "DEBIT", true);
-        NumberExpression<BigDecimal> paymentUsd = sumWhenDocType(line, "PAYMENT", true);
-        NumberExpression<BigDecimal> creditUsd = sumWhenDocType(line, "CREDIT", true);
-
-        List<Tuple> rows = queryFactory
-            .select(
-                header.blType, header.blId,
-                houseBl.hblNo.min(), houseBl.mblNo.min(), masterBl.mblNo.min(),
-                houseBl.jobDiv.min(), masterBl.jobDiv.min(),
-                houseBl.bound.min(), masterBl.bound.min(),
-                houseBl.etd.min(), masterBl.etd.min(),
-                houseBl.eta.min(), masterBl.eta.min(),
-                line.performanceDt.max(),
-                header.actualCustomerCode.min(), header.settlePartnerCode.min(), header.linerCode.min(),
-                houseBl.polCode.min(), masterBl.polCode.min(),
-                houseBl.podCode.min(), masterBl.podCode.min(),
-                houseBl.salesManCode.min(), houseBl.incoterms.min(),
-                houseBl.houseBlId.min(),
-                houseBl.teamCode.min(),
-                invoiceLocal, debitLocal, paymentLocal, creditLocal,
-                invoiceUsd, debitUsd, paymentUsd, creditUsd
-            )
-            .from(line)
-            .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
-            .leftJoin(houseBl).on(header.blType.eq("HOUSE").and(header.blId.eq(houseBl.houseBlId)))
-            .leftJoin(masterBl).on(header.blType.eq("MASTER").and(header.blId.eq(masterBl.masterBlId)))
-            .where(where)
-            .groupBy(header.blType, header.blId)
-            .orderBy(line.performanceDt.max().desc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        List<PmsRawBlRow> content = rows.stream()
-            .map(t -> toRawRow(t, line, header, houseBl, masterBl,
-                invoiceLocal, debitLocal, paymentLocal, creditLocal,
-                invoiceUsd, debitUsd, paymentUsd, creditUsd))
-            .toList();
-
-        return new PageImpl<>(content, pageable, total);
+        return new PageImpl<>(rows, pageable, totalHolder[0]);
     }
 
-    // ── WHERE 절 ─────────────────────────────────────────────────────────────────
+    // ── 내부 집계 SQL 조립 ─────────────────────────────────────────────────────
 
-    private BooleanExpression[] buildWhere(
-            SearchPmsPerformanceCommand c,
-            QPmsFreightLineRefJpaEntity line,
-            QPmsFreightHeaderRefJpaEntity header,
-            QPmsHouseBlRefJpaEntity houseBl,
-            QPmsMasterBlRefJpaEntity masterBl) {
-
-        BooleanExpression[] base = whereBuilder.buildForFreightLine(c, line, header, houseBl, masterBl);
-        // basis 분기 조건 추가
-        BooleanExpression basisCondition = switch (c.effectiveBasis()) {
-            case TAX_ISSUED -> line.taxNo.isNotNull();
-            case SLIP_ISSUED -> line.slipNo.isNotNull();
-            default -> null; // FREIGHT_INPUT: 조건 없음
-        };
-        if (basisCondition == null) return base;
-        BooleanExpression[] extended = new BooleanExpression[base.length + 1];
-        System.arraycopy(base, 0, extended, 0, base.length);
-        extended[base.length] = basisCondition;
-        return extended;
+    private String buildInnerAggregate(String from, List<String> outerWhere) {
+        StringBuilder sb = new StringBuilder(INNER_SELECT);
+        sb.append(from);
+        if (!outerWhere.isEmpty()) {
+            sb.append("WHERE ").append(String.join("\n  AND ", outerWhere)).append("\n");
+        }
+        sb.append(INNER_GROUP_ORDER);
+        return sb.toString();
     }
 
-    // ── 집계 표현식 헬퍼 ───────────────────────────────────────────────────────────
+    // ── 행 매핑 ───────────────────────────────────────────────────────────────
 
-    private NumberExpression<BigDecimal> sumWhenDocType(
-            QPmsFreightLineRefJpaEntity line, String docType, boolean usd) {
-        String col = usd ? "usd_amount" : "local_amount";
-        // SUM(CASE WHEN financial_doc_type=? THEN col ELSE 0 END)
-        return Expressions.numberTemplate(BigDecimal.class,
-            "sum(case when {0} = '" + docType + "' then {1} else 0 end)",
-            line.financialDocType,
-            usd ? line.usdAmount : line.localAmount);
-    }
+    /**
+     * HOUSE 행: hb.* 컬럼(hblNo/jobDiv 등)이 채워짐, mb.* 컬럼은 null.
+     * MASTER 행: mb.* 컬럼이 채워짐, hb.* 컬럼(hblNo/cargo 등)은 null.
+     */
+    private PmsRawBlRow mapRow(ResultSet rs) throws SQLException {
+        boolean isHouse = "HOUSE".equals(rs.getString("bl_type"));
+        Long blId = rs.getLong("bl_id");
 
-    // ── 행 매핑 ─────────────────────────────────────────────────────────────────
-
-    private PmsRawBlRow toRawRow(
-            Tuple t,
-            QPmsFreightLineRefJpaEntity line,
-            QPmsFreightHeaderRefJpaEntity header,
-            QPmsHouseBlRefJpaEntity houseBl,
-            QPmsMasterBlRefJpaEntity masterBl,
-            NumberExpression<BigDecimal> invoiceLocal,
-            NumberExpression<BigDecimal> debitLocal,
-            NumberExpression<BigDecimal> paymentLocal,
-            NumberExpression<BigDecimal> creditLocal,
-            NumberExpression<BigDecimal> invoiceUsd,
-            NumberExpression<BigDecimal> debitUsd,
-            NumberExpression<BigDecimal> paymentUsd,
-            NumberExpression<BigDecimal> creditUsd) {
-
-        String blType = t.get(header.blType);
-        boolean isHouse = "HOUSE".equals(blType);
-
-        String houseBlNo = isHouse ? t.get(houseBl.hblNo.min()) : null;
-        String mblFromHouse = isHouse ? t.get(houseBl.mblNo.min()) : null;
-        String mblFromMaster = !isHouse ? t.get(masterBl.mblNo.min()) : null;
-        String masterBlNo = isHouse ? mblFromHouse : mblFromMaster;
-
-        String jobDiv = isHouse ? t.get(houseBl.jobDiv.min()) : t.get(masterBl.jobDiv.min());
-        String bound = isHouse ? t.get(houseBl.bound.min()) : t.get(masterBl.bound.min());
-        String etd = isHouse ? t.get(houseBl.etd.min()) : t.get(masterBl.etd.min());
-        String eta = isHouse ? t.get(houseBl.eta.min()) : t.get(masterBl.eta.min());
-        String polCode = isHouse ? t.get(houseBl.polCode.min()) : t.get(masterBl.polCode.min());
-        String podCode = isHouse ? t.get(houseBl.podCode.min()) : t.get(masterBl.podCode.min());
+        String houseBlNo = isHouse ? rs.getString("hbl_no") : null;
+        String masterBlNo = isHouse ? rs.getString("h_mbl_no") : rs.getString("m_mbl_no");
+        String jobDiv = isHouse ? rs.getString("h_job_div") : rs.getString("m_job_div");
+        String bound  = isHouse ? rs.getString("h_bound")   : rs.getString("m_bound");
+        String etd    = isHouse ? rs.getString("h_etd")     : rs.getString("m_etd");
+        String eta    = isHouse ? rs.getString("h_eta")     : rs.getString("m_eta");
+        String pol    = isHouse ? rs.getString("h_pol")     : rs.getString("m_pol");
+        String pod    = isHouse ? rs.getString("h_pod")     : rs.getString("m_pod");
+        String salesManCode = isHouse ? rs.getString("sales_man_code") : null;
+        String incoterms    = isHouse ? rs.getString("incoterms")      : null;
+        String teamCode     = isHouse ? rs.getString("team_code")       : null;
+        Long   houseBlId    = isHouse ? blId                            : null;
 
         return new PmsRawBlRow(
-            blType, t.get(header.blId),
-            houseBlNo, masterBlNo,
-            jobDiv, bound, etd, eta,
-            t.get(line.performanceDt.max()),
-            t.get(header.actualCustomerCode.min()),
-            t.get(header.settlePartnerCode.min()),
-            t.get(header.linerCode.min()),
-            polCode, podCode,
-            isHouse ? t.get(houseBl.salesManCode.min()) : null,
-            isHouse ? t.get(houseBl.incoterms.min()) : null,
-            isHouse ? t.get(houseBl.houseBlId.min()) : null,
-            isHouse ? t.get(houseBl.teamCode.min()) : null,
-            null,  // operator — freight_line 기반 집계에서는 financial_document 미조인
-            t.get(invoiceLocal), t.get(debitLocal), t.get(paymentLocal), t.get(creditLocal),
-            t.get(invoiceUsd), t.get(debitUsd), t.get(paymentUsd), t.get(creditUsd)
+            rs.getString("bl_type"), blId,
+            houseBlNo, masterBlNo, jobDiv, bound, etd, eta,
+            rs.getString("perf"),
+            rs.getString("acc"), rs.getString("spc"), rs.getString("lc"),
+            pol, pod, salesManCode, incoterms, houseBlId,
+            teamCode,
+            null,   // operator — freight_line 경로에서는 사용 안 함
+            nvl(rs, "inv_l"), nvl(rs, "deb_l"), nvl(rs, "pay_l"), nvl(rs, "crd_l"),
+            nvl(rs, "inv_u"), nvl(rs, "deb_u"), nvl(rs, "pay_u"), nvl(rs, "crd_u"),
+            // cargo (HOUSE만 의미 있음)
+            isHouse ? rs.getObject("pkg_qty", Integer.class) : null,
+            isHouse ? rs.getBigDecimal("cbm")                : null,
+            isHouse ? rs.getBigDecimal("gross_weight_kg")    : null,
+            isHouse ? rs.getString("sea_load_type")          : null,
+            isHouse ? rs.getBigDecimal("air_cw")             : null,
+            isHouse ? rs.getBigDecimal("tr_cw")              : null,
+            isHouse ? rs.getString("tr_load_type")           : null,
+            isHouse ? rs.getBigDecimal("rton")               : null,
+            // 이름
+            rs.getString("acc_name"), rs.getString("spc_name"), rs.getString("lc_name"),
+            isHouse ? rs.getString("team_name")      : null,
+            isHouse ? rs.getString("sales_man_name") : null
         );
+    }
+
+    private BigDecimal nvl(ResultSet rs, String col) throws SQLException {
+        BigDecimal v = rs.getBigDecimal(col);
+        return v != null ? v : BigDecimal.ZERO;
     }
 }

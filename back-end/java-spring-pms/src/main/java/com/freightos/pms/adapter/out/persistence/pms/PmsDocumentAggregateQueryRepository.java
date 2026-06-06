@@ -1,171 +1,183 @@
 package com.freightos.pms.adapter.out.persistence.pms;
 
-import com.freightos.pms.adapter.out.persistence.entity.QPmsFinancialDocumentRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsFreightHeaderRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsFreightLineRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsHouseBlRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.entity.QPmsMasterBlRefJpaEntity;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.projection.PmsRawBlRow;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * financial_document 기반 B/L 집계 쿼리 레포지토리 (DOCUMENT_CREATED basis).
+ * financial_document 기반 B/L 집계 쿼리 레포지토리 (DOCUMENT_CREATED basis, single-query).
  *
- * fan-out 방지 전략:
- * 1. count + 페이지 B/L 키 조회 → distinct (bl_type, bl_id) 페이지
- * 2. 해당 B/L 키 목록에서 DISTINCT (bl_type, bl_id, doc_id, doc_type, local_total, usd_total) 조회
- * 3. 서비스가 아닌 이 레포지토리에서 in-memory fold (doc_type별 합산)
- * 이렇게 하면 financial_document→freight_line 1:N fan-out으로 인한 금액 중복 합산 방지.
+ * 단일 쿼리 구조:
+ *   WITH page AS ( <membership+sort+window count: GROUP BY bl_type,bl_id + ORDER BY + OFFSET/LIMIT> ),
+ *   amounts AS (
+ *     SELECT DISTINCT(bl_type,bl_id,doc_id,doc_type,amounts) → GROUP BY bl_type,bl_id
+ *     FROM bms.financial_document … JOIN page  -- page 범위만 처리
+ *   )
+ *   SELECT page.* + amounts.8sums + identity + cargo + name
+ *   FROM page JOIN amounts … LEFT JOIN fms.* … LEFT JOIN admin.*
+ *   ORDER BY page.perf DESC
+ *
+ * DISTINCT inner SELECT가 1:N freight_line 팬아웃을 방지한다 (기존 전략 유지).
+ * Phase-2 keyed lookup (= ANY(?) 왕복) 완전 제거.
  */
 @Repository
 @RequiredArgsConstructor
 public class PmsDocumentAggregateQueryRepository {
 
-    private final JPAQueryFactory queryFactory;
-    private final PmsPerformanceWhereBuilder whereBuilder;
+    private final NamedParameterJdbcTemplate jdbc;
+    private final PmsDocumentSqlBuilder sqlBuilder;
+    private final PmsFmsJoinDecider fmsJoinDecider;
+
+    // ── page CTE 내부 SELECT (membership + sort + window count) ──────────────
+
+    private static final String PAGE_INNER_SELECT = """
+        SELECT
+          h.bl_type,
+          h.bl_id,
+          max(fd.performance_dt)       AS perf,
+          max(h.actual_customer_code)  AS acc,
+          max(h.settle_partner_code)   AS spc,
+          max(h.liner_code)            AS lc,
+          max(fd.team_code)            AS team_code,
+          max(fd.operator)             AS operator,
+          count(*) OVER()              AS total_count
+        """;
+
+    private static final String PAGE_FROM = """
+        FROM bms.financial_document fd
+        JOIN bms.freight_line l ON l.financial_document_id = fd.financial_document_id
+        JOIN bms.freight_header h ON h.freight_header_id = l.freight_header_id
+        """;
+
+    private static final String PAGE_GROUP_ORDER = """
+        GROUP BY h.bl_type, h.bl_id
+        ORDER BY max(fd.performance_dt) DESC
+        OFFSET :off LIMIT :lim
+        """;
+
+    // ── 단일 쿼리 실행 ────────────────────────────────────────────────────────
 
     public Page<PmsRawBlRow> search(SearchPmsPerformanceCommand command, Pageable pageable) {
-        QPmsFinancialDocumentRefJpaEntity doc = QPmsFinancialDocumentRefJpaEntity.pmsFinancialDocumentRefJpaEntity;
-        QPmsFreightHeaderRefJpaEntity header = QPmsFreightHeaderRefJpaEntity.pmsFreightHeaderRefJpaEntity;
-        QPmsFreightLineRefJpaEntity line = QPmsFreightLineRefJpaEntity.pmsFreightLineRefJpaEntity;
-        QPmsHouseBlRefJpaEntity houseBl = QPmsHouseBlRefJpaEntity.pmsHouseBlRefJpaEntity;
-        QPmsMasterBlRefJpaEntity masterBl = QPmsMasterBlRefJpaEntity.pmsMasterBlRefJpaEntity;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("off", pageable.getOffset());
+        params.addValue("lim", pageable.getPageSize());
 
-        BooleanExpression[] where = whereBuilder.buildForDocument(command, doc, header, houseBl, masterBl);
+        List<String> pageWhere = new ArrayList<>();
+        sqlBuilder.addDocumentPredicates(command, pageWhere, params);
+        sqlBuilder.addHeaderPredicates(command, pageWhere, params);
 
-        // Step 1: count distinct B/L 키
-        NumberExpression<Long> countExpr = Expressions.numberTemplate(Long.class,
-            "count(distinct ({0},{1}))", header.blType, header.blId);
-        Long countResult = queryFactory
-            .select(countExpr)
-            .from(doc)
-            .join(line).on(line.financialDocumentId.eq(doc.financialDocumentId))
-            .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
-            .leftJoin(houseBl).on(header.blType.eq("HOUSE").and(header.blId.eq(houseBl.houseBlId)))
-            .leftJoin(masterBl).on(header.blType.eq("MASTER").and(header.blId.eq(masterBl.masterBlId)))
-            .where(where)
-            .fetchOne();
-        long total = countResult != null ? countResult : 0L;
-        if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
+        boolean fmsJoin = fmsJoinDecider.fmsJoinNeededForDocument(command);
+        String fmsJoinSql = fmsJoin ? sqlBuilder.buildFmsJoinFragment(command, pageWhere, params) : "";
 
-        // Step 2: 페이지 B/L 키 목록 조회 (identity 컬럼은 max로 대표)
-        List<Tuple> blKeyRows = queryFactory
-            .select(
-                header.blType, header.blId,
-                houseBl.hblNo.max(), houseBl.mblNo.max(), masterBl.mblNo.max(),
-                houseBl.jobDiv.max(), masterBl.jobDiv.max(),
-                houseBl.bound.max(), masterBl.bound.max(),
-                houseBl.etd.max(), masterBl.etd.max(),
-                houseBl.eta.max(), masterBl.eta.max(),
-                doc.performanceDt.max(),
-                header.actualCustomerCode.max(), header.settlePartnerCode.max(), header.linerCode.max(),
-                houseBl.polCode.max(), masterBl.polCode.max(),
-                houseBl.podCode.max(), masterBl.podCode.max(),
-                houseBl.salesManCode.max(), houseBl.incoterms.max(),
-                houseBl.houseBlId.max(),
-                doc.teamCode.max(), doc.operator.max()
-            )
-            .from(doc)
-            .join(line).on(line.financialDocumentId.eq(doc.financialDocumentId))
-            .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
-            .leftJoin(houseBl).on(header.blType.eq("HOUSE").and(header.blId.eq(houseBl.houseBlId)))
-            .leftJoin(masterBl).on(header.blType.eq("MASTER").and(header.blId.eq(masterBl.masterBlId)))
-            .where(where)
-            .groupBy(header.blType, header.blId)
-            .orderBy(doc.performanceDt.max().desc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
+        String pageInner = buildPageInner(fmsJoinSql, pageWhere);
 
-        if (blKeyRows.isEmpty()) return new PageImpl<>(List.of(), pageable, total);
+        // amounts CTE 필터는 page CTE와 동일 술어 재사용 (파라미터 공유)
+        // amounts DISTINCT inner는 page JOIN으로 범위 제한 — 추가 WHERE는 선택적
+        List<String> amountWhere = buildAmountWhere(command);
+        String sql = sqlBuilder.buildSingleQuery(pageInner, amountWhere);
 
-        // Step 3: 해당 B/L 키에 대해 DISTINCT 서류 금액 조회 (fan-out 방지)
-        List<String> blTypes = blKeyRows.stream().map(r -> r.get(header.blType)).toList();
-        List<Long> blIds = blKeyRows.stream().map(r -> r.get(header.blId)).toList();
+        long[] totalHolder = {0L};
+        List<PmsRawBlRow> rows = new ArrayList<>();
+        jdbc.query(sql, params, rs -> {
+            if (rows.isEmpty()) {
+                totalHolder[0] = rs.getLong("total_count");
+            }
+            rows.add(mapRow(rs));
+        });
 
-        List<Tuple> docAmountRows = queryFactory
-            .selectDistinct(
-                header.blType, header.blId,
-                doc.financialDocumentId,
-                doc.documentType,
-                doc.localTotalAmount,
-                doc.usdTotalAmount
-            )
-            .from(doc)
-            .join(line).on(line.financialDocumentId.eq(doc.financialDocumentId))
-            .join(header).on(header.freightHeaderId.eq(line.freightHeaderId))
-            .where(header.blType.in(blTypes), header.blId.in(blIds))
-            .fetch();
-
-        // Step 4: in-memory fold
-        Map<String, Map<String, BigDecimal>> localByBlKey = new HashMap<>();
-        Map<String, Map<String, BigDecimal>> usdByBlKey = new HashMap<>();
-        for (Tuple t : docAmountRows) {
-            String key = t.get(header.blType) + ":" + t.get(header.blId);
-            String docType = t.get(doc.documentType);
-            BigDecimal local = t.get(doc.localTotalAmount);
-            BigDecimal usd = t.get(doc.usdTotalAmount);
-            localByBlKey.computeIfAbsent(key, k -> new HashMap<>())
-                .merge(docType, nvl(local), BigDecimal::add);
-            usdByBlKey.computeIfAbsent(key, k -> new HashMap<>())
-                .merge(docType, nvl(usd), BigDecimal::add);
-        }
-
-        List<PmsRawBlRow> content = new ArrayList<>();
-        for (Tuple t : blKeyRows) {
-            String blType = t.get(header.blType);
-            boolean isHouse = "HOUSE".equals(blType);
-            String key = blType + ":" + t.get(header.blId);
-            Map<String, BigDecimal> localMap = localByBlKey.getOrDefault(key, Map.of());
-            Map<String, BigDecimal> usdMap = usdByBlKey.getOrDefault(key, Map.of());
-
-            content.add(new PmsRawBlRow(
-                blType, t.get(header.blId),
-                isHouse ? t.get(houseBl.hblNo.max()) : null,
-                isHouse ? t.get(houseBl.mblNo.max()) : t.get(masterBl.mblNo.max()),
-                isHouse ? t.get(houseBl.jobDiv.max()) : t.get(masterBl.jobDiv.max()),
-                isHouse ? t.get(houseBl.bound.max()) : t.get(masterBl.bound.max()),
-                isHouse ? t.get(houseBl.etd.max()) : t.get(masterBl.etd.max()),
-                isHouse ? t.get(houseBl.eta.max()) : t.get(masterBl.eta.max()),
-                t.get(doc.performanceDt.max()),
-                t.get(header.actualCustomerCode.max()),
-                t.get(header.settlePartnerCode.max()),
-                t.get(header.linerCode.max()),
-                isHouse ? t.get(houseBl.polCode.max()) : t.get(masterBl.polCode.max()),
-                isHouse ? t.get(houseBl.podCode.max()) : t.get(masterBl.podCode.max()),
-                isHouse ? t.get(houseBl.salesManCode.max()) : null,
-                isHouse ? t.get(houseBl.incoterms.max()) : null,
-                isHouse ? t.get(houseBl.houseBlId.max()) : null,
-                t.get(doc.teamCode.max()),
-                t.get(doc.operator.max()),
-                localMap.get("INVOICE"), localMap.get("DEBIT"),
-                localMap.get("PAYMENT"), localMap.get("CREDIT"),
-                usdMap.get("INVOICE"), usdMap.get("DEBIT"),
-                usdMap.get("PAYMENT"), usdMap.get("CREDIT")
-            ));
-        }
-
-        return new PageImpl<>(content, pageable, total);
+        return new PageImpl<>(rows, pageable, totalHolder[0]);
     }
 
-    private BigDecimal nvl(BigDecimal v) {
+    // ── SQL 조립 ──────────────────────────────────────────────────────────────
+
+    private String buildPageInner(String fmsJoinSql, List<String> pageWhere) {
+        StringBuilder sb = new StringBuilder(PAGE_INNER_SELECT);
+        sb.append(PAGE_FROM);
+        sb.append(fmsJoinSql);
+        if (!pageWhere.isEmpty()) {
+            sb.append("WHERE ").append(String.join("\n  AND ", pageWhere)).append("\n");
+        }
+        sb.append(PAGE_GROUP_ORDER);
+        return sb.toString();
+    }
+
+    /**
+     * amounts CTE DISTINCT inner에 적용할 필터. document_type IN 같은 집계에 영향을 주는
+     * 필터만 포함한다 (page JOIN으로 범위는 이미 제한되므로 날짜/페이징은 불필요).
+     *
+     * 현재 구현: amounts는 페이지 범위 내 모든 서류를 집계하므로 추가 WHERE 없음.
+     * 필요 시 document_type 필터를 명시적으로 추가해 amounts 범위를 좁힐 수 있다.
+     */
+    private List<String> buildAmountWhere(SearchPmsPerformanceCommand command) {
+        return List.of();
+    }
+
+    // ── 행 매핑 ───────────────────────────────────────────────────────────────
+
+    /**
+     * HOUSE 행: hb.* 컬럼이 채워짐. MASTER 행: mb.* 컬럼이 채워짐.
+     * teamCode/operator는 page CTE (fd.team_code/operator) 에서 직접 읽음.
+     * cargo 필드: document 경로에서는 house_bl 확장 테이블 LEFT JOIN으로 제공.
+     */
+    private PmsRawBlRow mapRow(ResultSet rs) throws SQLException {
+        boolean isHouse = "HOUSE".equals(rs.getString("bl_type"));
+        Long blId = rs.getLong("bl_id");
+
+        String houseBlNo = isHouse ? rs.getString("hbl_no")    : null;
+        String masterBlNo = isHouse ? rs.getString("h_mbl_no") : rs.getString("m_mbl_no");
+        String jobDiv = isHouse ? rs.getString("h_job_div") : rs.getString("m_job_div");
+        String bound  = isHouse ? rs.getString("h_bound")   : rs.getString("m_bound");
+        String etd    = isHouse ? rs.getString("h_etd")     : rs.getString("m_etd");
+        String eta    = isHouse ? rs.getString("h_eta")     : rs.getString("m_eta");
+        String pol    = isHouse ? rs.getString("h_pol")     : rs.getString("m_pol");
+        String pod    = isHouse ? rs.getString("h_pod")     : rs.getString("m_pod");
+        String salesManCode = isHouse ? rs.getString("sales_man_code") : null;
+        String incoterms    = isHouse ? rs.getString("incoterms")      : null;
+        Long   houseBlId    = isHouse ? blId                            : null;
+
+        // document 경로: teamCode/operator는 page CTE (financial_document) 출처
+        String teamCode = rs.getString("team_code");
+        String operator = rs.getString("operator");
+
+        return new PmsRawBlRow(
+            rs.getString("bl_type"), blId,
+            houseBlNo, masterBlNo, jobDiv, bound, etd, eta,
+            rs.getString("perf"),
+            rs.getString("acc"), rs.getString("spc"), rs.getString("lc"),
+            pol, pod, salesManCode, incoterms, houseBlId,
+            teamCode, operator,
+            nvl(rs, "inv_l"), nvl(rs, "deb_l"), nvl(rs, "pay_l"), nvl(rs, "crd_l"),
+            nvl(rs, "inv_u"), nvl(rs, "deb_u"), nvl(rs, "pay_u"), nvl(rs, "crd_u"),
+            // cargo (HOUSE만 의미 있음)
+            isHouse ? rs.getObject("pkg_qty", Integer.class) : null,
+            isHouse ? rs.getBigDecimal("cbm")                : null,
+            isHouse ? rs.getBigDecimal("gross_weight_kg")    : null,
+            isHouse ? rs.getString("sea_load_type")          : null,
+            isHouse ? rs.getBigDecimal("air_cw")             : null,
+            isHouse ? rs.getBigDecimal("tr_cw")              : null,
+            isHouse ? rs.getString("tr_load_type")           : null,
+            isHouse ? rs.getBigDecimal("rton")               : null,
+            // 이름
+            rs.getString("acc_name"), rs.getString("spc_name"), rs.getString("lc_name"),
+            isHouse ? rs.getString("team_name")      : null,
+            isHouse ? rs.getString("sales_man_name") : null
+        );
+    }
+
+    private BigDecimal nvl(ResultSet rs, String col) throws SQLException {
+        BigDecimal v = rs.getBigDecimal(col);
         return v != null ? v : BigDecimal.ZERO;
     }
 }

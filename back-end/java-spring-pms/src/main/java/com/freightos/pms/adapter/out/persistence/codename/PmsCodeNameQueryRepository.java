@@ -1,104 +1,83 @@
 package com.freightos.pms.adapter.out.persistence.codename;
 
-import com.freightos.pms.adapter.out.persistence.codename.entity.QPmsAdminUserRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.codename.entity.QPmsCarrierRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.codename.entity.QPmsCustomerRefJpaEntity;
-import com.freightos.pms.adapter.out.persistence.codename.entity.QPmsTeamRefJpaEntity;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
- * admin 스키마 code → name 일괄 조회 전용 QueryDSL 컴포넌트.
+ * admin 스키마 code → name 일괄 조회 전용 JDBC 컴포넌트.
  * cross-schema 접근은 이 컴포넌트에만 격리됨.
+ *
+ * = ANY(?) 단일 배열 파라미터로 IN-explosion 없이 compact SQL 로그를 유지한다.
  */
 @Repository
 @RequiredArgsConstructor
 public class PmsCodeNameQueryRepository {
 
-    private final JPAQueryFactory queryFactory;
+    private final JdbcTemplate jdbcTemplate;
+
+    private static final String SQL_CUSTOMER =
+        "SELECT customer_code, name FROM admin.customer WHERE customer_code = ANY(?) AND deleted_at IS NULL";
+
+    private static final String SQL_CARRIER =
+        "SELECT carrier_code, name FROM admin.carrier WHERE carrier_code = ANY(?) AND deleted_at IS NULL";
+
+    private static final String SQL_TEAM =
+        "SELECT team_code, name FROM admin.team WHERE team_code = ANY(?)";
+
+    private static final String SQL_OPERATOR =
+        "SELECT username, user_eng_name FROM admin.admin_user WHERE username = ANY(?)";
 
     Map<String, String> fetchCustomerNames(Collection<String> codes) {
         if (codes == null || codes.isEmpty()) return Collections.emptyMap();
-        QPmsCustomerRefJpaEntity c = QPmsCustomerRefJpaEntity.pmsCustomerRefJpaEntity;
-        BooleanExpression inCodes = c.customerCode.in(codes);
-        BooleanExpression notDeleted = c.deletedAt.isNull();
-
-        List<Tuple> rows = queryFactory
-            .select(c.customerCode, c.name)
-            .from(c)
-            .where(inCodes, notDeleted)
-            .fetch();
-
-        return rows.stream()
-            .filter(t -> t.get(c.customerCode) != null)
-            .collect(Collectors.toMap(
-                t -> t.get(c.customerCode),
-                t -> t.get(c.name) != null ? t.get(c.name) : ""
-            ));
+        return fetchCodeNameMap(SQL_CUSTOMER, codes, "customer_code", "name");
     }
 
     Map<String, String> fetchCarrierNames(Collection<String> codes) {
         if (codes == null || codes.isEmpty()) return Collections.emptyMap();
-        QPmsCarrierRefJpaEntity c = QPmsCarrierRefJpaEntity.pmsCarrierRefJpaEntity;
-        BooleanExpression inCodes = c.carrierCode.in(codes);
-        BooleanExpression notDeleted = c.deletedAt.isNull();
-
-        List<Tuple> rows = queryFactory
-            .select(c.carrierCode, c.name)
-            .from(c)
-            .where(inCodes, notDeleted)
-            .fetch();
-
-        return rows.stream()
-            .filter(t -> t.get(c.carrierCode) != null)
-            .collect(Collectors.toMap(
-                t -> t.get(c.carrierCode),
-                t -> t.get(c.name) != null ? t.get(c.name) : ""
-            ));
+        return fetchCodeNameMap(SQL_CARRIER, codes, "carrier_code", "name");
     }
 
     Map<String, String> fetchTeamNames(Collection<String> codes) {
         if (codes == null || codes.isEmpty()) return Collections.emptyMap();
-        QPmsTeamRefJpaEntity t = QPmsTeamRefJpaEntity.pmsTeamRefJpaEntity;
-
-        List<Tuple> rows = queryFactory
-            .select(t.teamCode, t.name)
-            .from(t)
-            .where(t.teamCode.in(codes))
-            .fetch();
-
-        return rows.stream()
-            .filter(row -> row.get(t.teamCode) != null)
-            .collect(Collectors.toMap(
-                row -> row.get(t.teamCode),
-                row -> row.get(t.name) != null ? row.get(t.name) : ""
-            ));
+        return fetchCodeNameMap(SQL_TEAM, codes, "team_code", "name");
     }
 
     Map<String, String> fetchOperatorNames(Collection<String> usernames) {
         if (usernames == null || usernames.isEmpty()) return Collections.emptyMap();
-        QPmsAdminUserRefJpaEntity u = QPmsAdminUserRefJpaEntity.pmsAdminUserRefJpaEntity;
+        return fetchCodeNameMap(SQL_OPERATOR, usernames, "username", "user_eng_name");
+    }
 
-        List<Tuple> rows = queryFactory
-            .select(u.username, u.userEngName)
-            .from(u)
-            .where(u.username.in(usernames))
-            .fetch();
+    // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-        return rows.stream()
-            .filter(row -> row.get(u.username) != null)
-            .collect(Collectors.toMap(
-                row -> row.get(u.username),
-                row -> row.get(u.userEngName) != null ? row.get(u.userEngName) : ""
-            ));
+    /**
+     * text[] 배열 파라미터로 code → name 맵을 조회한다. null name은 빈 문자열로 변환.
+     */
+    private Map<String, String> fetchCodeNameMap(
+            String sql, Collection<String> keys, String keyCol, String nameCol) {
+
+        String[] keyArray = keys.toArray(String[]::new);
+        Map<String, String> result = new HashMap<>();
+        jdbcTemplate.query(
+            con -> {
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setArray(1, con.createArrayOf("text", keyArray));
+                return ps;
+            },
+            rs -> {
+                String key = rs.getString(keyCol);
+                if (key != null) {
+                    String name = rs.getString(nameCol);
+                    result.put(key, name != null ? name : "");
+                }
+            }
+        );
+        return result;
     }
 }
