@@ -2099,7 +2099,8 @@
         "groupFinancialNo": "Group No",
         "grouped": "Grouped",
         "issued": "Document Issued",
-        "basisLabel": "Aggregation Basis"
+        "basisLabel": "Aggregation Basis",
+        "dateRangeRequired": "Please enter a search period (From/To)."
       }
     }
   }

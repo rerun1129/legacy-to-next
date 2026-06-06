@@ -10,53 +10,54 @@ const apiResponse = <T extends z.ZodTypeAny>(schema: T) =>
   z.object({ data: schema, message: z.string().optional() });
 
 // BE: PmsPerformanceRowResponse — 36컬럼.
-// BigDecimal → JSON number or string → z.coerce.number().nullable() で수신 안전.
-// null 가능 여부는 BE DTO 주석 기준 (수치·금액은 null 가능, 식별·코드는 string으로 non-null).
+// BigDecimal → JSON number or string → z.coerce.number().nullable() 으로 수신 안전.
+// 문자열 필드는 blType/blId 제외 전부 nullable — loadType(AIR/NON_BL 미지원),
+// houseBlNo(MASTER 행), blClosed/freightClosed(플레이스홀더), 코드·날짜도 null 가능.
 const PMS_PERFORMANCE_ROW_SCHEMA = z.object({
-  // 식별
+  // 식별 — 항상 존재
   blType: z.string(),
   blId: z.number(),
 
   // col 1-2
-  houseBlNo: z.string(),
-  masterBlNo: z.string(),
+  houseBlNo: z.string().nullable(),
+  masterBlNo: z.string().nullable(),
 
   // col 3 Team
-  teamCode: z.string(),
-  teamName: z.string(),
+  teamCode: z.string().nullable(),
+  teamName: z.string().nullable(),
 
   // col 4-8 B/L 속성
-  jobDiv: z.string(),
-  bound: z.string(),
-  etd: z.string(),
-  eta: z.string(),
-  performanceDt: z.string(),
+  jobDiv: z.string().nullable(),
+  bound: z.string().nullable(),
+  etd: z.string().nullable(),
+  eta: z.string().nullable(),
+  performanceDt: z.string().nullable(),
 
   // col 9-10 Actual Customer
-  actualCustomerCode: z.string(),
-  actualCustomerName: z.string(),
+  actualCustomerCode: z.string().nullable(),
+  actualCustomerName: z.string().nullable(),
 
   // col 11-12 Settle Partner
-  settlePartnerCode: z.string(),
-  settlePartnerName: z.string(),
+  settlePartnerCode: z.string().nullable(),
+  settlePartnerName: z.string().nullable(),
 
   // col 13-14 Carrier
-  linerCode: z.string(),
-  linerName: z.string(),
+  linerCode: z.string().nullable(),
+  linerName: z.string().nullable(),
 
   // col 15-16 항만
-  polCode: z.string(),
-  podCode: z.string(),
+  polCode: z.string().nullable(),
+  podCode: z.string().nullable(),
 
   // col 17 Sales Man
-  salesManCode: z.string(),
-  salesManName: z.string(),
+  salesManCode: z.string().nullable(),
+  salesManName: z.string().nullable(),
 
   // col 18
-  incoterms: z.string(),
+  incoterms: z.string().nullable(),
 
   // col 19-24 화물 수치 (null 가능 — 모드별 미지원 필드)
-  loadType: z.string(),
+  loadType: z.string().nullable(),
   pkgQty: z.number().nullable(),
   rton: z.coerce.number().nullable(),
   cbm: z.coerce.number().nullable(),
@@ -77,9 +78,9 @@ const PMS_PERFORMANCE_ROW_SCHEMA = z.object({
   creditUsdAmt: z.coerce.number().nullable(),
   usdProfit: z.coerce.number().nullable(),
 
-  // col 35-36 마감 (공란 — BE는 null/빈문자열 가능성 있음)
-  blClosed: z.string(),
-  freightClosed: z.string(),
+  // col 35-36 마감 (플레이스홀더 — BE는 항상 null)
+  blClosed: z.string().nullable(),
+  freightClosed: z.string().nullable(),
 }) satisfies z.ZodType<import("@/application/pms/performance/ports").PmsPerformanceRow>;
 
 // BE: PmsPerformancePageResponse

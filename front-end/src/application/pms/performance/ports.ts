@@ -16,50 +16,50 @@ export type AggregationBasis =
 
 /** BE: PmsPerformanceRowResponse — 36컬럼 실적 그리드 한 행 */
 export interface PmsPerformanceRow {
-  // 식별
+  // 식별 — 항상 존재
   blType: string;
   blId: number;
 
   // col 1-2
-  houseBlNo: string;
-  masterBlNo: string;
+  houseBlNo: string | null;
+  masterBlNo: string | null;
 
   // col 3 Team
-  teamCode: string;
-  teamName: string;
+  teamCode: string | null;
+  teamName: string | null;
 
   // col 4-8 B/L 속성
-  jobDiv: string;
-  bound: string;
-  etd: string;
-  eta: string;
-  performanceDt: string;
+  jobDiv: string | null;
+  bound: string | null;
+  etd: string | null;
+  eta: string | null;
+  performanceDt: string | null;
 
   // col 9-10 Actual Customer
-  actualCustomerCode: string;
-  actualCustomerName: string;
+  actualCustomerCode: string | null;
+  actualCustomerName: string | null;
 
   // col 11-12 Settle Partner
-  settlePartnerCode: string;
-  settlePartnerName: string;
+  settlePartnerCode: string | null;
+  settlePartnerName: string | null;
 
   // col 13-14 Carrier
-  linerCode: string;
-  linerName: string;
+  linerCode: string | null;
+  linerName: string | null;
 
   // col 15-16 항만
-  polCode: string;
-  podCode: string;
+  polCode: string | null;
+  podCode: string | null;
 
   // col 17 Sales Man
-  salesManCode: string;
-  salesManName: string;
+  salesManCode: string | null;
+  salesManName: string | null;
 
   // col 18
-  incoterms: string;
+  incoterms: string | null;
 
   // col 19-24 화물 수치
-  loadType: string;
+  loadType: string | null;
   pkgQty: number | null;
   rton: number | null;
   cbm: number | null;
@@ -80,9 +80,9 @@ export interface PmsPerformanceRow {
   creditUsdAmt: number | null;
   usdProfit: number | null;
 
-  // col 35-36 마감 (공란)
-  blClosed: string;
-  freightClosed: string;
+  // col 35-36 마감 (플레이스홀더 — BE는 항상 null)
+  blClosed: string | null;
+  freightClosed: string | null;
 }
 
 /** BE: PmsPerformancePageResponse */

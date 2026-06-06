@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { RotateCcw, Search } from "lucide-react";
@@ -8,6 +8,7 @@ import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { listFilterStore } from "@/lib/use-list-filter-store";
 import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
+import { toast } from "@/lib/toast-store";
 import { PmsPerformanceFilterFms } from "./pms-performance-filter-fms";
 import { PmsPerformanceFilterBms } from "./pms-performance-filter-bms";
 import { PmsPerformanceGrid } from "./pms-performance-grid";
@@ -66,6 +67,9 @@ export function PmsPerformanceListClient() {
     defaultValues: DEFAULT_PMS_FILTER,
   });
 
+  // basis 현재값 구독 — DOC 옵션 노출 여부 계산에 사용
+  const currentBasis = form.watch("basis");
+
   const [submittedFilter, setSubmittedFilter] = useState<SearchPmsPerformanceInput | null>(() => {
     const saved = listFilterStore.getState().getSearch(ROUTE_SCOPE);
     return (saved?.submittedFilter as SearchPmsPerformanceInput | null | undefined) ?? null;
@@ -76,6 +80,15 @@ export function PmsPerformanceListClient() {
   );
   const [pageSize, setPageSize] = useState(
     () => listFilterStore.getState().getSearch(ROUTE_SCOPE)?.pageSize ?? DEFAULT_PAGE_SIZE
+  );
+
+  // DOC 옵션은 서류 생성 기준에서만 유효. 다른 기준에서는 ETD/ETA/PERF만 노출.
+  const dateKindOptions = useMemo(
+    () =>
+      opts.dateKindOptions.filter(
+        (o) => o.value !== "DOC" || currentBasis === "DOCUMENT_CREATED"
+      ),
+    [opts.dateKindOptions, currentBasis]
   );
 
   // 영속화 저장
@@ -100,6 +113,11 @@ export function PmsPerformanceListClient() {
 
   function handleSearch() {
     form.handleSubmit((values) => {
+      // 날짜 범위 미입력 시 전체 스캔 방지 — Reset이 당월 기본값을 복원하므로 정상 경로에서 미노출
+      if (!values.dateFrom?.trim() || !values.dateTo?.trim()) {
+        toast.error(t("dateRangeRequired"));
+        return;
+      }
       setSubmittedFilter(buildSearchInput(values));
       setCurrentPage(1);
     })();
@@ -138,7 +156,14 @@ export function PmsPerformanceListClient() {
               variant="panel"
               options={opts.basisOptions}
               value={field.value}
-              onChange={field.onChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                field.onChange(value);
+                // DOCUMENT_CREATED 외 기준으로 전환 시 DOC dateKind는 무효 → ETD로 초기화
+                if (value !== "DOCUMENT_CREATED" && form.getValues("dateKind") === "DOC") {
+                  form.setValue("dateKind", "ETD", { shouldDirty: true });
+                }
+              }}
               onBlur={field.onBlur}
               name={field.name}
               style={{ width: 180 }}
@@ -172,7 +197,7 @@ export function PmsPerformanceListClient() {
                 boundOptionsWithAll={opts.boundOptionsWithAll}
                 boundLoading={opts.boundLoading}
                 boundPlaceholder={opts.boundPlaceholder}
-                dateKindOptions={opts.dateKindOptions}
+                dateKindOptions={dateKindOptions}
                 portKindOptions={opts.portKindOptions}
                 actualCustomer={opts.actualCustomer}
                 settlePartner={opts.settlePartner}

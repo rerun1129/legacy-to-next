@@ -2099,7 +2099,8 @@
         "groupFinancialNo": "그룹번호",
         "grouped": "그룹화 여부",
         "issued": "서류 발행 여부",
-        "basisLabel": "집계 기준"
+        "basisLabel": "집계 기준",
+        "dateRangeRequired": "조회 기간(From/To)을 입력하세요."
       }
     }
   }
