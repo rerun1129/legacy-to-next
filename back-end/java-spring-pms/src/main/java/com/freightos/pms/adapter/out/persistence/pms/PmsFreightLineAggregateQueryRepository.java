@@ -24,7 +24,7 @@ import java.util.List;
  *   SELECT <page cols> + <identity cols> + <cargo cols> + <name cols>
  *   FROM page
  *   LEFT JOIN fms.house_bl … fms.master_bl … admin.*
- *   ORDER BY p.perf DESC
+ *   ORDER BY p.bl_id DESC, p.bl_type
  *
  * page CTE의 ≤pageSize 행에만 JOIN이 적용 — 전체 결과 집합 스캔 없음.
  * Phase-2 keyed lookup (cargoRepo/masterRepo/codeNameResolver) 완전 제거.
@@ -64,7 +64,7 @@ public class PmsFreightLineAggregateQueryRepository {
 
     private static final String INNER_GROUP_ORDER = """
         GROUP BY h.bl_type, h.bl_id
-        ORDER BY max(l.performance_dt) DESC
+        ORDER BY h.bl_id DESC, h.bl_type
         OFFSET :off LIMIT :lim
         """;
 

@@ -203,7 +203,7 @@ public class PmsDocumentSqlBuilder {
             + "JOIN amounts ON amounts.bl_type = p.bl_type AND amounts.bl_id = p.bl_id\n"
             + PmsIdentityNameJoinSql.IDENTITY_JOINS
             + DOCUMENT_NAME_JOINS
-            + "ORDER BY p.perf DESC\n";
+            + "ORDER BY p.bl_id DESC, p.bl_type\n";
     }
 
     /**

@@ -27,7 +27,7 @@ import java.util.List;
  *   )
  *   SELECT page.* + amounts.8sums + identity + cargo + name
  *   FROM page JOIN amounts … LEFT JOIN fms.* … LEFT JOIN admin.*
- *   ORDER BY page.perf DESC
+ *   ORDER BY page.bl_id DESC, page.bl_type
  *
  * DISTINCT inner SELECT가 1:N freight_line 팬아웃을 방지한다 (기존 전략 유지).
  * Phase-2 keyed lookup (= ANY(?) 왕복) 완전 제거.
@@ -63,7 +63,7 @@ public class PmsDocumentAggregateQueryRepository {
 
     private static final String PAGE_GROUP_ORDER = """
         GROUP BY h.bl_type, h.bl_id
-        ORDER BY max(fd.performance_dt) DESC
+        ORDER BY h.bl_id DESC, h.bl_type
         OFFSET :off LIMIT :lim
         """;
 

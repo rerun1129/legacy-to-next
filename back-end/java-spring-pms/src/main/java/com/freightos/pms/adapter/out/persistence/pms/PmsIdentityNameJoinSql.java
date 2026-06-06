@@ -52,6 +52,6 @@ final class PmsIdentityNameJoinSql {
     /** page CTE 래퍼 + 외부 SELECT/JOIN + 정렬 조합. */
     static String wrapWithPageCte(String innerAggregate) {
         return "WITH page AS (\n" + innerAggregate + "\n)\n"
-            + PAGE_SELECT + IDENTITY_JOINS + NAME_JOINS + "ORDER BY p.perf DESC\n";
+            + PAGE_SELECT + IDENTITY_JOINS + NAME_JOINS + "ORDER BY p.bl_id DESC, p.bl_type\n";
     }
 }
