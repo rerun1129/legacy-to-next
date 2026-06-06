@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * FreightLineIssuePort 아웃바운드 어댑터 구현.
- * 발급 전용 메서드(search / loadIssueLinesByIds / bulkUpdateLineTax·Slip / loadDocumentTaxSlipFlags)만 위임.
+ * 조회: issueQueryRepository 위임, 벌크 UPDATE: issueMutationRepository 위임.
  * bulkUpdateDocumentStatus는 기존 FinancialDocumentPort(FinancialDocumentPersistenceAdapter) 경유(S4).
  */
 @Component
@@ -22,6 +22,7 @@ import java.util.List;
 public class FreightLineIssuePersistenceAdapter implements FreightLineIssuePort {
 
     private final FreightLineIssueQueryRepository issueQueryRepository;
+    private final FreightLineIssueMutationRepository issueMutationRepository;
 
     @Override
     public Page<FreightLineIssueRowView> searchFreightLines(
@@ -36,12 +37,12 @@ public class FreightLineIssuePersistenceAdapter implements FreightLineIssuePort 
 
     @Override
     public void bulkUpdateLineTax(List<Long> lineIds, String taxNo, String taxDt) {
-        issueQueryRepository.bulkUpdateLineTax(lineIds, taxNo, taxDt);
+        issueMutationRepository.bulkUpdateLineTax(lineIds, taxNo, taxDt);
     }
 
     @Override
     public void bulkUpdateLineSlip(List<Long> lineIds, String slipNo, String slipDt) {
-        issueQueryRepository.bulkUpdateLineSlip(lineIds, slipNo, slipDt);
+        issueMutationRepository.bulkUpdateLineSlip(lineIds, slipNo, slipDt);
     }
 
     @Override
@@ -51,11 +52,11 @@ public class FreightLineIssuePersistenceAdapter implements FreightLineIssuePort 
 
     @Override
     public void bulkClearLineTax(List<Long> lineIds) {
-        issueQueryRepository.bulkClearLineTax(lineIds);
+        issueMutationRepository.bulkClearLineTax(lineIds);
     }
 
     @Override
     public void bulkClearLineSlip(List<Long> lineIds) {
-        issueQueryRepository.bulkClearLineSlip(lineIds);
+        issueMutationRepository.bulkClearLineSlip(lineIds);
     }
 }

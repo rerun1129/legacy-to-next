@@ -23,11 +23,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 운임 행 발급 화면 전용 QueryDSL 레포지토리.
+ * 운임 행 발급 화면 전용 QueryDSL 조회 레포지토리(조회 전용).
  * ① 전역 조회(발급 화면 그리드) ② 발급용 스냅샷 로드 ③ 발급 상태 집계.
  * FinancialDocumentSearchQueryRepository 패턴 준용 — cross-schema leftJoin.
  * S5: line-level 1:1, selectDistinct·countDistinct 사용 금지, count = freightLineId.count().
  * S5: financial_document inner join(결정1: doc_id IS NOT NULL 고정).
+ * 벌크 UPDATE는 FreightLineIssueMutationRepository로 분리.
  */
 @Repository
 @RequiredArgsConstructor
@@ -180,68 +181,6 @@ public class FreightLineIssueQueryRepository {
                 t.get(doc.groupFinancialNo)
             ))
             .toList();
-    }
-
-    // ── 벌크 UPDATE ───────────────────────────────────────────────────────────
-
-    /**
-     * 지정 라인들의 tax_no·tax_dt를 일괄 기록한다.
-     * .execute() 즉시 반영 — 이후 loadDocumentTaxSlipFlags DB 재조회 보장(S6).
-     */
-    public void bulkUpdateLineTax(List<Long> lineIds, String taxNo, String taxDt) {
-        if (lineIds == null || lineIds.isEmpty()) return;
-        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
-        queryFactory
-            .update(line)
-            .set(line.taxNo, taxNo)
-            .set(line.taxDt, taxDt)
-            .where(line.freightLineId.in(lineIds))
-            .execute();
-    }
-
-    /**
-     * 지정 라인들의 slip_no·slip_dt를 일괄 기록한다.
-     * .execute() 즉시 반영 — 이후 loadDocumentTaxSlipFlags DB 재조회 보장(S6).
-     */
-    public void bulkUpdateLineSlip(List<Long> lineIds, String slipNo, String slipDt) {
-        if (lineIds == null || lineIds.isEmpty()) return;
-        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
-        queryFactory
-            .update(line)
-            .set(line.slipNo, slipNo)
-            .set(line.slipDt, slipDt)
-            .where(line.freightLineId.in(lineIds))
-            .execute();
-    }
-
-    /**
-     * 지정 라인들의 tax_no·tax_dt를 NULL로 일괄 클리어한다.
-     * .execute() 즉시 반영 — 이후 loadDocumentTaxSlipFlags DB 재조회 보장(S6).
-     */
-    public void bulkClearLineTax(List<Long> lineIds) {
-        if (lineIds == null || lineIds.isEmpty()) return;
-        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
-        queryFactory
-            .update(line)
-            .setNull(line.taxNo)
-            .setNull(line.taxDt)
-            .where(line.freightLineId.in(lineIds))
-            .execute();
-    }
-
-    /**
-     * 지정 라인들의 slip_no·slip_dt를 NULL로 일괄 클리어한다.
-     * .execute() 즉시 반영 — 이후 loadDocumentTaxSlipFlags DB 재조회 보장(S6).
-     */
-    public void bulkClearLineSlip(List<Long> lineIds) {
-        if (lineIds == null || lineIds.isEmpty()) return;
-        QBmsFreightLineJpaEntity line = QBmsFreightLineJpaEntity.bmsFreightLineJpaEntity;
-        queryFactory
-            .update(line)
-            .setNull(line.slipNo)
-            .setNull(line.slipDt)
-            .where(line.freightLineId.in(lineIds))
-            .execute();
     }
 
     // ── WHERE 절 조합 ─────────────────────────────────────────────────────────
