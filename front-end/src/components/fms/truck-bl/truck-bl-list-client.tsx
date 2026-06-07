@@ -9,7 +9,7 @@ import type { TruckBlFilter } from '@/domain/truck-bl';
 import { TruckBlListFilter } from './truck-bl-list-filter';
 import { TruckBlGrid } from './truck-bl-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -64,8 +64,8 @@ export function TruckBlListClient() {
     return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -100,7 +100,7 @@ export function TruckBlListClient() {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={pageSize}
-          onCyclePageSize={handleCyclePageSize}
+          onPageSizeChange={handlePageSizeChange}
         />
       </div>
     </>

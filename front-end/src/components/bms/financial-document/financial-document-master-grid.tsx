@@ -17,7 +17,7 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   pageSize: number;
-  onCyclePageSize: () => void;
+  onPageSizeChange: (size: number) => void;
   selectedId: number | null;
   onSelectRow: (row: FinancialDocumentSearchRow | null) => void;
   /** 체크박스 다중선택 활성화 여부 */
@@ -33,7 +33,7 @@ export function FinancialDocumentMasterGrid({
   currentPage,
   onPageChange,
   pageSize,
-  onCyclePageSize,
+  onPageSizeChange,
   selectedId,
   onSelectRow,
   selectable,
@@ -185,7 +185,7 @@ export function FinancialDocumentMasterGrid({
           onPageChange={onPageChange}
           disabled={isFetching}
           pageSize={pageSize}
-          onCyclePageSize={onCyclePageSize}
+          onPageSizeChange={onPageSizeChange}
         />
       </div>
     </div>

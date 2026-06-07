@@ -16,7 +16,7 @@ import { GridList, GridColumn } from "@/components/shared/grid-list";
 import { ColumnVisibilityMenu } from "@/components/shared/column-visibility-menu";
 import { Pagination } from "@/components/shared/pagination";
 import { getModeLabels } from "@/lib/bl-mode-labels";
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 
 interface Props {
   variantKey: string;
@@ -38,8 +38,8 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
   const tl = useTranslations("fms.masterBl.list");
   const tCommon = useTranslations("common");
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -212,7 +212,7 @@ export function MasterBlGrid({ variantKey, variant, extraFilter = {} }: Props) {
         onPageChange={setCurrentPage}
         disabled={isFetching}
         pageSize={pageSize}
-        onCyclePageSize={handleCyclePageSize}
+        onPageSizeChange={handlePageSizeChange}
       />
     </div>
   );

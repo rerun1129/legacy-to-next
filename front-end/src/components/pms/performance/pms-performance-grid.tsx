@@ -18,7 +18,7 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   pageSize: number;
-  onCyclePageSize: () => void;
+  onPageSizeChange: (size: number) => void;
 }
 
 /**
@@ -31,7 +31,7 @@ export function PmsPerformanceGrid({
   currentPage,
   onPageChange,
   pageSize,
-  onCyclePageSize,
+  onPageSizeChange,
 }: Props) {
   const { options: jobDivOptions } = usePmsEnumOptions("JobDiv");
   const { options: boundOptions }  = usePmsEnumOptions("Bound");
@@ -117,7 +117,7 @@ export function PmsPerformanceGrid({
           onPageChange={onPageChange}
           disabled={isFetching}
           pageSize={pageSize}
-          onCyclePageSize={onCyclePageSize}
+          onPageSizeChange={onPageSizeChange}
         />
       </div>
     </div>

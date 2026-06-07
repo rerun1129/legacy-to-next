@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { useTranslations } from "next-intl";
 import { listFilterStore } from "@/lib/use-list-filter-store";
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { toast } from "@/lib/toast-store";
 import { FreightLineIssueListFilter } from "./freight-line-issue-list-filter";
 import { FreightLineIssueGrid } from "./freight-line-issue-grid";
@@ -62,8 +62,8 @@ export function FreightLineIssueListClient({ config }: Props) {
     });
   }, [submittedFilter, currentPage, pageSize, scope]);
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -196,7 +196,7 @@ export function FreightLineIssueListClient({ config }: Props) {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={pageSize}
-          onCyclePageSize={handleCyclePageSize}
+          onPageSizeChange={handlePageSizeChange}
           selectedKeys={selectedKeys}
           onSelectionChange={setSelectedKeys}
           issueType={config.issueType}

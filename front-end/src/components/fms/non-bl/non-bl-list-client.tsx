@@ -9,7 +9,7 @@ import type { NonBlFilter } from '@/domain/non-bl';
 import { NonBlListFilter } from './non-bl-list-filter';
 import { NonBlGrid } from './non-bl-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -73,8 +73,8 @@ export function NonBlListClient() {
     return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -117,7 +117,7 @@ export function NonBlListClient() {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={pageSize}
-          onCyclePageSize={handleCyclePageSize}
+          onPageSizeChange={handlePageSizeChange}
         />
       </div>
     </>

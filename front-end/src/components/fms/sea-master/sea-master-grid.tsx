@@ -20,11 +20,11 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   pageSize: number;
-  onCyclePageSize: () => void;
+  onPageSizeChange: (size: number) => void;
   bound: "EXP" | "IMP";
 }
 
-export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize, bound }: Props) {
+export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, pageSize, onPageSizeChange, bound }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -147,7 +147,7 @@ export function SeaMasterGrid({ extraFilter, currentPage, onPageChange, pageSize
         onPageChange={onPageChange}
         disabled={isFetching}
         pageSize={pageSize}
-        onCyclePageSize={onCyclePageSize}
+        onPageSizeChange={onPageSizeChange}
       />
     </div>
   );

@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { useTranslations } from "next-intl";
 import { listFilterStore } from "@/lib/use-list-filter-store";
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { toast } from "@/lib/toast-store";
 import { FinancialDocumentListFilter } from "./financial-document-list-filter";
 import { FinancialDocumentMasterGrid } from "./financial-document-master-grid";
@@ -122,8 +122,8 @@ export function FinancialDocumentListClient({ config }: Props) {
     });
   }, [submittedFilter, currentPage, pageSize, selectedRow, scope]);
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -248,7 +248,7 @@ export function FinancialDocumentListClient({ config }: Props) {
             currentPage={currentPage}
             onPageChange={setCurrentPage}
             pageSize={pageSize}
-            onCyclePageSize={handleCyclePageSize}
+            onPageSizeChange={handlePageSizeChange}
             selectedId={selectedRow?.financialDocumentId ?? null}
             onSelectRow={setSelectedRow}
             selectable

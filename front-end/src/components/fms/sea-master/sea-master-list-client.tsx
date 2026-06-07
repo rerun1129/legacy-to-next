@@ -10,7 +10,7 @@ import type { SeaMasterFilter } from '@/domain/sea-master';
 import { SeaMasterListFilter } from './sea-master-list-filter';
 import { SeaMasterGrid } from './sea-master-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -74,8 +74,8 @@ export function SeaMasterListClient({ bound }: Props) {
     return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -131,7 +131,7 @@ export function SeaMasterListClient({ bound }: Props) {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={pageSize}
-          onCyclePageSize={handleCyclePageSize}
+          onPageSizeChange={handlePageSizeChange}
           bound={bound}
         />
       </div>

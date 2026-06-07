@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/shared/button";
+import { PAGE_SIZE_OPTIONS } from "@/lib/grid-pagination";
 
 export interface PaginationProps {
   currentPage: number;
@@ -8,23 +9,25 @@ export interface PaginationProps {
   onPageChange: (page: number) => void;
   disabled?: boolean;
   pageSize?: number;
-  onCyclePageSize?: () => void;
+  onPageSizeChange?: (size: number) => void;
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange, disabled, pageSize, onCyclePageSize }: PaginationProps) {
-  if (!onCyclePageSize && totalPages <= 1) return null;
+export function Pagination({ currentPage, totalPages, onPageChange, disabled, pageSize, onPageSizeChange }: PaginationProps) {
+  if (!onPageSizeChange && totalPages <= 1) return null;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", padding: "6px 0" }}>
-      {onCyclePageSize && (
-        <Button
-          size="sm"
-          variant="normal"
+      {onPageSizeChange && (
+        <select
+          className="lcn__select"
+          value={pageSize}
           disabled={disabled}
-          onClick={onCyclePageSize}
+          onChange={(e) => onPageSizeChange(Number(e.target.value))}
         >
-          {pageSize}
-        </Button>
+          {PAGE_SIZE_OPTIONS.map((n) => (
+            <option key={n} value={n}>{n}건</option>
+          ))}
+        </select>
       )}
       {totalPages > 1 && (
         <>

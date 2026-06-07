@@ -17,7 +17,7 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   pageSize: number;
-  onCyclePageSize: () => void;
+  onPageSizeChange: (size: number) => void;
   selectedKeys: ReadonlySet<number>;
   onSelectionChange: (next: Set<number>) => void;
   issueType: IssueType;
@@ -28,7 +28,7 @@ export function FreightLineIssueGrid({
   currentPage,
   onPageChange,
   pageSize,
-  onCyclePageSize,
+  onPageSizeChange,
   selectedKeys,
   onSelectionChange,
   issueType,
@@ -182,7 +182,7 @@ export function FreightLineIssueGrid({
           onPageChange={onPageChange}
           disabled={isFetching}
           pageSize={pageSize}
-          onCyclePageSize={onCyclePageSize}
+          onPageSizeChange={onPageSizeChange}
         />
       </div>
     </div>

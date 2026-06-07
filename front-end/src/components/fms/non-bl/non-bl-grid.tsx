@@ -20,10 +20,10 @@ interface Props {
   currentPage: number;
   onPageChange: (page: number) => void;
   pageSize: number;
-  onCyclePageSize: () => void;
+  onPageSizeChange: (size: number) => void;
 }
 
-export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, onCyclePageSize }: Props) {
+export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, onPageSizeChange }: Props) {
   const router = useRouter();
   const addTab = useTabs((s) => s.addTab);
   const setFocus = useEntryFocusStore((s) => s.setFocus);
@@ -146,7 +146,7 @@ export function NonBlGrid({ extraFilter, currentPage, onPageChange, pageSize, on
         onPageChange={onPageChange}
         disabled={isFetching}
         pageSize={pageSize}
-        onCyclePageSize={onCyclePageSize}
+        onPageSizeChange={onPageSizeChange}
       />
     </div>
   );

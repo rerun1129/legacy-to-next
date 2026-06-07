@@ -7,7 +7,7 @@ import { RotateCcw, Search } from "lucide-react";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
 import { ActionButton } from "@/components/admin/access/action-button";
 import { listFilterStore } from "@/lib/use-list-filter-store";
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from "@/lib/grid-pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/grid-pagination";
 import { toast } from "@/lib/toast-store";
 import { PmsPerformanceFilterFms } from "./pms-performance-filter-fms";
 import { PmsPerformanceFilterBms } from "./pms-performance-filter-bms";
@@ -101,8 +101,8 @@ export function PmsPerformanceListClient() {
     });
   }, [submittedFilter, currentPage, pageSize]);
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -236,7 +236,7 @@ export function PmsPerformanceListClient() {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={pageSize}
-          onCyclePageSize={handleCyclePageSize}
+          onPageSizeChange={handlePageSizeChange}
         />
       </div>
     </>

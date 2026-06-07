@@ -10,7 +10,7 @@ import type { SeaHouseFilter } from '@/domain/sea-house';
 import { SeaHouseListFilter } from './sea-house-list-filter';
 import { SeaHouseGrid } from './sea-house-grid';
 import { listFilterStore, type SavedSearchState } from '@/lib/use-list-filter-store';
-import { DEFAULT_PAGE_SIZE, cyclePageSize } from '@/lib/grid-pagination';
+import { DEFAULT_PAGE_SIZE } from '@/lib/grid-pagination';
 
 function getDefaultMonthRange() {
   const now = new Date();
@@ -86,8 +86,8 @@ export function SeaHouseListClient({ bound }: Props) {
     return s?.pageSize ?? DEFAULT_PAGE_SIZE;
   });
 
-  const handleCyclePageSize = () => {
-    setPageSize(cyclePageSize(pageSize));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   };
 
@@ -155,7 +155,7 @@ export function SeaHouseListClient({ bound }: Props) {
           currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={pageSize}
-          onCyclePageSize={handleCyclePageSize}
+          onPageSizeChange={handlePageSizeChange}
           bound={bound}
         />
       </div>
