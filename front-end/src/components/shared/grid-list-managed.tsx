@@ -42,6 +42,7 @@ export function ManagedGridList<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
+  footerSumFilter,
 }: GridListProps<T> & { gridId: string }) {
   const { visibleColumns, resizeColumn, reorderColumn, hideColumn } =
     useColumnLayout(gridId, defaultColumns);
@@ -312,6 +313,7 @@ export function ManagedGridList<T>({
               columns={visibleColumns}
               data={data}
               selectable={selectable}
+              footerSumFilter={footerSumFilter}
             />
           )}
         </table>

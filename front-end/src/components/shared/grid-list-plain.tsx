@@ -66,6 +66,7 @@ export function PlainGridList<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
+  footerSumFilter,
 }: Omit<GridListProps<T>, "gridId">) {
   const { colWidths, handleResizePointerDown } = useColResize();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -293,6 +294,7 @@ export function PlainGridList<T>({
             columns={resolvedColumns}
             data={data}
             selectable={selectable}
+            footerSumFilter={footerSumFilter}
           />
         )}
       </table>

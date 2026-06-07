@@ -423,3 +423,14 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 tr.is-new { box-shadow: inset 3px 0 0 var(--success); }
 tr.is-modified { box-shadow: inset 3px 0 0 var(--warning); }
 tr.is-deleted { opacity: 0.45; text-decoration: line-through; pointer-events: none; }
+
+/* ── 집계 트리 아웃라인 (토큰 기반, 다크모드 자동) ─────────────── */
+.grid--list tbody tr.agg-grp td { background: var(--surface-2); font-weight: 600; }
+.grid--list tbody tr.agg-grp--top td { background: var(--surface-3); border-top: 1px solid var(--border-strong); }
+.grid--list tbody tr.agg-grp:hover td { background: var(--surface-2); }
+.grid--list tbody tr.agg-grp--top:hover td { background: var(--surface-3); }
+.grid--list tbody tr.agg-grp { cursor: default; }
+
+/* agg-toggle: 그룹 셀 접기/펼치기 버튼 및 leaf 정렬 spacer */
+.agg-toggle { display: inline-flex; align-items: center; gap: 2px; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+.agg-toggle__chevron { display: inline-block; width: 12px; flex-shrink: 0; color: var(--ink-4); font-size: 9px; }

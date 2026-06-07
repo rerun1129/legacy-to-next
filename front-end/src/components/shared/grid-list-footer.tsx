@@ -13,6 +13,8 @@ interface GridFooterProps<T> {
   columns: GridColumn<T>[];
   data: T[];
   selectable?: boolean;
+  /** 합계에 포함할 행 필터. 미지정 시 전체 data 합산. */
+  footerSumFilter?: (row: T) => boolean;
 }
 
 /**
@@ -28,22 +30,29 @@ export function GridFooter<T>({
   columns,
   data,
   selectable = false,
+  footerSumFilter,
 }: GridFooterProps<T>) {
   const hasAggregate = columns.some((c) => c.aggregate === "sum");
   if (!hasAggregate || data.length === 0) return null;
+
+  // footerSumFilter가 지정된 경우 해당 행만 합산 대상으로 사용
+  const sumData = footerSumFilter ? data.filter(footerSumFilter) : data;
 
   // 라벨을 표시할 첫 번째 비집계 컬럼 인덱스
   const labelColIndex = columns.findIndex((c) => c.aggregate !== "sum");
 
   return (
     <tfoot>
-      {/* 1행: 현재 페이지(data) 합계 */}
+      {/* 1행: 현재 페이지(sumData) 합계 */}
       <tr>
         {selectable && <td className="grid__select-cell" />}
         {columns.map((col, idx) => {
           const key = String(col.key);
           if (col.aggregate === "sum") {
-            const pageTotal = sumColumn(data, key);
+            // footerValue 접근자가 있으면 우선 사용, 없으면 row[key] 기본 합산
+            const pageTotal = col.footerValue
+              ? sumData.reduce((acc, row) => acc + (Number(col.footerValue!(row)) || 0), 0)
+              : sumColumn(sumData, key);
             return (
               <td
                 key={key}

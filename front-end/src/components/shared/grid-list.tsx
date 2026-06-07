@@ -17,6 +17,8 @@ export interface GridColumn<T> {
   aggregate?: "sum";
   /** 합계 표시 소수 자리. 기본 0. */
   aggregateDecimals?: number;
+  /** footer 합계 시 이 행의 값 접근자. 미지정 시 Number(row[key]). */
+  footerValue?: (row: T) => number;
 }
 
 export interface GridListProps<T> {
@@ -41,6 +43,8 @@ export interface GridListProps<T> {
   selectedKeys?: ReadonlySet<string | number>;
   /** 선택 변경 콜백. 새 Set을 인자로 전달한다. selectable=true일 때 유효. */
   onSelectionChange?: (next: Set<string | number>) => void;
+  /** footer 합계에 포함할 행 필터. 미지정 시 전체 data 합산. */
+  footerSumFilter?: (row: T) => boolean;
 }
 
 // --row-h 기본값 24px — tokens.css:21 정의 기준
