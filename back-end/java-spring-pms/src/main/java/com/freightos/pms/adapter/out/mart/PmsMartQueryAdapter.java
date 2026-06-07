@@ -112,8 +112,30 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
     // ── count 분기 (근사 기본 / exactCount 토글 / 희소는 exact) ─────────────
 
     /**
+     * TAX/SLIP basis + 서류타입 필터 동시 적용 시 sidecar covered count는
+     * (발급 플래그, 서류타입)이 같은 라인임을 보장하지 못해 과대 집계된다.
+     * 이 조합에서는 라인-그레인 pageCriteria($elemMatch)로 count·page를 일관 처리한다.
+     */
+    private static boolean needsLineGrainCorrelation(SearchPmsPerformanceCommand c) {
+        AggregationBasis basis = c.effectiveBasis();
+        boolean taxOrSlip = basis == AggregationBasis.TAX_ISSUED || basis == AggregationBasis.SLIP_ISSUED;
+        boolean hasDocTypeFilter =
+            (c.documentTypes() != null && !c.documentTypes().isEmpty())
+            || StringUtils.hasText(c.financialDocType());
+        return taxOrSlip && hasDocTypeFilter;
+    }
+
+    /** 라인-그레인 정확 count: pageCriteria($elemMatch) 매칭 B/L 문서 수 = 정확 distinct B/L 수. */
+    private long exactFreightCount(SearchPmsPerformanceCommand command, String flagField, Criteria pageCriteria) {
+        if (needsLineGrainCorrelation(command)) {
+            return mongoTemplate.count(Query.query(pageCriteria), PmsBlMartDocument.class);
+        }
+        return planner.get().countFreight(command, flagField);
+    }
+
+    /**
      * freight basis 총건수 결정.
-     * exactCount=true → sidecar 정확 count.
+     * exactCount=true → 라인-그레인 상관 조합이면 pageCriteria count, 그 외 sidecar 정확 count.
      * 근사 total이 earlyTermThreshold 미만 → 희소 판정 → 정확 count(근사 오차 큰 구간).
      * 그 외 → 근사 추정.
      */
@@ -123,12 +145,12 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             Criteria pageCriteria) {
 
         if (Boolean.TRUE.equals(command.exactCount())) {
-            return planner.get().countFreight(command, flagField);
+            return exactFreightCount(command, flagField, pageCriteria);
         }
         long approx = approxEstimator.get().estimate(pageCriteria);
         // 희소: 근사 오차가 커지는 구간이라 정확 count가 오히려 저렴
         if (approx < props.getLineAccel().getEarlyTermThreshold()) {
-            return planner.get().countFreight(command, flagField);
+            return exactFreightCount(command, flagField, pageCriteria);
         }
         return approx;
     }
@@ -169,8 +191,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             long total,
             Pageable pageable) {
 
-        if (total > props.getLineAccel().getEarlyTermThreshold()) {
-            // 밀집 경로: blId DESC 인덱스를 타며 상위 N건만 FETCH
+        if (total > props.getLineAccel().getEarlyTermThreshold() || needsLineGrainCorrelation(command)) {
+            // 밀집 / 라인-그레인 상관 경로: pageCriteria + blId DESC 조기종료 find
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())
