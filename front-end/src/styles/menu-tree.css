@@ -1,0 +1,137 @@
+/* =========================================================
+   Menu Tree View
+   ========================================================= */
+.menu-tree {
+  width: 100%;
+}
+
+.menu-tree__module {
+  border-bottom: 1px solid var(--border);
+}
+
+.menu-tree__module-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.menu-tree__module-header:hover {
+  background: var(--surface-3);
+}
+
+.menu-tree__module-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-4);
+  font-family: var(--font-mono);
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--surface);
+}
+
+.tree-row:hover {
+  background: var(--surface-1);
+}
+
+.tree-row--selected {
+  background: var(--accent-soft);
+}
+
+.tree-row--selected:hover {
+  background: var(--accent-soft);
+}
+
+.tree-row__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-3);
+  border-radius: 3px;
+  padding: 0;
+}
+
+.tree-row__toggle:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.tree-row__leaf-indent {
+  display: inline-block;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.tree-row__code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.tree-row__label {
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-row__path {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tree-row__badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.tree-row__badge--active {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.tree-row__badge--inactive {
+  background: var(--surface-3);
+  color: var(--ink-4);
+}
+
+.tree-row__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
