@@ -132,6 +132,7 @@ export function PlainGridList<T>({
     const w = colWidths[key] ?? col.width ?? col.minWidth;
     return { ...col, width: w };
   });
+  const hasFooter = resolvedColumns.some((c) => c.aggregate === "sum");
 
   // 셀 선택/복사 범위는 체크박스 컬럼을 제외한 데이터 컬럼만 대상으로 한다.
   const { handleTableMouseDown } = useGridCellSelection({
@@ -176,7 +177,7 @@ export function PlainGridList<T>({
 
   return (
     <div className={`grid-wrap${className ? ` ${className}` : ""}`} ref={scrollRef} style={{ ...style, overflowY: isLoading ? "hidden" : undefined }}>
-      <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
+      <table ref={tableRef} className={`grid--list${hasFooter ? " grid--list--has-foot" : ""}`} onMouseDown={handleTableMouseDown}>
         <colgroup>
           {selectable && <col style={{ width: 28 }} />}
           {resolvedColumns.map((col) => (
@@ -277,6 +278,11 @@ export function PlainGridList<T>({
               {paddingBottom > 0 && (
                 <tr>
                   <td colSpan={totalColSpan} style={{ height: paddingBottom, padding: 0 }} />
+                </tr>
+              )}
+              {hasFooter && (
+                <tr className="grid__filler" aria-hidden="true">
+                  <td colSpan={totalColSpan} />
                 </tr>
               )}
             </>

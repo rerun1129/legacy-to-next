@@ -107,6 +107,14 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   text-align: right; font-family: var(--font-mono);
 }
 .grid--list tfoot td.grid-foot-label { text-align: left; font-family: inherit; color: var(--ink-3); }
+/* 행이 적어 컨테이너를 못 채워도 합계(tfoot)를 그리드 하단에 고정한다.
+   테이블을 컨테이너 높이까지 채우고 filler 행이 남는 세로 여백을 흡수한다. */
+.grid--list--has-foot { min-height: 100%; }
+.grid--list--has-foot tbody tr.grid__filler { height: 100%; cursor: default; }
+.grid--list--has-foot tbody tr.grid__filler td {
+  padding: 0; border: 0; background: var(--surface);
+}
+.grid--list--has-foot tbody tr.grid__filler:hover td { background: var(--surface); }
 .grid--list thead th.is-sorted { background: var(--accent-soft); color: var(--accent-ink); }
 .grid--list thead th .sort-ind { margin-left: 4px; color: var(--accent); font-size: 11px; }
 .grid--list tbody td { padding: 4px 4px; border-bottom: 1px solid var(--divider); border-right: 1px solid var(--divider); font-size: 10px; color: var(--ink); white-space: nowrap; background: var(--surface); box-sizing: border-box; }

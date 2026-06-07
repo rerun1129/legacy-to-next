@@ -150,6 +150,7 @@ export function ManagedGridList<T>({
 
   // 체크박스 컬럼 포함 시 colSpan 계산
   const totalColSpan = visibleColumns.length + (selectable ? 1 : 0);
+  const hasFooter = visibleColumns.some((c) => c.aggregate === "sum");
 
   function isOutsideTable(rect: { left: number; right: number; top: number; bottom: number }) {
     const tableEl = tableRef.current;
@@ -203,7 +204,7 @@ export function ManagedGridList<T>({
         onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
       >
-        <table ref={tableRef} className="grid--list" onMouseDown={handleTableMouseDown}>
+        <table ref={tableRef} className={`grid--list${hasFooter ? " grid--list--has-foot" : ""}`} onMouseDown={handleTableMouseDown}>
           <colgroup>
             {selectable && <col style={{ width: 28 }} />}
             {visibleColumns.map((col) => (
@@ -296,6 +297,11 @@ export function ManagedGridList<T>({
                 {paddingBottom > 0 && (
                   <tr>
                     <td colSpan={totalColSpan} style={{ height: paddingBottom, padding: 0 }} />
+                  </tr>
+                )}
+                {hasFooter && (
+                  <tr className="grid__filler" aria-hidden="true">
+                    <td colSpan={totalColSpan} />
                   </tr>
                 )}
               </>
