@@ -70,11 +70,11 @@ logging:
   level:
     com.freightos: DEBUG
 
-# ── p6spy (SQL 로깅 — 로컬 프로파일에서만 활성화) ──────────────────
+# ── p6spy (SQL 로깅 — 디버그 시에만 임시로 true) ───────────────────
 decorator:
   datasource:
     p6spy:
-      enable-logging: true
+      enable-logging: false
 
 # ── CORS ─────────────────────────────────────────────────────────
 app:
