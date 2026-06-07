@@ -47,12 +47,6 @@ dependencies {
     compileOnly    'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // ── QueryDSL ───────────────────────────────────────────────────
-    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
-    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
-    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
-    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
-
     // ── Security ──────────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // JJWT — admin·fms·bms 모듈과 동일 버전(0.12.6)·동일 secret으로 토큰 검증
