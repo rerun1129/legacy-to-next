@@ -62,7 +62,10 @@ public record SearchPmsPerformanceCommand(
 
     // ── BMS 운임행 필터 ──────────────────────────────────────────────────────
     String financialDocType,
-    String taxType
+    String taxType,
+
+    // ── 총건수 정확도 ─────────────────────────────────────────────────────────
+    Boolean exactCount           // null/false = 근사(기본), true = 정확
 ) {
     /** basis가 null이면 FREIGHT_INPUT으로 정규화. */
     public AggregationBasis effectiveBasis() {

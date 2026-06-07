@@ -98,6 +98,8 @@ services:
       MONGO_URI: "${MONGO_URI:-mongodb://mongo:27017/pms_mart}"
       PMS_MART_BATCH_SIZE: "${PMS_MART_BATCH_SIZE:-2000}"
       PMS_MART_PARALLELISM: "${PMS_MART_PARALLELISM:-4}"
+      # ── line-grain(실적일자/서류일자 + 차원) 가속 — sidecar 적재 동반. 켤 때만 rebuild 필요(기본 OFF) ──
+      PMS_MART_LINE_ACCEL_ENABLED: "${PMS_MART_LINE_ACCEL_ENABLED:-false}"
     depends_on:
       postgres:
         condition: service_healthy

@@ -83,9 +83,9 @@ public class PmsDocumentAggregateQueryRepository {
 
         String pageInner = buildPageInner(fmsJoinSql, pageWhere);
 
-        // amounts CTE 필터는 page CTE와 동일 술어 재사용 (파라미터 공유)
-        // amounts DISTINCT inner는 page JOIN으로 범위 제한 — 추가 WHERE는 선택적
-        List<String> amountWhere = buildAmountWhere(command);
+        // amounts CTE 필터: freight와 일관되게 fd.* 술어를 amounts inner에도 반영
+        // (날짜/타입/상태 등 fd 레벨 필터가 합산 대상 서류를 결정)
+        List<String> amountWhere = buildAmountWhere(command, params);
         String sql = sqlBuilder.buildSingleQuery(pageInner, amountWhere);
 
         long[] totalHolder = {0L};
@@ -114,14 +114,19 @@ public class PmsDocumentAggregateQueryRepository {
     }
 
     /**
-     * amounts CTE DISTINCT inner에 적용할 필터. document_type IN 같은 집계에 영향을 주는
-     * 필터만 포함한다 (page JOIN으로 범위는 이미 제한되므로 날짜/페이징은 불필요).
+     * amounts CTE DISTINCT inner에 적용할 fd.* 술어.
      *
-     * 현재 구현: amounts는 페이지 범위 내 모든 서류를 집계하므로 추가 WHERE 없음.
-     * 필요 시 document_type 필터를 명시적으로 추가해 amounts 범위를 좁힐 수 있다.
+     * document 기준 금액이 freight 기준과 일관되게 날짜/타입/상태 등 필터를 반영하도록
+     * addDocumentPredicates를 재사용한다. params는 page CTE 파라미터와 공유하며,
+     * 동일 키·값의 재바인딩은 무해하다.
+     *
+     * header(h.*), FMS(hb./mb.) 술어는 포함하지 않는다 — 해당 제약은 page CTE JOIN이
+     * 이미 적용하므로 amounts inner에서 중복 추가하면 불필요한 조인 비용이 발생한다.
      */
-    private List<String> buildAmountWhere(SearchPmsPerformanceCommand command) {
-        return List.of();
+    private List<String> buildAmountWhere(SearchPmsPerformanceCommand command, MapSqlParameterSource params) {
+        List<String> amountWhere = new ArrayList<>();
+        sqlBuilder.addDocumentPredicates(command, amountWhere, params);
+        return amountWhere;
     }
 
     // ── 행 매핑 ───────────────────────────────────────────────────────────────

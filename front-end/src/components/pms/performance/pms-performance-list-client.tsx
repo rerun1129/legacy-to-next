@@ -51,6 +51,7 @@ function buildSearchInput(values: PmsPerformanceFilter): SearchPmsPerformanceInp
     issued: values.issued || null,
     financialDocType: values.financialDocType || null,
     taxType: values.taxType || null,
+    exactCount: values.exactCount ?? false,
   };
 }
 

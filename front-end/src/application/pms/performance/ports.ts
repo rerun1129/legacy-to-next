@@ -145,6 +145,9 @@ export interface SearchPmsPerformanceInput {
   // BMS 운임행
   financialDocType?: string | null;
   taxType?: string | null;
+
+  // 총건수 정확도 옵션 — true: 정확치(느릴 수 있음), false/미전송: 근사치(기본)
+  exactCount?: boolean | null;
 }
 
 // === 포트 인터페이스 ===

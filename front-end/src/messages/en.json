@@ -2100,6 +2100,8 @@
         "grouped": "Grouped",
         "issued": "Document Issued",
         "basisLabel": "Aggregation Basis",
+        "exactCount": "Exact Total Count",
+        "exactCountHint": "Default: approximate",
         "dateRangeRequired": "Please enter a search period (From/To)."
       }
     }

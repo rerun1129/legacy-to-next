@@ -56,6 +56,23 @@ public class PmsMartRowMapper {
             b.getTeamCode(), b.getTeamName(), b.getOperator());
     }
 
+    /**
+     * 재집계 경로(line-grain 2-tier)에서 계산된 금액·팀·오퍼레이터를 주입하여 행을 조립한다.
+     * 기존 toFreightRow/toDocumentRow·build 시그니처는 변경하지 않고 위임만 한다.
+     */
+    public PmsRawBlRow buildReaggregated(
+            PmsBlMartDocument doc, String performanceDt,
+            BigDecimal invoiceLocalAmt, BigDecimal debitLocalAmt,
+            BigDecimal paymentLocalAmt, BigDecimal creditLocalAmt,
+            BigDecimal invoiceUsdAmt, BigDecimal debitUsdAmt,
+            BigDecimal paymentUsdAmt, BigDecimal creditUsdAmt,
+            String teamCode, String teamName, String operator) {
+        return build(doc, performanceDt,
+            invoiceLocalAmt, debitLocalAmt, paymentLocalAmt, creditLocalAmt,
+            invoiceUsdAmt, debitUsdAmt, paymentUsdAmt, creditUsdAmt,
+            teamCode, teamName, operator);
+    }
+
     // ── 공용 빌더 ─────────────────────────────────────────────────────────────
 
     /**

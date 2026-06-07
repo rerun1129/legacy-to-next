@@ -102,3 +102,7 @@ pms:
       cron: "${PMS_MART_CRON:0 */1 * * * *}"    # 1분 증분(켤 때만)
       jitter-max-ms: ${PMS_MART_JITTER_MAX_MS:15000}
       watermark-overlap-seconds: ${PMS_MART_WATERMARK_OVERLAP_SECONDS:10}
+    line-accel:
+      enabled: ${PMS_MART_LINE_ACCEL_ENABLED:false}
+      early-term-threshold: ${PMS_MART_LINE_EARLY_TERM_THRESHOLD:20000}
+      approx-sample-size: ${PMS_MART_APPROX_SAMPLE_SIZE:20000}

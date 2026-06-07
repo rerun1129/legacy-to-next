@@ -27,6 +27,7 @@ public class PmsMartProperties {
 
     private Rebuild rebuild = new Rebuild();
     private Scheduler scheduler = new Scheduler();
+    private LineAccel lineAccel = new LineAccel();
 
     /** Mart 재빌드 관련 크기 설정. */
     @Getter
@@ -56,6 +57,29 @@ public class PmsMartProperties {
         private long jitterMaxMs = 15000;
         /** 워터마크 중첩 구간(초). 증분 sync 누락 방지를 위해 겹쳐서 조회. */
         private int watermarkOverlapSeconds = 10;
+    }
+
+    /** line-grain(실적일자/서류일자 + 차원) 가속 설정. OFF(기본)면 sidecar 미적재·미조회 = Mart 동작 오늘과 동일. */
+    @Getter
+    @Setter
+    public static class LineAccel {
+        /** line-grain sidecar 적재/인덱스/조회 활성. 기본 false. */
+        private boolean enabled;
+
+        /**
+         * 적응형 page 경로 임계값.
+         * count가 이 값을 초과하면(밀집) blId DESC + $elemMatch 조기종료 find 경로를 선택한다.
+         * count가 이 값 이하이면(희소) 기존 sidecar pageBlKeys 경로를 유지한다.
+         * 환경변수 PMS_MART_LINE_EARLY_TERM_THRESHOLD로 오버라이드 가능.
+         */
+        private long earlyTermThreshold = 20000;
+
+        /**
+         * $sample 근사 추정에 사용할 샘플 크기.
+         * 컬렉션의 5% 미만이면 MongoDB는 random-cursor 방식을 사용하므로 sub-second.
+         * 환경변수 PMS_MART_APPROX_SAMPLE_SIZE로 오버라이드 가능.
+         */
+        private long approxSampleSize = 20000;
     }
 
     /** routing이 "mart-only"인지 확인. */

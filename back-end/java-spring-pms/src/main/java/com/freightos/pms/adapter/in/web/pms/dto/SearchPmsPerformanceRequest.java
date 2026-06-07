@@ -60,5 +60,8 @@ public record SearchPmsPerformanceRequest(
 
     // BMS 운임행
     String financialDocType,
-    String taxType
+    String taxType,
+
+    // 총건수 정확도: null/false = 근사(기본), true = 정확
+    Boolean exactCount
 ) {}

@@ -67,6 +67,9 @@ export interface PmsPerformanceFilter {
   // BMS 운임행
   financialDocType: string;
   taxType: string;
+
+  // 총건수 정확도 — true: 정확치, false: 근사치(기본)
+  exactCount: boolean;
 }
 
 // 옵션 배열은 PMS 백엔드 /api/enums/{name} 에서 동적 조회 (use-pms-enum.ts 참조)
@@ -106,5 +109,6 @@ export const DEFAULT_PMS_FILTER: PmsPerformanceFilter = {
   issued: "",
   financialDocType: "",
   taxType: "",
+  exactCount: false,
 };
 

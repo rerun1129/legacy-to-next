@@ -1,5 +1,6 @@
 package com.freightos.pms.adapter.out.mart.sync;
 
+import com.freightos.common.config.PmsMartProperties;
 import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,6 +26,7 @@ import java.util.function.Consumer;
 class PmsMartSourceReader {
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final PmsMartProperties props;
 
     /**
      * OLTP 전체를 keyset 루프로 읽어 batchSink에 배치 단위로 전달한다.
@@ -34,8 +36,9 @@ class PmsMartSourceReader {
      * @param batchSize 한 번에 읽을 최대 행 수
      */
     void readFull(Instant runAt, Consumer<List<PmsBlMartDocument>> batchSink, int batchSize) {
-        PmsMartSourceRowMapper rowMapper = new PmsMartSourceRowMapper(runAt);
-        String sql = PmsMartEtlSql.fullBatchSql();
+        boolean arrays = props.getLineAccel().isEnabled();
+        PmsMartSourceRowMapper rowMapper = new PmsMartSourceRowMapper(runAt, arrays);
+        String sql = PmsMartEtlSql.fullBatchSql(arrays);
 
         long lastId = 0L;
         while (true) {
@@ -98,8 +101,9 @@ class PmsMartSourceReader {
      */
     long readRange(long loId, long hiId, int batchSize, Instant runAt,
                    Consumer<List<PmsBlMartDocument>> batchSink) {
-        PmsMartSourceRowMapper rowMapper = new PmsMartSourceRowMapper(runAt);
-        String sql = PmsMartEtlSql.rangeBatchSql();
+        boolean arrays = props.getLineAccel().isEnabled();
+        PmsMartSourceRowMapper rowMapper = new PmsMartSourceRowMapper(runAt, arrays);
+        String sql = PmsMartEtlSql.rangeBatchSql(arrays);
 
         long lastId = loId - 1;
         long totalRead = 0L;
@@ -146,8 +150,9 @@ class PmsMartSourceReader {
         if (headerIds.isEmpty()) {
             return;
         }
-        PmsMartSourceRowMapper rowMapper = new PmsMartSourceRowMapper(runAt);
-        String sql = PmsMartEtlSql.incrementalBatchSql();
+        boolean arrays = props.getLineAccel().isEnabled();
+        PmsMartSourceRowMapper rowMapper = new PmsMartSourceRowMapper(runAt, arrays);
+        String sql = PmsMartEtlSql.incrementalBatchSql(arrays);
 
         for (int from = 0; from < headerIds.size(); from += batchSize) {
             List<Long> slice = headerIds.subList(from, Math.min(from + batchSize, headerIds.size()));

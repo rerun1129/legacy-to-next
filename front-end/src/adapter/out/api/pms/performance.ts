@@ -141,6 +141,7 @@ export const API_PMS_PERFORMANCE_PORT: PmsPerformancePort = {
       issued: input.issued ?? null,
       financialDocType: input.financialDocType ?? null,
       taxType: input.taxType ?? null,
+      exactCount: input.exactCount ?? false,
     };
 
     const json = await pmsFetchJson(`${BASE}/search`, {

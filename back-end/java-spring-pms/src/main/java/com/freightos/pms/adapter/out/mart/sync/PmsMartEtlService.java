@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,6 +42,8 @@ public class PmsMartEtlService implements PmsMartSyncPort {
     private final PmsMartChangeDetector changeDetector;
     private final MongoTemplate mongoTemplate;
     private final PmsMartProperties props;
+    /** line-accel OFF면 빈 Optional — @ConditionalOnProperty로 빈 미등록. */
+    private final Optional<PmsMartEntryWriter> entryWriter;
 
     /** 동시 실행 방지 플래그. */
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -113,6 +116,7 @@ public class PmsMartEtlService implements PmsMartSyncPort {
                 futures.add(pool.submit(() -> {
                     long read = reader.readRange(rLo, rHi, batchSize, runAt, docs -> {
                         writer.upsertBatch(docs);
+                        entryWriter.ifPresent(w -> w.writeFromDocs(docs));
                         total.addAndGet(docs.size());
                     });
                     log.debug("Mart full range [{}, {}] 완료: {} 건", rLo, rHi, read);
@@ -193,6 +197,7 @@ public class PmsMartEtlService implements PmsMartSyncPort {
 
         reader.readIncremental(changedIds, runAt, batch -> {
             long written = writer.upsertBatch(batch);
+            entryWriter.ifPresent(w -> w.writeFromDocs(batch));
             totalWritten[0] += written;
         }, batchSize);
 

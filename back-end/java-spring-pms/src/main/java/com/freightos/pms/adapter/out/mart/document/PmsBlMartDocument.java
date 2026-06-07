@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * PMS B/L 단위 사전집계 Mart 문서.
@@ -122,4 +123,8 @@ public class PmsBlMartDocument {
 
     /** 이 문서가 마지막으로 갱신된 시각. */
     private Instant martUpdatedAt;
+
+    // ── line-grain 원본 배열 (페이지 금액 재집계용 — Phase 2 소비. line-accel ON ETL에서만 채움) ──
+    private List<PmsBlLineEmbedded> lines;
+    private List<PmsBlDocEmbedded> docs;
 }

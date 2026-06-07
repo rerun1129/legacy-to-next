@@ -1,26 +1,52 @@
 package com.freightos.pms.adapter.out.mart.sync;
 
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.pms.adapter.out.mart.document.BasisAggEmbedded;
 import com.freightos.pms.adapter.out.mart.document.DocumentAggEmbedded;
+import com.freightos.pms.adapter.out.mart.document.PmsBlDocEmbedded;
+import com.freightos.pms.adapter.out.mart.document.PmsBlLineEmbedded;
 import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * ETL 배치 ResultSet 한 행 → PmsBlMartDocument 변환기.
  * runAt은 생성 시 주입받아 모든 행에 동일한 martUpdatedAt을 설정한다(행마다 now() 호출 금지).
  *
  * HOUSE/MASTER nulling 규칙은 기존 OLTP mapRow와 동일하게 유지한다.
+ *
+ * parseArrays=true이면 fi_lines/dc_docs JSON 컬럼을 파싱해 lines/docs 필드에 채운다.
+ * parseArrays=false이면 lines/docs는 null(기존 동작 100% 동일).
+ *
+ * VO는 setter가 없으므로 FIELD visibility ANY가 필수.
+ * @SpringBootTest 없는 환경에서 이 설정 누락은 빌드로 잡히지 않고 런타임에서만 역직렬화 실패로 노출된다.
  */
 class PmsMartSourceRowMapper {
 
-    private final Instant runAt;
+    /**
+     * FIELD visibility ANY: @Getter만 있고 setter 없는 VO(PmsBlLineEmbedded, PmsBlDocEmbedded)를
+     * Jackson이 필드 직접 접근으로 역직렬화하기 위해 필수.
+     */
+    private static final ObjectMapper OM = new ObjectMapper()
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-    PmsMartSourceRowMapper(Instant runAt) {
+    private static final TypeReference<List<PmsBlLineEmbedded>> LINE_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<PmsBlDocEmbedded>> DOC_TYPE = new TypeReference<>() {};
+
+    private final Instant runAt;
+    private final boolean parseArrays;
+
+    PmsMartSourceRowMapper(Instant runAt, boolean parseArrays) {
         this.runAt = runAt;
+        this.parseArrays = parseArrays;
     }
 
     PmsBlMartDocument mapRow(ResultSet rs) throws SQLException {
@@ -96,6 +122,10 @@ class PmsMartSourceRowMapper {
             rs.getString("dc_operator")
         );
 
+        // ── line-accel 배열 (parseArrays=true일 때만 파싱) ───────────────────
+        List<PmsBlLineEmbedded> lines = parseArrays ? parseLines(rs) : null;
+        List<PmsBlDocEmbedded> docs = parseArrays ? parseDocs(rs) : null;
+
         return PmsBlMartDocument.builder()
             .id(id)
             .blType(blType)
@@ -137,8 +167,36 @@ class PmsMartSourceRowMapper {
             .taxIssued(taxIssued)
             .slipIssued(slipIssued)
             .documentCreated(documentCreated)
+            .lines(lines)
+            .docs(docs)
             .martUpdatedAt(runAt)
             .build();
+    }
+
+    // ── line-accel JSON 파싱 ──────────────────────────────────────────────────
+
+    private List<PmsBlLineEmbedded> parseLines(ResultSet rs) throws SQLException {
+        String json = rs.getString("fi_lines");
+        if (json == null || json.isBlank()) {
+            return Collections.emptyList();
+        }
+        try {
+            return OM.readValue(json, LINE_TYPE);
+        } catch (Exception e) {
+            throw new RuntimeException("fi_lines JSON 파싱 실패: " + e.getMessage(), e);
+        }
+    }
+
+    private List<PmsBlDocEmbedded> parseDocs(ResultSet rs) throws SQLException {
+        String json = rs.getString("dc_docs");
+        if (json == null || json.isBlank()) {
+            return Collections.emptyList();
+        }
+        try {
+            return OM.readValue(json, DOC_TYPE);
+        } catch (Exception e) {
+            throw new RuntimeException("dc_docs JSON 파싱 실패: " + e.getMessage(), e);
+        }
     }
 
     // ── 헬퍼 ─────────────────────────────────────────────────────────────────
