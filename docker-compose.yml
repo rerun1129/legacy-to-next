@@ -17,6 +17,19 @@ services:
       timeout: 5s
       retries: 5
 
+  mongo:
+    image: mongo:7
+    container_name: fms-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   fms-api:
     build:
       context: ./back-end/java-spring
@@ -78,8 +91,17 @@ services:
       PMS_DB_PASS: fms_local
       APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
       JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+      # ── Mart (MongoDB OLAP) — docker 스택 기본 ON(mongo 동반). 끄려면 .env에 PMS_MART_ENABLED=false ──
+      # (bare bootRun은 application.yml 기본값 false — mongo 없이도 OLTP로 동작)
+      PMS_MART_ENABLED: "${PMS_MART_ENABLED:-true}"
+      PMS_MART_ROUTING: "${PMS_MART_ROUTING:-auto}"
+      MONGO_URI: "${MONGO_URI:-mongodb://mongo:27017/pms_mart}"
+      PMS_MART_BATCH_SIZE: "${PMS_MART_BATCH_SIZE:-2000}"
+      PMS_MART_PARALLELISM: "${PMS_MART_PARALLELISM:-4}"
     depends_on:
       postgres:
+        condition: service_healthy
+      mongo:
         condition: service_healthy
 
   frontend:
@@ -103,3 +125,4 @@ services:
 
 volumes:
   postgres_data:
+  mongo_data:

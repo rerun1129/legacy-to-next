@@ -36,6 +36,10 @@ dependencies {
 
     // PMS는 스키마를 소유하지 않음 — Flyway 의존성 제외
 
+    // ── Mart (MongoDB OLAP — 사전집계 조회 가속, 기존 OLTP 어댑터와 병존) ──
+    //   pms.mart.enabled=false(기본)면 Mart 빈 미생성. Mongo 미기동이어도 부팅 영향 없음.
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
     // ── OpenAPI / Swagger UI ───────────────────────────────────────
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 

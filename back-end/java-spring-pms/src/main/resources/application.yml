@@ -24,6 +24,12 @@ spring:
     show-sql: false
     open-in-view: false
 
+  # ── MongoDB Mart (OLAP 사전집계 — pms.mart.enabled 일 때만 실사용) ──
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/pms_mart}
+      auto-index-creation: false   # 인덱스는 PmsMartIndexInitializer가 명시 생성
+
   output:
     ansi:
       enabled: always
@@ -43,6 +49,10 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    mongo:
+      # Mart OFF면 mongo 헬스 기여자 비활성 → Mongo 미기동 환경에서도 /health 영향 없음(오늘과 동일)
+      enabled: ${PMS_MART_ENABLED:false}
 
 # ── OpenAPI / Swagger ─────────────────────────────────────────────
 springdoc:
@@ -76,3 +86,19 @@ jwt:
   secret: ${JWT_SECRET:dev-secret-please-rotate-at-least-32-chars!!}
   access-token-ttl-minutes: ${JWT_ACCESS_TTL:15}
   refresh-token-ttl-days: ${JWT_REFRESH_TTL:14}
+
+# ── PMS Mart (MongoDB OLAP — OLTP 어댑터와 병존, 기본 OFF) ──────────
+# enabled=false면 라우터/Mart/스케줄러 빈 미생성 → 동작은 OLTP 그대로(오늘과 동일).
+pms:
+  mart:
+    enabled: ${PMS_MART_ENABLED:false}
+    routing: ${PMS_MART_ROUTING:auto}          # auto = 미지원 필터 OLTP 폴백 | mart-only = 항상 Mart
+    rebuild:
+      batch-size: ${PMS_MART_BATCH_SIZE:2000}
+      fetch-size: ${PMS_MART_FETCH_SIZE:2000}
+      parallelism: ${PMS_MART_PARALLELISM:4}   # full rebuild 레인지 병렬 워커 수(증분은 단일)
+    scheduler:
+      enabled: ${PMS_MART_SCHEDULER_ENABLED:false}
+      cron: "${PMS_MART_CRON:0 */1 * * * *}"    # 1분 증분(켤 때만)
+      jitter-max-ms: ${PMS_MART_JITTER_MAX_MS:15000}
+      watermark-overlap-seconds: ${PMS_MART_WATERMARK_OVERLAP_SECONDS:10}

@@ -7,6 +7,7 @@
 .vite/
 .playwright-mcp/
 .env*
+!.env.example
 *.pem
 .claude/.review_pending
 .claude/.review_skip
@@ -32,3 +33,7 @@ build/
 # IntelliJ IDEA 빌드 출력 (프로젝트 루트 + 백엔드 모듈 루트 한정 — adapter/out 같은 깊은 경로 보호)
 /out/
 back-end/*/out/
+
+# IntelliJ 모듈 파일 / 런타임 로그 (커밋 대상 아님)
+*.iml
+*.log

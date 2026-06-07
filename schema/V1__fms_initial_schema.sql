@@ -872,3 +872,13 @@ CREATE INDEX IF NOT EXISTS ix_house_bl_etd  ON fms.house_bl  (etd);
 CREATE INDEX IF NOT EXISTS ix_house_bl_eta  ON fms.house_bl  (eta);
 CREATE INDEX IF NOT EXISTS ix_master_bl_etd ON fms.master_bl (etd);
 CREATE INDEX IF NOT EXISTS ix_master_bl_eta ON fms.master_bl (eta);
+
+-- =============================================================================
+-- PMS Mart 증분 동기화 변경 탐지 인덱스 (updated_at 워터마크)
+--   java-spring-pms 의 MongoDB Mart 증분 스케줄러는 "updated_at > 마지막동기화시각"
+--   으로 바뀐 B/L 을 탐지한다. 인덱스가 없으면 매 틱 house_bl/master_bl 풀스캔 → OLTP 부하.
+--   bms 측(freight_header/line/financial_document) updated_at 인덱스는 bms V10 참조.
+--   idempotent. ⚠️ 기존(데이터 적재된) DB 에는 동일 DDL 수동 1회 적용 필요.
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS ix_house_bl_updated_at  ON fms.house_bl  (updated_at);
+CREATE INDEX IF NOT EXISTS ix_master_bl_updated_at ON fms.master_bl (updated_at);
