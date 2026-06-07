@@ -2101,7 +2101,7 @@
         "issued": "Document Issued",
         "basisLabel": "Aggregation Basis",
         "exactCount": "Exact Total Count",
-        "exactCountHint": "Default: approximate",
+        "exactCountHint": "Unchecked = approximate (default)",
         "dateRangeRequired": "Please enter a search period (From/To)."
       }
     }

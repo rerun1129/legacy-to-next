@@ -39,7 +39,10 @@ export function PmsPerformanceFilterBms({
               variant="panel"
               options={documentTypeOptions}
               value={field.value[0] ?? ""}
-              onChange={(v) => field.onChange(v ? [v] : [])}
+              onChange={(e) => {
+                const v = e.target.value;
+                field.onChange(v ? [v] : []);
+              }}
               onBlur={field.onBlur}
               name={field.name}
               style={{ gridColumn: "2 / span 2" }}

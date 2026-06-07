@@ -2101,7 +2101,7 @@
         "issued": "서류 발행 여부",
         "basisLabel": "집계 기준",
         "exactCount": "정확 총건수",
-        "exactCountHint": "기본 근사치",
+        "exactCountHint": "체크 해제 시 근사치(기본값)",
         "dateRangeRequired": "조회 기간(From/To)을 입력하세요."
       }
     }
