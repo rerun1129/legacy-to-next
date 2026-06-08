@@ -93,7 +93,7 @@ const PMS_PERFORMANCE_PAGE_SCHEMA = z.object({
 }) satisfies z.ZodType<PmsPerformancePage>;
 
 export const API_PMS_PERFORMANCE_PORT: PmsPerformancePort = {
-  async search(input: SearchPmsPerformanceInput): Promise<PmsPerformancePage> {
+  async search(input: SearchPmsPerformanceInput, opts?: { signal?: AbortSignal }): Promise<PmsPerformancePage> {
     // 단일 dateKind 콤보 → 백엔드 날짜 필드 분기 매핑
     // ETD/ETA: dateKind + dateFrom/dateTo 전송
     // PERF: performanceDtFrom/To 전송 (dateKind null)
@@ -147,6 +147,7 @@ export const API_PMS_PERFORMANCE_PORT: PmsPerformancePort = {
     const json = await pmsFetchJson(`${BASE}/search`, {
       method: "POST",
       body: JSON.stringify(body),
+      signal: opts?.signal,
     });
 
     const parsed = apiResponse(PMS_PERFORMANCE_PAGE_SCHEMA).safeParse(json);

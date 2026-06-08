@@ -2101,6 +2101,7 @@
         "issued": "서류 발행 여부",
         "basisLabel": "집계 기준",
         "approxCountTooltip": "정확 집계 중…",
+        "showExactCount": "정확히",
         "dateRangeRequired": "조회 기간(From/To)을 입력하세요."
       }
     }

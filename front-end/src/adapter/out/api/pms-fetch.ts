@@ -39,6 +39,8 @@ export async function pmsFetchJson(path: string, init?: RequestInit): Promise<un
   try {
     res = await fetchOnce(path, init);
   } catch (e) {
+    // React Query가 queryKey 변경 시 signal을 abort함 — AbortError는 cancel로 인지하도록 그대로 throw
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
     throw new ApiError("Network error", undefined, e);
   }
 

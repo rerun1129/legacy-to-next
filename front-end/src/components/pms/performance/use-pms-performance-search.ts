@@ -7,6 +7,8 @@ interface UsePmsPerformanceSearchParams {
   searchFilter: SearchPmsPerformanceInput | null;
   currentPage: number;
   pageSize: number;
+  /** true일 때만 배경 정확 count 쿼리를 발화. 기본 false → 근사치만 표시(스피너 없음). */
+  exactCountRequested?: boolean;
 }
 
 interface UsePmsPerformanceSearchResult {
@@ -18,6 +20,11 @@ interface UsePmsPerformanceSearchResult {
   isApprox: boolean;
   /** true = 배경 정확 count 조회 진행 중 */
   isExactLoading: boolean;
+  /**
+   * true = 현재 조건이 광범위 PERF/DOC 범위 — 정확 count는 opt-in 토글로만 조회.
+   * 토글 버튼 노출 조건에 사용(isApprox는 정확치 도착 후 false가 되므로 토글 조건에 부적합).
+   */
+  needsApprox: boolean;
 }
 
 /** PERF/DOC dateKind에서 이 일수를 초과할 때만 근사 count를 사용한다 (분기 기준). */
@@ -54,6 +61,7 @@ export function usePmsPerformanceSearch({
   searchFilter,
   currentPage,
   pageSize,
+  exactCountRequested = false,
 }: UsePmsPerformanceSearchParams): UsePmsPerformanceSearchResult {
   const needsApprox = calcNeedsApprox(searchFilter);
 
@@ -70,7 +78,7 @@ export function usePmsPerformanceSearch({
     isSuccess: isPrimarySuccess,
   } = useQuery<PmsPerformancePage>({
     queryKey: pmsPerformanceKeys.search(primaryInput ?? PLACEHOLDER),
-    queryFn: () => pmsPerformancePort.search(primaryInput!),
+    queryFn: ({ signal }) => pmsPerformancePort.search(primaryInput!, { signal }),
     enabled: searchFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -89,9 +97,9 @@ export function usePmsPerformanceSearch({
     isFetching: isExactFetching,
   } = useQuery<PmsPerformancePage>({
     queryKey: pmsPerformanceKeys.search(exactInput ?? EXACT_PLACEHOLDER),
-    queryFn: () => pmsPerformancePort.search(exactInput!),
-    // 근사 조회 성공 후에만 활성화, 그리고 needsApprox 조건 필수
-    enabled: searchFilter !== null && needsApprox && isPrimarySuccess,
+    queryFn: ({ signal }) => pmsPerformancePort.search(exactInput!, { signal }),
+    // 근사 조회 성공 후에만 활성화, needsApprox 조건 필수, 사용자 opt-in 요청 시에만 발화
+    enabled: searchFilter !== null && needsApprox && isPrimarySuccess && exactCountRequested,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -116,5 +124,6 @@ export function usePmsPerformanceSearch({
     totalPages,
     isApprox,
     isExactLoading,
+    needsApprox,
   };
 }

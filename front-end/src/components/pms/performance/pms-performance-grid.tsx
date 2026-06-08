@@ -40,6 +40,15 @@ export function PmsPerformanceGrid({
   const [viewMode, setViewMode] = useState<PmsViewMode>("detail");
   const [dimKeys, setDimKeys]   = useState<string[]>([]);
 
+  // 정확 count opt-in — 필터 시그니처 기반으로 필터 변경 시 자동 리셋(effect 없음)
+  const [requestedSig, setRequestedSig] = useState<string | null>(null);
+  const currentSig = useMemo(
+    () => (searchFilter ? JSON.stringify(searchFilter) : null),
+    [searchFilter],
+  );
+  // 현재 필터와 마지막 요청 시그니처가 일치할 때만 exactCountRequested=true
+  const exactCountRequested = requestedSig !== null && requestedSig === currentSig;
+
   const {
     rows,
     isFetching,
@@ -47,7 +56,8 @@ export function PmsPerformanceGrid({
     totalPages,
     isApprox,
     isExactLoading,
-  } = usePmsPerformanceSearch({ searchFilter, currentPage, pageSize });
+    needsApprox,
+  } = usePmsPerformanceSearch({ searchFilter, currentPage, pageSize, exactCountRequested });
 
   const detailColumns = useMemo(
     () => buildDetailColumns(jobDivOptions, boundOptions),
@@ -78,6 +88,28 @@ export function PmsPerformanceGrid({
             title={isApprox ? t("approxCountTooltip") : undefined}
           >
             {isApprox ? `~${totalElements}` : totalElements}
+            {/* 근사 모드이고 정확 요청 전: "정확히" 텍스트버튼 노출 */}
+            {needsApprox && !exactCountRequested && !isExactLoading && (
+              <button
+                type="button"
+                onClick={() => setRequestedSig(currentSig)}
+                style={{
+                  marginLeft: 4,
+                  fontSize: 10,
+                  padding: "0 4px",
+                  cursor: "pointer",
+                  border: "1px solid currentColor",
+                  borderRadius: 3,
+                  background: "transparent",
+                  color: "inherit",
+                  lineHeight: 1.4,
+                  verticalAlign: "middle",
+                }}
+              >
+                {t("showExactCount")}
+              </button>
+            )}
+            {/* 정확 요청 후 로딩 중: 스피너 */}
             {isExactLoading && (
               <Loader2
                 size={11}

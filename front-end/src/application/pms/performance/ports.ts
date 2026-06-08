@@ -154,5 +154,5 @@ export interface SearchPmsPerformanceInput {
 
 export interface PmsPerformancePort {
   /** POST /api/pms/performance/search */
-  search(input: SearchPmsPerformanceInput): Promise<PmsPerformancePage>;
+  search(input: SearchPmsPerformanceInput, opts?: { signal?: AbortSignal }): Promise<PmsPerformancePage>;
 }
