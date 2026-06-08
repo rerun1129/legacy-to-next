@@ -89,6 +89,19 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
 
     const hasSuggestions = Boolean(onSearch);
 
+    // name input DOM ref — clearName에서 native setter 방식 적용을 위해 보유
+    const nameInputRef = useRef<HTMLInputElement | null>(null);
+    // RHF register의 콜백 ref와 우리 ref를 동시에 연결하는 병합 콜백
+    const setNameRef = useCallback(
+      (el: HTMLInputElement | null) => {
+        nameInputRef.current = el;
+        const r = (nameProps as React.RefAttributes<HTMLInputElement> | undefined)?.ref;
+        if (typeof r === "function") r(el);
+        else if (r) (r as React.MutableRefObject<HTMLInputElement | null>).current = el;
+      },
+      [nameProps]
+    );
+
     const handleSelectItem = useCallback(
       (item: CodeBoxSuggestion) => {
         // code input 값 세팅: native input value setter + input event로 RHF register도 인식
@@ -114,6 +127,17 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       [ref, nameProps, onSelect]
     );
 
+    // 코드가 비워질 때 짝꿍 name 필드도 초기화
+    // synthetic onChange는 RHF store만 건드리고 uncontrolled DOM 표시값을 바꾸지 못하므로,
+    // code input 비우기와 동일한 native setter + input 이벤트 방식 사용
+    const clearName = useCallback(() => {
+      const el = nameInputRef.current;
+      if (!el) return;
+      Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")
+        ?.set?.call(el, "");
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }, []);
+
     const { handleChange, handleKeyDown, handleBlur } = useCodeInputHandlers(
       codeProps,
       onSearch,
@@ -127,7 +151,8 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
       isOpen,
       handleExpand,
       handleShrink,
-      clearInvalidOnBlur
+      clearInvalidOnBlur,
+      clearName
     );
 
     if (kind === "code-only") {
@@ -241,6 +266,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
                 readOnly={readOnly}
                 disabled={disabled}
                 {...(nameProps ?? {})}
+                ref={setNameRef}
               />
             </div>
           </div>
@@ -310,6 +336,7 @@ export const CodeBox = forwardRef<HTMLInputElement, CodeBoxProps>(
           readOnly={readOnly}
           disabled={disabled}
           {...(nameProps ?? {})}
+          ref={setNameRef}
         />
       </div>
     );

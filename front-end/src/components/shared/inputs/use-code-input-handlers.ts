@@ -19,7 +19,8 @@ export function useCodeInputHandlers(
   isOpen: boolean,
   onExpand: () => void,
   onShrink: () => void,
-  clearInvalidOnBlur: boolean
+  clearInvalidOnBlur: boolean,
+  clearName?: () => void
 ) {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,15 +89,18 @@ export function useCodeInputHandlers(
       if (!clearInvalidOnBlur) return;
       if (!onSearch || readOnly || disabled) return;
       const value = e.target.value.trim();
-      if (value === "") return;
+      // case A: 코드 빈값 — name도 함께 초기화
+      if (value === "") { clearName?.(); return; }
       const match = suggestions.find((s) => s.code === value);
+      // case B: 미매칭 — 코드 비운 직후 name도 초기화
       if (!match) {
         Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")
           ?.set?.call(e.target, "");
         e.target.dispatchEvent(new Event("input", { bubbles: true }));
+        clearName?.();
       }
     },
-    [codeProps, setIsOpen, clearInvalidOnBlur, onSearch, readOnly, disabled, suggestions]
+    [codeProps, setIsOpen, clearInvalidOnBlur, onSearch, readOnly, disabled, suggestions, clearName]
   );
 
   return { handleChange, handleKeyDown, handleBlur };
