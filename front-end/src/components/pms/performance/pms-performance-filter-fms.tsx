@@ -286,16 +286,6 @@ export function PmsPerformanceFilterFms({
         suggestionsLoading={operator.suggestionsLoading}
       />
 
-      {/* 정확 총건수 토글 — 다음 검색 시 반영, 즉시 재조회 없음 */}
-      <div className="lcn">
-        <span className="lcn__label">{t("exactCount")}</span>
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <input type="checkbox" {...register("exactCount")} />
-          <span style={{ fontSize: "var(--fs-xs)", color: "var(--ink-2)" }}>
-            {t("exactCountHint")}
-          </span>
-        </label>
-      </div>
     </>
   );
 }

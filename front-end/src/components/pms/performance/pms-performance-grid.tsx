@@ -1,16 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { usePmsEnumOptions } from "@/application/pms/enums/use-pms-enum";
 import { GridList } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
-import { pmsPerformancePort } from "@/lib/ports";
-import { pmsPerformanceKeys } from "@/application/pms/performance/use-cases";
 import { buildDetailColumns } from "./pms-performance-detail-columns";
 import { buildPmsDimensionCatalog, PMS_MEASURES } from "./pms-performance-aggregate-model";
 import { PmsPerformanceAggregateView } from "./pms-performance-aggregate-view";
 import { PmsViewToggle, PmsAggregateDimBar, type PmsViewMode } from "./pms-performance-aggregate-toolbar";
+import { usePmsPerformanceSearch } from "./use-pms-performance-search";
 import type { PmsPerformanceRow, SearchPmsPerformanceInput } from "@/application/pms/performance/ports";
 
 interface Props {
@@ -33,29 +33,21 @@ export function PmsPerformanceGrid({
   pageSize,
   onPageSizeChange,
 }: Props) {
+  const t = useTranslations("pms.performance.filter");
   const { options: jobDivOptions } = usePmsEnumOptions("JobDiv");
   const { options: boundOptions }  = usePmsEnumOptions("Bound");
 
   const [viewMode, setViewMode] = useState<PmsViewMode>("detail");
   const [dimKeys, setDimKeys]   = useState<string[]>([]);
 
-  const enabled = searchFilter !== null;
-  const queryInput = searchFilter
-    ? { ...searchFilter, page: currentPage - 1, size: pageSize }
-    : null;
-
-  const { data, isFetching } = useQuery({
-    queryKey: pmsPerformanceKeys.search(queryInput ?? { basis: "FREIGHT_INPUT", page: 0, size: pageSize }),
-    queryFn: () => pmsPerformancePort.search(queryInput!),
-    enabled,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnMount: false,
-  });
-
-  const rows: PmsPerformanceRow[] = data?.content ?? [];
-  const totalPages    = data?.totalPages ?? 0;
-  const totalElements = data?.totalElements ?? 0;
+  const {
+    rows,
+    isFetching,
+    totalElements,
+    totalPages,
+    isApprox,
+    isExactLoading,
+  } = usePmsPerformanceSearch({ searchFilter, currentPage, pageSize });
 
   const detailColumns = useMemo(
     () => buildDetailColumns(jobDivOptions, boundOptions),
@@ -81,7 +73,23 @@ export function PmsPerformanceGrid({
         <div className="panel__head">
           <div className="panel__title-accent" />
           <span className="panel__title">실적 조회</span>
-          <span className="panel__rowcount">{totalElements}</span>
+          <span
+            className="panel__rowcount"
+            title={isApprox ? t("approxCountTooltip") : undefined}
+          >
+            {isApprox ? `~${totalElements}` : totalElements}
+            {isExactLoading && (
+              <Loader2
+                size={11}
+                style={{
+                  marginLeft: 3,
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            )}
+          </span>
           {/* 토글은 panel__head 우측 */}
           <PmsViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
         </div>
