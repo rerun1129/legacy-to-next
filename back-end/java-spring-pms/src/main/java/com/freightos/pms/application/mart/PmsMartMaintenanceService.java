@@ -2,6 +2,7 @@ package com.freightos.pms.application.mart;
 
 import com.freightos.pms.adapter.out.mart.document.PmsMartSyncState;
 import com.freightos.pms.application.mart.port.in.PmsMartMaintenanceUseCase;
+import com.freightos.pms.application.mart.port.out.PmsMartReadinessPort;
 import com.freightos.pms.application.mart.port.out.PmsMartSyncPort;
 import com.freightos.pms.application.mart.result.MartSyncResult;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,13 @@ import org.springframework.stereotype.Service;
 public class PmsMartMaintenanceService implements PmsMartMaintenanceUseCase {
 
     private final PmsMartSyncPort syncPort;
+    private final PmsMartReadinessPort readinessPort;
 
     @Override
     public MartSyncResult rebuildFull() {
-        return syncPort.rebuildFull();
+        MartSyncResult result = syncPort.rebuildFull();
+        readinessPort.markReady();
+        return result;
     }
 
     @Override

@@ -28,6 +28,7 @@ public class PmsMartProperties {
     private Rebuild rebuild = new Rebuild();
     private Scheduler scheduler = new Scheduler();
     private LineAccel lineAccel = new LineAccel();
+    private Bootstrap bootstrap = new Bootstrap();
 
     /** Mart 재빌드 관련 크기 설정. */
     @Getter
@@ -79,7 +80,19 @@ public class PmsMartProperties {
          * 컬렉션의 5% 미만이면 MongoDB는 random-cursor 방식을 사용하므로 sub-second.
          * 환경변수 PMS_MART_APPROX_SAMPLE_SIZE로 오버라이드 가능.
          */
-        private long approxSampleSize = 20000;
+        private long approxSampleSize = 2000;
+    }
+
+    /** 기동 시 Mart 자동 빌드 설정. */
+    @Getter
+    @Setter
+    public static class Bootstrap {
+        /**
+         * true(기본)이면 기동 시 Mart가 비어 있을 때 백그라운드 full rebuild를 자동 실행한다.
+         * false이면 Mart가 비어 있어도 rebuild를 실행하지 않고 OLTP 폴백 상태를 유지한다.
+         * 환경변수 PMS_MART_BOOTSTRAP_AUTO_REBUILD로 오버라이드 가능.
+         */
+        private boolean autoRebuild = true;
     }
 
     /** routing이 "mart-only"인지 확인. */

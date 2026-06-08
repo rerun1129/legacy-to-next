@@ -98,8 +98,10 @@ services:
       MONGO_URI: "${MONGO_URI:-mongodb://mongo:27017/pms_mart}"
       PMS_MART_BATCH_SIZE: "${PMS_MART_BATCH_SIZE:-2000}"
       PMS_MART_PARALLELISM: "${PMS_MART_PARALLELISM:-4}"
-      # ── line-grain(실적일자/서류일자 + 차원) 가속 — sidecar 적재 동반. 켤 때만 rebuild 필요(기본 OFF) ──
-      PMS_MART_LINE_ACCEL_ENABLED: "${PMS_MART_LINE_ACCEL_ENABLED:-false}"
+      # ── line-grain(실적일자/서류일자 + 차원) 가속 — docker 기본 ON(자가관리: 빈 Mart면 기동 시 자동 rebuild·그 동안 OLTP 폴백) ──
+      PMS_MART_LINE_ACCEL_ENABLED: "${PMS_MART_LINE_ACCEL_ENABLED:-true}"
+      # ── 증분 동기화 스케줄러 — docker 기본 ON, 1분마다 source 변경분 Mart 반영(cron=application.yml) ──
+      PMS_MART_SCHEDULER_ENABLED: "${PMS_MART_SCHEDULER_ENABLED:-true}"
       # ── 근사 총건수 $sample 크기 — 캐시 미달 대용량 컬렉션서 20000은 랜덤리드 thrash(~5s). 2000=sub-second(~0.74s)·오차~1.3%(배경 정확 쿼리가 교정) ──
       PMS_MART_APPROX_SAMPLE_SIZE: "${PMS_MART_APPROX_SAMPLE_SIZE:-2000}"
     depends_on:

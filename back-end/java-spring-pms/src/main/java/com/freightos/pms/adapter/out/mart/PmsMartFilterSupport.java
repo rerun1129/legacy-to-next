@@ -22,12 +22,18 @@ import org.springframework.util.StringUtils;
 public class PmsMartFilterSupport {
 
     private final PmsMartProperties props;
+    private final PmsMartReadiness readiness;
 
     /**
      * Mart 어댑터를 사용할 수 있으면 true, OLTP 폴백이 필요하면 false.
      * line-accel OFF이면 legacySupported를 그대로 위임한다.
      */
     public boolean supportedByMart(SearchPmsPerformanceCommand c) {
+        // Mart 빌드 전·빌드 중에는 전부 OLTP 폴백
+        if (!readiness.isReady()) {
+            return false;
+        }
+
         if (!props.getLineAccel().isEnabled()) {
             return legacySupported(c);
         }
