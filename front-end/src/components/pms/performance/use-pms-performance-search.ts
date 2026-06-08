@@ -20,43 +20,69 @@ interface UsePmsPerformanceSearchResult {
   isExactLoading: boolean;
 }
 
+/** PERF/DOC dateKind에서 이 일수를 초과할 때만 근사 count를 사용한다 (분기 기준). */
+const APPROX_MIN_SPAN_DAYS = 92;
+
+/** yyyyMMdd 문자열 두 개의 일수 차이. 하나라도 없으면 0. */
+function spanDays(from: string | null | undefined, to: string | null | undefined): number {
+  if (!from || !to) return 0;
+  const toDate = (s: string) =>
+    new Date(Number(s.slice(0, 4)), Number(s.slice(4, 6)) - 1, Number(s.slice(6, 8)));
+  return Math.round((toDate(to).getTime() - toDate(from).getTime()) / 86400000);
+}
+
 /**
- * 근사 총건수(sub-second) → 배경 정확 count 비동기 보정.
- * - 근사 쿼리: page·size 포함(표시용 행 조회), exactCount=false
- * - 정확 쿼리: page=0·size=1(키 고정, 필터당 1회), exactCount=true
- *   근사 쿼리 성공 후 활성화 → 도착 시 totalElements 교체
+ * 조회 조건에 따라 근사 count 사용 여부를 판단한다.
+ *
+ * - ETD/ETA: 항상 정확치 직접(근사 불필요)
+ * - PERF/DOC 범위 ≤ 92일: 정확치 직접
+ * - PERF/DOC 범위 > 92일: 근사(sub-second) → 배경 정확 보정
+ */
+function calcNeedsApprox(filter: SearchPmsPerformanceInput | null): boolean {
+  if (!filter) return false;
+  const dk = filter.dateKind;
+  if (dk !== "PERF" && dk !== "DOC") return false;
+  return spanDays(filter.dateFrom, filter.dateTo) > APPROX_MIN_SPAN_DAYS;
+}
+
+/**
+ * 점진적 count 훅:
+ * - needsApprox=false (ETD/ETA·좁은 범위): primary를 exactCount=true로 호출 → 1회 왕복으로 정확치 바로 표시
+ * - needsApprox=true (PERF/DOC > 92일): primary=근사(fast), 배경=정확 보정(기존 동작)
  */
 export function usePmsPerformanceSearch({
   searchFilter,
   currentPage,
   pageSize,
 }: UsePmsPerformanceSearchParams): UsePmsPerformanceSearchResult {
+  const needsApprox = calcNeedsApprox(searchFilter);
+
   const PLACEHOLDER: SearchPmsPerformanceInput = { basis: "FREIGHT_INPUT", page: 0, size: pageSize, exactCount: false };
 
-  // 근사(주) 쿼리 — 페이지/페이지크기 포함, 실제 행 데이터 조회
-  const approxInput: SearchPmsPerformanceInput | null = searchFilter
-    ? { ...searchFilter, page: currentPage - 1, size: pageSize, exactCount: false }
+  // 주 쿼리 — 실제 행 데이터 + (조건에 따라) 정확 or 근사 count
+  const primaryInput: SearchPmsPerformanceInput | null = searchFilter
+    ? { ...searchFilter, page: currentPage - 1, size: pageSize, exactCount: !needsApprox }
     : null;
 
   const {
-    data: approxData,
-    isFetching: isApproxFetching,
-    isSuccess: isApproxSuccess,
+    data: primaryData,
+    isFetching: isPrimaryFetching,
+    isSuccess: isPrimarySuccess,
   } = useQuery<PmsPerformancePage>({
-    queryKey: pmsPerformanceKeys.search(approxInput ?? PLACEHOLDER),
-    queryFn: () => pmsPerformancePort.search(approxInput!),
+    queryKey: pmsPerformanceKeys.search(primaryInput ?? PLACEHOLDER),
+    queryFn: () => pmsPerformancePort.search(primaryInput!),
     enabled: searchFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
   });
 
-  // 정확(배경) 쿼리 — page=0·size=1로 키 고정(필터당 1회만 조회), content 미사용
+  // 배경 정확 쿼리 — needsApprox일 때만 실행 (page=0·size=1로 필터당 1회 키 고정)
+  const EXACT_PLACEHOLDER: SearchPmsPerformanceInput = { basis: "FREIGHT_INPUT", page: 0, size: 1, exactCount: true };
+
   const exactInput: SearchPmsPerformanceInput | null = searchFilter
     ? { ...searchFilter, page: 0, size: 1, exactCount: true }
     : null;
-
-  const EXACT_PLACEHOLDER: SearchPmsPerformanceInput = { basis: "FREIGHT_INPUT", page: 0, size: 1, exactCount: true };
 
   const {
     data: exactData,
@@ -64,30 +90,31 @@ export function usePmsPerformanceSearch({
   } = useQuery<PmsPerformancePage>({
     queryKey: pmsPerformanceKeys.search(exactInput ?? EXACT_PLACEHOLDER),
     queryFn: () => pmsPerformancePort.search(exactInput!),
-    // 근사 조회 성공 후에만 활성화 — 근사 결과가 먼저 화면에 표시된 뒤 배경 보정
-    enabled: searchFilter !== null && isApproxSuccess,
+    // 근사 조회 성공 후에만 활성화, 그리고 needsApprox 조건 필수
+    enabled: searchFilter !== null && needsApprox && isPrimarySuccess,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
   });
 
-  const rows: PmsPerformanceRow[] = approxData?.content ?? [];
-  const approxTotal               = approxData?.totalElements;
-  const exactTotal                = exactData?.totalElements;
+  const rows: PmsPerformanceRow[] = primaryData?.content ?? [];
+  const primaryTotal               = primaryData?.totalElements;
+  const exactTotal                 = exactData?.totalElements;
 
-  // 정확치 도착 시 totalElements 교체; 미도착이면 근사치 사용
-  const totalElements = exactTotal ?? approxTotal ?? 0;
+  // needsApprox=false면 primaryTotal이 이미 정확치; needsApprox=true면 exactTotal 도착 시 교체
+  const totalElements = exactTotal ?? primaryTotal ?? 0;
   const totalPages    = Math.ceil(totalElements / pageSize) || 0;
 
-  // 근사 데이터는 있으나 정확 데이터 미도착 상태
-  const isApprox = approxData !== undefined && exactTotal === undefined;
+  // 틸드(~) 표시: 근사 모드이고 행 데이터는 있으나 정확치 미도착 상태
+  const isApprox      = needsApprox && primaryData !== undefined && exactTotal === undefined;
+  const isExactLoading = needsApprox && isExactFetching;
 
   return {
     rows,
-    isFetching: isApproxFetching,
+    isFetching: isPrimaryFetching,
     totalElements,
     totalPages,
     isApprox,
-    isExactLoading: isExactFetching,
+    isExactLoading,
   };
 }
