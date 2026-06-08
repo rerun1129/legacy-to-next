@@ -106,5 +106,7 @@ pms:
       enabled: ${PMS_MART_LINE_ACCEL_ENABLED:false}
       early-term-threshold: ${PMS_MART_LINE_EARLY_TERM_THRESHOLD:20000}
       approx-sample-size: ${PMS_MART_APPROX_SAMPLE_SIZE:2000}
+      exact-count-timeout-ms: ${PMS_MART_EXACT_COUNT_TIMEOUT_MS:30000}
+      deep-jump-offset-threshold: ${PMS_MART_DEEP_JUMP_OFFSET_THRESHOLD:3000}
     bootstrap:
       auto-rebuild: ${PMS_MART_BOOTSTRAP_AUTO_REBUILD:true}

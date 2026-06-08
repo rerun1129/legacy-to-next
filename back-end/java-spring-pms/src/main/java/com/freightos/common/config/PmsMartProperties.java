@@ -81,6 +81,35 @@ public class PmsMartProperties {
          * 환경변수 PMS_MART_APPROX_SAMPLE_SIZE로 오버라이드 가능.
          */
         private long approxSampleSize = 2000;
+
+        /**
+         * 조회 결과(카운트·키셋 경계) 캐시 TTL(초).
+         * 동일 필터 조합 반복 조회 시 count 재계산·skip 스캔을 생략한다.
+         * 환경변수 PMS_MART_CACHE_TTL_SECONDS로 오버라이드 가능.
+         */
+        private long cacheTtlSeconds = 60;
+
+        /**
+         * 캐시 항목 최대 개수(사용자 × 필터 조합 수).
+         * 초과 시 가장 오래된 항목부터 정리한다.
+         */
+        private int cacheMaxSize = 500;
+
+        /**
+         * exact count aggregation에 적용하는 maxTime(ms).
+         * 신규 조회 killOp이 race로 늦을 경우 최후 백스톱 역할을 한다.
+         * 환경변수 PMS_MART_EXACT_COUNT_TIMEOUT_MS로 오버라이드 가능.
+         */
+        private long exactCountTimeoutMs = 30000;
+
+        /**
+         * 깊은 페이지 점프 판정 offset 임계값.
+         * 경계 캐시 miss + pageable.getOffset() 이 이 값을 초과하면
+         * skip 대신 사이드카 경로로 우회한다.
+         * 0페이지·순차(경계 hit)는 이 값과 무관하게 종래 경로를 유지한다.
+         * 환경변수 PMS_MART_DEEP_JUMP_OFFSET_THRESHOLD로 오버라이드 가능.
+         */
+        private long deepJumpOffsetThreshold = 3000;
     }
 
     /** 기동 시 Mart 자동 빌드 설정. */

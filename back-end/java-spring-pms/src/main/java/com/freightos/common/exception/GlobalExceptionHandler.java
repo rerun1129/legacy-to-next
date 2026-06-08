@@ -1,5 +1,6 @@
 package com.freightos.common.exception;
 
+import com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +26,23 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final String TYPE_BASE = "https://fms.freightos.com/errors/";
+
+    /**
+     * exact count 연산이 신규 조회에 의해 취소됐을 때 발생하는 예외.
+     * FE는 이미 HTTP abort를 완료한 상태이므로 이 응답은 실질적으로 폐기된다.
+     * 전역 에러 토스트로 새지 않도록 409 + debug 로그만 출력한다.
+     */
+    @ExceptionHandler(PmsQueryCancelledException.class)
+    public ResponseEntity<ProblemDetail> handlePmsQueryCancelled(PmsQueryCancelledException ex) {
+        log.debug("PmsQueryCancelledException: {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        pd.setType(URI.create(TYPE_BASE + "QUERY_CANCELLED"));
+        pd.setTitle("Query Cancelled");
+        pd.setDetail("이전 조회가 취소됐습니다.");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
+    }
 
     @ExceptionHandler(FmsException.class)
     public ResponseEntity<ProblemDetail> handleFmsException(FmsException ex, WebRequest request) {

@@ -1,28 +1,24 @@
 package com.freightos.pms.adapter.out.mart;
 
-import com.freightos.common.config.PmsMartProperties;
+import com.freightos.pms.adapter.out.mart.cancel.PmsExactCountRegistry;
 import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
-import com.freightos.pms.application.pms.AggregationBasis;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.port.out.PmsPerformanceQueryPort;
 import com.freightos.pms.application.pms.projection.PmsRawBlRow;
 import lombok.RequiredArgsConstructor;
+import org.bson.Document;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * MongoDB Mart 기반 PmsPerformanceQueryPort 구현체.
@@ -31,20 +27,24 @@ import java.util.stream.Collectors;
  *
  * 날짜 필터 존재 + line-accel ON 시 2-tier 경로를 사용하며,
  * count 값으로 page 경로를 적응형 분기한다.
- *   - 밀집(count > earlyTermThreshold): blId DESC + $elemMatch 조기종료 find
- *   - 희소(count <= earlyTermThreshold): 기존 sidecar pageBlKeys + _id 조회
+ *   - 밀집(count > earlyTermThreshold): keyset 우선(P1-a) / skip 폴백, count 캐시(P1-b)
+ *     단, 경계 miss + offset > deepJumpOffsetThreshold 인 깊은 점프는 사이드카 경로 우회
+ *   - 희소(count <= earlyTermThreshold): sidecar pageBlKeys + _id 조회
  * 그 외에는 fast path(Criteria 단일 쿼리)로 처리한다.
+ *
+ * page 선택 세부 로직은 PmsMartPageSelector에 위임한다.
+ * count 결정 로직은 PmsMartCountResolver, keyset 페이지 선택은 PmsMartKeysetSupport가 담당한다.
  */
 @Component
 @ConditionalOnProperty(prefix = "pms.mart", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
-    private final MongoTemplate mongoTemplate;
     private final PmsMartCriteriaBuilder criteriaBuilder;
     private final PmsMartPageCriteriaBuilder pageCriteriaBuilder;
     private final PmsMartRowMapper rowMapper;
-    private final PmsMartProperties props;
+    private final PmsMartCountResolver countResolver;
+    private final PmsMartPageSelector pageSelector;
 
     /**
      * line-accel OFF이면 Optional.empty() — @RequiredArgsConstructor가 Optional<T> 파라미터를
@@ -52,184 +52,89 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
      */
     private final Optional<PmsMartDateDimQueryPlanner>   planner;
     private final Optional<PmsMartLineReaggregator>      reaggregator;
-    private final Optional<PmsMartApproxCountEstimator>  approxEstimator;
-
-    // B/L 단위 정렬: blId DESC(최신순) + blType ASC(HOUSE < MASTER — 사전순 tie-break)
-    private static final Sort BL_SORT = Sort.by(Sort.Direction.DESC, "blId")
-        .and(Sort.by(Sort.Direction.ASC, "blType"));
+    private final Optional<PmsExactCountRegistry>        exactCountRegistry;
 
     @Override
     public Page<PmsRawBlRow> searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
-        AggregationBasis basis = command.effectiveBasis();
-        String basisKey = switch (basis) {
+        String basisKey = switch (command.effectiveBasis()) {
             case FREIGHT_INPUT -> "freightInput";
             case TAX_ISSUED    -> "taxIssued";
             case SLIP_ISSUED   -> "slipIssued";
             // DOCUMENT_CREATED는 searchByDocument 경로 — 방어적 처리
-            default -> throw new IllegalStateException("searchByFreightLine은 DOCUMENT_CREATED를 지원하지 않습니다: " + basis);
+            default -> throw new IllegalStateException("searchByFreightLine은 DOCUMENT_CREATED를 지원하지 않습니다: " + command.effectiveBasis());
         };
-        String flagField = switch (basis) {
+        String flagField = switch (command.effectiveBasis()) {
             case FREIGHT_INPUT -> "hasFreightInput";
             case TAX_ISSUED    -> "hasTaxIssued";
             case SLIP_ISSUED   -> "hasSlipIssued";
-            default -> throw new IllegalStateException("지원하지 않는 basis: " + basis);
+            default -> throw new IllegalStateException("지원하지 않는 basis: " + command.effectiveBasis());
         };
+
+        // 어떤 경로(fast-path·2-tier)로 분기되든 직전 필터의 진행 중 정확 count를 먼저 취소한다.
+        // 페이지 이동(동일 signature)은 레지스트리 내부 가드가 보호한다. line-accel OFF면 empty → no-op.
+        String userKey = currentUserKey();
+        String signature = PmsPerformanceFilterSignature.of(command);
+        exactCountRegistry.ifPresent(r -> r.onNewSearch(userKey, signature));
 
         // 2-tier 경로: 실적일자 필터 존재 + line-accel ON
         if (planner.isPresent() && reaggregator.isPresent() && hasFreightDate(command)) {
+            String cacheKey = userKey + "|" + signature;
             Criteria pageCriteria = pageCriteriaBuilder.buildFreightPageCriteria(command, basisKey, flagField);
-            long total = resolveFreightTotal(command, flagField, pageCriteria);
-            List<PmsBlMartDocument> pageDocs = selectFreightPageDocsWithCriteria(command, flagField, pageCriteria, total, pageable);
+            long total = countResolver.resolveFreightTotal(command, flagField, pageCriteria, cacheKey, userKey, signature);
+            List<PmsBlMartDocument> pageDocs = pageSelector.selectFreightPageDocs(command, flagField, pageCriteria, total, pageable, cacheKey);
             List<PmsRawBlRow> content = pageDocs.stream()
                 .map(doc -> reaggregator.get().reaggregateFreight(doc, command, basisKey))
                 .toList();
             return new PageImpl<>(content, pageable, total);
         }
 
-        // fast path
+        // fast path: count 캐시 + hint 정렬커버 인덱스 + keyset/skip
+        String cacheKey = userKey + "|" + signature;
         Criteria criteria = criteriaBuilder.buildFreight(command, flagField);
-        return executeQuery(criteria, pageable, doc -> rowMapper.toFreightRow(doc, basisKey));
+        long total = countResolver.resolveFastPathTotal(criteria, cacheKey);
+        Document hint = new Document(flagField, 1).append("blId", -1).append("blType", 1);
+        List<PmsBlMartDocument> docs = pageSelector.selectDensePage(criteria, pageable, cacheKey, hint);
+        List<PmsRawBlRow> content = docs.stream().map(doc -> rowMapper.toFreightRow(doc, basisKey)).toList();
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override
     public Page<PmsRawBlRow> searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
+        // 어떤 경로(fast-path·2-tier)로 분기되든 직전 필터의 진행 중 정확 count를 먼저 취소한다.
+        // 페이지 이동(동일 signature)은 레지스트리 내부 가드가 보호한다. line-accel OFF면 empty → no-op.
+        String userKey = currentUserKey();
+        String signature = PmsPerformanceFilterSignature.of(command);
+        exactCountRegistry.ifPresent(r -> r.onNewSearch(userKey, signature));
+
         // 2-tier 경로: 날짜 필터(실적·서류 중 하나라도) 존재 + line-accel ON
         if (planner.isPresent() && reaggregator.isPresent() && hasDocumentDate(command)) {
+            String cacheKey = userKey + "|" + signature;
             Criteria docPageCriteria = pageCriteriaBuilder.buildDocumentPageCriteria(command);
-            long total = resolveDocumentTotal(command, docPageCriteria);
-            List<PmsBlMartDocument> pageDocs = selectDocumentPageDocsWithCriteria(command, docPageCriteria, total, pageable);
+            long total = countResolver.resolveDocumentTotal(command, docPageCriteria, cacheKey, userKey, signature);
+            List<PmsBlMartDocument> pageDocs = pageSelector.selectDocumentPageDocs(command, docPageCriteria, total, pageable, cacheKey);
             List<PmsRawBlRow> content = pageDocs.stream()
                 .map(doc -> reaggregator.get().reaggregateDocument(doc, command))
                 .toList();
             return new PageImpl<>(content, pageable, total);
         }
 
-        // fast path
+        // fast path: count 캐시 + hint 정렬커버 인덱스 + keyset/skip
+        String cacheKey = userKey + "|" + signature;
         Criteria criteria = criteriaBuilder.buildDocument(command);
-        return executeQuery(criteria, pageable, doc -> rowMapper.toDocumentRow(doc));
+        long total = countResolver.resolveFastPathTotal(criteria, cacheKey);
+        Document hint = new Document("hasDocumentCreated", 1).append("blId", -1).append("blType", 1);
+        List<PmsBlMartDocument> docs = pageSelector.selectDensePage(criteria, pageable, cacheKey, hint);
+        List<PmsRawBlRow> content = docs.stream().map(doc -> rowMapper.toDocumentRow(doc)).toList();
+        return new PageImpl<>(content, pageable, total);
     }
 
-    // ── count 분기 (근사 기본 / exactCount 토글 / 희소는 exact) ─────────────
+    // ── 캐시 키 생성 ─────────────────────────────────────────────────────────
 
-    /**
-     * TAX/SLIP basis + 서류타입 필터 동시 적용 시 sidecar covered count는
-     * (발급 플래그, 서류타입)이 같은 라인임을 보장하지 못해 과대 집계된다.
-     * 이 조합에서는 라인-그레인 pageCriteria($elemMatch)로 count·page를 일관 처리한다.
-     */
-    private static boolean needsLineGrainCorrelation(SearchPmsPerformanceCommand c) {
-        AggregationBasis basis = c.effectiveBasis();
-        boolean taxOrSlip = basis == AggregationBasis.TAX_ISSUED || basis == AggregationBasis.SLIP_ISSUED;
-        boolean hasDocTypeFilter =
-            (c.documentTypes() != null && !c.documentTypes().isEmpty())
-            || StringUtils.hasText(c.financialDocType());
-        return taxOrSlip && hasDocTypeFilter;
-    }
-
-    /** 라인-그레인 정확 count: pageCriteria($elemMatch) 매칭 B/L 문서 수 = 정확 distinct B/L 수. */
-    private long exactFreightCount(SearchPmsPerformanceCommand command, String flagField, Criteria pageCriteria) {
-        if (needsLineGrainCorrelation(command)) {
-            return mongoTemplate.count(Query.query(pageCriteria), PmsBlMartDocument.class);
-        }
-        return planner.get().countFreight(command, flagField);
-    }
-
-    /**
-     * freight basis 총건수 결정.
-     * exactCount=true → 라인-그레인 상관 조합이면 pageCriteria count, 그 외 sidecar 정확 count.
-     * 근사 total이 earlyTermThreshold 미만 → 희소 판정 → 정확 count(근사 오차 큰 구간).
-     * 그 외 → 근사 추정.
-     */
-    private long resolveFreightTotal(
-            SearchPmsPerformanceCommand command,
-            String flagField,
-            Criteria pageCriteria) {
-
-        if (Boolean.TRUE.equals(command.exactCount())) {
-            return exactFreightCount(command, flagField, pageCriteria);
-        }
-        long approx = approxEstimator.get().estimate(pageCriteria);
-        // 희소: 근사 오차가 커지는 구간이라 정확 count가 오히려 저렴
-        if (approx < props.getLineAccel().getEarlyTermThreshold()) {
-            return exactFreightCount(command, flagField, pageCriteria);
-        }
-        return approx;
-    }
-
-    /**
-     * document basis 총건수 결정.
-     * exactCount=true → sidecar 정확 count.
-     * 근사 total이 earlyTermThreshold 미만 → 희소 판정 → 정확 count.
-     * 그 외 → 근사 추정.
-     */
-    private long resolveDocumentTotal(
-            SearchPmsPerformanceCommand command,
-            Criteria pageCriteria) {
-
-        if (Boolean.TRUE.equals(command.exactCount())) {
-            return planner.get().countDocument(command);
-        }
-        long approx = approxEstimator.get().estimate(pageCriteria);
-        if (approx < props.getLineAccel().getEarlyTermThreshold()) {
-            return planner.get().countDocument(command);
-        }
-        return approx;
-    }
-
-    // ── 적응형 page 선택 ─────────────────────────────────────────────────────
-
-    /**
-     * count 임계를 기준으로 freight page 문서 목록을 선택한다.
-     * 이미 구성된 pageCriteria를 재사용하여 밀집 경로에서 중복 빌드를 피한다.
-     *
-     * 밀집(total > threshold): pageCriteria + blId DESC 조기종료 find.
-     * 희소(total <= threshold): sidecar pageBlKeys + _id 조회 (기존 경로).
-     */
-    private List<PmsBlMartDocument> selectFreightPageDocsWithCriteria(
-            SearchPmsPerformanceCommand command,
-            String flagField,
-            Criteria pageCriteria,
-            long total,
-            Pageable pageable) {
-
-        if (total > props.getLineAccel().getEarlyTermThreshold() || needsLineGrainCorrelation(command)) {
-            // 밀집 / 라인-그레인 상관 경로: pageCriteria + blId DESC 조기종료 find
-            Query q = Query.query(pageCriteria)
-                .with(BL_SORT)
-                .skip(pageable.getOffset())
-                .limit(pageable.getPageSize());
-            return mongoTemplate.find(q, PmsBlMartDocument.class);
-        }
-
-        // 희소 경로: sidecar sort 기준 blKeys 선택 후 _id 조회(순서 보존)
-        List<String> blKeys = planner.get().pageBlKeysFreight(command, flagField, pageable);
-        return findByBlKeysOrdered(blKeys);
-    }
-
-    /**
-     * count 임계를 기준으로 document page 문서 목록을 선택한다.
-     * 이미 구성된 pageCriteria를 재사용하여 밀집 경로에서 중복 빌드를 피한다.
-     *
-     * 밀집(total > threshold): pageCriteria + blId DESC 조기종료 find.
-     * 희소(total <= threshold): sidecar pageBlKeys + _id 조회 (기존 경로).
-     */
-    private List<PmsBlMartDocument> selectDocumentPageDocsWithCriteria(
-            SearchPmsPerformanceCommand command,
-            Criteria pageCriteria,
-            long total,
-            Pageable pageable) {
-
-        if (total > props.getLineAccel().getEarlyTermThreshold()) {
-            // 밀집 경로
-            Query q = Query.query(pageCriteria)
-                .with(BL_SORT)
-                .skip(pageable.getOffset())
-                .limit(pageable.getPageSize());
-            return mongoTemplate.find(q, PmsBlMartDocument.class);
-        }
-
-        // 희소 경로
-        List<String> blKeys = planner.get().pageBlKeysDocument(command, pageable);
-        return findByBlKeysOrdered(blKeys);
+    /** 인증 사용자 키. 미인증 또는 null이면 "anonymous"를 반환한다. */
+    private static String currentUserKey() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) return "anonymous";
+        return auth.getName();
     }
 
     // ── 날짜 존재 헬퍼 ────────────────────────────────────────────────────────
@@ -246,52 +151,4 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             || StringUtils.hasText(c.documentDtTo());
     }
 
-    // ── blKeys 순서 보존 조회 ─────────────────────────────────────────────────
-
-    /**
-     * blKeys 순서를 보존하여 PmsBlMartDocument 일괄 조회한다.
-     * sidecar sort(blId DESC, blType ASC) 기준 페이지 순서 보존이 목적.
-     */
-    private List<PmsBlMartDocument> findByBlKeysOrdered(List<String> blKeys) {
-        if (blKeys.isEmpty()) return List.of();
-
-        List<PmsBlMartDocument> docs = mongoTemplate.find(
-            Query.query(Criteria.where("_id").in(blKeys)),
-            PmsBlMartDocument.class);
-
-        Map<String, PmsBlMartDocument> byId = docs.stream()
-            .collect(Collectors.toMap(PmsBlMartDocument::getId, d -> d));
-
-        return blKeys.stream()
-            .map(byId::get)
-            .filter(Objects::nonNull)
-            .toList();
-    }
-
-    // ── fast-path 공통 실행 템플릿 ────────────────────────────────────────────
-
-    /**
-     * Criteria로 skip/limit 페이지 조회 + 별도 count 쿼리를 수행한다.
-     * count는 skip/limit/sort 없는 별도 Query로 실행한다.
-     */
-    private Page<PmsRawBlRow> executeQuery(
-            Criteria criteria, Pageable pageable, DocMapper mapper) {
-
-        Query findQuery = Query.query(criteria)
-            .with(BL_SORT)
-            .skip(pageable.getOffset())
-            .limit(pageable.getPageSize());
-
-        List<PmsBlMartDocument> docs = mongoTemplate.find(findQuery, PmsBlMartDocument.class);
-
-        long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
-
-        List<PmsRawBlRow> content = docs.stream().map(mapper::map).toList();
-        return new PageImpl<>(content, pageable, total);
-    }
-
-    @FunctionalInterface
-    private interface DocMapper {
-        PmsRawBlRow map(PmsBlMartDocument doc);
-    }
 }

@@ -1,5 +1,6 @@
 package com.freightos.pms.adapter.out.mart;
 
+import com.freightos.common.config.PmsMartProperties;
 import com.freightos.pms.adapter.out.mart.document.PmsDocDtEntryDocument;
 import com.freightos.pms.adapter.out.mart.document.PmsPerfDtEntryDocument;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -33,6 +35,7 @@ public class PmsMartDateDimQueryPlanner {
 
     private final MongoTemplate mongoTemplate;
     private final PmsMartDateDimMatchBuilder matchBuilder;
+    private final PmsMartProperties props;
 
     // ── 공개 API ─────────────────────────────────────────────────────────────
 
@@ -43,7 +46,19 @@ public class PmsMartDateDimQueryPlanner {
      */
     public long countFreight(SearchPmsPerformanceCommand c, String flagField) {
         Criteria criteria = matchBuilder.buildFreightMatch(c, flagField);
-        return count(criteria, PmsPerfDtEntryDocument.class);
+        return count(criteria, PmsPerfDtEntryDocument.class, null);
+    }
+
+    /**
+     * freight basis(pms_perfdt_entry) distinct blKey 수를 반환한다 (comment·maxTime 주입).
+     * killOp 대상 식별을 위해 aggregation에 comment를 태깅하고 exactCountTimeoutMs를 maxTime으로 설정한다.
+     *
+     * @param flagField "hasFreightInput" / "hasTaxIssued" / "hasSlipIssued"
+     * @param comment   Mongo op 식별 태그 ("pms-exact-{uuid}" 형식)
+     */
+    public long countFreight(SearchPmsPerformanceCommand c, String flagField, String comment) {
+        Criteria criteria = matchBuilder.buildFreightMatch(c, flagField);
+        return count(criteria, PmsPerfDtEntryDocument.class, comment);
     }
 
     /**
@@ -62,7 +77,17 @@ public class PmsMartDateDimQueryPlanner {
      */
     public long countDocument(SearchPmsPerformanceCommand c) {
         Criteria criteria = matchBuilder.buildDocumentMatch(c);
-        return count(criteria, PmsDocDtEntryDocument.class);
+        return count(criteria, PmsDocDtEntryDocument.class, null);
+    }
+
+    /**
+     * document basis(pms_docdt_entry) distinct blKey 수를 반환한다 (comment·maxTime 주입).
+     *
+     * @param comment Mongo op 식별 태그 ("pms-exact-{uuid}" 형식)
+     */
+    public long countDocument(SearchPmsPerformanceCommand c, String comment) {
+        Criteria criteria = matchBuilder.buildDocumentMatch(c);
+        return count(criteria, PmsDocDtEntryDocument.class, comment);
     }
 
     /**
@@ -80,13 +105,21 @@ public class PmsMartDateDimQueryPlanner {
      * match → group("blKey") → count 파이프라인.
      * 결과 Document의 "n" 필드가 distinct blKey 수.
      * 결과 없으면 0 반환.
+     *
+     * comment가 null이 아니면 Mongo op 태깅 + exactCountTimeoutMs를 maxTime으로 설정한다.
+     * maxTime은 killOp race 시 최후 백스톱 역할을 한다.
      */
-    private long count(Criteria criteria, Class<?> entityClass) {
+    private long count(Criteria criteria, Class<?> entityClass, String comment) {
+        AggregationOptions.Builder optBuilder = AggregationOptions.builder().allowDiskUse(true);
+        if (comment != null) {
+            optBuilder.comment(comment)
+                      .maxTime(Duration.ofMillis(props.getLineAccel().getExactCountTimeoutMs()));
+        }
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),
                 Aggregation.group("blKey"),
                 Aggregation.count().as("n")
-        ).withOptions(AggregationOptions.builder().allowDiskUse(true).build());
+        ).withOptions(optBuilder.build());
 
         AggregationResults<Document> results = mongoTemplate.aggregate(agg, entityClass, Document.class);
         Document mapped = results.getUniqueMappedResult();
