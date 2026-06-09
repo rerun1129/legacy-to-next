@@ -29,6 +29,7 @@ public class PmsMartProperties {
     private Scheduler scheduler = new Scheduler();
     private LineAccel lineAccel = new LineAccel();
     private Bootstrap bootstrap = new Bootstrap();
+    private Mongo mongo = new Mongo();
 
     /** Mart 재빌드 관련 크기 설정. */
     @Getter
@@ -122,6 +123,24 @@ public class PmsMartProperties {
          * 환경변수 PMS_MART_BOOTSTRAP_AUTO_REBUILD로 오버라이드 가능.
          */
         private boolean autoRebuild = true;
+    }
+
+    /** Mongo 클라이언트 타임아웃(회로차단기가 빠르게 열리도록 기본 30s 대비 하향). */
+    @Getter
+    @Setter
+    public static class Mongo {
+        /**
+         * 서버 선택 타임아웃(ms). 기본 드라이버 30s라 하향하지 않으면 Mongo 다운 시
+         * 차단기가 열리기 전 첫 요청들이 30s씩 매달린다. mongo:7 standalone이라 election window 없음.
+         * 환경변수 PMS_MART_MONGO_SERVER_SELECTION_TIMEOUT_MS로 오버라이드.
+         */
+        private long serverSelectionTimeoutMs = 3000;
+        /**
+         * 소켓 connect 타임아웃(ms). socket read 타임아웃은 건드리지 않는다
+         * (긴 exact-count 집계·full rebuild가 죽으면 안 됨).
+         * 환경변수 PMS_MART_MONGO_CONNECT_TIMEOUT_MS로 오버라이드.
+         */
+        private int connectTimeoutMs = 2000;
     }
 
     /** routing이 "mart-only"인지 확인. */

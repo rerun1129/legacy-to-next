@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
  * - isMartOnly()==true → 항상 Mart
  * - filterSupport.supportedByMart()==true → Mart
  * - 그 외 → OLTP 폴백
+ * - Mart 결함 시 회로차단기로 OLTP 폴백
  */
 @Primary
 @Component
@@ -36,19 +37,26 @@ public class PmsPerformanceQueryRouter implements PmsPerformanceQueryPort {
     private final PmsMartQueryAdapter mart;
     private final PmsMartFilterSupport filterSupport;
     private final PmsMartProperties props;
+    private final PmsMartCircuitGuard guard;
 
     @Override
     public Page<PmsRawBlRow> searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
-        return useMart(command)
-            ? mart.searchByFreightLine(command, pageable)
-            : oltp.searchByFreightLine(command, pageable);
+        if (!useMart(command)) {
+            return oltp.searchByFreightLine(command, pageable);
+        }
+        return guard.martOrOltp(
+            () -> mart.searchByFreightLine(command, pageable),
+            () -> oltp.searchByFreightLine(command, pageable));
     }
 
     @Override
     public Page<PmsRawBlRow> searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
-        return useMart(command)
-            ? mart.searchByDocument(command, pageable)
-            : oltp.searchByDocument(command, pageable);
+        if (!useMart(command)) {
+            return oltp.searchByDocument(command, pageable);
+        }
+        return guard.martOrOltp(
+            () -> mart.searchByDocument(command, pageable),
+            () -> oltp.searchByDocument(command, pageable));
     }
 
     private boolean useMart(SearchPmsPerformanceCommand command) {

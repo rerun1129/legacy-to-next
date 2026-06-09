@@ -70,6 +70,28 @@ logging:
   level:
     com.freightos: DEBUG
 
+# ── Resilience4j — Mongo Mart 회로차단기 ─────────────────────────
+# Mart supplier만 차단기로 감싼다. OLTP 분기는 차단기 밖.
+# DataAccessException/MongoException → 실패 집계·OLTP 폴백.
+# PmsQueryCancelledException → ignoreExceptions(트립 없음, 409 전파).
+resilience4j:
+  circuitbreaker:
+    instances:
+      pmsMart:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: false
+        recordExceptions:
+          - org.springframework.dao.DataAccessException
+          - com.mongodb.MongoException
+        ignoreExceptions:
+          - com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException
+
 # ── p6spy (SQL 로깅 — 디버그 시에만 임시로 true) ───────────────────
 decorator:
   datasource:
@@ -110,3 +132,6 @@ pms:
       deep-jump-offset-threshold: ${PMS_MART_DEEP_JUMP_OFFSET_THRESHOLD:3000}
     bootstrap:
       auto-rebuild: ${PMS_MART_BOOTSTRAP_AUTO_REBUILD:true}
+    mongo:
+      server-selection-timeout-ms: ${PMS_MART_MONGO_SERVER_SELECTION_TIMEOUT_MS:3000}
+      connect-timeout-ms: ${PMS_MART_MONGO_CONNECT_TIMEOUT_MS:2000}

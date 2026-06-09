@@ -3,6 +3,7 @@ package com.freightos.common.exception;
 import com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -102,6 +103,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setTitle("Bad Request");
         pd.setDetail(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
+    }
+
+    /**
+     * 데이터 저장소(Mongo/Postgres) 접근 실패. 회로차단기 OLTP 폴백조차 실패한 경우 등.
+     * 일시적 인프라 장애이므로 500이 아닌 503 + Retry-After.
+     */
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ProblemDetail> handleDataAccess(DataAccessException ex) {
+        log.error("DataAccessException — 데이터 저장소 접근 실패(503)", ex);
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE);
+        pd.setType(URI.create(TYPE_BASE + "DATABASE_UNAVAILABLE"));
+        pd.setTitle("Service Unavailable");
+        pd.setDetail("데이터 저장소에 일시적으로 접근할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.RETRY_AFTER, "5")
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(pd);
     }

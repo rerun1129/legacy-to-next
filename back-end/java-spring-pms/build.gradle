@@ -43,6 +43,10 @@ dependencies {
     // ── OpenAPI / Swagger UI ───────────────────────────────────────
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 
+    // ── Resilience4j (circuit breaker — Mongo Mart 장애 시 OLTP 자동 폴백) ──
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
     // ── Utilities ──────────────────────────────────────────────────
     compileOnly    'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
