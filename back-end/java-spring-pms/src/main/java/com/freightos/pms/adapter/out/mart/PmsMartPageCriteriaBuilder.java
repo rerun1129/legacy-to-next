@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * 적응형 page 경로(조기종료 find)용 pms_bl_mart Criteria 빌더.
@@ -78,6 +77,15 @@ public class PmsMartPageCriteriaBuilder {
             elemParts.add(Criteria.where("fdcType").in(types));
         } else if (StringUtils.hasText(c.financialDocType())) {
             elemParts.add(Criteria.where("fdcType").is(c.financialDocType()));
+        }
+
+        // issued Y/N → financial_document_id IS (NOT) NULL 동치(lines[].issued)
+        if (StringUtils.hasText(c.issued())) {
+            switch (c.issued()) {
+                case "Y" -> elemParts.add(Criteria.where("issued").is(true));
+                case "N" -> elemParts.add(Criteria.where("issued").is(false));
+                default  -> { /* 미인식값: 필터 무시 */ }
+            }
         }
 
         return buildElemMatch("lines", elemParts);
@@ -251,9 +259,10 @@ public class PmsMartPageCriteriaBuilder {
         }
     }
 
+    /** prefix case-sensitive 정규식 필터. PmsBlNoMatch 공용 헬퍼 위임. */
     private void addRegex(List<Criteria> parts, String field, String value) {
         if (StringUtils.hasText(value)) {
-            parts.add(Criteria.where(field).regex(Pattern.quote(value), "i"));
+            parts.add(PmsBlNoMatch.prefixCriteria(field, value));
         }
     }
 

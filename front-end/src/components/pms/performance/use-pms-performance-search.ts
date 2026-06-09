@@ -7,8 +7,8 @@ interface UsePmsPerformanceSearchParams {
   searchFilter: SearchPmsPerformanceInput | null;
   currentPage: number;
   pageSize: number;
-  /** true일 때만 배경 정확 count 쿼리를 발화. 기본 false → 근사치만 표시(스피너 없음). */
-  exactCountRequested?: boolean;
+  /** true = 사용자가 정확 count를 명시 요청(opt-in). 기본 false. */
+  exactRequested?: boolean;
 }
 
 interface UsePmsPerformanceSearchResult {
@@ -20,14 +20,11 @@ interface UsePmsPerformanceSearchResult {
   isApprox: boolean;
   /** true = 배경 정확 count 조회 진행 중 */
   isExactLoading: boolean;
-  /**
-   * true = 현재 조건이 광범위 PERF/DOC 범위 — 정확 count는 opt-in 토글로만 조회.
-   * 토글 버튼 노출 조건에 사용(isApprox는 정확치 도착 후 false가 되므로 토글 조건에 부적합).
-   */
-  needsApprox: boolean;
+  /** true = 서류조건 근사 표시 중 + 아직 정확 요청 안 함 → 클릭으로 정확 조회 가능 */
+  canRequestExact: boolean;
 }
 
-/** PERF/DOC dateKind에서 이 일수를 초과할 때만 근사 count를 사용한다 (분기 기준). */
+/** 모든 dateKind(ETD/ETA/PERF/DOC)에서 이 일수를 초과할 때만 근사 count를 사용한다 (분기 기준). */
 const APPROX_MIN_SPAN_DAYS = 92;
 
 /** yyyyMMdd 문자열 두 개의 일수 차이. 하나라도 없으면 0. */
@@ -39,31 +36,40 @@ function spanDays(from: string | null | undefined, to: string | null | undefined
 }
 
 /**
+ * 정형 서류조건(issued/grouped/documentStatus/documentTypes) 존재 여부.
+ * 저카디라 정확 count가 범위와 무관하게 느리므로 이 조건이 있으면 전 범위 근사 기본 대상.
+ */
+export function hasDocLineFilter(f: SearchPmsPerformanceInput | null): boolean {
+  if (!f) return false;
+  return Boolean(f.issued || f.grouped || f.documentStatus || (f.documentTypes && f.documentTypes.length > 0));
+}
+
+/**
  * 조회 조건에 따라 근사 count 사용 여부를 판단한다.
  *
- * - ETD/ETA: 항상 정확치 직접(근사 불필요)
- * - PERF/DOC 범위 ≤ 92일: 정확치 직접
- * - PERF/DOC 범위 > 92일: 근사(sub-second) → 배경 정확 보정
+ * - 서류조건(issued/grouped/documentStatus/documentTypes)이 있으면 범위와 무관하게 근사 → opt-in 정확
+ * - 서류조건 없고 날짜 범위 > 92일: 근사(sub-second) → 배경 자동 정확 보정
+ * - 그 외(범위 ≤ 92일): 정확치 직접(1회 왕복)
  */
 function calcNeedsApprox(filter: SearchPmsPerformanceInput | null): boolean {
   if (!filter) return false;
-  const dk = filter.dateKind;
-  if (dk !== "PERF" && dk !== "DOC") return false;
-  return spanDays(filter.dateFrom, filter.dateTo) > APPROX_MIN_SPAN_DAYS;
+  return hasDocLineFilter(filter) || spanDays(filter.dateFrom, filter.dateTo) > APPROX_MIN_SPAN_DAYS;
 }
 
 /**
  * 점진적 count 훅:
- * - needsApprox=false (ETD/ETA·좁은 범위): primary를 exactCount=true로 호출 → 1회 왕복으로 정확치 바로 표시
- * - needsApprox=true (PERF/DOC > 92일): primary=근사(fast), 배경=정확 보정(기존 동작)
+ * - needsApprox=false (모든 dateKind·범위 ≤ 92일): primary를 exactCount=true로 호출 → 1회 왕복으로 정확치 바로 표시
+ * - needsApprox=true (모든 dateKind·범위 > 92일): primary=근사(fast), 배경=정확 보정
  */
 export function usePmsPerformanceSearch({
   searchFilter,
   currentPage,
   pageSize,
-  exactCountRequested = false,
+  exactRequested = false,
 }: UsePmsPerformanceSearchParams): UsePmsPerformanceSearchResult {
   const needsApprox = calcNeedsApprox(searchFilter);
+  // 서류조건 여부: true이면 배경 정확은 자동이 아닌 opt-in으로만 실행
+  const structured  = hasDocLineFilter(searchFilter);
 
   const PLACEHOLDER: SearchPmsPerformanceInput = { basis: "FREIGHT_INPUT", page: 0, size: pageSize, exactCount: false };
 
@@ -78,7 +84,7 @@ export function usePmsPerformanceSearch({
     isSuccess: isPrimarySuccess,
   } = useQuery<PmsPerformancePage>({
     queryKey: pmsPerformanceKeys.search(primaryInput ?? PLACEHOLDER),
-    queryFn: ({ signal }) => pmsPerformancePort.search(primaryInput!, { signal }),
+    queryFn: () => pmsPerformancePort.search(primaryInput!),
     enabled: searchFilter !== null,
     staleTime: Infinity,
     gcTime: Infinity,
@@ -97,9 +103,9 @@ export function usePmsPerformanceSearch({
     isFetching: isExactFetching,
   } = useQuery<PmsPerformancePage>({
     queryKey: pmsPerformanceKeys.search(exactInput ?? EXACT_PLACEHOLDER),
-    queryFn: ({ signal }) => pmsPerformancePort.search(exactInput!, { signal }),
-    // 근사 조회 성공 후에만 활성화, needsApprox 조건 필수, 사용자 opt-in 요청 시에만 발화
-    enabled: searchFilter !== null && needsApprox && isPrimarySuccess && exactCountRequested,
+    queryFn: () => pmsPerformancePort.search(exactInput!),
+    // 서류조건: 클릭 opt-in(exactRequested) 시에만. 그 외 근사(>92일): 기존대로 자동 배경 정확.
+    enabled: searchFilter !== null && needsApprox && isPrimarySuccess && (!structured || exactRequested === true),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -117,6 +123,9 @@ export function usePmsPerformanceSearch({
   const isApprox      = needsApprox && primaryData !== undefined && exactTotal === undefined;
   const isExactLoading = needsApprox && isExactFetching;
 
+  // 서류조건 근사 표시 중 + 아직 정확 요청 안 함 → 클릭으로 정확 조회 가능
+  const canRequestExact = isApprox && structured && exactRequested !== true;
+
   return {
     rows,
     isFetching: isPrimaryFetching,
@@ -124,6 +133,6 @@ export function usePmsPerformanceSearch({
     totalPages,
     isApprox,
     isExactLoading,
-    needsApprox,
+    canRequestExact,
   };
 }

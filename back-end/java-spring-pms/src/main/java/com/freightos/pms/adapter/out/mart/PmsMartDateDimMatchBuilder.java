@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * line-grain sidecar용 MongoDB Criteria 빌더.
@@ -206,9 +205,10 @@ public class PmsMartDateDimMatchBuilder {
         }
     }
 
+    /** prefix case-sensitive 정규식 필터. PmsBlNoMatch 공용 헬퍼 위임. */
     private void addRegex(List<Criteria> parts, String field, String value) {
         if (StringUtils.hasText(value)) {
-            parts.add(Criteria.where(field).regex(Pattern.quote(value), "i"));
+            parts.add(PmsBlNoMatch.prefixCriteria(field, value));
         }
     }
 

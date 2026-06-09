@@ -39,10 +39,16 @@ public class PmsMartFilterSupport {
         }
 
         // line-accel ON: basis별 날짜 보유 여부 + 미지원 필터 검사
-        boolean hasLineDocFilter = !legacySupported(c);
-        if (!hasLineDocFilter) {
+        boolean hasBeyondBlLevelFilter = !legacySupported(c);
+        if (!hasBeyondBlLevelFilter) {
             // B/L-only 필터(legacySupported=true 케이스) → 기존 fast path 그대로
             return true;
+        }
+
+        // 정형 서류조건(issued/grouped/documentStatus/documentTypes)은 pms_bl_mart pageCriteria로 sub-second 처리.
+        // basis 분기(sidecar)보다 먼저 평가 → ETD/ETA·무날짜 + 서류조건 결합도 Mart 진입.
+        if (hasDocLineFilter(c)) {
+            return isDocLineFilterSupported(c);
         }
 
         // line/doc 레벨 필터가 하나 이상 존재하는 케이스: sidecar로 해소 가능한지 판단
@@ -52,6 +58,43 @@ public class PmsMartFilterSupport {
         } else {
             return isFreightBasisSupported(c);
         }
+    }
+
+    /**
+     * 정형 서류조건(issued/grouped/documentStatus/documentTypes) 존재 여부.
+     * 이 조건들은 pms_bl_mart의 lines[]/docs[] 임베드 배열에 이미 적재돼 있어
+     * pageCriteria($elemMatch) 경로로 sub-second 처리 가능하다.
+     * PmsMartQueryAdapter의 라우팅·count/page 분기에서도 참조한다(static).
+     */
+    public static boolean hasDocLineFilter(SearchPmsPerformanceCommand c) {
+        return StringUtils.hasText(c.issued())
+            || StringUtils.hasText(c.grouped())
+            || StringUtils.hasText(c.documentStatus())
+            || (c.documentTypes() != null && !c.documentTypes().isEmpty());
+    }
+
+    /**
+     * houseBlNo/masterBlNo 필터 존재 여부.
+     * 이 조건이 있으면 sidecar 인덱스(flag, pd)에 해당 필드가 없어 residual 필터가 되어
+     * $sample 근사가 희소오판·전체 스캔을 유발한다.
+     * pms_bl_mart houseBlNo 인덱스(prefix bounded scan)로 우회한다.
+     */
+    public static boolean hasBlNoFilter(SearchPmsPerformanceCommand c) {
+        return StringUtils.hasText(c.hblNo()) || StringUtils.hasText(c.mblNo());
+    }
+
+    /**
+     * TAX/SLIP basis + 서류타입 필터 동시 적용 시 sidecar covered count는
+     * (발급 플래그, 서류타입)이 같은 라인임을 보장하지 못해 과대 집계된다.
+     * 이 조합에서는 라인-그레인 pageCriteria($elemMatch)로 count·page를 일관 처리한다.
+     */
+    public static boolean needsLineGrainCorrelation(SearchPmsPerformanceCommand c) {
+        AggregationBasis basis = c.effectiveBasis();
+        boolean taxOrSlip = basis == AggregationBasis.TAX_ISSUED || basis == AggregationBasis.SLIP_ISSUED;
+        boolean hasDocTypeFilter =
+            (c.documentTypes() != null && !c.documentTypes().isEmpty())
+            || StringUtils.hasText(c.financialDocType());
+        return taxOrSlip && hasDocTypeFilter;
     }
 
     // ── 기존 로직(line-accel OFF 기본 경로) ─────────────────────────────────────
@@ -119,6 +162,23 @@ public class PmsMartFilterSupport {
         if (StringUtils.hasText(c.groupFinancialNo())) return false;
 
         // documentTypes, documentStatus, grouped, teamCode, operator, B/L 필터 = sidecar 지원
+        return true;
+    }
+
+    /**
+     * 정형 서류조건이 pms_bl_mart pageCriteria 경로로 처리 가능한지 판단.
+     * pageCriteria가 다루지 못하는 비정형(taxType/documentNoLike/groupFinancialNo) 또는
+     * PERFORMANCE dateKind(line-level 실적일자 — pageCriteria addDateRange가 ETD/ETA만 처리)면 OLTP 폴백.
+     * (참고: 현재 FE는 실적일자를 performanceDtFrom/To로 보내고 dateKind=null이므로 PERFORMANCE 가드는 방어적.)
+     */
+    private boolean isDocLineFilterSupported(SearchPmsPerformanceCommand c) {
+        if (StringUtils.hasText(c.taxType())) return false;
+        if (StringUtils.hasText(c.documentNoLike())) return false;
+        if (StringUtils.hasText(c.groupFinancialNo())) return false;
+        if ("PERFORMANCE".equals(c.dateKind())
+                && (StringUtils.hasText(c.dateFrom()) || StringUtils.hasText(c.dateTo()))) {
+            return false;
+        }
         return true;
     }
 

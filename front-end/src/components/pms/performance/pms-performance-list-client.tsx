@@ -30,27 +30,10 @@ function buildSearchInput(values: PmsPerformanceFilter): SearchPmsPerformanceInp
     dateKind: values.dateKind || null,
     dateFrom: values.dateFrom || null,
     dateTo: values.dateTo || null,
-    hblNo: values.hblNo || null,
-    mblNo: values.mblNo || null,
-    actualCustomerCode: values.actualCustomerCode || null,
-    settlePartnerCode: values.settlePartnerCode || null,
-    carrierCode: values.carrierCode || null,
-    portKind: values.portKind || null,
-    portCode: values.portCode || null,
-    salesManCode: values.salesManCode || null,
-    salesClass: values.salesClass || null,
-    incoterms: values.incoterms || null,
-    loadType: values.loadType || null,
-    teamCode: values.teamCode || null,
-    operator: values.operator || null,
     documentTypes: values.documentTypes.length > 0 ? values.documentTypes : null,
     documentStatus: values.documentStatus || null,
-    documentNoLike: values.documentNoLike || null,
-    groupFinancialNo: values.groupFinancialNo || null,
     grouped: values.grouped || null,
     issued: values.issued || null,
-    financialDocType: values.financialDocType || null,
-    taxType: values.taxType || null,
   };
 }
 
@@ -187,9 +170,6 @@ export function PmsPerformanceListClient() {
             <div className="filter-grid">
               <PmsPerformanceFilterFms
                 control={form.control}
-                register={form.register}
-                setValue={form.setValue}
-                watch={form.watch}
                 t={t}
                 jobDivOptionsWithAll={opts.jobDivOptionsWithAll}
                 jobDivLoading={opts.jobDivLoading}
@@ -198,18 +178,9 @@ export function PmsPerformanceListClient() {
                 boundLoading={opts.boundLoading}
                 boundPlaceholder={opts.boundPlaceholder}
                 dateKindOptions={dateKindOptions}
-                portKindOptions={opts.portKindOptions}
-                actualCustomer={opts.actualCustomer}
-                settlePartner={opts.settlePartner}
-                carrier={opts.carrier}
-                port={opts.port}
-                salesMan={opts.salesMan}
-                team={opts.team}
-                operator={opts.operator}
               />
               <PmsPerformanceFilterBms
                 control={form.control}
-                register={form.register}
                 t={t}
                 groupedOptions={opts.groupedOptions}
                 issuedOptions={opts.issuedOptions}

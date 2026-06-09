@@ -2,6 +2,9 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: fms-postgres
+    # parallel worker의 공유메모리(/dev/shm) — Docker 기본 64MB는 PMS 대량 집계 OLTP 폴백 쿼리의
+    # parallel hash/sort에서 "could not resize shared memory segment" 유발. 1g로 상향.
+    shm_size: 1gb
     environment:
       POSTGRES_DB: fms
       POSTGRES_USER: fms
@@ -102,8 +105,8 @@ services:
       PMS_MART_LINE_ACCEL_ENABLED: "${PMS_MART_LINE_ACCEL_ENABLED:-true}"
       # ── 증분 동기화 스케줄러 — docker 기본 ON, 1분마다 source 변경분 Mart 반영(cron=application.yml) ──
       PMS_MART_SCHEDULER_ENABLED: "${PMS_MART_SCHEDULER_ENABLED:-true}"
-      # ── 근사 총건수 $sample 크기 — 캐시 미달 대용량 컬렉션서 20000은 랜덤리드 thrash(~5s). 2000=sub-second(~0.74s)·오차~1.3%(배경 정확 쿼리가 교정) ──
-      PMS_MART_APPROX_SAMPLE_SIZE: "${PMS_MART_APPROX_SAMPLE_SIZE:-2000}"
+      # ── 근사 총건수 $sample 크기 — 큰 doc(lines/docs 배열) random FETCH 비용. 2000=~800ms, 800=~320ms(page 270ms와 합쳐 sub-second). 오차는 밀집(>20000) 구간만·배경 정확 쿼리가 교정 ──
+      PMS_MART_APPROX_SAMPLE_SIZE: "${PMS_MART_APPROX_SAMPLE_SIZE:-800}"
     depends_on:
       postgres:
         condition: service_healthy

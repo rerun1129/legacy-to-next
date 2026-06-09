@@ -131,7 +131,7 @@ public class PmsDocumentSqlBuilder {
         }
         if (hasValue(c.mblNo())) {
             where.add(
-                "(hb.mbl_no ILIKE '%' || :fms_mbl_no || '%' OR mb.mbl_no ILIKE '%' || :fms_mbl_no || '%')");
+                "(hb.mbl_no LIKE :fms_mbl_no || '%' OR mb.mbl_no LIKE :fms_mbl_no || '%')");
             params.addValue("fms_mbl_no", c.mblNo());
         }
         if (hasValue(c.portKind()) && hasValue(c.portCode())) {
