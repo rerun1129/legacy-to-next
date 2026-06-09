@@ -20,7 +20,7 @@ interface UsePmsPerformanceSearchResult {
   isExactLoading: boolean;
 }
 
-/** PERF/DOC dateKind에서 이 일수를 초과할 때만 근사 count를 사용한다 (분기 기준). */
+/** 모든 dateKind(ETD/ETA/PERF/DOC)에서 이 일수를 초과할 때만 근사 count를 사용한다 (분기 기준). */
 const APPROX_MIN_SPAN_DAYS = 92;
 
 /** yyyyMMdd 문자열 두 개의 일수 차이. 하나라도 없으면 0. */
@@ -34,21 +34,18 @@ function spanDays(from: string | null | undefined, to: string | null | undefined
 /**
  * 조회 조건에 따라 근사 count 사용 여부를 판단한다.
  *
- * - ETD/ETA: 항상 정확치 직접(근사 불필요)
- * - PERF/DOC 범위 ≤ 92일: 정확치 직접
- * - PERF/DOC 범위 > 92일: 근사(sub-second) → 배경 정확 보정
+ * - dateKind 4종(ETD/ETA/PERF/DOC) 모두 날짜 범위가 92일 초과이면 근사(sub-second) → 배경 정확 보정
+ * - 범위 ≤ 92일: 정확치 직접(1회 왕복)
  */
 function calcNeedsApprox(filter: SearchPmsPerformanceInput | null): boolean {
   if (!filter) return false;
-  const dk = filter.dateKind;
-  if (dk !== "PERF" && dk !== "DOC") return false;
   return spanDays(filter.dateFrom, filter.dateTo) > APPROX_MIN_SPAN_DAYS;
 }
 
 /**
  * 점진적 count 훅:
- * - needsApprox=false (ETD/ETA·좁은 범위): primary를 exactCount=true로 호출 → 1회 왕복으로 정확치 바로 표시
- * - needsApprox=true (PERF/DOC > 92일): primary=근사(fast), 배경=정확 보정(기존 동작)
+ * - needsApprox=false (모든 dateKind·범위 ≤ 92일): primary를 exactCount=true로 호출 → 1회 왕복으로 정확치 바로 표시
+ * - needsApprox=true (모든 dateKind·범위 > 92일): primary=근사(fast), 배경=정확 보정
  */
 export function usePmsPerformanceSearch({
   searchFilter,
