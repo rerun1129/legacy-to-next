@@ -63,5 +63,8 @@ public record SearchPmsPerformanceRequest(
     String taxType,
 
     // 총건수 정확도: null/false = 근사(기본), true = 정확
-    Boolean exactCount
+    Boolean exactCount,
+
+    // BE 조회 캐시 무효화용 Search 토큰 — 페이지 이동 시 동일값 유지, Search 시 새 값 전송
+    Long searchNonce
 ) {}

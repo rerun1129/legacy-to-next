@@ -65,8 +65,41 @@ public record SearchPmsPerformanceCommand(
     String taxType,
 
     // ── 총건수 정확도 ─────────────────────────────────────────────────────────
-    Boolean exactCount           // null/false = 근사(기본), true = 정확
+    Boolean exactCount,          // null/false = 근사(기본), true = 정확
+
+    // ── 캐시 무효화 토큰 ─────────────────────────────────────────────────────
+    Long searchNonce             // Search 시 새 값 → 시그니처 변경 → 캐시 미스. 페이지 이동은 동일값 유지
 ) {
+    /**
+     * searchNonce 이전 호출부·테스트가 positional 생성자로 searchNonce 없이 생성할 수 있도록
+     * 하위호환 편의 생성자를 제공한다. searchNonce=null 위임.
+     */
+    public SearchPmsPerformanceCommand(
+        AggregationBasis basis, Integer page, Integer size,
+        String jobDiv, String bound, String dateKind, String dateFrom, String dateTo,
+        String performanceDtFrom, String performanceDtTo, String hblNo, String mblNo,
+        String partyKind, String partyCode, String actualCustomerCode, String settlePartnerCode,
+        String carrierCode, String portKind, String portCode,
+        String salesManCode, String salesClass, String incoterms,
+        String vesselVoyage, String loadType, String teamCode, String operator,
+        List<String> documentTypes, String documentStatus, String documentNoLike,
+        String documentDtFrom, String documentDtTo, String groupFinancialNo,
+        String grouped, String issued, String financialDocType, String taxType,
+        Boolean exactCount
+    ) {
+        this(basis, page, size,
+            jobDiv, bound, dateKind, dateFrom, dateTo,
+            performanceDtFrom, performanceDtTo, hblNo, mblNo,
+            partyKind, partyCode, actualCustomerCode, settlePartnerCode,
+            carrierCode, portKind, portCode,
+            salesManCode, salesClass, incoterms,
+            vesselVoyage, loadType, teamCode, operator,
+            documentTypes, documentStatus, documentNoLike,
+            documentDtFrom, documentDtTo, groupFinancialNo,
+            grouped, issued, financialDocType, taxType,
+            exactCount, null);
+    }
+
     /** basis가 null이면 FREIGHT_INPUT으로 정규화. */
     public AggregationBasis effectiveBasis() {
         return basis != null ? basis : AggregationBasis.FREIGHT_INPUT;

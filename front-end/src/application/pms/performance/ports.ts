@@ -148,6 +148,10 @@ export interface SearchPmsPerformanceInput {
 
   // 총건수 정확도 옵션 — true: 정확치(느릴 수 있음), false/미전송: 근사치(기본)
   exactCount?: boolean | null;
+
+  // Search 클릭 시점 타임스탬프 — FE queryKey 변경(캐시 미스) + BE filterSignature 변경(BE 캐시 미스) 동시 적용.
+  // 페이지 이동 시엔 nonce 불변 → count 캐시 재사용(비용 절감).
+  searchNonce?: number | null;
 }
 
 // === 포트 인터페이스 ===

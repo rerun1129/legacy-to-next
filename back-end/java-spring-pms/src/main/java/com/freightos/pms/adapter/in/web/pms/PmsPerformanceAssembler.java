@@ -38,7 +38,7 @@ public class PmsPerformanceAssembler {
             req.documentNoLike(), req.documentDtFrom(), req.documentDtTo(),
             req.groupFinancialNo(), req.grouped(), req.issued(),
             req.financialDocType(), req.taxType(),
-            req.exactCount()
+            req.exactCount(), req.searchNonce()
         );
     }
 

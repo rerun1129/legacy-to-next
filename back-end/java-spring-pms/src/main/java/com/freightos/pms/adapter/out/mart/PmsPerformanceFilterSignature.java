@@ -53,7 +53,8 @@ final class PmsPerformanceFilterSignature {
             + "|gr=" + s(c.grouped())
             + "|is=" + s(c.issued())
             + "|fd=" + s(c.financialDocType())
-            + "|tx=" + s(c.taxType());
+            + "|tx=" + s(c.taxType())
+            + "|sn=" + (c.searchNonce() != null ? c.searchNonce() : "");
     }
 
     private static String s(String v) {

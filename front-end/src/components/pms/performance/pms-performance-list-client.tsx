@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { RotateCcw, Search } from "lucide-react";
 import { ComboBox } from "@/components/shared/inputs/combo-box";
@@ -16,6 +17,7 @@ import { usePmsPerformanceFilterOptions } from "./use-pms-performance-filter-opt
 import type { PmsPerformanceFilter } from "./pms-performance-filter-model";
 import { DEFAULT_PMS_FILTER } from "./pms-performance-filter-model";
 import type { SearchPmsPerformanceInput } from "@/application/pms/performance/ports";
+import { pmsPerformanceKeys } from "@/application/pms/performance/use-cases";
 
 const ROUTE_SCOPE = "/pms/performance";
 
@@ -45,6 +47,7 @@ function buildSearchInput(values: PmsPerformanceFilter): SearchPmsPerformanceInp
 export function PmsPerformanceListClient() {
   const t = useTranslations("pms.performance.filter");
   const opts = usePmsPerformanceFilterOptions(t);
+  const queryClient = useQueryClient();
 
   const form = useForm<PmsPerformanceFilter>({
     defaultValues: DEFAULT_PMS_FILTER,
@@ -101,7 +104,10 @@ export function PmsPerformanceListClient() {
         toast.error(t("dateRangeRequired"));
         return;
       }
-      setSubmittedFilter(buildSearchInput(values));
+      // gcTime:Infinity 누적 방지 — Search 경로에서만 직전 캐시 제거(페이지 이동·Reset엔 미호출).
+      // 새 nonce가 담긴 키는 이후 fetch에서 생성되므로 기존 키만 정리.
+      queryClient.removeQueries({ queryKey: pmsPerformanceKeys.all });
+      setSubmittedFilter({ ...buildSearchInput(values), searchNonce: Date.now() });
       setCurrentPage(1);
     })();
   }
