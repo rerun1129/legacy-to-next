@@ -71,6 +71,7 @@ export function SortableTh<T>({ col, onResize, isDraggingThis }: SortableThProps
       {...listeners}
     >
       {col.label}
+      {col.headerAccessory?.(col)}
       <span className="grid__resize-handle" onPointerDown={handleResizePointerDown} />
     </th>
   );

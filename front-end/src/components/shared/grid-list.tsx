@@ -19,6 +19,11 @@ export interface GridColumn<T> {
   aggregateDecimals?: number;
   /** footer 합계 시 이 행의 값 접근자. 미지정 시 Number(row[key]). */
   footerValue?: (row: T) => number;
+  /**
+   * 컬럼 헤더 label 옆에 렌더할 추가 슬롯.
+   * 미지정 시 기존 헤더와 100% 동일. 호출처에서 opt-in 방식으로 사용.
+   */
+  headerAccessory?: (col: GridColumn<T>) => React.ReactNode;
 }
 
 export interface GridListProps<T> {

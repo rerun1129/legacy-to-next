@@ -207,6 +207,7 @@ export function PlainGridList<T>({
                   className={col.isRequired ? "is-required" : undefined}
                 >
                   {col.label}
+                  {col.headerAccessory?.(col)}
                   <span
                     className="grid__resize-handle"
                     onPointerDown={(e) =>
