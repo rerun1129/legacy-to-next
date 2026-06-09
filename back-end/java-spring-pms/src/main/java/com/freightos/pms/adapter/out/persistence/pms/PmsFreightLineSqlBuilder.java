@@ -121,7 +121,7 @@ public class PmsFreightLineSqlBuilder {
         // job_div/bound/mbl_no/port — master에도 있는 공통 컬럼
         if (hasValue(c.jobDiv()))   predicates.add("job_div = :fms_job_div");
         if (hasValue(c.bound()))    predicates.add("bound = :fms_bound");
-        if (hasValue(c.mblNo()))    predicates.add("mbl_no ILIKE '%' || :fms_mbl_no || '%'");
+        if (hasValue(c.mblNo()))    predicates.add("mbl_no LIKE :fms_mbl_no || '%'");
         addPortFilter(predicates, params, c);   // params: fms_port_code 이미 추가됨
 
         return predicates;
@@ -238,7 +238,7 @@ public class PmsFreightLineSqlBuilder {
     private void addLike(List<String> predicates, MapSqlParameterSource params,
                          String col, String paramName, String value) {
         if (!hasValue(value)) return;
-        predicates.add(col + " ILIKE '%' || :" + paramName + " || '%'");
+        predicates.add(col + " LIKE :" + paramName + " || '%'");
         params.addValue(paramName, value);
     }
 

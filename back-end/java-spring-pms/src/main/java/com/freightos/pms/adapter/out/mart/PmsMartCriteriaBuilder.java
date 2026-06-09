@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * SearchPmsPerformanceCommand → MongoDB Criteria 변환기.
@@ -68,7 +67,7 @@ public class PmsMartCriteriaBuilder {
         // dateKind + dateFrom/dateTo — ETD/ETA 범위 (PERFORMANCE는 line-level이므로 Mart 미지원)
         addDateRange(parts, c);
 
-        // B/L 번호 — 부분일치 대소문자무시
+        // B/L 번호 — prefix case-sensitive (입력은 대문자 정규화 전제)
         addRegex(parts, "houseBlNo", c.hblNo());
         addRegex(parts, "masterBlNo", c.mblNo());
 
@@ -150,10 +149,10 @@ public class PmsMartCriteriaBuilder {
         }
     }
 
-    /** 대소문자무시 부분일치 정규식 필터. */
+    /** prefix case-sensitive 정규식 필터. PmsBlNoMatch 공용 헬퍼 위임. */
     private void addRegex(List<Criteria> parts, String field, String value) {
         if (StringUtils.hasText(value)) {
-            parts.add(Criteria.where(field).regex(Pattern.quote(value), "i"));
+            parts.add(PmsBlNoMatch.prefixCriteria(field, value));
         }
     }
 

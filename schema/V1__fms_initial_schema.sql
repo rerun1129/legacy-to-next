@@ -882,3 +882,15 @@ CREATE INDEX IF NOT EXISTS ix_master_bl_eta ON fms.master_bl (eta);
 -- =============================================================================
 CREATE INDEX IF NOT EXISTS ix_house_bl_updated_at  ON fms.house_bl  (updated_at);
 CREATE INDEX IF NOT EXISTS ix_master_bl_updated_at ON fms.master_bl (updated_at);
+
+-- =============================================================================
+-- PMS hbl_no/mbl_no 전방일치(prefix) 검색 인덱스 (text_pattern_ops)
+--   PMS 실적 조회는 B/L 번호를 prefix(LIKE 'ABC%')로 검색한다. 그러나 본 DB collate
+--   가 C 로캘이 아니므로(en_US.utf8) 일반 btree 인덱스는 LIKE 'x%' 를 range scan 으로
+--   타지 못한다 → text_pattern_ops 연산자 클래스 인덱스가 있어야 prefix range 가 동작.
+--   (contains '%x%' 였던 과거에는 full scan 이었음. 입력은 애플리케이션에서 대문자 정규화.)
+--   idempotent. ⚠️ 기존(데이터 적재된) DB 에는 동일 DDL 수동 1회 적용 필요.
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS ix_house_bl_hbl_no_pattern  ON fms.house_bl  (hbl_no text_pattern_ops);
+CREATE INDEX IF NOT EXISTS ix_house_bl_mbl_no_pattern  ON fms.house_bl  (mbl_no text_pattern_ops);
+CREATE INDEX IF NOT EXISTS ix_master_bl_mbl_no_pattern ON fms.master_bl (mbl_no text_pattern_ops);

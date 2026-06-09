@@ -7,7 +7,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * 적응형 page 경로(조기종료 find)용 pms_bl_mart Criteria 빌더.
@@ -251,9 +250,10 @@ public class PmsMartPageCriteriaBuilder {
         }
     }
 
+    /** prefix case-sensitive 정규식 필터. PmsBlNoMatch 공용 헬퍼 위임. */
     private void addRegex(List<Criteria> parts, String field, String value) {
         if (StringUtils.hasText(value)) {
-            parts.add(Criteria.where(field).regex(Pattern.quote(value), "i"));
+            parts.add(PmsBlNoMatch.prefixCriteria(field, value));
         }
     }
 

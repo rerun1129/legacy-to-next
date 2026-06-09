@@ -18,12 +18,15 @@ public class PmsPerformanceAssembler {
 
     public SearchPmsPerformanceCommand toCommand(SearchPmsPerformanceRequest req) {
         AggregationBasis basis = parseBasis(req.basis());
+        // B/L 번호는 DB에 100% 대문자 저장 → prefix CS 인덱스 활용을 위해 단일 진입점에서 정규화
+        String hblNo = req.hblNo() != null && !req.hblNo().isBlank() ? req.hblNo().toUpperCase() : req.hblNo();
+        String mblNo = req.mblNo() != null && !req.mblNo().isBlank() ? req.mblNo().toUpperCase() : req.mblNo();
         return new SearchPmsPerformanceCommand(
             basis, req.page(), req.size(),
             req.jobDiv(), req.bound(),
             req.dateKind(), req.dateFrom(), req.dateTo(),
             req.performanceDtFrom(), req.performanceDtTo(),
-            req.hblNo(), req.mblNo(),
+            hblNo, mblNo,
             req.partyKind(), req.partyCode(),
             req.actualCustomerCode(), req.settlePartnerCode(),
             req.carrierCode(),
