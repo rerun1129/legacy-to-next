@@ -31,7 +31,7 @@ public class PmsMartLineReaggregator {
 
     /**
      * freight_line 임베드 배열(lines[])로 페이지 금액을 재집계한다.
-     * 2-tier 진입 보장 조건: 실적일자 필터가 존재하므로 inRange 적용 후 합산.
+     * 실적일자 범위가 있으면 inRange로, 없으면(ETD/ETA·무날짜 진입) 전 라인을 basis/docType/issued로만 필터해 합산한다.
      *
      * @param basisKey "freightInput" | "taxIssued" | "slipIssued"
      */
@@ -42,10 +42,17 @@ public class PmsMartLineReaggregator {
 
         List<PmsBlLineEmbedded> lines = doc.getLines() != null ? doc.getLines() : List.of();
 
+        // ETD/ETA·무날짜로 2-tier 진입 시 실적일자 범위가 없다. 이때 inRange(pd,null,null)는
+        // pd=null 라인을 누락시켜 금액이 틀어지므로, 실적일자 범위가 있을 때만 inRange를 적용한다.
+        // (OLTP도 performanceDt 술어가 없으면 전 라인을 합산 → 동치)
+        boolean hasPerfDtRange = StringUtils.hasText(c.performanceDtFrom())
+            || StringUtils.hasText(c.performanceDtTo());
+
         List<PmsBlLineEmbedded> matched = lines.stream()
-            .filter(line -> inRange(line.getPd(), c.performanceDtFrom(), c.performanceDtTo()))
+            .filter(line -> !hasPerfDtRange || inRange(line.getPd(), c.performanceDtFrom(), c.performanceDtTo()))
             .filter(line -> matchesBasisFlag(line, basisKey))
             .filter(line -> matchesDocType(line.getFdcType(), c))
+            .filter(line -> matchesIssued(line, c))
             .toList();
 
         BigDecimal[] sums = sumLineAmounts(matched);
@@ -139,6 +146,16 @@ public class PmsMartLineReaggregator {
         if (types != null && !types.isEmpty()) return types.contains(fdcType);
         if (StringUtils.hasText(c.financialDocType())) return c.financialDocType().equals(fdcType);
         return true;
+    }
+
+    private static boolean matchesIssued(PmsBlLineEmbedded line, SearchPmsPerformanceCommand c) {
+        String issued = c.issued();
+        if (!StringUtils.hasText(issued)) return true;
+        return switch (issued) {
+            case "Y" -> line.isIssued();
+            case "N" -> !line.isIssued();
+            default  -> true;
+        };
     }
 
     // ── document 필터 헬퍼 ──────────────────────────────────────────────────

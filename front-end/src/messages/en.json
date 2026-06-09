@@ -2101,6 +2101,7 @@
         "issued": "Document Issued",
         "basisLabel": "Aggregation Basis",
         "approxCountTooltip": "Counting exact total…",
+        "approxClickToExact": "Click to load the exact count (may be slow)",
         "dateRangeRequired": "Please enter a search period (From/To)."
       }
     }

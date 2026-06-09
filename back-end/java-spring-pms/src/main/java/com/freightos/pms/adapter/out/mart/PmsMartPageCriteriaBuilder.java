@@ -79,6 +79,15 @@ public class PmsMartPageCriteriaBuilder {
             elemParts.add(Criteria.where("fdcType").is(c.financialDocType()));
         }
 
+        // issued Y/N → financial_document_id IS (NOT) NULL 동치(lines[].issued)
+        if (StringUtils.hasText(c.issued())) {
+            switch (c.issued()) {
+                case "Y" -> elemParts.add(Criteria.where("issued").is(true));
+                case "N" -> elemParts.add(Criteria.where("issued").is(false));
+                default  -> { /* 미인식값: 필터 무시 */ }
+            }
+        }
+
         return buildElemMatch("lines", elemParts);
     }
 

@@ -40,6 +40,11 @@ export function PmsPerformanceGrid({
   const [viewMode, setViewMode] = useState<PmsViewMode>("detail");
   const [dimKeys, setDimKeys]   = useState<string[]>([]);
 
+  // 정확 count opt-in: 필터 시그니처가 일치할 때만 요청 유지. 재조회(searchFilter 변경) 시 자동 해제(derived).
+  const [exactSig, setExactSig] = useState<string | null>(null);
+  const filterSig = useMemo(() => (searchFilter ? JSON.stringify(searchFilter) : null), [searchFilter]);
+  const exactRequested = exactSig !== null && exactSig === filterSig;
+
   const {
     rows,
     isFetching,
@@ -47,7 +52,8 @@ export function PmsPerformanceGrid({
     totalPages,
     isApprox,
     isExactLoading,
-  } = usePmsPerformanceSearch({ searchFilter, currentPage, pageSize });
+    canRequestExact,
+  } = usePmsPerformanceSearch({ searchFilter, currentPage, pageSize, exactRequested });
 
   const detailColumns = useMemo(
     () => buildDetailColumns(jobDivOptions, boundOptions),
@@ -77,7 +83,18 @@ export function PmsPerformanceGrid({
             className="panel__rowcount"
             title={isApprox ? t("approxCountTooltip") : undefined}
           >
-            {isApprox ? `~${totalElements}` : totalElements}
+            {canRequestExact ? (
+              <button
+                type="button"
+                onClick={() => setExactSig(filterSig)}
+                title={t("approxClickToExact")}
+                style={{ background: "none", border: "none", padding: 0, font: "inherit", color: "inherit", cursor: "pointer", textDecoration: "underline dotted" }}
+              >
+                {`~${totalElements}`}
+              </button>
+            ) : (
+              <>{isApprox ? `~${totalElements}` : totalElements}</>
+            )}
             {isExactLoading && (
               <Loader2
                 size={11}

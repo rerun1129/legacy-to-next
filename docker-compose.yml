@@ -2,6 +2,9 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: fms-postgres
+    # parallel worker의 공유메모리(/dev/shm) — Docker 기본 64MB는 PMS 대량 집계 OLTP 폴백 쿼리의
+    # parallel hash/sort에서 "could not resize shared memory segment" 유발. 1g로 상향.
+    shm_size: 1gb
     environment:
       POSTGRES_DB: fms
       POSTGRES_USER: fms
