@@ -105,6 +105,6 @@ pms:
     line-accel:
       enabled: ${PMS_MART_LINE_ACCEL_ENABLED:false}
       early-term-threshold: ${PMS_MART_LINE_EARLY_TERM_THRESHOLD:20000}
-      approx-sample-size: ${PMS_MART_APPROX_SAMPLE_SIZE:2000}
+      approx-sample-size: ${PMS_MART_APPROX_SAMPLE_SIZE:800}
     bootstrap:
       auto-rebuild: ${PMS_MART_BOOTSTRAP_AUTO_REBUILD:true}

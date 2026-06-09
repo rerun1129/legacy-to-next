@@ -88,7 +88,7 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
         // fast path
         Criteria criteria = criteriaBuilder.buildFreight(command, flagField);
-        return executeQuery(criteria, pageable, doc -> rowMapper.toFreightRow(doc, basisKey));
+        return executeQuery(criteria, pageable, doc -> rowMapper.toFreightRow(doc, basisKey), command);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
         // fast path
         Criteria criteria = criteriaBuilder.buildDocument(command);
-        return executeQuery(criteria, pageable, doc -> rowMapper.toDocumentRow(doc));
+        return executeQuery(criteria, pageable, doc -> rowMapper.toDocumentRow(doc), command);
     }
 
     // ── count 분기 (근사 기본 / exactCount 토글 / 희소는 exact) ─────────────
@@ -125,9 +125,13 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
         return taxOrSlip && hasDocTypeFilter;
     }
 
-    /** 라인-그레인 정확 count: pageCriteria($elemMatch) 매칭 B/L 문서 수 = 정확 distinct B/L 수. */
+    /**
+     * 라인-그레인 정확 count: pageCriteria($elemMatch) 매칭 B/L 문서 수 = 정확 distinct B/L 수.
+     * needsLineGrainCorrelation 또는 hasBlNoFilter 시 pms_bl_mart count 사용.
+     * houseBlNo/masterBlNo 인덱스가 pageCriteria에 포함되어 있어 prefix bounded scan으로 처리된다.
+     */
     private long exactFreightCount(SearchPmsPerformanceCommand command, String flagField, Criteria pageCriteria) {
-        if (needsLineGrainCorrelation(command)) {
+        if (needsLineGrainCorrelation(command) || hasBlNoFilter(command)) {
             return mongoTemplate.count(Query.query(pageCriteria), PmsBlMartDocument.class);
         }
         return planner.get().countFreight(command, flagField);
@@ -144,7 +148,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             String flagField,
             Criteria pageCriteria) {
 
-        if (Boolean.TRUE.equals(command.exactCount())) {
+        // hasBlNoFilter: $sample 근사가 희소오판을 유발하므로 바로 pms_bl_mart count로 확정
+        if (Boolean.TRUE.equals(command.exactCount()) || hasBlNoFilter(command)) {
             return exactFreightCount(command, flagField, pageCriteria);
         }
         long approx = approxEstimator.get().estimate(pageCriteria);
@@ -157,14 +162,20 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
     /**
      * document basis 총건수 결정.
-     * exactCount=true → sidecar 정확 count.
-     * 근사 total이 earlyTermThreshold 미만 → 희소 판정 → 정확 count.
+     * exactCount=true 또는 hasBlNoFilter → 정확 count.
+     *   hasBlNoFilter: pms_bl_mart houseBlNo 인덱스로 pageCriteria count(sidecar 우회).
+     *   그 외 exactCount: sidecar 정확 count.
+     * 근사 total이 earlyTermThreshold 미만 → 희소 판정 → sidecar 정확 count.
      * 그 외 → 근사 추정.
      */
     private long resolveDocumentTotal(
             SearchPmsPerformanceCommand command,
             Criteria pageCriteria) {
 
+        // hasBlNoFilter: $sample 근사가 희소오판을 유발하므로 pms_bl_mart count로 바로 확정
+        if (hasBlNoFilter(command)) {
+            return mongoTemplate.count(Query.query(pageCriteria), PmsBlMartDocument.class);
+        }
         if (Boolean.TRUE.equals(command.exactCount())) {
             return planner.get().countDocument(command);
         }
@@ -191,8 +202,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             long total,
             Pageable pageable) {
 
-        if (total > props.getLineAccel().getEarlyTermThreshold() || needsLineGrainCorrelation(command)) {
-            // 밀집 / 라인-그레인 상관 경로: pageCriteria + blId DESC 조기종료 find
+        if (total > props.getLineAccel().getEarlyTermThreshold() || needsLineGrainCorrelation(command) || hasBlNoFilter(command)) {
+            // 밀집 / 라인-그레인 상관 / blNo 필터 경로: pageCriteria + blId DESC 조기종료 find
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())
@@ -218,8 +229,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             long total,
             Pageable pageable) {
 
-        if (total > props.getLineAccel().getEarlyTermThreshold()) {
-            // 밀집 경로
+        if (total > props.getLineAccel().getEarlyTermThreshold() || hasBlNoFilter(command)) {
+            // 밀집 / blNo 필터 경로: pms_bl_mart houseBlNo 인덱스 활용
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())
@@ -232,7 +243,17 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
         return findByBlKeysOrdered(blKeys);
     }
 
-    // ── 날짜 존재 헬퍼 ────────────────────────────────────────────────────────
+    // ── 날짜 존재 헬퍼 / blNo 존재 헬퍼 ─────────────────────────────────────
+
+    /**
+     * houseBlNo/masterBlNo 필터 존재 여부.
+     * 이 조건이 있으면 sidecar 인덱스(flag, pd)에 해당 필드가 없어 residual 필터가 되어
+     * $sample 근사가 희소오판·530만 풀스캔을 유발한다.
+     * pms_bl_mart houseBlNo 인덱스(prefix bounded scan)로 우회한다.
+     */
+    private static boolean hasBlNoFilter(SearchPmsPerformanceCommand c) {
+        return StringUtils.hasText(c.hblNo()) || StringUtils.hasText(c.mblNo());
+    }
 
     /** freight basis: 실적일자 필터가 하나라도 있으면 2-tier 대상. */
     private static boolean hasFreightDate(SearchPmsPerformanceCommand c) {
@@ -271,11 +292,34 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
     // ── fast-path 공통 실행 템플릿 ────────────────────────────────────────────
 
     /**
-     * Criteria로 skip/limit 페이지 조회 + 별도 count 쿼리를 수행한다.
+     * fast-path criteria에 대한 총건수를 결정한다.
+     * 2-tier 경로의 resolveFreightTotal과 동형 적응형 분기를 적용한다:
+     *   - line-accel OFF(approxEstimator 없음): 무조건 정확 count(기존 동작 무회귀).
+     *   - exactCount=true 또는 hasBlNoFilter: 정확 count.
+     *   - 근사 < earlyTermThreshold(희소): 정확 count(근사 오차 큰 구간).
+     *   - 그 외: 근사 추정.
+     */
+    private long resolveFastPathTotal(Criteria criteria, SearchPmsPerformanceCommand command) {
+        if (approxEstimator.isEmpty()) {
+            return mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
+        }
+        if (Boolean.TRUE.equals(command.exactCount()) || hasBlNoFilter(command)) {
+            return mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
+        }
+        long approx = approxEstimator.get().estimate(criteria);
+        if (approx < props.getLineAccel().getEarlyTermThreshold()) {
+            return mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
+        }
+        return approx;
+    }
+
+    /**
+     * Criteria로 skip/limit 페이지 조회 + 적응형 count를 수행한다.
      * count는 skip/limit/sort 없는 별도 Query로 실행한다.
      */
     private Page<PmsRawBlRow> executeQuery(
-            Criteria criteria, Pageable pageable, DocMapper mapper) {
+            Criteria criteria, Pageable pageable, DocMapper mapper,
+            SearchPmsPerformanceCommand command) {
 
         Query findQuery = Query.query(criteria)
             .with(BL_SORT)
@@ -284,7 +328,7 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
         List<PmsBlMartDocument> docs = mongoTemplate.find(findQuery, PmsBlMartDocument.class);
 
-        long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
+        long total = resolveFastPathTotal(criteria, command);
 
         List<PmsRawBlRow> content = docs.stream().map(mapper::map).toList();
         return new PageImpl<>(content, pageable, total);
