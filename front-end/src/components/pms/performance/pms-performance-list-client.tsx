@@ -34,8 +34,6 @@ function buildSearchInput(values: PmsPerformanceFilter): SearchPmsPerformanceInp
     dateTo: values.dateTo || null,
     documentTypes: values.documentTypes.length > 0 ? values.documentTypes : null,
     documentStatus: values.documentStatus || null,
-    grouped: values.grouped || null,
-    issued: values.issued || null,
   };
 }
 
@@ -188,8 +186,6 @@ export function PmsPerformanceListClient() {
               <PmsPerformanceFilterBms
                 control={form.control}
                 t={t}
-                groupedOptions={opts.groupedOptions}
-                issuedOptions={opts.issuedOptions}
                 documentTypeOptions={opts.documentTypeOptions}
                 documentStatusOptions={opts.documentStatusOptions}
               />

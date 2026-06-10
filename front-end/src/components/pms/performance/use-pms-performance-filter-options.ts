@@ -22,7 +22,6 @@ export function usePmsPerformanceFilterOptions(t: (key: string) => string) {
   // PMS 백엔드 enum 훅 — 전체(allOption) 붙는 항목
   const { options: documentTypeRaw }   = usePmsEnumOptions("DocumentType");
   const { options: documentStatusRaw } = usePmsEnumOptions("DocumentStatus");
-  const { options: yesNoRaw }          = usePmsEnumOptions("YesNo");
   const {
     options: jobDivOptions,
     isLoading: jobDivLoading,
@@ -47,14 +46,6 @@ export function usePmsPerformanceFilterOptions(t: (key: string) => string) {
     () => [allOption, ...documentStatusRaw],
     [allOption, documentStatusRaw]
   );
-  const groupedOptions = useMemo<LabelOption[]>(
-    () => [allOption, ...yesNoRaw],
-    [allOption, yesNoRaw]
-  );
-  const issuedOptions = useMemo<LabelOption[]>(
-    () => [allOption, ...yesNoRaw],
-    [allOption, yesNoRaw]
-  );
   const jobDivOptionsWithAll = useMemo<LabelOption[]>(
     () => [allOption, ...jobDivOptions],
     [allOption, jobDivOptions]
@@ -67,8 +58,6 @@ export function usePmsPerformanceFilterOptions(t: (key: string) => string) {
   return {
     basisOptions,
     dateKindOptions,
-    groupedOptions,
-    issuedOptions,
     documentTypeOptions,
     documentStatusOptions,
     jobDivOptionsWithAll,

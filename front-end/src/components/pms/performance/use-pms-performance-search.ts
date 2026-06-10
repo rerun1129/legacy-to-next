@@ -36,18 +36,18 @@ function spanDays(from: string | null | undefined, to: string | null | undefined
 }
 
 /**
- * 정형 서류조건(issued/grouped/documentStatus/documentTypes) 존재 여부.
+ * 정형 서류조건(documentStatus/documentTypes) 존재 여부.
  * 저카디라 정확 count가 범위와 무관하게 느리므로 이 조건이 있으면 전 범위 근사 기본 대상.
  */
 export function hasDocLineFilter(f: SearchPmsPerformanceInput | null): boolean {
   if (!f) return false;
-  return Boolean(f.issued || f.grouped || f.documentStatus || (f.documentTypes && f.documentTypes.length > 0));
+  return Boolean(f.documentStatus || (f.documentTypes && f.documentTypes.length > 0));
 }
 
 /**
  * 조회 조건에 따라 근사 count 사용 여부를 판단한다.
  *
- * - 서류조건(issued/grouped/documentStatus/documentTypes)이 있으면 범위와 무관하게 근사 → opt-in 정확
+ * - 서류조건(documentStatus/documentTypes)이 있으면 범위와 무관하게 근사 → opt-in 정확
  * - 서류조건 없고 날짜 범위 > 92일: 근사(sub-second) → 배경 자동 정확 보정
  * - 그 외(범위 ≤ 92일): 정확치 직접(1회 왕복)
  */
@@ -68,7 +68,7 @@ export function usePmsPerformanceSearch({
   exactRequested = false,
 }: UsePmsPerformanceSearchParams): UsePmsPerformanceSearchResult {
   const needsApprox = calcNeedsApprox(searchFilter);
-  // 서류조건 여부: true이면 배경 정확은 자동이 아닌 opt-in으로만 실행
+  // 서류조건(documentStatus/documentTypes) 여부: true이면 배경 정확은 자동이 아닌 opt-in으로만 실행
   const structured  = hasDocLineFilter(searchFilter);
 
   const PLACEHOLDER: SearchPmsPerformanceInput = { basis: "FREIGHT_INPUT", page: 0, size: pageSize, exactCount: false };

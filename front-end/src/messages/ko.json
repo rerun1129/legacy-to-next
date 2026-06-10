@@ -2097,8 +2097,6 @@
         "documentStatus": "서류 상태",
         "documentNoLike": "서류번호",
         "groupFinancialNo": "그룹번호",
-        "grouped": "그룹화 여부",
-        "issued": "서류 발행 여부",
         "basisLabel": "집계 기준",
         "approxCountTooltip": "정확 집계 중…",
         "showExactCount": "정확히",

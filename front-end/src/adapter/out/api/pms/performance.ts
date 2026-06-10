@@ -122,8 +122,6 @@ export const API_PMS_PERFORMANCE_PORT: PmsPerformancePort = {
       documentDtTo,
       documentTypes: input.documentTypes ?? null,
       documentStatus: input.documentStatus ?? null,
-      grouped: input.grouped ?? null,
-      issued: input.issued ?? null,
       exactCount: input.exactCount ?? false,
       searchNonce: input.searchNonce ?? null,
     };

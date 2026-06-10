@@ -116,8 +116,6 @@ export interface SearchPmsPerformanceInput {
   // BMS 서류
   documentTypes?: string[] | null;
   documentStatus?: string | null;
-  grouped?: string | null;
-  issued?: string | null;
 
   // 총건수 정확도 옵션 — true: 정확치(느릴 수 있음), false/미전송: 근사치(기본)
   exactCount?: boolean | null;

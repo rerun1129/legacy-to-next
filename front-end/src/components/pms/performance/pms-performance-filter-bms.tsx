@@ -9,18 +9,14 @@ import type { PmsPerformanceFilter } from "./pms-performance-filter-model";
 interface Props {
   control: Control<PmsPerformanceFilter>;
   t: (key: string) => string;
-  groupedOptions: LabelOption[];
-  issuedOptions: LabelOption[];
   documentTypeOptions: LabelOption[];
   documentStatusOptions: LabelOption[];
 }
 
-/** BMS 필드 그룹: 서류 종류 / 서류 상태 / 그룹화여부 / 발급여부 (정형 4개) */
+/** BMS 필드 그룹: 서류 종류 / 서류 상태 (정형 2개) */
 export function PmsPerformanceFilterBms({
   control,
   t,
-  groupedOptions,
-  issuedOptions,
   documentTypeOptions,
   documentStatusOptions,
 }: Props) {
@@ -59,46 +55,6 @@ export function PmsPerformanceFilterBms({
             <ComboBox
               variant="panel"
               options={documentStatusOptions}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              name={field.name}
-              style={{ gridColumn: "2 / span 2" }}
-            />
-          )}
-        />
-      </div>
-
-      {/* 그룹화 여부 */}
-      <div className="lcn">
-        <span className="lcn__label">{t("grouped")}</span>
-        <Controller
-          control={control}
-          name="grouped"
-          render={({ field }) => (
-            <ComboBox
-              variant="panel"
-              options={groupedOptions}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              name={field.name}
-              style={{ gridColumn: "2 / span 2" }}
-            />
-          )}
-        />
-      </div>
-
-      {/* 발급 여부 */}
-      <div className="lcn">
-        <span className="lcn__label">{t("issued")}</span>
-        <Controller
-          control={control}
-          name="issued"
-          render={({ field }) => (
-            <ComboBox
-              variant="panel"
-              options={issuedOptions}
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}

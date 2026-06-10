@@ -15,7 +15,7 @@ function getDefaultMonthRange() {
 
 const { from, to } = getDefaultMonthRange();
 
-/** PS-01 조회 폼 값 인터페이스 — 정형 9개 조건만 노출 */
+/** PS-01 조회 폼 값 인터페이스 — 정형 7개 조건만 노출 */
 export interface PmsPerformanceFilter {
   // 집계 기준 (토글)
   basis: AggregationBasis;
@@ -28,11 +28,9 @@ export interface PmsPerformanceFilter {
   dateFrom: string;
   dateTo: string;
 
-  // BMS 서류 (BMS 정형 4개)
+  // BMS 서류 (BMS 정형 2개)
   documentTypes: string[];
   documentStatus: string;
-  grouped: string;
-  issued: string;
 }
 
 // 옵션 배열은 PMS 백엔드 /api/enums/{name} 에서 동적 조회 (use-pms-enum.ts 참조)
@@ -46,7 +44,5 @@ export const DEFAULT_PMS_FILTER: PmsPerformanceFilter = {
   dateTo: to,
   documentTypes: [],
   documentStatus: "",
-  grouped: "",
-  issued: "",
 };
 
