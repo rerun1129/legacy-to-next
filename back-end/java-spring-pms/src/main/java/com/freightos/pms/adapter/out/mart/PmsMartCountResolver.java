@@ -4,9 +4,11 @@ import com.freightos.common.config.PmsMartProperties;
 import com.freightos.pms.adapter.out.mart.cancel.PmsExactCountRegistry;
 import com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException;
 import com.freightos.pms.adapter.out.mart.cancel.RunningOp;
+import com.freightos.pms.adapter.out.mart.countindex.PmsRedisExactCountProvider;
 import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,6 +28,7 @@ import java.util.Optional;
 @Component
 @ConditionalOnProperty(prefix = "pms.mart", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
+@Slf4j
 class PmsMartCountResolver {
 
     private final MongoTemplate mongoTemplate;
@@ -34,15 +37,18 @@ class PmsMartCountResolver {
     private final Optional<PmsMartApproxCountEstimator> approxEstimator;
     private final Optional<PmsPerformanceQueryCache> queryCache;
     private final Optional<PmsExactCountRegistry> exactCountRegistry;
+    /** count-index OFF면 빈 Optional — @ConditionalOnProperty로 빈 미등록. */
+    private final Optional<PmsRedisExactCountProvider> redisCount;
 
     /**
      * freight basis 총건수를 결정한다.
      *
      * 결정 규칙 (back 원본과 동일):
-     * - exactCount=true → 캐시(exact) 적중 시 반환; 아니면 exactFreightCount(op-kill 래핑) + putExact.
+     * - exactCount=true → 캐시(exact) 적중 시 반환; Redis Count Index 시도(성공 시 반환);
+     *   아니면 exactFreightCount(op-kill 래핑) + putExact.
      * - hasBlNoFilter → $sample 희소오판 방지로 exactFreightCount(op-kill 래핑) + putExact.
-     * - 그 외 → 캐시(total) 적중 시 반환; approx 추정 후
-     *   !hasDocLineFilter && approx < threshold 이면 exact 폴백 + putExact, 아니면 approx + putApprox.
+     * - 그 외 → 캐시(total) 적중 시 반환; Redis Count Index 시도(성공 시 반환);
+     *   approx 추정 후 !hasDocLineFilter && approx < threshold 이면 exact 폴백 + putExact, 아니면 approx + putApprox.
      *
      * @param command      조회 커맨드
      * @param flagField    basis 존재 플래그 필드명
@@ -62,6 +68,11 @@ class PmsMartCountResolver {
         if (Boolean.TRUE.equals(command.exactCount())) {
             Long cachedExact = queryCache.isPresent() ? queryCache.get().getExactTotal(cacheKey) : null;
             if (cachedExact != null) return cachedExact;
+
+            // Redis Count Index 우선 시도
+            Long redisExact = tryRedisExact(command, cacheKey);
+            if (redisExact != null) return redisExact;
+
             long exact = exactFreightCountWithCancel(command, flagField, pageCriteria, userKey, signature);
             queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
             return exact;
@@ -76,6 +87,10 @@ class PmsMartCountResolver {
 
         Long cached = getCachedTotal(cacheKey);
         if (cached != null) return cached;
+
+        // Redis Count Index 우선 시도 (approx 전)
+        Long redisExact = tryRedisExact(command, cacheKey);
+        if (redisExact != null) return redisExact;
 
         long approx = approxEstimator.get().estimate(pageCriteria);
         // 희소 폴백(정확)은 서류조건에선 저카디라 비싸므로 적용하지 않고 근사 유지.
@@ -124,6 +139,11 @@ class PmsMartCountResolver {
         if (Boolean.TRUE.equals(command.exactCount())) {
             Long cachedExact = queryCache.isPresent() ? queryCache.get().getExactTotal(cacheKey) : null;
             if (cachedExact != null) return cachedExact;
+
+            // Redis Count Index 우선 시도
+            Long redisExact = tryRedisExact(command, cacheKey);
+            if (redisExact != null) return redisExact;
+
             // 서류조건은 pageCriteria(sidecar는 etd 미보유·저카디라 동일하게 느림), 그 외는 sidecar covered count.
             long exact = exactDocumentCountWithCancel(command, pageCriteria, docLine, userKey, signature);
             queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
@@ -132,6 +152,10 @@ class PmsMartCountResolver {
 
         Long cached = getCachedTotal(cacheKey);
         if (cached != null) return cached;
+
+        // Redis Count Index 우선 시도 (approx 전)
+        Long redisExact = tryRedisExact(command, cacheKey);
+        if (redisExact != null) return redisExact;
 
         long approx = approxEstimator.get().estimate(pageCriteria);
         // 희소 폴백(정확)은 서류조건에선 비싸므로 적용하지 않고 근사 유지.
@@ -161,6 +185,10 @@ class PmsMartCountResolver {
     long resolveFastPathTotal(Criteria criteria, SearchPmsPerformanceCommand command, String cacheKey) {
         Long cached = getCachedTotal(cacheKey);
         if (cached != null) return cached;
+
+        // Redis Count Index 우선 조회 — tryRedisExact 헬퍼로 통합
+        Long redisExact = tryRedisExact(command, cacheKey);
+        if (redisExact != null) return redisExact;
 
         if (approxEstimator.isEmpty()) {
             long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
@@ -327,5 +355,26 @@ class PmsMartCountResolver {
     private Long getCachedTotal(String cacheKey) {
         if (queryCache.isEmpty()) return null;
         return queryCache.get().getTotal(cacheKey);
+    }
+
+    /**
+     * Redis Count Index가 준비된 경우 exactCount를 시도한다.
+     * 성공(비-null) 시 캐시에 exact로 저장 후 반환한다.
+     * 미준비·미지원·RuntimeException은 null 반환(기존 Mongo 경로로 폴백).
+     */
+    private Long tryRedisExact(SearchPmsPerformanceCommand command, String cacheKey) {
+        if (redisCount.isEmpty() || !redisCount.get().isReady()) {
+            return null;
+        }
+        try {
+            Long count = redisCount.get().exactCount(command);
+            if (count != null) {
+                queryCache.ifPresent(c -> c.putExact(cacheKey, count));
+                return count;
+            }
+        } catch (RuntimeException ex) {
+            log.warn("Count Index tryRedisExact 실패 — Mongo 폴백: {}", ex.toString());
+        }
+        return null;
     }
 }

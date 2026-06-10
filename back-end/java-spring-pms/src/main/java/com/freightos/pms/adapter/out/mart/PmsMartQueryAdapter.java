@@ -91,6 +91,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
             Criteria pageCriteria = pageCriteriaBuilder.buildFreightPageCriteria(command, basisKey, flagField);
             long total = countResolver.resolveFreightTotal(command, flagField, pageCriteria, cacheKey, userKey, signature);
+            // count=0이면 매칭 결과가 없으므로 페이지 find를 생략한다.
+            if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
             List<PmsBlMartDocument> pageDocs = selectFreightPageDocsWithCriteria(command, flagField, pageCriteria, total, pageable);
             List<PmsRawBlRow> content = pageDocs.stream()
                 .map(doc -> reaggregator.get().reaggregateFreight(doc, command, basisKey))
@@ -118,6 +120,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
             Criteria docPageCriteria = pageCriteriaBuilder.buildDocumentPageCriteria(command);
             long total = countResolver.resolveDocumentTotal(command, docPageCriteria, cacheKey, userKey, signature);
+            // count=0이면 매칭 결과가 없으므로 페이지 find를 생략한다.
+            if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
             List<PmsBlMartDocument> pageDocs = selectDocumentPageDocsWithCriteria(command, docPageCriteria, total, pageable);
             List<PmsRawBlRow> content = pageDocs.stream()
                 .map(doc -> reaggregator.get().reaggregateDocument(doc, command))
@@ -242,15 +246,17 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             Criteria criteria, Pageable pageable, DocMapper mapper,
             SearchPmsPerformanceCommand command, String cacheKey) {
 
+        // count를 find보다 먼저 결정한다.
+        // total=0이면 페이지 find를 생략(3M 풀스캔 방지).
+        long total = countResolver.resolveFastPathTotal(criteria, command, cacheKey);
+        if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
+
         Query findQuery = Query.query(criteria)
             .with(BL_SORT)
             .skip(pageable.getOffset())
             .limit(pageable.getPageSize());
 
         List<PmsBlMartDocument> docs = mongoTemplate.find(findQuery, PmsBlMartDocument.class);
-
-        long total = countResolver.resolveFastPathTotal(criteria, command, cacheKey);
-
         List<PmsRawBlRow> content = docs.stream().map(mapper::map).toList();
         return new PageImpl<>(content, pageable, total);
     }

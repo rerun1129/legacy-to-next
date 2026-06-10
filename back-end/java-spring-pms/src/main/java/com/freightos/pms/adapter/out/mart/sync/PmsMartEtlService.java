@@ -1,5 +1,8 @@
 package com.freightos.pms.adapter.out.mart.sync;
 
+import com.freightos.pms.adapter.out.mart.countindex.PmsCountIndexBulkBuilder;
+import com.freightos.pms.adapter.out.mart.countindex.PmsCountIndexMaintainer;
+import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
 import com.freightos.pms.adapter.out.mart.document.PmsMartSyncState;
 import com.freightos.pms.application.mart.port.out.PmsMartSyncPort;
 import com.freightos.pms.application.mart.result.MartSyncResult;
@@ -16,18 +19,26 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * Mart ETL 아웃바운드 포트 구현체.
  *
- * AtomicBoolean running으로 동시 실행을 차단한다(스케줄러·엔드포인트 공유).
- * sync state는 pms_mart_sync_state 컬렉션에 "pms_bl_mart" 고정 키로 저장된다.
+ * <p>AtomicBoolean running으로 동시 실행을 차단한다(스케줄러·엔드포인트 공유).
+ * <p>sync state는 pms_mart_sync_state 컬렉션에 "pms_bl_mart" 고정 키로 저장된다.
+ *
+ * <p>Count Index 훅:
+ * <ul>
+ *   <li>doFull: per-batch applyBatch 제거. full 완료 후 bulkBuilder.rebuildFromMart() 동기 호출.
+ *   <li>doIncremental: upsert 전 oldDocs 조회 → applyChanges(oldDocs, newDocs).
+ * </ul>
  */
 @Component
 @ConditionalOnProperty(prefix = "pms.mart", name = "enabled", havingValue = "true")
@@ -44,6 +55,10 @@ public class PmsMartEtlService implements PmsMartSyncPort {
     private final PmsMartProperties props;
     /** line-accel OFF면 빈 Optional — @ConditionalOnProperty로 빈 미등록. */
     private final Optional<PmsMartEntryWriter> entryWriter;
+    /** count-index OFF면 빈 Optional — @ConditionalOnProperty로 빈 미등록. */
+    private final Optional<PmsCountIndexMaintainer> countIndex;
+    /** count-index OFF면 빈 Optional — @ConditionalOnProperty로 빈 미등록. */
+    private final Optional<PmsCountIndexBulkBuilder> countIndexBulkBuilder;
 
     /** 동시 실행 방지 플래그. */
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -117,12 +132,12 @@ public class PmsMartEtlService implements PmsMartSyncPort {
                     long read = reader.readRange(rLo, rHi, batchSize, runAt, docs -> {
                         writer.upsertBatch(docs);
                         entryWriter.ifPresent(w -> w.writeFromDocs(docs));
+                        // count-index 훅: per-batch 적재 제거. full 완료 후 bulk rebuild가 담당
                         total.addAndGet(docs.size());
                     });
                     log.debug("Mart full range [{}, {}] 완료: {} 건", rLo, rHi, read);
                 }));
             }
-            // 모든 워커 완료 대기 — 예외 발생 시 즉시 전파
             for (Future<?> f : futures) {
                 try {
                     f.get();
@@ -148,19 +163,26 @@ public class PmsMartEtlService implements PmsMartSyncPort {
             .lastDurationMs(durationMs)
             .build());
 
+        // Count Index: full rebuild 성공 완료 후 bulk rebuild 실행(동기)
+        // 4개 병렬 워커가 동일 비트맵 키에 RMW하는 lost-update를 방지한다
+        countIndexBulkBuilder.ifPresent(b -> {
+            try {
+                b.rebuildFromMart();
+            } catch (Exception e) {
+                log.warn("Count Index bulk rebuild 실패 — Mongo 폴백 유지: {}", e.toString());
+            }
+        });
+
         log.info("Mart full rebuild 완료: {} 건, {} ms (워커 {}개)", total.get(), durationMs, n);
         return new MartSyncResult("full", total.get(), durationMs, runAt);
     }
 
     /**
      * [lo, hi] 범위를 최대 n개의 서로소 서브레인지로 등폭 분할한다.
-     * 마지막 레인지는 hi를 정확히 포함하도록 상한을 고정한다.
-     *
-     * freight_header_id 레인지를 워커별로 분리해 Mongo _id 충돌 없이 병렬 upsert할 수 있다.
      */
     private List<long[]> splitRanges(long lo, long hi, int n) {
         long span = hi - lo + 1;
-        long step = Math.max(1L, (span + n - 1) / n); // 올림 나눗셈으로 최소 1
+        long step = Math.max(1L, (span + n - 1) / n);
         List<long[]> ranges = new ArrayList<>();
         long cur = lo;
         while (cur <= hi) {
@@ -174,7 +196,6 @@ public class PmsMartEtlService implements PmsMartSyncPort {
     private MartSyncResult doIncremental() {
         PmsMartSyncState state = findState();
         if (state == null || state.getLastSyncAt() == null) {
-            // 첫 동기화: full로 위임
             log.info("Mart 동기화 이력 없음. full rebuild로 위임.");
             return doFull();
         }
@@ -194,10 +215,21 @@ public class PmsMartEtlService implements PmsMartSyncPort {
 
         int batchSize = props.getRebuild().getBatchSize();
         long[] totalWritten = {0L};
+        boolean countIndexPresent = countIndex.isPresent();
 
         reader.readIncremental(changedIds, runAt, batch -> {
+            // Count Index present: upsert 전 oldDocs 조회 → diff 적용
+            List<PmsBlMartDocument> oldDocs = countIndexPresent
+                ? fetchOldDocs(batch)
+                : List.of();
+
             long written = writer.upsertBatch(batch);
             entryWriter.ifPresent(w -> w.writeFromDocs(batch));
+
+            if (countIndexPresent) {
+                countIndex.get().applyChanges(oldDocs, batch);
+            }
+
             totalWritten[0] += written;
         }, batchSize);
 
@@ -212,6 +244,19 @@ public class PmsMartEtlService implements PmsMartSyncPort {
 
         log.info("Mart incremental 완료: {} 건, {} ms", totalWritten[0], durationMs);
         return new MartSyncResult("incremental", totalWritten[0], durationMs, runAt);
+    }
+
+    /**
+     * 증분 배치에 해당하는 blKey 목록으로 기존 Mart 문서를 조회한다.
+     * Count Index applyChanges의 oldDocs 인자로 전달된다.
+     */
+    private List<PmsBlMartDocument> fetchOldDocs(List<PmsBlMartDocument> batch) {
+        Set<String> blKeys = batch.stream()
+            .map(PmsBlMartDocument::getId)
+            .collect(Collectors.toSet());
+        return mongoTemplate.find(
+            Query.query(Criteria.where("_id").in(blKeys)),
+            PmsBlMartDocument.class);
     }
 
     // ── sync state R/W ────────────────────────────────────────────────────────

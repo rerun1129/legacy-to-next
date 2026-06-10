@@ -30,6 +30,7 @@ public class PmsMartProperties {
     private LineAccel lineAccel = new LineAccel();
     private Bootstrap bootstrap = new Bootstrap();
     private Mongo mongo = new Mongo();
+    private CountIndex countIndex = new CountIndex();
 
     /** Mart 재빌드 관련 크기 설정. */
     @Getter
@@ -146,5 +147,38 @@ public class PmsMartProperties {
     /** routing이 "mart-only"인지 확인. */
     public boolean isMartOnly() {
         return "mart-only".equalsIgnoreCase(routing);
+    }
+
+    /** Redis 역색인 기반 정확 distinct-count 가속 설정. */
+    @Getter
+    @Setter
+    public static class CountIndex {
+        /**
+         * Redis 역색인 활성 여부. false(기본)이면 Redis 관련 빈이 등록되지 않는다.
+         * 환경변수 PMS_MART_COUNT_INDEX_ENABLED로 오버라이드 가능.
+         */
+        private boolean enabled = false;
+
+        /** Redis 키 공통 prefix. 기본 "pms:ix". */
+        private String keyPrefix = "pms:ix";
+
+        /**
+         * Redis 역색인 허용 stale 구간(초).
+         * meta.syncAt 이 Mart lastSyncAt 보다 이 값 초과 지연이면 not-ready → Mongo 폴백.
+         */
+        private long staleToleranceSeconds = 120;
+
+        /**
+         * exact count 연산 대상 최대 ordinal 수.
+         * MGET 키 수가 이 값을 초과하는 날짜 범위 쿼리는 Mongo 폴백(JVM 비용 상한).
+         */
+        private long maxDistinctScan = 2000000;
+
+        /**
+         * perfdt 일버킷 계산을 허용하는 최대 일수.
+         * from~to 일수가 이 값을 초과하는 경우 freight 경로 null 반환(Mongo 폴백).
+         * 환경변수 PMS_MART_COUNT_INDEX_MAX_DAY_BUCKETS로 오버라이드 가능.
+         */
+        private long maxDayBuckets = 1500;
     }
 }

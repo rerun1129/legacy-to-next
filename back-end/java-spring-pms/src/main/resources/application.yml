@@ -29,6 +29,11 @@ spring:
     mongodb:
       uri: ${MONGO_URI:mongodb://localhost:27017/pms_mart}
       auto-index-creation: false   # 인덱스는 PmsMartIndexInitializer가 명시 생성
+    # ── Redis (Count Index 역색인 — pms.mart.count-index.enabled 일 때만 실사용) ──
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 3000ms
 
   output:
     ansi:
@@ -91,6 +96,20 @@ resilience4j:
           - com.mongodb.MongoException
         ignoreExceptions:
           - com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException
+      pmsCountIndex:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: false
+        recordExceptions:
+          - org.springframework.dao.DataAccessException
+          - org.springframework.data.redis.RedisConnectionFailureException
+        ignoreExceptions:
+          - com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException
 
 # ── p6spy (SQL 로깅 — 디버그 시에만 임시로 true) ───────────────────
 decorator:
@@ -135,3 +154,9 @@ pms:
     mongo:
       server-selection-timeout-ms: ${PMS_MART_MONGO_SERVER_SELECTION_TIMEOUT_MS:3000}
       connect-timeout-ms: ${PMS_MART_MONGO_CONNECT_TIMEOUT_MS:2000}
+    count-index:
+      enabled: ${PMS_MART_COUNT_INDEX_ENABLED:false}
+      key-prefix: "pms:ix"
+      stale-tolerance-seconds: 120
+      max-distinct-scan: 2000000
+      max-day-buckets: 1500

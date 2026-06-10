@@ -33,6 +33,19 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: fms-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   fms-api:
     build:
       context: ./back-end/java-spring
@@ -107,10 +120,18 @@ services:
       PMS_MART_SCHEDULER_ENABLED: "${PMS_MART_SCHEDULER_ENABLED:-true}"
       # ── 근사 총건수 $sample 크기 — 큰 doc(lines/docs 배열) random FETCH 비용. 2000=~800ms, 800=~320ms(page 270ms와 합쳐 sub-second). 오차는 밀집(>20000) 구간만·배경 정확 쿼리가 교정 ──
       PMS_MART_APPROX_SAMPLE_SIZE: "${PMS_MART_APPROX_SAMPLE_SIZE:-800}"
+      # ── 정확 distinct-count Redis 역색인(RoaringBitmap) — docker 기본 ON. Redis 다운/stale 시 Mongo 정확 count로 자동 폴백(degraded). 기동 시 인덱스 비었으면 자가치유 빌드 ──
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      PMS_MART_COUNT_INDEX_ENABLED: "${PMS_MART_COUNT_INDEX_ENABLED:-true}"
+      # ── 벌크 빌드 JVM 누적(3M docs) 힙 헤드룸 — 기본 25%는 플러시 단계 OOM 위험 ──
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=40.0"
     depends_on:
       postgres:
         condition: service_healthy
       mongo:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   frontend:
@@ -135,3 +156,4 @@ services:
 volumes:
   postgres_data:
   mongo_data:
+  redis_data:

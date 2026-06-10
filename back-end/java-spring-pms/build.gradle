@@ -47,6 +47,11 @@ dependencies {
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+    // ── Count Index (Redis) — 정확 distinct-count 역색인 오프로드 ──
+    //   pms.mart.count-index.enabled=false(기본)면 빈 미생성. Redis 미기동이어도 부팅 영향 없음.
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.roaringbitmap:RoaringBitmap:1.3.0'
+
     // ── Utilities ──────────────────────────────────────────────────
     compileOnly    'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
