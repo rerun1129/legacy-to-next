@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
  * <p>
  * 필요한 경우에만 JOIN하여 freight_line 집계 쿼리에서
  * 수백만 행 스캔 비용을 줄인다.
+ *
+ * W1-A: FE가 전송하지 않는 필드(hblNo/mblNo/portCode/salesManCode/salesClass/
+ *        incoterms/teamCode/partyCode) 체크 제거. jobDiv/bound + 날짜만 잔존.
  */
 @Component
 public class PmsFmsJoinDecider {
@@ -15,35 +18,22 @@ public class PmsFmsJoinDecider {
     /**
      * freight_line 집계에서 FMS LEFT JOIN이 필요한지 판단.
      * (a) dateKind=ETD/ETA 이면서 dateFrom 또는 dateTo가 있을 때, 또는
-     * (b) FMS 컬럼 필터(jobDiv/bound/hblNo/mblNo/portCode/salesManCode/salesClass/
-     *     incoterms/teamCode/partyCode)가 하나라도 있을 때 true.
+     * (b) jobDiv 또는 bound 필터가 있을 때 true.
      */
     public boolean fmsJoinNeeded(SearchPmsPerformanceCommand c) {
         return etdEtaDateFilterPresent(c)
             || hasValue(c.jobDiv())
-            || hasValue(c.bound())
-            || hasValue(c.hblNo())
-            || hasValue(c.mblNo())
-            || hasValue(c.portCode())
-            || hasValue(c.salesManCode())
-            || hasValue(c.salesClass())
-            || hasValue(c.incoterms())
-            || hasValue(c.teamCode())
-            || hasValue(c.partyCode());
+            || hasValue(c.bound());
     }
 
     /**
      * financial_document 집계에서 FMS LEFT JOIN이 필요한지 판단.
-     * document 경로에서 teamCode/operator는 financial_document 테이블에서 직접 필터링되므로
-     * FMS JOIN 판단에서 제외한다. jobDiv/bound/hblNo/mblNo/portCode는 FMS 필터.
+     * jobDiv/bound + 날짜 필터가 있을 때 true.
      */
     public boolean fmsJoinNeededForDocument(SearchPmsPerformanceCommand c) {
         return etdEtaDateFilterPresent(c)
             || hasValue(c.jobDiv())
-            || hasValue(c.bound())
-            || hasValue(c.hblNo())
-            || hasValue(c.mblNo())
-            || hasValue(c.portCode());
+            || hasValue(c.bound());
     }
 
     private boolean etdEtaDateFilterPresent(SearchPmsPerformanceCommand c) {

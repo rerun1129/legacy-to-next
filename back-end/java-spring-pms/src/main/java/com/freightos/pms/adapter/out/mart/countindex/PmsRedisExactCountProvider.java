@@ -133,15 +133,12 @@ public class PmsRedisExactCountProvider {
      *
      * null 반환(Mongo 폴백) 조건:
      * - line/doc grain 필터 존재 (hasDocLineFilter, performanceDt, documentDt)
-     * - B/L 번호 필터 존재 (hasBlNoFilter)
      * - dateKind == "PERFORMANCE" (line-level 실적일자)
-     * - financialDocType, taxType, documentNoLike, groupFinancialNo (비정형)
-     * - operator 존재: CriteriaBuilder는 DOCUMENT_CREATED basis의 documentCreated.operator 서브문서로
-     *   처리하므로 B/L-level 역색인으로는 커버 불가
-     * - teamCode 존재 && basis==DOCUMENT_CREATED: documentCreated.teamCode(max 의미)로 처리 — Phase C에서 모델링
+     *
+     * W1-A: hasBlNoFilter/financialDocType/taxType/documentNoLike/groupFinancialNo/operator/teamCode 규칙 제거.
+     *        이 필드들은 FE가 전송하지 않으므로 항상 null → 체크 불필요.
      */
     static boolean isSupportedShape(SearchPmsPerformanceCommand cmd) {
-        if (PmsMartFilterSupport.hasBlNoFilter(cmd)) return false;
         if (PmsMartFilterSupport.hasDocLineFilter(cmd)) return false;
 
         if (StringUtils.hasText(cmd.performanceDtFrom()) || StringUtils.hasText(cmd.performanceDtTo())) return false;
@@ -149,22 +146,6 @@ public class PmsRedisExactCountProvider {
 
         if ("PERFORMANCE".equals(cmd.dateKind())
                 && (StringUtils.hasText(cmd.dateFrom()) || StringUtils.hasText(cmd.dateTo()))) return false;
-
-        if (StringUtils.hasText(cmd.financialDocType())) return false;
-        if (StringUtils.hasText(cmd.taxType())) return false;
-        if (StringUtils.hasText(cmd.documentNoLike())) return false;
-        if (StringUtils.hasText(cmd.groupFinancialNo())) return false;
-
-        // operator: CriteriaBuilder가 DOCUMENT_CREATED basis의 documentCreated.operator 서브문서로 처리
-        // B/L-level 역색인으로 커버 불가 → null
-        if (StringUtils.hasText(cmd.operator())) return false;
-
-        // teamCode + DOCUMENT_CREATED: documentCreated.teamCode(max 의미)로 처리 — Phase C documentPath 소관.
-        // Phase A B/L-level 경로에서는 bl:docteam 차원이 있지만 isSupportedShape는 여전히 false 유지
-        // (기존 Phase B 테스트 호환성 보존, documentPath가 먼저 시도됨).
-        if (StringUtils.hasText(cmd.teamCode()) && cmd.effectiveBasis() == AggregationBasis.DOCUMENT_CREATED) {
-            return false;
-        }
 
         return true;
     }

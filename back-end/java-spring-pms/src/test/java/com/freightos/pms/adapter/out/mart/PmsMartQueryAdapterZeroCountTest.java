@@ -136,10 +136,7 @@ class PmsMartQueryAdapterZeroCountTest {
             null, null, null, null, null,
             null, null, null, null,
             null, null, null, null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null
         );
     }
 
@@ -150,10 +147,7 @@ class PmsMartQueryAdapterZeroCountTest {
             null, null, null, null, null,
             null, null, null, null,
             null, null, null, null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null
         );
     }
 
@@ -164,10 +158,7 @@ class PmsMartQueryAdapterZeroCountTest {
             null, null, null, null, null,
             null, null, null, null,
             null, null, null, null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null
         );
     }
 }

@@ -24,6 +24,8 @@ import java.util.Optional;
  * 결과를 인메모리 캐시에 저장하고 Mongo op-kill(서버사이드 취소)로 감싼다.
  *
  * 활성 조건: pms.mart.enabled=true
+ *
+ * W1-A: hasBlNoFilter 분기 전부 제거 — hblNo/mblNo는 FE가 전송하지 않아 항상 null.
  */
 @Component
 @ConditionalOnProperty(prefix = "pms.mart", name = "enabled", havingValue = "true")
@@ -43,10 +45,9 @@ class PmsMartCountResolver {
     /**
      * freight basis 총건수를 결정한다.
      *
-     * 결정 규칙 (back 원본과 동일):
+     * 결정 규칙:
      * - exactCount=true → 캐시(exact) 적중 시 반환; Redis Count Index 시도(성공 시 반환);
      *   아니면 exactFreightCount(op-kill 래핑) + putExact.
-     * - hasBlNoFilter → $sample 희소오판 방지로 exactFreightCount(op-kill 래핑) + putExact.
      * - 그 외 → 캐시(total) 적중 시 반환; Redis Count Index 시도(성공 시 반환);
      *   approx 추정 후 !hasDocLineFilter && approx < threshold 이면 exact 폴백 + putExact, 아니면 approx + putApprox.
      *
@@ -78,13 +79,6 @@ class PmsMartCountResolver {
             return exact;
         }
 
-        // hasBlNoFilter: $sample 근사가 희소오판을 유발하므로 바로 정확 count로 확정.
-        if (PmsMartFilterSupport.hasBlNoFilter(command)) {
-            long exact = exactFreightCountWithCancel(command, flagField, pageCriteria, userKey, signature);
-            queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
-            return exact;
-        }
-
         Long cached = getCachedTotal(cacheKey);
         if (cached != null) return cached;
 
@@ -107,8 +101,7 @@ class PmsMartCountResolver {
     /**
      * document basis 총건수를 결정한다.
      *
-     * 결정 규칙 (back 원본과 동일):
-     * - hasBlNoFilter → pageCriteria 직접 count(op-kill 래핑) + putExact.
+     * 결정 규칙:
      * - exactCount=true → 캐시(exact) 적중 시 반환;
      *   docLine ? mongoTemplate.count(pageCriteria) : planner.countDocument (op-kill 래핑) + putExact.
      * - 그 외 → 캐시(total) 적중 시 반환; approx 추정 후
@@ -126,13 +119,6 @@ class PmsMartCountResolver {
             String cacheKey,
             String userKey,
             String signature) {
-
-        // hasBlNoFilter: $sample 근사가 희소오판을 유발하므로 항상 pageCriteria 정확 count.
-        if (PmsMartFilterSupport.hasBlNoFilter(command)) {
-            long exact = exactDocumentBlNoCaseWithCancel(pageCriteria, userKey, signature);
-            queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
-            return exact;
-        }
 
         boolean docLine = PmsMartFilterSupport.hasDocLineFilter(command);
 
@@ -171,15 +157,15 @@ class PmsMartCountResolver {
     /**
      * fast-path(ETD/ETA 전용 경로) 총건수를 결정한다.
      *
-     * 결정 규칙 (back 원본과 동일):
+     * 결정 규칙:
      * - 캐시(total) 적중 시 반환.
      * - line-accel OFF(approxEstimator 없음) → mongoTemplate.count + putExact(무회귀).
-     * - exactCount=true 또는 hasBlNoFilter → mongoTemplate.count + putExact.
+     * - exactCount=true → mongoTemplate.count + putExact.
      * - approx 추정 후 approx < earlyTermThreshold(희소) → mongoTemplate.count + putExact.
      * - 그 외 → approx + putApprox.
      *
      * @param criteria criteria (flagField 필터 포함)
-     * @param command  조회 커맨드(exactCount·hasBlNoFilter 판단용)
+     * @param command  조회 커맨드(exactCount 판단용)
      * @param cacheKey 사용자 키 + 필터 서명 조합
      */
     long resolveFastPathTotal(Criteria criteria, SearchPmsPerformanceCommand command, String cacheKey) {
@@ -196,7 +182,7 @@ class PmsMartCountResolver {
             return total;
         }
 
-        if (Boolean.TRUE.equals(command.exactCount()) || PmsMartFilterSupport.hasBlNoFilter(command)) {
+        if (Boolean.TRUE.equals(command.exactCount())) {
             long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
             queryCache.ifPresent(c -> c.putExact(cacheKey, total));
             return total;
@@ -232,32 +218,6 @@ class PmsMartCountResolver {
         RunningOp op = registry.begin(userKey, signature);
         try {
             return exactFreightCount(command, flagField, pageCriteria, op.getComment());
-        } catch (RuntimeException ex) {
-            if (op.isKilled()) throw new PmsQueryCancelledException();
-            throw ex;
-        } finally {
-            registry.complete(userKey, op);
-        }
-    }
-
-    /**
-     * document hasBlNoFilter 경로 — pageCriteria 직접 count를 op-kill 래핑으로 실행한다.
-     * comment가 있으면 maxTime + comment를 Query에 주입한다.
-     */
-    private long exactDocumentBlNoCaseWithCancel(
-            Criteria pageCriteria,
-            String userKey,
-            String signature) {
-
-        if (exactCountRegistry.isEmpty()) {
-            return mongoTemplate.count(Query.query(pageCriteria), PmsBlMartDocument.class);
-        }
-        PmsExactCountRegistry registry = exactCountRegistry.get();
-        RunningOp op = registry.begin(userKey, signature);
-        try {
-            long timeout = props.getLineAccel().getExactCountTimeoutMs();
-            Query q = Query.query(pageCriteria).comment(op.getComment()).maxTimeMsec(timeout);
-            return mongoTemplate.count(q, PmsBlMartDocument.class);
         } catch (RuntimeException ex) {
             if (op.isKilled()) throw new PmsQueryCancelledException();
             throw ex;
@@ -327,7 +287,7 @@ class PmsMartCountResolver {
     /**
      * freight exact count. back 어댑터의 인라인 메서드와 동일한 규칙.
      *
-     * needsLineGrainCorrelation || hasBlNoFilter || hasDocLineFilter이면 pageCriteria count,
+     * needsLineGrainCorrelation || hasDocLineFilter이면 pageCriteria count,
      * 아니면 planner.countFreight.
      * comment가 null이 아니면 maxTime + comment를 Query/Aggregation에 주입한다.
      */
@@ -338,7 +298,6 @@ class PmsMartCountResolver {
             String comment) {
 
         if (PmsMartFilterSupport.needsLineGrainCorrelation(command)
-                || PmsMartFilterSupport.hasBlNoFilter(command)
                 || PmsMartFilterSupport.hasDocLineFilter(command)) {
             if (comment != null) {
                 long timeout = props.getLineAccel().getExactCountTimeoutMs();

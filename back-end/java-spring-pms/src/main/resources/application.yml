@@ -160,3 +160,4 @@ pms:
       stale-tolerance-seconds: 120
       max-distinct-scan: 2000000
       max-day-buckets: 1500
+      max-collapse-fd-ids: ${PMS_MART_COUNT_INDEX_MAX_COLLAPSE_FD_IDS:2000000}

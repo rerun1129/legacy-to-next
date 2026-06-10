@@ -141,12 +141,6 @@ final class PmsCountIndexDocSupport {
         if (d.isGrouped()) {
             keys.add(PmsCountIndexKeys.docGroupedBitmap(prefix));
         }
-        if (StringUtils.hasText(d.getTeam())) {
-            keys.add(PmsCountIndexKeys.docTeamBitmap(prefix, d.getTeam()));
-        }
-        if (StringUtils.hasText(d.getOperator())) {
-            keys.add(PmsCountIndexKeys.docOperatorBitmap(prefix, d.getOperator()));
-        }
         if (StringUtils.hasText(d.getDocDt())) {
             keys.add(PmsCountIndexKeys.docDtDayBitmap(prefix, d.getDocDt()));
         }
@@ -172,10 +166,6 @@ final class PmsCountIndexDocSupport {
                 keys.add(PmsCountIndexKeys.docTypeBitmap(prefix, d.getDocType()));
             if (StringUtils.hasText(d.getStatus()))
                 keys.add(PmsCountIndexKeys.docStatusBitmap(prefix, d.getStatus()));
-            if (StringUtils.hasText(d.getTeam()))
-                keys.add(PmsCountIndexKeys.docTeamBitmap(prefix, d.getTeam()));
-            if (StringUtils.hasText(d.getOperator()))
-                keys.add(PmsCountIndexKeys.docOperatorBitmap(prefix, d.getOperator()));
             if (StringUtils.hasText(d.getDocDt()))
                 keys.add(PmsCountIndexKeys.docDtDayBitmap(prefix, d.getDocDt()));
             if (StringUtils.hasText(d.getPerfPd()))

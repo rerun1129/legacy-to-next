@@ -53,17 +53,17 @@ class PmsCountIndexBulkBuilderTest {
             accum.computeIfAbsent(k, ignored -> new RoaringBitmap()).add(ordinal);
         }
 
-        String custKey = PREFIX + ":bl:cust:CUST01";
-        assertThat(accum).containsKey(custKey);
-        assertThat(accum.get(custKey).contains(ordinal)).isTrue();
+        String jobdivKey = PREFIX + ":bl:jobdiv:SEA";
+        assertThat(accum).containsKey(jobdivKey);
+        assertThat(accum.get(jobdivKey).contains(ordinal)).isTrue();
     }
 
     @Test
     void 여러_문서가_같은_dim을_공유하면_하나의_비트맵에_누적된다() {
         PmsBlMartDocument doc1 = PmsBlMartDocument.builder()
-            .id("HOUSE#1").blId(1L).blType("HOUSE").actualCustomerCode("CUST01").build();
+            .id("HOUSE#1").blId(1L).blType("HOUSE").actualCustomerCode("CUST01").jobDiv("SEA").build();
         PmsBlMartDocument doc2 = PmsBlMartDocument.builder()
-            .id("HOUSE#2").blId(2L).blType("HOUSE").actualCustomerCode("CUST01").build();
+            .id("HOUSE#2").blId(2L).blType("HOUSE").actualCustomerCode("CUST01").jobDiv("SEA").build();
 
         Map<String, RoaringBitmap> accum = new HashMap<>();
         for (PmsBlMartDocument doc : List.of(doc1, doc2)) {
@@ -73,18 +73,18 @@ class PmsCountIndexBulkBuilderTest {
             }
         }
 
-        String custKey = PREFIX + ":bl:cust:CUST01";
-        assertThat(accum.get(custKey).getCardinality()).isEqualTo(2);
-        assertThat(accum.get(custKey).contains(PmsCountIndexKeys.toOrdinal(1L, "HOUSE"))).isTrue();
-        assertThat(accum.get(custKey).contains(PmsCountIndexKeys.toOrdinal(2L, "HOUSE"))).isTrue();
+        String jobdivKey = PREFIX + ":bl:jobdiv:SEA";
+        assertThat(accum.get(jobdivKey).getCardinality()).isEqualTo(2);
+        assertThat(accum.get(jobdivKey).contains(PmsCountIndexKeys.toOrdinal(1L, "HOUSE"))).isTrue();
+        assertThat(accum.get(jobdivKey).contains(PmsCountIndexKeys.toOrdinal(2L, "HOUSE"))).isTrue();
     }
 
     @Test
-    void HOUSE와_MASTER_같은_custCode는_각자_ordinal이다() {
+    void HOUSE와_MASTER_같은_jobDiv는_각자_ordinal이다() {
         PmsBlMartDocument house = PmsBlMartDocument.builder()
-            .id("HOUSE#10").blId(10L).blType("HOUSE").actualCustomerCode("CUST01").build();
+            .id("HOUSE#10").blId(10L).blType("HOUSE").actualCustomerCode("CUST01").jobDiv("SEA").build();
         PmsBlMartDocument master = PmsBlMartDocument.builder()
-            .id("MASTER#10").blId(10L).blType("MASTER").actualCustomerCode("CUST01").build();
+            .id("MASTER#10").blId(10L).blType("MASTER").actualCustomerCode("CUST01").jobDiv("SEA").build();
 
         Map<String, RoaringBitmap> accum = new HashMap<>();
         for (PmsBlMartDocument doc : List.of(house, master)) {
@@ -94,11 +94,11 @@ class PmsCountIndexBulkBuilderTest {
             }
         }
 
-        String custKey = PREFIX + ":bl:cust:CUST01";
-        assertThat(accum.get(custKey).getCardinality()).isEqualTo(2);
+        String jobdivKey = PREFIX + ":bl:jobdiv:SEA";
+        assertThat(accum.get(jobdivKey).getCardinality()).isEqualTo(2);
         // ordinal 20 (HOUSE#10), 21 (MASTER#10)
-        assertThat(accum.get(custKey).contains(20)).isTrue();
-        assertThat(accum.get(custKey).contains(21)).isTrue();
+        assertThat(accum.get(jobdivKey).contains(20)).isTrue();
+        assertThat(accum.get(jobdivKey).contains(21)).isTrue();
     }
 
     // ── fdId → ordinal 배열 (growable int[]) ─────────────────────────────────

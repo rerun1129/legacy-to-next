@@ -22,6 +22,13 @@ public class PmsDocumentSqlBuilder {
      * financial_document(fd) + freight_header(h) 조건을 수집.
      * params에 값도 함께 바인딩.
      */
+    /**
+     * financial_document(fd) + freight_header(h) 조건을 수집.
+     * params에 값도 함께 바인딩.
+     *
+     * W1-A: teamCode/operator/documentNoLike/groupFinancialNo 제거.
+     *        performanceDtFrom/To, documentTypes, documentStatus, documentDtFrom/To, grouped 유지.
+     */
     public void addDocumentPredicates(SearchPmsPerformanceCommand c,
                                       List<String> where, MapSqlParameterSource params) {
         if (hasValue(c.performanceDtFrom())) {
@@ -32,14 +39,6 @@ public class PmsDocumentSqlBuilder {
             where.add("fd.performance_dt <= :perf_to");
             params.addValue("perf_to", c.performanceDtTo());
         }
-        if (hasValue(c.teamCode())) {
-            where.add("fd.team_code = :team_code");
-            params.addValue("team_code", c.teamCode());
-        }
-        if (hasValue(c.operator())) {
-            where.add("fd.operator = :operator");
-            params.addValue("operator", c.operator());
-        }
         if (c.documentTypes() != null && !c.documentTypes().isEmpty()) {
             where.add("fd.document_type IN (:doc_types)");
             params.addValue("doc_types", c.documentTypes());
@@ -48,10 +47,6 @@ public class PmsDocumentSqlBuilder {
             where.add("fd.document_status = :doc_status");
             params.addValue("doc_status", c.documentStatus());
         }
-        if (hasValue(c.documentNoLike())) {
-            where.add("fd.document_no ILIKE '%' || :doc_no || '%'");
-            params.addValue("doc_no", c.documentNoLike());
-        }
         if (hasValue(c.documentDtFrom())) {
             where.add("fd.document_dt >= :doc_dt_from");
             params.addValue("doc_dt_from", c.documentDtFrom());
@@ -59,10 +54,6 @@ public class PmsDocumentSqlBuilder {
         if (hasValue(c.documentDtTo())) {
             where.add("fd.document_dt <= :doc_dt_to");
             params.addValue("doc_dt_to", c.documentDtTo());
-        }
-        if (hasValue(c.groupFinancialNo())) {
-            where.add("fd.group_financial_no ILIKE '%' || :grp_no || '%'");
-            params.addValue("grp_no", c.groupFinancialNo());
         }
         if (hasValue(c.grouped())) {
             where.add("Y".equalsIgnoreCase(c.grouped())
@@ -73,21 +64,12 @@ public class PmsDocumentSqlBuilder {
 
     /**
      * freight_header(h) 필터 조건 수집.
+     * W1-A: actualCustomerCode/settlePartnerCode/carrierCode 제거.
+     *        FE가 전송하지 않으므로 항상 null → 빈 메서드.
      */
     public void addHeaderPredicates(SearchPmsPerformanceCommand c,
                                     List<String> where, MapSqlParameterSource params) {
-        if (hasValue(c.actualCustomerCode())) {
-            where.add("h.actual_customer_code = :acc");
-            params.addValue("acc", c.actualCustomerCode());
-        }
-        if (hasValue(c.settlePartnerCode())) {
-            where.add("h.settle_partner_code = :spc");
-            params.addValue("spc", c.settlePartnerCode());
-        }
-        if (hasValue(c.carrierCode())) {
-            where.add("h.liner_code = :liner_code");
-            params.addValue("liner_code", c.carrierCode());
-        }
+        // W1-A: 모든 필터 제거됨 — FE가 전송하는 필드가 없음
     }
 
     // ── FMS LEFT JOIN 조각 ────────────────────────────────────────────────────
@@ -128,17 +110,6 @@ public class PmsDocumentSqlBuilder {
         if (hasValue(c.bound())) {
             where.add("(hb.bound = :fms_bound OR mb.bound = :fms_bound)");
             params.addValue("fms_bound", c.bound());
-        }
-        if (hasValue(c.mblNo())) {
-            where.add(
-                "(hb.mbl_no LIKE :fms_mbl_no || '%' OR mb.mbl_no LIKE :fms_mbl_no || '%')");
-            params.addValue("fms_mbl_no", c.mblNo());
-        }
-        if (hasValue(c.portKind()) && hasValue(c.portCode())) {
-            String hCol = "POL".equals(c.portKind()) ? "hb.pol_code" : "hb.pod_code";
-            String mCol = "POL".equals(c.portKind()) ? "mb.pol_code" : "mb.pod_code";
-            where.add("(" + hCol + " = :fms_port_code OR " + mCol + " = :fms_port_code)");
-            params.addValue("fms_port_code", c.portCode());
         }
 
         return joinSql.toString();

@@ -12,12 +12,13 @@ import java.util.List;
  *
  * 두 가지 FROM 형태를 생성한다:
  * (A) BMS-only: FMS 조인 불필요 → FROM bms.freight_line … bms.freight_header
- * (B) B/L-driven: FMS 날짜·필터 활성 → UNION ALL CTE로 house/master 먼저 필터링 후 BMS JOIN.
- *
- * house-only 필터(hblNo/salesManCode/incoterms/salesClass/teamCode) 활성 시
- * UNION ALL master 브랜치를 완전히 생략한다 (master 행이 조건을 충족할 수 없음).
+ * (B) B/L-driven: FMS 날짜 활성 → UNION ALL CTE로 house/master 먼저 필터링 후 BMS JOIN.
  *
  * 모든 사용자 값은 named parameter로 바인딩 — SQL 인젝션 위험 없음.
+ *
+ * W1-A: FE가 전송하지 않는 필터(hblNo/mblNo/salesManCode/salesClass/incoterms/teamCode/
+ *        portKind/portCode/actualCustomerCode/settlePartnerCode/carrierCode/partyKind/partyCode/
+ *        financialDocType/taxType) 제거.
  */
 @Component
 public class PmsFreightLineSqlBuilder {
@@ -38,7 +39,6 @@ public class PmsFreightLineSqlBuilder {
     /**
      * B/L-driven FROM (fmsJoinNeeded = true).
      * house_bl / master_bl 인덱스를 먼저 타게 한 뒤 BMS 테이블에 JOIN.
-     * houseOnlyActive=true 시 master UNION ALL 브랜치를 생략.
      */
     public String blDrivenFrom(
             SearchPmsPerformanceCommand c,
@@ -90,13 +90,6 @@ public class PmsFreightLineSqlBuilder {
 
         addEq(predicates, params, "job_div", "fms_job_div", c.jobDiv());
         addEq(predicates, params, "bound", "fms_bound", c.bound());
-        addLike(predicates, params, "hbl_no", "fms_hbl_no", c.hblNo());
-        addLike(predicates, params, "mbl_no", "fms_mbl_no", c.mblNo());
-        addPortFilter(predicates, params, c);
-        addEq(predicates, params, "sales_man_code", "fms_sales_man_code", c.salesManCode());
-        addEq(predicates, params, "sales_class", "fms_sales_class", c.salesClass());
-        addEq(predicates, params, "incoterms", "fms_incoterms", c.incoterms());
-        addEq(predicates, params, "team_code", "fms_team_code", c.teamCode());
 
         return predicates;
     }
@@ -104,8 +97,8 @@ public class PmsFreightLineSqlBuilder {
     // ── MASTER WHERE 술어 ─────────────────────────────────────────────────────
 
     /**
-     * master_bl은 hblNo/salesManCode/incoterms/salesClass/teamCode 컬럼이 없다.
-     * 그 필터가 활성이면 이 브랜치 자체가 UNION ALL에서 제거되므로 여기서는 공통 필터만.
+     * master_bl 공통 필터 — job_div/bound/ETD/ETA 범위.
+     * house-only 필터가 활성이면 이 브랜치 자체가 UNION ALL에서 제거되므로 여기서는 공통 필터만.
      */
     private List<String> buildMasterWhere(SearchPmsPerformanceCommand c, MapSqlParameterSource params) {
         List<String> predicates = new ArrayList<>();
@@ -118,11 +111,8 @@ public class PmsFreightLineSqlBuilder {
             if (hasValue(c.dateTo()))   predicates.add(col + " <= :fms_date_to");
         }
 
-        // job_div/bound/mbl_no/port — master에도 있는 공통 컬럼
-        if (hasValue(c.jobDiv()))   predicates.add("job_div = :fms_job_div");
-        if (hasValue(c.bound()))    predicates.add("bound = :fms_bound");
-        if (hasValue(c.mblNo()))    predicates.add("mbl_no LIKE :fms_mbl_no || '%'");
-        addPortFilter(predicates, params, c);   // params: fms_port_code 이미 추가됨
+        if (hasValue(c.jobDiv())) predicates.add("job_div = :fms_job_div");
+        if (hasValue(c.bound()))  predicates.add("bound = :fms_bound");
 
         return predicates;
     }
@@ -132,6 +122,9 @@ public class PmsFreightLineSqlBuilder {
     /**
      * freight_line·freight_header 필터 + basis 술어를 수집한다.
      * params에 값도 함께 바인딩.
+     *
+     * W1-A: financialDocType/taxType/actualCustomerCode/settlePartnerCode/carrierCode/partyKind/partyCode 제거.
+     *        issued/documentTypes/performanceDtFrom/To 유지.
      */
     public List<String> buildOuterWhere(SearchPmsPerformanceCommand c, MapSqlParameterSource params) {
         List<String> predicates = new ArrayList<>();
@@ -144,14 +137,6 @@ public class PmsFreightLineSqlBuilder {
         }
 
         // freight_line 필터
-        if (hasValue(c.financialDocType())) {
-            predicates.add("l.financial_doc_type = :financial_doc_type");
-            params.addValue("financial_doc_type", c.financialDocType());
-        }
-        if (hasValue(c.taxType())) {
-            predicates.add("l.tax_type = :tax_type");
-            params.addValue("tax_type", c.taxType());
-        }
         if (hasValue(c.issued())) {
             predicates.add("Y".equalsIgnoreCase(c.issued())
                 ? "l.financial_document_id IS NOT NULL"
@@ -162,7 +147,7 @@ public class PmsFreightLineSqlBuilder {
             params.addValue("doc_types", c.documentTypes());
         }
 
-        // performanceDt 범위 (BMS-only FROM에서만 유효 — B/L-driven에서는 불필요하나 부여해도 무해)
+        // performanceDt 범위
         if (hasValue(c.performanceDtFrom())) {
             predicates.add("l.performance_dt >= :perf_from");
             params.addValue("perf_from", c.performanceDtFrom());
@@ -170,37 +155,6 @@ public class PmsFreightLineSqlBuilder {
         if (hasValue(c.performanceDtTo())) {
             predicates.add("l.performance_dt <= :perf_to");
             params.addValue("perf_to", c.performanceDtTo());
-        }
-
-        // freight_header 필터
-        if (hasValue(c.actualCustomerCode())) {
-            predicates.add("h.actual_customer_code = :acc");
-            params.addValue("acc", c.actualCustomerCode());
-        }
-        if (hasValue(c.settlePartnerCode())) {
-            predicates.add("h.settle_partner_code = :spc");
-            params.addValue("spc", c.settlePartnerCode());
-        }
-        if (hasValue(c.carrierCode())) {
-            predicates.add("h.liner_code = :liner_code");
-            params.addValue("liner_code", c.carrierCode());
-        }
-
-        // partyKind + partyCode: 동적 거래처 코드 분기 (freight_header 컬럼)
-        // PmsFmsJoinDecider.fmsJoinNeeded()에서 partyCode 활성 시 FMS JOIN을 트리거하지만
-        // 필터 자체는 h.* 컬럼이므로 외부 WHERE에 추가한다.
-        if (hasValue(c.partyKind()) && hasValue(c.partyCode())) {
-            switch (c.partyKind()) {
-                case "ACTUAL_CUSTOMER" -> {
-                    predicates.add("h.actual_customer_code = :party_code");
-                    params.addValue("party_code", c.partyCode());
-                }
-                case "SETTLE_PARTNER" -> {
-                    predicates.add("h.settle_partner_code = :party_code");
-                    params.addValue("party_code", c.partyCode());
-                }
-                default -> { /* 미인식 partyKind: 필터 무시 */ }
-            }
         }
 
         return predicates;
@@ -219,13 +173,13 @@ public class PmsFreightLineSqlBuilder {
 
     // ── 공통 헬퍼 ─────────────────────────────────────────────────────────────
 
-    /** houseOnlyActive: house-only 필터(hblNo/salesManCode 등)가 하나라도 활성인지 판단. */
+    /**
+     * houseOnlyActive: house-only 필터가 하나라도 활성인지 판단.
+     * W1-A: house-only 필터(hblNo/salesManCode/incoterms/salesClass/teamCode)가 모두 제거됨.
+     *        FE가 전송하는 필터 중 house-only 조건이 없으므로 항상 false.
+     */
     public boolean houseOnlyActive(SearchPmsPerformanceCommand c) {
-        return hasValue(c.hblNo())
-            || hasValue(c.salesManCode())
-            || hasValue(c.incoterms())
-            || hasValue(c.salesClass())
-            || hasValue(c.teamCode());
+        return false;
     }
 
     private void addEq(List<String> predicates, MapSqlParameterSource params,
@@ -233,24 +187,6 @@ public class PmsFreightLineSqlBuilder {
         if (!hasValue(value)) return;
         predicates.add(col + " = :" + paramName);
         params.addValue(paramName, value);
-    }
-
-    private void addLike(List<String> predicates, MapSqlParameterSource params,
-                         String col, String paramName, String value) {
-        if (!hasValue(value)) return;
-        predicates.add(col + " LIKE :" + paramName + " || '%'");
-        params.addValue(paramName, value);
-    }
-
-    private void addPortFilter(List<String> predicates, MapSqlParameterSource params,
-                               SearchPmsPerformanceCommand c) {
-        if (!hasValue(c.portKind()) || !hasValue(c.portCode())) return;
-        String col = "POL".equals(c.portKind()) ? "pol_code" : "pod_code";
-        predicates.add(col + " = :fms_port_code");
-        // 중복 추가 방지: HOUSE/MASTER 모두 같은 파라미터명을 공유
-        if (!params.hasValue("fms_port_code")) {
-            params.addValue("fms_port_code", c.portCode());
-        }
     }
 
     private void appendWhere(StringBuilder sb, List<String> predicates) {

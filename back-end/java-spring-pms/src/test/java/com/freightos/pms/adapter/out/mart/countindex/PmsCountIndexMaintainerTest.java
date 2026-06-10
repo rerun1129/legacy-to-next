@@ -70,13 +70,17 @@ class PmsCountIndexMaintainerTest {
 
     // ── deriveMembershipKeys 멤버십 파생 검증 ─────────────────────────────────
 
+    /**
+     * W1-A: deriveMembershipKeys는 이제 jobDiv/bound + has-flag + etd/eta만 파생.
+     *        cust/spc/liner/pol/pod/salesman/houseteam/salesclass/incoterms dim은 제거됨.
+     */
     @Test
-    void 차원필드가있는문서는해당차원비트맵키를포함한다() {
+    void 차원필드가있는문서는jobDiv_bound_hasflag_etdeta키를포함한다() {
         PmsBlMartDocument doc = PmsBlMartDocument.builder()
             .id("HOUSE#100")
             .blId(100L)
             .blType("HOUSE")
-            .actualCustomerCode("CUST01")
+            .actualCustomerCode("CUST01")   // Mart 필드는 유지되지만 dim 키 미생성
             .settlePartnerCode("SPC01")
             .linerCode("LINER01")
             .polCode("ICN")
@@ -97,7 +101,17 @@ class PmsCountIndexMaintainerTest {
 
         Set<String> keys = PmsCountIndexMaintainer.deriveMembershipKeys(doc, PREFIX);
 
+        // W1-A: 잔존 차원 jobDiv/bound + has-flag + ETD/ETA
         assertThat(keys).contains(
+            PREFIX + ":bl:jobdiv:SEA",
+            PREFIX + ":bl:bound:EXP",
+            PREFIX + ":bl:etd:20240101",
+            PREFIX + ":bl:eta:20240120",
+            PREFIX + ":bl:has:freight",
+            PREFIX + ":bl:has:doc"
+        );
+        // W1-A: 제거된 dim 키들은 생성되지 않아야 함
+        assertThat(keys).doesNotContain(
             PREFIX + ":bl:cust:CUST01",
             PREFIX + ":bl:spc:SPC01",
             PREFIX + ":bl:liner:LINER01",
@@ -105,39 +119,28 @@ class PmsCountIndexMaintainerTest {
             PREFIX + ":bl:pod:LAX",
             PREFIX + ":bl:salesman:SM01",
             PREFIX + ":bl:houseteam:TEAM01",
-            PREFIX + ":bl:jobdiv:SEA",
-            PREFIX + ":bl:bound:EXP",
             PREFIX + ":bl:salesclass:SC01",
             PREFIX + ":bl:incoterms:FOB",
-            PREFIX + ":bl:etd:20240101",
-            PREFIX + ":bl:eta:20240120",
-            PREFIX + ":bl:has:freight",
-            PREFIX + ":bl:has:doc"
-        );
-        assertThat(keys).doesNotContain(
             PREFIX + ":bl:has:tax",
             PREFIX + ":bl:has:slip"
         );
     }
 
     @Test
-    void 차원필드가null인문서는해당차원키를포함하지않는다() {
+    void 차원필드가null인문서는jobDiv_bound없으면_dim키없다() {
         PmsBlMartDocument doc = PmsBlMartDocument.builder()
             .id("MASTER#200")
             .blId(200L)
             .blType("MASTER")
-            .actualCustomerCode("CUST02")
+            .actualCustomerCode("CUST02")  // W1-A: dim 키 미생성
             .build();
 
         Set<String> keys = PmsCountIndexMaintainer.deriveMembershipKeys(doc, PREFIX);
 
-        assertThat(keys).contains(PREFIX + ":bl:cust:CUST02");
-        assertThat(keys).doesNotContain(
-            PREFIX + ":bl:salesman:",
-            PREFIX + ":bl:houseteam:",
-            PREFIX + ":bl:incoterms:",
-            PREFIX + ":bl:salesclass:"
-        );
+        // W1-A: jobDiv/bound null → 차원 키 없음
+        assertThat(keys).noneMatch(k -> k.contains(":bl:cust:"));
+        assertThat(keys).noneMatch(k -> k.contains(":bl:jobdiv:"));
+        assertThat(keys).noneMatch(k -> k.contains(":bl:bound:"));
     }
 
     @Test

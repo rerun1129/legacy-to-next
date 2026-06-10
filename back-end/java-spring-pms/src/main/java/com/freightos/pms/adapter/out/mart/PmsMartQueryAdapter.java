@@ -155,9 +155,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
         if (total > props.getLineAccel().getEarlyTermThreshold()
                 || PmsMartFilterSupport.needsLineGrainCorrelation(command)
-                || PmsMartFilterSupport.hasBlNoFilter(command)
                 || PmsMartFilterSupport.hasDocLineFilter(command)) {
-            // 밀집 / 라인-그레인 상관 / blNo 필터 / 서류조건 경로: pageCriteria + blId DESC 조기종료 find
+            // 밀집 / 라인-그레인 상관 / 서류조건 경로: pageCriteria + blId DESC 조기종료 find
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())
@@ -184,9 +183,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             Pageable pageable) {
 
         if (total > props.getLineAccel().getEarlyTermThreshold()
-                || PmsMartFilterSupport.hasBlNoFilter(command)
                 || PmsMartFilterSupport.hasDocLineFilter(command)) {
-            // 밀집 / blNo 필터 / 서류조건 경로: pms_bl_mart houseBlNo 인덱스 활용
+            // 밀집 / 서류조건 경로: pageCriteria + blId DESC 조기종료 find
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())

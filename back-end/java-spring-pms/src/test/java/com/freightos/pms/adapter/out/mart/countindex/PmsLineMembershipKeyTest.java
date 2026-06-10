@@ -106,12 +106,19 @@ class PmsLineMembershipKeyTest {
     }
 
     @Test
-    void pd_공백_fdcType도_null인_라인은_line_키를_추가하지않는다() {
+    void pd_null_fdcType_null_라인은_전역_복합_none_버킷_1개만_추가된다() {
+        // W2 global composite 도입 후: pd-null 라인도 전역 복합 버킷(ln:c:{t}{s}{i}:none)에 적재된다.
+        // Mongo pageCriteria의 lines.$elemMatch(issued:false) 등이 pd-null 라인도 매칭하므로
+        // 전역 composite에서 빼면 ETD+issued류 쿼리가 과소집계됨 — 전역 composite 포함이 정합.
         PmsBlMartDocument doc = docWithLines(
             new PmsBlLineEmbedded(null, null, null, false, false, false, null, null)
         );
         Set<String> keys = PmsCountIndexMaintainer.deriveMembershipKeys(doc, PREFIX);
-        assertThat(keys).noneMatch(k -> k.startsWith(PREFIX + ":ln:"));
+        // 일버킷(ln:pd:)과 전역 fdc(ln:fdc:)는 추가되지 않아야 함
+        assertThat(keys).noneMatch(k -> k.contains(":ln:pd:"));
+        assertThat(keys).noneMatch(k -> k.contains(":ln:fdc:"));
+        // 전역 복합 버킷 정확히 1개만 존재: tax=0, slip=0, issued=0, type=none
+        assertThat(keys).containsOnlyOnce(PREFIX + ":ln:c:000:none");
     }
 
     // ── lines null/empty ──────────────────────────────────────────────────────

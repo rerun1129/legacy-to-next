@@ -94,7 +94,7 @@ export interface PmsPerformancePage {
   size: number;
 }
 
-/** PS-01 조회 요청 입력 */
+/** PS-01 조회 요청 입력 — BE SearchPmsPerformanceRequest 18필드와 1:1 대응 */
 export interface SearchPmsPerformanceInput {
   basis: AggregationBasis;
   page: number;
@@ -112,39 +112,12 @@ export interface SearchPmsPerformanceInput {
   /** dateKind=DOC 선택 시 dateFrom/dateTo에서 파생하여 전송 */
   documentDtFrom?: string | null;
   documentDtTo?: string | null;
-  hblNo?: string | null;
-  mblNo?: string | null;
-
-  // 거래처
-  actualCustomerCode?: string | null;
-  settlePartnerCode?: string | null;
-
-  // 운송사
-  carrierCode?: string | null;
-
-  // 항만
-  portKind?: string | null;
-  portCode?: string | null;
-
-  // 영업
-  salesManCode?: string | null;
-  salesClass?: string | null;
-  incoterms?: string | null;
-  loadType?: string | null;
-  teamCode?: string | null;
-  operator?: string | null;
 
   // BMS 서류
   documentTypes?: string[] | null;
   documentStatus?: string | null;
-  documentNoLike?: string | null;
-  groupFinancialNo?: string | null;
   grouped?: string | null;
   issued?: string | null;
-
-  // BMS 운임행
-  financialDocType?: string | null;
-  taxType?: string | null;
 
   // 총건수 정확도 옵션 — true: 정확치(느릴 수 있음), false/미전송: 근사치(기본)
   exactCount?: boolean | null;

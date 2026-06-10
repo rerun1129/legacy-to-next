@@ -12,32 +12,23 @@ import org.springframework.stereotype.Component;
 /**
  * PMS 실적 조회 어셈블러. Request DTO → Command 변환, View → Response DTO 변환.
  * Controller·Domain 계층 간 변환 책임을 단일화한다(ARCH1).
+ *
+ * W1-B: 기간 필수 검증 — 세 쌍(ETD/ETA, 실적, 서류) 중 정확히 한 쌍이 양끝 모두 존재해야 한다.
  */
 @Component
 public class PmsPerformanceAssembler {
 
     public SearchPmsPerformanceCommand toCommand(SearchPmsPerformanceRequest req) {
+        validateDatePair(req);
         AggregationBasis basis = parseBasis(req.basis());
-        // B/L 번호는 DB에 100% 대문자 저장 → prefix CS 인덱스 활용을 위해 단일 진입점에서 정규화
-        String hblNo = req.hblNo() != null && !req.hblNo().isBlank() ? req.hblNo().toUpperCase() : req.hblNo();
-        String mblNo = req.mblNo() != null && !req.mblNo().isBlank() ? req.mblNo().toUpperCase() : req.mblNo();
         return new SearchPmsPerformanceCommand(
             basis, req.page(), req.size(),
             req.jobDiv(), req.bound(),
             req.dateKind(), req.dateFrom(), req.dateTo(),
             req.performanceDtFrom(), req.performanceDtTo(),
-            hblNo, mblNo,
-            req.partyKind(), req.partyCode(),
-            req.actualCustomerCode(), req.settlePartnerCode(),
-            req.carrierCode(),
-            req.portKind(), req.portCode(),
-            req.salesManCode(), req.salesClass(), req.incoterms(),
-            req.vesselVoyage(), req.loadType(),
-            req.teamCode(), req.operator(),
+            req.documentDtFrom(), req.documentDtTo(),
             req.documentTypes(), req.documentStatus(),
-            req.documentNoLike(), req.documentDtFrom(), req.documentDtTo(),
-            req.groupFinancialNo(), req.grouped(), req.issued(),
-            req.financialDocType(), req.taxType(),
+            req.grouped(), req.issued(),
             req.exactCount(), req.searchNonce()
         );
     }
@@ -72,6 +63,28 @@ public class PmsPerformanceAssembler {
             view.paymentUsdAmt(), view.creditUsdAmt(), view.usdProfit(),
             view.blClosed(), view.freightClosed()
         );
+    }
+
+    // ── 검증 ─────────────────────────────────────────────────────────────────
+
+    /**
+     * 기간 필수 검증(W1-B).
+     * (dateFrom&&dateTo) / (performanceDtFrom&&performanceDtTo) / (documentDtFrom&&documentDtTo)
+     * 세 쌍 중 정확히 한 쌍이 양끝 모두 존재해야 한다. 아니면 IllegalArgumentException → 400.
+     */
+    private void validateDatePair(SearchPmsPerformanceRequest req) {
+        boolean hasEtdEta = hasText(req.dateFrom()) && hasText(req.dateTo());
+        boolean hasPerf   = hasText(req.performanceDtFrom()) && hasText(req.performanceDtTo());
+        boolean hasDoc    = hasText(req.documentDtFrom()) && hasText(req.documentDtTo());
+
+        int pairCount = (hasEtdEta ? 1 : 0) + (hasPerf ? 1 : 0) + (hasDoc ? 1 : 0);
+        if (pairCount != 1) {
+            throw new IllegalArgumentException("조회 기간(From/To)은 필수입니다");
+        }
+    }
+
+    private boolean hasText(String s) {
+        return s != null && !s.isBlank();
     }
 
     private AggregationBasis parseBasis(String raw) {

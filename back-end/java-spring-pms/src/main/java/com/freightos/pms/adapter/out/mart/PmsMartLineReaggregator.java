@@ -88,7 +88,6 @@ public class PmsMartLineReaggregator {
             .filter(d -> matchesDocumentTypes(d.getDocType(), c))
             .filter(d -> matchesDocumentStatus(d.getStatus(), c))
             .filter(d -> matchesGrouped(d, c))
-            .filter(d -> matchesTeamAndOperator(d, c))
             .toList();
 
         BigDecimal[] sums = sumDocAmounts(matched);
@@ -144,7 +143,6 @@ public class PmsMartLineReaggregator {
     private static boolean matchesDocType(String fdcType, SearchPmsPerformanceCommand c) {
         List<String> types = c.documentTypes();
         if (types != null && !types.isEmpty()) return types.contains(fdcType);
-        if (StringUtils.hasText(c.financialDocType())) return c.financialDocType().equals(fdcType);
         return true;
     }
 
@@ -189,12 +187,6 @@ public class PmsMartLineReaggregator {
             case "N" -> !d.isGrouped();
             default  -> true;
         };
-    }
-
-    private static boolean matchesTeamAndOperator(PmsBlDocEmbedded d, SearchPmsPerformanceCommand c) {
-        if (StringUtils.hasText(c.teamCode()) && !c.teamCode().equals(d.getTeam())) return false;
-        if (StringUtils.hasText(c.operator()) && !c.operator().equals(d.getOperator())) return false;
-        return true;
     }
 
     // ── 금액 합산 헬퍼 ────────────────────────────────────────────────────────

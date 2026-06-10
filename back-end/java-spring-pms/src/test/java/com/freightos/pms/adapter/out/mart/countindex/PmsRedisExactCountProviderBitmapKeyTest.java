@@ -20,12 +20,15 @@ import static org.mockito.Mockito.when;
 /**
  * PmsRedisExactCountProvider.collectBitmapKeys basis has-flag 키 포함 여부 단위 테스트.
  *
+ * W1-A: 18-field Command로 업데이트.
+ *        제거된 필드(actualCustomerCode/linerCode 등)를 dim 필터로 사용하던 케이스를
+ *        jobDiv/bound dim으로 교체.
+ *
  * 버그 A 수정 검증:
  * - 차원/날짜 필터가 있을 때 basis별 has-flag 키가 AND 묶음에 포함되는지 확인한다.
  * - 차원/날짜가 모두 없을 때(무필터 전체 조회)는 여전히 빈 목록이 반환되는지 확인한다.
  *
  * 라이브 Redis/Mongo 없이 순수 로직만 검증한다.
- * 시간·랜덤·sleep 의존 없는 결정적 로직만 사용한다.
  */
 class PmsRedisExactCountProviderBitmapKeyTest {
 
@@ -53,16 +56,14 @@ class PmsRedisExactCountProviderBitmapKeyTest {
     // ── basis has-flag 키 포함 검증 ───────────────────────────────────────────
 
     @Test
-    void FREIGHT_INPUT_차원필터있으면_hasFlagFreight키가_AND묶음에포함된다() {
+    void FREIGHT_INPUT_dim필터있으면_hasFlagFreight키가_AND묶음에포함된다() {
+        // jobDiv 차원 필터 사용 (W1-A: partyKind/actualCustomerCode 제거 → jobDiv/bound으로 교체)
         SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, "CUST01", null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null, null, null,
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -73,16 +74,13 @@ class PmsRedisExactCountProviderBitmapKeyTest {
     }
 
     @Test
-    void TAX_ISSUED_차원필터있으면_hasFlagTax키가_AND묶음에포함된다() {
+    void TAX_ISSUED_dim필터있으면_hasFlagTax키가_AND묶음에포함된다() {
         SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
             AggregationBasis.TAX_ISSUED, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, "CUST01", null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null, null, null,
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -93,16 +91,13 @@ class PmsRedisExactCountProviderBitmapKeyTest {
     }
 
     @Test
-    void SLIP_ISSUED_차원필터있으면_hasFlagSlip키가_AND묶음에포함된다() {
+    void SLIP_ISSUED_dim필터있으면_hasFlagSlip키가_AND묶음에포함된다() {
         SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
             AggregationBasis.SLIP_ISSUED, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, "CUST01", null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null, null, null,
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -113,16 +108,13 @@ class PmsRedisExactCountProviderBitmapKeyTest {
     }
 
     @Test
-    void DOCUMENT_CREATED_차원필터있으면_hasFlagDoc키가_AND묶음에포함된다() {
+    void DOCUMENT_CREATED_dim필터있으면_hasFlagDoc키가_AND묶음에포함된다() {
         SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
             AggregationBasis.DOCUMENT_CREATED, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, "CUST01", null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null, null, null,
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -139,10 +131,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             null, null, "ETD", "20240101", "20240131",
             null, null, null, null,
             null, null, null, null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -160,10 +149,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             null, null, null, null, null,
             null, null, null, null,
             null, null, null, null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -181,10 +167,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             null, null, "ETD", "20240101", "20240103",
             null, null, null, null,
             null, null, null, null,
-            null, null, null,
-            null, null, null, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null,
-            null
+            null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());

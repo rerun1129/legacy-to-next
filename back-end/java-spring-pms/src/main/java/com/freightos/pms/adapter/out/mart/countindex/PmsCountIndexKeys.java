@@ -1,5 +1,8 @@
 package com.freightos.pms.adapter.out.mart.countindex;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Redis Count Index 키 스키마 헬퍼.
  *
@@ -7,30 +10,33 @@ package com.freightos.pms.adapter.out.mart.countindex;
  * 모든 메서드는 순수 문자열 조합이므로 Spring 빈이 아니다.
  *
  * 키 레이아웃:
- * - {p}:bl:{dim}:{code}       — dim별 코드 비트맵 (byte[])
- * - {p}:bl:has:{flag}         — basis 존재 플래그 비트맵 (byte[])
- * - {p}:bl:etd:{date}         — ETD 일별 버킷 비트맵 (byte[])
- * - {p}:bl:eta:{date}         — ETA 일별 버킷 비트맵 (byte[])
- * - {p}:ln:pd:{day}:{attr}    — line(perfdt) 일·속성 버킷 비트맵 (byte[]). attr = has-freight|has-tax|has-slip|fdc-{TYPE}
- * - {p}:ln:fdc:{TYPE}         — line 전역 서류타입 버킷 비트맵 (byte[])
- * - {p}:meta                  — 메타 해시 (complete, syncAt)
- * - {p}:bl:overflow           — B/L ordinal overflow 플래그 (존재 시 not-ready)
+ * - {p}:bl:{dim}:{code}                    — dim별 코드 비트맵 (byte[])
+ * - {p}:bl:has:{flag}                      — basis 존재 플래그 비트맵 (byte[])
+ * - {p}:bl:etd:{date}                      — ETD 일별 버킷 비트맵 (byte[])
+ * - {p}:bl:eta:{date}                      — ETA 일별 버킷 비트맵 (byte[])
+ * - {p}:ln:pd:{day}:{attr}                 — line(perfdt) 일·속성 버킷 비트맵 (byte[])
+ * - {p}:ln:pd:{day}:c:{t}{s}{i}:{TYPE}     — E3 composite 일·복합 버킷 비트맵 (byte[])
+ * - {p}:ln:c:{t}{s}{i}:{TYPE}              — E3 전역(무pd) composite 버킷 비트맵 (byte[])
+ * - {p}:ln:fdc:{TYPE}                      — line 전역 서류타입 버킷 비트맵 (byte[])
+ * - {p}:bl:dcx:status:{STATUS}             — W3 doc-exists: status=S인 doc ≥1 보유 B/L 비트맵 (byte[])
+ * - {p}:bl:dcx:grouped:{Y|N}               — W3 doc-exists: grouped=true(Y)/false(N) doc ≥1 보유 B/L 비트맵 (byte[])
+ * - {p}:bl:dcx:sg:{STATUS}:{Y|N}           — W3 doc-exists: status=S ∧ grouped=G인 same-doc ≥1 보유 B/L 비트맵 (byte[])
+ * - {p}:meta                               — 메타 해시 (complete, syncAt)
+ * - {p}:bl:overflow                        — B/L ordinal overflow 플래그 (존재 시 not-ready)
+ *
+ * W1-A: FE가 전송하지 않는 차원(cust/spc/liner/pol/pod/salesman/houseteam/salesclass/incoterms)
+ *        관련 상수·메서드 제거. jobDiv/bound 차원만 잔존.
+ * W2: E3 composite 일버킷({p}:ln:pd:{day}:c:{t}{s}{i}:{TYPE}) 및
+ *     전역 composite({p}:ln:c:{t}{s}{i}:{TYPE}) 키 메서드 추가.
+ * W3: B/L-grain doc-exists 비트맵 키 3종 추가(blDocStatusBitmap/blDocGroupedBitmap/blDocStatusGroupedBitmap).
+ *     grouped:N은 "grouped=false doc 존재" 의미 — Y/N 둘 다 직접 적재.
  */
 final class PmsCountIndexKeys {
 
-    // ── dim 코드 상수 ────────────────────────────────────────────────────────
+    // ── dim 코드 상수 (W1-A: jobDiv/bound만 잔존) ───────────────────────────────
 
-    static final String DIM_CUST        = "cust";
-    static final String DIM_SPC         = "spc";
-    static final String DIM_LINER       = "liner";
-    static final String DIM_POL         = "pol";
-    static final String DIM_POD         = "pod";
-    static final String DIM_SALESMAN    = "salesman";
-    static final String DIM_HOUSETEAM   = "houseteam";
-    static final String DIM_JOBDIV      = "jobdiv";
-    static final String DIM_BOUND       = "bound";
-    static final String DIM_SALESCLASS  = "salesclass";
-    static final String DIM_INCOTERMS   = "incoterms";
+    static final String DIM_JOBDIV  = "jobdiv";
+    static final String DIM_BOUND   = "bound";
 
     // ── has-flag 상수 ────────────────────────────────────────────────────────
 
@@ -38,6 +44,23 @@ final class PmsCountIndexKeys {
     static final String FLAG_TAX     = "tax";
     static final String FLAG_SLIP    = "slip";
     static final String FLAG_DOC     = "doc";
+
+    // ── fdcType 도메인 상수 (PmsBlLineEmbedded.fdcType 값 집합) ──────────────
+    // Maintainer.addLineKeys가 fdcType 그대로 버킷에 인코딩하므로 이 상수가 인코딩 결과와 동일하다.
+
+    static final String FDC_TYPE_INVOICE = "INVOICE";
+    static final String FDC_TYPE_DEBIT   = "DEBIT";
+    static final String FDC_TYPE_PAYMENT = "PAYMENT";
+    static final String FDC_TYPE_CREDIT  = "CREDIT";
+
+    /**
+     * documentTypes 미지정(무제약) 시 열거할 fdcType 도메인 전체.
+     * null 원소는 "none" 버킷 — pd/lines가 있지만 fdcType이 설정되지 않은 라인을 포함한다.
+     * List.of는 null 원소 금지(NPE)이므로 Arrays.asList를 사용한다.
+     */
+    static final List<String> FDC_ALL_TYPES = Arrays.asList(
+            FDC_TYPE_INVOICE, FDC_TYPE_DEBIT, FDC_TYPE_PAYMENT, FDC_TYPE_CREDIT, null
+    );
 
     // ── line 속성 상수 (perfdt 버킷 attr 부분) ────────────────────────────────
 
@@ -134,6 +157,30 @@ final class PmsCountIndexKeys {
         return prefix + ":ln:fdc:" + fdcType;
     }
 
+    // ── E3 composite 버킷 키 (W2) ─────────────────────────────────────────────
+
+    /**
+     * E3 복합 일버킷 키.
+     * 라인 하나에 대해 (pd일자, tax여부, slip여부, issued여부, fdcType)을 모두 인코딩한다.
+     * 양 끝 비트(t/s/i)는 "0" 또는 "1". TYPE은 fdcType 또는 "none".
+     *
+     * 예: {p}:ln:pd:20240115:c:010:INVOICE
+     *     {p}:ln:pd:20240115:c:001:none
+     */
+    static String lineCompositePdBitmap(String prefix, String day, boolean tax, boolean slip, boolean issued, String fdcType) {
+        return prefix + ":ln:pd:" + day + ":c:" + encodeTsi(tax, slip, issued) + ":" + encodeType(fdcType);
+    }
+
+    /**
+     * E3 전역(pd 없는 라인) 복합 버킷 키.
+     * pd 값이 null/공백인 라인은 일버킷에 포함되지 않으나 전역 집계에는 포함된다.
+     *
+     * 예: {p}:ln:c:010:INVOICE
+     */
+    static String lineCompositeGlobalBitmap(String prefix, boolean tax, boolean slip, boolean issued, String fdcType) {
+        return prefix + ":ln:c:" + encodeTsi(tax, slip, issued) + ":" + encodeType(fdcType);
+    }
+
     // ── doc(fdId-grain) 버킷 키 생성 메서드 ─────────────────────────────────
 
     /**
@@ -169,22 +216,6 @@ final class PmsCountIndexKeys {
     }
 
     /**
-     * doc team 비트맵(docs[] 원소 레벨).
-     * 예: {p}:dc:team:TEAMCODE
-     */
-    static String docTeamBitmap(String prefix, String team) {
-        return prefix + ":dc:team:" + team;
-    }
-
-    /**
-     * doc operator 비트맵(docs[] 원소 레벨).
-     * 예: {p}:dc:op:OP001
-     */
-    static String docOperatorBitmap(String prefix, String operator) {
-        return prefix + ":dc:op:" + operator;
-    }
-
-    /**
      * doc 서류일자(docDt) 일버킷 비트맵.
      * 예: {p}:dc:docdt:20240115
      */
@@ -217,11 +248,42 @@ final class PmsCountIndexKeys {
         return prefix + ":dc:overflow";
     }
 
+    // ── W3 doc-exists (B/L-grain) 버킷 키 생성 메서드 ────────────────────────
+
     /**
-     * B/L 레벨 docteam 비트맵 (documentCreated.teamCode — fast-path 용, 멤버: blOrdinal).
-     * 예: {p}:bl:docteam:TEAMCODE
+     * W3 doc-exists: status=S인 doc ≥1 보유 B/L의 blOrdinal 비트맵.
+     * 예: {p}:bl:dcx:status:CREATED
      */
-    static String blDocteamBitmap(String prefix, String teamCode) {
-        return prefix + ":bl:docteam:" + teamCode;
+    static String blDocStatusBitmap(String prefix, String status) {
+        return prefix + ":bl:dcx:status:" + status;
+    }
+
+    /**
+     * W3 doc-exists: grouped=true("Y")/false("N")인 doc ≥1 보유 B/L의 blOrdinal 비트맵.
+     * grouped:N은 "grouped=false doc 존재" 의미이므로 Y/N 둘 다 직접 적재한다.
+     * 예: {p}:bl:dcx:grouped:N
+     */
+    static String blDocGroupedBitmap(String prefix, boolean grouped) {
+        return prefix + ":bl:dcx:grouped:" + (grouped ? "Y" : "N");
+    }
+
+    /**
+     * W3 doc-exists same-doc 복합: status=S ∧ grouped=G인 같은 doc ≥1 보유 B/L 비트맵.
+     * 예: {p}:bl:dcx:sg:CREATED:N
+     */
+    static String blDocStatusGroupedBitmap(String prefix, String status, boolean grouped) {
+        return prefix + ":bl:dcx:sg:" + status + ":" + (grouped ? "Y" : "N");
+    }
+
+    // ── 내부 인코딩 헬퍼 ──────────────────────────────────────────────────────
+
+    /** tax/slip/issued 3-bit 문자열 인코딩: "010" 형식. */
+    private static String encodeTsi(boolean tax, boolean slip, boolean issued) {
+        return (tax ? "1" : "0") + (slip ? "1" : "0") + (issued ? "1" : "0");
+    }
+
+    /** fdcType → 버킷 세그먼트. null/공백은 "none"으로 정규화. */
+    static String encodeType(String fdcType) {
+        return (fdcType != null && !fdcType.isBlank()) ? fdcType : "none";
     }
 }

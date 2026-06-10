@@ -16,6 +16,9 @@ import java.util.List;
  *
  * freight 컬렉션(pms_perfdt_entry)과 document 컬렉션(pms_docdt_entry)의
  * 각 필드명은 해당 Document 클래스의 실제 필드와 1:1 대응한다.
+ *
+ * W1-A: FE가 전송하지 않는 필터(hblNo/mblNo/거래처/운송사/항만/영업/비정형)를 제거.
+ * 잔존: jobDiv/bound + 날짜 범위 + documentTypes/documentStatus/grouped.
  */
 @Component
 public class PmsMartDateDimMatchBuilder {
@@ -38,11 +41,8 @@ public class PmsMartDateDimMatchBuilder {
         // 차원 필터(residual): fdcTypes contains
         addFdcTypesFilter(parts, c);
 
-        // B/L 레벨 식별자 필터(residual)
+        // B/L 레벨 식별자 필터(residual) — jobDiv/bound만 잔존
         addCommonBlCriteria(parts, c);
-
-        // houseTeamCode — perfdt sidecar는 house 레벨 필드로 보유
-        addEq(parts, "houseTeamCode", c.teamCode());
 
         return andAll(parts);
     }
@@ -66,11 +66,7 @@ public class PmsMartDateDimMatchBuilder {
         addEq(parts, "status", c.documentStatus());
         addGroupedFilter(parts, c);
 
-        // document 레벨 필터
-        addEq(parts, "teamCode", c.teamCode());
-        addEq(parts, "operator", c.operator());
-
-        // B/L 레벨 식별자 필터(residual)
+        // B/L 레벨 식별자 필터(residual) — jobDiv/bound만 잔존
         addCommonBlCriteria(parts, c);
 
         return andAll(parts);
@@ -130,14 +126,12 @@ public class PmsMartDateDimMatchBuilder {
 
     /**
      * fdcTypes 배열 contains 매칭.
-     * documentTypes 다중 선택이면 in(), 단일 financialDocType이면 is().
-     * MongoDB 배열 필드에 대한 in/is 모두 "배열에 해당 값 포함" 의미로 동작.
+     * documentTypes 다중 선택이면 in().
+     * MongoDB 배열 필드에 대한 in은 "배열에 해당 값 포함" 의미로 동작.
      */
     private void addFdcTypesFilter(List<Criteria> parts, SearchPmsPerformanceCommand c) {
         if (c.documentTypes() != null && !c.documentTypes().isEmpty()) {
             parts.add(Criteria.where("fdcTypes").in(c.documentTypes()));
-        } else if (StringUtils.hasText(c.financialDocType())) {
-            parts.add(Criteria.where("fdcTypes").is(c.financialDocType()));
         }
     }
 
@@ -154,47 +148,12 @@ public class PmsMartDateDimMatchBuilder {
     // ── 공통 B/L 식별자 필터 ─────────────────────────────────────────────────
 
     /**
-     * 두 sidecar 컬렉션에 공통 비정규화된 B/L 레벨 식별자 필터.
-     * PmsMartCriteriaBuilder.addCommonIdentifierCriteria 와 동일 의미 술어.
-     * 단, ETD/ETA dateRange는 sidecar에 없으므로 제외.
+     * 두 sidecar 컬렉션에 공통인 B/L 레벨 식별자 필터.
+     * FE가 전송하는 jobDiv/bound만 잔존한다.
      */
     private void addCommonBlCriteria(List<Criteria> parts, SearchPmsPerformanceCommand c) {
         addEq(parts, "jobDiv", c.jobDiv());
         addEq(parts, "bound", c.bound());
-
-        addRegex(parts, "houseBlNo", c.hblNo());
-        addRegex(parts, "masterBlNo", c.mblNo());
-
-        addEq(parts, "actualCustomerCode", c.actualCustomerCode());
-        addEq(parts, "settlePartnerCode", c.settlePartnerCode());
-
-        addPartyFilter(parts, c);
-
-        addEq(parts, "linerCode", c.carrierCode());
-
-        addPortFilter(parts, c);
-
-        addEq(parts, "salesManCode", c.salesManCode());
-        addEq(parts, "incoterms", c.incoterms());
-        addEq(parts, "salesClass", c.salesClass());
-    }
-
-    private void addPartyFilter(List<Criteria> parts, SearchPmsPerformanceCommand c) {
-        if (!StringUtils.hasText(c.partyKind()) || !StringUtils.hasText(c.partyCode())) return;
-        switch (c.partyKind()) {
-            case "ACTUAL_CUSTOMER" -> parts.add(Criteria.where("actualCustomerCode").is(c.partyCode()));
-            case "SETTLE_PARTNER"  -> parts.add(Criteria.where("settlePartnerCode").is(c.partyCode()));
-            default -> { /* 미인식 partyKind: 필터 무시 */ }
-        }
-    }
-
-    private void addPortFilter(List<Criteria> parts, SearchPmsPerformanceCommand c) {
-        if (!StringUtils.hasText(c.portKind()) || !StringUtils.hasText(c.portCode())) return;
-        switch (c.portKind()) {
-            case "POL" -> parts.add(Criteria.where("polCode").is(c.portCode()));
-            case "POD" -> parts.add(Criteria.where("podCode").is(c.portCode()));
-            default -> { /* 미인식 portKind: 필터 무시 */ }
-        }
     }
 
     // ── 단순 헬퍼 ─────────────────────────────────────────────────────────────
@@ -202,13 +161,6 @@ public class PmsMartDateDimMatchBuilder {
     private void addEq(List<Criteria> parts, String field, String value) {
         if (StringUtils.hasText(value)) {
             parts.add(Criteria.where(field).is(value));
-        }
-    }
-
-    /** prefix case-sensitive 정규식 필터. PmsBlNoMatch 공용 헬퍼 위임. */
-    private void addRegex(List<Criteria> parts, String field, String value) {
-        if (StringUtils.hasText(value)) {
-            parts.add(PmsBlNoMatch.prefixCriteria(field, value));
         }
     }
 

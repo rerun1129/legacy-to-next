@@ -15,6 +15,9 @@ import org.springframework.util.StringUtils;
  * line-accel ON:  날짜(실적일자/서류일자)가 1차 가속기. sidecar 날짜 인덱스로
  *                 좁힌 뒤 B/L 레벨 + 차원 필터를 residual 적용한다.
  *                 날짜 없는 dim-only 또는 sidecar가 지원하지 않는 필터는 OLTP 폴백.
+ *
+ * W1-A: FE가 전송하지 않는 필드(financialDocType/taxType/documentNoLike/groupFinancialNo/
+ *        operator/hblNo/mblNo) 체크를 제거. 잔존: documentTypes/issued/grouped/documentStatus.
  */
 @Component
 @ConditionalOnProperty(prefix = "pms.mart", name = "enabled", havingValue = "true")
@@ -74,26 +77,16 @@ public class PmsMartFilterSupport {
     }
 
     /**
-     * houseBlNo/masterBlNo 필터 존재 여부.
-     * 이 조건이 있으면 sidecar 인덱스(flag, pd)에 해당 필드가 없어 residual 필터가 되어
-     * $sample 근사가 희소오판·전체 스캔을 유발한다.
-     * pms_bl_mart houseBlNo 인덱스(prefix bounded scan)로 우회한다.
-     */
-    public static boolean hasBlNoFilter(SearchPmsPerformanceCommand c) {
-        return StringUtils.hasText(c.hblNo()) || StringUtils.hasText(c.mblNo());
-    }
-
-    /**
      * TAX/SLIP basis + 서류타입 필터 동시 적용 시 sidecar covered count는
      * (발급 플래그, 서류타입)이 같은 라인임을 보장하지 못해 과대 집계된다.
      * 이 조합에서는 라인-그레인 pageCriteria($elemMatch)로 count·page를 일관 처리한다.
+     *
+     * W1-A: financialDocType 제거 — documentTypes만 체크.
      */
     public static boolean needsLineGrainCorrelation(SearchPmsPerformanceCommand c) {
         AggregationBasis basis = c.effectiveBasis();
         boolean taxOrSlip = basis == AggregationBasis.TAX_ISSUED || basis == AggregationBasis.SLIP_ISSUED;
-        boolean hasDocTypeFilter =
-            (c.documentTypes() != null && !c.documentTypes().isEmpty())
-            || StringUtils.hasText(c.financialDocType());
+        boolean hasDocTypeFilter = c.documentTypes() != null && !c.documentTypes().isEmpty();
         return taxOrSlip && hasDocTypeFilter;
     }
 
@@ -103,6 +96,8 @@ public class PmsMartFilterSupport {
      * line-accel 이전 판단 로직. line-accel OFF 시 그대로 사용되며,
      * line-accel ON 시에도 "line/doc 필터 존재 여부" 판별에 재사용된다.
      * 아래 line/document 레벨 필터가 하나라도 존재하면 false.
+     *
+     * W1-A: financialDocType/taxType/documentNoLike/groupFinancialNo 체크 제거.
      */
     private boolean legacySupported(SearchPmsPerformanceCommand c) {
         // dateKind=="PERFORMANCE" + 날짜 범위: performance_dt는 line 레벨 필터
@@ -126,15 +121,9 @@ public class PmsMartFilterSupport {
             return false;
         }
 
-        // BMS 운임행 필터 (freight_line 레벨)
-        if (StringUtils.hasText(c.financialDocType())) return false;
-        if (StringUtils.hasText(c.taxType())) return false;
+        // 정형 발급·묶음 필터 (line/document 레벨)
         if (StringUtils.hasText(c.issued())) return false;
-
-        // BMS 서류 필터 (financial_document 레벨)
         if (StringUtils.hasText(c.documentStatus())) return false;
-        if (StringUtils.hasText(c.documentNoLike())) return false;
-        if (StringUtils.hasText(c.groupFinancialNo())) return false;
         if (StringUtils.hasText(c.grouped())) return false;
 
         return true;
@@ -145,7 +134,9 @@ public class PmsMartFilterSupport {
     /**
      * DOCUMENT_CREATED basis에서 sidecar(pms_docdt_entry)로 해소 가능한지 판단.
      * 날짜(실적일자 또는 서류일자) 없으면 dim-only → OLTP 폴백.
-     * sidecar 미지원 필터(financialDocType, taxType, issued, documentNoLike, groupFinancialNo) 존재 시 OLTP 폴백.
+     *
+     * W1-A: financialDocType/taxType/issued/documentNoLike/groupFinancialNo 체크 제거.
+     *       이 필드들은 FE가 전송하지 않으므로 항상 null → 체크 불필요.
      */
     private boolean isDocumentBasisSupported(SearchPmsPerformanceCommand c) {
         boolean hasDate = StringUtils.hasText(c.performanceDtFrom()) || StringUtils.hasText(c.performanceDtTo())
@@ -153,28 +144,18 @@ public class PmsMartFilterSupport {
         if (!hasDate) {
             return false;
         }
-
-        // fd 레벨에 sidecar가 다루지 못하는 필터가 있으면 OLTP 폴백
-        if (StringUtils.hasText(c.financialDocType())) return false;
-        if (StringUtils.hasText(c.taxType())) return false;
-        if (StringUtils.hasText(c.issued())) return false;
-        if (StringUtils.hasText(c.documentNoLike())) return false;
-        if (StringUtils.hasText(c.groupFinancialNo())) return false;
-
-        // documentTypes, documentStatus, grouped, teamCode, operator, B/L 필터 = sidecar 지원
+        // documentTypes, documentStatus, grouped, B/L 필터 = sidecar 지원
         return true;
     }
 
     /**
      * 정형 서류조건이 pms_bl_mart pageCriteria 경로로 처리 가능한지 판단.
-     * pageCriteria가 다루지 못하는 비정형(taxType/documentNoLike/groupFinancialNo) 또는
      * PERFORMANCE dateKind(line-level 실적일자 — pageCriteria addDateRange가 ETD/ETA만 처리)면 OLTP 폴백.
      * (참고: 현재 FE는 실적일자를 performanceDtFrom/To로 보내고 dateKind=null이므로 PERFORMANCE 가드는 방어적.)
+     *
+     * W1-A: taxType/documentNoLike/groupFinancialNo 체크 제거.
      */
     private boolean isDocLineFilterSupported(SearchPmsPerformanceCommand c) {
-        if (StringUtils.hasText(c.taxType())) return false;
-        if (StringUtils.hasText(c.documentNoLike())) return false;
-        if (StringUtils.hasText(c.groupFinancialNo())) return false;
         if ("PERFORMANCE".equals(c.dateKind())
                 && (StringUtils.hasText(c.dateFrom()) || StringUtils.hasText(c.dateTo()))) {
             return false;
@@ -186,7 +167,9 @@ public class PmsMartFilterSupport {
      * freight basis(FREIGHT_INPUT/TAX_ISSUED/SLIP_ISSUED)에서 sidecar(pms_perfdt_entry)로
      * 해소 가능한지 판단.
      * 날짜(실적일자) 없으면 OLTP 폴백.
-     * sidecar 미지원 필터(taxType, issued, operator, doc-only 필드) 존재 시 OLTP 폴백.
+     *
+     * W1-A: taxType/issued/operator/documentNoLike/groupFinancialNo 체크 제거.
+     *       issued는 hasDocLineFilter 경로에서 먼저 처리되어 이 경로에는 도달하지 않음.
      */
     private boolean isFreightBasisSupported(SearchPmsPerformanceCommand c) {
         boolean hasDate = StringUtils.hasText(c.performanceDtFrom()) || StringUtils.hasText(c.performanceDtTo());
@@ -194,20 +177,13 @@ public class PmsMartFilterSupport {
             return false;
         }
 
-        // freight sidecar 미지원 필터
-        if (StringUtils.hasText(c.taxType())) return false;
-        if (StringUtils.hasText(c.issued())) return false;
-        if (StringUtils.hasText(c.operator())) return false;
-
         // doc-only 필드: freight sidecar에는 없음
         if (StringUtils.hasText(c.documentStatus())) return false;
         if (StringUtils.hasText(c.documentDtFrom())) return false;
         if (StringUtils.hasText(c.documentDtTo())) return false;
-        if (StringUtils.hasText(c.documentNoLike())) return false;
-        if (StringUtils.hasText(c.groupFinancialNo())) return false;
         if (StringUtils.hasText(c.grouped())) return false;
 
-        // documentTypes, financialDocType, B/L 필터 = sidecar 지원
+        // documentTypes, B/L 필터 = sidecar 지원
         return true;
     }
 }

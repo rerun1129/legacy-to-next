@@ -180,5 +180,14 @@ public class PmsMartProperties {
          * 환경변수 PMS_MART_COUNT_INDEX_MAX_DAY_BUCKETS로 오버라이드 가능.
          */
         private long maxDayBuckets = 1500;
+
+        /**
+         * collapse(fdId→blOrdinal HMGET) 진입 직전 fdId cardinality 상한.
+         * grouped=N·흔한 status 등 저선택도 doc 술어에서 매칭 fdId가 수백만이면
+         * dc:bl HMGET 수백 청크가 수십 초를 점유한다. 이 한도를 초과하면 Mongo 폴백.
+         * 150만급 collapse ≈1~2s 양호 실측, 300만+ 저선택도만 차단 — W3 B/L-grain doc-exists 비트맵으로 대체 예정.
+         * 환경변수 PMS_MART_COUNT_INDEX_MAX_COLLAPSE_FD_IDS로 오버라이드 가능.
+         */
+        private long maxCollapseFdIds = 2_000_000;
     }
 }

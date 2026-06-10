@@ -13,6 +13,10 @@ import java.util.List;
  *
  * dim 필터 키 수집과 ETD/ETA 날짜 범위 일별 버킷 키 확장을 담당한다.
  * Spring 빈이 아닌 package-private 유틸 클래스.
+ *
+ * W1-A: FE가 전송하지 않는 차원(actualCustomerCode/settlePartnerCode/carrierCode/
+ *        salesManCode/salesClass/incoterms/teamCode/partyKind/partyCode/portKind/portCode)
+ *        제거. jobDiv/bound만 잔존.
  */
 final class PmsCountIndexBitmapKeyCollector {
 
@@ -22,44 +26,11 @@ final class PmsCountIndexBitmapKeyCollector {
 
     /**
      * SearchPmsPerformanceCommand의 차원 필터를 비트맵 키 목록으로 변환해 결과에 추가한다.
-     *
-     * 각 dim 코드는 독립 AND 교집합 대상이다.
-     * polCode/podCode 통합 필드(portKind/portCode)도 처리한다.
+     * FE가 전송하는 jobDiv/bound 두 차원만 처리한다.
      */
     static void collectDimKeys(SearchPmsPerformanceCommand cmd, String prefix, List<String> keys) {
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_CUST,       cmd.actualCustomerCode());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_SPC,        cmd.settlePartnerCode());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_LINER,      cmd.carrierCode());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_SALESMAN,   cmd.salesManCode());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_SALESCLASS, cmd.salesClass());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_INCOTERMS,  cmd.incoterms());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_JOBDIV,     cmd.jobDiv());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_BOUND,      cmd.bound());
-        addDim(keys, prefix, PmsCountIndexKeys.DIM_HOUSETEAM,  cmd.teamCode());
-
-        // partyKind/partyCode: 둘 다 hasText일 때만. case-sensitive 정확 매칭.
-        // PmsMartCriteriaBuilder.addPartyFilter(:126-131) 미러.
-        if (StringUtils.hasText(cmd.partyKind()) && StringUtils.hasText(cmd.partyCode())) {
-            switch (cmd.partyKind()) {
-                case "ACTUAL_CUSTOMER" ->
-                    keys.add(PmsCountIndexKeys.dimBitmap(prefix, PmsCountIndexKeys.DIM_CUST, cmd.partyCode()));
-                case "SETTLE_PARTNER" ->
-                    keys.add(PmsCountIndexKeys.dimBitmap(prefix, PmsCountIndexKeys.DIM_SPC, cmd.partyCode()));
-                default -> { /* 미인식 partyKind: Mongo도 무시하므로 Redis도 무시 */ }
-            }
-        }
-
-        // portKind/portCode: 둘 다 hasText일 때만. case-sensitive 정확 매칭.
-        // PmsMartCriteriaBuilder.addPortFilter 미러 — equalsIgnoreCase 금지.
-        if (StringUtils.hasText(cmd.portKind()) && StringUtils.hasText(cmd.portCode())) {
-            switch (cmd.portKind()) {
-                case "POL" ->
-                    keys.add(PmsCountIndexKeys.dimBitmap(prefix, PmsCountIndexKeys.DIM_POL, cmd.portCode()));
-                case "POD" ->
-                    keys.add(PmsCountIndexKeys.dimBitmap(prefix, PmsCountIndexKeys.DIM_POD, cmd.portCode()));
-                default -> { /* 미인식 portKind: Mongo도 무시하므로 Redis도 무시 */ }
-            }
-        }
+        addDim(keys, prefix, PmsCountIndexKeys.DIM_JOBDIV, cmd.jobDiv());
+        addDim(keys, prefix, PmsCountIndexKeys.DIM_BOUND,  cmd.bound());
     }
 
     /**
