@@ -90,6 +90,8 @@ const PMS_PERFORMANCE_PAGE_SCHEMA = z.object({
   totalPages: z.number(),
   page: z.number(),
   size: z.number(),
+  /** 근사치 응답 여부 — BE가 항상 내려줌(.default/.optional 금지). */
+  approximateTotal: z.boolean(),
 }) satisfies z.ZodType<PmsPerformancePage>;
 
 export const API_PMS_PERFORMANCE_PORT: PmsPerformancePort = {

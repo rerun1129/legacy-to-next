@@ -92,6 +92,8 @@ export interface PmsPerformancePage {
   totalPages: number;
   page: number;
   size: number;
+  /** BE가 근사치를 반환할 때만 true. 정확치면 false. */
+  approximateTotal: boolean;
 }
 
 /** PS-01 조회 요청 입력 — BE SearchPmsPerformanceRequest 18필드와 1:1 대응 */
