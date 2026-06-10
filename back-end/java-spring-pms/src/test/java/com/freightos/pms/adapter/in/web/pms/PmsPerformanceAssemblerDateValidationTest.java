@@ -122,7 +122,7 @@ class PmsPerformanceAssemblerDateValidationTest {
             "ETD", dateFrom, dateTo,
             perfFrom, perfTo,
             docFrom, docTo,
-            null, null, null, null,
+            null, null,
             null, null
         );
     }
