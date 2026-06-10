@@ -3,11 +3,10 @@ package com.freightos.pms.adapter.in.web.pms;
 import com.freightos.common.response.ApiResponse;
 import com.freightos.pms.adapter.in.web.pms.dto.PmsPerformancePageResponse;
 import com.freightos.pms.adapter.in.web.pms.dto.SearchPmsPerformanceRequest;
+import com.freightos.pms.application.pms.PmsPerformanceSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.port.in.PmsPerformanceUseCase;
-import com.freightos.pms.application.pms.projection.PmsPerformanceRowView;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +35,7 @@ public class PmsPerformanceController {
         int pageNo = request.page() != null ? request.page() : 0;
         int pageSize = request.size() != null ? request.size() : 20;
         SearchPmsPerformanceCommand command = assembler.toCommand(request);
-        Page<PmsPerformanceRowView> page = pmsPerformanceUseCase.search(command, PageRequest.of(pageNo, pageSize));
-        return ApiResponse.of(assembler.toPageResponse(page));
+        PmsPerformanceSearchResult result = pmsPerformanceUseCase.search(command, PageRequest.of(pageNo, pageSize));
+        return ApiResponse.of(assembler.toPageResponse(result));
     }
 }

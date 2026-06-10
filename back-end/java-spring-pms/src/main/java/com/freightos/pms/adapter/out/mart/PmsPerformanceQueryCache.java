@@ -55,6 +55,17 @@ public class PmsPerformanceQueryCache {
     }
 
     /**
+     * 캐시에 저장된 총건수를 ResolvedTotal(total + approximate 여부)로 반환한다.
+     * TTL 초과이거나 total이 null이면 null 반환(miss).
+     * exact 저장이면 approximate=false, approx 저장이면 approximate=true.
+     */
+    public ResolvedTotal getResolvedTotal(String cacheKey) {
+        Entry e = fetchLive(cacheKey);
+        if (e == null || e.total == null) return null;
+        return e.exact ? ResolvedTotal.exact(e.total) : ResolvedTotal.approx(e.total);
+    }
+
+    /**
      * exact count로 저장된 총건수만 반환한다.
      * approx로 저장된 항목이거나 TTL 초과이면 null 반환(miss).
      * exactCount=true 분기에서 캐시 재사용 시 사용한다.

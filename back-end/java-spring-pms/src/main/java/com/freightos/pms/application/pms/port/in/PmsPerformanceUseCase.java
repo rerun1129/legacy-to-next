@@ -1,8 +1,7 @@
 package com.freightos.pms.application.pms.port.in;
 
+import com.freightos.pms.application.pms.PmsPerformanceSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
-import com.freightos.pms.application.pms.projection.PmsPerformanceRowView;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -10,5 +9,5 @@ import org.springframework.data.domain.Pageable;
  */
 public interface PmsPerformanceUseCase {
 
-    Page<PmsPerformanceRowView> search(SearchPmsPerformanceCommand command, Pageable pageable);
+    PmsPerformanceSearchResult search(SearchPmsPerformanceCommand command, Pageable pageable);
 }

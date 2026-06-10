@@ -1,8 +1,7 @@
 package com.freightos.pms.application.pms.port.out;
 
+import com.freightos.pms.application.pms.PmsRawBlSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
-import com.freightos.pms.application.pms.projection.PmsRawBlRow;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -12,8 +11,8 @@ import org.springframework.data.domain.Pageable;
 public interface PmsPerformanceQueryPort {
 
     /** freight_line 소스 기반 B/L 페이지 집계. */
-    Page<PmsRawBlRow> searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable);
+    PmsRawBlSearchResult searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable);
 
     /** financial_document 소스 기반 B/L 페이지 집계. */
-    Page<PmsRawBlRow> searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable);
+    PmsRawBlSearchResult searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable);
 }

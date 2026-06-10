@@ -4,6 +4,7 @@ import com.freightos.common.config.PmsMartProperties;
 import com.freightos.pms.adapter.out.mart.cancel.PmsExactCountRegistry;
 import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
 import com.freightos.pms.application.pms.AggregationBasis;
+import com.freightos.pms.application.pms.PmsRawBlSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.port.out.PmsPerformanceQueryPort;
 import com.freightos.pms.application.pms.projection.PmsRawBlRow;
@@ -65,7 +66,7 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
         .and(Sort.by(Sort.Direction.ASC, "blType"));
 
     @Override
-    public Page<PmsRawBlRow> searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
+    public PmsRawBlSearchResult searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
         AggregationBasis basis = command.effectiveBasis();
         String basisKey = switch (basis) {
             case FREIGHT_INPUT -> "freightInput";
@@ -90,14 +91,15 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             String cacheKey = userKey + "|" + signature;
 
             Criteria pageCriteria = pageCriteriaBuilder.buildFreightPageCriteria(command, basisKey, flagField);
-            long total = countResolver.resolveFreightTotal(command, flagField, pageCriteria, cacheKey, userKey, signature);
+            ResolvedTotal resolved = countResolver.resolveFreightTotal(command, flagField, pageCriteria, cacheKey, userKey, signature);
             // count=0이면 매칭 결과가 없으므로 페이지 find를 생략한다.
-            if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
-            List<PmsBlMartDocument> pageDocs = selectFreightPageDocsWithCriteria(command, flagField, pageCriteria, total, pageable);
+            if (resolved.total() == 0L) return PmsRawBlSearchResult.exact(new PageImpl<>(List.of(), pageable, 0L));
+            List<PmsBlMartDocument> pageDocs = selectFreightPageDocsWithCriteria(command, flagField, pageCriteria, resolved.total(), pageable);
             List<PmsRawBlRow> content = pageDocs.stream()
                 .map(doc -> reaggregator.get().reaggregateFreight(doc, command, basisKey))
                 .toList();
-            return new PageImpl<>(content, pageable, total);
+            Page<PmsRawBlRow> page = new PageImpl<>(content, pageable, resolved.total());
+            return new PmsRawBlSearchResult(page, resolved.approximate());
         }
 
         // fast path
@@ -109,7 +111,7 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
     }
 
     @Override
-    public Page<PmsRawBlRow> searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
+    public PmsRawBlSearchResult searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
         // 2-tier 경로: 날짜 필터(실적·서류 중 하나라도) OR 정형 서류조건 존재 + line-accel ON
         if (planner.isPresent() && reaggregator.isPresent()
                 && (hasDocumentDate(command) || PmsMartFilterSupport.hasDocLineFilter(command))) {
@@ -119,14 +121,15 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
             String cacheKey = userKey + "|" + signature;
 
             Criteria docPageCriteria = pageCriteriaBuilder.buildDocumentPageCriteria(command);
-            long total = countResolver.resolveDocumentTotal(command, docPageCriteria, cacheKey, userKey, signature);
+            ResolvedTotal resolved = countResolver.resolveDocumentTotal(command, docPageCriteria, cacheKey, userKey, signature);
             // count=0이면 매칭 결과가 없으므로 페이지 find를 생략한다.
-            if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
-            List<PmsBlMartDocument> pageDocs = selectDocumentPageDocsWithCriteria(command, docPageCriteria, total, pageable);
+            if (resolved.total() == 0L) return PmsRawBlSearchResult.exact(new PageImpl<>(List.of(), pageable, 0L));
+            List<PmsBlMartDocument> pageDocs = selectDocumentPageDocsWithCriteria(command, docPageCriteria, resolved.total(), pageable);
             List<PmsRawBlRow> content = pageDocs.stream()
                 .map(doc -> reaggregator.get().reaggregateDocument(doc, command))
                 .toList();
-            return new PageImpl<>(content, pageable, total);
+            Page<PmsRawBlRow> page = new PageImpl<>(content, pageable, resolved.total());
+            return new PmsRawBlSearchResult(page, resolved.approximate());
         }
 
         // fast path
@@ -240,14 +243,14 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
      * count는 skip/limit/sort 없는 별도 Query로 실행한다.
      * count 결정은 countResolver.resolveFastPathTotal에 위임한다.
      */
-    private Page<PmsRawBlRow> executeQuery(
+    private PmsRawBlSearchResult executeQuery(
             Criteria criteria, Pageable pageable, DocMapper mapper,
             SearchPmsPerformanceCommand command, String cacheKey) {
 
         // count를 find보다 먼저 결정한다.
         // total=0이면 페이지 find를 생략(3M 풀스캔 방지).
-        long total = countResolver.resolveFastPathTotal(criteria, command, cacheKey);
-        if (total == 0L) return new PageImpl<>(List.of(), pageable, 0L);
+        ResolvedTotal resolved = countResolver.resolveFastPathTotal(criteria, command, cacheKey);
+        if (resolved.total() == 0L) return PmsRawBlSearchResult.exact(new PageImpl<>(List.of(), pageable, 0L));
 
         Query findQuery = Query.query(criteria)
             .with(BL_SORT)
@@ -256,7 +259,8 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
 
         List<PmsBlMartDocument> docs = mongoTemplate.find(findQuery, PmsBlMartDocument.class);
         List<PmsRawBlRow> content = docs.stream().map(mapper::map).toList();
-        return new PageImpl<>(content, pageable, total);
+        Page<PmsRawBlRow> page = new PageImpl<>(content, pageable, resolved.total());
+        return new PmsRawBlSearchResult(page, resolved.approximate());
     }
 
     // ── 인증 헬퍼 ─────────────────────────────────────────────────────────────

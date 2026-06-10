@@ -35,22 +35,25 @@ public class PmsPerformanceQueryService implements PmsPerformanceUseCase {
     private final PmsPerformanceQueryPort queryPort;
 
     @Override
-    public Page<PmsPerformanceRowView> search(SearchPmsPerformanceCommand command, Pageable pageable) {
-        Page<PmsRawBlRow> rawPage = fetchRawPage(command, pageable);
+    public PmsPerformanceSearchResult search(SearchPmsPerformanceCommand command, Pageable pageable) {
+        PmsRawBlSearchResult rawResult = fetchRawResult(command, pageable);
+        Page<PmsRawBlRow> rawPage = rawResult.page();
+
         if (rawPage.isEmpty()) {
-            return Page.empty(pageable);
+            return new PmsPerformanceSearchResult(Page.empty(pageable), false);
         }
 
         List<PmsPerformanceRowView> content = rawPage.getContent().stream()
             .map(this::toRowView)
             .toList();
 
-        return new PageImpl<>(content, pageable, rawPage.getTotalElements());
+        Page<PmsPerformanceRowView> viewPage = new PageImpl<>(content, pageable, rawPage.getTotalElements());
+        return new PmsPerformanceSearchResult(viewPage, rawResult.approximateTotal());
     }
 
     // ── basis 분기 ────────────────────────────────────────────────────────────
 
-    private Page<PmsRawBlRow> fetchRawPage(SearchPmsPerformanceCommand command, Pageable pageable) {
+    private PmsRawBlSearchResult fetchRawResult(SearchPmsPerformanceCommand command, Pageable pageable) {
         return switch (command.effectiveBasis()) {
             case FREIGHT_INPUT, TAX_ISSUED, SLIP_ISSUED -> queryPort.searchByFreightLine(command, pageable);
             case DOCUMENT_CREATED -> queryPort.searchByDocument(command, pageable);

@@ -57,8 +57,9 @@ class PmsMartCountResolver {
      * @param cacheKey     캐시 키
      * @param userKey      인증 사용자 키(취소 레지스트리 식별용)
      * @param signature    필터 서명(취소 레지스트리 식별용)
+     * @return total 값과 근사 여부를 담은 ResolvedTotal
      */
-    long resolveFreightTotal(
+    ResolvedTotal resolveFreightTotal(
             SearchPmsPerformanceCommand command,
             String flagField,
             Criteria pageCriteria,
@@ -68,23 +69,23 @@ class PmsMartCountResolver {
 
         if (Boolean.TRUE.equals(command.exactCount())) {
             Long cachedExact = queryCache.isPresent() ? queryCache.get().getExactTotal(cacheKey) : null;
-            if (cachedExact != null) return cachedExact;
+            if (cachedExact != null) return ResolvedTotal.exact(cachedExact);
 
             // Redis Count Index 우선 시도
             Long redisExact = tryRedisExact(command, cacheKey);
-            if (redisExact != null) return redisExact;
+            if (redisExact != null) return ResolvedTotal.exact(redisExact);
 
             long exact = exactFreightCountWithCancel(command, flagField, pageCriteria, userKey, signature);
             queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
-            return exact;
+            return ResolvedTotal.exact(exact);
         }
 
-        Long cached = getCachedTotal(cacheKey);
+        ResolvedTotal cached = getCachedResolved(cacheKey);
         if (cached != null) return cached;
 
         // Redis Count Index 우선 시도 (approx 전)
         Long redisExact = tryRedisExact(command, cacheKey);
-        if (redisExact != null) return redisExact;
+        if (redisExact != null) return ResolvedTotal.exact(redisExact);
 
         long approx = approxEstimator.get().estimate(pageCriteria);
         // 희소 폴백(정확)은 서류조건에선 저카디라 비싸므로 적용하지 않고 근사 유지.
@@ -92,10 +93,11 @@ class PmsMartCountResolver {
                 && approx < props.getLineAccel().getEarlyTermThreshold()) {
             long exact = exactFreightCountWithCancel(command, flagField, pageCriteria, userKey, signature);
             queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
-            return exact;
+            return ResolvedTotal.exact(exact);
         }
+        // ★ approximate=true: $sample 근사 추정 결과를 그대로 반환하는 유일한 분기
         queryCache.ifPresent(c -> c.putApprox(cacheKey, approx));
-        return approx;
+        return ResolvedTotal.approx(approx);
     }
 
     /**
@@ -112,8 +114,9 @@ class PmsMartCountResolver {
      * @param cacheKey     캐시 키
      * @param userKey      인증 사용자 키(취소 레지스트리 식별용)
      * @param signature    필터 서명(취소 레지스트리 식별용)
+     * @return total 값과 근사 여부를 담은 ResolvedTotal
      */
-    long resolveDocumentTotal(
+    ResolvedTotal resolveDocumentTotal(
             SearchPmsPerformanceCommand command,
             Criteria pageCriteria,
             String cacheKey,
@@ -124,34 +127,35 @@ class PmsMartCountResolver {
 
         if (Boolean.TRUE.equals(command.exactCount())) {
             Long cachedExact = queryCache.isPresent() ? queryCache.get().getExactTotal(cacheKey) : null;
-            if (cachedExact != null) return cachedExact;
+            if (cachedExact != null) return ResolvedTotal.exact(cachedExact);
 
             // Redis Count Index 우선 시도
             Long redisExact = tryRedisExact(command, cacheKey);
-            if (redisExact != null) return redisExact;
+            if (redisExact != null) return ResolvedTotal.exact(redisExact);
 
             // 서류조건은 pageCriteria(sidecar는 etd 미보유·저카디라 동일하게 느림), 그 외는 sidecar covered count.
             long exact = exactDocumentCountWithCancel(command, pageCriteria, docLine, userKey, signature);
             queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
-            return exact;
+            return ResolvedTotal.exact(exact);
         }
 
-        Long cached = getCachedTotal(cacheKey);
+        ResolvedTotal cached = getCachedResolved(cacheKey);
         if (cached != null) return cached;
 
         // Redis Count Index 우선 시도 (approx 전)
         Long redisExact = tryRedisExact(command, cacheKey);
-        if (redisExact != null) return redisExact;
+        if (redisExact != null) return ResolvedTotal.exact(redisExact);
 
         long approx = approxEstimator.get().estimate(pageCriteria);
         // 희소 폴백(정확)은 서류조건에선 비싸므로 적용하지 않고 근사 유지.
         if (!docLine && approx < props.getLineAccel().getEarlyTermThreshold()) {
             long exact = exactDocumentNonDocLineWithCancel(command, userKey, signature);
             queryCache.ifPresent(c -> c.putExact(cacheKey, exact));
-            return exact;
+            return ResolvedTotal.exact(exact);
         }
+        // ★ approximate=true: $sample 근사 추정 결과를 그대로 반환하는 유일한 분기
         queryCache.ifPresent(c -> c.putApprox(cacheKey, approx));
-        return approx;
+        return ResolvedTotal.approx(approx);
     }
 
     /**
@@ -167,35 +171,37 @@ class PmsMartCountResolver {
      * @param criteria criteria (flagField 필터 포함)
      * @param command  조회 커맨드(exactCount 판단용)
      * @param cacheKey 사용자 키 + 필터 서명 조합
+     * @return total 값과 근사 여부를 담은 ResolvedTotal
      */
-    long resolveFastPathTotal(Criteria criteria, SearchPmsPerformanceCommand command, String cacheKey) {
-        Long cached = getCachedTotal(cacheKey);
+    ResolvedTotal resolveFastPathTotal(Criteria criteria, SearchPmsPerformanceCommand command, String cacheKey) {
+        ResolvedTotal cached = getCachedResolved(cacheKey);
         if (cached != null) return cached;
 
         // Redis Count Index 우선 조회 — tryRedisExact 헬퍼로 통합
         Long redisExact = tryRedisExact(command, cacheKey);
-        if (redisExact != null) return redisExact;
+        if (redisExact != null) return ResolvedTotal.exact(redisExact);
 
         if (approxEstimator.isEmpty()) {
             long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
             queryCache.ifPresent(c -> c.putExact(cacheKey, total));
-            return total;
+            return ResolvedTotal.exact(total);
         }
 
         if (Boolean.TRUE.equals(command.exactCount())) {
             long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
             queryCache.ifPresent(c -> c.putExact(cacheKey, total));
-            return total;
+            return ResolvedTotal.exact(total);
         }
 
         long approx = approxEstimator.get().estimate(criteria);
         if (approx < props.getLineAccel().getEarlyTermThreshold()) {
             long total = mongoTemplate.count(Query.query(criteria), PmsBlMartDocument.class);
             queryCache.ifPresent(c -> c.putExact(cacheKey, total));
-            return total;
+            return ResolvedTotal.exact(total);
         }
+        // ★ approximate=true: $sample 근사 추정 결과를 그대로 반환하는 유일한 분기
         queryCache.ifPresent(c -> c.putApprox(cacheKey, approx));
-        return approx;
+        return ResolvedTotal.approx(approx);
     }
 
     // ── op-kill 래핑 헬퍼 ────────────────────────────────────────────────────
@@ -311,9 +317,13 @@ class PmsMartCountResolver {
             : planner.get().countFreight(command, flagField);
     }
 
-    private Long getCachedTotal(String cacheKey) {
+    /**
+     * 캐시에 저장된 총건수를 ResolvedTotal로 반환한다(exact/approx 구분 포함).
+     * 캐시 없음 또는 TTL 초과이면 null 반환(miss).
+     */
+    private ResolvedTotal getCachedResolved(String cacheKey) {
         if (queryCache.isEmpty()) return null;
-        return queryCache.get().getTotal(cacheKey);
+        return queryCache.get().getResolvedTotal(cacheKey);
     }
 
     /**

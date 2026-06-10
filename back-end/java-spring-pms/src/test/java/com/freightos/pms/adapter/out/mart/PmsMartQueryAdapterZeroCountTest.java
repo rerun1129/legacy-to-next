@@ -4,6 +4,7 @@ import com.freightos.common.config.PmsMartProperties;
 import com.freightos.pms.adapter.out.mart.cancel.PmsExactCountRegistry;
 import com.freightos.pms.adapter.out.mart.document.PmsBlMartDocument;
 import com.freightos.pms.application.pms.AggregationBasis;
+import com.freightos.pms.application.pms.PmsRawBlSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.projection.PmsRawBlRow;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,12 +86,12 @@ class PmsMartQueryAdapterZeroCountTest {
         Criteria fakeCriteria = Criteria.where("hasFreightInput").is(true);
 
         when(criteriaBuilder.buildFreight(eq(cmd), any())).thenReturn(fakeCriteria);
-        when(countResolver.resolveFastPathTotal(eq(fakeCriteria), eq(cmd), any())).thenReturn(0L);
+        when(countResolver.resolveFastPathTotal(eq(fakeCriteria), eq(cmd), any())).thenReturn(ResolvedTotal.exact(0L));
 
-        Page<PmsRawBlRow> result = adapter.searchByFreightLine(cmd, pageable);
+        PmsRawBlSearchResult result = adapter.searchByFreightLine(cmd, pageable);
 
-        assertThat(result.getTotalElements()).isEqualTo(0L);
-        assertThat(result.getContent()).isEmpty();
+        assertThat(result.page().getTotalElements()).isEqualTo(0L);
+        assertThat(result.page().getContent()).isEmpty();
         // total=0이면 find는 호출되지 않아야 한다
         verify(mongoTemplate, never()).find(any(Query.class), eq(PmsBlMartDocument.class));
     }
@@ -102,12 +103,12 @@ class PmsMartQueryAdapterZeroCountTest {
         Criteria fakeCriteria = Criteria.where("hasTaxIssued").is(true);
 
         when(criteriaBuilder.buildFreight(eq(cmd), any())).thenReturn(fakeCriteria);
-        when(countResolver.resolveFastPathTotal(eq(fakeCriteria), eq(cmd), any())).thenReturn(0L);
+        when(countResolver.resolveFastPathTotal(eq(fakeCriteria), eq(cmd), any())).thenReturn(ResolvedTotal.exact(0L));
 
-        Page<PmsRawBlRow> result = adapter.searchByFreightLine(cmd, pageable);
+        PmsRawBlSearchResult result = adapter.searchByFreightLine(cmd, pageable);
 
-        assertThat(result.getContent()).isEmpty();
-        assertThat(result.getPageable()).isEqualTo(pageable);
+        assertThat(result.page().getContent()).isEmpty();
+        assertThat(result.page().getPageable()).isEqualTo(pageable);
         verify(mongoTemplate, never()).find(any(Query.class), eq(PmsBlMartDocument.class));
     }
 
@@ -118,12 +119,12 @@ class PmsMartQueryAdapterZeroCountTest {
         Criteria fakeCriteria = Criteria.where("hasDocCreated").is(true);
 
         when(criteriaBuilder.buildDocument(eq(cmd))).thenReturn(fakeCriteria);
-        when(countResolver.resolveFastPathTotal(eq(fakeCriteria), eq(cmd), any())).thenReturn(0L);
+        when(countResolver.resolveFastPathTotal(eq(fakeCriteria), eq(cmd), any())).thenReturn(ResolvedTotal.exact(0L));
 
-        Page<PmsRawBlRow> result = adapter.searchByDocument(cmd, pageable);
+        PmsRawBlSearchResult result = adapter.searchByDocument(cmd, pageable);
 
-        assertThat(result.getTotalElements()).isEqualTo(0L);
-        assertThat(result.getContent()).isEmpty();
+        assertThat(result.page().getTotalElements()).isEqualTo(0L);
+        assertThat(result.page().getContent()).isEmpty();
         verify(mongoTemplate, never()).find(any(Query.class), eq(PmsBlMartDocument.class));
     }
 

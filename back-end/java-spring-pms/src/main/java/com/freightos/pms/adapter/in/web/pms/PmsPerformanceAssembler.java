@@ -4,6 +4,7 @@ import com.freightos.pms.adapter.in.web.pms.dto.PmsPerformancePageResponse;
 import com.freightos.pms.adapter.in.web.pms.dto.PmsPerformanceRowResponse;
 import com.freightos.pms.adapter.in.web.pms.dto.SearchPmsPerformanceRequest;
 import com.freightos.pms.application.pms.AggregationBasis;
+import com.freightos.pms.application.pms.PmsPerformanceSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.projection.PmsPerformanceRowView;
 import org.springframework.data.domain.Page;
@@ -32,13 +33,15 @@ public class PmsPerformanceAssembler {
         );
     }
 
-    public PmsPerformancePageResponse toPageResponse(Page<PmsPerformanceRowView> page) {
+    public PmsPerformancePageResponse toPageResponse(PmsPerformanceSearchResult result) {
+        Page<PmsPerformanceRowView> page = result.page();
         return new PmsPerformancePageResponse(
             page.getContent().stream().map(this::toRowResponse).toList(),
             page.getTotalElements(),
             page.getTotalPages(),
             page.getNumber(),
-            page.getSize()
+            page.getSize(),
+            result.approximateTotal()
         );
     }
 

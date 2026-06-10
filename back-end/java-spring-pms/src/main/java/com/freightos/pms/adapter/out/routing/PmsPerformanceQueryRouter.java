@@ -4,13 +4,12 @@ import com.freightos.common.config.PmsMartProperties;
 import com.freightos.pms.adapter.out.mart.PmsMartFilterSupport;
 import com.freightos.pms.adapter.out.mart.PmsMartQueryAdapter;
 import com.freightos.pms.adapter.out.persistence.pms.PmsPerformancePersistenceAdapter;
+import com.freightos.pms.application.pms.PmsRawBlSearchResult;
 import com.freightos.pms.application.pms.command.SearchPmsPerformanceCommand;
 import com.freightos.pms.application.pms.port.out.PmsPerformanceQueryPort;
-import com.freightos.pms.application.pms.projection.PmsRawBlRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +39,7 @@ public class PmsPerformanceQueryRouter implements PmsPerformanceQueryPort {
     private final PmsMartCircuitGuard guard;
 
     @Override
-    public Page<PmsRawBlRow> searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
+    public PmsRawBlSearchResult searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
         if (!useMart(command)) {
             return oltp.searchByFreightLine(command, pageable);
         }
@@ -50,7 +49,7 @@ public class PmsPerformanceQueryRouter implements PmsPerformanceQueryPort {
     }
 
     @Override
-    public Page<PmsRawBlRow> searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
+    public PmsRawBlSearchResult searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
         if (!useMart(command)) {
             return oltp.searchByDocument(command, pageable);
         }
