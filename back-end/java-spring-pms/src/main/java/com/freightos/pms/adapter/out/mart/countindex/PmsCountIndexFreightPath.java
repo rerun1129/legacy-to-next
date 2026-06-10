@@ -22,22 +22,21 @@ import java.util.Map;
  * 지원 불가이면 null을 반환(Mongo 폴백 신호).
  *
  * 계산 전략:
- * - perfDt 범위(양쪽) 있고 라인 술어(issued/types/basis) 있으면:
+ * - perfDt 범위(양쪽) 있고 라인 술어(types/basis) 있으면:
  *     E3 composite 일버킷 OR → B/L 차원 AND → [W3 doc-exists AND] → cardinality
  * - perfDt 범위(양쪽) 있고 라인 술어 없으면:
  *     일·속성 버킷 OR → B/L 차원 AND → [W3 doc-exists AND] → cardinality
  * - perfDt 없고 라인 술어 있으면:
  *     E3 전역 composite 버킷 OR → ETD/ETA 및 차원 AND → [W3 doc-exists AND] → cardinality
- * - perfDt 없고 FREIGHT_INPUT && documentTypes 있고 issued 없으면:
+ * - perfDt 없고 FREIGHT_INPUT && documentTypes 있으면:
  *     전역 fdc 버킷 OR → dim AND → [W3 doc-exists AND] (기존 fast-path 유지)
- * - W3 P6: perfDt 없고 라인 술어도 없고 doc 술어(status/grouped)만 있으면:
+ * - W3 P6: perfDt 없고 라인 술어도 없고 doc 술어(status)만 있으면:
  *     has-flag 비트맵 → ETD/ETA AND → dim AND → W3 doc-exists AND → cardinality
  * - 그 외: null (Mongo 폴백)
  *
  * W1-A: hasBlNoFilter/taxType/documentNoLike/groupFinancialNo/operator/documentDtFrom/To/financialDocType 규칙 제거.
- * W2: issued 필터를 E3 composite 버킷({p}:ln:pd:{day}:c:{t}{s}{i}:{TYPE})으로 처리.
- *     issued 있으면 compound 버킷(tax/slip/issued 조합 × fdcType 변형)을 OR하여 정확 count 반환.
- * W3: documentStatus/grouped 있으면 fdId-grain collapse(cap 초과 폴백) 대신 B/L-grain dcx:* 비트맵 AND.
+ * W2: E3 composite 버킷({p}:ln:pd:{day}:c:{t}{s}:{TYPE}) 2-bit(t/s) 처리.
+ * W3: documentStatus 있으면 B/L-grain dcx:status:* 비트맵 AND.
  *     dc:overflow 게이팅 보존: docOverflowFlag 존재 시 null(Mongo 폴백).
  *
  * 헬퍼 위임: 키 수집·비트맵 연산·날짜 유틸은 {@link PmsCountIndexFreightPathSupport}에 분리.
@@ -69,11 +68,10 @@ final class PmsCountIndexFreightPath {
      * - perfDt 범위 한쪽만 존재 (open range)
      * - 일수 > maxDayBuckets
      * - 변형 키 수 > maxDayBuckets×8 (전역 composite 키 수 가드)
-     * - W3: documentStatus/grouped 있을 때 dc:overflow 플래그 존재 → Mongo 폴백
+     * - W3: documentStatus 있을 때 dc:overflow 플래그 존재 → Mongo 폴백
      * - perfDt 없고 라인 술어도 없고 doc 술어도 없고 FREIGHT_INPUT 타입필터도 없는 형태
      *
-     * W2: issued 필터는 E3 composite 버킷으로 처리(null 반환하지 않음).
-     * W3: documentStatus/grouped는 B/L-grain dcx:* 비트맵 AND로 처리(null 반환하지 않음).
+     * W3: documentStatus는 B/L-grain dcx:status:* 비트맵 AND로 처리(null 반환하지 않음).
      *     dc:overflow 게이팅 보존.
      * E3: TAX/SLIP+types 조합의 needsLineGrainCorrelation null 규칙 제거 — 복합버킷 경로로 처리.
      *     perfDt 없는 경우에도 전역 composite 버킷(lineCompositeGlobalBitmap)으로 처리.
@@ -103,9 +101,8 @@ final class PmsCountIndexFreightPath {
         }
 
         boolean hasDocTypes      = cmd.documentTypes() != null && !cmd.documentTypes().isEmpty();
-        boolean hasIssued        = StringUtils.hasText(cmd.issued());
-        // 라인 술어: issued·documentTypes·TAX·SLIP basis — 복합버킷이 필요한 조건
-        boolean hasLinePredicate = hasIssued || hasDocTypes
+        // 라인 술어: documentTypes·TAX·SLIP basis — 복합버킷이 필요한 조건
+        boolean hasLinePredicate = hasDocTypes
                 || basis == AggregationBasis.TAX_ISSUED || basis == AggregationBasis.SLIP_ISSUED;
 
         // perfDt 범위 처리
@@ -126,7 +123,7 @@ final class PmsCountIndexFreightPath {
                 return null;
             }
 
-            // 라인 술어(issued/types/TAX·SLIP basis) 있으면 E3 composite 일버킷 경로
+            // 라인 술어(types/TAX·SLIP basis) 있으면 E3 composite 일버킷 경로
             if (hasLinePredicate) {
                 return computeWithCompositeAndDoc(cmd, prefix, basis, perfFrom, perfTo, hasDocTypes);
             }
@@ -145,8 +142,8 @@ final class PmsCountIndexFreightPath {
             return computeWithGlobalFdc(cmd, prefix, hasDocTypes);
         }
 
-        // W3: 라인 술어·타입 필터 없이 doc-exists 술어(status/grouped)만 있는 형태 — B/L-grain 즉답
-        if (StringUtils.hasText(cmd.documentStatus()) || StringUtils.hasText(cmd.grouped())) {
+        // W3: 라인 술어·타입 필터 없이 doc-exists 술어(status)만 있는 형태 — B/L-grain 즉답
+        if (StringUtils.hasText(cmd.documentStatus())) {
             return computeWithBlDocOnly(cmd, prefix, basis);
         }
 
@@ -214,9 +211,9 @@ final class PmsCountIndexFreightPath {
     /**
      * perfDt 없고 라인 술어 있는 경로(E3 전역 composite 버킷) → [E2 doc AND] → cardinality.
      *
-     * issued/types/TAX·SLIP basis 조합에 맞는 전역 composite 키를 열거해 OR → ETD/ETA AND
+     * types/TAX·SLIP basis 조합에 맞는 전역 composite 키를 열거해 OR → ETD/ETA AND
      * → 차원 AND → [E2 doc AND] → cardinality.
-     * 변형 키 수 가드 초과·issued 미존재 등 지원 불가 시 null.
+     * 변형 키 수 가드 초과 등 지원 불가 시 null.
      */
     private Long computeWithGlobalCompositeAndDoc(
             SearchPmsPerformanceCommand cmd,
@@ -230,8 +227,8 @@ final class PmsCountIndexFreightPath {
     }
 
     /**
-     * perfDt 없고 FREIGHT_INPUT && 서류타입 필터가 있고 issued 없는 fast-path.
-     * E2: documentStatus/grouped 있으면 doc-grain blOrdinal AND 적용.
+     * perfDt 없고 FREIGHT_INPUT && 서류타입 필터가 있는 fast-path (라인 술어 없음).
+     * documentStatus 있으면 doc-grain B/L-grain dcx:status AND 적용.
      */
     private Long computeWithGlobalFdc(
             SearchPmsPerformanceCommand cmd,
@@ -274,18 +271,11 @@ final class PmsCountIndexFreightPath {
     /**
      * W3: freight lineSet 결과에 B/L-grain doc-exists 비트맵 AND를 적용한다.
      *
-     * documentStatus/grouped 없으면 lineSet cardinality를 그대로 반환한다.
+     * documentStatus 없으면 lineSet cardinality를 그대로 반환한다.
      * dc:overflow 플래그 존재 시 null(Mongo 폴백) — 같은 빌드 파이프라인 산물이므로 게이팅 보존.
-     *
-     * grouped 미인식값(Y/N 외): 무시(기존 의미 유지).
-     * - hasStatus && groupedYn → sg 키(status ∧ grouped) 1개 AND
-     * - hasStatus만             → status 키 AND
-     * - groupedYn만             → grouped 키 AND
-     * - 둘 다 없음(미인식 grouped 단독 포함) → lineSet cardinality 그대로
      */
     private Long andDocComponent(RoaringBitmap lineSet, SearchPmsPerformanceCommand cmd, String prefix) {
-        boolean hasDocPredicate = StringUtils.hasText(cmd.documentStatus()) || StringUtils.hasText(cmd.grouped());
-        if (!hasDocPredicate) {
+        if (!StringUtils.hasText(cmd.documentStatus())) {
             return (long) lineSet.getCardinality();
         }
 
@@ -296,24 +286,7 @@ final class PmsCountIndexFreightPath {
             return null;
         }
 
-        boolean hasStatus = StringUtils.hasText(cmd.documentStatus());
-        boolean groupedY  = "Y".equals(cmd.grouped());
-        boolean groupedN  = "N".equals(cmd.grouped());
-        boolean groupedYn = groupedY || groupedN;
-
-        String docExistsKey;
-        if (hasStatus && groupedYn) {
-            // W3: status ∧ grouped same-doc 복합 키
-            docExistsKey = PmsCountIndexKeys.blDocStatusGroupedBitmap(prefix, cmd.documentStatus(), groupedY);
-        } else if (hasStatus) {
-            docExistsKey = PmsCountIndexKeys.blDocStatusBitmap(prefix, cmd.documentStatus());
-        } else if (groupedYn) {
-            docExistsKey = PmsCountIndexKeys.blDocGroupedBitmap(prefix, groupedY);
-        } else {
-            // 미인식 grouped 단독 — 술어 무시, lineSet 그대로
-            return (long) lineSet.getCardinality();
-        }
-
+        String docExistsKey = PmsCountIndexKeys.blDocStatusBitmap(prefix, cmd.documentStatus());
         byte[] docExistsBytes = redisTemplate.opsForValue().get(docExistsKey);
         RoaringBitmap docExists = PmsCountIndexMaintainer.deserialize(docExistsBytes);
 
@@ -321,7 +294,7 @@ final class PmsCountIndexFreightPath {
     }
 
     /**
-     * W3 P6: 라인 술어·타입 필터 없이 doc-exists 술어(status/grouped)만 있는 경우의 즉답 경로.
+     * W3 P6: 라인 술어·타입 필터 없이 doc-exists 술어(status)만 있는 경우의 즉답 경로.
      *
      * has-flag 비트맵 → ETD/ETA AND → dim AND → andDocComponent 의 B/L-grain doc-exists AND.
      * flag 비트맵이 시작점이므로 무필터 전체(flag만+doc술어)도 안전하게 동작한다.

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
  *
  * - 무날짜·무타입+status → computeBlDocShortCircuit 단락 경로 진입
  * - 날짜 있으면 기존 fdId-grain 경로 유지(단락 미진입)
- * - dcx:* 키 패턴 검증
+ * - dcx:status 키 패턴 검증
  * 라이브 Redis/Mongo 없이 mock RedisTemplate로 검증한다.
  * 시간·랜덤·sleep 의존 없는 결정적 로직만 테스트한다.
  */
@@ -74,27 +74,7 @@ class PmsW3DocumentPathShortCircuitTest {
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             null, null, null, null,
-            "CREATED", null
-        );
-        assertThat(path.computeDocumentCount(cmd, PREFIX)).isNotNull();
-    }
-
-    @Test
-    void 무날짜_무타입_grouped_Y만_있으면_비null을_반환한다() {
-        SearchPmsPerformanceCommand cmd = buildDocCmd(
-            AggregationBasis.DOCUMENT_CREATED,
-            null, null, null, null,
-            null, "Y"
-        );
-        assertThat(path.computeDocumentCount(cmd, PREFIX)).isNotNull();
-    }
-
-    @Test
-    void 무날짜_무타입_status와_grouped_N_동시이면_sg_키_단락_경로로_비null_반환한다() {
-        SearchPmsPerformanceCommand cmd = buildDocCmd(
-            AggregationBasis.DOCUMENT_CREATED,
-            null, null, null, null,
-            "ISSUED", "N"
+            "CREATED"
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNotNull();
     }
@@ -104,7 +84,7 @@ class PmsW3DocumentPathShortCircuitTest {
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             null, null, null, null,
-            "CREATED", null
+            "CREATED"
         );
         path.computeDocumentCount(cmd, PREFIX);
 
@@ -129,7 +109,7 @@ class PmsW3DocumentPathShortCircuitTest {
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             "20240101", "20240101", null, null,
-            "CREATED", null
+            "CREATED"
         );
         Long result = path.computeDocumentCount(cmd, PREFIX);
         // 기존 fdId-grain 경로: 빈 비트맵 → 0L 이상
@@ -152,7 +132,7 @@ class PmsW3DocumentPathShortCircuitTest {
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             null, null, List.of("INVOICE"), null,
-            "CREATED", null
+            "CREATED"
         );
         Long result = path.computeDocumentCount(cmd, PREFIX);
         assertThat(result).isNotNull();
@@ -191,7 +171,7 @@ class PmsW3DocumentPathShortCircuitTest {
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             null, null, null, null,
-            "CREATED", null
+            "CREATED"
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isEqualTo(2L);
     }
@@ -202,7 +182,7 @@ class PmsW3DocumentPathShortCircuitTest {
             AggregationBasis basis,
             String perfDtFrom, String perfDtTo,
             List<String> documentTypes, String docDtFrom,
-            String documentStatus, String grouped) {
+            String documentStatus) {
         return new SearchPmsPerformanceCommand(
             basis, 0, 20,
             null, null,
@@ -210,7 +190,6 @@ class PmsW3DocumentPathShortCircuitTest {
             perfDtFrom, perfDtTo,
             docDtFrom, null,
             documentTypes, documentStatus,
-            grouped, null,
             null, null
         );
     }

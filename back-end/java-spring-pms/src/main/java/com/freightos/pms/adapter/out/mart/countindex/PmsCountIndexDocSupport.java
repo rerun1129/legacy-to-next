@@ -138,9 +138,6 @@ final class PmsCountIndexDocSupport {
         if (StringUtils.hasText(d.getStatus())) {
             keys.add(PmsCountIndexKeys.docStatusBitmap(prefix, d.getStatus()));
         }
-        if (d.isGrouped()) {
-            keys.add(PmsCountIndexKeys.docGroupedBitmap(prefix));
-        }
         if (StringUtils.hasText(d.getDocDt())) {
             keys.add(PmsCountIndexKeys.docDtDayBitmap(prefix, d.getDocDt()));
         }
@@ -157,7 +154,6 @@ final class PmsCountIndexDocSupport {
     private Set<String> collectAllDcPatternKeys(PmsBlMartDocument martDoc) {
         Set<String> keys = new HashSet<>();
         keys.add(PmsCountIndexKeys.docAllBitmap(prefix));
-        keys.add(PmsCountIndexKeys.docGroupedBitmap(prefix));
 
         List<PmsBlDocEmbedded> docList = martDoc.getDocs();
         if (docList == null) return keys;

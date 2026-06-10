@@ -140,9 +140,9 @@ final class PmsCountIndexFreightPathSupport {
     // ── E3 composite 계산 (W2) ───────────────────────────────────────────────
 
     /**
-     * issued 필터 있을 때 E3 composite 버킷 기반 계산.
+     * E3 composite 버킷 기반 계산.
      *
-     * issued + basis + fdcType 조합에 맞는 composite 키를 열거해 OR → dim AND → cardinality.
+     * basis + fdcType 조합에 맞는 2-bit composite 키를 열거해 OR → dim AND → cardinality.
      *
      * @return cardinality, 또는 지원 불가 시 null
      */
@@ -162,7 +162,7 @@ final class PmsCountIndexFreightPathSupport {
     /**
      * E3 composite 일버킷 기반 계산 — B/L ordinal 비트맵 반환.
      *
-     * issued 있으면 i 고정, 없으면 i∈{0,1} 열거.
+     * 2-bit(t/s) 조합 × fdcType 변형 × 일수.
      * E2 doc-grain AND 합성을 위해 PmsCountIndexFreightPath에서 호출한다.
      * null 반환은 지원 불가(Mongo 폴백 신호).
      */
@@ -177,10 +177,6 @@ final class PmsCountIndexFreightPathSupport {
         List<LocalDate> days = enumerateDays(perfFrom, perfTo);
         if (days == null) return null;
 
-        // issued: Y/N 고정 또는 null(열거). Y/N 외 이상값이면 폴백.
-        Boolean issuedFixed = parseIssuedFixed(cmd.issued());
-        if (issuedFixed == null && StringUtils.hasText(cmd.issued())) return null;
-
         // documentTypes 미지정(무제약) = 모든 fdcType 변형 열거.
         // FDC_ALL_TYPES 마지막 원소 null → encodeType(null)="none" 버킷(fdcType 없는 라인) 포함.
         List<String> typeList = hasDocTypes ? cmd.documentTypes() : PmsCountIndexKeys.FDC_ALL_TYPES;
@@ -189,7 +185,7 @@ final class PmsCountIndexFreightPathSupport {
         for (LocalDate day : days) {
             String d = day.format(DATE_FMT);
             for (String fdcType : typeList) {
-                addCompositeKeysForBasis(compositeKeys, prefix, d, basis, issuedFixed, fdcType);
+                addCompositeKeysForBasis(compositeKeys, prefix, d, basis, fdcType);
             }
         }
 
@@ -221,37 +217,27 @@ final class PmsCountIndexFreightPathSupport {
     }
 
     /**
-     * basis에 따라 composite 일버킷 키를 수집한다.
-     *
-     * issuedFixed null: i∈{0,1} 열거.
-     * issuedFixed non-null: i 고정.
+     * basis에 따라 composite 일버킷 키를 수집한다(2-bit t/s).
      */
     void addCompositeKeysForBasis(
             List<String> keys, String prefix, String day,
-            AggregationBasis basis, Boolean issuedFixed, String fdcType) {
-        List<Boolean> issuedVals = issuedFixed != null ? List.of(issuedFixed) : List.of(false, true);
+            AggregationBasis basis, String fdcType) {
         switch (basis) {
             case FREIGHT_INPUT -> {
-                for (boolean iv : issuedVals) {
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, false, false, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true,  false, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, false, true,  iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true,  true,  iv, fdcType));
-                }
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, false, false, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true,  false, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, false, true,  fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true,  true,  fdcType));
             }
             case TAX_ISSUED -> {
-                // t=1 고정, s 열거 × issued
-                for (boolean iv : issuedVals) {
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true, false, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true, true,  iv, fdcType));
-                }
+                // t=1 고정, s 열거
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true, false, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true, true,  fdcType));
             }
             case SLIP_ISSUED -> {
-                // s=1 고정, t 열거 × issued
-                for (boolean iv : issuedVals) {
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, false, true, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true,  true, iv, fdcType));
-                }
+                // s=1 고정, t 열거
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, false, true, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositePdBitmap(prefix, day, true,  true, fdcType));
             }
             default -> { /* no-op */ }
         }
@@ -266,10 +252,9 @@ final class PmsCountIndexFreightPathSupport {
     // ── E3 전역 composite 계산 (perfDt 없음) ─────────────────────────────────
 
     /**
-     * perfDt 없는 케이스: 전역 composite 버킷({p}:ln:c:{t}{s}{i}:{TYPE}) 기반 계산.
+     * perfDt 없는 케이스: 전역 composite 버킷({p}:ln:c:{t}{s}:{TYPE}) 기반 계산.
      *
-     * issued 있으면 i 고정, 나머지 축(t/s/TYPE) 열거.
-     * issued 없으면 i∈{0,1} 모두 열거 — basis에 따라 t/s 고정 여부만 다름.
+     * 2-bit(t/s) × fdcType 변형 열거. basis에 따라 t/s 고정 여부 다름.
      * 변형 수(compositeKeys.size()) > maxDayBuckets×8 이면 null(키 수 가드).
      *
      * @return B/L ordinal 비트맵, 지원 불가 시 null
@@ -280,20 +265,13 @@ final class PmsCountIndexFreightPathSupport {
             AggregationBasis basis,
             boolean hasDocTypes) {
 
-        // issued: Y/N 고정 혹은 null(열거). Y/N 외 값은 폴백.
-        Boolean issuedFixed = parseIssuedFixed(cmd.issued());
-        if (issuedFixed == null && StringUtils.hasText(cmd.issued())) {
-            // Y/N 아닌 값(예: 빈 문자열이 아닌 이상한 값) → 폴백
-            return null;
-        }
-
         // documentTypes 미지정(무제약) = 모든 fdcType 변형 열거.
         // FDC_ALL_TYPES 마지막 원소 null → encodeType(null)="none" 버킷(fdcType 없는 라인) 포함.
         List<String> typeList = hasDocTypes ? cmd.documentTypes() : PmsCountIndexKeys.FDC_ALL_TYPES;
         List<String> compositeKeys = new ArrayList<>();
 
         for (String fdcType : typeList) {
-            addCompositeGlobalKeysForBasis(compositeKeys, prefix, basis, issuedFixed, fdcType);
+            addCompositeGlobalKeysForBasis(compositeKeys, prefix, basis, fdcType);
         }
 
         if (compositeKeys.isEmpty()) return null;
@@ -324,53 +302,29 @@ final class PmsCountIndexFreightPathSupport {
     }
 
     /**
-     * issued 문자열을 고정값으로 파싱한다.
-     * "Y" → true, "N" → false, null/blank → null(i 열거 신호).
-     * Y/N 외 다른 값도 null 반환 — 호출측에서 hasText(issued)와 조합해 Y/N 외 이상값 구분.
-     */
-    private static Boolean parseIssuedFixed(String issued) {
-        if (!StringUtils.hasText(issued)) return null;
-        return switch (issued) {
-            case "Y" -> true;
-            case "N" -> false;
-            default  -> null;
-        };
-    }
-
-    /**
-     * basis에 따라 전역 composite 키를 수집한다.
+     * basis에 따라 전역 composite 키를 수집한다(2-bit t/s).
      * 일버킷과 달리 day 파라미터 없음 — lineCompositeGlobalBitmap 사용.
-     *
-     * issuedFixed null: i∈{0,1} 열거.
-     * issuedFixed non-null: i 고정.
      */
     void addCompositeGlobalKeysForBasis(
             List<String> keys, String prefix,
-            AggregationBasis basis, Boolean issuedFixed, String fdcType) {
-        List<Boolean> issuedVals = issuedFixed != null ? List.of(issuedFixed) : List.of(false, true);
+            AggregationBasis basis, String fdcType) {
         switch (basis) {
             case FREIGHT_INPUT -> {
-                // t,s 모두 열거 × issued
-                for (boolean iv : issuedVals) {
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, false, false, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true,  false, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, false, true,  iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true,  true,  iv, fdcType));
-                }
+                // t,s 모두 열거
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, false, false, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true,  false, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, false, true,  fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true,  true,  fdcType));
             }
             case TAX_ISSUED -> {
-                // t=1 고정, s 열거 × issued
-                for (boolean iv : issuedVals) {
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true, false, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true, true,  iv, fdcType));
-                }
+                // t=1 고정, s 열거
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true, false, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true, true,  fdcType));
             }
             case SLIP_ISSUED -> {
-                // s=1 고정, t 열거 × issued
-                for (boolean iv : issuedVals) {
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, false, true, iv, fdcType));
-                    keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true,  true, iv, fdcType));
-                }
+                // s=1 고정, t 열거
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, false, true, fdcType));
+                keys.add(PmsCountIndexKeys.lineCompositeGlobalBitmap(prefix, true,  true, fdcType));
             }
             default -> { /* no-op */ }
         }

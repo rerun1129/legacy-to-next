@@ -8,7 +8,6 @@ import com.freightos.pms.domain.enums.DocumentStatus;
 import com.freightos.pms.domain.enums.DocumentType;
 import com.freightos.pms.domain.enums.JobDiv;
 import com.freightos.pms.domain.enums.PortKind;
-import com.freightos.pms.domain.enums.YesNo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +41,6 @@ public class EnumRegistryFactory {
         register(map, "DocumentType", DocumentType.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
         register(map, "DocumentStatus", DocumentStatus.values(),
-                e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
-        register(map, "YesNo", YesNo.values(),
                 e -> new EnumOption(e.name(), e.getLabel(), null, e.getLabelKo()));
 
         return EnumRegistry.of(map);

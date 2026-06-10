@@ -52,7 +52,6 @@ public class PmsMartLineReaggregator {
             .filter(line -> !hasPerfDtRange || inRange(line.getPd(), c.performanceDtFrom(), c.performanceDtTo()))
             .filter(line -> matchesBasisFlag(line, basisKey))
             .filter(line -> matchesDocType(line.getFdcType(), c))
-            .filter(line -> matchesIssued(line, c))
             .toList();
 
         BigDecimal[] sums = sumLineAmounts(matched);
@@ -87,7 +86,6 @@ public class PmsMartLineReaggregator {
             .filter(d -> matchesDocumentDateFilters(d, c))
             .filter(d -> matchesDocumentTypes(d.getDocType(), c))
             .filter(d -> matchesDocumentStatus(d.getStatus(), c))
-            .filter(d -> matchesGrouped(d, c))
             .toList();
 
         BigDecimal[] sums = sumDocAmounts(matched);
@@ -146,16 +144,6 @@ public class PmsMartLineReaggregator {
         return true;
     }
 
-    private static boolean matchesIssued(PmsBlLineEmbedded line, SearchPmsPerformanceCommand c) {
-        String issued = c.issued();
-        if (!StringUtils.hasText(issued)) return true;
-        return switch (issued) {
-            case "Y" -> line.isIssued();
-            case "N" -> !line.isIssued();
-            default  -> true;
-        };
-    }
-
     // ── document 필터 헬퍼 ──────────────────────────────────────────────────
 
     private static boolean matchesDocumentDateFilters(PmsBlDocEmbedded d, SearchPmsPerformanceCommand c) {
@@ -177,16 +165,6 @@ public class PmsMartLineReaggregator {
     private static boolean matchesDocumentStatus(String status, SearchPmsPerformanceCommand c) {
         if (!StringUtils.hasText(c.documentStatus())) return true;
         return c.documentStatus().equals(status);
-    }
-
-    private static boolean matchesGrouped(PmsBlDocEmbedded d, SearchPmsPerformanceCommand c) {
-        String grouped = c.grouped();
-        if (!StringUtils.hasText(grouped)) return true;
-        return switch (grouped) {
-            case "Y" -> d.isGrouped();
-            case "N" -> !d.isGrouped();
-            default  -> true;
-        };
     }
 
     // ── 금액 합산 헬퍼 ────────────────────────────────────────────────────────

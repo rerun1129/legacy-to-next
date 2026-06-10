@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * PMS 실적 조회 커맨드. 필터 필드는 null/blank = 무시.
- * FE가 실제로 전송하는 9개 필터 + 기간 파생 필드만 보유한다.
+ * FE가 실제로 전송하는 필터 + 기간 파생 필드만 보유한다.
  * 다중 선택(documentTypes)은 빈 리스트 = 전체.
  */
 public record SearchPmsPerformanceCommand(
@@ -32,8 +32,6 @@ public record SearchPmsPerformanceCommand(
     String documentDtTo,
     List<String> documentTypes,      // INVOICE/PAYMENT/DEBIT/CREDIT (다중)
     String documentStatus,
-    String grouped,                  // Y/N
-    String issued,                   // Y/N (freight_line.financial_document_id IS (NOT) NULL)
 
     // ── 총건수 정확도 ─────────────────────────────────────────────────────────
     Boolean exactCount,          // null/false = 근사(기본), true = 정확

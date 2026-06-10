@@ -27,7 +27,7 @@ public class PmsDocumentSqlBuilder {
      * params에 값도 함께 바인딩.
      *
      * W1-A: teamCode/operator/documentNoLike/groupFinancialNo 제거.
-     *        performanceDtFrom/To, documentTypes, documentStatus, documentDtFrom/To, grouped 유지.
+     *        performanceDtFrom/To, documentTypes, documentStatus, documentDtFrom/To 유지.
      */
     public void addDocumentPredicates(SearchPmsPerformanceCommand c,
                                       List<String> where, MapSqlParameterSource params) {
@@ -54,11 +54,6 @@ public class PmsDocumentSqlBuilder {
         if (hasValue(c.documentDtTo())) {
             where.add("fd.document_dt <= :doc_dt_to");
             params.addValue("doc_dt_to", c.documentDtTo());
-        }
-        if (hasValue(c.grouped())) {
-            where.add("Y".equalsIgnoreCase(c.grouped())
-                ? "fd.group_financial_no IS NOT NULL"
-                : "fd.group_financial_no IS NULL");
         }
     }
 

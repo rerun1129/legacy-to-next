@@ -32,8 +32,6 @@ public record SearchPmsPerformanceRequest(
     // BMS 서류
     List<String> documentTypes,
     String documentStatus,
-    String grouped,
-    String issued,
 
     // 총건수 정확도: null/false = 근사(기본), true = 정확
     Boolean exactCount,

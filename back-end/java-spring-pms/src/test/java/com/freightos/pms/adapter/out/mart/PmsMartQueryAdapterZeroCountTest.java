@@ -135,8 +135,7 @@ class PmsMartQueryAdapterZeroCountTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, null, null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
     }
 
@@ -146,8 +145,7 @@ class PmsMartQueryAdapterZeroCountTest {
             AggregationBasis.TAX_ISSUED, 0, 20,
             null, null, null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
     }
 
@@ -157,8 +155,7 @@ class PmsMartQueryAdapterZeroCountTest {
             AggregationBasis.DOCUMENT_CREATED, 0, 20,
             null, null, null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
     }
 }

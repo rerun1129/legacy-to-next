@@ -28,7 +28,6 @@ public class PmsPerformanceAssembler {
             req.performanceDtFrom(), req.performanceDtTo(),
             req.documentDtFrom(), req.documentDtTo(),
             req.documentTypes(), req.documentStatus(),
-            req.grouped(), req.issued(),
             req.exactCount(), req.searchNonce()
         );
     }

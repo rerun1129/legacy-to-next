@@ -19,17 +19,14 @@ import java.util.List;
  * - {p}:ln:c:{t}{s}{i}:{TYPE}              — E3 전역(무pd) composite 버킷 비트맵 (byte[])
  * - {p}:ln:fdc:{TYPE}                      — line 전역 서류타입 버킷 비트맵 (byte[])
  * - {p}:bl:dcx:status:{STATUS}             — W3 doc-exists: status=S인 doc ≥1 보유 B/L 비트맵 (byte[])
- * - {p}:bl:dcx:grouped:{Y|N}               — W3 doc-exists: grouped=true(Y)/false(N) doc ≥1 보유 B/L 비트맵 (byte[])
- * - {p}:bl:dcx:sg:{STATUS}:{Y|N}           — W3 doc-exists: status=S ∧ grouped=G인 same-doc ≥1 보유 B/L 비트맵 (byte[])
  * - {p}:meta                               — 메타 해시 (complete, syncAt)
  * - {p}:bl:overflow                        — B/L ordinal overflow 플래그 (존재 시 not-ready)
  *
  * W1-A: FE가 전송하지 않는 차원(cust/spc/liner/pol/pod/salesman/houseteam/salesclass/incoterms)
  *        관련 상수·메서드 제거. jobDiv/bound 차원만 잔존.
- * W2: E3 composite 일버킷({p}:ln:pd:{day}:c:{t}{s}{i}:{TYPE}) 및
- *     전역 composite({p}:ln:c:{t}{s}{i}:{TYPE}) 키 메서드 추가.
- * W3: B/L-grain doc-exists 비트맵 키 3종 추가(blDocStatusBitmap/blDocGroupedBitmap/blDocStatusGroupedBitmap).
- *     grouped:N은 "grouped=false doc 존재" 의미 — Y/N 둘 다 직접 적재.
+ * W2: E3 composite 일버킷({p}:ln:pd:{day}:c:{t}{s}:{TYPE}) 및
+ *     전역 composite({p}:ln:c:{t}{s}:{TYPE}) 키 메서드 추가. 2-bit(t/s) 인코딩.
+ * W3: B/L-grain doc-exists 비트맵 키 blDocStatusBitmap 추가.
  */
 final class PmsCountIndexKeys {
 
@@ -161,24 +158,24 @@ final class PmsCountIndexKeys {
 
     /**
      * E3 복합 일버킷 키.
-     * 라인 하나에 대해 (pd일자, tax여부, slip여부, issued여부, fdcType)을 모두 인코딩한다.
-     * 양 끝 비트(t/s/i)는 "0" 또는 "1". TYPE은 fdcType 또는 "none".
+     * 라인 하나에 대해 (pd일자, tax여부, slip여부, fdcType)을 모두 인코딩한다.
+     * 2-bit(t/s)는 "0" 또는 "1". TYPE은 fdcType 또는 "none".
      *
-     * 예: {p}:ln:pd:20240115:c:010:INVOICE
-     *     {p}:ln:pd:20240115:c:001:none
+     * 예: {p}:ln:pd:20240115:c:01:INVOICE
+     *     {p}:ln:pd:20240115:c:00:none
      */
-    static String lineCompositePdBitmap(String prefix, String day, boolean tax, boolean slip, boolean issued, String fdcType) {
-        return prefix + ":ln:pd:" + day + ":c:" + encodeTsi(tax, slip, issued) + ":" + encodeType(fdcType);
+    static String lineCompositePdBitmap(String prefix, String day, boolean tax, boolean slip, String fdcType) {
+        return prefix + ":ln:pd:" + day + ":c:" + encodeTs(tax, slip) + ":" + encodeType(fdcType);
     }
 
     /**
      * E3 전역(pd 없는 라인) 복합 버킷 키.
      * pd 값이 null/공백인 라인은 일버킷에 포함되지 않으나 전역 집계에는 포함된다.
      *
-     * 예: {p}:ln:c:010:INVOICE
+     * 예: {p}:ln:c:01:INVOICE
      */
-    static String lineCompositeGlobalBitmap(String prefix, boolean tax, boolean slip, boolean issued, String fdcType) {
-        return prefix + ":ln:c:" + encodeTsi(tax, slip, issued) + ":" + encodeType(fdcType);
+    static String lineCompositeGlobalBitmap(String prefix, boolean tax, boolean slip, String fdcType) {
+        return prefix + ":ln:c:" + encodeTs(tax, slip) + ":" + encodeType(fdcType);
     }
 
     // ── doc(fdId-grain) 버킷 키 생성 메서드 ─────────────────────────────────
@@ -205,14 +202,6 @@ final class PmsCountIndexKeys {
      */
     static String docStatusBitmap(String prefix, String status) {
         return prefix + ":dc:status:" + status;
-    }
-
-    /**
-     * doc grouped=true 비트맵.
-     * 예: {p}:dc:grouped
-     */
-    static String docGroupedBitmap(String prefix) {
-        return prefix + ":dc:grouped";
     }
 
     /**
@@ -258,28 +247,11 @@ final class PmsCountIndexKeys {
         return prefix + ":bl:dcx:status:" + status;
     }
 
-    /**
-     * W3 doc-exists: grouped=true("Y")/false("N")인 doc ≥1 보유 B/L의 blOrdinal 비트맵.
-     * grouped:N은 "grouped=false doc 존재" 의미이므로 Y/N 둘 다 직접 적재한다.
-     * 예: {p}:bl:dcx:grouped:N
-     */
-    static String blDocGroupedBitmap(String prefix, boolean grouped) {
-        return prefix + ":bl:dcx:grouped:" + (grouped ? "Y" : "N");
-    }
-
-    /**
-     * W3 doc-exists same-doc 복합: status=S ∧ grouped=G인 같은 doc ≥1 보유 B/L 비트맵.
-     * 예: {p}:bl:dcx:sg:CREATED:N
-     */
-    static String blDocStatusGroupedBitmap(String prefix, String status, boolean grouped) {
-        return prefix + ":bl:dcx:sg:" + status + ":" + (grouped ? "Y" : "N");
-    }
-
     // ── 내부 인코딩 헬퍼 ──────────────────────────────────────────────────────
 
-    /** tax/slip/issued 3-bit 문자열 인코딩: "010" 형식. */
-    private static String encodeTsi(boolean tax, boolean slip, boolean issued) {
-        return (tax ? "1" : "0") + (slip ? "1" : "0") + (issued ? "1" : "0");
+    /** tax/slip 2-bit 문자열 인코딩: "10" 형식. */
+    private static String encodeTs(boolean tax, boolean slip) {
+        return (tax ? "1" : "0") + (slip ? "1" : "0");
     }
 
     /** fdcType → 버킷 세그먼트. null/공백은 "none"으로 정규화. */

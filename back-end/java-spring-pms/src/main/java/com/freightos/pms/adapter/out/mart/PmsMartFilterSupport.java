@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
  *                 날짜 없는 dim-only 또는 sidecar가 지원하지 않는 필터는 OLTP 폴백.
  *
  * W1-A: FE가 전송하지 않는 필드(financialDocType/taxType/documentNoLike/groupFinancialNo/
- *        operator/hblNo/mblNo) 체크를 제거. 잔존: documentTypes/issued/grouped/documentStatus.
+ *        operator/hblNo/mblNo) 체크를 제거. 잔존: documentTypes/documentStatus.
  */
 @Component
 @ConditionalOnProperty(prefix = "pms.mart", name = "enabled", havingValue = "true")
@@ -48,7 +48,7 @@ public class PmsMartFilterSupport {
             return true;
         }
 
-        // 정형 서류조건(issued/grouped/documentStatus/documentTypes)은 pms_bl_mart pageCriteria로 sub-second 처리.
+        // 정형 서류조건(documentStatus/documentTypes)은 pms_bl_mart pageCriteria로 sub-second 처리.
         // basis 분기(sidecar)보다 먼저 평가 → ETD/ETA·무날짜 + 서류조건 결합도 Mart 진입.
         if (hasDocLineFilter(c)) {
             return isDocLineFilterSupported(c);
@@ -64,15 +64,13 @@ public class PmsMartFilterSupport {
     }
 
     /**
-     * 정형 서류조건(issued/grouped/documentStatus/documentTypes) 존재 여부.
-     * 이 조건들은 pms_bl_mart의 lines[]/docs[] 임베드 배열에 이미 적재돼 있어
+     * 정형 서류조건(documentStatus/documentTypes) 존재 여부.
+     * 이 조건들은 pms_bl_mart의 docs[] 임베드 배열에 이미 적재돼 있어
      * pageCriteria($elemMatch) 경로로 sub-second 처리 가능하다.
      * PmsMartQueryAdapter의 라우팅·count/page 분기에서도 참조한다(static).
      */
     public static boolean hasDocLineFilter(SearchPmsPerformanceCommand c) {
-        return StringUtils.hasText(c.issued())
-            || StringUtils.hasText(c.grouped())
-            || StringUtils.hasText(c.documentStatus())
+        return StringUtils.hasText(c.documentStatus())
             || (c.documentTypes() != null && !c.documentTypes().isEmpty());
     }
 
@@ -121,10 +119,8 @@ public class PmsMartFilterSupport {
             return false;
         }
 
-        // 정형 발급·묶음 필터 (line/document 레벨)
-        if (StringUtils.hasText(c.issued())) return false;
+        // 정형 서류 필터 (document 레벨)
         if (StringUtils.hasText(c.documentStatus())) return false;
-        if (StringUtils.hasText(c.grouped())) return false;
 
         return true;
     }
@@ -135,7 +131,7 @@ public class PmsMartFilterSupport {
      * DOCUMENT_CREATED basis에서 sidecar(pms_docdt_entry)로 해소 가능한지 판단.
      * 날짜(실적일자 또는 서류일자) 없으면 dim-only → OLTP 폴백.
      *
-     * W1-A: financialDocType/taxType/issued/documentNoLike/groupFinancialNo 체크 제거.
+     * W1-A: financialDocType/taxType/documentNoLike/groupFinancialNo 체크 제거.
      *       이 필드들은 FE가 전송하지 않으므로 항상 null → 체크 불필요.
      */
     private boolean isDocumentBasisSupported(SearchPmsPerformanceCommand c) {
@@ -144,7 +140,7 @@ public class PmsMartFilterSupport {
         if (!hasDate) {
             return false;
         }
-        // documentTypes, documentStatus, grouped, B/L 필터 = sidecar 지원
+        // documentTypes, documentStatus, B/L 필터 = sidecar 지원
         return true;
     }
 
@@ -168,8 +164,7 @@ public class PmsMartFilterSupport {
      * 해소 가능한지 판단.
      * 날짜(실적일자) 없으면 OLTP 폴백.
      *
-     * W1-A: taxType/issued/operator/documentNoLike/groupFinancialNo 체크 제거.
-     *       issued는 hasDocLineFilter 경로에서 먼저 처리되어 이 경로에는 도달하지 않음.
+     * W1-A: taxType/operator/documentNoLike/groupFinancialNo 체크 제거.
      */
     private boolean isFreightBasisSupported(SearchPmsPerformanceCommand c) {
         boolean hasDate = StringUtils.hasText(c.performanceDtFrom()) || StringUtils.hasText(c.performanceDtTo());
@@ -181,7 +176,6 @@ public class PmsMartFilterSupport {
         if (StringUtils.hasText(c.documentStatus())) return false;
         if (StringUtils.hasText(c.documentDtFrom())) return false;
         if (StringUtils.hasText(c.documentDtTo())) return false;
-        if (StringUtils.hasText(c.grouped())) return false;
 
         // documentTypes, B/L 필터 = sidecar 지원
         return true;

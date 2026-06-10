@@ -18,7 +18,7 @@ import java.util.List;
  * 각 필드명은 해당 Document 클래스의 실제 필드와 1:1 대응한다.
  *
  * W1-A: FE가 전송하지 않는 필터(hblNo/mblNo/거래처/운송사/항만/영업/비정형)를 제거.
- * 잔존: jobDiv/bound + 날짜 범위 + documentTypes/documentStatus/grouped.
+ * 잔존: jobDiv/bound + 날짜 범위 + documentTypes/documentStatus.
  */
 @Component
 public class PmsMartDateDimMatchBuilder {
@@ -64,7 +64,6 @@ public class PmsMartDateDimMatchBuilder {
             parts.add(Criteria.where("docType").in(c.documentTypes()));
         }
         addEq(parts, "status", c.documentStatus());
-        addGroupedFilter(parts, c);
 
         // B/L 레벨 식별자 필터(residual) — jobDiv/bound만 잔존
         addCommonBlCriteria(parts, c);
@@ -132,16 +131,6 @@ public class PmsMartDateDimMatchBuilder {
     private void addFdcTypesFilter(List<Criteria> parts, SearchPmsPerformanceCommand c) {
         if (c.documentTypes() != null && !c.documentTypes().isEmpty()) {
             parts.add(Criteria.where("fdcTypes").in(c.documentTypes()));
-        }
-    }
-
-    /** grouped "Y"/"N" → boolean 변환. */
-    private void addGroupedFilter(List<Criteria> parts, SearchPmsPerformanceCommand c) {
-        if (!StringUtils.hasText(c.grouped())) return;
-        switch (c.grouped()) {
-            case "Y" -> parts.add(Criteria.where("grouped").is(true));
-            case "N" -> parts.add(Criteria.where("grouped").is(false));
-            default -> { /* 미인식값: 필터 무시 */ }
         }
     }
 

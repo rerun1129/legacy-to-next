@@ -124,7 +124,7 @@ public class PmsFreightLineSqlBuilder {
      * params에 값도 함께 바인딩.
      *
      * W1-A: financialDocType/taxType/actualCustomerCode/settlePartnerCode/carrierCode/partyKind/partyCode 제거.
-     *        issued/documentTypes/performanceDtFrom/To 유지.
+     *        documentTypes/performanceDtFrom/To 유지.
      */
     public List<String> buildOuterWhere(SearchPmsPerformanceCommand c, MapSqlParameterSource params) {
         List<String> predicates = new ArrayList<>();
@@ -137,11 +137,6 @@ public class PmsFreightLineSqlBuilder {
         }
 
         // freight_line 필터
-        if (hasValue(c.issued())) {
-            predicates.add("Y".equalsIgnoreCase(c.issued())
-                ? "l.financial_document_id IS NOT NULL"
-                : "l.financial_document_id IS NULL");
-        }
         if (c.documentTypes() != null && !c.documentTypes().isEmpty()) {
             predicates.add("l.financial_doc_type IN (:doc_types)");
             params.addValue("doc_types", c.documentTypes());

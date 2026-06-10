@@ -33,8 +33,6 @@ final class PmsPerformanceFilterSignature {
             + "|ddt=" + s(c.documentDtTo())
             + "|dt2=" + sortedJoin(c.documentTypes())
             + "|ds=" + s(c.documentStatus())
-            + "|gr=" + s(c.grouped())
-            + "|is=" + s(c.issued())
             + "|sn=" + (c.searchNonce() != null ? c.searchNonce() : "");
     }
 

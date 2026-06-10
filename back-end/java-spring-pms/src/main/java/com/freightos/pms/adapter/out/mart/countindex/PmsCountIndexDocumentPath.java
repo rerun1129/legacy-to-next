@@ -25,8 +25,7 @@ import java.util.Map;
  *
  * <p>PmsMartPageCriteriaBuilder.buildDocumentElemMatch 분석 결과:
  * <ul>
- *   <li>perfPd, docDt, docType, status, grouped 모두 docs[] $elemMatch 내부 → same-doc 상관 보장.
- *   <li>grouped "Y"→grouped=true / "N"→grouped=false.
+ *   <li>perfPd, docDt, docType, status 모두 docs[] $elemMatch 내부 → same-doc 상관 보장.
  * </ul>
  *
  * <p>null 규칙(Mongo 폴백):
@@ -42,8 +41,8 @@ import java.util.Map;
  *   <li>fdId-grain 경로: 매칭 fdId cardinality > maxDistinctScan (collapse 비용 상한)
  * </ul>
  *
- * W1-A: hasBlNoFilter/issued/financialDocType/taxType/documentNoLike/groupFinancialNo/teamCode/operator 규칙 제거.
- * W3: 날짜·타입 없이 status/grouped만 있는 경우 — fdId-grain collapse 대신 B/L-grain dcx:* 비트맵 즉답 단락.
+ * W1-A: hasBlNoFilter/financialDocType/taxType/documentNoLike/groupFinancialNo/teamCode/operator 규칙 제거.
+ * W3: 날짜·타입 없이 status만 있는 경우 — fdId-grain collapse 대신 B/L-grain dcx:status 비트맵 즉답 단락.
  */
 @Slf4j
 final class PmsCountIndexDocumentPath {
@@ -67,10 +66,6 @@ final class PmsCountIndexDocumentPath {
     Long computeDocumentCount(SearchPmsPerformanceCommand cmd, String prefix) {
         // basis 확인
         if (cmd.effectiveBasis() != AggregationBasis.DOCUMENT_CREATED) return null;
-
-        // issued는 line-레벨 속성이므로 fdId-grain doc 경로로 표현 불가.
-        // DOC basis + issued 조합은 Mongo 폴백을 유지한다 (Phase C 동작 보전).
-        if (StringUtils.hasText(cmd.issued())) return null;
 
         // line-accel OFF: dc:* 버킷 미적재 → 폴백
         if (!props.getLineAccel().isEnabled()) return null;
@@ -123,8 +118,7 @@ final class PmsCountIndexDocumentPath {
         // doc-level 술어가 하나도 없으면 fast-path 소관 → null
         boolean hasAnyDocPredicate = hasPerfFrom || hasDocFrom
             || (cmd.documentTypes() != null && !cmd.documentTypes().isEmpty())
-            || StringUtils.hasText(cmd.documentStatus())
-            || StringUtils.hasText(cmd.grouped());
+            || StringUtils.hasText(cmd.documentStatus());
         if (!hasAnyDocPredicate) return null;
 
         return doComputeDocumentCount(cmd, prefix, perfFrom, perfTo, hasPerfFrom,
@@ -134,15 +128,12 @@ final class PmsCountIndexDocumentPath {
     // ── W3 B/L-grain doc-exists 단락 경로 ──────────────────────────────────
 
     /**
-     * W3: 날짜·타입 없이 status/grouped만 있는 경우의 B/L-grain 즉답 경로.
+     * W3: 날짜·타입 없이 status만 있는 경우의 B/L-grain 즉답 경로.
      *
-     * FLAG_DOC has-flag 비트맵 → ETD/ETA(collectEtdEtaKeys) → dim → dcx:* 비트맵 AND.
+     * FLAG_DOC has-flag 비트맵 → ETD/ETA(collectEtdEtaKeys) → dim → dcx:status 비트맵 AND.
      * null 반환: collectEtdEtaKeys가 null(maxDistinctScan 초과).
      *
-     * grouped 미인식값(Y/N 외): 기존 doComputeDocumentCount의 "미인식: 무시" 의미 유지.
-     * - status 있으면 status 키만 사용.
-     * - status 없고 grouped가 미인식값이면 기존 fdId-grain 경로로 진행(grouped 무시).
-     *   이 경우 호출측(doComputeDocumentCount)에서 단락 조건이 충족되지 않아 여기로 진입하지 않는다.
+     * status 없으면 — has-flag 기반 단순 카운트 반환(전체 doc-exists B/L 수).
      */
     private Long computeBlDocShortCircuit(SearchPmsPerformanceCommand cmd, String prefix) {
         List<String> etdEtaKeys = collectEtdEtaKeys(cmd, prefix);
@@ -179,27 +170,15 @@ final class PmsCountIndexDocumentPath {
             result = RoaringBitmap.and(result, PmsCountIndexMaintainer.deserialize(keyToBytes.get(k)));
         }
 
-        // W3 dcx:* 비트맵 AND — FreightPath.andDocComponent와 동일 분기
-        boolean hasStatus = StringUtils.hasText(cmd.documentStatus());
-        boolean groupedY  = "Y".equals(cmd.grouped());
-        boolean groupedN  = "N".equals(cmd.grouped());
-        boolean groupedYn = groupedY || groupedN;
-
-        String docExistsKey;
-        if (hasStatus && groupedYn) {
-            docExistsKey = PmsCountIndexKeys.blDocStatusGroupedBitmap(prefix, cmd.documentStatus(), groupedY);
-        } else if (hasStatus) {
-            docExistsKey = PmsCountIndexKeys.blDocStatusBitmap(prefix, cmd.documentStatus());
-        } else if (groupedYn) {
-            docExistsKey = PmsCountIndexKeys.blDocGroupedBitmap(prefix, groupedY);
-        } else {
-            // 미인식 grouped 단독 — grouped 무시(기존 동작 동일)
-            return result.getLongCardinality();
+        // W3 dcx:status 비트맵 AND
+        if (StringUtils.hasText(cmd.documentStatus())) {
+            byte[] docExistsBytes = redisTemplate.opsForValue().get(
+                    PmsCountIndexKeys.blDocStatusBitmap(prefix, cmd.documentStatus()));
+            RoaringBitmap docExists = PmsCountIndexMaintainer.deserialize(docExistsBytes);
+            result = RoaringBitmap.and(result, docExists);
         }
 
-        byte[] docExistsBytes = redisTemplate.opsForValue().get(docExistsKey);
-        RoaringBitmap docExists = PmsCountIndexMaintainer.deserialize(docExistsBytes);
-        return RoaringBitmap.and(result, docExists).getLongCardinality();
+        return result.getLongCardinality();
     }
 
     // ── 내부 계산 ─────────────────────────────────────────────────────────────
@@ -210,8 +189,8 @@ final class PmsCountIndexDocumentPath {
             String perfFrom, String perfTo, boolean hasPerfFrom,
             String docFrom, String docTo, boolean hasDocFrom) {
 
-        // W3: 날짜·타입 없이 status/grouped만 — fdId-grain collapse(cap 초과 폴백) 대신 B/L-grain 즉답
-        // hasAnyDocPredicate 검사를 이미 통과했으므로 status/grouped 중 하나는 존재한다.
+        // W3: 날짜·타입 없이 status만 — fdId-grain collapse(cap 초과 폴백) 대신 B/L-grain 즉답
+        // hasAnyDocPredicate 검사를 이미 통과했으므로 status가 존재한다.
         boolean hasTypes = cmd.documentTypes() != null && !cmd.documentTypes().isEmpty();
         if (!hasPerfFrom && !hasDocFrom && !hasTypes) {
             return computeBlDocShortCircuit(cmd, prefix);
@@ -241,25 +220,10 @@ final class PmsCountIndexDocumentPath {
             base = RoaringBitmap.and(base, PmsCountIndexMaintainer.deserialize(b));
         }
 
-        // 4. grouped Y→AND / N→ANDNOT
-        if (StringUtils.hasText(cmd.grouped())) {
-            switch (cmd.grouped()) {
-                case "Y" -> {
-                    byte[] b = fetchBitmap(PmsCountIndexKeys.docGroupedBitmap(prefix));
-                    base = RoaringBitmap.and(base, PmsCountIndexMaintainer.deserialize(b));
-                }
-                case "N" -> {
-                    byte[] b = fetchBitmap(PmsCountIndexKeys.docGroupedBitmap(prefix));
-                    base = RoaringBitmap.andNot(base, PmsCountIndexMaintainer.deserialize(b));
-                }
-                default -> { /* 미인식: 무시 */ }
-            }
-        }
-
-        // 5. cardinality 상한 검사 — 두 단계:
+        // 4. cardinality 상한 검사 — 두 단계:
         //    a) maxDistinctScan: JVM 비용 절대 상한.
         //    b) maxCollapseFdIds: collapse(dc:bl HMGET 청크) 비용 제어.
-        //       날짜/타입 없는 status/grouped 단독 케이스는 W3 단락 경로가 처리하므로
+        //       날짜/타입 없는 status 단독 케이스는 W3 단락 경로가 처리하므로
         //       이 지점에 도달하는 케이스는 날짜/타입 조건이 있는 경우다.
         long fdIdCardinality = base.getLongCardinality();
         if (fdIdCardinality == 0) return 0L;
@@ -272,10 +236,10 @@ final class PmsCountIndexDocumentPath {
             return null;
         }
 
-        // 6. fdId → blOrdinal collapse: dc:bl HMGET (10,000개 chunk)
+        // 5. fdId → blOrdinal collapse: dc:bl HMGET (10,000개 chunk)
         RoaringBitmap blOrdinalBitmap = collapseToBlOrdinals(base, prefix);
 
-        // 7. B/L 차원 AND (ETD/ETA + dim keys)
+        // 6. B/L 차원 AND (ETD/ETA + dim keys)
         blOrdinalBitmap = andBlDimBitmaps(blOrdinalBitmap, cmd, prefix);
         if (blOrdinalBitmap == null) return null;
 

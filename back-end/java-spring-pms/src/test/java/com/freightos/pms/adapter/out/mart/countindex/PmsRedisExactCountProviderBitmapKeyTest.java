@@ -20,8 +20,8 @@ import static org.mockito.Mockito.when;
 /**
  * PmsRedisExactCountProvider.collectBitmapKeys basis has-flag 키 포함 여부 단위 테스트.
  *
- * W1-A: 18-field Command로 업데이트.
- *        제거된 필드(actualCustomerCode/linerCode 등)를 dim 필터로 사용하던 케이스를
+ * W1-A: 16-field Command로 업데이트.
+ *        제거된 필드(actualCustomerCode/linerCode/grouped/issued 등)를 dim 필터로 사용하던 케이스를
  *        jobDiv/bound dim으로 교체.
  *
  * 버그 A 수정 검증:
@@ -62,8 +62,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -79,8 +78,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.TAX_ISSUED, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -96,8 +94,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.SLIP_ISSUED, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -113,8 +110,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.DOCUMENT_CREATED, 0, 20,
             "SEA", "EXP", "ETD", null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -130,8 +126,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, null, "ETD", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -148,8 +143,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, null, null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());
@@ -166,8 +160,7 @@ class PmsRedisExactCountProviderBitmapKeyTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, null, "ETD", "20240101", "20240103",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
 
         List<String> keys = provider.collectBitmapKeys(cmd, PREFIX, cmd.dateKind(), cmd.dateFrom(), cmd.dateTo());

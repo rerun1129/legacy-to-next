@@ -27,10 +27,9 @@ import static org.mockito.Mockito.when;
  * Phase C: PmsCountIndexDocumentPath·PmsCountIndexDocSupport·PmsCountIndexMaintainer
  * doc-grain 순수 로직 단위 테스트.
  *
- * W1-A: 18-field Command로 업데이트.
- *        제거된 필드(partyKind/partyCode/portKind/portCode/teamCode/operator/financialDocType)
+ * W1-A: 제거된 필드(partyKind/partyCode/portKind/portCode/teamCode/operator/financialDocType)
  *        참조 케이스를 삭제.
- *        collectDimKeys는 이제 jobDiv/bound만 처리하므로 관련 케이스도 삭제.
+ *        collectDimKeys는 이제 jobDiv/bound만 처리.
  * 라이브 Redis/Mongo 없이 JVM 로직만 검증한다.
  */
 class PmsCountIndexDocumentPathTest {
@@ -40,8 +39,7 @@ class PmsCountIndexDocumentPathTest {
     // ── PmsCountIndexDocSupport: fdId-grain 비트맵 키 파생 ──────────────────────
 
     /**
-     * W1-A: deriveDocBitmapKeysForDoc는 이제 docTeamBitmap/docOperatorBitmap을 생성하지 않음.
-     *        teamCode/operator는 doc-grain 필터에서 제거됨.
+     * W1-A: deriveDocBitmapKeysForDoc는 teamCode/operator dim 키를 생성하지 않음.
      */
     @Test
     void doc_모든_필드_있으면_해당_키들이_파생된다() {
@@ -56,26 +54,15 @@ class PmsCountIndexDocumentPathTest {
             PREFIX + ":dc:all",
             PREFIX + ":dc:type:INVOICE",
             PREFIX + ":dc:status:ISSUED",
-            PREFIX + ":dc:grouped",
             PREFIX + ":dc:docdt:20240120",
             PREFIX + ":dc:perfpd:20240115"
         );
-        // W1-A: teamCode/operator dim 키는 더 이상 생성 안 됨
+        // W1-A: teamCode/operator dim 키, grouped 키는 생성 안 됨
         assertThat(keys).doesNotContain(
             PREFIX + ":dc:team:TEAM01",
-            PREFIX + ":dc:op:OP01"
+            PREFIX + ":dc:op:OP01",
+            PREFIX + ":dc:grouped"
         );
-    }
-
-    @Test
-    void doc_grouped_false이면_grouped_키가_없다() {
-        PmsCountIndexDocSupport support = new PmsCountIndexDocSupport(null, PREFIX);
-        PmsBlDocEmbedded d = new PmsBlDocEmbedded(
-            11L, null, null, "DEBIT", null, false, null, null, null, null, null
-        );
-        List<String> keys = support.deriveDocBitmapKeysForDoc(d);
-        assertThat(keys).contains(PREFIX + ":dc:all", PREFIX + ":dc:type:DEBIT");
-        assertThat(keys).doesNotContain(PREFIX + ":dc:grouped");
     }
 
     @Test
@@ -142,28 +129,6 @@ class PmsCountIndexDocumentPathTest {
         assertThat(both.getCardinality()).isEqualTo(0);
     }
 
-    // ── grouped Y/N ANDNOT 검증 ───────────────────────────────────────────────
-
-    @Test
-    void grouped_Y이면_grouped_비트맵과_AND를_한다() {
-        // base: {100, 200, 300}, grouped: {100, 300} → Y→ {100, 300}
-        RoaringBitmap base    = RoaringBitmap.bitmapOf(100, 200, 300);
-        RoaringBitmap grouped = RoaringBitmap.bitmapOf(100, 300);
-        RoaringBitmap result  = RoaringBitmap.and(base, grouped);
-        assertThat(result.getCardinality()).isEqualTo(2);
-        assertThat(result.contains(200)).isFalse();
-    }
-
-    @Test
-    void grouped_N이면_grouped_비트맵과_ANDNOT를_한다() {
-        // base: {100, 200, 300}, grouped: {100, 300} → N→ {200}
-        RoaringBitmap base    = RoaringBitmap.bitmapOf(100, 200, 300);
-        RoaringBitmap grouped = RoaringBitmap.bitmapOf(100, 300);
-        RoaringBitmap result  = RoaringBitmap.andNot(base, grouped);
-        assertThat(result.getCardinality()).isEqualTo(1);
-        assertThat(result.contains(200)).isTrue();
-    }
-
     // ── collapse dedup: 같은 B/L의 doc 2건 매칭 → B/L 1 ─────────────────────
 
     @Test
@@ -187,7 +152,7 @@ class PmsCountIndexDocumentPathTest {
         PmsCountIndexDocumentPath path = makeDocumentPath(true);
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.FREIGHT_INPUT,
-            null, null, null, null, null, null
+            null, null, null, null
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
     }
@@ -197,17 +162,7 @@ class PmsCountIndexDocumentPathTest {
         PmsCountIndexDocumentPath path = makeDocumentPath(false);
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
-            "20240101", "20240131", null, null, null, null
-        );
-        assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
-    }
-
-    @Test
-    void issued_있으면_null이다() {
-        PmsCountIndexDocumentPath path = makeDocumentPath(true);
-        SearchPmsPerformanceCommand cmd = buildDocCmd(
-            AggregationBasis.DOCUMENT_CREATED,
-            "20240101", "20240131", null, null, "Y", null
+            "20240101", "20240131", null, null
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
     }
@@ -237,7 +192,7 @@ class PmsCountIndexDocumentPathTest {
         PmsCountIndexDocumentPath path = makeDocumentPath(true);
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
-            "20240101", null, null, null, null, null
+            "20240101", null, null, null
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
     }
@@ -247,7 +202,7 @@ class PmsCountIndexDocumentPathTest {
         PmsCountIndexDocumentPath path = makeDocumentPath(true);
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
-            null, null, null, null, null, null
+            null, null, null, null
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
     }
@@ -263,7 +218,7 @@ class PmsCountIndexDocumentPathTest {
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             "20240101", "20240108", // 8일 > 5일 제한
-            null, null, null, null
+            null, null
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
     }
@@ -277,8 +232,7 @@ class PmsCountIndexDocumentPathTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", null, null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         PmsCountIndexBitmapKeyCollector.collectDimKeys(cmd, PREFIX, keys);
         assertThat(keys).contains(PREFIX + ":bl:" + PmsCountIndexKeys.DIM_JOBDIV + ":SEA");
@@ -291,8 +245,7 @@ class PmsCountIndexDocumentPathTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, "EXP", null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         PmsCountIndexBitmapKeyCollector.collectDimKeys(cmd, PREFIX, keys);
         assertThat(keys).contains(PREFIX + ":bl:" + PmsCountIndexKeys.DIM_BOUND + ":EXP");
@@ -305,8 +258,7 @@ class PmsCountIndexDocumentPathTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, "IMP", null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         PmsCountIndexBitmapKeyCollector.collectDimKeys(cmd, PREFIX, keys);
         assertThat(keys).noneMatch(k -> k.contains(":bl:" + PmsCountIndexKeys.DIM_JOBDIV + ":"));
@@ -350,7 +302,7 @@ class PmsCountIndexDocumentPathTest {
 
     @Test
     void fdId_cardinality가_maxCollapseFdIds_초과이면_null이다() {
-        // 결함2 회귀: grouped=N·흔한 status 등 저선택도 술어는 fdId 집합이 수백만이 될 수 있다.
+        // 결함2 회귀: 저선택도 술어는 fdId 집합이 수백만이 될 수 있다.
         // maxCollapseFdIds(300,000)를 낮춰 cardinality가 초과하는 상황을 시뮬레이션.
         PmsMartProperties props = new PmsMartProperties();
         props.getLineAccel().setEnabled(true);
@@ -362,9 +314,6 @@ class PmsCountIndexDocumentPathTest {
         RoaringBitmap statusBitmap = RoaringBitmap.bitmapOf(1, 2, 3, 4, 5, 6);
         byte[] statusBytes = PmsCountIndexMaintainer.serialize(statusBitmap);
 
-        // dc:all, perfpd, status 비트맵 모두 동일하게 6개 fdId 등록.
-        // perfDtFrom/To="20240101"이면 computeBaseFdIdBitmap이 dc:perfpd:20240101 버킷을 fetch하므로
-        // 해당 키가 없으면 빈 비트맵 → 0L 조기반환(cap 분기 미도달). 반드시 등록 필요.
         byte[] allBytes    = PmsCountIndexMaintainer.serialize(statusBitmap);
         byte[] perfpdBytes = PmsCountIndexMaintainer.serialize(statusBitmap);
         String allKey      = "pms:ix:dc:all";
@@ -376,12 +325,10 @@ class PmsCountIndexDocumentPathTest {
         );
         PmsCountIndexDocumentPath path = new PmsCountIndexDocumentPath(redisMock, props);
 
-        // perfDt 있고 documentStatus="ISSUED" → doc 경로 진입 → cardinality 6 > 5 → null
         SearchPmsPerformanceCommand cmd = buildDocCmd(
             AggregationBasis.DOCUMENT_CREATED,
             "20240101", "20240101",
-            null, "ISSUED",
-            null, null
+            null, "ISSUED"
         );
         assertThat(path.computeDocumentCount(cmd, PREFIX)).isNull();
     }
@@ -436,21 +383,18 @@ class PmsCountIndexDocumentPathTest {
     }
 
     /**
-     * 18-field Command 헬퍼.
-     * W1-A: teamCode/operator 파라미터 제거.
+     * 16-field Command 헬퍼.
      */
     private SearchPmsPerformanceCommand buildDocCmd(
             AggregationBasis basis,
             String perfDtFrom, String perfDtTo,
-            List<String> documentTypes, String documentStatus,
-            String issued, String grouped) {
+            List<String> documentTypes, String documentStatus) {
         return new SearchPmsPerformanceCommand(
             basis, 0, 20,
             null, null, null, null, null,
             perfDtFrom, perfDtTo,
             null, null,
             documentTypes, documentStatus,
-            grouped, issued,
             null, null
         );
     }
@@ -462,7 +406,6 @@ class PmsCountIndexDocumentPathTest {
             null, null, null, null, null,
             null, null,
             docFrom, docTo,
-            null, null,
             null, null,
             null, null
         );

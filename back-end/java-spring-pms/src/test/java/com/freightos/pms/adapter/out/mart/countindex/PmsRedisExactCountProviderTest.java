@@ -12,21 +12,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * PmsRedisExactCountProvider 순수 로직 단위 테스트.
  * 지원 형태 판정(isSupportedShape) 메서드를 라이브 Redis/Mongo 없이 검증한다.
  *
- * W1-A: 18-field Command 생성자로 업데이트.
- *        제거된 필드(hblNo/mblNo/taxType/financialDocType/documentNoLike/groupFinancialNo)
+ * W1-A: 16-field Command 생성자로 업데이트.
+ *        제거된 필드(hblNo/mblNo/taxType/financialDocType/documentNoLike/groupFinancialNo/grouped/issued)
  *        관련 테스트를 신규 null 규칙(isDocLineFilter / performanceDt / documentDt / PERFORMANCE dateKind)으로 교체.
  */
 class PmsRedisExactCountProviderTest {
 
     // ── 지원 형태 — null 반환 경로 ─────────────────────────────────────────────
-
-    @Test
-    void issued필터가있으면미지원형태이다() {
-        // issued → hasDocLineFilter=true → false
-        SearchPmsPerformanceCommand cmd = buildCmd()
-            .issued("Y").build();
-        assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isFalse();
-    }
 
     @Test
     void documentTypes필터가있으면미지원형태이다() {
@@ -39,13 +31,6 @@ class PmsRedisExactCountProviderTest {
     void documentStatus필터가있으면미지원형태이다() {
         SearchPmsPerformanceCommand cmd = buildCmd()
             .documentStatus("ISSUED").build();
-        assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isFalse();
-    }
-
-    @Test
-    void grouped필터가있으면미지원형태이다() {
-        SearchPmsPerformanceCommand cmd = buildCmd()
-            .grouped("Y").build();
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isFalse();
     }
 
@@ -69,8 +54,7 @@ class PmsRedisExactCountProviderTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", null, "PERFORMANCE", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isFalse();
     }
@@ -85,8 +69,7 @@ class PmsRedisExactCountProviderTest {
             "SEA", "EXP",
             null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -97,8 +80,7 @@ class PmsRedisExactCountProviderTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", "EXP", "ETD", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -109,8 +91,7 @@ class PmsRedisExactCountProviderTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, null, "ETA", "20240201", "20240229",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -121,8 +102,7 @@ class PmsRedisExactCountProviderTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             null, null, null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -134,17 +114,13 @@ class PmsRedisExactCountProviderTest {
     }
 
     private static class DimCmdBuilder {
-        private String issued;
         private List<String> documentTypes;
         private String documentStatus;
-        private String grouped;
         private String performanceDtFrom;
         private String documentDtFrom;
 
-        DimCmdBuilder issued(String v)                   { this.issued = v; return this; }
         DimCmdBuilder documentTypes(List<String> v)      { this.documentTypes = v; return this; }
         DimCmdBuilder documentStatus(String v)           { this.documentStatus = v; return this; }
-        DimCmdBuilder grouped(String v)                  { this.grouped = v; return this; }
         DimCmdBuilder performanceDtFrom(String v)        { this.performanceDtFrom = v; return this; }
         DimCmdBuilder documentDtFrom(String v)           { this.documentDtFrom = v; return this; }
 
@@ -155,7 +131,6 @@ class PmsRedisExactCountProviderTest {
                 performanceDtFrom, null,
                 documentDtFrom, null,
                 documentTypes, documentStatus,
-                grouped, issued,
                 null, null
             );
         }

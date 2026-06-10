@@ -26,8 +26,7 @@ import static org.mockito.Mockito.when;
  * W3 FreightPath B/L-grain doc-exists 경로 단위 테스트.
  *
  * - P6형(FREIGHT, perfDt 없음, ETD범위, documentStatus만): 비-null 라우팅 + flag∩date∩docExists
- * - grouped 미인식값 단독: 기존 null 반환(라인술어·타입필터 없으므로 폴백) 확인
- * - W3 dcx:* 키가 단건 GET으로 조회되는지 키 패턴 검증
+ * - W3 dcx:status 키가 단건 GET으로 조회되는지 키 패턴 검증
  * - dc:overflow 게이팅: freight 경로의 andDocComponent에서 폴백
  * 라이브 Redis/Mongo 없이 mock RedisTemplate로 검증한다.
  * 시간·랜덤·sleep 의존 없는 결정적 로직만 테스트한다.
@@ -81,7 +80,6 @@ class PmsW3FreightDocExistsPathTest {
             null, null,
             null, null,
             null, "CREATED",
-            null, null,
             null, null
         );
         Long result = path.computeFreightCount(cmd, PREFIX);
@@ -99,7 +97,6 @@ class PmsW3FreightDocExistsPathTest {
             null, null,
             null, null,
             null, "CREATED",
-            null, null,
             null, null
         );
         Long result = path.computeFreightCount(cmd, PREFIX);
@@ -116,7 +113,6 @@ class PmsW3FreightDocExistsPathTest {
             null, null,
             null, null,
             null, "CREATED",
-            null, null,
             null, null
         );
         path.computeFreightCount(cmd, PREFIX);
@@ -127,78 +123,6 @@ class PmsW3FreightDocExistsPathTest {
         List<String> gotKeys = captor.getAllValues();
         // W3: bl:dcx:status:CREATED 키가 단건 GET에 포함되어야 한다
         assertThat(gotKeys).anyMatch(k -> k.equals(PREFIX + ":bl:dcx:status:CREATED"));
-    }
-
-    @Test
-    void P6형_status와_grouped_Y_동시이면_sg_키가_조회된다() {
-        // status + grouped=Y → bl:dcx:sg:CREATED:Y 복합 키 사용
-        SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
-            AggregationBasis.FREIGHT_INPUT, 0, 20,
-            null, null,
-            "ETD", "20250101", "20250105",
-            null, null,
-            null, null,
-            null, "CREATED",
-            "Y", null,
-            null, null
-        );
-        path.computeFreightCount(cmd, PREFIX);
-
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(valueOps, atLeastOnce()).get(captor.capture());
-
-        List<String> gotKeys = captor.getAllValues();
-        assertThat(gotKeys).anyMatch(k -> k.equals(PREFIX + ":bl:dcx:sg:CREATED:Y"));
-        // status 단독 키·grouped 단독 키는 sg 대신 sg만 쓰므로 없어야 한다
-        assertThat(gotKeys).noneMatch(k -> k.equals(PREFIX + ":bl:dcx:status:CREATED"));
-        assertThat(gotKeys).noneMatch(k -> k.equals(PREFIX + ":bl:dcx:grouped:Y"));
-    }
-
-    @Test
-    void grouped_N이면_grouped_N_키가_조회된다() {
-        SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
-            AggregationBasis.FREIGHT_INPUT, 0, 20,
-            null, null,
-            "ETD", "20250101", "20250105",
-            null, null,
-            null, null,
-            null, null,
-            "N", null,
-            null, null
-        );
-        path.computeFreightCount(cmd, PREFIX);
-
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(valueOps, atLeastOnce()).get(captor.capture());
-
-        assertThat(captor.getAllValues()).anyMatch(k -> k.equals(PREFIX + ":bl:dcx:grouped:N"));
-    }
-
-    // ── grouped 미인식값 단독 → 라인술어·타입필터 없으므로 null(Mongo 폴백) ────
-
-    @Test
-    void grouped_미인식값_단독은_null을_반환한다() {
-        // 미인식값(Y/N 아닌 값): perfDt 없고 라인술어 없고 타입필터 없음
-        // W3 분기에서 hasText(grouped)=true → computeWithBlDocOnly 진입
-        // 그러나 andDocComponent 내 분기: 미인식 grouped → lineSet 그대로 반환
-        // 실제로는 computeWithBlDocOnly 자체는 진입하고, andDocComponent에서 미인식 grouped 처리
-        SearchPmsPerformanceCommand cmd = new SearchPmsPerformanceCommand(
-            AggregationBasis.FREIGHT_INPUT, 0, 20,
-            null, null,
-            null, null, null,
-            null, null,
-            null, null,
-            null, null,
-            "UNKNOWN_VALUE", null,
-            null, null
-        );
-        // W3 분기: hasText("UNKNOWN_VALUE")=true → computeWithBlDocOnly 진입
-        // andDocComponent: groupedY=false, groupedN=false → 미인식 grouped → lineSet 그대로
-        // result = 0L (빈 flag 비트맵)
-        Long result = path.computeFreightCount(cmd, PREFIX);
-        // 미인식 grouped 단독: lineSet 그대로 반환 → 0L(빈 비트맵 환경)
-        assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(0L);
     }
 
     // ── dc:overflow 게이팅 보존 ───────────────────────────────────────────────
@@ -215,7 +139,6 @@ class PmsW3FreightDocExistsPathTest {
             null, null,
             null, null,
             null, "CREATED",
-            null, null,
             null, null
         );
         assertThat(path.computeFreightCount(cmd, PREFIX)).isNull();
@@ -247,7 +170,6 @@ class PmsW3FreightDocExistsPathTest {
             return result;
         });
         // GET 시 statusKey 응답
-        when(valueOps.get(statusKey)).thenReturn(statusBytes);
         when(valueOps.get(anyString())).thenAnswer(inv -> {
             String k = inv.getArgument(0);
             if (k.equals(statusKey)) return statusBytes;
@@ -261,7 +183,6 @@ class PmsW3FreightDocExistsPathTest {
             null, null,
             null, null,
             null, "CREATED",
-            null, null,
             null, null
         );
         Long result = path.computeFreightCount(cmd, PREFIX);

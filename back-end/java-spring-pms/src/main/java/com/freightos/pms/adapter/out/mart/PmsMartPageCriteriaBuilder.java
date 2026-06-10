@@ -15,10 +15,10 @@ import java.util.List;
  * lines/docs $elemMatch 원소 조건을 AND로 합성하여 반환한다.
  *
  * W1-A: FE가 전송하지 않는 필터(hblNo/mblNo/거래처/운송사/항만/영업/비정형)를 제거.
- * 잔존: jobDiv/bound/ETD/ETA + lines $elemMatch(perfDt, basis flag, docType, issued)
- *       + docs $elemMatch(docDt, docType, status, grouped).
+ * 잔존: jobDiv/bound/ETD/ETA + lines $elemMatch(perfDt, basis flag, docType)
+ *       + docs $elemMatch(docDt, docType, status).
  *
- * E2: freight basis에서 documentStatus/grouped가 있으면 docs[] $elemMatch(status/grouped/dc:all base)를
+ * E2: freight basis에서 documentStatus가 있으면 docs[] $elemMatch(status/dc:all base)를
  *     lines $elemMatch 결과에 AND로 추가한다. same-doc 상관 보장(docs[] $elemMatch 내부 AND).
  *     documentDt는 freight 경로에서 발생하지 않으므로 docs 컴포넌트에 포함하지 않는다.
  *     documentTypes는 lines[]의 fdcType으로 이미 처리되므로 docs 컴포넌트에 포함하지 않는다.
@@ -38,8 +38,8 @@ public class PmsMartPageCriteriaBuilder {
 
     /**
      * freight basis 밀집 경로용 pms_bl_mart Criteria.
-     * base(flag + B/L 레벨 식별자) AND lines $elemMatch(실적일자 범위 + basis flag + docType + issued).
-     * E2: documentStatus/grouped 있으면 docs $elemMatch AND 추가.
+     * base(flag + B/L 레벨 식별자) AND lines $elemMatch(실적일자 범위 + basis flag + docType).
+     * E2: documentStatus 있으면 docs $elemMatch AND 추가.
      *
      * @param flagField "hasFreightInput" / "hasTaxIssued" / "hasSlipIssued"
      * @param basisKey  "freightInput" / "taxIssued" / "slipIssued"
@@ -52,8 +52,7 @@ public class PmsMartPageCriteriaBuilder {
         Criteria blLevel  = base.buildFreight(c, flagField);
         Criteria lineElem = buildFreightElemMatch(c, basisKey);
 
-        boolean hasDocPredicate = StringUtils.hasText(c.documentStatus()) || StringUtils.hasText(c.grouped());
-        if (hasDocPredicate) {
+        if (StringUtils.hasText(c.documentStatus())) {
             Criteria docElem = buildFreightDocElemMatch(c);
             return new Criteria().andOperator(blLevel, lineElem, docElem);
         }
@@ -65,7 +64,6 @@ public class PmsMartPageCriteriaBuilder {
      * performanceDtFrom/To → pd gte/lte (단일 Criteria 체이닝으로 동일 키 중복 회피).
      * basis flag → tax/slip boolean.
      * documentTypes → fdcType in.
-     * issued Y/N → issued boolean.
      */
     private Criteria buildFreightElemMatch(SearchPmsPerformanceCommand c, String basisKey) {
         List<Criteria> elemParts = new ArrayList<>();
@@ -94,15 +92,6 @@ public class PmsMartPageCriteriaBuilder {
             elemParts.add(Criteria.where("fdcType").in(types));
         }
 
-        // issued Y/N → financial_document_id IS (NOT) NULL 동치(lines[].issued)
-        if (StringUtils.hasText(c.issued())) {
-            switch (c.issued()) {
-                case "Y" -> elemParts.add(Criteria.where("issued").is(true));
-                case "N" -> elemParts.add(Criteria.where("issued").is(false));
-                default  -> { /* 미인식값: 필터 무시 */ }
-            }
-        }
-
         return buildElemMatch("lines", elemParts);
     }
 
@@ -111,7 +100,7 @@ public class PmsMartPageCriteriaBuilder {
     /**
      * document basis 밀집 경로용 pms_bl_mart Criteria.
      * B/L 레벨 식별자(jobDiv/bound/ETD/ETA)를 직접 구성하고
-     * docs $elemMatch(날짜 범위 + docType/status/grouped)를 AND 합성한다.
+     * docs $elemMatch(날짜 범위 + docType/status)를 AND 합성한다.
      */
     public Criteria buildDocumentPageCriteria(SearchPmsPerformanceCommand c) {
         Criteria blLevel = buildDocumentBlLevelCriteria(c);
@@ -135,7 +124,7 @@ public class PmsMartPageCriteriaBuilder {
     /**
      * docs $elemMatch 원소 조건 빌드.
      * 실적일자(perfPd)/서류일자(docDt) 각각 단일 Criteria 체이닝.
-     * docType/status/grouped 포함.
+     * docType/status 포함.
      */
     private Criteria buildDocumentElemMatch(SearchPmsPerformanceCommand c) {
         List<Criteria> elemParts = new ArrayList<>();
@@ -173,15 +162,6 @@ public class PmsMartPageCriteriaBuilder {
             elemParts.add(Criteria.where("status").is(c.documentStatus()));
         }
 
-        // grouped Y/N → boolean
-        if (StringUtils.hasText(c.grouped())) {
-            switch (c.grouped()) {
-                case "Y" -> elemParts.add(Criteria.where("grouped").is(true));
-                case "N" -> elemParts.add(Criteria.where("grouped").is(false));
-                default  -> { /* 미인식값: 필터 무시 */ }
-            }
-        }
-
         return buildElemMatch("docs", elemParts);
     }
 
@@ -190,23 +170,13 @@ public class PmsMartPageCriteriaBuilder {
      *
      * documentDt는 freight 경로에서 발생하지 않으므로 날짜 조건 없이 dc:all base에서 시작한다.
      * documentTypes는 lines[] fdcType으로 이미 처리되므로 docs 컴포넌트에 포함하지 않는다.
-     * status/grouped만 적용한다.
-     *
-     * PmsMartPageCriteriaBuilder.buildDocumentElemMatch의 status/grouped 로직과 동일한 의미.
+     * status만 적용한다.
      */
     private Criteria buildFreightDocElemMatch(SearchPmsPerformanceCommand c) {
         List<Criteria> elemParts = new ArrayList<>();
 
         if (StringUtils.hasText(c.documentStatus())) {
             elemParts.add(Criteria.where("status").is(c.documentStatus()));
-        }
-
-        if (StringUtils.hasText(c.grouped())) {
-            switch (c.grouped()) {
-                case "Y" -> elemParts.add(Criteria.where("grouped").is(true));
-                case "N" -> elemParts.add(Criteria.where("grouped").is(false));
-                default  -> { /* 미인식값: 필터 무시 */ }
-            }
         }
 
         return buildElemMatch("docs", elemParts);

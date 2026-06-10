@@ -9,8 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Phase B: PmsRedisExactCountProvider.isSupportedShape 추가 케이스 검증.
  *
- * W1-A: 18-field Command로 업데이트.
- *        제거된 필드(operator/teamCode/actualCustomerCode/linerCode)를 참조하는 케이스를 삭제하고
+ * W1-A: 16-field Command로 업데이트.
+ *        제거된 필드(operator/teamCode/actualCustomerCode/linerCode/grouped/issued)를 참조하는 케이스를 삭제하고
  *        현재 남아 있는 필터(jobDiv/bound)·dateKind 조합으로 교체.
  * 라이브 Redis/Mongo 없이 순수 로직만 검증한다.
  */
@@ -25,8 +25,7 @@ class PmsRedisExactCountProviderPhaseBTest {
             AggregationBasis.DOCUMENT_CREATED, 0, 20,
             "SEA", "EXP", "ETD", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         // isSupportedShape는 basis 자체를 차단하지 않지만
         // DOCUMENT_CREATED + doc-line 필터 없이는 shape 지원 여부 테스트
@@ -41,8 +40,7 @@ class PmsRedisExactCountProviderPhaseBTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", "EXP", "ETD", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -53,8 +51,7 @@ class PmsRedisExactCountProviderPhaseBTest {
             AggregationBasis.TAX_ISSUED, 0, 20,
             "SEA", "EXP", "ETD", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -65,8 +62,7 @@ class PmsRedisExactCountProviderPhaseBTest {
             AggregationBasis.SLIP_ISSUED, 0, 20,
             null, "EXP", null, null, null,
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
@@ -77,8 +73,7 @@ class PmsRedisExactCountProviderPhaseBTest {
             AggregationBasis.FREIGHT_INPUT, 0, 20,
             "SEA", "EXP", "ETD", "20240101", "20240131",
             null, null, null, null,
-            null, null, null, null,
-            null, null
+            null, null, null, null
         );
         assertThat(PmsRedisExactCountProvider.isSupportedShape(cmd)).isTrue();
     }
