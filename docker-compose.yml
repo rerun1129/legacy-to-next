@@ -134,24 +134,47 @@ services:
       redis:
         condition: service_healthy
 
-  frontend:
+  # ── API Gateway (SCG WebFlux) — FE 단일 진입점. 경로 prefix로 4모듈 라우팅 ──
+  gateway:
     build:
-      context: ./front-end
-      args:
-        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
-        NEXT_PUBLIC_FMS_API_URL: http://localhost:8080
-        NEXT_PUBLIC_ADMIN_API_URL: http://localhost:8081
-        NEXT_PUBLIC_BMS_API_URL: http://localhost:8082
-        NEXT_PUBLIC_PMS_API_URL: http://localhost:8083
-        NEXT_PUBLIC_USE_MOCK: "false"
-    container_name: fms-frontend
+      context: ./back-end/java-spring-gateway
+    container_name: gateway-api
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8084:8084"
+    environment:
+      FMS_API_URI: http://fms-api:8080
+      ADMIN_API_URI: http://admin-api:8081
+      BMS_API_URI: http://bms-api:8082
+      PMS_API_URI: http://pms-api:8083
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
     depends_on:
       - fms-api
       - admin-api
       - bms-api
       - pms-api
+    healthcheck:
+      # temurin JRE 이미지에 curl/wget 없음 — bash /dev/tcp로 포트 오픈 확인
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/8084' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./front-end
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8084
+        NEXT_PUBLIC_FMS_API_URL: http://localhost:8084
+        NEXT_PUBLIC_ADMIN_API_URL: http://localhost:8084
+        NEXT_PUBLIC_BMS_API_URL: http://localhost:8084
+        NEXT_PUBLIC_PMS_API_URL: http://localhost:8084
+        NEXT_PUBLIC_USE_MOCK: "false"
+    container_name: fms-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gateway
 
 volumes:
   postgres_data:
