@@ -85,13 +85,6 @@ decorator:
     p6spy:
       enable-logging: false
 
-# ── CORS ─────────────────────────────────────────────────────────
-app:
-  cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
-
-# ── JWT (admin과 동일 secret 공유 — HS256 대칭키 검증) ────────────
-jwt:
-  secret: ${JWT_SECRET:dev-secret-please-rotate-at-least-32-chars!!}
-  access-token-ttl-minutes: ${JWT_ACCESS_TTL:15}
-  refresh-token-ttl-days: ${JWT_REFRESH_TTL:14}
+# ── 게이트웨이 신뢰 토큰 (게이트웨이와 동일 기본값 공유) ─────────────
+gateway:
+  internal-token: ${INTERNAL_GATEWAY_KEY:dev-internal-gateway-key-change-me}

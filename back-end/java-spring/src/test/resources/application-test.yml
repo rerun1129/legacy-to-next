@@ -20,8 +20,6 @@ logging:
     com.freightos.fms: WARN
     org.hibernate.SQL: WARN
 
-# JWT 설정 — 테스트 전용 고정 secret (컨텍스트 로딩 시 JwtProperties 바인딩 필요)
-jwt:
-  secret: test-secret-fixed-value-32-chars-ok
-  access-token-ttl-minutes: 15
-  refresh-token-ttl-days: 14
+# 게이트웨이 신뢰 토큰 — 테스트 전용 고정값 (GatewayProperties 바인딩)
+gateway:
+  internal-token: test-internal-gateway-token

@@ -6,8 +6,7 @@ import com.freightos.bms.adapter.in.web.financialdocument.dto.ApplyGroupingRespo
 import com.freightos.bms.application.financialdocument.GroupResult;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentGroupUseCase;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentUseCase;
-import com.freightos.common.security.JwtAuthenticationFilter;
-import com.freightos.common.security.JwtTokenProvider;
+import com.freightos.common.security.GatewayProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +48,11 @@ class FinancialDocumentGroupControllerTest {
     @MockitoBean
     private FinancialDocumentAssembler assembler;
 
+    // SecurityConfig가 HeaderAuthenticationFilter를 등록하고, GatewayProperties를 주입받음
+    // WebMvcTest 슬라이스에서 GatewayProperties 바인딩을 위해 Mock 등록
     @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
-
-    @MockitoBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @SuppressWarnings("unused")
+    private GatewayProperties gatewayProperties;
 
     @Test
     @DisplayName("POST /group — 200 OK + groupFinancialNo 반환")

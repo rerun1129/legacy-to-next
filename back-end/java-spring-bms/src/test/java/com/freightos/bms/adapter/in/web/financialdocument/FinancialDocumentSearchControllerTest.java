@@ -7,8 +7,7 @@ import com.freightos.bms.application.financialdocument.FinancialDocumentSearchVi
 import com.freightos.bms.application.financialdocument.FreightLineDetailView;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentGroupUseCase;
 import com.freightos.bms.application.financialdocument.port.in.FinancialDocumentUseCase;
-import com.freightos.common.security.JwtAuthenticationFilter;
-import com.freightos.common.security.JwtTokenProvider;
+import com.freightos.common.security.GatewayProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +57,11 @@ class FinancialDocumentSearchControllerTest {
     @MockitoBean
     private FinancialDocumentAssembler assembler;
 
-    // SecurityConfig에서 JwtTokenProvider 의존 — WebMvcTest 슬라이스에서는 Mock 필요
+    // SecurityConfig가 HeaderAuthenticationFilter를 등록하고, GatewayProperties를 주입받음
+    // WebMvcTest 슬라이스에서 GatewayProperties 바인딩을 위해 Mock 등록
     @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
-
-    @MockitoBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @SuppressWarnings("unused")
+    private GatewayProperties gatewayProperties;
 
     @Test
     @DisplayName("POST /search — documentTypes IN INVOICE 결과 1건 반환")

@@ -6,9 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties("jwt")
-public class JwtProperties {
-    private String secret;
-    private long accessTokenTtlMinutes = 15;
-    private long refreshTokenTtlDays = 14;
+@ConfigurationProperties("gateway")
+public class GatewayProperties {
+    private String internalToken = "dev-internal-gateway-key-change-me";
 }

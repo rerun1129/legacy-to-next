@@ -1,7 +1,6 @@
 package com.freightos.fms.adapter.in.web.blquicksearch;
 
-import com.freightos.common.security.JwtAuthenticationFilter;
-import com.freightos.common.security.JwtTokenProvider;
+import com.freightos.common.security.GatewayProperties;
 import com.freightos.fms.adapter.in.web.blquicksearch.dto.BlQuickSearchItemResponse;
 import com.freightos.fms.application.blquicksearch.command.BlQuickSearchCommand;
 import com.freightos.fms.application.blquicksearch.port.in.BlQuickSearchUseCase;
@@ -43,14 +42,11 @@ class BlQuickSearchControllerWebMvcTest {
     @SuppressWarnings("unused")
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-    // SecurityConfig가 JwtAuthenticationFilter를 등록하고, JwtAuthenticationFilter는 JwtTokenProvider를 주입받음
+    // SecurityConfig가 HeaderAuthenticationFilter를 등록하고, GatewayProperties를 주입받음
+    // WebMvcTest 슬라이스에서 GatewayProperties 바인딩을 위해 Mock 등록
     @MockitoBean
     @SuppressWarnings("unused")
-    private JwtTokenProvider jwtTokenProvider;
-
-    @MockitoBean
-    @SuppressWarnings("unused")
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private GatewayProperties gatewayProperties;
 
     @Test
     @DisplayName("GET /api/bl/quick-search/autocomplete: 200 + data 배열 반환")

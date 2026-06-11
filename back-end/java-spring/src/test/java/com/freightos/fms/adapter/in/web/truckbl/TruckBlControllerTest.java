@@ -5,8 +5,7 @@ import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.truckbl.port.in.TruckBlSearchUseCase;
 import com.freightos.fms.application.truckbl.port.in.TruckBlUseCase;
 import com.freightos.fms.common.response.MessageCode;
-import com.freightos.common.security.JwtAuthenticationFilter;
-import com.freightos.common.security.JwtTokenProvider;
+import com.freightos.common.security.GatewayProperties;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,15 +53,11 @@ class TruckBlControllerTest {
     @SuppressWarnings("unused")
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-    // SecurityConfig가 JwtAuthenticationFilter를 등록하고, JwtAuthenticationFilter는 JwtTokenProvider를 주입받음
-    // WebMvcTest 슬라이스는 @Component인 JwtTokenProvider를 스캔하지 않으므로 Mock 등록으로 컨텍스트 로딩 보완
+    // SecurityConfig가 HeaderAuthenticationFilter를 등록하고, GatewayProperties를 주입받음
+    // WebMvcTest 슬라이스에서 GatewayProperties 바인딩을 위해 Mock 등록
     @MockitoBean
     @SuppressWarnings("unused")
-    private JwtTokenProvider jwtTokenProvider;
-
-    @MockitoBean
-    @SuppressWarnings("unused")
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private GatewayProperties gatewayProperties;
 
     // ── POST /api/truck-bl ────────────────────────────────────────────────
 

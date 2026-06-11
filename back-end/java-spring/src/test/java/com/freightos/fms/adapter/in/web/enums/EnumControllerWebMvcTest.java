@@ -6,8 +6,7 @@ import com.freightos.fms.adapter.in.web.enums.dto.EnumOptionResponse;
 import com.freightos.fms.application.enums.EnumRegistry;
 import com.freightos.fms.application.enums.port.in.EnumQueryResult;
 import com.freightos.fms.application.enums.port.in.EnumQueryUseCase;
-import com.freightos.common.security.JwtAuthenticationFilter;
-import com.freightos.common.security.JwtTokenProvider;
+import com.freightos.common.security.GatewayProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +48,11 @@ class EnumControllerWebMvcTest {
     @SuppressWarnings("unused")
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-    // SecurityConfig가 JwtAuthenticationFilter를 등록하고, JwtAuthenticationFilter는 JwtTokenProvider를 주입받음
-    // WebMvcTest 슬라이스는 @Component인 JwtTokenProvider를 스캔하지 않으므로 Mock 등록으로 컨텍스트 로딩 보완
+    // SecurityConfig가 HeaderAuthenticationFilter를 등록하고, GatewayProperties를 주입받음
+    // WebMvcTest 슬라이스에서 GatewayProperties 바인딩을 위해 Mock 등록
     @MockitoBean
     @SuppressWarnings("unused")
-    private JwtTokenProvider jwtTokenProvider;
-
-    @MockitoBean
-    @SuppressWarnings("unused")
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private GatewayProperties gatewayProperties;
 
     @Test
     @DisplayName("GET /api/enums/Per → 200 + Cache-Control + ETag 헤더 + JSON body")
