@@ -67,6 +67,19 @@ spring:
                 name: pmsCb
                 fallbackUri: forward:/fallback/pms
 
+        # teams-route: /api/teams[/**] — order 0
+        # admin TeamController 가 /api/admin prefix 미준수(레거시) — Phase 2에서 경로 정규화 검토
+        - id: teams-route
+          uri: ${ADMIN_API_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/teams/**
+          order: 0
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: adminCb
+                fallbackUri: forward:/fallback/admin
+
         # fms-route: /api/** — order 10 (catch-all, 반드시 뒤)
         - id: fms-route
           uri: ${FMS_API_URI:http://localhost:8080}

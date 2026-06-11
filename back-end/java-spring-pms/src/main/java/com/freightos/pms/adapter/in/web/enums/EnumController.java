@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+// /api/enums 는 FMS EnumController와 경로가 동일해 게이트웨이 경로 기반 라우팅에서 분리 불가.
+// PMS 모듈 prefix 규약(/api/pms/**)을 준수해 충돌을 해소한다.
 @Tag(name = "Enums", description = "드롭박스 ENUM 메타 조회 SSOT")
 @RestController
-@RequestMapping("/api/enums")
+@RequestMapping("/api/pms/enums")
 public class EnumController {
 
     private final EnumQueryUseCase enumQueryUseCase;
