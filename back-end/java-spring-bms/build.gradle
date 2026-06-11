@@ -52,6 +52,9 @@ dependencies {
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
+    // ── Redis (공통코드 폴백 체인: Redis → admin DB → Java enum) ──────
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     // ── Security ──────────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-security'
 

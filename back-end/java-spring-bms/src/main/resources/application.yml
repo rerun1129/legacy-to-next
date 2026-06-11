@@ -32,6 +32,14 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
 
+  # ── Redis (공통코드 폴백 체인 1단계 캐시) ────────────────────────────
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 2000ms
+      connect-timeout: 1000ms
+
   output:
     ansi:
       enabled: always

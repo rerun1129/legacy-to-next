@@ -1,9 +1,10 @@
-package com.freightos.fms.application.enums;
+package com.freightos.bms.application.enums;
 
-import com.freightos.common.exception.ResourceNotFoundException;
-import com.freightos.fms.application.enums.port.in.EnumQueryResult;
-import com.freightos.fms.application.enums.port.in.EnumQueryUseCase;
-import com.freightos.fms.application.enums.projection.EnumOption;
+import com.freightos.bms.application.enums.port.in.EnumQueryResult;
+import com.freightos.bms.application.enums.port.in.EnumQueryUseCase;
+import com.freightos.bms.application.enums.projection.EnumOption;
+import com.freightos.common.exception.FmsException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.Optional;
 
 /**
  * 공통코드 폴백 체인으로 ENUM 옵션을 서빙한다.
- * 순서: Redis → admin.common_code DB → Java enum 레지스트리.
  */
 @Service
 public class EnumQueryService implements EnumQueryUseCase {
@@ -30,7 +30,7 @@ public class EnumQueryService implements EnumQueryUseCase {
     @Override
     public List<EnumOption> getByName(String name) {
         return resolveByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("EnumRegistry", name));
+                .orElseThrow(() -> new FmsException(HttpStatus.NOT_FOUND, "EnumRegistry not found: " + name));
     }
 
     @Override
@@ -47,7 +47,6 @@ public class EnumQueryService implements EnumQueryUseCase {
         return new EnumQueryResult(found, notFound);
     }
 
-    // Redis → DB → Java enum 순서로 조회한다
     private Optional<List<EnumOption>> resolveByName(String name) {
         Optional<List<EnumOption>> fromChain = chainReader.resolve(name);
         if (fromChain.isPresent()) {

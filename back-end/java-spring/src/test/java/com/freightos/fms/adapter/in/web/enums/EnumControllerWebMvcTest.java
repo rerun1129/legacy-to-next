@@ -3,7 +3,6 @@ package com.freightos.fms.adapter.in.web.enums;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.adapter.in.web.enums.dto.EnumMapResponse;
 import com.freightos.fms.adapter.in.web.enums.dto.EnumOptionResponse;
-import com.freightos.fms.application.enums.EnumRegistry;
 import com.freightos.fms.application.enums.port.in.EnumQueryResult;
 import com.freightos.fms.application.enums.port.in.EnumQueryUseCase;
 import com.freightos.common.security.GatewayProperties;
@@ -20,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -40,9 +40,6 @@ class EnumControllerWebMvcTest {
     @MockitoBean
     private EnumAssembler enumAssembler;
 
-    @MockitoBean
-    private EnumRegistry enumRegistry;
-
     // @EnableJpaAuditing이 FmsApplication에 선언되어 WebMvcTest 슬라이스에서도 JpaMetamodelMappingContext를 요구함
     @MockitoBean
     @SuppressWarnings("unused")
@@ -55,17 +52,17 @@ class EnumControllerWebMvcTest {
     private GatewayProperties gatewayProperties;
 
     @Test
-    @DisplayName("GET /api/enums/Per → 200 + Cache-Control + ETag 헤더 + JSON body")
+    @DisplayName("GET /api/enums/Per → 200 + Cache-Control(max-age=300) + ETag 헤더 + JSON body")
     void getByName_happyPath_returns200WithCacheHeaders() throws Exception {
         List<EnumOptionResponse> responses = List.of(
                 new EnumOptionResponse("SHP", "Ship", "Ship"));
         given(enumQueryUseCase.getByName("Per")).willReturn(List.of());
         given(enumAssembler.toResponse(List.of())).willReturn(responses);
-        given(enumRegistry.getEtag()).willReturn("abc123");
+        given(enumAssembler.computeEtag(any())).willReturn("abc123");
 
         mockMvc.perform(get("/api/enums/{name}", "Per"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Cache-Control", "public, max-age=3600"))
+                .andExpect(header().string("Cache-Control", "public, max-age=300"))
                 .andExpect(header().string("ETag", "\"abc123\""))
                 .andExpect(jsonPath("$.data[0].code").value("SHP"))
                 .andExpect(jsonPath("$.data[0].label").value("Ship"));
@@ -94,12 +91,12 @@ class EnumControllerWebMvcTest {
                 List.of());
         given(enumQueryUseCase.getByNames(List.of("Per", "Bound"))).willReturn(queryResult);
         given(enumAssembler.toMapResponse(queryResult)).willReturn(mapResponse);
-        given(enumRegistry.getEtag()).willReturn("abc123");
+        given(enumAssembler.computeEtag(any())).willReturn("abc123");
 
         mockMvc.perform(get("/api/enums")
                         .param("names", "Per", "Bound"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Cache-Control", "public, max-age=3600"))
+                .andExpect(header().string("Cache-Control", "public, max-age=300"))
                 .andExpect(header().string("ETag", "\"abc123\""))
                 .andExpect(jsonPath("$.data.enums.Per[0].code").value("SHP"))
                 .andExpect(jsonPath("$.data.enums.Bound[0].code").value("EXP"))
@@ -117,7 +114,7 @@ class EnumControllerWebMvcTest {
                 List.of("Unknown"));
         given(enumQueryUseCase.getByNames(List.of("Per", "Unknown"))).willReturn(queryResult);
         given(enumAssembler.toMapResponse(queryResult)).willReturn(mapResponse);
-        given(enumRegistry.getEtag()).willReturn("abc123");
+        given(enumAssembler.computeEtag(any())).willReturn("abc123");
 
         mockMvc.perform(get("/api/enums")
                         .param("names", "Per", "Unknown"))

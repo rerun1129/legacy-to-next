@@ -3,10 +3,10 @@ package com.freightos.fms.application.enums;
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.enums.projection.EnumOption;
 import com.freightos.fms.application.enums.port.in.EnumQueryResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,17 +22,35 @@ import static org.mockito.BDDMockito.then;
 class EnumQueryServiceTest {
 
     @Mock
+    private CommonCodeChainReader chainReader;
+
+    @Mock
     private EnumRegistry enumRegistry;
 
-    @InjectMocks
     private EnumQueryService enumQueryService;
 
+    @BeforeEach
+    void setUp() {
+        enumQueryService = new EnumQueryService(chainReader, enumRegistry);
+    }
+
     @Test
-    @DisplayName("getByName — registry가 Optional.of(List) 반환 시 정상 반환")
-    void getByName_registryReturnsOptions_returnsOptions() {
-        List<EnumOption> options = List.of(
-                new EnumOption("EXP", "EXP", null),
-                new EnumOption("IMP", "IMP", null));
+    @DisplayName("getByName — chainReader가 hit 시 registry 미조회, 체인 결과 반환")
+    void getByName_chainHit_returnsChainResult() {
+        List<EnumOption> options = List.of(new EnumOption("EXP", "EXP", null));
+        given(chainReader.resolve("Bound")).willReturn(Optional.of(options));
+
+        List<EnumOption> result = enumQueryService.getByName("Bound");
+
+        assertThat(result).isEqualTo(options);
+        then(enumRegistry).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("getByName — chainReader miss, registry hit — registry 결과 반환")
+    void getByName_chainMissRegistryHit_returnsRegistryResult() {
+        List<EnumOption> options = List.of(new EnumOption("EXP", "EXP", null));
+        given(chainReader.resolve("Bound")).willReturn(Optional.empty());
         given(enumRegistry.getByName("Bound")).willReturn(Optional.of(options));
 
         List<EnumOption> result = enumQueryService.getByName("Bound");
@@ -42,35 +60,34 @@ class EnumQueryServiceTest {
     }
 
     @Test
-    @DisplayName("getByName — registry가 Optional.empty() 반환 시 ResourceNotFoundException throw")
-    void getByName_registryReturnsEmpty_throwsResourceNotFoundException() {
+    @DisplayName("getByName — 체인·registry 모두 miss → ResourceNotFoundException throw")
+    void getByName_allMiss_throwsResourceNotFoundException() {
+        given(chainReader.resolve("Unknown")).willReturn(Optional.empty());
         given(enumRegistry.getByName("Unknown")).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> enumQueryService.getByName("Unknown"))
                 .isInstanceOf(ResourceNotFoundException.class);
-
-        then(enumRegistry).should().getByName("Unknown");
     }
 
     @Test
     @DisplayName("getByNames — 존재하는 name은 found에, 미존재 name은 notFound에 분류된다")
     void getByNames_mixedNames_classifiesFoundAndNotFound() {
         List<EnumOption> boundOptions = List.of(new EnumOption("EXP", "EXP", null));
-        List<EnumOption> perOptions = List.of(new EnumOption("SHP", "Ship", "Ship"));
-        given(enumRegistry.getByName("Bound")).willReturn(Optional.of(boundOptions));
-        given(enumRegistry.getByName("Per")).willReturn(Optional.of(perOptions));
+        given(chainReader.resolve("Bound")).willReturn(Optional.of(boundOptions));
+        given(chainReader.resolve("Unknown")).willReturn(Optional.empty());
         given(enumRegistry.getByName("Unknown")).willReturn(Optional.empty());
 
-        EnumQueryResult result = enumQueryService.getByNames(List.of("Bound", "Per", "Unknown"));
+        EnumQueryResult result = enumQueryService.getByNames(List.of("Bound", "Unknown"));
 
-        assertThat(result.found()).containsKeys("Bound", "Per");
-        assertThat(result.found()).doesNotContainKey("Unknown");
+        assertThat(result.found()).containsKey("Bound");
         assertThat(result.notFound()).containsExactly("Unknown");
     }
 
     @Test
-    @DisplayName("getByNames — 모두 미존재 시 found는 비어있고 notFound에 모두 담긴다")
+    @DisplayName("getByNames — 모두 미존재 시 found 비어있고 notFound에 모두 담긴다")
     void getByNames_allUnknown_foundEmptyNotFoundFull() {
+        given(chainReader.resolve("X")).willReturn(Optional.empty());
+        given(chainReader.resolve("Y")).willReturn(Optional.empty());
         given(enumRegistry.getByName("X")).willReturn(Optional.empty());
         given(enumRegistry.getByName("Y")).willReturn(Optional.empty());
 
@@ -84,8 +101,8 @@ class EnumQueryServiceTest {
     @DisplayName("getByNames — 모두 존재 시 notFound는 비어있다")
     void getByNames_allFound_notFoundEmpty() {
         List<EnumOption> options = List.of(new EnumOption("A", "A", null));
-        given(enumRegistry.getByName("Bound")).willReturn(Optional.of(options));
-        given(enumRegistry.getByName("BlType")).willReturn(Optional.of(options));
+        given(chainReader.resolve("Bound")).willReturn(Optional.of(options));
+        given(chainReader.resolve("BlType")).willReturn(Optional.of(options));
 
         EnumQueryResult result = enumQueryService.getByNames(List.of("Bound", "BlType"));
 

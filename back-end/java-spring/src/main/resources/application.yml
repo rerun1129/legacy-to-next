@@ -30,6 +30,14 @@ spring:
     show-sql: false
     open-in-view: false
 
+  # ── Redis (공통코드 폴백 체인 1단계 캐시 — 2s 타임아웃, 실패 시 DB 폴백) ──
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 2000ms
+      connect-timeout: 1000ms
+
   # ── Flyway ────────────────────────────────────────────────────────
   # fms 스키마 정본 = db/migration. 기존 DB는 baseline-on-migrate로 V1 스킵, 신규 DB는 V1 실행.
   flyway:

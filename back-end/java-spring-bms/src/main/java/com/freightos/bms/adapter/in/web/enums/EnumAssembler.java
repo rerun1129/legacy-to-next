@@ -1,9 +1,9 @@
-package com.freightos.pms.adapter.in.web.enums;
+package com.freightos.bms.adapter.in.web.enums;
 
-import com.freightos.pms.adapter.in.web.enums.dto.EnumMapResponse;
-import com.freightos.pms.adapter.in.web.enums.dto.EnumOptionResponse;
-import com.freightos.pms.application.enums.port.in.EnumQueryResult;
-import com.freightos.pms.application.enums.projection.EnumOption;
+import com.freightos.bms.adapter.in.web.enums.dto.EnumMapResponse;
+import com.freightos.bms.adapter.in.web.enums.dto.EnumOptionResponse;
+import com.freightos.bms.application.enums.port.in.EnumQueryResult;
+import com.freightos.bms.application.enums.projection.EnumOption;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -29,9 +29,6 @@ public class EnumAssembler {
         return new EnumMapResponse(converted, result.notFound());
     }
 
-    /**
-     * 응답 본문 객체의 toString() 기반 SHA-256 ETag를 계산한다.
-     */
     public String computeEtag(Object payload) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

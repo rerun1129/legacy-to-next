@@ -1,10 +1,10 @@
-package com.freightos.pms.adapter.in.web.enums;
+package com.freightos.bms.adapter.in.web.enums;
 
+import com.freightos.bms.adapter.in.web.enums.dto.EnumMapResponse;
+import com.freightos.bms.adapter.in.web.enums.dto.EnumOptionResponse;
+import com.freightos.bms.application.enums.port.in.EnumQueryResult;
+import com.freightos.bms.application.enums.port.in.EnumQueryUseCase;
 import com.freightos.common.response.ApiResponse;
-import com.freightos.pms.adapter.in.web.enums.dto.EnumMapResponse;
-import com.freightos.pms.adapter.in.web.enums.dto.EnumOptionResponse;
-import com.freightos.pms.application.enums.port.in.EnumQueryResult;
-import com.freightos.pms.application.enums.port.in.EnumQueryUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-// /api/enums 는 FMS EnumController와 경로가 동일해 게이트웨이 경로 기반 라우팅에서 분리 불가.
-// PMS 모듈 prefix 규약(/api/pms/**)을 준수해 충돌을 해소한다.
 @Tag(name = "Enums", description = "드롭박스 ENUM 메타 조회 SSOT")
 @RestController
-@RequestMapping("/api/pms/enums")
+@RequestMapping("/api/bms/enums")
 public class EnumController {
 
     private final EnumQueryUseCase enumQueryUseCase;

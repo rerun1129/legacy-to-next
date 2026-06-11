@@ -33,7 +33,9 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
+      # count-index 파이프라인 고려 3s 유지, 공통코드 체인은 실패 삼킴
       timeout: 3000ms
+      connect-timeout: 1000ms
 
   output:
     ansi:

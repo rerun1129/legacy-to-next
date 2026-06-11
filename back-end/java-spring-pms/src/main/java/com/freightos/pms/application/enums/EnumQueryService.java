@@ -10,19 +10,26 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+/**
+ * 공통코드 폴백 체인으로 ENUM 옵션을 서빙한다.
+ * 순서: Redis → admin.common_code DB → Java enum 레지스트리.
+ */
 @Service
 public class EnumQueryService implements EnumQueryUseCase {
 
+    private final CommonCodeChainReader chainReader;
     private final EnumRegistry enumRegistry;
 
-    public EnumQueryService(EnumRegistry enumRegistry) {
+    public EnumQueryService(CommonCodeChainReader chainReader, EnumRegistry enumRegistry) {
+        this.chainReader  = chainReader;
         this.enumRegistry = enumRegistry;
     }
 
     @Override
     public List<EnumOption> getByName(String name) {
-        return enumRegistry.getByName(name)
+        return resolveByName(name)
                 .orElseThrow(() -> FmsException.notFound("EnumRegistry not found: " + name));
     }
 
@@ -32,12 +39,19 @@ public class EnumQueryService implements EnumQueryUseCase {
         List<String> notFound = new ArrayList<>();
 
         for (String name : names) {
-            enumRegistry.getByName(name).ifPresentOrElse(
+            resolveByName(name).ifPresentOrElse(
                     options -> found.put(name, options),
-                    () -> notFound.add(name)
-            );
+                    () -> notFound.add(name));
         }
 
         return new EnumQueryResult(found, notFound);
+    }
+
+    private Optional<List<EnumOption>> resolveByName(String name) {
+        Optional<List<EnumOption>> fromChain = chainReader.resolve(name);
+        if (fromChain.isPresent()) {
+            return fromChain;
+        }
+        return enumRegistry.getByName(name);
     }
 }
