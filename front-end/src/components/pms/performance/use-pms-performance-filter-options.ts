@@ -7,7 +7,7 @@ import type { LabelOption } from "@/components/shared/inputs/_types";
 /**
  * PS-01 필터 바 전용 PMS enum 옵션 배열.
  * list-client에서 분리하여 파일 크기를 300줄 이하로 유지.
- * 모든 콤보 옵션은 PMS 백엔드 /api/enums/{name} 에서 조회한다.
+ * 모든 콤보 옵션은 PMS 백엔드 /api/pms/enums/{name} 에서 조회한다.
  */
 export function usePmsPerformanceFilterOptions(t: (key: string) => string) {
   const allOption = useMemo<LabelOption>(

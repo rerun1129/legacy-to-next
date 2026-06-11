@@ -33,7 +33,7 @@ export interface PmsPerformanceFilter {
   documentStatus: string;
 }
 
-// 옵션 배열은 PMS 백엔드 /api/enums/{name} 에서 동적 조회 (use-pms-enum.ts 참조)
+// 옵션 배열은 PMS 백엔드 /api/pms/enums/{name} 에서 동적 조회 (use-pms-enum.ts 참조)
 
 export const DEFAULT_PMS_FILTER: PmsPerformanceFilter = {
   basis: "FREIGHT_INPUT",
