@@ -10,6 +10,8 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 2s            # command timeout — 초과 시 예외 → 어댑터가 삼키고 로그인 계속(degrade)
+      connect-timeout: 1s
 
   cloud:
     gateway:
