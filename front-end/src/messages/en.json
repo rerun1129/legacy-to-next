@@ -1073,79 +1073,28 @@
     }
   },
   "admin": {
-    "code": {
-      "master": {
-        "cols": {
-          "no": "#",
-          "masterCode": "Master Code",
-          "masterName": "Master Name",
-          "description": "Description",
-          "sortOrder": "Sort Order",
-          "status": "Status"
-        },
-        "options": {
-          "active": "Active",
-          "inactive": "Inactive"
-        },
-        "filter": {
-          "masterCode": "Master Code",
-          "masterName": "Master Name",
-          "status": "Status",
-          "all": "All",
-          "active": "Active",
-          "inactive": "Inactive",
-          "masterCodePlaceholder": "Master Code",
-          "masterNamePlaceholder": "Master Name"
-        },
-        "panel": {
-          "title": "Common Code"
-        },
-        "msg": {
-          "enterCriteria": "Enter search criteria and click Search.",
-          "noResults": "No results found.",
-          "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
-        }
-      },
-      "detail": {
-        "cols": {
-          "no": "#",
-          "codeValue": "Code Value",
-          "codeLabel": "Code Label",
-          "sortOrder": "Sort Order",
-          "status": "Status",
-          "remark": "Remark"
-        },
-        "options": {
-          "active": "Active",
-          "inactive": "Inactive"
-        },
-        "panel": {
-          "title": "Code Detail"
-        },
-        "msg": {
-          "selectMaster": "Select a master code on the left.",
-          "saveMasterFirst": "Save the master code first.",
-          "noResults": "No results found.",
-          "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
-        }
-      },
-      "list": {
-        "msg": {
-          "unsavedTitle": "Unsaved Changes",
-          "unsavedDescription": "There are unsaved changes in Detail. Discard and continue?"
-        }
-      }
-    },
     "commonCode": {
       "group": {
         "title": "Code Groups",
         "noGroups": "No groups registered."
+      },
+      "filter": {
+        "groupCode": "Group Code",
+        "groupCodePlaceholder": "Group Code",
+        "module": "Module",
+        "status": "Status",
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive"
       },
       "panel": {
         "title": "Common Code List"
       },
       "cols": {
         "no": "#",
+        "groupCode": "Group Code",
+        "module": "Module",
+        "description": "Description",
         "code": "Code",
         "label": "Label (EN)",
         "labelKo": "Label (KO)",
@@ -1159,7 +1108,10 @@
       "msg": {
         "selectGroup": "Select a code group on the left.",
         "noResults": "No codes registered.",
-        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}",
+        "unsavedTitle": "Unsaved Changes",
+        "unsavedDescription": "There are unsaved changes. Discard and continue?",
+        "enterCriteria": "Enter search criteria and click Search."
       }
     },
     "carrier": {
@@ -1892,7 +1844,7 @@
       "/fms/truck-bl/entry": "Truck B/L Entry",
       "/fms/non-bl/list": "Non B/L List",
       "/fms/non-bl/entry": "Non B/L Entry",
-      "/admin/code/list": "Code Master Common Code",
+      "/admin/code/common-code": "Common Code",
       "/bms/invoice/list": "Invoice List",
       "/bms/payment/list": "Payment List",
       "/bms/dc-note/list": "D/C Note List",

@@ -1073,79 +1073,28 @@
     }
   },
   "admin": {
-    "code": {
-      "master": {
-        "cols": {
-          "no": "#",
-          "masterCode": "마스터 코드",
-          "masterName": "마스터명",
-          "description": "설명",
-          "sortOrder": "정렬 순서",
-          "status": "사용"
-        },
-        "options": {
-          "active": "사용",
-          "inactive": "미사용"
-        },
-        "filter": {
-          "masterCode": "마스터 코드",
-          "masterName": "마스터명",
-          "status": "사용",
-          "all": "전체",
-          "active": "사용",
-          "inactive": "미사용",
-          "masterCodePlaceholder": "마스터 코드",
-          "masterNamePlaceholder": "마스터명"
-        },
-        "panel": {
-          "title": "공통 코드"
-        },
-        "msg": {
-          "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요.",
-          "noResults": "검색 결과가 없습니다.",
-          "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
-        }
-      },
-      "detail": {
-        "cols": {
-          "no": "#",
-          "codeValue": "코드 값",
-          "codeLabel": "코드명",
-          "sortOrder": "정렬 순서",
-          "status": "사용",
-          "remark": "비고"
-        },
-        "options": {
-          "active": "사용",
-          "inactive": "미사용"
-        },
-        "panel": {
-          "title": "코드 상세"
-        },
-        "msg": {
-          "selectMaster": "좌측에서 마스터 코드를 선택하세요.",
-          "saveMasterFirst": "마스터를 먼저 저장하세요.",
-          "noResults": "검색 결과가 없습니다.",
-          "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
-        }
-      },
-      "list": {
-        "msg": {
-          "unsavedTitle": "미저장 변경",
-          "unsavedDescription": "저장하지 않은 Detail 변경이 있습니다. 버리고 이동할까요?"
-        }
-      }
-    },
     "commonCode": {
       "group": {
         "title": "코드 그룹",
         "noGroups": "등록된 그룹이 없습니다."
+      },
+      "filter": {
+        "groupCode": "그룹 코드",
+        "groupCodePlaceholder": "그룹 코드",
+        "module": "모듈",
+        "status": "사용",
+        "all": "전체",
+        "active": "사용",
+        "inactive": "미사용"
       },
       "panel": {
         "title": "공통 코드 목록"
       },
       "cols": {
         "no": "#",
+        "groupCode": "그룹 코드",
+        "module": "모듈",
+        "description": "설명",
         "code": "코드",
         "label": "코드명(EN)",
         "labelKo": "코드명(KO)",
@@ -1159,7 +1108,10 @@
       "msg": {
         "selectGroup": "좌측에서 코드 그룹을 선택하세요.",
         "noResults": "등록된 코드가 없습니다.",
-        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}",
+        "unsavedTitle": "미저장 변경",
+        "unsavedDescription": "저장하지 않은 변경이 있습니다. 버리고 이동할까요?",
+        "enterCriteria": "검색 조건을 입력하고 검색을 클릭하세요."
       }
     },
     "carrier": {
@@ -1892,7 +1844,7 @@
       "/fms/truck-bl/entry": "Truck B/L 등록",
       "/fms/non-bl/list": "Non B/L 목록",
       "/fms/non-bl/entry": "Non B/L 등록",
-      "/admin/code/list": "공통 코드 마스터",
+      "/admin/code/common-code": "공통 코드",
       "/bms/invoice/list": "Invoice 조회",
       "/bms/payment/list": "Payment 조회",
       "/bms/dc-note/list": "D/C Note 조회",

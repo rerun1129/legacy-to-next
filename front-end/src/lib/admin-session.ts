@@ -68,7 +68,7 @@ export function getButtonLabel(session: AdminSession | null, buttonCode: string,
 // login·guard 양측에서 공유하는 "이 세션으로 진입 가능한 첫 번째 라우트" 헬퍼
 export function firstAccessibleRoute(session: AdminSession): string | null {
   const order: Array<[string, string]> = [
-    ["MENU_ADMIN_CODE_LIST", "/admin/code/list"],
+    ["MENU_ADMIN_COMMON_CODE", "/admin/code/common-code"],
     ["MENU_ADMIN_USER_LIST", "/admin/user/list"],
     ["MENU_ADMIN_CUSTOMER_LIST", "/admin/customer/list"],
     ["MENU_ADMIN_CMS_NOTICE_LIST", "/admin/cms/notice/list"],

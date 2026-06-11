@@ -4,17 +4,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { Plus, Save, RotateCcw } from "lucide-react";
+import { RotateCcw, Search } from "lucide-react";
+import { listFilterStore, type SavedSearchState } from "@/lib/use-list-filter-store";
+import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { ActionButton } from "@/components/admin/access/action-button";
-import { GridList } from "@/components/shared/grid-list";
-import { Button } from "@/components/shared/button";
 import { toast } from "@/lib/toast-store";
 import { collectGridChanges } from "@/lib/collect-grid-changes";
+import { confirm } from "@/components/confirm";
 import { commonCodeUseCases } from "@/application/common-code/use-cases";
 import type { CommonCodeGroupRow } from "@/domain/common-code";
+import { CommonCodeGroupFilter } from "./common-code-group-filter";
+import { CommonCodeGroupGrid } from "./common-code-group-grid";
+import { CommonCodeCodePanel } from "./common-code-code-panel";
 import {
   buildCommonCodeColumns,
-  getCommonCodeRowClassName,
   type CommonCodeFormRow,
   type CommonCodeFormValues,
 } from "./common-code-grid-columns";
@@ -24,19 +27,54 @@ import {
   COMMON_CODE_TO_CREATE,
   COMMON_CODE_TO_UPDATE,
 } from "./common-code-list-helpers";
+import type { GroupFilterValues } from "./common-code-filter-types";
+export type { GroupFilterValues };
+
+const SCOPE = "/admin/code/common-code";
+
+const DEFAULT_FILTER: GroupFilterValues = {
+  groupCode: "",
+  module: "ALL",
+};
+
+type CommonCodeSearchState = SavedSearchState & {
+  submittedFilter: GroupFilterValues | null;
+  selectedGroupCode: string | null;
+};
 
 export function CommonCodeListClient() {
   const tMsg = useTranslations("admin.commonCode.msg");
   const tCols = useTranslations("admin.commonCode.cols");
   const tOptions = useTranslations("admin.commonCode.options");
   const tPanel = useTranslations("admin.commonCode.panel");
-  const tGroup = useTranslations("admin.commonCode.group");
 
   const qc = useQueryClient();
 
+  // ─── 필터 폼 ─────────────────────────────────────────────────────────────
+
+  const filterForm = useForm<GroupFilterValues>({ defaultValues: DEFAULT_FILTER });
+  useListFilterSync(filterForm, SCOPE);
+
+  const [submittedFilter, setSubmittedFilter] = useState<GroupFilterValues | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as CommonCodeSearchState | undefined;
+    return s?.submittedFilter ?? null;
+  });
+  const [selectedGroupCode, setSelectedGroupCode] = useState<string | null>(() => {
+    const s = listFilterStore.getState().getSearch(SCOPE) as CommonCodeSearchState | undefined;
+    return s?.selectedGroupCode ?? null;
+  });
+
+  // 검색 상태 영속화
+  useEffect(() => {
+    listFilterStore.getState().setSearch(SCOPE, {
+      submittedFilter,
+      selectedGroupCode,
+    });
+  }, [submittedFilter, selectedGroupCode]);
+
   // ─── 그룹 목록 조회 ──────────────────────────────────────────────────────
 
-  const { data: groups, isFetching: groupsFetching } = useQuery({
+  const { data: groups = [], isFetching: groupsFetching } = useQuery<CommonCodeGroupRow[]>({
     queryKey: ["admin-common-code", "groups"],
     queryFn: () => commonCodeUseCases.listGroups(),
     staleTime: Infinity,
@@ -44,8 +82,6 @@ export function CommonCodeListClient() {
     refetchOnMount: false,
     structuralSharing: false,
   });
-
-  const [selectedGroupCode, setSelectedGroupCode] = useState<string | null>(null);
 
   // ─── 코드 그리드 폼 ──────────────────────────────────────────────────────
 
@@ -58,12 +94,10 @@ export function CommonCodeListClient() {
 
   // ─── 코드 목록 조회 ──────────────────────────────────────────────────────
 
-  const enabled = selectedGroupCode !== null;
-
   const { data: codeRows, isFetching: codesFetching } = useQuery({
     queryKey: ["admin-common-code", "list", selectedGroupCode],
     queryFn: () => commonCodeUseCases.listByGroup(selectedGroupCode!),
-    enabled,
+    enabled: selectedGroupCode !== null,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -80,30 +114,7 @@ export function CommonCodeListClient() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalRows]);
 
-  // ─── 그룹 선택 ───────────────────────────────────────────────────────────
-
-  function handleSelectGroup(groupCode: string) {
-    if (groupCode === selectedGroupCode) return;
-    setSelectedGroupCode(groupCode);
-    setSelectedKeys(new Set());
-  }
-
-  // ─── Reset ───────────────────────────────────────────────────────────────
-
-  function handleReset() {
-    setSelectedGroupCode(null);
-    setSelectedKeys(new Set());
-    reset({ rows: [] });
-    qc.invalidateQueries({ queryKey: ["admin-common-code", "groups"] });
-  }
-
-  // ─── 행 추가 ─────────────────────────────────────────────────────────────
-
-  function handleAdd() {
-    const id = -Date.now();
-    append({ entityId: id, code: "", label: "", labelKo: "", sortOrder: null, active: true });
-    pendingFocusRef.current = id;
-  }
+  // ─── 행 추가 포커스 ──────────────────────────────────────────────────────
 
   useEffect(() => {
     if (pendingFocusRef.current === null) return;
@@ -117,6 +128,53 @@ export function CommonCodeListClient() {
       input?.focus();
     });
   });
+
+  // ─── 그룹 선택 (dirty 가드) ───────────────────────────────────────────────
+
+  async function handleSelectGroup(groupCode: string) {
+    if (groupCode === selectedGroupCode) return;
+    if (isDirty) {
+      const ok = await confirm({
+        title: tMsg("unsavedTitle"),
+        description: tMsg("unsavedDescription"),
+        variant: "destructive",
+      });
+      if (!ok) return;
+    }
+    setSelectedGroupCode(groupCode);
+    setSelectedKeys(new Set());
+  }
+
+  // ─── Search ───────────────────────────────────────────────────────────────
+
+  function handleSearch() {
+    filterForm.handleSubmit((values) => {
+      setSubmittedFilter(values);
+      // 그룹 선택 초기화 — 새 검색 결과에서 새로 선택하도록
+      setSelectedGroupCode(null);
+      setSelectedKeys(new Set());
+      reset({ rows: [] });
+    })();
+  }
+
+  // ─── Reset ───────────────────────────────────────────────────────────────
+  // invalidateQueries 금지 — Reset = 비우기(listFilter store 규칙)
+
+  function handleReset() {
+    filterForm.reset(DEFAULT_FILTER);
+    setSubmittedFilter(null);
+    setSelectedGroupCode(null);
+    setSelectedKeys(new Set());
+    reset({ rows: [] });
+  }
+
+  // ─── 행 추가 ─────────────────────────────────────────────────────────────
+
+  function handleAdd() {
+    const id = -Date.now();
+    append({ entityId: id, code: "", label: "", labelKo: "", sortOrder: null, active: true });
+    pendingFocusRef.current = id;
+  }
 
   // ─── save-changes ─────────────────────────────────────────────────────────
 
@@ -157,173 +215,73 @@ export function CommonCodeListClient() {
     [register, control, tCols, tOptions],
   );
 
-  // ─── 렌더 ────────────────────────────────────────────────────────────────
-
   const isSaveDisabled =
     !isDirty || saveChangesMutation.isPending || selectedGroupCode === null;
 
+  // ─── 렌더 ────────────────────────────────────────────────────────────────
+
   return (
     <>
-      {/* 상단 툴바 */}
+      {/* 상단 툴바 — Reset / Search */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
         <ActionButton
-          buttonCode="BTN_COMMON_CODE_RESET"
+          buttonCode="BTN_ADMIN_COMMON_CODE_RESET"
           className="btn btn--normal btn--sm"
           onClick={handleReset}
           icon={<RotateCcw size={12} style={{ marginRight: 4 }} />}
         />
         <ActionButton
-          buttonCode="BTN_COMMON_CODE_SAVE"
-          className="btn btn--transaction btn--sm"
-          disabled={isSaveDisabled}
-          onClick={() => saveChangesMutation.mutate()}
-          icon={<Save size={12} style={{ marginRight: 4 }} />}
+          buttonCode="BTN_ADMIN_COMMON_CODE_SEARCH"
+          className="btn btn--search btn--sm"
+          onClick={handleSearch}
+          icon={<Search size={12} style={{ marginRight: 4 }} />}
         />
       </div>
+
+      {/* 필터 카드 */}
+      <CommonCodeGroupFilter form={filterForm} />
 
       {/* 2분할 컨테이너: 그룹(좌) + 코드(우) */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "320px 1fr",
+          gridTemplateColumns: "360px 1fr",
           gap: 12,
           flex: 1,
           minHeight: 0,
           overflow: "hidden",
+          marginTop: 10,
         }}
       >
-        {/* 좌측: 그룹 목록 */}
+        {/* 좌측: 그룹 GridList */}
         <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <div className="panel__head">
-              <div className="panel__title-accent" />
-              <span className="panel__title">{tGroup("title")}</span>
-              <span className="panel__rowcount">{groups?.length ?? 0}</span>
-            </div>
-            <div className="list-wrap">
-              <GroupListTable
-                groups={groups ?? []}
-                selectedGroupCode={selectedGroupCode}
-                onSelectGroup={handleSelectGroup}
-                isLoading={groupsFetching}
-                emptyMessage={tGroup("noGroups")}
-              />
-            </div>
-          </div>
+          <CommonCodeGroupGrid
+            groups={groups}
+            selectedGroupCode={selectedGroupCode}
+            onSelectGroup={handleSelectGroup}
+            isLoading={groupsFetching}
+            submittedFilter={submittedFilter}
+          />
         </div>
 
         {/* 우측: 코드 그리드 */}
         <div style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          {selectedGroupCode === null ? (
-            <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-              <div className="panel__head">
-                <div className="panel__title-accent" />
-                <span className="panel__title">{tPanel("title")}</span>
-              </div>
-              <div
-                className="list-wrap"
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
-              >
-                <span style={{ color: "var(--ink-3)" }}>{tMsg("selectGroup")}</span>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-              {/* 코드 그리드 툴바 */}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
-                <Button variant="success" size="sm" iconOnly onClick={handleAdd}>
-                  <Plus size={12} />
-                </Button>
-              </div>
-
-              <div className="panel" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-                <div className="panel__head">
-                  <div className="panel__title-accent" />
-                  <span className="panel__title">{tPanel("title")}</span>
-                  <span className="panel__rowcount">{fields.length}</span>
-                </div>
-                <div className="list-wrap">
-                  <GridList<CommonCodeFormRow>
-                    columns={columns}
-                    data={fields as unknown as CommonCodeFormRow[]}
-                    rowKey={(row) => row.entityId}
-                    rowClassName={(row) => getCommonCodeRowClassName(row, originalRows)}
-                    isLoading={codesFetching}
-                    emptyMessage={tMsg("noResults")}
-                    selectable
-                    selectedKeys={selectedKeys}
-                    onSelectionChange={(next) => setSelectedKeys(new Set([...next].map(Number)))}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+          <CommonCodeCodePanel
+            selectedGroupCode={selectedGroupCode}
+            tPanel={(k) => tPanel(k)}
+            tMsg={(k) => tMsg(k)}
+            fields={fields as unknown as CommonCodeFormRow[]}
+            columns={columns}
+            originalRows={originalRows}
+            codesFetching={codesFetching}
+            selectedKeys={selectedKeys}
+            onSelectionChange={setSelectedKeys}
+            isSaveDisabled={isSaveDisabled}
+            onSave={() => saveChangesMutation.mutate()}
+            onAdd={handleAdd}
+          />
         </div>
       </div>
     </>
-  );
-}
-
-// ─── 그룹 목록 테이블 (간단한 읽기 전용) ────────────────────────────────────
-
-interface GroupListTableProps {
-  groups: CommonCodeGroupRow[];
-  selectedGroupCode: string | null;
-  onSelectGroup: (groupCode: string) => void;
-  isLoading: boolean;
-  emptyMessage: string;
-}
-
-function GroupListTable({
-  groups,
-  selectedGroupCode,
-  onSelectGroup,
-  isLoading,
-  emptyMessage,
-}: GroupListTableProps) {
-  if (isLoading) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, padding: 16 }}>
-        <span style={{ color: "var(--ink-3)" }}>…</span>
-      </div>
-    );
-  }
-  if (groups.length === 0) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, padding: 16 }}>
-        <span style={{ color: "var(--ink-3)" }}>{emptyMessage}</span>
-      </div>
-    );
-  }
-
-  return (
-    <table className="grid-table" style={{ width: "100%" }}>
-      <colgroup>
-        <col style={{ width: 36 }} />
-        <col />
-        <col style={{ width: 70 }} />
-      </colgroup>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Group Code</th>
-          <th>Module</th>
-        </tr>
-      </thead>
-      <tbody>
-        {groups.map((g, i) => (
-          <tr
-            key={g.id}
-            onClick={() => onSelectGroup(g.groupCode)}
-            className={g.groupCode === selectedGroupCode ? "is-selected" : undefined}
-            style={{ cursor: "pointer" }}
-          >
-            <td className="row-num">{i + 1}</td>
-            <td style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{g.groupCode}</td>
-            <td>{g.sourceModule}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
   );
 }

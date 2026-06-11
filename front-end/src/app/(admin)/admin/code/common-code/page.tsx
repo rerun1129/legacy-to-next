@@ -6,7 +6,7 @@ import { CommonCodeListClient } from "@/components/admin/code/common-code/common
 
 export default function AdminCommonCodePage() {
   return (
-    <AdminGuard requiredMenuCode="MENU_ADMIN_CODE_COMMON_CODE">
+    <AdminGuard requiredMenuCode="MENU_ADMIN_COMMON_CODE">
       <div className="app__main--list" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden" }}>
         <div className="page-head">
           <div className="page-head__title">
