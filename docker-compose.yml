@@ -46,18 +46,16 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── Phase 2: 모듈은 host 포트 비공개(게이트웨이만 노출), 인증은 게이트웨이 신뢰 헤더+내부키 ──
   fms-api:
     build:
       context: ./back-end/java-spring
     container_name: fms-api
-    ports:
-      - "8080:8080"
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/fms
       DB_USER: fms
       DB_PASS: fms_local
-      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
-      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+      INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,14 +64,13 @@ services:
     build:
       context: ./back-end/java-spring-admin
     container_name: admin-api
-    ports:
-      - "8081:8081"
     environment:
       ADMIN_DB_URL: jdbc:postgresql://postgres:5432/fms?currentSchema=admin
       ADMIN_DB_USER: fms
       ADMIN_DB_PASS: fms_local
-      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+      # admin은 토큰 발급처라 JWT_SECRET 유지
       JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+      INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,14 +79,11 @@ services:
     build:
       context: ./back-end/java-spring-bms
     container_name: bms-api
-    ports:
-      - "8082:8082"
     environment:
       BMS_DB_URL: jdbc:postgresql://postgres:5432/fms?currentSchema=bms
       BMS_DB_USER: fms
       BMS_DB_PASS: fms_local
-      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
-      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+      INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,15 +92,12 @@ services:
     build:
       context: ./back-end/java-spring-pms
     container_name: pms-api
-    ports:
-      - "8083:8083"
     environment:
       # PMS 는 스키마 미소유(읽기 전용 cross-schema) — currentSchema 미지정, 엔티티가 @Table(schema=...) 명시
       PMS_DB_URL: jdbc:postgresql://postgres:5432/fms
       PMS_DB_USER: fms
       PMS_DB_PASS: fms_local
-      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
-      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+      INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
       # ── Mart (MongoDB OLAP) — docker 스택 기본 ON(mongo 동반). 끄려면 .env에 PMS_MART_ENABLED=false ──
       # (bare bootRun은 application.yml 기본값 false — mongo 없이도 OLTP로 동작)
       PMS_MART_ENABLED: "${PMS_MART_ENABLED:-true}"
@@ -148,6 +139,9 @@ services:
       BMS_API_URI: http://bms-api:8082
       PMS_API_URI: http://pms-api:8083
       APP_CORS_ALLOWED_ORIGINS: http://localhost:3000
+      # JWT 중앙 검증(발급 secret과 동일) + 다운스트림 신뢰 헤더 내부키
+      JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
+      INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
     depends_on:
       - fms-api
       - admin-api
