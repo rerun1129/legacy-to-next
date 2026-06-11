@@ -35,11 +35,17 @@ public class EnumDriftChecker {
     }
 
     private void checkGroup(String groupCode) {
+        // DB 조회는 별칭 그룹 코드로 수행하여 FMS와 동일한 group_code를 사용한다.
+        String dbGroup = CommonCodeGroupAliases.toDbGroup(groupCode);
+        String groupLabel = CommonCodeGroupAliases.hasAlias(groupCode)
+                ? "group='" + groupCode + "'(db: " + dbGroup + ")"
+                : "group='" + groupCode + "'";
+
         Optional<List<EnumOption>> dbOptions;
         try {
-            dbOptions = dbPort.findByGroupCode(groupCode);
+            dbOptions = dbPort.findByGroupCode(dbGroup);
         } catch (Exception e) {
-            log.warn("[EnumDrift] DB unreachable for group '{}' — skipping drift check: {}", groupCode, e.getMessage());
+            log.warn("[EnumDrift] DB unreachable for {} — skipping drift check: {}", groupLabel, e.getMessage());
             return;
         }
 
@@ -59,10 +65,10 @@ public class EnumDriftChecker {
         Set<String> onlyInDb   = dbKeys.stream().filter(k -> !javaKeys.contains(k)).collect(Collectors.toSet());
 
         if (!onlyInJava.isEmpty()) {
-            log.warn("[EnumDrift] group='{}' Java에만 있는 코드(DB 누락): {}", groupCode, onlyInJava);
+            log.warn("[EnumDrift] {} Java에만 있는 코드(DB 누락): {}", groupLabel, onlyInJava);
         }
         if (!onlyInDb.isEmpty()) {
-            log.warn("[EnumDrift] group='{}' DB에만 있는 코드(Java 미선언): {}", groupCode, onlyInDb);
+            log.warn("[EnumDrift] {} DB에만 있는 코드(Java 미선언): {}", groupLabel, onlyInDb);
         }
     }
 }

@@ -25,18 +25,21 @@ public class CommonCodeChainReader {
     }
 
     public Optional<List<EnumOption>> resolve(String groupCode) {
-        Optional<List<EnumOption>> cached = cachePort.get(groupCode);
+        // DB/캐시 조회는 별칭 그룹 코드로 수행하여 FMS write-through 캐시(cc:housebl.JobDiv)를 공유한다.
+        String dbGroup = CommonCodeGroupAliases.toDbGroup(groupCode);
+
+        Optional<List<EnumOption>> cached = cachePort.get(dbGroup);
         if (cached.isPresent()) {
             return cached;
         }
 
-        Optional<List<EnumOption>> fromDb = dbPort.findByGroupCode(groupCode);
+        Optional<List<EnumOption>> fromDb = dbPort.findByGroupCode(dbGroup);
         if (fromDb.isPresent()) {
-            cachePort.put(groupCode, fromDb.get());
+            cachePort.put(dbGroup, fromDb.get());
             return fromDb;
         }
 
-        log.debug("CommonCode group '{}' not found in Redis nor DB — falling back to Java enum", groupCode);
+        log.debug("CommonCode group '{}' (db: '{}') not found in Redis nor DB — falling back to Java enum", groupCode, dbGroup);
         return Optional.empty();
     }
 }
