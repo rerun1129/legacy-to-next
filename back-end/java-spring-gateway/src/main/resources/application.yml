@@ -1,0 +1,123 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    gateway:
+      # Phase 1 동안 다운스트림 모듈도 CORS 헤더를 붙이므로 중복 제거
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
+
+      globalcors:
+        # FMS WebMvcConfig 기준 미러링.
+        # BMS가 PATCH를 사용하므로 allowedMethods에 PATCH 추가.
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: '*'
+            exposedHeaders:
+              - Location
+            allowCredentials: false
+            maxAge: 3600
+
+      routes:
+        # admin-route: /api/admin/** — order 0 (구체적 경로 우선)
+        - id: admin-route
+          uri: ${ADMIN_API_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/admin/**
+          order: 0
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: adminCb
+                fallbackUri: forward:/fallback/admin
+
+        # bms-route: /api/bms/** — order 0
+        - id: bms-route
+          uri: ${BMS_API_URI:http://localhost:8082}
+          predicates:
+            - Path=/api/bms/**
+          order: 0
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: bmsCb
+                fallbackUri: forward:/fallback/bms
+
+        # pms-route: /api/pms/** — order 0
+        - id: pms-route
+          uri: ${PMS_API_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/pms/**
+          order: 0
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pmsCb
+                fallbackUri: forward:/fallback/pms
+
+        # fms-route: /api/** — order 10 (catch-all, 반드시 뒤)
+        - id: fms-route
+          uri: ${FMS_API_URI:http://localhost:8080}
+          predicates:
+            - Path=/api/**
+          order: 10
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: fmsCb
+                fallbackUri: forward:/fallback/fms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      adminCb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+      bmsCb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+      pmsCb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+      fmsCb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+  timelimiter:
+    # Spring Cloud CircuitBreaker TimeLimiter 기본값 1초가 대부분의 API를 차단하므로 명시 설정 필수.
+    # PMS mart rebuild는 동기 작업으로 분 단위 소요 — 게이트웨이에서 끊기지 않도록 600s 설정.
+    instances:
+      adminCb:
+        timeoutDuration: 60s
+      bmsCb:
+        timeoutDuration: 60s
+      pmsCb:
+        timeoutDuration: 600s
+      fmsCb:
+        timeoutDuration: 60s
