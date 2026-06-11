@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.time.Duration;
+
 /**
  * pms.mart 설정 블록 바인딩 POJO.
  * @EnableConfigurationProperties(PmsMartProperties.class)로 등록되며
@@ -31,6 +33,14 @@ public class PmsMartProperties {
     private Bootstrap bootstrap = new Bootstrap();
     private Mongo mongo = new Mongo();
     private CountIndex countIndex = new CountIndex();
+
+    /**
+     * Mart 페이지 find 쿼리의 서버측 실행 상한.
+     * TimeLimiter 클라이언트 예산(기본 15s)과 동일 예산으로 서버측 kill을 보장한다.
+     * half-dead Mongo 회복 시 블로킹 read 워커 해방 목적.
+     * 환경변수 PMS_MART_QUERY_TIMEOUT으로 오버라이드 가능.
+     */
+    private Duration queryTimeout = Duration.ofSeconds(15);
 
     /** Mart 재빌드 관련 크기 설정. */
     @Getter

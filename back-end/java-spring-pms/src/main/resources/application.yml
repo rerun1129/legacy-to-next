@@ -94,6 +94,8 @@ resilience4j:
         recordExceptions:
           - org.springframework.dao.DataAccessException
           - com.mongodb.MongoException
+          # 미등재 시 타임아웃이 '성공' 집계 → half-dead Mongo에서 CB 영구 CLOSED 상태가 된다
+          - com.freightos.pms.adapter.out.routing.PmsMartQueryTimeoutException
         ignoreExceptions:
           - com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException
       pmsCountIndex:
@@ -110,6 +112,32 @@ resilience4j:
           - org.springframework.data.redis.RedisConnectionFailureException
         ignoreExceptions:
           - com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException
+  retry:
+    instances:
+      pmsMart:
+        maxAttempts: 2          # 원호출 + 1회 재시도
+        waitDuration: 200ms
+        ignoreExceptions:        # 선언적 이중 안전망(Customizer 술어와 중복, 가독성 목적)
+          - com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException
+          - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+          - com.freightos.pms.adapter.out.routing.PmsMartQueryTimeoutException
+        # retryExceptions 의도적 미사용 — RetryConfigCustomizer 술어가 단독 결정(우선순위 혼선 방지)
+  timelimiter:
+    instances:
+      pmsMart:
+        timeoutDuration: ${PMS_MART_QUERY_TIMEOUT:15s}   # 합법 최장 Mart 작업(깊은 페이지점프 ~10s) 위
+        cancelRunningFuture: true   # best-effort 인터럽트(소켓 read는 비중단)
+  bulkhead:
+    instances:
+      pmsOltpSearch:
+        maxConcurrentCalls: 5   # Hikari 10 = 검색 5 + full rebuild ETL parallelism 4 + 여유 1
+        maxWaitDuration: 2s
+  ratelimiter:
+    instances:
+      pmsMartRebuild:
+        limitForPeriod: 1
+        limitRefreshPeriod: 60s
+        timeoutDuration: 0      # 초과 즉시 RequestNotPermitted → 429
 
 # ── p6spy (SQL 로깅 — 디버그 시에만 임시로 true) ───────────────────
 decorator:
@@ -151,6 +179,7 @@ pms:
       deep-jump-offset-threshold: ${PMS_MART_DEEP_JUMP_OFFSET_THRESHOLD:3000}
     bootstrap:
       auto-rebuild: ${PMS_MART_BOOTSTRAP_AUTO_REBUILD:true}
+    query-timeout: ${PMS_MART_QUERY_TIMEOUT:15s}   # Mart 페이지 find 서버측 maxTime — TimeLimiter와 동일 예산
     mongo:
       server-selection-timeout-ms: ${PMS_MART_MONGO_SERVER_SELECTION_TIMEOUT_MS:3000}
       connect-timeout-ms: ${PMS_MART_MONGO_CONNECT_TIMEOUT_MS:2000}

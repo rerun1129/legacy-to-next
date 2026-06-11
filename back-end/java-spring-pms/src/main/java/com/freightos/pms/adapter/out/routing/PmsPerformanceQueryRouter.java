@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.util.function.Supplier;
+
 /**
  * PmsPerformanceQueryPort 라우팅 어댑터.
  *
@@ -25,6 +27,9 @@ import org.springframework.stereotype.Component;
  * - filterSupport.supportedByMart()==true → Mart
  * - 그 외 → OLTP 폴백
  * - Mart 결함 시 회로차단기로 OLTP 폴백
+ *
+ * OLTP supplier는 직행·폴백 양 경로 모두 PmsOltpBulkheadGuard로 래핑한다.
+ * CB OPEN 시 모든 트래픽이 Postgres(Hikari 10)로 몰려 커넥션 풀이 고갈되는 것을 방지한다.
  */
 @Primary
 @Component
@@ -37,25 +42,22 @@ public class PmsPerformanceQueryRouter implements PmsPerformanceQueryPort {
     private final PmsMartFilterSupport filterSupport;
     private final PmsMartProperties props;
     private final PmsMartCircuitGuard guard;
+    private final PmsOltpBulkheadGuard oltpBulkhead;
 
     @Override
     public PmsRawBlSearchResult searchByFreightLine(SearchPmsPerformanceCommand command, Pageable pageable) {
-        if (!useMart(command)) {
-            return oltp.searchByFreightLine(command, pageable);
-        }
-        return guard.martOrOltp(
-            () -> mart.searchByFreightLine(command, pageable),
-            () -> oltp.searchByFreightLine(command, pageable));
+        Supplier<PmsRawBlSearchResult> oltpCall =
+                () -> oltpBulkhead.execute(() -> oltp.searchByFreightLine(command, pageable));
+        if (!useMart(command)) return oltpCall.get();
+        return guard.martOrOltp(() -> mart.searchByFreightLine(command, pageable), oltpCall);
     }
 
     @Override
     public PmsRawBlSearchResult searchByDocument(SearchPmsPerformanceCommand command, Pageable pageable) {
-        if (!useMart(command)) {
-            return oltp.searchByDocument(command, pageable);
-        }
-        return guard.martOrOltp(
-            () -> mart.searchByDocument(command, pageable),
-            () -> oltp.searchByDocument(command, pageable));
+        Supplier<PmsRawBlSearchResult> oltpCall =
+                () -> oltpBulkhead.execute(() -> oltp.searchByDocument(command, pageable));
+        if (!useMart(command)) return oltpCall.get();
+        return guard.martOrOltp(() -> mart.searchByDocument(command, pageable), oltpCall);
     }
 
     private boolean useMart(SearchPmsPerformanceCommand command) {

@@ -1,15 +1,24 @@
 package com.freightos.pms.adapter.out.routing;
 
+import com.freightos.common.config.PmsMartConfig;
 import com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException;
 import com.mongodb.MongoException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
 
+import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +34,7 @@ class PmsMartCircuitGuardTest {
 
     private CircuitBreakerRegistry registry;
     private PmsMartCircuitGuard guard;
+    private ExecutorService executor;
 
     @BeforeEach
     void setUp() {
@@ -42,7 +52,30 @@ class PmsMartCircuitGuardTest {
                 .build();
 
         registry = CircuitBreakerRegistry.of(config);
-        guard = new PmsMartCircuitGuard(registry);
+
+        // in-memory RetryRegistry: waitDuration ZERO(결정적 실행), 운영과 동일 술어
+        RetryConfig retryConfig = RetryConfig.custom()
+                .maxAttempts(2)
+                .waitDuration(Duration.ZERO)
+                .retryOnException(PmsMartConfig::retryableMartFault)
+                .build();
+        RetryRegistry retryRegistry = RetryRegistry.of(retryConfig);
+        retryRegistry.retry(PmsMartCircuitGuard.INSTANCE, retryConfig);
+
+        // in-memory TimeLimiterRegistry: 여유 타임아웃(이 파일 케이스에서 절대 발화 안 함)
+        TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom()
+                .timeoutDuration(Duration.ofSeconds(5))
+                .build();
+        TimeLimiterRegistry timeLimiterRegistry = TimeLimiterRegistry.of(timeLimiterConfig);
+
+        executor = Executors.newSingleThreadExecutor();
+
+        guard = new PmsMartCircuitGuard(registry, retryRegistry, timeLimiterRegistry, executor);
+    }
+
+    @AfterEach
+    void tearDown() {
+        executor.shutdownNow();
     }
 
     @Test

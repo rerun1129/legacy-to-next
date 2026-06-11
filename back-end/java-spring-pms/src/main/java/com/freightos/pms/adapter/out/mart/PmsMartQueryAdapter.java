@@ -160,10 +160,12 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
                 || PmsMartFilterSupport.needsLineGrainCorrelation(command)
                 || PmsMartFilterSupport.hasDocLineFilter(command)) {
             // 밀집 / 라인-그레인 상관 / 서류조건 경로: pageCriteria + blId DESC 조기종료 find
+            // maxTimeMsec: 클라이언트 TimeLimiter(15s)와 동일 예산의 서버측 kill — half-dead 후 Mongo 회복 시 블로킹 read 워커 해방 보장
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())
-                .limit(pageable.getPageSize());
+                .limit(pageable.getPageSize())
+                .maxTimeMsec(props.getQueryTimeout().toMillis());
             return mongoTemplate.find(q, PmsBlMartDocument.class);
         }
 
@@ -188,10 +190,12 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
         if (total > props.getLineAccel().getEarlyTermThreshold()
                 || PmsMartFilterSupport.hasDocLineFilter(command)) {
             // 밀집 / 서류조건 경로: pageCriteria + blId DESC 조기종료 find
+            // maxTimeMsec: 클라이언트 TimeLimiter(15s)와 동일 예산의 서버측 kill — half-dead 후 Mongo 회복 시 블로킹 read 워커 해방 보장
             Query q = Query.query(pageCriteria)
                 .with(BL_SORT)
                 .skip(pageable.getOffset())
-                .limit(pageable.getPageSize());
+                .limit(pageable.getPageSize())
+                .maxTimeMsec(props.getQueryTimeout().toMillis());
             return mongoTemplate.find(q, PmsBlMartDocument.class);
         }
 
@@ -223,8 +227,9 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
     private List<PmsBlMartDocument> findByBlKeysOrdered(List<String> blKeys) {
         if (blKeys.isEmpty()) return List.of();
 
+        // maxTimeMsec: 클라이언트 TimeLimiter(15s)와 동일 예산의 서버측 kill — half-dead 후 Mongo 회복 시 블로킹 read 워커 해방 보장
         List<PmsBlMartDocument> docs = mongoTemplate.find(
-            Query.query(Criteria.where("_id").in(blKeys)),
+            Query.query(Criteria.where("_id").in(blKeys)).maxTimeMsec(props.getQueryTimeout().toMillis()),
             PmsBlMartDocument.class);
 
         Map<String, PmsBlMartDocument> byId = docs.stream()
@@ -252,10 +257,12 @@ public class PmsMartQueryAdapter implements PmsPerformanceQueryPort {
         ResolvedTotal resolved = countResolver.resolveFastPathTotal(criteria, command, cacheKey);
         if (resolved.total() == 0L) return PmsRawBlSearchResult.exact(new PageImpl<>(List.of(), pageable, 0L));
 
+        // maxTimeMsec: 클라이언트 TimeLimiter(15s)와 동일 예산의 서버측 kill — half-dead 후 Mongo 회복 시 블로킹 read 워커 해방 보장
         Query findQuery = Query.query(criteria)
             .with(BL_SORT)
             .skip(pageable.getOffset())
-            .limit(pageable.getPageSize());
+            .limit(pageable.getPageSize())
+            .maxTimeMsec(props.getQueryTimeout().toMillis());
 
         List<PmsBlMartDocument> docs = mongoTemplate.find(findQuery, PmsBlMartDocument.class);
         List<PmsRawBlRow> content = docs.stream().map(mapper::map).toList();

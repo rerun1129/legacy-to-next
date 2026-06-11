@@ -1,6 +1,8 @@
 package com.freightos.common.exception;
 
 import com.freightos.pms.adapter.out.mart.cancel.PmsQueryCancelledException;
+import io.github.resilience4j.bulkhead.BulkheadFullException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -103,6 +105,40 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setTitle("Bad Request");
         pd.setDetail(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
+    }
+
+    /**
+     * OLTP 폴백 동시 처리 한도 초과 — CB OPEN 시 Mart 트래픽이 Postgres로 몰릴 때 발생.
+     * 일시적 부하이므로 503 + Retry-After: 5.
+     */
+    @ExceptionHandler(BulkheadFullException.class)
+    public ResponseEntity<ProblemDetail> handleBulkheadFull(BulkheadFullException ex) {
+        log.warn("BulkheadFullException — OLTP 폴백 동시 처리 한도 초과(503): {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE);
+        pd.setType(URI.create(TYPE_BASE + "OLTP_BUSY"));
+        pd.setTitle("Service Unavailable");
+        pd.setDetail("OLTP 폴백 동시 처리 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.RETRY_AFTER, "5")
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(pd);
+    }
+
+    /**
+     * Mart rebuild 요청 빈도 초과 — pmsMartRebuild RateLimiter(1회/60s) 초과 시 발생.
+     * 429 + Retry-After: 60.
+     */
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<ProblemDetail> handleRateLimitExceeded(RequestNotPermitted ex) {
+        log.warn("RequestNotPermitted — rebuild 요청 빈도 초과(429): {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.TOO_MANY_REQUESTS);
+        pd.setType(URI.create(TYPE_BASE + "REBUILD_RATE_LIMITED"));
+        pd.setTitle("Too Many Requests");
+        pd.setDetail("Mart rebuild는 60초당 1회만 허용됩니다.");
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, "60")
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(pd);
     }
