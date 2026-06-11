@@ -25,17 +25,11 @@ docker compose up -d
 ## 4. Swagger UI
 http://localhost:8080/swagger-ui.html
 
-## 5. DB 스키마 적용 (Flyway 활성화 전 수동)
-스키마 설계 완료 후:
-```bash
-# 1. schema/ 디렉터리의 V*.sql 파일을 마이그레이션 폴더에 복사
-cp ../../schema/V1__fms_initial_schema.sql src/main/resources/db/migration/
-
-# 2. application-local.yml 에서 flyway.enabled=true 로 변경
-
-# 3. 재시작하면 Flyway가 자동 적용
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
+## 5. DB 스키마 (Flyway 자동 적용)
+fms 스키마 정본은 `src/main/resources/db/migration` 이며, bootRun 시 Flyway가 자동 적용한다.
+- 기존 DB(테이블 존재): `baseline-on-migrate`가 V1을 baseline 처리하고 스킵
+- 신규 DB: V1부터 순차 실행
+- 스키마 변경: V1·기적용 파일 수정 금지(checksum 불변), `V2__*.sql`부터 증분 추가
 
 ## API 엔드포인트 (v1)
 | 메서드 | 경로 | 설명 |

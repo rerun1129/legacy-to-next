@@ -31,11 +31,13 @@ spring:
     open-in-view: false
 
   # ── Flyway ────────────────────────────────────────────────────────
-  # 스키마 설계 완료 전까지 off. /schema/V*.sql → src/main/resources/db/migration/ 복사 후 활성화.
+  # fms 스키마 정본 = db/migration. 기존 DB는 baseline-on-migrate로 V1 스킵, 신규 DB는 V1 실행.
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
+    default-schema: fms          # history 테이블 = fms.flyway_schema_history
     baseline-on-migrate: true
+    validate-on-migrate: true
 
   # ── Logging ───────────────────────────────────────────────────────
   output:

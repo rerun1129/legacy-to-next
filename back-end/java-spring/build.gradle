@@ -37,8 +37,7 @@ dependencies {
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0'
 
     // ── Schema migration (Flyway) ──────────────────────────────────
-    // application.yml: spring.flyway.enabled=false (로컬 개발 시 off)
-    // 스키마 확정 후 /schema/V*.sql 파일을 src/main/resources/db/migration/ 에 복사하고 enabled=true
+    // fms 스키마 정본 = src/main/resources/db/migration (V1 불변, 이후 변경은 V2+ 증분)
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
 

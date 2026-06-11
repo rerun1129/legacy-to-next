@@ -38,4 +38,4 @@
 
 ## 디렉토리 구조
 
-'front-end/' 프론트엔드 'back-end/' 자바 백엔드 'schema/' DDL 스크립트 보관소 'docs/' PRD 및 중요 문서 보관소
+'front-end/' 프론트엔드 'back-end/' 자바 백엔드 'schema/' docker-init 스크립트·과거 수동 마이그레이션 이력(FMS DDL 정본: back-end/java-spring/src/main/resources/db/migration) 'docs/' PRD 및 중요 문서 보관소
