@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.ArgumentMatchers.eq;
@@ -75,15 +76,16 @@ class CommonCodeChainReaderTest {
     }
 
     @Test
-    @DisplayName("Redis 예외 — DB 조회로 자동 폴백")
-    void resolve_redisException_fallsBackToDb() {
-        List<EnumOption> dbOptions = List.of(new EnumOption("E", "Export", null, "수출"));
-        given(cachePort.get("Bound")).willThrow(new RuntimeException("Redis connection failed"));
-        // cachePort.get 예외는 CommonCodeRedisAdapter에서 삼킨 뒤 빈 Optional을 반환하므로
-        // 실제 환경에서는 이 케이스가 발생하지 않는다. 방어 목적 테스트.
-        given(dbPort.findByGroupCode("Bound")).willReturn(Optional.of(dbOptions));
+    @DisplayName("Redis 예외 — ChainReader가 예외를 전파한다(어댑터에서 삼키는 계약은 별도 테스트)")
+    void resolve_redisException_propagatesException() {
+        RuntimeException redisError = new RuntimeException("Redis connection failed");
+        given(cachePort.get("Bound")).willThrow(redisError);
 
-        // ChainReader는 cachePort가 삼킨 예외를 받으므로 실제론 Optional.empty() 수신
-        // 이 테스트는 ChainReader 자체의 로직만 검증한다(어댑터가 예외를 삼키는 계약은 별도 테스트)
+        // ChainReader는 cachePort 예외를 삼키지 않으므로 그대로 전파된다
+        assertThatThrownBy(() -> sut.resolve("Bound"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Redis connection failed");
+
+        then(dbPort).shouldHaveNoInteractions();
     }
 }
