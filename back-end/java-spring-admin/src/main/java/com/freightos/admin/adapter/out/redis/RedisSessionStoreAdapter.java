@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.auth.SessionBundle;
 import com.freightos.admin.application.auth.port.out.SessionStorePort;
 import lombok.RequiredArgsConstructor;
-import lombok.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
