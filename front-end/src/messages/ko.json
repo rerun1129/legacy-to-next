@@ -1136,6 +1136,32 @@
         }
       }
     },
+    "commonCode": {
+      "group": {
+        "title": "코드 그룹",
+        "noGroups": "등록된 그룹이 없습니다."
+      },
+      "panel": {
+        "title": "공통 코드 목록"
+      },
+      "cols": {
+        "no": "#",
+        "code": "코드",
+        "label": "코드명(EN)",
+        "labelKo": "코드명(KO)",
+        "sortOrder": "정렬 순서",
+        "status": "사용"
+      },
+      "options": {
+        "active": "사용",
+        "inactive": "미사용"
+      },
+      "msg": {
+        "selectGroup": "좌측에서 코드 그룹을 선택하세요.",
+        "noResults": "등록된 코드가 없습니다.",
+        "saveSuccess": "저장 완료 — 생성 {created}, 수정 {updated}, 삭제 {deleted}"
+      }
+    },
     "carrier": {
       "cols": {
         "no": "#",

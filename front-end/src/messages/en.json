@@ -1136,6 +1136,32 @@
         }
       }
     },
+    "commonCode": {
+      "group": {
+        "title": "Code Groups",
+        "noGroups": "No groups registered."
+      },
+      "panel": {
+        "title": "Common Code List"
+      },
+      "cols": {
+        "no": "#",
+        "code": "Code",
+        "label": "Label (EN)",
+        "labelKo": "Label (KO)",
+        "sortOrder": "Sort Order",
+        "status": "Status"
+      },
+      "options": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "msg": {
+        "selectGroup": "Select a code group on the left.",
+        "noResults": "No codes registered.",
+        "saveSuccess": "Saved — created {created}, updated {updated}, deleted {deleted}"
+      }
+    },
     "carrier": {
       "cols": {
         "no": "#",

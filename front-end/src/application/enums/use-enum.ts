@@ -10,12 +10,14 @@ export const enumKeys = {
   many: (names: string[]) => [...enumKeys.all, 'many', [...names].sort().join(',')] as const,
 }
 
+// 공통코드 동적 관리 도입으로 무기한 캐시 가정 폐기 — 5분 TTL로 전환
+const ENUM_STALE_TIME = 300_000;
+
 export function useEnum(name: EnumName) {
   return useQuery({
     queryKey: enumKeys.one(name),
     queryFn: () => enumPort.fetchEnum(name),
-    // ENUM 값은 배포 중 변경되지 않으므로 무기한 캐싱
-    staleTime: Infinity,
+    staleTime: ENUM_STALE_TIME,
     retry: false,
   })
 }
@@ -24,7 +26,7 @@ export function useEnums(names: EnumName[]) {
   return useQuery({
     queryKey: enumKeys.many(names),
     queryFn: () => enumPort.fetchEnums(names),
-    staleTime: Infinity,
+    staleTime: ENUM_STALE_TIME,
     retry: false,
   })
 }
