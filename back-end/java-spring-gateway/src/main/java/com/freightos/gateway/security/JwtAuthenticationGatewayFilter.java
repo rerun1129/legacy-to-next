@@ -21,7 +21,7 @@ import java.util.Optional;
  * JWT 중앙 검증 GlobalFilter.
  *
  * 동작 원칙: 게이트웨이는 차단하지 않고 신원 정보를 주입(enrich-only)한다.
- * - 클라이언트가 보낸 X-Auth-*/X-Internal-Token은 위조 차단을 위해 무조건 제거한다.
+ * - 클라이언트가 보낸 X-Auth-* 와 X-Internal-Token은 위조 차단을 위해 무조건 제거한다.
  * - Bearer 토큰이 있고 검증 성공 시 X-Auth-User/X-Auth-Authorities/X-Auth-Attr 주입.
  * - 검증 실패 또는 토큰 부재 시 X-Auth-* 주입 없이 통과(보호 판단은 모듈 SecurityConfig 몫).
  * - 항상 X-Internal-Token을 주입하여 다운스트림이 게이트웨이 경유 여부를 확인할 수 있게 한다.
