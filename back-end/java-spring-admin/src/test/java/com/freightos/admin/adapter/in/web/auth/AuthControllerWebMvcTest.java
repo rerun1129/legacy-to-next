@@ -2,6 +2,7 @@ package com.freightos.admin.adapter.in.web.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
+import com.freightos.admin.application.auth.port.out.SessionStorePort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
 import com.freightos.admin.common.security.HeaderAuthenticationFilter;
@@ -20,13 +21,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,6 +43,9 @@ class AuthControllerWebMvcTest {
 
     @MockitoBean
     private AuthUseCase authUseCase;
+
+    @MockitoBean
+    private SessionStorePort sessionStorePort;
 
     @MockitoBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
@@ -139,59 +141,5 @@ class AuthControllerWebMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isUnauthorized());
-    }
-
-    // ── refresh: 정상 → 200 ──────────────────────────────────────────────────
-
-    @Test
-    void refresh_validToken_returns200() throws Exception {
-        Map<String, List<String>> attrsAdmin = Map.of("role", List.of("ADMIN"));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashed", true, attrsAdmin, null, null);
-        user.assignIdentity(1L, null, null, null, null);
-        LoginResult refreshResult = new LoginResult("new.access.token", "new.refresh.token", user,
-                attrsAdmin, List.of(), List.of());
-
-        given(authUseCase.refresh(any())).willReturn(refreshResult);
-
-        String body = """
-                {"refreshToken":"some.refresh.token"}
-                """;
-        mockMvc.perform(post("/api/admin/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.accessToken").value("new.access.token"))
-                .andExpect(jsonPath("$.data.refreshToken").value("new.refresh.token"));
-    }
-
-    // ── refresh: 유효하지 않은 token → 401 ───────────────────────────────────
-
-    @Test
-    void refresh_invalidToken_returns401() throws Exception {
-        given(authUseCase.refresh(any())).willThrow(new BadCredentialsException("유효하지 않은 refresh token"));
-
-        String body = """
-                {"refreshToken":"invalid.token"}
-                """;
-        mockMvc.perform(post("/api/admin/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isUnauthorized());
-    }
-
-    // ── logout: 정상 → 200 ───────────────────────────────────────────────────
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void logout_authenticated_returns200() throws Exception {
-        willDoNothing().given(authUseCase).logout(any());
-
-        String body = """
-                {"refreshToken":"some.refresh.token"}
-                """;
-        mockMvc.perform(post("/api/admin/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk());
     }
 }

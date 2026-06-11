@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.properties.hibernate.default_schema=admin",
         "spring.sql.init.mode=never",
         "spring.flyway.enabled=false",
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration",
         "jwt.secret=test-secret-key-must-be-at-least-32-chars!!",
         "gateway.internal-token=test-internal-token"
 })

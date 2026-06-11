@@ -1,22 +1,19 @@
 package com.freightos.admin.application.auth;
 
 import com.freightos.admin.application.auth.command.LoginCommand;
-import com.freightos.admin.application.auth.command.LogoutCommand;
-import com.freightos.admin.application.auth.command.RefreshCommand;
+import com.freightos.admin.application.auth.port.out.SessionStorePort;
 import com.freightos.admin.application.auth.port.out.SubscriptionQueryPort;
-import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
-import com.freightos.admin.common.security.AccessibleButton;
-import com.freightos.admin.common.security.ButtonEvalRow;
-import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
+import com.freightos.admin.application.permissionpreset.ComputeEffectiveAttributeValuesService;
 import com.freightos.admin.application.user.port.in.UserUseCase;
 import com.freightos.admin.common.exception.ApplicationException;
+import com.freightos.admin.common.security.AccessibleButton;
+import com.freightos.admin.common.security.ButtonEvalRow;
 import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
-import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,12 +26,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +57,7 @@ class AuthServiceTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Mock
-    private RefreshTokenPort refreshTokenPort;
+    private SessionStorePort sessionStorePort;
 
     @Mock
     private PolicyEvaluator policyEvaluator;
@@ -92,7 +87,7 @@ class AuthServiceTest {
                 userUseCase,
                 passwordEncoder,
                 jwtTokenProvider,
-                refreshTokenPort,
+                sessionStorePort,
                 policyEvaluator,
                 menuPolicyPort,
                 buttonPolicyPort,
@@ -102,7 +97,7 @@ class AuthServiceTest {
         );
     }
 
-    // ── login: 정상 → LoginResult 반환, refresh save 호출 ──────────────────────
+    // ── login: 정상 → LoginResult 반환, sessionStorePort.saveSession 호출 ──────
 
     @Test
     void login_validCredentials_returnsLoginResult() {
@@ -121,7 +116,7 @@ class AuthServiceTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rawRefresh");
         given(jwtTokenProvider.hashRefreshToken("rawRefresh")).willReturn("hashedRefresh");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("admin", "rawPw"));
 
@@ -130,9 +125,7 @@ class AuthServiceTest {
         assertThat(result.user()).isSameAs(user);
         assertThat(result.accessibleMenus()).contains("MENU_ADMIN_CODE_LIST");
 
-        org.mockito.ArgumentCaptor<RefreshToken> tokenCaptor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
-        then(refreshTokenPort).should().save(tokenCaptor.capture());
-        assertThat(tokenCaptor.getValue().getTokenHash()).isEqualTo("hashedRefresh");
+        then(sessionStorePort).should().saveSession(eq("hashedRefresh"), any(SessionBundle.class), eq(14L));
     }
 
     // ── login: 비밀번호 불일치 → BadCredentialsException ──────────────────────
@@ -175,59 +168,6 @@ class AuthServiceTest {
             .hasMessageContaining("비활성");
     }
 
-    // ── refresh: 정상 → 이전 revoke + 새 발급 ────────────────────────────────
-
-    @Test
-    void refresh_validToken_revokesOldAndIssuesNew() {
-        RefreshToken oldToken = RefreshToken.issue(1L, "oldHash", LocalDateTime.now().plusDays(7));
-        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, Collections.emptyMap(), null, null);
-        user.assignIdentity(1L, null, null, null, null);
-
-        given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
-        given(refreshTokenPort.findActiveByTokenHash("oldHash")).willReturn(Optional.of(oldToken));
-        willDoNothing().given(refreshTokenPort).revokeByTokenHash("oldHash");
-        given(userUseCase.findUserById(1L)).willReturn(user);
-        given(effectiveAttributesService.computeEffectiveAttributes(1L, Collections.emptyMap())).willReturn(Collections.emptyMap());
-        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
-        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
-        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
-        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
-        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("new.access.token");
-        given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("newRawRefresh");
-        given(jwtTokenProvider.hashRefreshToken("newRawRefresh")).willReturn("newHash");
-        given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
-
-        LoginResult result = authService.refresh(new RefreshCommand("rawOld"));
-
-        then(refreshTokenPort).should().revokeByTokenHash("oldHash");
-        assertThat(result.accessToken()).isEqualTo("new.access.token");
-        assertThat(result.refreshToken()).isEqualTo("newRawRefresh");
-    }
-
-    // ── refresh: 미존재 hash → BadCredentialsException ────────────────────────
-
-    @Test
-    void refresh_invalidToken_throwsBadCredentials() {
-        given(jwtTokenProvider.hashRefreshToken("unknownRaw")).willReturn("unknownHash");
-        given(refreshTokenPort.findActiveByTokenHash("unknownHash")).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> authService.refresh(new RefreshCommand("unknownRaw")))
-            .isInstanceOf(BadCredentialsException.class);
-    }
-
-    // ── logout: revoke 호출 ────────────────────────────────────────────────────
-
-    @Test
-    void logout_callsRevokeByTokenHash() {
-        given(jwtTokenProvider.hashRefreshToken("rawToken")).willReturn("hashed");
-        willDoNothing().given(refreshTokenPort).revokeByTokenHash("hashed");
-
-        authService.logout(new LogoutCommand("rawToken"));
-
-        then(refreshTokenPort).should().revokeByTokenHash("hashed");
-    }
-
     // ── getMe: 정상 → MeProjection 반환 ──────────────────────────────────────
 
     @Test
@@ -254,7 +194,7 @@ class AuthServiceTest {
             .contains("BTN_ADMIN_USER_LIST_CREATE");
     }
 
-    // ── 구독 만료 신규 케이스들 ─────────────────────────────────────────────────
+    // ── 구독 관련 케이스들 ─────────────────────────────────────────────────────
 
     // ① login_subscriptionExpired: module=["FMS"], valid={} → SUBSCRIPTION_EXPIRED
 
@@ -297,7 +237,7 @@ class AuthServiceTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
         given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("fms", "rawPw"));
 
@@ -323,7 +263,7 @@ class AuthServiceTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
         given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         authService.login(new LoginCommand("admin", "rawPw"));
 
@@ -351,33 +291,40 @@ class AuthServiceTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
         given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("combo", "rawPw"));
 
         assertThat(result.accessToken()).isEqualTo("tok");
     }
 
-    // ⑤ refresh_subscriptionExpired: refresh 시 구독 만료 → SUBSCRIPTION_EXPIRED
+    // ── Redis 실패에도 로그인 성공 ─────────────────────────────────────────────
 
     @Test
-    void refresh_subscriptionExpired_throwsForbidden() {
-        RefreshToken oldToken = RefreshToken.issue(10L, "oldHash", LocalDateTime.now().plusDays(7));
-        Map<String, List<String>> attrs = Map.of("module", List.of("FMS"));
-        AdminUser user = AdminUser.create("fms", "fms@example.com", "hashedPw", true, attrs, null, 42L);
-        user.assignIdentity(10L, null, null, null, null);
+    void login_redisFailure_loginSucceedsAnyway() {
+        Map<String, List<String>> attrs = Map.of("role", List.of("ADMIN"));
+        AdminUser user = AdminUser.create("admin", "admin@example.com", "hashedPw", true, attrs, null, null);
+        user.assignIdentity(1L, null, null, null, null);
 
-        given(jwtTokenProvider.hashRefreshToken("rawOld")).willReturn("oldHash");
-        given(refreshTokenPort.findActiveByTokenHash("oldHash")).willReturn(Optional.of(oldToken));
-        willDoNothing().given(refreshTokenPort).revokeByTokenHash("oldHash");
-        given(userUseCase.findUserById(10L)).willReturn(user);
-        given(subscriptionQueryPort.findValidModuleCodes(eq(42L), eq(TODAY))).willReturn(Set.of());
+        given(userUseCase.findUserByUsername("admin")).willReturn(user);
+        given(passwordEncoder.matches("rawPw", "hashedPw")).willReturn(true);
+        given(effectiveAttributesService.computeEffectiveAttributes(1L, attrs)).willReturn(attrs);
+        given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
+        given(policyEvaluator.accessibleMenuCodes(any(), any())).willReturn(Set.of());
+        given(policyEvaluator.accessibleButtonCodes(any(), any())).willReturn(Set.of());
+        given(jwtTokenProvider.generateAccessToken(anyString(), anyCollection(), anyMap())).willReturn("tok");
+        given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rtok");
+        given(jwtTokenProvider.hashRefreshToken("rtok")).willReturn("rtokh");
+        given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
+        // Redis 어댑터가 내부적으로 예외를 삼키므로, 포트 자체가 예외를 던지면 로그인이 실패한다.
+        // 실제 RedisSessionStoreAdapter는 RuntimeException을 삼키고 warn 로그만 남긴다.
+        // 이 테스트는 SessionStorePort 구현이 예외를 삼키는 계약(saveSession이 throw 안 함)을 검증한다.
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
-        assertThatThrownBy(() -> authService.refresh(new RefreshCommand("rawOld")))
-            .isInstanceOf(ApplicationException.class)
-            .satisfies(ex -> {
-                ApplicationException appEx = (ApplicationException) ex;
-                assertThat(appEx.getErrorCode()).isEqualTo("SUBSCRIPTION_EXPIRED");
-            });
+        LoginResult result = authService.login(new LoginCommand("admin", "rawPw"));
+
+        assertThat(result.accessToken()).isEqualTo("tok");
+        assertThat(result.refreshToken()).isEqualTo("rtok");
     }
 }

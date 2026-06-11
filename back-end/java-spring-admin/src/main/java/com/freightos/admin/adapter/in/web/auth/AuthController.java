@@ -2,13 +2,8 @@ package com.freightos.admin.adapter.in.web.auth;
 
 import com.freightos.admin.adapter.in.web.auth.dto.LoginRequest;
 import com.freightos.admin.adapter.in.web.auth.dto.LoginResponse;
-import com.freightos.admin.adapter.in.web.auth.dto.LogoutRequest;
 import com.freightos.admin.adapter.in.web.auth.dto.MeResponse;
-import com.freightos.admin.adapter.in.web.auth.dto.RefreshRequest;
-import com.freightos.admin.adapter.in.web.auth.dto.RefreshResponse;
 import com.freightos.admin.application.auth.command.LoginCommand;
-import com.freightos.admin.application.auth.command.LogoutCommand;
-import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
@@ -62,20 +57,5 @@ public class AuthController {
                 new LoginResponse(result.accessToken(), result.refreshToken(), me),
                 MessageCode.AUTH_LOGIN_OK.getMessage()
         ));
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<RefreshResponse>> refresh(@Valid @RequestBody RefreshRequest req) {
-        LoginResult result = authUseCase.refresh(new RefreshCommand(req.refreshToken()));
-        return ResponseEntity.ok(ApiResponse.of(
-                new RefreshResponse(result.accessToken(), result.refreshToken()),
-                MessageCode.AUTH_REFRESH_OK.getMessage()
-        ));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody LogoutRequest req) {
-        authUseCase.logout(new LogoutCommand(req.refreshToken()));
-        return ResponseEntity.ok(ApiResponse.ok(MessageCode.AUTH_LOGOUT_OK.getMessage()));
     }
 }

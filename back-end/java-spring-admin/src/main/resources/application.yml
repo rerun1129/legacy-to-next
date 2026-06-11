@@ -1,6 +1,10 @@
 spring:
   application:
     name: java-spring-admin
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
   datasource:
     url: ${ADMIN_DB_URL:jdbc:postgresql://localhost:5432/fms?currentSchema=admin}
     username: ${ADMIN_DB_USER:fms}

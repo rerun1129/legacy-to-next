@@ -1,10 +1,8 @@
 package com.freightos.admin.application.auth;
 
 import com.freightos.admin.application.auth.command.LoginCommand;
-import com.freightos.admin.application.auth.command.LogoutCommand;
-import com.freightos.admin.application.auth.command.RefreshCommand;
 import com.freightos.admin.application.auth.port.in.AuthUseCase;
-import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
+import com.freightos.admin.application.auth.port.out.SessionStorePort;
 import com.freightos.admin.application.auth.port.out.SubscriptionQueryPort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.auth.projection.MeProjection;
@@ -18,18 +16,15 @@ import com.freightos.admin.common.security.ButtonEvalRow;
 import com.freightos.admin.common.security.MenuEvalRow;
 import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
-import com.freightos.admin.domain.auth.entity.RefreshToken;
 import com.freightos.admin.domain.user.entity.AdminUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +37,7 @@ public class AuthService implements AuthUseCase {
     private final UserUseCase userUseCase;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenPort refreshTokenPort;
+    private final SessionStorePort sessionStorePort;
     private final PolicyEvaluator policyEvaluator;
     private final MenuPolicyPort menuPolicyPort;
     private final ButtonPolicyPort buttonPolicyPort;
@@ -51,7 +46,6 @@ public class AuthService implements AuthUseCase {
     private final Clock clock;
 
     @Override
-    @Transactional
     public LoginResult login(LoginCommand command) {
         AdminUser user;
         try {
@@ -76,55 +70,19 @@ public class AuthService implements AuthUseCase {
         String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
         String refreshRaw = jwtTokenProvider.generateRefreshTokenRaw();
         String refreshHash = jwtTokenProvider.hashRefreshToken(refreshRaw);
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(jwtTokenProvider.refreshTtlDays());
 
-        refreshTokenPort.save(RefreshToken.issue(user.getId(), refreshHash, expiresAt));
+        // authorities CSV는 JWT auth claim과 동일한 문자열로 세션 번들에 기록한다.
+        SessionBundle bundle = new SessionBundle(
+                user.getUsername(),
+                String.join(",", authorities),
+                attrs
+        );
+        sessionStorePort.saveSession(refreshHash, bundle, jwtTokenProvider.refreshTtlDays());
 
         // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
         return new LoginResult(accessToken, refreshRaw, user, attrs,
                 accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
                 accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label(), ab.labelEn())).toList());
-    }
-
-    @Override
-    @Transactional
-    public LoginResult refresh(RefreshCommand command) {
-        String oldHash = jwtTokenProvider.hashRefreshToken(command.refreshToken());
-        RefreshToken oldToken = refreshTokenPort.findActiveByTokenHash(oldHash)
-            .orElseThrow(() -> new BadCredentialsException("유효하지 않은 refresh token"));
-
-        refreshTokenPort.revokeByTokenHash(oldHash);
-
-        AdminUser user = userUseCase.findUserById(oldToken.getUserId());
-        if (!user.isActive()) {
-            throw new BadCredentialsException("비활성 사용자입니다.");
-        }
-        verifySubscriptionOrThrow(user);
-
-        // direct ∪ active preset attribute_value union
-        Map<String, List<String>> attrs = effectiveAttributesService.computeEffectiveAttributes(user.getId(), user.getAttributes());
-        Set<String> accessibleMenus = evaluateMenus(attrs);
-        List<AccessibleButton> accessibleButtons = evaluateButtons(attrs);
-        Set<String> authorities = buildAuthorities(attrs, accessibleMenus, accessibleButtons);
-
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername(), authorities, attrs);
-        String newRefreshRaw = jwtTokenProvider.generateRefreshTokenRaw();
-        String newRefreshHash = jwtTokenProvider.hashRefreshToken(newRefreshRaw);
-        LocalDateTime newExpiresAt = LocalDateTime.now().plusDays(jwtTokenProvider.refreshTtlDays());
-
-        refreshTokenPort.save(RefreshToken.issue(user.getId(), newRefreshHash, newExpiresAt));
-
-        // FE 컨벤션(MENU_*/BTN_*)에 맞춰 prefix 부착 후 반환
-        return new LoginResult(accessToken, newRefreshRaw, user, attrs,
-                accessibleMenus.stream().map(c -> "MENU_" + c).toList(),
-                accessibleButtons.stream().map(ab -> new AccessibleButton("BTN_" + ab.code(), ab.label(), ab.labelEn())).toList());
-    }
-
-    @Override
-    @Transactional
-    public void logout(LogoutCommand command) {
-        String hash = jwtTokenProvider.hashRefreshToken(command.refreshToken());
-        refreshTokenPort.revokeByTokenHash(hash);
     }
 
     @Override

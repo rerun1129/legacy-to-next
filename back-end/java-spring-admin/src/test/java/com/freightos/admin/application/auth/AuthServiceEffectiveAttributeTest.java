@@ -1,7 +1,7 @@
 package com.freightos.admin.application.auth;
 
 import com.freightos.admin.application.auth.command.LoginCommand;
-import com.freightos.admin.application.auth.port.out.RefreshTokenPort;
+import com.freightos.admin.application.auth.port.out.SessionStorePort;
 import com.freightos.admin.application.auth.projection.LoginResult;
 import com.freightos.admin.application.buttonpolicy.port.out.ButtonPolicyPort;
 import com.freightos.admin.application.menupolicy.port.out.MenuPolicyPort;
@@ -10,13 +10,13 @@ import com.freightos.admin.application.user.port.in.UserUseCase;
 import com.freightos.admin.common.security.PolicyEvaluator;
 import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.domain.user.entity.AdminUser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +25,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,7 +50,7 @@ class AuthServiceEffectiveAttributeTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Mock
-    private RefreshTokenPort refreshTokenPort;
+    private SessionStorePort sessionStorePort;
 
     @Mock
     private PolicyEvaluator policyEvaluator;
@@ -68,10 +69,10 @@ class AuthServiceEffectiveAttributeTest {
 
     private AuthService authService;
 
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     void setUp() {
         authService = new AuthService(
-                userUseCase, passwordEncoder, jwtTokenProvider, refreshTokenPort,
+                userUseCase, passwordEncoder, jwtTokenProvider, sessionStorePort,
                 policyEvaluator, menuPolicyPort, buttonPolicyPort, effectiveAttributesService,
                 subscriptionQueryPort,
                 java.time.Clock.systemDefaultZone()
@@ -88,7 +89,6 @@ class AuthServiceEffectiveAttributeTest {
 
         given(userUseCase.findUserByUsername("admin")).willReturn(user);
         given(passwordEncoder.matches("pw", "hash")).willReturn(true);
-        // effectiveAttributesService 가 직접 속성 그대로 반환
         given(effectiveAttributesService.computeEffectiveAttributes(eq(1L), eq(directAttrs))).willReturn(directAttrs);
         given(menuPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
         given(buttonPolicyPort.findAllActiveForEvaluation()).willReturn(List.of());
@@ -98,7 +98,7 @@ class AuthServiceEffectiveAttributeTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rt");
         given(jwtTokenProvider.hashRefreshToken("rt")).willReturn("rth");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("admin", "pw"));
 
@@ -127,7 +127,7 @@ class AuthServiceEffectiveAttributeTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rt2");
         given(jwtTokenProvider.hashRefreshToken("rt2")).willReturn("rth2");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("user2", "pw"));
 
@@ -156,7 +156,7 @@ class AuthServiceEffectiveAttributeTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rt3");
         given(jwtTokenProvider.hashRefreshToken("rt3")).willReturn("rth3");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("combo", "pw"));
 
@@ -186,7 +186,7 @@ class AuthServiceEffectiveAttributeTest {
         given(jwtTokenProvider.generateRefreshTokenRaw()).willReturn("rt4");
         given(jwtTokenProvider.hashRefreshToken("rt4")).willReturn("rth4");
         given(jwtTokenProvider.refreshTtlDays()).willReturn(14L);
-        willDoNothing().given(refreshTokenPort).save(any());
+        willDoNothing().given(sessionStorePort).saveSession(anyString(), any(), anyLong());
 
         LoginResult result = authService.login(new LoginCommand("nobody", "pw"));
 
