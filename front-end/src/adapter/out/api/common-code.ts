@@ -24,7 +24,8 @@ const COMMON_CODE_ROW_SCHEMA = z.object({
   groupCode: z.string(),
   code: z.string(),
   label: z.string(),
-  labelKo: z.string(),
+  // DB admin.common_code.label_ko는 nullable — null을 그대로 허용
+  labelKo: z.string().nullable().optional().transform((v) => v ?? null),
   sortOrder: z.number().nullable().optional().transform((v) => v ?? null),
   active: z.boolean(),
 }) satisfies z.ZodType<CommonCodeRow>;

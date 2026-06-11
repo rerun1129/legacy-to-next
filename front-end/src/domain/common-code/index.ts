@@ -11,7 +11,7 @@ export interface CommonCodeRow {
   groupCode: string;
   code: string;
   label: string;
-  labelKo: string;
+  labelKo: string | null;
   sortOrder: number | null;
   active: boolean;
 }
@@ -19,7 +19,7 @@ export interface CommonCodeRow {
 export interface CreateCommonCodeDto {
   code: string;
   label: string;
-  labelKo: string;
+  labelKo: string | null;
   sortOrder: number | null;
   active: boolean;
 }
@@ -27,7 +27,7 @@ export interface CreateCommonCodeDto {
 export interface UpdateCommonCodeItem {
   id: number;
   label: string;
-  labelKo: string;
+  labelKo: string | null;
   sortOrder: number | null;
   active: boolean;
 }

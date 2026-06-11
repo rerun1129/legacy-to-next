@@ -6,7 +6,8 @@ export function toCommonCodeFormRow(row: CommonCodeRow): CommonCodeFormRow {
     entityId: row.id,
     code: row.code,
     label: row.label,
-    labelKo: row.labelKo,
+    // DB nullable → 폼 input은 string 필요
+    labelKo: row.labelKo ?? "",
     sortOrder: row.sortOrder,
     active: row.active,
   };
@@ -24,7 +25,8 @@ export const COMMON_CODE_ROW_IS_EQUAL = (
 export const COMMON_CODE_TO_CREATE = (row: CommonCodeFormRow) => ({
   code: row.code,
   label: row.label,
-  labelKo: row.labelKo,
+  // 빈 문자열은 null로 정규화 — 시드 컨벤션(null) 오염 방지
+  labelKo: row.labelKo === "" ? null : row.labelKo,
   sortOrder: row.sortOrder,
   active: row.active,
 });
@@ -32,7 +34,8 @@ export const COMMON_CODE_TO_CREATE = (row: CommonCodeFormRow) => ({
 export const COMMON_CODE_TO_UPDATE = (row: CommonCodeFormRow) => ({
   id: row.entityId,
   label: row.label,
-  labelKo: row.labelKo,
+  // 빈 문자열은 null로 정규화 — 시드 컨벤션(null) 오염 방지
+  labelKo: row.labelKo === "" ? null : row.labelKo,
   sortOrder: row.sortOrder,
   active: row.active,
 });
