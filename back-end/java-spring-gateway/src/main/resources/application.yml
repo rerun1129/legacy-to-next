@@ -92,6 +92,16 @@ spring:
                 name: fmsCb
                 fallbackUri: forward:/fallback/fms
 
+# ── JWT (admin과 동일 secret 공유 — HS256 대칭키 검증) ────────────────
+# admin이 발급한 JWT를 중앙에서 검증하여 신원 헤더로 변환한다.
+jwt:
+  secret: ${JWT_SECRET:dev-secret-please-rotate-at-least-32-chars!!}
+
+# ── 내부 공유키 — 다운스트림이 게이트웨이 경유 여부를 확인 ──────────────
+# 모든 다운스트림 모듈과 동일 기본값으로 합의. 운영 시 반드시 교체.
+gateway:
+  internal-token: ${INTERNAL_GATEWAY_KEY:dev-internal-gateway-key-change-me}
+
 management:
   endpoints:
     web:

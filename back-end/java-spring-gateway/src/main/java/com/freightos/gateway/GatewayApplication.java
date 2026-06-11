@@ -1,9 +1,13 @@
 package com.freightos.gateway;
 
+import com.freightos.gateway.security.GatewayInternalProperties;
+import com.freightos.gateway.security.GatewayJwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
+@EnableConfigurationProperties({GatewayJwtProperties.class, GatewayInternalProperties.class})
 public class GatewayApplication {
 
     public static void main(String[] args) {
