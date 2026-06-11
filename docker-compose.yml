@@ -36,6 +36,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: fms-redis
+    # AOF 영속 — 세션(auth:session:*)이 Redis 재시작에도 보존되도록 (Phase 3)
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
     volumes:
@@ -71,8 +73,13 @@ services:
       # admin은 토큰 발급처라 JWT_SECRET 유지
       JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
       INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
+      # 로그인 세션 번들 기록(auth:session:*) — Redis 다운이어도 로그인은 성공(단명 세션 degrade)
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   bms-api:
@@ -142,11 +149,20 @@ services:
       # JWT 중앙 검증(발급 secret과 동일) + 다운스트림 신뢰 헤더 내부키
       JWT_SECRET: dev-secret-please-rotate-at-least-32-chars!!
       INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
+      # refresh/logout 로컬 처리용 세션 저장소 — admin 다운 중에도 세션 갱신 생존 (Phase 3)
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
-      - fms-api
-      - admin-api
-      - bms-api
-      - pms-api
+      fms-api:
+        condition: service_started
+      admin-api:
+        condition: service_started
+      bms-api:
+        condition: service_started
+      pms-api:
+        condition: service_started
+      redis:
+        condition: service_healthy
     healthcheck:
       # temurin JRE 이미지에 curl/wget 없음 — bash /dev/tcp로 포트 오픈 확인
       test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/8084' || exit 1"]
