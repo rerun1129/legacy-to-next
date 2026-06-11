@@ -58,6 +58,9 @@ services:
       DB_USER: fms
       DB_PASS: fms_local
       INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
+      # 공통코드 캐시(cc:{group}) 리더 체인 — Redis 미가용이어도 DB→Java enum 폴백
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,6 +94,9 @@ services:
       BMS_DB_USER: fms
       BMS_DB_PASS: fms_local
       INTERNAL_GATEWAY_KEY: local-compose-internal-key-7c2e
+      # 공통코드 캐시(cc:{group}) 리더 체인 — Redis 미가용이어도 DB→Java enum 폴백
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
       postgres:
         condition: service_healthy
