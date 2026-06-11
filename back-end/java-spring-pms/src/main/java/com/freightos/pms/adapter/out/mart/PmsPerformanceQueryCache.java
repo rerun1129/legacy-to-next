@@ -20,10 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * 캐시 항목 수가 cacheMaxSize를 초과하면 가장 오래된 항목부터 정리한다.
  *
  * 외부 의존성 추가 없이 ConcurrentHashMap + timestamp 로 단순 구현한다.
- * 활성 조건: pms.mart.line-accel.enabled=true
+ * 활성 조건: master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  */
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.line-accel", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "line-accel.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 public class PmsPerformanceQueryCache {
 

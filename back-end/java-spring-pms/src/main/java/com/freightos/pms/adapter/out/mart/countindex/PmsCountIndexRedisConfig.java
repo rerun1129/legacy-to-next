@@ -12,10 +12,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * Count Index 전용 RedisTemplate 빈 설정.
  *
  * key: String, value: byte[] (RoaringBitmap 직렬화 결과 저장).
- * 게이팅: pms.mart.count-index.enabled=true 일 때만 빈 등록.
+ * 게이팅: master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  */
 @Configuration
-@ConditionalOnProperty(prefix = "pms.mart.count-index", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "count-index.enabled"}, havingValue = "true")
 class PmsCountIndexRedisConfig {
 
     @Bean

@@ -15,13 +15,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Mart 증분 동기화 스케줄러.
- * pms.mart.scheduler.enabled=true일 때만 등록된다.
+ * master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  *
  * CronTrigger 기반 nextExecution에 jitter(임의 지연)를 더해 여러 인스턴스 동시 기동을 분산한다.
  * ETL이 이미 running 중이면 skip한다(AtomicBoolean 차단).
  */
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.scheduler", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "scheduler.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class PmsMartScheduler implements SchedulingConfigurer {

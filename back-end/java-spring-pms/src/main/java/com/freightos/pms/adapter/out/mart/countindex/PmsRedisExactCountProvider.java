@@ -30,11 +30,11 @@ import java.util.Map;
  * isReady()가 true일 때만 exactCount()를 호출해야 한다.
  * 지원 불가 형태(line/doc grain, B/L 번호, PERFORMANCE dateKind)는 null 반환 → Mongo 폴백.
  *
- * 게이팅: pms.mart.count-index.enabled=true
+ * 게이팅: master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.count-index", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "count-index.enabled"}, havingValue = "true")
 public class PmsRedisExactCountProvider {
 
     static final String CIRCUIT_BREAKER_NAME = "pmsCountIndex";

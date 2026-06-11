@@ -27,8 +27,9 @@ import org.springframework.stereotype.Component;
  * pms_docdt_entry : (perfPd|docDt, blKey, blId, blType) — 날짜 2종
  *                   (dim, docDt) × 8 — 고카디 차원필터 count 가속
  */
+// master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.line-accel", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "line-accel.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 public class PmsMartEntryIndexInitializer implements ApplicationRunner {
 

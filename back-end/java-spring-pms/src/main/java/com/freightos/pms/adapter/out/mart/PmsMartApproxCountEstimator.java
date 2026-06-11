@@ -23,10 +23,10 @@ import org.springframework.stereotype.Component;
  * 빠르다. pageCriteria에 차원 필터($elemMatch 포함)가 반영되어 있으므로
  * 날짜·차원 조건이 있는 조회에서도 근사 비율이 적절히 반영된다.
  *
- * 활성 조건: pms.mart.line-accel.enabled=true
+ * 활성 조건: master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  */
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.line-accel", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "line-accel.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 public class PmsMartApproxCountEstimator {
 

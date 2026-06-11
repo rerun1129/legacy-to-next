@@ -40,7 +40,8 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.count-index", name = "enabled", havingValue = "true")
+// master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "count-index.enabled"}, havingValue = "true")
 public class PmsCountIndexBulkBuilder {
 
     /** dc:bl HSET 청크 크기 (field 개수 기준). */

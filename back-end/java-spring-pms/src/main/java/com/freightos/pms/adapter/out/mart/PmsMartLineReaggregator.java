@@ -17,11 +17,11 @@ import java.util.List;
 /**
  * line-grain 임베드 배열(lines/docs)로 페이지 단위 금액을 재집계한다.
  *
- * pms.mart.line-accel.enabled=true일 때만 등록된다.
+ * master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  * OFF 경로(Optional.empty)는 PmsMartQueryAdapter에서 fast-path로 fall-through한다.
  */
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.line-accel", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "line-accel.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 public class PmsMartLineReaggregator {
 

@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * line-accel ON일 때만 등록되는 sidecar 엔트리 라이터.
+ * master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  *
  * 적재 전략: blKey 범위 delete-then-insert(stale 제거).
  * full 병렬 워커는 freight_header_id(=blKey, 1:1) 레인지가 서로소이므로 blKey 충돌 없다.
  * 한 배치 규모는 batchSize(기본 2000) B/L이고 sidecar는 그보다 작으므로 단일 배치 insert 충분.
  */
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.line-accel", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "line-accel.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 class PmsMartEntryWriter {
 

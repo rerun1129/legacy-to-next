@@ -26,10 +26,10 @@ import java.util.List;
  * 나머지 필터를 residual 적용한다. count·page-select는 동일 match를
  * 공유하므로 totalElements·페이지 슬라이스가 정합을 유지한다.
  *
- * 활성 조건: pms.mart.line-accel.enabled=true
+ * 활성 조건: master(pms.mart.enabled)와 하위 플래그 모두 true일 때만 활성 — mart off 시 계열 전체 off
  */
 @Component
-@ConditionalOnProperty(prefix = "pms.mart.line-accel", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "pms.mart", name = {"enabled", "line-accel.enabled"}, havingValue = "true")
 @RequiredArgsConstructor
 public class PmsMartDateDimQueryPlanner {
 
