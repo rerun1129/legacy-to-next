@@ -1,5 +1,6 @@
 package com.freightos.gateway.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +42,7 @@ class JwtAuthenticationGatewayFilterTest {
         GatewayInternalProperties internalProps = new GatewayInternalProperties();
         internalProps.setInternalToken(INTERNAL_TOKEN);
 
-        GatewayJwtTokenProvider provider = new GatewayJwtTokenProvider(jwtProps);
+        GatewayJwtTokenProvider provider = new GatewayJwtTokenProvider(jwtProps, new ObjectMapper());
         filter = new JwtAuthenticationGatewayFilter(provider, internalProps);
     }
 
@@ -72,11 +75,14 @@ class JwtAuthenticationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("유효 토큰이면 X-Auth-* 3종이 주입되고 X-Internal-Token도 있다")
+    @DisplayName("유효 토큰이면 X-Auth-* 3종이 주입되고 X-Internal-Token도 있다 — attr이 Map(admin 실제 발급 형태)인 경우")
     void validTokenInjectsAllAuthHeaders() {
         AtomicReference<HttpHeaders> capturedHeaders = new AtomicReference<>();
 
-        String token = buildToken("alice", "ROLE_USER,ROLE_FMS", "{\"dept\":\"IT\"}");
+        // admin은 Map<String, List<String>> 타입을 attr 클레임에 저장하며
+        // JJWT는 이를 JSON 객체로 직렬화한다. 동일 구조로 픽스처를 구성한다.
+        Map<String, List<String>> attrMap = Map.of("dept", List.of("IT"), "role", List.of("FMS_USER"));
+        String token = buildTokenWithMapAttr("alice", "ROLE_USER,ROLE_FMS", attrMap);
         MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, "/api/test")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .build();
@@ -92,10 +98,78 @@ class JwtAuthenticationGatewayFilterTest {
         HttpHeaders headers = capturedHeaders.get();
         assertThat(headers.getFirst("X-Auth-User")).isEqualTo("alice");
         assertThat(headers.getFirst("X-Auth-Authorities")).isEqualTo("ROLE_USER,ROLE_FMS");
-        // attr는 UTF-8 Base64 인코딩 값이어야 한다
-        String expectedAttr = Base64.getEncoder().encodeToString("{\"dept\":\"IT\"}".getBytes(StandardCharsets.UTF_8));
-        assertThat(headers.getFirst("X-Auth-Attr")).isEqualTo(expectedAttr);
+        // attr Map은 Jackson으로 JSON 직렬화 후 UTF-8 Base64 인코딩된다.
+        // Base64 디코드 결과가 JSON 파싱 가능한 객체 문자열인지 검증한다.
+        String encodedAttr = headers.getFirst("X-Auth-Attr");
+        assertThat(encodedAttr).isNotNull();
+        String decodedAttr = new String(Base64.getDecoder().decode(encodedAttr), StandardCharsets.UTF_8);
+        assertThat(decodedAttr).contains("dept").contains("IT");
         assertThat(headers.getFirst("X-Internal-Token")).isEqualTo(INTERNAL_TOKEN);
+    }
+
+    @Test
+    @DisplayName("attr 클레임이 Map(JSON 객체)인 토큰 — X-Auth-Attr가 Base64 디코드 시 유효한 JSON 객체 문자열이 된다")
+    void attrMapClaimIsSerializedToJsonAndBase64Encoded() {
+        AtomicReference<HttpHeaders> capturedHeaders = new AtomicReference<>();
+
+        // admin generateAccessToken이 실제로 넣는 구조: Map<String, List<String>>
+        Map<String, List<String>> attrMap = Map.of(
+            "MENU", List.of("MENU_FMS_HOUSE_BL", "MENU_FMS_MASTER_BL"),
+            "BTN", List.of("BTN_FMS_HOUSE_BL_SAVE")
+        );
+        String token = buildTokenWithMapAttr("carol", "ROLE_FMS", attrMap);
+        MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, "/api/fms/test")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        GatewayFilterChain chain = ex -> {
+            capturedHeaders.set(ex.getRequest().getHeaders());
+            return Mono.empty();
+        };
+
+        filter.filter(exchange, chain).block();
+
+        HttpHeaders headers = capturedHeaders.get();
+        assertThat(headers.getFirst("X-Auth-User")).isEqualTo("carol");
+        assertThat(headers.getFirst("X-Auth-Authorities")).isEqualTo("ROLE_FMS");
+
+        String encodedAttr = headers.getFirst("X-Auth-Attr");
+        assertThat(encodedAttr).isNotNull();
+
+        // Base64 디코드 후 JSON 파싱 가능한 객체이어야 한다
+        String decodedAttr = new String(Base64.getDecoder().decode(encodedAttr), StandardCharsets.UTF_8);
+        assertThat(decodedAttr).startsWith("{");
+        assertThat(decodedAttr).contains("MENU");
+        assertThat(decodedAttr).contains("BTN");
+        assertThat(headers.getFirst("X-Internal-Token")).isEqualTo(INTERNAL_TOKEN);
+    }
+
+    @Test
+    @DisplayName("attr 클레임이 String인 토큰 — X-Auth-Attr에 Base64 인코딩된 원본 문자열이 주입된다")
+    void attrStringClaimIsBase64Encoded() {
+        AtomicReference<HttpHeaders> capturedHeaders = new AtomicReference<>();
+
+        String attrJson = "{\"dept\":\"IT\"}";
+        String token = buildToken("dave", "ROLE_USER", attrJson);
+        MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, "/api/test")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        GatewayFilterChain chain = ex -> {
+            capturedHeaders.set(ex.getRequest().getHeaders());
+            return Mono.empty();
+        };
+
+        filter.filter(exchange, chain).block();
+
+        HttpHeaders headers = capturedHeaders.get();
+        assertThat(headers.getFirst("X-Auth-User")).isEqualTo("dave");
+        String encodedAttr = headers.getFirst("X-Auth-Attr");
+        assertThat(encodedAttr).isNotNull();
+        String decodedAttr = new String(Base64.getDecoder().decode(encodedAttr), StandardCharsets.UTF_8);
+        assertThat(decodedAttr).isEqualTo(attrJson);
     }
 
     @Test
@@ -171,6 +245,22 @@ class JwtAuthenticationGatewayFilterTest {
 
     // ── 테스트용 토큰 생성 헬퍼 ──────────────────────────────────────────
 
+    /**
+     * attr 클레임에 Map을 넣는 헬퍼 — admin generateAccessToken의 실제 발급 형태와 일치.
+     * JJWT는 Map을 JSON 객체로 직렬화하고, 파싱 시 LinkedHashMap으로 역직렬화한다.
+     */
+    private String buildTokenWithMapAttr(String username, String auth, Map<String, List<String>> attrMap) {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        return Jwts.builder()
+                .subject(username)
+                .claim("auth", auth)
+                .claim("attr", attrMap)
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(key)
+                .compact();
+    }
+
+    /** attr 클레임에 String을 넣는 헬퍼 — extractAttr instanceof String 분기 검증용. */
     private String buildToken(String username, String auth, String attr) {
         SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
