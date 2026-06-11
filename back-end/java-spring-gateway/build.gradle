@@ -38,6 +38,9 @@ dependencies {
     runtimeOnly    'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly    'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
+    // ── Redis (Reactive — 세션 저장소 로컬 처리) ──────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
     // ── Lombok ───────────────────────────────────────────────────────
     compileOnly    'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

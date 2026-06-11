@@ -13,11 +13,21 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
- * admin이 발급한 JWT를 동일 secret(HS256)으로 검증하는 역할만 수행.
- * 토큰 발급은 게이트웨이 책임 범위 밖이다.
+ * admin이 발급한 JWT를 동일 secret(HS256)으로 검증하고, refresh rotation 시 재발급하는 역할.
+ * admin JwtTokenProvider와 클레임 구조(sub/auth/attr)·해시 방식(SHA-256 hex)을 동일하게 미러한다.
  */
 @Slf4j
 @Component
@@ -26,6 +36,7 @@ public class GatewayJwtTokenProvider {
 
     private final GatewayJwtProperties properties;
     private final ObjectMapper objectMapper;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     private SecretKey key() {
         return Keys.hmacShaKeyFor(properties.getSecret().getBytes(StandardCharsets.UTF_8));
@@ -82,4 +93,51 @@ public class GatewayJwtTokenProvider {
             return Optional.empty();
         }
     }
+
+    // ── 발급 메서드 (refresh rotation 시 게이트웨이에서 직접 서명) ──────
+
+    /**
+     * 새 access token 발급.
+     * admin generateAccessToken과 동일한 클레임 구조(sub/auth(CSV)/attr(Map))·TTL·secret.
+     */
+    public String generateAccessToken(String username, Collection<String> authorities, Map<String, List<String>> attributes) {
+        Instant now = Instant.now();
+        Instant exp = now.plus(properties.getAccessTokenTtlMinutes(), ChronoUnit.MINUTES);
+        return Jwts.builder()
+            .subject(username)
+            .claim("auth", String.join(",", authorities))
+            .claim("attr", attributes != null ? attributes : Collections.emptyMap())
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(exp))
+            .signWith(key())
+            .compact();
+    }
+
+    /**
+     * refresh token raw 값 생성 — admin generateRefreshTokenRaw와 동일 방식.
+     * SecureRandom 32바이트 → Base64URL(no padding).
+     */
+    public String generateRefreshTokenRaw() {
+        byte[] buf = new byte[32];
+        secureRandom.nextBytes(buf);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
+    }
+
+    /**
+     * refresh token 해시 — admin hashRefreshToken과 동일 방식.
+     * SHA-256 → hex 소문자.
+     */
+    public String hashRefreshToken(String raw) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(digest.length * 2);
+            for (byte b : digest) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
+    }
+
+    public long refreshTtlDays() { return properties.getRefreshTokenTtlDays(); }
 }
