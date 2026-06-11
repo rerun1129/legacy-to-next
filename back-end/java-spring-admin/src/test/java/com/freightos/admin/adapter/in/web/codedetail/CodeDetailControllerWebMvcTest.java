@@ -8,9 +8,8 @@ import com.freightos.admin.adapter.in.web.codedetail.dto.SearchCodeDetailRequest
 import com.freightos.admin.application.codedetail.port.in.CodeDetailUseCase;
 import com.freightos.admin.application.codedetail.projection.CodeDetailSummary;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CodeDetailController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class CodeDetailControllerWebMvcTest {
 
     @Autowired
@@ -60,9 +59,6 @@ class CodeDetailControllerWebMvcTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── 미인증 → 401 ─────────────────────────────────────────────────────────
 

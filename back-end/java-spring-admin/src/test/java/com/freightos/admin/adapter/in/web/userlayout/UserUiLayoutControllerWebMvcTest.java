@@ -3,9 +3,8 @@ package com.freightos.admin.adapter.in.web.userlayout;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.userlayout.port.in.UserUiLayoutUseCase;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserUiLayoutController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class UserUiLayoutControllerWebMvcTest {
 
     @Autowired
@@ -54,9 +53,6 @@ class UserUiLayoutControllerWebMvcTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── 미인증 → 401 ──────────────────────────────────────────────────────────
 

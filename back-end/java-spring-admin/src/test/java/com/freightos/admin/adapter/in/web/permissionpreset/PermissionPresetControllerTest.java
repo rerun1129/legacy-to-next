@@ -23,9 +23,8 @@ import com.freightos.admin.application.permissionpreset.projection.PermissionPre
 import com.freightos.admin.application.permissionpreset.projection.PermissionPresetSummary;
 import com.freightos.admin.common.exception.ApplicationException;
 import com.freightos.admin.common.response.MessageCode;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PermissionPresetController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class PermissionPresetControllerTest {
 
     @Autowired
@@ -98,9 +97,6 @@ class PermissionPresetControllerTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── 미인증 → 401 ─────────────────────────────────────────────────────────
 

@@ -5,9 +5,8 @@ import com.freightos.admin.adapter.in.web.menu.dto.AccessibleMenuResponse;
 import com.freightos.admin.application.menu.port.in.MenuUseCase;
 import com.freightos.admin.application.menu.port.in.SaveMenuChangesUseCase;
 import com.freightos.admin.common.response.SaveChangesResult;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import com.freightos.admin.domain.menu.entity.Menu;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MenuController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class MenuControllerTest {
 
     @Autowired
@@ -61,9 +60,6 @@ class MenuControllerTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── MENU_ 권한 보유 → 200, useCase 호출 Set 검증 ─────────────────────────
 

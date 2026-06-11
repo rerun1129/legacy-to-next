@@ -3,9 +3,8 @@ package com.freightos.admin.adapter.in.web.notice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.freightos.admin.application.notice.port.in.NoticeUseCase;
 import com.freightos.admin.common.request.BulkDeleteRequest;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NoticeController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class NoticeBulkDeleteControllerWebMvcTest {
 
     @Autowired
@@ -49,9 +48,6 @@ class NoticeBulkDeleteControllerWebMvcTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── 미인증 → 401 ──────────────────────────────────────────────────────────
 

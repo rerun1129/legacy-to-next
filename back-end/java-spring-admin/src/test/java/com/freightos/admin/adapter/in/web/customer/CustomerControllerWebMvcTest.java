@@ -10,9 +10,8 @@ import com.freightos.admin.application.customer.command.SearchCustomerCommand;
 import com.freightos.admin.application.customer.port.in.CustomerUseCase;
 import com.freightos.admin.application.customer.projection.CustomerSummary;
 import com.freightos.admin.common.response.PagedResult;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import com.freightos.admin.domain.customer.entity.CustomerType;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CustomerController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class CustomerControllerWebMvcTest {
 
     @Autowired
@@ -63,9 +62,6 @@ class CustomerControllerWebMvcTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── 미인증 → 401 ──────────────────────────────────────────────────────────
 

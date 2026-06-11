@@ -3,9 +3,8 @@ package com.freightos.admin.adapter.in.web.menu;
 import com.freightos.admin.application.menu.port.in.MenuUseCase;
 import com.freightos.admin.application.menu.port.in.SaveMenuChangesUseCase;
 import com.freightos.admin.common.response.AutocompleteItem;
+import com.freightos.admin.common.security.HeaderAuthenticationFilter;
 import com.freightos.admin.common.security.JpaUserDetailsService;
-import com.freightos.admin.common.security.JwtAuthenticationFilter;
-import com.freightos.admin.common.security.JwtTokenProvider;
 import com.freightos.admin.common.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MenuController.class)
-@Import({ SecurityConfig.class, JwtAuthenticationFilter.class })
+@Import({ SecurityConfig.class, HeaderAuthenticationFilter.class })
 class MenuAutocompleteControllerTest {
 
     @Autowired
@@ -48,9 +47,6 @@ class MenuAutocompleteControllerTest {
 
     @MockitoBean
     private JpaUserDetailsService jpaUserDetailsService;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     // ── MENU_ 권한 보유 → 200 + 제안 목록 반환 ─────────────────────────────────
 
