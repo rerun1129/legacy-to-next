@@ -32,7 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.sql.init.mode=never",
         "spring.flyway.enabled=false",
         "jwt.secret=test-secret-key-must-be-at-least-32-chars!!",
-        "gateway.internal-token=test-internal-token"
+        "gateway.internal-token=test-internal-token",
+        // 로컬 Redis 부재 시 health 503으로 actuatorHealth_isPermitAll이 환경 의존 실패하는 것 차단(테스트 결정성)
+        "management.health.redis.enabled=false"
 })
 class SecurityConfigWebMvcTest {
 
