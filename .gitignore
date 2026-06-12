@@ -26,6 +26,9 @@ schema/seed/
 # Windows Bash 크래시 덤프
 *.stackdump
 
+# EDMS 첨부 로컬 스토리지 (bare bootRun 기본 경로)
+back-end/java-spring/storage/
+
 # Gradle
 .gradle/
 build/

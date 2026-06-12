@@ -32,7 +32,10 @@ public enum MessageCode {
     FREIGHT_LINE_REQUIRED("운임 라인에 필수 항목이 누락되었습니다."),
     FREIGHT_LINE_QTY_INVALID("운임 라인의 수량(qty)은 0보다 커야 합니다."),
     FREIGHT_LINE_PRICE_INVALID("운임 라인의 단가(price)는 0보다 커야 합니다."),
-    FREIGHT_DELETE_BLOCKED("운임 라인이 존재하는 B/L은 삭제할 수 없습니다. 먼저 운임 라인을 삭제하십시오.");
+    FREIGHT_DELETE_BLOCKED("운임 라인이 존재하는 B/L은 삭제할 수 없습니다. 먼저 운임 라인을 삭제하십시오."),
+    BL_ATTACHMENT_UPLOADED("첨부파일이 업로드되었습니다."),
+    BL_ATTACHMENT_DELETED("첨부파일이 삭제되었습니다."),
+    BL_ATTACHMENT_NOT_FOUND("첨부파일을 찾을 수 없습니다.");
 
     private final String message;
 

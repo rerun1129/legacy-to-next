@@ -15,6 +15,8 @@ import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.nonbl.command.SearchNonBlCommand;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
+import com.freightos.fms.domain.attachment.enums.AttachmentBlKind;
 import com.freightos.fms.application.nonbl.port.in.NonBlUseCase;
 import com.freightos.fms.application.nonbl.port.out.NonBlPersistencePort;
 import com.freightos.fms.application.nonbl.port.out.NonBlSearchPort;
@@ -51,6 +53,7 @@ public class NonBlService implements NonBlUseCase {
     private final CodeNameResolver codeNameResolver;
     private final FreightInputPort freightInputPort;
     private final HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
+    private final BlAttachmentUseCase blAttachmentUseCase;
 
     @Override
     public PagedResult<NonBlListItem> searchNonBls(SearchNonBlCommand cmd, PageRequest pageRequest) {
@@ -167,6 +170,7 @@ public class NonBlService implements NonBlUseCase {
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
         freightInputPort.deleteFreight(FreightBlType.HOUSE, id);
+        blAttachmentUseCase.deleteAttachmentsByBl(AttachmentBlKind.NON_BL, id);
         // NON_BL은 jobDiv가 고정이므로 projection 없이 직접 호출 (SELECT 0회 추가)
         houseBlPort.deleteByIdAndJobDiv(id, JobDiv.NON_BL);
         log.info("Deleted NonBl id={}", id);

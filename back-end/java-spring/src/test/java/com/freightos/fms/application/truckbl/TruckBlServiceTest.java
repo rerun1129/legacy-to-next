@@ -1,6 +1,8 @@
 package com.freightos.fms.application.truckbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
+import com.freightos.fms.domain.attachment.enums.AttachmentBlKind;
 import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.HouseBlFreightCommandBuilder;
@@ -41,6 +43,7 @@ class TruckBlServiceTest {
     @Mock private CodeNameResolver codeNameResolver;
     @Mock private FreightInputPort freightInputPort;
     @Mock private HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
+    @Mock private BlAttachmentUseCase blAttachmentUseCase;
 
     @InjectMocks
     private TruckBlService truckBlService;
@@ -52,6 +55,7 @@ class TruckBlServiceTest {
 
         truckBlService.deleteTruckBlById(99L);
 
+        then(blAttachmentUseCase).should().deleteAttachmentsByBl(AttachmentBlKind.TRUCK, 99L);
         then(houseBlPort).should().deleteByIdAndJobDiv(99L, JobDiv.TRUCK);
     }
 

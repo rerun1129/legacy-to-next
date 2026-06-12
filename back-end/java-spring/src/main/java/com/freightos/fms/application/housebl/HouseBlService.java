@@ -22,6 +22,8 @@ import com.freightos.fms.domain.common.vo.BlNumber;
 import com.freightos.fms.domain.freight.enums.FreightBlType;
 import com.freightos.fms.domain.housebl.entity.HouseBl;
 import com.freightos.fms.domain.housebl.enums.JobDiv;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
+import com.freightos.fms.domain.attachment.enums.AttachmentBlKind;
 import com.freightos.fms.application.housebl.port.in.HouseBlUseCase;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.housebl.projection.HouseBlSummary;
@@ -49,6 +51,7 @@ public class HouseBlService implements HouseBlUseCase {
     private final CodeNameResolver codeNameResolver;
     private final FreightInputPort freightInputPort;
     private final HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
+    private final BlAttachmentUseCase blAttachmentUseCase;
 
     @Override
     public PagedResult<HouseBlSummary> searchHouseBls(SearchHouseBlCommand cmd, PageRequest pageRequest) {
@@ -243,6 +246,7 @@ public class HouseBlService implements HouseBlUseCase {
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
         freightInputPort.deleteFreight(FreightBlType.HOUSE, id);
+        blAttachmentUseCase.deleteAttachmentsByBl(AttachmentBlKind.HOUSE, id);
         houseBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted HouseBl id={}", id);
     }

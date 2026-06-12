@@ -11,6 +11,8 @@ import com.freightos.fms.application.housebl.command.ChangeHouseBlNoCommand;
 import com.freightos.fms.application.housebl.command.CreateHouseBlCommand;
 import com.freightos.fms.application.housebl.command.UpdateHouseBlCommand;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
+import com.freightos.fms.domain.attachment.enums.AttachmentBlKind;
 import com.freightos.fms.application.truckbl.port.in.TruckBlUseCase;
 import com.freightos.fms.application.truckbl.port.out.TruckBlPersistencePort;
 import com.freightos.fms.application.truckbl.port.out.TruckBlSearchPort;
@@ -46,6 +48,7 @@ public class TruckBlService implements TruckBlUseCase {
     private final CodeNameResolver codeNameResolver;
     private final FreightInputPort freightInputPort;
     private final HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
+    private final BlAttachmentUseCase blAttachmentUseCase;
 
     @Override
     public TruckBlDetailView findTruckBlById(Long id) {
@@ -123,6 +126,7 @@ public class TruckBlService implements TruckBlUseCase {
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
         freightInputPort.deleteFreight(FreightBlType.HOUSE, id);
+        blAttachmentUseCase.deleteAttachmentsByBl(AttachmentBlKind.TRUCK, id);
         // TRUCK은 jobDiv가 고정이므로 SELECT 없이 직접 호출
         houseBlPort.deleteByIdAndJobDiv(id, JobDiv.TRUCK);
         log.info("Deleted TruckBl id={}", id);

@@ -61,6 +61,10 @@ services:
       # 공통코드 캐시(cc:{group}) 리더 체인 — Redis 미가용이어도 DB→Java enum 폴백
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
+      # EDMS 첨부 로컬 스토리지 — named volume이라 컨테이너 재빌드에도 파일 보존
+      FMS_STORAGE_BASE_PATH: /var/fms/storage/attachments
+    volumes:
+      - fms_attachments:/var/fms/storage
     depends_on:
       postgres:
         condition: service_healthy
@@ -196,3 +200,4 @@ volumes:
   postgres_data:
   mongo_data:
   redis_data:
+  fms_attachments:

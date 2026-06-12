@@ -1,6 +1,8 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
+import com.freightos.fms.domain.attachment.enums.AttachmentBlKind;
 import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
@@ -36,6 +38,7 @@ class MasterBlDeleteServiceTest {
     @Mock private MasterBlFactory masterBlFactory;
     @Mock private FreightInputPort freightInputPort;
     @Mock private MasterBlFreightCommandBuilder masterBlFreightCommandBuilder;
+    @Mock private BlAttachmentUseCase blAttachmentUseCase;
 
     @InjectMocks
     private MasterBlService masterBlService;
@@ -54,6 +57,7 @@ class MasterBlDeleteServiceTest {
         order.verify(freightInputPort).existsFreightLines(any(), any());
         order.verify(houseBlPort).nullifyMasterRefByMasterBlId(id);
         order.verify(masterBlPort).deleteByIdAndJobDiv(id, MasterBlJobDiv.SEA);
+        then(blAttachmentUseCase).should().deleteAttachmentsByBl(AttachmentBlKind.MASTER, id);
     }
 
     @Test

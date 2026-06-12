@@ -25,6 +25,8 @@ import com.freightos.fms.domain.masterbl.entity.MasterBl;
 import com.freightos.fms.domain.masterbl.entity.MasterBlAir;
 import com.freightos.fms.domain.masterbl.entity.MasterBlSea;
 import com.freightos.fms.domain.masterbl.enums.MasterBlJobDiv;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
+import com.freightos.fms.domain.attachment.enums.AttachmentBlKind;
 import com.freightos.fms.application.masterbl.port.in.MasterBlUseCase;
 import com.freightos.fms.application.masterbl.port.out.AirMasterPersistencePort;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
@@ -54,6 +56,7 @@ public class MasterBlService implements MasterBlUseCase {
     private final CodeNameResolver codeNameResolver;
     private final FreightInputPort freightInputPort;
     private final MasterBlFreightCommandBuilder masterBlFreightCommandBuilder;
+    private final BlAttachmentUseCase blAttachmentUseCase;
 
     @Override
     public PagedResult<MasterBlSummaryResult> searchMasterBls(SearchMasterBlCommand cmd, PageRequest pageRequest) {
@@ -169,6 +172,7 @@ public class MasterBlService implements MasterBlUseCase {
             throw FmsException.conflict("FREIGHT_DELETE_BLOCKED", MessageCode.FREIGHT_DELETE_BLOCKED.message());
         }
         freightInputPort.deleteFreight(FreightBlType.MASTER, id);
+        blAttachmentUseCase.deleteAttachmentsByBl(AttachmentBlKind.MASTER, id);
         int unlinked = houseBlPort.nullifyMasterRefByMasterBlId(id);
         masterBlPort.deleteByIdAndJobDiv(id, jobDiv);
         log.info("Deleted MasterBl id={} (unlinked {} house_bl rows)", id, unlinked);

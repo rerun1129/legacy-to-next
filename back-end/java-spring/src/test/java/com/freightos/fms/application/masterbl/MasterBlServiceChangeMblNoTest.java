@@ -1,6 +1,7 @@
 package com.freightos.fms.application.masterbl;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
 import com.freightos.fms.application.masterbl.command.ChangeMasterBlNoCommand;
 import com.freightos.fms.application.housebl.port.out.HouseBlPort;
 import com.freightos.fms.application.masterbl.port.out.MasterBlPort;
@@ -24,6 +25,7 @@ class MasterBlServiceChangeMblNoTest {
     @Mock private SeaMasterPersistencePort seaMasterPersistencePort;
     @Mock private HouseBlPort houseBlPort;
     @Mock private MasterBlFactory masterBlFactory;
+    @Mock private BlAttachmentUseCase blAttachmentUseCase;
 
     @InjectMocks
     private MasterBlService masterBlService;

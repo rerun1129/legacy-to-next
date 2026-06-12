@@ -1,5 +1,6 @@
 package com.freightos.fms.application.truckbl;
 
+import com.freightos.fms.application.attachment.port.in.BlAttachmentUseCase;
 import com.freightos.fms.application.common.codename.CodeNameResolver;
 import com.freightos.fms.application.freight.port.out.FreightInputPort;
 import com.freightos.fms.application.housebl.HouseBlFactory;
@@ -42,6 +43,7 @@ class TruckBlServiceEnrichTest {
     @Mock private HouseBlFactory houseBlFactory;
     @Mock private FreightInputPort freightInputPort;
     @Mock private HouseBlFreightCommandBuilder houseBlFreightCommandBuilder;
+    @Mock private BlAttachmentUseCase blAttachmentUseCase;
 
     private TruckBlService truckBlService;
 
@@ -50,7 +52,7 @@ class TruckBlServiceEnrichTest {
         TruckBlFactory truckBlFactory = new TruckBlFactory(houseBlFactory);
         truckBlService = new TruckBlService(
                 houseBlPort, truckBlFactory, truckBlPersistencePort, truckBlSearchPort, codeNameResolver,
-                freightInputPort, houseBlFreightCommandBuilder);
+                freightInputPort, houseBlFreightCommandBuilder, blAttachmentUseCase);
     }
 
     @Test
