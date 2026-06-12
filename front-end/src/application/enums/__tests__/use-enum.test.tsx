@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { useEnumOptions, useEnums, enumKeys } from '../use-enum'
+// useEnumOptions는 useLocale/useTranslations를 호출하므로
+// NextIntlClientProvider + QueryClientProvider 를 함께 공급하는 Providers를 wrapper로 사용
+import { Providers } from '@/test/render-with-providers'
 
 vi.mock('../bindings', () => ({
   enumPort: {
@@ -16,11 +18,8 @@ const mockFetchEnum = vi.mocked(enumPort.fetchEnum)
 const mockFetchEnums = vi.mocked(enumPort.fetchEnums)
 
 function makeWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    return <Providers>{children}</Providers>
   }
 }
 
@@ -39,7 +38,7 @@ describe('useEnumOptions', () => {
 
     expect(result.current.isLoading).toBe(true)
     expect(result.current.options).toEqual([])
-    expect(result.current.placeholder).toBe('로딩 중...')
+    expect(result.current.placeholder).toBe('불러오는 중…')
   })
 
   it('성공 후: isLoading=false, options에 value/label 매핑, placeholder=undefined', async () => {
