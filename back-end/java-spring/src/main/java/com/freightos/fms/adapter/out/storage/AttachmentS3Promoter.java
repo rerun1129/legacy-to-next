@@ -1,6 +1,7 @@
 package com.freightos.fms.adapter.out.storage;
 
 import com.freightos.common.exception.ResourceNotFoundException;
+import com.freightos.fms.application.attachment.port.out.StoragePort;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
