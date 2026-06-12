@@ -48,6 +48,11 @@ dependencies {
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+    // ── AWS SDK v2 (S3 어댑터 — fms.storage.mode=s3 시 활성) ─────────
+    implementation platform('software.amazon.awssdk:bom:2.31.21')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:apache-client'
+
     // ── Utilities ──────────────────────────────────────────────────
     compileOnly    'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

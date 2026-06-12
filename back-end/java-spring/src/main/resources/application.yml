@@ -108,9 +108,33 @@ gateway:
 # ── 첨부파일 스토리지 ───────────────────────────────────────────────
 fms:
   storage:
+    mode: ${FMS_STORAGE_MODE:local}        # yml 기본 local 유지 — compose가 s3로 켬
     local:
       base-path: ${FMS_STORAGE_BASE_PATH:./storage/attachments}
+    s3:
+      bucket: ${FMS_S3_BUCKET:}
+      region: ${FMS_S3_REGION:ap-northeast-2}
+      key-prefix: ${FMS_S3_KEY_PREFIX:}
+      endpoint: ${FMS_S3_ENDPOINT:}        # MinIO/드릴용. 빈값=실 AWS
     cleanup:
       enabled: true
-      cron: "0 0 3 * * *"
+      cron: "${FMS_STORAGE_CLEANUP_CRON:0 0 3 * * *}"   # 드릴 매분 트리거용 env 바인딩 신설
       grace-hours: 24
+
+# ── Resilience4j (S3 서킷브레이커) ───────────────────────────────────
+resilience4j:
+  circuitbreaker:
+    instances:
+      fmsS3:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true   # 무트래픽(03시 배치)에도 자동 half-open
+        registerHealthIndicator: false
+        slowCallDurationThreshold: 30s
+        slowCallRateThreshold: 100
+        ignoreExceptions:
+          - com.freightos.common.exception.ResourceNotFoundException   # not-found=정상계, 미제외 시 로컬 체인 조회가 CB 허위 트립

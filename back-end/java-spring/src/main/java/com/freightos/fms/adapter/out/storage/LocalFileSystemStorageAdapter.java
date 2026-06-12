@@ -89,6 +89,19 @@ public class LocalFileSystemStorageAdapter implements StoragePort {
     }
 
     /**
+     * storageKey 파일의 바이트 크기를 반환한다.
+     * AttachmentS3Promoter가 승격 시 S3 putObject에 contentLength를 전달할 때 사용한다.
+     */
+    public long sizeOf(String storageKey) {
+        Path target = resolveAndValidate(storageKey);
+        try {
+            return Files.size(target);
+        } catch (IOException e) {
+            throw new UncheckedIOException("첨부파일 크기 조회 실패: storageKey=" + storageKey, e);
+        }
+    }
+
+    /**
      * storageKey를 basePath 기준 절대 경로로 변환하고,
      * basePath 상위 탈출 여부를 검증한다 (경로 탈출 공격 방어).
      */
