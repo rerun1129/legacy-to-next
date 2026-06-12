@@ -9,6 +9,9 @@
 .env*
 !.env.example
 *.pem
+
+# AWS 자격증명 보관 폴더 (절대 커밋 금지)
+docs/credencial/
 .claude/.review_pending
 .claude/.review_skip
 .claude/.deferred_snooze
