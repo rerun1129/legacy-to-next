@@ -47,6 +47,8 @@ spring:
 # ── Server (FMS 8080 · ADMIN 8081 다음) ──────────────────────────
 server:
   port: 8082
+  # 게이트웨이 주입 헤더(JWT 권한 클레임+X-Auth-*)가 기본 8KB 초과 — 32KB로 상향
+  max-http-request-header-size: 32KB
   error:
     include-message: always
     include-binding-errors: always
