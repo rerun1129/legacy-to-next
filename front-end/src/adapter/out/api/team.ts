@@ -5,7 +5,7 @@ import type { CodeBoxSuggestion } from "@/components/shared/inputs/_types";
 import { adminFetchJson } from "./admin-fetch";
 import { ResponseParseError } from "./errors";
 
-const BASE = "/api/teams";
+const BASE = "/api/admin/teams";
 
 const TEAM_ROW_SCHEMA = z.object({
   id: z.number(),
