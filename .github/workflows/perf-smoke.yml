@@ -1,0 +1,102 @@
+name: perf-smoke
+
+# k6 스모크 — 수동 트리거 전용. 러너 VM 안에서 infra(compose)+jar 기동 후 게이트웨이로 부하.
+# NFR §1.2 본격 프로필(5000u/24h)은 CI 밖(AWS 프로덕션 동등 환경) 수동 트랙.
+on:
+  workflow_dispatch:
+    inputs:
+      vus:
+        description: '동시 가상유저 수'
+        default: '10'
+      hold:
+        description: '부하 유지 구간 (예: 60s)'
+        default: '60s'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: perf-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      JWT_SECRET: ci-smoke-secret-please-keep-32chars-min!!
+      INTERNAL_GATEWAY_KEY: ci-smoke-internal-key
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Infra up (postgres, redis)
+        run: docker compose up -d --wait postgres redis
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Build boot jars (admin, fms, gateway)
+        run: |
+          back-end/java-spring-admin/gradlew -p back-end/java-spring-admin bootJar -x test
+          back-end/java-spring/gradlew -p back-end/java-spring bootJar -x test
+          back-end/java-spring-gateway/gradlew -p back-end/java-spring-gateway bootJar -x test
+
+      # admin 먼저(fresh DB Flyway는 admin-first 검증된 순서) → fms → gateway
+      - name: Start admin-api (8081)
+        run: |
+          JAR=$(find back-end/java-spring-admin/build/libs -name '*.jar' ! -name '*-plain.jar' | head -1)
+          nohup java -jar "$JAR" > admin-api.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -fsS http://localhost:8081/actuator/health > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          echo "admin-api 기동 실패"; tail -80 admin-api.log; exit 1
+
+      - name: Start fms-api (8080)
+        run: |
+          JAR=$(find back-end/java-spring/build/libs -name '*.jar' ! -name '*-plain.jar' | head -1)
+          nohup java -jar "$JAR" > fms-api.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -fsS http://localhost:8080/actuator/health > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          echo "fms-api 기동 실패"; tail -80 fms-api.log; exit 1
+
+      - name: Start gateway (8084)
+        run: |
+          JAR=$(find back-end/java-spring-gateway/build/libs -name '*.jar' ! -name '*-plain.jar' | head -1)
+          nohup java -jar "$JAR" > gateway-api.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -fsS http://localhost:8084/actuator/health > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          echo "gateway 기동 실패"; tail -80 gateway-api.log; exit 1
+
+      - name: k6 smoke
+        env:
+          VUS: ${{ inputs.vus }}
+          HOLD: ${{ inputs.hold }}
+        run: |
+          docker run --rm --network host \
+            -v "$PWD/load:/load" -w /load \
+            -e BASE_URL=http://localhost:8084 \
+            -e VUS="$VUS" -e HOLD="$HOLD" \
+            grafana/k6 run --summary-export=summary.json smoke.js
+
+      - name: Upload results & logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: perf-smoke-results
+          path: |
+            load/summary.json
+            admin-api.log
+            fms-api.log
+            gateway-api.log
+          if-no-files-found: ignore
