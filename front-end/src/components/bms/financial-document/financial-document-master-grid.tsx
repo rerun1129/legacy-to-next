@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 import { GridList, type GridColumn } from "@/components/shared/grid-list";
 import { Pagination } from "@/components/shared/pagination";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { useBmsEnumOptions } from "@/application/bms/enums/use-bms-enum";
 import { financialDocumentKeys } from "@/application/bms/financial-document/use-cases";
 import { financialDocumentPort } from "@/lib/ports";
 import { fmtDate, fmtEnum, fmtNumber } from "@/lib/grid-formatters";
-import type { LabelOption } from "@/components/shared/inputs/_types";
 import type { SearchFinancialDocumentInput, FinancialDocumentSearchRow } from "@/application/bms/financial-document/ports";
 
 interface Props {
@@ -42,17 +42,8 @@ export function FinancialDocumentMasterGrid({
 }: Props) {
   const t = useTranslations("bms.list.masterCols");
   const tBmsCommon = useTranslations("bms.list.common");
-  const tFilter = useTranslations("bms.list.filter");
 
-  // status는 BE에 enum 미등록 → 정적 라벨 사용
-  const statusOptions = useMemo<LabelOption[]>(() => [
-    { value: "CREATED", label: tFilter("statusCreated") },
-    { value: "GROUPED", label: tFilter("statusGrouped") },
-    { value: "TAX",     label: tFilter("statusTax") },
-    { value: "SLIP",    label: tFilter("statusSlip") },
-    { value: "CLEAR",   label: tFilter("statusClear") },
-  ], [tFilter]);
-
+  const { options: statusOptions } = useBmsEnumOptions("DocumentStatus");
   const { options: jobDivOptions }  = useEnumOptions("housebl.JobDiv");
   const { options: boundOptions }   = useEnumOptions("Bound");
 

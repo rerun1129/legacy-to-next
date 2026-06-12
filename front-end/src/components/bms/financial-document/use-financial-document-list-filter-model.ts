@@ -7,11 +7,9 @@ import { useListFilterSync } from "@/lib/use-list-filter-sync";
 import { useCodeAutocomplete } from "@/lib/use-code-autocomplete";
 import { CODE_SOURCES } from "@/lib/autocomplete-sources";
 import { useEnumOptions } from "@/application/enums/use-enum";
+import { useBmsEnumOptions } from "@/application/bms/enums/use-bms-enum";
 import type { LabelOption } from "@/components/shared/inputs/_types";
-import {
-  DATE_KIND_OPTIONS,
-  DOCUMENT_STATUS_OPTIONS,
-} from "./financial-document-list-filter-options";
+import { DATE_KIND_OPTIONS } from "./financial-document-list-filter-options";
 
 /** 필터 폼 값 인터페이스 */
 export interface FinancialDocumentFilter {
@@ -84,12 +82,18 @@ export function useFinancialDocumentListFilterModel(
     [t]
   );
 
-  // 서류 Status 옵션 — 정적(재사용 가능 라벨은 기존 freight.issue.documentStatus 활용)
+  // 서류 Status 옵션 — admin DB 공통코드 동적 조회
+  const {
+    options: documentStatusRawOptions,
+    isLoading: documentStatusLoading,
+    placeholder: documentStatusPlaceholder,
+  } = useBmsEnumOptions("DocumentStatus");
+
   const allOption = useMemo<LabelOption>(() => ({ value: "", label: t("all") }), [t]);
 
   const documentStatusOptions = useMemo<LabelOption[]>(
-    () => [allOption, ...DOCUMENT_STATUS_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) }))],
-    [allOption, t]
+    () => [allOption, ...documentStatusRawOptions],
+    [allOption, documentStatusRawOptions]
   );
 
   const jobDivOptionsWithAll = useMemo<LabelOption[]>(
@@ -113,6 +117,8 @@ export function useFinancialDocumentListFilterModel(
     setValue,
     dateKindOptions,
     documentStatusOptions,
+    documentStatusLoading,
+    documentStatusPlaceholder,
     jobDivOptionsWithAll,
     jobDivLoading,
     jobDivPlaceholder,

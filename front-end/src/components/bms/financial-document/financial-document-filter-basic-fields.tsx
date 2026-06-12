@@ -12,6 +12,8 @@ interface Props {
   t: (key: string) => string;
   dateKindOptions: LabelOption[];
   documentStatusOptions: LabelOption[];
+  documentStatusLoading: boolean;
+  documentStatusPlaceholder: string | undefined;
   jobDivOptionsWithAll: LabelOption[];
   jobDivLoading: boolean;
   jobDivPlaceholder: string | undefined;
@@ -26,6 +28,8 @@ export function FinancialDocumentFilterBasicFields({
   t,
   dateKindOptions,
   documentStatusOptions,
+  documentStatusLoading,
+  documentStatusPlaceholder,
   jobDivOptionsWithAll,
   jobDivLoading,
   jobDivPlaceholder,
@@ -132,6 +136,8 @@ export function FinancialDocumentFilterBasicFields({
               onChange={field.onChange}
               onBlur={field.onBlur}
               name={field.name}
+              disabled={documentStatusLoading}
+              placeholder={documentStatusPlaceholder}
               style={{ gridColumn: "2 / span 2" }}
             />
           )}

@@ -23,6 +23,8 @@ export function FinancialDocumentListFilter({ form, scope }: Props) {
             t={model.t}
             dateKindOptions={model.dateKindOptions}
             documentStatusOptions={model.documentStatusOptions}
+            documentStatusLoading={model.documentStatusLoading}
+            documentStatusPlaceholder={model.documentStatusPlaceholder}
             jobDivOptionsWithAll={model.jobDivOptionsWithAll}
             jobDivLoading={model.jobDivLoading}
             jobDivPlaceholder={model.jobDivPlaceholder}
