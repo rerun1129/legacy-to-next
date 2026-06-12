@@ -1070,6 +1070,26 @@
           "portKindDestination": "도착지"
         }
       }
+    },
+    "shared": {
+      "attachment": {
+        "modalTitle": "첨부파일",
+        "colFilename": "파일명",
+        "colSize": "크기",
+        "colUploadedBy": "업로더",
+        "colUploadedAt": "업로드 일시",
+        "colActions": "",
+        "uploadBtn": "업로드",
+        "uploading": "업로드 중…",
+        "downloadBtn": "다운로드",
+        "deleteBtn": "삭제",
+        "confirmDelete": "삭제",
+        "cancelDelete": "취소",
+        "empty": "첨부파일이 없습니다.",
+        "uploadSuccess": "파일이 업로드되었습니다.",
+        "deleteSuccess": "파일이 삭제되었습니다.",
+        "attachBtn": "첨부파일"
+      }
     }
   },
   "admin": {

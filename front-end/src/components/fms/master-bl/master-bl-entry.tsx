@@ -24,6 +24,7 @@ import { MasterMainTab } from "./tabs/main-tab";
 import { FreightTab }    from "@/components/fms/house-bl/tabs/freight-tab";
 import { ScreenGuard }   from "@/components/shared/screen-guard";
 import { MasterChangeBlNoModal } from "./master-change-bl-no-modal";
+import { BlAttachmentModal } from "@/components/fms/shared/bl-attachment-modal";
 
 interface Props {
   variantKey: string;
@@ -45,6 +46,7 @@ function getToolbarFields(mode: string) {
 export function MasterBLEntry({ variantKey }: Props) {
   const [resetVersion, setResetVersion] = useState(0);
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
+  const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
   const queryClient = useQueryClient();
@@ -195,6 +197,7 @@ export function MasterBLEntry({ variantKey }: Props) {
         onSearchBl={handleSearchBl}
         onDelete={handleDelete}
         onChangeBlNo={handleChangeBlNo}
+        onOpenAttachments={() => setIsAttachmentsOpen(true)}
       />
 
       {/* Toolbar — SEA 7 필드: TextBox(3) + ComboBox+useEnumOptions(4 enum) */}
@@ -270,6 +273,14 @@ export function MasterBLEntry({ variantKey }: Props) {
           didRestoreFromDraftRef.current = false;
           clearDraft(`master:${variantKey}:${id}`);
         }}
+      />
+    )}
+    {id != null && (
+      <BlAttachmentModal
+        blKind="MASTER"
+        blId={id}
+        isOpen={isAttachmentsOpen}
+        onClose={() => setIsAttachmentsOpen(false)}
       />
     )}
     </FormProvider>

@@ -1070,6 +1070,26 @@
           "portKindDestination": "Destination"
         }
       }
+    },
+    "shared": {
+      "attachment": {
+        "modalTitle": "Attachments",
+        "colFilename": "Filename",
+        "colSize": "Size",
+        "colUploadedBy": "Uploaded By",
+        "colUploadedAt": "Uploaded At",
+        "colActions": "",
+        "uploadBtn": "Upload",
+        "uploading": "Uploading…",
+        "downloadBtn": "Download",
+        "deleteBtn": "Delete",
+        "confirmDelete": "Confirm",
+        "cancelDelete": "Cancel",
+        "empty": "No attachments.",
+        "uploadSuccess": "File uploaded successfully.",
+        "deleteSuccess": "File deleted successfully.",
+        "attachBtn": "Attachments"
+      }
     }
   },
   "admin": {

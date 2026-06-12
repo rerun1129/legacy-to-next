@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, Printer, Trash2, FileText, SquarePen, Search, FilePlus, ExternalLink } from "lucide-react";
+import { Save, Printer, Trash2, FileText, SquarePen, Search, FilePlus, ExternalLink, Paperclip } from "lucide-react";
 import { Controller, useWatch } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
@@ -57,6 +57,7 @@ interface HouseBlEntryPageHeadProps {
   onDelete: () => Promise<void>;
   onChangeBlNo: () => void;
   onOpenSwitchBl: () => void;
+  onOpenAttachments?: () => void;
 }
 
 const VARIANT_TO_MENU: Record<string, string> = {
@@ -81,6 +82,7 @@ export function HouseBlEntryPageHead({
   onDelete,
   onChangeBlNo,
   onOpenSwitchBl,
+  onOpenAttachments,
 }: HouseBlEntryPageHeadProps) {
   const router = useRouter();
   const isExp = variant.direction === "EXP";
@@ -170,6 +172,13 @@ export function HouseBlEntryPageHead({
             onClick={onChangeBlNo}
             disabled={!isEdit}
             icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+          />
+          <ActionButton
+            buttonCode={`BTN_${menuCode}_ATTACH`}
+            className="btn btn--modal btn--sm"
+            onClick={onOpenAttachments}
+            disabled={!isEdit}
+            icon={<Paperclip size={12} style={{ marginRight: 4 }} />}
           />
         </div>
       </div>

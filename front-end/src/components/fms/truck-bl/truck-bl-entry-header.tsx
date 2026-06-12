@@ -1,6 +1,6 @@
 "use client";
 
-import { Truck, FilePlus, Search, Save, Trash2, SquarePen } from "lucide-react";
+import { Truck, FilePlus, Search, Save, Trash2, SquarePen, Paperclip } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ActionButton } from "@/components/admin/access/action-button";
 
@@ -13,6 +13,7 @@ export function TruckBlEntryHeader(props: {
   onSave: () => void;
   onDelete: () => void;
   onChangeBlNo: () => void;
+  onOpenAttachments?: () => void;
 }) {
   // Rules of Hooks: ALL hooks unconditionally before any early-return
   const tt = useTranslations("fms.truckBl.entry.title");
@@ -28,6 +29,7 @@ export function TruckBlEntryHeader(props: {
     onSave,
     onDelete,
     onChangeBlNo,
+    onOpenAttachments,
   } = props;
 
   return (
@@ -74,6 +76,13 @@ export function TruckBlEntryHeader(props: {
           className="btn btn--modal btn--sm"
           onClick={onChangeBlNo}
           icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode="BTN_FMS_TRUCK_BL_ENTRY_ATTACH"
+          className="btn btn--modal btn--sm"
+          onClick={onOpenAttachments}
+          disabled={!isEdit}
+          icon={<Paperclip size={12} style={{ marginRight: 4 }} />}
         />
       </div>
     </div>

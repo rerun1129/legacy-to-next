@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback }               from "react";
+import { useCallback, useState }     from "react";
 import { useTranslations }               from "next-intl";
 import { FormProvider, Controller }       from "react-hook-form";
 import { useQueryClient }                from "@tanstack/react-query";
@@ -10,10 +10,12 @@ import { TextBox, ComboBox }              from "@/components/shared/inputs";
 import { ScreenGuard }                   from "@/components/shared/screen-guard";
 import { TruckBlEntryHeader }            from "./truck-bl-entry-header";
 import { TruckChangeBlNoModal }          from "./truck-change-bl-no-modal";
+import { BlAttachmentModal }             from "@/components/fms/shared/bl-attachment-modal";
 import { useTruckBlEntry }               from "./use-truck-bl-entry";
 
 export function TruckBLEntry() {
   // Rules of Hooks: ALL hooks unconditionally before any early-return
+  const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
   const tb  = useTranslations("fms.truckBl.entry.toolbar");
   const tts = useTranslations("fms.truckBl.entry.tabs");
   const tm  = useTranslations("fms.truckBl.entry.msg");
@@ -66,6 +68,7 @@ export function TruckBLEntry() {
         }}
         onDelete={entry.handleDelete}
         onChangeBlNo={entry.handleChangeBlNo}
+        onOpenAttachments={() => setIsAttachmentsOpen(true)}
       />
 
       {/* Toolbar: 4필드 — gridTemplateColumns는 툴바 레이아웃에 필수이므로 인라인 유지 */}
@@ -159,6 +162,14 @@ export function TruckBLEntry() {
         isOpen={entry.isChangeBlNoModalOpen}
         onClose={() => entry.setIsChangeBlNoModalOpen(false)}
         onChanged={entry.resetDetailLoaded}
+      />
+    )}
+    {entry.id != null && (
+      <BlAttachmentModal
+        blKind="TRUCK"
+        blId={entry.id}
+        isOpen={isAttachmentsOpen}
+        onClose={() => setIsAttachmentsOpen(false)}
       />
     )}
     </FormProvider>

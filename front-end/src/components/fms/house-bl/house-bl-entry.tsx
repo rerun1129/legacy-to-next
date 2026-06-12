@@ -20,6 +20,7 @@ import {
 import { createEmptyHouseBlFormValues } from "./house-bl-defaults";
 import { SwitchBlModal } from "@/components/fms/switch-bl/switch-bl-modal";
 import { HouseChangeBlNoModal } from "./house-change-bl-no-modal";
+import { BlAttachmentModal } from "@/components/fms/shared/bl-attachment-modal";
 import { useEntryFocusStore, entryFocusKeys } from "@/lib/use-entry-focus-store";
 import { useEntryTabStore } from "@/lib/use-entry-tab-store";
 import { ScreenGuard } from "@/components/shared/screen-guard";
@@ -52,6 +53,7 @@ export function HouseBLEntry({ variant }: Props) {
   const tt = useTranslations("fms.houseBl.entry.tabs");
   const [isSwitchBlModalOpen, setIsSwitchBlModalOpen] = useState(false);
   const [isChangeBlNoModalOpen, setIsChangeBlNoModalOpen] = useState(false);
+  const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const { setCanEdit } = useWidgetLayout();
@@ -179,6 +181,7 @@ export function HouseBLEntry({ variant }: Props) {
           onDelete={handleDelete}
           onChangeBlNo={handleChangeBlNo}
           onOpenSwitchBl={() => setIsSwitchBlModalOpen(true)}
+          onOpenAttachments={() => setIsAttachmentsOpen(true)}
         />
 
         <div className="tabbar">
@@ -231,6 +234,14 @@ export function HouseBLEntry({ variant }: Props) {
             didRestoreFromDraftRef.current = false;
             clearDraft(`house:${variant.key}:${id}`);
           }}
+        />
+      )}
+      {id != null && (
+        <BlAttachmentModal
+          blKind="HOUSE"
+          blId={id}
+          isOpen={isAttachmentsOpen}
+          onClose={() => setIsAttachmentsOpen(false)}
         />
       )}
     </>

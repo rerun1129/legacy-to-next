@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, Trash2, Layers, SquarePen, Search, FilePlus } from "lucide-react";
+import { Save, Trash2, Layers, SquarePen, Search, FilePlus, Paperclip } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { ActionButton } from "@/components/admin/access/action-button";
@@ -16,6 +16,7 @@ interface MasterBlEntryPageHeadProps {
   onSearchBl: () => void;
   onDelete: () => Promise<void>;
   onChangeBlNo: () => void;
+  onOpenAttachments?: () => void;
 }
 
 const VARIANT_TO_MENU: Record<string, string> = {
@@ -43,6 +44,7 @@ export function MasterBlEntryPageHead({
   onSearchBl,
   onDelete,
   onChangeBlNo,
+  onOpenAttachments,
 }: MasterBlEntryPageHeadProps) {
   const tt = useTranslations("fms.masterBl.entry.title");
   const ts = useTranslations("fms.masterBl.entry.status");
@@ -92,6 +94,13 @@ export function MasterBlEntryPageHead({
           onClick={onChangeBlNo}
           disabled={!isEdit}
           icon={<SquarePen size={12} style={{ marginRight: 4 }} />}
+        />
+        <ActionButton
+          buttonCode={`BTN_${menuCode}_ATTACH`}
+          className="btn btn--modal btn--sm"
+          onClick={onOpenAttachments}
+          disabled={!isEdit}
+          icon={<Paperclip size={12} style={{ marginRight: 4 }} />}
         />
       </div>
     </div>

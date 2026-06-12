@@ -38,6 +38,7 @@ import { API_BL_QUICK_SEARCH_PORT } from '@/adapter/out/api/bl-quick-search';
 import { API_FREIGHT_LINE_ISSUE_PORT } from '@/adapter/out/api/bms/freight-line-issue';
 import { API_PMS_PERFORMANCE_PORT } from '@/adapter/out/api/pms/performance';
 import { API_COMMON_CODE_PORT } from '@/adapter/out/api/common-code';
+import { API_BL_ATTACHMENT_PORT } from '@/adapter/out/api/attachment';
 
 const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -78,3 +79,4 @@ export const financialDocumentPort = API_FINANCIAL_DOCUMENT_PORT;
 export const freightLineIssuePort = API_FREIGHT_LINE_ISSUE_PORT;
 export const pmsPerformancePort = API_PMS_PERFORMANCE_PORT;
 export const commonCodePort = API_COMMON_CODE_PORT;
+export const blAttachmentPort = API_BL_ATTACHMENT_PORT;
