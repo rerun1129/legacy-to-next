@@ -151,31 +151,30 @@ class AttachmentS3PromoterTest {
     // ── 개별 실패 → WARN 후 계속 ─────────────────────────────────────
 
     @Test
-    @DisplayName("promote: 개별 파일 S3 실패 → WARN 후 다음 파일 계속")
+    @DisplayName("promote: 개별 파일 S3 실패 → WARN 후 다음 파일 계속(성공)")
     void promote_individualFailure_continuesLoop() {
         given(local.list()).willReturn(List.of(
-                new StoredObject("HOUSE/1/fail.pdf", Instant.now()),
-                new StoredObject("HOUSE/2/ok.pdf", Instant.now())));
+                new StoredObject("HOUSE/1/fail.pdf", Instant.parse("2026-01-01T00:00:00Z")),
+                new StoredObject("HOUSE/2/ok.pdf", Instant.parse("2026-01-02T00:00:00Z"))));
         // 첫 번째 파일: sizeOf 성공, load 성공, s3.store 실패
         given(local.sizeOf("HOUSE/1/fail.pdf")).willReturn(5L);
         given(local.load("HOUSE/1/fail.pdf")).willReturn(new ByteArrayInputStream(new byte[5]));
-        willThrow(new RuntimeException("s3 error")).given(s3).store(
-                anyString(), any(), anyLong());
-
-        // minimumNumberOfCalls=2이고 두 번 실패여야 OPEN이므로, 하나 실패 후에도 두 번째 파일 시도
-        // 두 번째 파일: 실패로 인해 sizeOf 전에 CB가 OPEN되지 않으므로 계속 진행
-        // 두 번째 파일은 sizeOf에서 멈추므로 willReturn 추가
-        given(local.sizeOf("HOUSE/2/ok.pdf")).willReturn(5L);
-        given(local.load("HOUSE/2/ok.pdf")).willReturn(new ByteArrayInputStream(new byte[5]));
-        // 두 번째 파일 s3.store도 실패 (minimumNumberOfCalls=2, 2번 실패 → OPEN)
-        // 두 번 모두 RuntimeException 이므로 willThrow(any RuntimeException) 이미 설정됨
+        // 두 번째 파일: sizeOf 성공, load 성공, s3.store 성공
+        given(local.sizeOf("HOUSE/2/ok.pdf")).willReturn(3L);
+        given(local.load("HOUSE/2/ok.pdf")).willReturn(new ByteArrayInputStream(new byte[3]));
+        given(local.delete("HOUSE/2/ok.pdf")).willReturn(true);
+        // 1번째 호출은 RuntimeException, 2번째 호출은 성공(무동작) — §6 개별 실패 후 다음 파일 성공 경로 검증
+        willThrow(new RuntimeException("s3 error")).willDoNothing()
+                .given(s3).store(anyString(), any(), anyLong());
 
         int count = promoter.promote(Set.of("HOUSE/1/fail.pdf", "HOUSE/2/ok.pdf"));
 
-        // 모두 실패했으므로 promoted=0
-        assertThat(count).isEqualTo(0);
-        // 두 파일 모두 시도했는지 확인(loop 계속)
+        // 1번째 실패, 2번째 성공 → promoted=1
+        assertThat(count).isEqualTo(1);
+        // 루프 계속(2번째 sizeOf 호출)
         then(local).should().sizeOf("HOUSE/2/ok.pdf");
+        // 2번째 파일 로컬 삭제 호출 확인
+        then(local).should().delete("HOUSE/2/ok.pdf");
     }
 
     // ── ResourceNotFoundException → continue ─────────────────────────
