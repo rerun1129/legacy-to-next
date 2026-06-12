@@ -1,5 +1,7 @@
 # legacy-to-next
 
+[![CI](https://github.com/rerun1129/legacy-to-next/actions/workflows/ci.yml/badge.svg)](https://github.com/rerun1129/legacy-to-next/actions/workflows/ci.yml)
+
 > 화물 포워딩 시스템을 **헥사고널 + ArchUnit**으로 재구축하는 1인 풀스택 포트폴리오.
 
 본 프로젝트는 세 가지 가설을 1인 환경에서 실증하는 것을 명시적 목표로 합니다 — (1) 헥사고널 아키텍처와 ArchUnit이 *소규모 프로젝트에서도* 의존 강제 도구로 작동하는가, (2) RFC 7807 + Zod 4로 *백엔드↔프론트엔드 타입 안전성*을 어디까지 끌어올릴 수 있는가, (3) Claude Code 기반 설계→구현→검토 사이클의 *리드타임 효과*는 어떠한가.
