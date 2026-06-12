@@ -1,0 +1,178 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      run_docker:
+        description: 'Docker 이미지 빌드 검증 포함 (전체 6개 컨텍스트)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend_modules: ${{ steps.resolve.outputs.backend_modules }}
+      frontend: ${{ steps.resolve.outputs.frontend }}
+      docker_contexts: ${{ steps.resolve.outputs.docker_contexts }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dorny/paths-filter@v4
+        id: backend
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          filters: |
+            java-spring:
+              - 'back-end/java-spring/**'
+              - '.github/workflows/ci.yml'
+            java-spring-admin:
+              - 'back-end/java-spring-admin/**'
+              - '.github/workflows/ci.yml'
+            java-spring-bms:
+              - 'back-end/java-spring-bms/**'
+              - '.github/workflows/ci.yml'
+            java-spring-pms:
+              - 'back-end/java-spring-pms/**'
+              - '.github/workflows/ci.yml'
+            java-spring-gateway:
+              - 'back-end/java-spring-gateway/**'
+              - '.github/workflows/ci.yml'
+
+      - uses: dorny/paths-filter@v4
+        id: frontend
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          filters: |
+            frontend:
+              - 'front-end/**'
+              - '.github/workflows/ci.yml'
+
+      # 출력 3종은 어떤 이벤트에서도 항상 유효한 값 보장 (빈 문자열이면 fromJSON에서 워크플로 에러)
+      - name: Resolve outputs
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_DOCKER: ${{ inputs.run_docker }}
+          BACKEND_CHANGES: ${{ steps.backend.outputs.changes }}
+          FRONTEND_CHANGED: ${{ steps.frontend.outputs.frontend }}
+        run: |
+          ALL_MODULES='["java-spring","java-spring-admin","java-spring-bms","java-spring-pms","java-spring-gateway"]'
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            BACKEND="$ALL_MODULES"
+            FRONTEND="true"
+          else
+            BACKEND="${BACKEND_CHANGES:-[]}"
+            FRONTEND="${FRONTEND_CHANGED:-false}"
+          fi
+          CONTEXTS='[]'
+          if [ "$EVENT_NAME" = "push" ] || [ "$RUN_DOCKER" = "true" ]; then
+            CONTEXTS=$(echo "$BACKEND" | jq -c '[.[] | "back-end/" + .]')
+            if [ "$FRONTEND" = "true" ]; then
+              CONTEXTS=$(echo "$CONTEXTS" | jq -c '. + ["front-end"]')
+            fi
+          fi
+          {
+            echo "backend_modules=$BACKEND"
+            echo "frontend=$FRONTEND"
+            echo "docker_contexts=$CONTEXTS"
+          } >> "$GITHUB_OUTPUT"
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend_modules != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.changes.outputs.backend_modules) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          validate-wrappers: true
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Build & test
+        working-directory: back-end/${{ matrix.module }}
+        run: ./gradlew build
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-report-${{ matrix.module }}
+          path: back-end/${{ matrix.module }}/build/reports/tests/test
+          if-no-files-found: ignore
+
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: front-end
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: front-end/.nvmrc
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm run test
+
+      # placeholder env — front-end/Dockerfile ARG 기본값과 동일 세트 (빌드 검증용, 배포 산출물 아님)
+      - name: Build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+          NEXT_PUBLIC_FMS_API_URL: http://localhost:8080
+          NEXT_PUBLIC_ADMIN_API_URL: http://localhost:8081
+          NEXT_PUBLIC_BMS_API_URL: http://localhost:8082
+          NEXT_PUBLIC_PMS_API_URL: http://localhost:8083
+          NEXT_PUBLIC_USE_MOCK: 'false'
+        run: npm run build
+
+  # master push: 변경 컨텍스트만 / workflow_dispatch(run_docker=true): 전체 — 이미지 빌드 가능 여부만 검증, push 없음
+  docker:
+    needs: [changes, backend, frontend]
+    if: ${{ !cancelled() && needs.changes.result == 'success' && needs.backend.result != 'failure' && needs.frontend.result != 'failure' && needs.changes.outputs.docker_contexts != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        context: ${{ fromJSON(needs.changes.outputs.docker_contexts) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Docker build
+        env:
+          BUILD_CONTEXT: ${{ matrix.context }}
+        run: docker build -t "ci-check:$(basename "$BUILD_CONTEXT")" "$BUILD_CONTEXT"

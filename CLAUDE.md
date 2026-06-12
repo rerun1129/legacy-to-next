@@ -22,6 +22,9 @@
 * back-end/java-spring-pms/gradlew.bat -p back-end/java-spring-pms build
 * back-end/java-spring-pms/gradlew.bat -p back-end/java-spring-pms bootRun
 * back-end/java-spring-pms/gradlew.bat -p back-end/java-spring-pms test
+* back-end/java-spring-gateway/gradlew.bat -p back-end/java-spring-gateway build
+* back-end/java-spring-gateway/gradlew.bat -p back-end/java-spring-gateway bootRun
+* back-end/java-spring-gateway/gradlew.bat -p back-end/java-spring-gateway test
 
 
 
