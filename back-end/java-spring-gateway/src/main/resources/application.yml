@@ -15,6 +15,11 @@ spring:
 
   cloud:
     gateway:
+      # 다운스트림 정지 시 Netty connect 기본 30s 대기 → CB fallback(503)까지 지연. 3s로 단축.
+      # 응답 read 타임아웃은 resilience4j TimeLimiter(60s/pmsCb 600s)가 담당 — response-timeout 미설정 유지.
+      httpclient:
+        connect-timeout: 3000   # ms (정수)
+
       # Phase 1 동안 다운스트림 모듈도 CORS 헤더를 붙이므로 중복 제거
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
@@ -74,19 +79,6 @@ spring:
               args:
                 name: pmsCb
                 fallbackUri: forward:/fallback/pms
-
-        # teams-route: /api/teams[/**] — order 0
-        # admin TeamController 가 /api/admin prefix 미준수(레거시) — Phase 2에서 경로 정규화 검토
-        - id: teams-route
-          uri: ${ADMIN_API_URI:http://localhost:8081}
-          predicates:
-            - Path=/api/teams/**
-          order: 0
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: adminCb
-                fallbackUri: forward:/fallback/admin
 
         # fms-route: /api/** — order 10 (catch-all, 반드시 뒤)
         - id: fms-route

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/teams")
+@RequestMapping("/api/admin/teams")
 @RequiredArgsConstructor
 @Validated
 public class TeamController {

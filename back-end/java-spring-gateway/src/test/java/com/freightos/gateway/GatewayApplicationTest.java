@@ -3,6 +3,7 @@ package com.freightos.gateway;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.gateway.config.HttpClientProperties;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import reactor.test.StepVerifier;
 
@@ -16,14 +17,17 @@ class GatewayApplicationTest {
     @Autowired
     private RouteLocator routeLocator;
 
+    @Autowired
+    private HttpClientProperties httpClientProperties;
+
     @Test
     void contextLoads() {
         // 애플리케이션 컨텍스트가 정상 기동되는지 검증
     }
 
     @Test
-    void fiveRoutesAreRegistered() {
-        // admin/teams/bms/pms/fms 5개 라우트가 모두 등록되어 있는지 검증
+    void fourRoutesAreRegistered() {
+        // admin/bms/pms/fms 4개 라우트가 모두 등록되어 있는지 검증
         // 외부 서비스 호출 없이 RouteLocator 빈만 검사하므로 flaky 요소 없음
         StepVerifier.create(
                 routeLocator.getRoutes()
@@ -32,9 +36,15 @@ class GatewayApplicationTest {
         )
         .assertNext(ids -> {
             assertThat(ids).containsExactlyInAnyOrderElementsOf(
-                    List.of("admin-route", "teams-route", "bms-route", "pms-route", "fms-route")
+                    List.of("admin-route", "bms-route", "pms-route", "fms-route")
             );
         })
         .verifyComplete();
+    }
+
+    @Test
+    void httpClientConnectTimeoutIsConfigured() {
+        // 다운스트림 정지 시 30s connect 대기 방지 설정이 바인딩되는지 검증
+        assertThat(httpClientProperties.getConnectTimeout()).isEqualTo(3000);
     }
 }

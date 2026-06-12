@@ -7,12 +7,11 @@ Spring Cloud Gateway(WebFlux) 단일 진입점. 포트 **8084**. FE의 모든 AP
 | 경로 | 대상 | 비고 |
 |---|---|---|
 | `/api/admin/**` | admin-api:8081 | |
-| `/api/teams/**` | admin-api:8081 | admin TeamController가 prefix 미준수(레거시) — 정규화 검토 항목 |
 | `/api/bms/**` | bms-api:8082 | |
 | `/api/pms/**` | pms-api:8083 | |
 | `/api/**` (catch-all, order 10) | fms-api:8080 | FMS는 모듈 prefix 없음 |
 
-라우트별 CircuitBreaker + `forward:/fallback/{module}` 503 JSON. TimeLimiter 60s(pmsCb는 mart rebuild 대비 600s).
+라우트별 CircuitBreaker + `forward:/fallback/{module}` 503 JSON. TimeLimiter 60s(pmsCb는 mart rebuild 대비 600s). HttpClient connect-timeout 3s — 다운스트림 정지 시 30s 대기 없이 즉시 CB fallback.
 CORS는 게이트웨이 globalcors 전담(모듈에는 CORS 설정 없음).
 
 ## 인증 — JWT 중앙 검증 + 신뢰 헤더 (Phase 2)
