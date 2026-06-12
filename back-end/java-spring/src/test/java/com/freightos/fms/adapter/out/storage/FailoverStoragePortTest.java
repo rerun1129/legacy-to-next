@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
@@ -110,13 +111,8 @@ class FailoverStoragePortTest {
             }
         };
 
-        // S3 store가 스트림에서 읽다가 실패하도록 구성
-        willThrow(SdkClientException.builder().message("mid-transfer error").build())
-                .given(s3).store(anyString(), any(), anyLong());
-
-        // ConsumptionTrackingInputStream이 래핑되므로, s3.store 호출 시 실제 스트림 읽기 발생을
-        // 시뮬레이션하기 위해 doAnswer로 처리
-        org.mockito.BDDMockito.willAnswer(invocation -> {
+        // ConsumptionTrackingInputStream이 래핑되므로, s3.store가 스트림 1바이트 소비 후 실패하는 흐름 시뮬레이션
+        willAnswer(invocation -> {
             InputStream in = invocation.getArgument(1);
             in.read(new byte[1], 0, 1); // 1바이트 읽어 부분소비 표시
             throw SdkClientException.builder().message("mid-transfer error").build();

@@ -2,6 +2,7 @@ package com.freightos.fms.adapter.out.storage;
 
 import com.freightos.common.exception.ResourceNotFoundException;
 import com.freightos.fms.application.attachment.port.out.StoragePort.StoredObject;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.core.exception.SdkClientException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
@@ -124,25 +125,27 @@ class AttachmentS3PromoterTest {
     // ── 도중 CallNotPermittedException → 중단 ──────────────────────
 
     @Test
-    @DisplayName("promote: 승격 도중 CB OPEN → 잔여 중단")
+    @DisplayName("promote: 승격 도중 CallNotPermittedException → 1건 완료 후 잔여 중단")
     void promote_callNotPermittedDuringLoop_breaksLoop() {
+        // CB는 CLOSED 유지(선두 가드 통과), 2개 파일 중 1번째는 성공, 2번째 s3.store에서 CallNotPermitted
         given(local.list()).willReturn(List.of(
-                new StoredObject("HOUSE/1/first.pdf", Instant.now()),
-                new StoredObject("HOUSE/2/second.pdf", Instant.now())));
+                new StoredObject("HOUSE/1/first.pdf", Instant.parse("2026-01-01T00:00:00Z")),
+                new StoredObject("HOUSE/2/second.pdf", Instant.parse("2026-01-02T00:00:00Z"))));
         given(local.sizeOf("HOUSE/1/first.pdf")).willReturn(5L);
         given(local.load("HOUSE/1/first.pdf")).willReturn(new ByteArrayInputStream(new byte[5]));
+        given(local.delete("HOUSE/1/first.pdf")).willReturn(true);
+        given(local.sizeOf("HOUSE/2/second.pdf")).willReturn(5L);
+        given(local.load("HOUSE/2/second.pdf")).willReturn(new ByteArrayInputStream(new byte[5]));
 
-        // first 승격 시 CB가 OPEN으로 전이 — s3.store가 CallNotPermittedException 발생 시뮬레이션
-        willThrow(SdkClientException.builder().message("err").build())
+        // 1번째 호출 성공, 2번째 호출 시 CallNotPermittedException — 루프 break 검증
+        willAnswer(invocation -> null)
+                .willThrow(CallNotPermittedException.createCallNotPermittedException(breaker))
                 .given(s3).store(anyString(), any(), anyLong());
-        // minimumNumberOfCalls=2 이므로 두 번 실패해야 OPEN
-        // 직접 transitionToOpenState()로 OPEN 전환 후 재호출 시뮬레이션
-        // 대신: 실제로 두 번 실패 후 루프가 break되는지 확인
-        breaker.transitionToOpenState();
 
-        // OPEN 상태에서 promote 호출 시 선두 가드에서 전체 skip
         int count = promoter.promote(Set.of("HOUSE/1/first.pdf", "HOUSE/2/second.pdf"));
-        assertThat(count).isEqualTo(0);
+
+        assertThat(count).isEqualTo(1);
+        then(local).should(never()).delete("HOUSE/2/second.pdf");
     }
 
     // ── 개별 실패 → WARN 후 계속 ─────────────────────────────────────

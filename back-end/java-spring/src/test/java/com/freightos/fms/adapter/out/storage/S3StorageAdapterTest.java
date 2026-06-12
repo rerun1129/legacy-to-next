@@ -9,11 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
@@ -72,14 +75,17 @@ class S3StorageAdapterTest {
     // ── load ─────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("load: 정상 → S3Client.getObject 결과 반환")
-    void load_normal_returnsStream() {
-        InputStream expected = new ByteArrayInputStream("content".getBytes());
-        given(s3Client.getObject(any(GetObjectRequest.class))).willAnswer(inv -> expected);
+    @DisplayName("load: 정상 → S3Client.getObject 결과 반환(기대 바이트 읽기 검증)")
+    void load_normal_returnsStream() throws Exception {
+        byte[] expectedBytes = "content".getBytes();
+        ResponseInputStream<GetObjectResponse> responseStream = new ResponseInputStream<>(
+                GetObjectResponse.builder().build(),
+                AbortableInputStream.create(new ByteArrayInputStream(expectedBytes)));
+        given(s3Client.getObject(any(GetObjectRequest.class))).willReturn(responseStream);
 
         InputStream result = adapter.load("HOUSE/1/file.pdf");
 
-        assertThat(result).isSameAs(expected);
+        assertThat(result.readAllBytes()).isEqualTo(expectedBytes);
         ArgumentCaptor<GetObjectRequest> captor = ArgumentCaptor.forClass(GetObjectRequest.class);
         then(s3Client).should().getObject(captor.capture());
         assertThat(captor.getValue().key()).isEqualTo("attachments/HOUSE/1/file.pdf");
