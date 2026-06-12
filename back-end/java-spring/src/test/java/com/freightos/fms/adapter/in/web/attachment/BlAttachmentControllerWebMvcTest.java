@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -66,6 +66,7 @@ class BlAttachmentControllerWebMvcTest {
     void getAttachments_happyPath_returns200() throws Exception {
         BlAttachment attachment = new BlAttachment(1L, AttachmentBlKind.HOUSE, 1L, "test.pdf",
                 "HOUSE/1/uuid", "application/pdf", 1024L, "user1", LocalDateTime.now());
+        given(blAttachmentAssembler.toBlKind("HOUSE")).willReturn(AttachmentBlKind.HOUSE);
         given(blAttachmentUseCase.findAttachmentsByBl(AttachmentBlKind.HOUSE, 1L))
                 .willReturn(List.of(attachment));
         given(blAttachmentAssembler.toResponseList(any())).willReturn(List.of());
@@ -82,6 +83,9 @@ class BlAttachmentControllerWebMvcTest {
     @Test
     @DisplayName("GET /api/bl-attachment: blKind 유효하지 않은 값 → 400")
     void getAttachments_invalidBlKind_returns400() throws Exception {
+        given(blAttachmentAssembler.toBlKind("INVALID"))
+                .willThrow(new IllegalArgumentException("유효하지 않은 blKind: INVALID"));
+
         mockMvc.perform(get("/api/bl-attachment")
                         .param("blKind", "INVALID")
                         .param("blId", "1"))
@@ -91,7 +95,6 @@ class BlAttachmentControllerWebMvcTest {
     // ── POST /api/bl-attachment (multipart) ───────────────────────
 
     @Test
-    @WithMockUser(username = "user1")
     @DisplayName("POST /api/bl-attachment: multipart 업로드 happy path → 201 + id + Location")
     void uploadAttachment_happyPath_returns201() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
@@ -99,13 +102,14 @@ class BlAttachmentControllerWebMvcTest {
         given(blAttachmentAssembler.toUploadCommand(any(), any(), any(), any()))
                 .willReturn(new UploadBlAttachmentCommand(
                         AttachmentBlKind.HOUSE, 1L, "test.pdf", "application/pdf",
-                        11L, new ByteArrayInputStream("pdf-content".getBytes()), "user1"));
+                        11L, new ByteArrayInputStream("pdf-content".getBytes()), "tester"));
         given(blAttachmentUseCase.upload(any())).willReturn(42L);
 
         mockMvc.perform(multipart("/api/bl-attachment")
                         .file(file)
                         .param("blKind", "HOUSE")
-                        .param("blId", "1"))
+                        .param("blId", "1")
+                        .principal(new UsernamePasswordAuthenticationToken("tester", "", List.of())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.id").value(42))
                 .andExpect(jsonPath("$.message").value(MessageCode.BL_ATTACHMENT_UPLOADED.message()))
@@ -114,7 +118,6 @@ class BlAttachmentControllerWebMvcTest {
     }
 
     @Test
-    @WithMockUser(username = "user1")
     @DisplayName("POST /api/bl-attachment: UseCase가 빈 파일 IllegalArgumentException → 400")
     void uploadAttachment_emptyFile_returns400() throws Exception {
         MockMultipartFile emptyFile = new MockMultipartFile(
@@ -122,14 +125,15 @@ class BlAttachmentControllerWebMvcTest {
         given(blAttachmentAssembler.toUploadCommand(any(), any(), any(), any()))
                 .willReturn(new UploadBlAttachmentCommand(
                         AttachmentBlKind.HOUSE, 1L, "empty.txt", "text/plain",
-                        0L, new ByteArrayInputStream(new byte[0]), "user1"));
+                        0L, new ByteArrayInputStream(new byte[0]), "tester"));
         given(blAttachmentUseCase.upload(any()))
                 .willThrow(new IllegalArgumentException("업로드 파일 크기가 0입니다."));
 
         mockMvc.perform(multipart("/api/bl-attachment")
                         .file(emptyFile)
                         .param("blKind", "HOUSE")
-                        .param("blId", "1"))
+                        .param("blId", "1")
+                        .principal(new UsernamePasswordAuthenticationToken("tester", "", List.of())))
                 .andExpect(status().isBadRequest());
     }
 
