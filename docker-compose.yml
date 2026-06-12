@@ -62,7 +62,17 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
       # EDMS 첨부 로컬 스토리지 — named volume이라 컨테이너 재빌드에도 파일 보존
+      # (s3 모드에서는 스필오버 티어로 동작 — volume 유지 필수)
       FMS_STORAGE_BASE_PATH: /var/fms/storage/attachments
+      # EDMS 첨부 S3 모드 — 개발 compose 기본 s3, 실값(버킷·키)은 루트 .env 에서 주입
+      FMS_STORAGE_MODE: "${FMS_STORAGE_MODE:-s3}"
+      FMS_S3_BUCKET: "${FMS_S3_BUCKET:-}"
+      FMS_S3_REGION: "${FMS_S3_REGION:-ap-northeast-2}"
+      FMS_S3_KEY_PREFIX: "${FMS_S3_KEY_PREFIX:-}"
+      FMS_S3_ENDPOINT: "${FMS_S3_ENDPOINT:-}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID:-}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY:-}"
+      FMS_STORAGE_CLEANUP_CRON: "${FMS_STORAGE_CLEANUP_CRON:-0 0 3 * * *}"
     volumes:
       - fms_attachments:/var/fms/storage
     depends_on:
