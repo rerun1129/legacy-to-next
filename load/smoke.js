@@ -4,8 +4,9 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 const BASE = __ENV.BASE_URL || 'http://localhost:8084';
-const USER = __ENV.SMOKE_USER || 'fms';
-const PASS = __ENV.SMOKE_PASS || 'fms12345';
+// 기본 계정 = perf-smoke.yml이 러너 DB에 직접 시드하는 전용 계정 (마이그레이션 시드 해시 드리프트와 무관)
+const USER = __ENV.SMOKE_USER || 'smoke';
+const PASS = __ENV.SMOKE_PASS || 'smoke-ci-pass';
 const VUS = Number(__ENV.VUS || 10);
 const HOLD = __ENV.HOLD || '60s';
 

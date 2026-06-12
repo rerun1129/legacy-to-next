@@ -58,6 +58,15 @@ jobs:
           done
           echo "admin-api 기동 실패"; tail -80 admin-api.log; exit 1
 
+      # 마이그레이션 시드 계정의 해시는 주석과 드리프트 이력이 있어(예: V21) CI는 전용 계정을 직접 시드
+      - name: Seed smoke user
+        run: |
+          docker compose exec -T postgres psql -U fms -d fms -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO admin.admin_user (username, email, password_hash, active, attributes, team_id, subscriber_id)
+             SELECT 'smoke', NULL, fms.crypt('smoke-ci-pass', fms.gen_salt('bf', 10)), TRUE, attributes, team_id, subscriber_id
+             FROM admin.admin_user WHERE username = 'fms'
+             ON CONFLICT (username) DO NOTHING;"
+
       - name: Start fms-api (8080)
         run: |
           JAR=$(find back-end/java-spring/build/libs -name '*.jar' ! -name '*-plain.jar' | head -1)
@@ -83,9 +92,10 @@ jobs:
           VUS: ${{ inputs.vus }}
           HOLD: ${{ inputs.hold }}
         run: |
-          docker run --rm --network host \
+          docker run --rm --network host --user "$(id -u)" \
             -v "$PWD/load:/load" -w /load \
             -e BASE_URL=http://localhost:8084 \
+            -e SMOKE_USER=smoke -e SMOKE_PASS=smoke-ci-pass \
             -e VUS="$VUS" -e HOLD="$HOLD" \
             grafana/k6 run --summary-export=summary.json smoke.js
 
